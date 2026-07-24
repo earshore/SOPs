@@ -43,6 +43,7 @@ export {
 export {
   extractResponsesId,
   extractResponsesIdFromStreamEvent,
+  describeResponsesEmptyBody,
   extractAssistantTextFromResponsesOrChat,
   extractResponsesOutputText,
   extractResponsesReasoningSummary,

@@ -144,7 +144,7 @@ function buildModelCapabilityBadges(
       active: cap.supportsPreviousResponseId,
       title: cap.supportsPreviousResponseId
         ? '支持 previous_response_id 多轮（Deep Chat 可链式）'
-        : '当前路径不支持 previous_response_id（网关 fail-closed，默认禁用）',
+        : '当前路径不支持 previous_response_id（网关 fail-closed，默认禁用；多轮改发完整 transcript / tool item 回放）',
     },
     {
       id: 'builtin',
@@ -195,6 +195,8 @@ interface RuntimeStrategyState {
 
 interface SettingsPanelData {
   isOpen: boolean;
+  /** API path custom dropdown open state */
+  llmApiPathMenuOpen: boolean;
   llm: LLMState;
   proxy: ProxyState;
   toolStrategy: ToolStrategyState;
@@ -212,6 +214,13 @@ interface SettingsPanelData {
   apiPathOptions: readonly ApiPathOption[];
   fullApiUrlPreview: string;
   apiPathCapabilityHint: string;
+  llmSetupReadinessText: string;
+  selectedApiPathDescription: string;
+  selectedApiPathOption: ApiPathOption | undefined;
+  selectedApiPathPathLabel: string;
+  selectedApiPathNameLabel: string;
+  reasoningEffortLabel: string;
+  reasoningEffortButtonLabel(level: string): string;
   modelCapabilityBadges: Array<{
     id: string;
     label: string;
@@ -288,11 +297,13 @@ interface SettingsPanelData {
   setLlmProvider(event: Event): void;
   setLlmEndpoint(event: Event): void;
   setLlmApiPath(event: Event): void;
+  setLlmApiPathId(id: string): void;
   setLlmApiKey(event: Event): void;
   setLlmModel(event: Event): void;
   setLlmServiceTier(event: Event): void;
   setReasoningEnabled(event: Event): void;
   setReasoningEffort(event: Event): void;
+  setReasoningEffortLevel(level: 'low' | 'medium' | 'high'): void;
   setToolTargetModel(targetId: ToolStrategyTargetId, event: Event): void;
   getRuntimeNumber(path: string, divisor?: number): number;
   getRuntimeBoolean(path: string): boolean;
@@ -897,12 +908,15 @@ function createSettingsState(): Pick<
   | 'runtimeStrategy'
   | 'developerDiagnostics'
   | 'localData'
+  | 'llmApiPathMenuOpen'
 > {
   return {
     isOpen: false,
 
     // 新增：清理函数数组
     _unsubscribers: [],
+
+    llmApiPathMenuOpen: false,
 
     // LLM Config State
     llm: {
@@ -1035,18 +1049,66 @@ const settingsPanelBehavior: SettingsPanelPart = {
     });
     if (!registryCap.source.registryMatched) {
       if (pathId === 'responses') {
-        return '当前模型未在能力目录中：/responses 可能 404，失败时会回退 chat/completions。';
+        return '该模型尚未收录在能力目录：若网关没有 /responses，请求会自动回退到通用对话路径，您不必担心「完全连不上」。';
       }
       return '';
     }
     const preferred = registryCap.apiSurface;
     if (pathId === 'responses' && preferred !== 'responses') {
-      return `目录默认路径为 ${preferred}；你选择了 /responses，网关需支持该路径。`;
+      return `能力目录更常把此模型配在「${preferred}」。您已改选 Responses：请确认中转站已开通该路径；若 404，系统会回退通用对话。`;
     }
     if (pathId === 'chat_completions' && preferred === 'responses') {
-      return '该模型目录默认推荐 /responses（推理更完整）；当前为 chat/completions。';
+      return '此模型更适合 Responses 路径（推理摘要更完整）。若您更看重兼容性，可继续使用通用对话。';
     }
     return '';
+  },
+
+  /** Soft readiness line under the section intro (human, non-blocking). */
+  get llmSetupReadinessText(): string {
+    const hasEndpoint = Boolean((this.llm.endpoint || '').trim());
+    const needsKey = isLLMApiKeyRequired(this.llm);
+    const hasKey = Boolean((this.llm.apiKey || '').trim());
+    const hasModel = Boolean((this.llm.model || '').trim());
+    if (!hasEndpoint) {
+      return '先填写 API Endpoint（官方 API 或兼容中转均可），密钥仅保存在本机浏览器。';
+    }
+    if (needsKey && !hasKey) {
+      return 'Endpoint 已就绪。填入 API Key 后即可「获取模型列表」与「测试连接」。';
+    }
+    if (!hasModel) {
+      return '连接信息已备齐。点「获取模型列表」，再选默认模型并保存。';
+    }
+    return '配置看起来可用。建议先「测试连接」，确认后再保存。';
+  },
+
+  get selectedApiPathDescription(): string {
+    return this.selectedApiPathOption?.description || '';
+  },
+
+  get selectedApiPathOption(): ApiPathOption | undefined {
+    const pathId = normalizeApiPathId(this.llm.apiPath);
+    return API_PATH_OPTIONS.find(o => o.id === pathId);
+  },
+
+  get selectedApiPathPathLabel(): string {
+    return this.selectedApiPathOption?.pathLabel || '/chat/completions';
+  },
+
+  get selectedApiPathNameLabel(): string {
+    return this.selectedApiPathOption?.label || 'Chat Completions';
+  },
+
+  get reasoningEffortLabel(): string {
+    const effort = this.llm.reasoningPrefs?.effort;
+    if (effort === 'low') return 'Low';
+    if (effort === 'high') return 'High';
+    return 'Medium';
+  },
+
+  reasoningEffortButtonLabel(level: string): string {
+    if (level === 'low') return 'Low';
+    if (level === 'high') return 'High';
+    return 'Medium';
   },
 
   /**
@@ -1366,11 +1428,24 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   scrollToSection(sectionId: string): void {
     const section = document.getElementById(sectionId);
-    if (typeof section?.scrollIntoView !== 'function') {
+    if (!section) {
       return;
     }
 
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Only scroll the settings content pane — never use scrollIntoView, which can
+    // move outer ancestors and push the sticky footer up over the content.
+    const scroller = section.closest('.settings-panel-scroll');
+    if (!(scroller instanceof HTMLElement)) {
+      return;
+    }
+
+    const scrollerRect = scroller.getBoundingClientRect();
+    const sectionRect = section.getBoundingClientRect();
+    const nextTop = scroller.scrollTop + (sectionRect.top - scrollerRect.top) - 8;
+    scroller.scrollTo({
+      top: Math.max(0, nextTop),
+      behavior: 'smooth',
+    });
   },
 
   // 打开性能监控面板
@@ -1627,6 +1702,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   setLlmApiPath(event: Event): void {
     this.llm.apiPath = normalizeApiPathId((event.target as HTMLSelectElement).value);
+    this.llmApiPathMenuOpen = false;
+  },
+
+  setLlmApiPathId(id: string): void {
+    this.llm.apiPath = normalizeApiPathId(id);
+    this.llmApiPathMenuOpen = false;
   },
 
   setLlmApiKey(event: Event): void {
@@ -1654,9 +1735,17 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   setReasoningEffort(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
-    const effort =
+    this.setReasoningEffortLevel(
       value === 'low' || value === 'medium' || value === 'high'
         ? value
+        : DEFAULT_REASONING_PREFS.effort
+    );
+  },
+
+  setReasoningEffortLevel(level: 'low' | 'medium' | 'high'): void {
+    const effort =
+      level === 'low' || level === 'medium' || level === 'high'
+        ? level
         : DEFAULT_REASONING_PREFS.effort;
     this.llm.reasoningPrefs = {
       ...normalizeReasoningUserPrefs(this.llm.reasoningPrefs),

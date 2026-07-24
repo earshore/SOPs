@@ -705,4 +705,41 @@ describe('callLLM streaming', () => {
 
     expect(text).toBe('compat-body');
   });
+
+  it('throws a specific error for incomplete max_output_tokens empty body on /responses', async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            id: 'resp_incomplete',
+            status: 'incomplete',
+            incomplete_details: { reason: 'max_output_tokens' },
+            output: [
+              {
+                type: 'reasoning',
+                summary: [{ type: 'summary_text', text: 'thinking only' }],
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      callLLM(
+        [{ role: 'user', content: 'hi' }],
+        'new_api',
+        'https://new.hongecb.store/v1',
+        'test-key',
+        'gpt-5.5',
+        {
+          stream: false,
+          retries: 0,
+          apiPath: 'responses',
+          reasoningPrefs: { enabled: false, effort: 'medium' },
+        }
+      )
+    ).rejects.toThrow(/max_output_tokens|输出未完成/);
+  });
 });

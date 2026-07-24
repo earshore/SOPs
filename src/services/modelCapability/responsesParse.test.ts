@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  describeResponsesEmptyBody,
   extractResponsesId,
   extractResponsesOutputText,
   extractResponsesReasoningSummary,
@@ -92,5 +93,33 @@ describe('responsesParse', () => {
     expect(harvestResponsesReasoningIncrement(completed, '')).toBe('plan A then B');
     expect(harvestResponsesReasoningIncrement(completed, 'plan A then B')).toBe('');
     expect(harvestResponsesReasoningIncrement(completed, 'plan A')).toBe(' then B');
+  });
+
+  it('describes incomplete and reasoning-only empty bodies specifically', () => {
+    expect(
+      describeResponsesEmptyBody({
+        status: 'incomplete',
+        incomplete_details: { reason: 'max_output_tokens' },
+      })
+    ).toMatch(/max_output_tokens/);
+
+    expect(
+      describeResponsesEmptyBody({
+        status: 'completed',
+        output: [
+          {
+            type: 'reasoning',
+            summary: [{ type: 'summary_text', text: 'only thinking' }],
+          },
+        ],
+      })
+    ).toMatch(/推理但未返回可见正文/);
+
+    expect(
+      describeResponsesEmptyBody({
+        output_text: 'ok',
+        status: 'completed',
+      })
+    ).toBeNull();
   });
 });

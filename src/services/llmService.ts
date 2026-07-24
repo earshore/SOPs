@@ -24,6 +24,7 @@ import {
   extractAnthropicMessagesText,
   extractGeminiGenerateText,
   DEFAULT_MAX_TOOL_ROUNDS,
+  describeResponsesEmptyBody,
   extractAssistantTextFromResponsesOrChat,
   extractResponsesFunctionCalls,
   extractResponsesId,
@@ -1447,7 +1448,27 @@ async function executeLLMAttempt(
   state: LLMAttemptState
 ): Promise<string> {
   const payload = await executeLLMAttemptPayload(context, attempt, state);
-  return getLLMResponseContent(payload);
+  const content = getLLMResponseContent(payload);
+  // Surface incomplete / reasoning-only empty bodies as explicit errors (not silent "").
+  if (
+    context.apiSurface === 'responses' &&
+    !content.trim() &&
+    !payload.streamFunctionCalls?.length &&
+    !(
+      payload.rawResponsesData && extractResponsesFunctionCalls(payload.rawResponsesData).length > 0
+    )
+  ) {
+    const specific = describeResponsesEmptyBody(payload.rawResponsesData ?? null);
+    if (specific) {
+      throw new ApiError(specific, 'API_EMPTY_RESPONSE', 200, payload.rawResponsesData ?? null, {
+        module: 'LLMService',
+        action: 'callLLM',
+        model: context.model,
+        endpoint: context.normalizedEndpoint,
+      });
+    }
+  }
+  return content;
 }
 
 function shouldRetryApiError(error: ApiError, context: LLMCallContext, attempt: number): boolean {

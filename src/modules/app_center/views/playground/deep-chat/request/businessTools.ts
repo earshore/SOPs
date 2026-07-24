@@ -1,11 +1,31 @@
 /**
  * Safe, read-only business tools for Deep Chat on Responses path.
  * No secrets, no writes, no network (except via model tools like web_search if added separately).
+ *
+ * Product rule: injection is **fail-closed** — tools are not sent on every Responses turn
+ * unless explicitly opted in (runtime deepChat.enableBusinessTools === true).
  */
 
 import type { ResponsesToolExecutor } from '@/services/modelCapability';
 import type { DeepChatThread } from '../types';
 import { getDeepChatMessageText } from '../session/conversationContext';
+import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
+
+/** Fail-closed product default: do not force tools on first-turn /responses replies. */
+export const DEEP_CHAT_BUSINESS_TOOLS_DEFAULT_ENABLED = false;
+
+/**
+ * Whether Deep Chat may inject read-only business tools on the Responses path.
+ * Opt-in only: explicit true enables; missing/false stays off (fail-closed).
+ */
+export function isDeepChatBusinessToolsEnabled(
+  prefs?: { enableBusinessTools?: boolean } | null
+): boolean {
+  if (prefs && Object.prototype.hasOwnProperty.call(prefs, 'enableBusinessTools')) {
+    return prefs.enableBusinessTools === true;
+  }
+  return getRuntimeStrategySettings().deepChat.enableBusinessTools === true;
+}
 
 export const DEEP_CHAT_BUSINESS_TOOLS: unknown[] = [
   {

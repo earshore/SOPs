@@ -19,25 +19,26 @@ export const API_PATH_OPTIONS: readonly ApiPathOption[] = [
     id: 'chat_completions',
     label: 'Chat Completions',
     pathLabel: '/chat/completions',
-    description: 'OpenAI 兼容 POST …/chat/completions',
+    description: 'OpenAI 兼容 Chat Completions：多数官方与中转默认支持，适合日常分析与对话。',
   },
   {
     id: 'responses',
     label: 'Responses',
     pathLabel: '/responses',
-    description: 'OpenAI Responses POST …/responses',
+    description:
+      'OpenAI Responses API：推理与工具链路更完整；上游不支持时客户端可回退 Chat Completions。',
   },
   {
     id: 'anthropic_messages',
     label: 'Messages (Anthropic)',
     pathLabel: '/messages',
-    description: 'Anthropic Messages POST …/messages',
+    description: 'Anthropic Messages 原生路径：仅当上游透传 Claude Messages 协议时使用。',
   },
   {
     id: 'gemini_generate',
     label: 'Gemini generateContent',
     pathLabel: '/v1beta/models/{model}:generateContent',
-    description: 'Google Gemini POST …/v1beta/models/{model}:generateContent',
+    description: 'Google Gemini generateContent 原生路径：仅当上游支持该形态时使用。',
   },
 ] as const;
 

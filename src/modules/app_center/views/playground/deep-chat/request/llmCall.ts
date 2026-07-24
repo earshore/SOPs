@@ -14,14 +14,19 @@ import {
 
 import { callLLM } from '@/services/llmService';
 import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
-import { createDeepChatBusinessToolExecutor, DEEP_CHAT_BUSINESS_TOOLS } from './businessTools';
+import {
+  createDeepChatBusinessToolExecutor,
+  DEEP_CHAT_BUSINESS_TOOLS,
+  isDeepChatBusinessToolsEnabled,
+} from './businessTools';
 import { StorageService } from '@/services/storageService';
 import { getRuntimeDeepChatOptions } from '@/services/runtimeStrategyService';
+import { describeResponsesEmptyBody } from '@/services/modelCapability';
 
 import type { LLMProviderConfig } from '@/types/state';
 
 import { appendPendingDeepChatReasoningText, type PendingDeepChatRequest } from './lifecycle';
-import { getDeepChatRequestBudgetDefaults } from './budget';
+import { getDeepChatRequestBudgetDefaults, resolveDeepChatMaxOutputTokens } from './budget';
 
 import type { DeepChatElement, DeepChatSignals, DeepChatLLMCallContext } from '../types';
 
@@ -60,7 +65,9 @@ export function prepareDeepChatReasoningCallOptions(): {
 
 export function resolveDeepChatResponsesChainOptions(
   config: LLMProviderConfig,
-  model: string
+  model: string,
+  /** Optional tool prefs override (tests / explicit callers). Runtime default is fail-closed. */
+  toolPrefs?: { enableBusinessTools?: boolean }
 ): {
   apiPath?: ReturnType<typeof normalizeApiPathId>;
   previousResponseId?: string;
@@ -88,20 +95,21 @@ export function resolveDeepChatResponsesChainOptions(
     preferredSurface: 'responses',
   });
 
-  // Read-only business tools whenever Responses tools are supported.
-  // callLLM uses stream-first + tool-loop fallback so 深度思考 chrome is preserved.
-  const toolOptions = cap.supportsTools
-    ? {
-        tools: DEEP_CHAT_BUSINESS_TOOLS,
-        executeTool: createDeepChatBusinessToolExecutor({
-          getThread: () => getActiveThread(),
-          getModel: () => model,
-          getProvider: () => config.provider,
-        }),
-        enableToolLoop: true,
-        maxToolRounds: 4,
-      }
-    : {};
+  // Fail-closed product rule: tools only when capability supports them AND opt-in enabled.
+  // callLLM uses stream-first + tool-loop fallback so 深度思考 chrome is preserved when on.
+  const toolOptions =
+    cap.supportsTools && isDeepChatBusinessToolsEnabled(toolPrefs)
+      ? {
+          tools: DEEP_CHAT_BUSINESS_TOOLS,
+          executeTool: createDeepChatBusinessToolExecutor({
+            getThread: () => getActiveThread(),
+            getModel: () => model,
+            getProvider: () => config.provider,
+          }),
+          enableToolLoop: true,
+          maxToolRounds: 4,
+        }
+      : {};
 
   // Only request store/previous_id when capability allows (fail-closed registry + gateway).
   const canChain =
@@ -200,10 +208,16 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
     streamState
   );
 
+  const reasoningEnabled = Boolean(reasoningOptions.reasoningPrefs?.enabled);
+  const maxTokens = resolveDeepChatMaxOutputTokens(
+    getDeepChatRequestBudgetDefaults().maxOutputTokens,
+    reasoningEnabled
+  );
+
   const run = (chain: typeof responsesChain) =>
     callLLM(messages, config.provider, config.endpoint, config.apiKey, model, {
       temperature: sessionState.sessionTemperature,
-      maxTokens: getDeepChatRequestBudgetDefaults().maxOutputTokens,
+      maxTokens,
       ...(config.serviceTier && { serviceTier: config.serviceTier }),
       ...reasoningOptions,
       ...chain,
@@ -253,14 +267,25 @@ function assertDeepChatAssistantText(
 ): void {
   if (assistantText) return;
   const hadReasoning = Boolean(pendingRequest.reasoningText?.trim());
-  throw new ValidationError(
-    hadReasoning
+  const specific =
+    describeResponsesEmptyBody(null, { hadStreamedReasoning: hadReasoning }) ||
+    (hadReasoning
       ? '模型完成了推理但未返回可见正文（常见原因：max_output_tokens 过小、网关只推 reasoning、或 /responses 返回了非标准正文格式）。请增大输出上限、关闭推理后重试，或在系统设置将路径改为 chat/completions。'
-      : '模型没有返回任何内容，请稍后重试或检查模型/上下文配置。',
-    'DEEP_CHAT_001',
-    'assistantText',
-    assistantText,
-    { module: 'deep-chat', action: 'resolveAssistantText' }
+      : '模型没有返回任何内容，请稍后重试或检查模型/上下文配置。');
+  throw new ValidationError(specific, 'DEEP_CHAT_001', 'assistantText', assistantText, {
+    module: 'deep-chat',
+    action: 'resolveAssistantText',
+  });
+}
+
+/** Map Responses empty payloads (including incomplete) for Deep Chat / diagnostics. */
+export function mapDeepChatEmptyResponsesMessage(
+  data: Record<string, unknown> | null | undefined,
+  options?: { hadStreamedReasoning?: boolean }
+): string {
+  return (
+    describeResponsesEmptyBody(data, options) ||
+    '模型没有返回任何内容，请稍后重试或检查模型/上下文配置。'
   );
 }
 

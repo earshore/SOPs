@@ -1,4 +1,4 @@
-<!-- 系统设置 (Alpine.js Refactored - Visual Enhanced) -->
+﻿<!-- 系统设置 (Alpine.js Refactored - Visual Enhanced) -->
 <div
   x-data="settingsPanel"
   @open-settings.window="open()"
@@ -104,398 +104,480 @@
         <div class="settings-panel-sections space-y-7">
           <!-- Section 1: AI Model Connection -->
           <section id="settings-section-llm" class="settings-panel-section space-y-4">
-            <div class="flex items-center gap-2.5 mb-1">
-              <div class="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center">
-                <i class="fas fa-robot text-violet-500 text-[10px]"></i>
+            <div class="settings-section-head">
+              <div class="settings-section-head__icon settings-section-head__icon--violet" aria-hidden="true">
+                <i class="fas fa-robot"></i>
               </div>
-              <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                AI 模型与连接
-              </h3>
+              <div class="min-w-0">
+                <h3 class="settings-section-head__title">AI 模型与连接</h3>
+                <p class="settings-section-head__desc">
+                  配置全局 AI 连接：Endpoint、API Key 与默认模型。可对接官方 API 或兼容中转（如
+                  new-api）；各工具可在「工具策略」中单独覆盖模型。
+                </p>
+              </div>
             </div>
 
             <div class="settings-section-frame settings-section-frame--llm space-y-4">
-              <!-- 🔒 Security Warning -->
+              <div class="settings-coach" role="status">
+                <span class="settings-coach__icon" aria-hidden="true">
+                  <i class="fas fa-circle-info"></i>
+                </span>
+                <div class="min-w-0">
+                  <p class="settings-coach__title">配置提示</p>
+                  <p class="settings-coach__text" x-text="llmSetupReadinessText"></p>
+                </div>
+              </div>
+
               <div
                 :hidden="!showDangerousEndpointWarning"
                 class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl shadow-sm"
+                role="alert"
               >
                 <div class="flex items-start gap-3">
                   <div
                     class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                    aria-hidden="true"
                   >
                     <i class="fas fa-exclamation-triangle text-amber-500 text-xs"></i>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <h4 class="font-bold text-amber-800 text-sm mb-1.5">安全警告</h4>
+                    <h4 class="font-bold text-amber-800 text-sm mb-1.5">安全提示</h4>
                     <p class="text-xs text-amber-700/80 leading-relaxed mb-2.5">
-                      为保护您的 API 密钥安全，生产环境已禁用直接调用外部 API。
+                      生产环境不建议在浏览器中直接调用公有云厂商 API（密钥易暴露）。推荐通过兼容
+                      OpenAI 协议的中转或企业网关访问；密钥始终仅保存在本机。
                     </p>
                     <div class="flex flex-wrap gap-1.5">
                       <span
                         class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700"
                       >
-                        <i class="fas fa-server"></i> 使用内置代理
+                        <i class="fas fa-server" aria-hidden="true"></i> 官方 API 或兼容网关
                       </span>
                       <span
                         class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700"
                       >
-                        <i class="fas fa-shield-alt"></i> 配置企业网关
+                        <i class="fas fa-shield-alt" aria-hidden="true"></i> 密钥仅存本机
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div class="space-y-4">
-                <!-- Provider Select -->
-                <div class="group">
-                  <label
-                    for="llm-provider"
-                    class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
-                    >AI 厂商</label
-                  >
-                  <div class="relative">
-                    <select
-                      id="llm-provider"
-                      name="llm-provider"
-                      :value="llm.provider"
-                      @change="setLlmProvider($event)"
-                      class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm transition duration-200 shadow-sm hover:border-slate-300 cursor-pointer"
-                    >
-                      <template x-for="option in llmProviderOptions" :key="option.id">
-                        <option :value="option.id" x-text="option.label"></option>
-                      </template>
-                    </select>
+              <div class="settings-llm-steps space-y-3">
+                <!-- Step 1: 基本信息 -->
+                <section class="settings-llm-step" aria-labelledby="llm-step-1-title">
+                  <header class="settings-llm-step__header">
+                    <span class="settings-llm-step__index" aria-hidden="true">1</span>
+                    <div class="min-w-0">
+                      <h4 id="llm-step-1-title" class="settings-llm-step__title">基本信息</h4>
+                      <p class="settings-llm-step__desc">厂商配置档、Endpoint 与协议路径</p>
+                    </div>
+                  </header>
+                  <div class="settings-llm-step__body space-y-3.5">
+                    <div class="group">
+                      <label
+                        for="llm-provider"
+                        class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                        >AI 厂商 / 配置档</label
+                      >
+                      <div class="relative">
+                        <select
+                          id="llm-provider"
+                          name="llm-provider"
+                          :value="llm.provider"
+                          @change="setLlmProvider($event)"
+                          class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm transition duration-200 shadow-sm hover:border-slate-300 cursor-pointer"
+                        >
+                          <template x-for="option in llmProviderOptions" :key="option.id">
+                            <option :value="option.id" x-text="option.label"></option>
+                          </template>
+                        </select>
+                        <div
+                          class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                          aria-hidden="true"
+                        >
+                          <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                        </div>
+                      </div>
+                      <p class="settings-field-help">
+                        本机多套连接配置的命名空间（官方 API 与兼容中转可各存一份），不绑定单一云厂商。
+                      </p>
+                    </div>
+
                     <div
-                      class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                      class="group settings-api-path-group"
+                      :class="llmApiPathMenuOpen ? 'is-menu-open' : ''"
                     >
-                      <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                      <!-- Side-by-side: Endpoint takes remaining width; path stays compact -->
+                      <div class="settings-endpoint-path-row">
+                        <div class="settings-endpoint-field">
+                          <label
+                            for="llm-endpoint"
+                            class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                            >API Endpoint</label
+                          >
+                          <input
+                            type="url"
+                            id="llm-endpoint"
+                            name="llm-endpoint"
+                            autocomplete="off"
+                            :value="llm.endpoint"
+                            @input="setLlmEndpoint($event)"
+                            class="settings-endpoint-input w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                            :placeholder="defaultLlmEndpoint"
+                          />
+                        </div>
+
+                        <div class="settings-api-path-field">
+                          <label
+                            id="llm-api-path-label"
+                            class="block text-xs font-semibold text-slate-600 mb-2"
+                            >API 路径</label
+                          >
+                          <div
+                            class="relative"
+                            @keydown.escape.window="llmApiPathMenuOpen = false"
+                            @click.outside="llmApiPathMenuOpen = false"
+                          >
+                            <button
+                              type="button"
+                              id="llm-api-path"
+                              class="settings-api-path-trigger w-full px-3 pr-8 py-2.5 text-left cursor-pointer"
+                              :aria-expanded="llmApiPathMenuOpen"
+                              aria-haspopup="listbox"
+                              aria-labelledby="llm-api-path-label"
+                              @click="llmApiPathMenuOpen = !llmApiPathMenuOpen"
+                            >
+                              <span
+                                class="settings-api-path-trigger__path font-mono"
+                                x-text="selectedApiPathPathLabel"
+                              ></span>
+                            </button>
+                            <div
+                              class="settings-api-path-chevron absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center"
+                              aria-hidden="true"
+                            >
+                              <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                            </div>
+                            <ul
+                              class="settings-api-path-menu absolute mt-1.5 max-h-72 overflow-auto py-1"
+                              role="listbox"
+                              aria-labelledby="llm-api-path-label"
+                              :hidden="!llmApiPathMenuOpen"
+                            >
+                              <template x-for="opt in apiPathOptions" :key="opt.id">
+                                <li role="option" :aria-selected="llm.apiPath === opt.id">
+                                  <button
+                                    type="button"
+                                    class="settings-api-path-option"
+                                    :class="llm.apiPath === opt.id ? 'is-selected' : ''"
+                                    @click="setLlmApiPathId(opt.id)"
+                                  >
+                                    <span
+                                      class="settings-api-path-option__title settings-api-path-option__path font-mono"
+                                      x-text="opt.pathLabel"
+                                    ></span>
+                                    <span
+                                      class="settings-api-path-option__desc"
+                                      x-text="opt.description"
+                                    ></span>
+                                  </button>
+                                </li>
+                              </template>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p
+                        class="settings-field-help settings-field-help--mono"
+                        x-text="'完整 URL：' + fullApiUrlPreview"
+                      ></p>
+                      <p
+                        class="settings-field-help"
+                        :hidden="!selectedApiPathDescription"
+                        x-text="selectedApiPathDescription"
+                      ></p>
+                      <p
+                        class="settings-field-help settings-field-help--hint"
+                        :hidden="!apiPathCapabilityHint"
+                        role="status"
+                        x-text="apiPathCapabilityHint"
+                      ></p>
                     </div>
                   </div>
-                </div>
+                </section>
 
-                <!-- Endpoint + API Path (URL base + route) -->
-                <div class="group">
-                  <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
-                    <div class="min-w-0 flex-1">
+                <!-- Step 2: 凭证 -->
+                <section class="settings-llm-step" aria-labelledby="llm-step-2-title">
+                  <header class="settings-llm-step__header">
+                    <span class="settings-llm-step__index" aria-hidden="true">2</span>
+                    <div class="min-w-0">
+                      <h4 id="llm-step-2-title" class="settings-llm-step__title">凭证</h4>
+                      <p class="settings-llm-step__desc">API Key 仅保存在本机浏览器</p>
+                    </div>
+                  </header>
+                  <div class="settings-llm-step__body">
+                    <div class="group">
                       <label
-                        for="llm-endpoint"
+                        for="llm-api-key"
                         class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
-                        >API Endpoint</label
+                        >API Key</label
                       >
                       <div class="relative">
                         <div
-                          class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-emerald-100 flex items-center justify-center"
+                          class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center"
+                          aria-hidden="true"
                         >
-                          <i class="fas fa-link text-emerald-500 text-[9px]"></i>
+                          <i class="fas fa-key text-amber-500 text-[9px]"></i>
                         </div>
                         <input
-                          type="text"
-                          id="llm-endpoint"
-                          name="llm-endpoint"
-                          :value="llm.endpoint"
-                          @input="setLlmEndpoint($event)"
-                          class="settings-leading-icon-input w-full pl-12 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
-                          :placeholder="defaultLlmEndpoint"
+                          :type="llmApiKeyInputType"
+                          id="llm-api-key"
+                          name="llm-api-key"
+                          autocomplete="off"
+                          spellcheck="false"
+                          :value="llm.apiKey"
+                          @input="setLlmApiKey($event)"
+                          class="settings-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                          placeholder="sk-..."
                         />
+                        <button
+                          type="button"
+                          @click="toggleLlmKeyVisibility()"
+                          :aria-label="llmApiKeyVisibilityLabel"
+                          :title="llmApiKeyVisibilityLabel"
+                          class="absolute right-2.5 top-1/2 -translate-y-1/2 min-h-[28px] min-w-[28px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 cursor-pointer"
+                        >
+                          <i class="fas text-xs" :class="llmApiKeyIconClass" aria-hidden="true"></i>
+                        </button>
                       </div>
+                      <p class="settings-field-help" x-text="localSecretBoundaryText"></p>
                     </div>
-                    <div class="w-full sm:w-[min(17.5rem,42%)] shrink-0">
+                  </div>
+                </section>
+
+                <!-- Step 3: 模型与能力 -->
+                <section class="settings-llm-step" aria-labelledby="llm-step-3-title">
+                  <header class="settings-llm-step__header">
+                    <span class="settings-llm-step__index" aria-hidden="true">3</span>
+                    <div class="min-w-0">
+                      <h4 id="llm-step-3-title" class="settings-llm-step__title">模型与能力</h4>
+                      <p class="settings-llm-step__desc">默认模型、路径能力与推理偏好</p>
+                    </div>
+                  </header>
+                  <div class="settings-llm-step__body space-y-3.5">
+                    <div class="group">
                       <label
-                        for="llm-api-path"
+                        for="llm-model"
                         class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
-                        >API 路径</label
+                        >默认模型</label
                       >
-                      <div class="relative">
-                        <select
-                          id="llm-api-path"
-                          name="llm-api-path"
-                          :value="llm.apiPath"
-                          @change="setLlmApiPath($event)"
-                          class="w-full pl-3 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm font-mono text-slate-700 shadow-sm transition duration-200 hover:border-slate-300 cursor-pointer"
-                        >
-                          <template x-for="opt in apiPathOptions" :key="opt.id">
-                            <option
-                              :value="opt.id"
-                              x-text="opt.pathLabel + ' · ' + opt.label"
-                            ></option>
-                          </template>
-                        </select>
-                        <div
-                          class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
-                        >
-                          <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                      <div class="flex gap-2">
+                        <div class="relative flex-1 min-w-0">
+                          <select
+                            id="llm-model"
+                            name="llm-model"
+                            :value="llm.model"
+                            @change="setLlmModel($event)"
+                            class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer"
+                            :disabled="modelSelectDisabled"
+                          >
+                            <option value="">— 请选择 —</option>
+                            <template x-for="(m, index) in llm.models" :key="index">
+                              <option :value="getModelValue(m)" x-text="getModelLabel(m)"></option>
+                            </template>
+                          </select>
+                          <div
+                            class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                            aria-hidden="true"
+                          >
+                            <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                          </div>
                         </div>
+                        <button
+                          type="button"
+                          :aria-label="fetchModelsText"
+                          @click="fetchModels()"
+                          :disabled="llm.isFetching"
+                          class="px-4 py-2.5 min-h-[42px] bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 rounded-xl transition duration-200 text-sm font-medium flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 cursor-pointer"
+                        >
+                          <i class="fas text-xs" :class="fetchModelsIconClass" aria-hidden="true"></i>
+                          <span x-text="fetchModelsText"></span>
+                        </button>
                       </div>
-                    </div>
-                  </div>
-                  <p
-                    class="mt-1.5 text-[10px] leading-relaxed text-slate-500 font-mono break-all"
-                    x-text="'完整 URL：' + fullApiUrlPreview"
-                  ></p>
-                  <p
-                    class="mt-1 text-[10px] leading-relaxed text-amber-700/90"
-                    x-show="apiPathCapabilityHint"
-                    x-text="apiPathCapabilityHint"
-                  ></p>
-                </div>
-
-                <!-- API Key -->
-                <div class="group">
-                  <label
-                    for="llm-api-key"
-                    class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
-                    >API Key</label
-                  >
-                  <div class="relative">
-                    <div
-                      class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center"
-                    >
-                      <i class="fas fa-key text-amber-500 text-[9px]"></i>
-                    </div>
-                    <input
-                      :type="llmApiKeyInputType"
-                      id="llm-api-key"
-                      name="llm-api-key"
-                      :value="llm.apiKey"
-                      @input="setLlmApiKey($event)"
-                      class="settings-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
-                      placeholder="sk-..."
-                    />
-                    <button
-                      type="button"
-                      @click="toggleLlmKeyVisibility()"
-                      :aria-label="llmApiKeyVisibilityLabel"
-                      :title="llmApiKeyVisibilityLabel"
-                      class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                    >
-                      <i class="fas text-xs" :class="llmApiKeyIconClass"></i>
-                    </button>
-                  </div>
-                  <p
-                    class="mt-1.5 text-[10px] leading-relaxed text-amber-700/75"
-                    x-text="localSecretBoundaryText"
-                  ></p>
-                </div>
-
-                <!-- Model Selection -->
-                <div class="group">
-                  <label
-                    for="llm-model"
-                    class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
-                    >选择模型</label
-                  >
-                  <div class="flex gap-2">
-                    <div class="relative flex-1">
-                      <select
-                        id="llm-model"
-                        name="llm-model"
-                        :value="llm.model"
-                        @change="setLlmModel($event)"
-                        class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer"
-                        :disabled="modelSelectDisabled"
-                      >
-                        <option value="">-- 请选择 --</option>
-                        <template x-for="(m, index) in llm.models" :key="index">
-                          <option :value="getModelValue(m)" x-text="getModelLabel(m)"></option>
-                        </template>
-                      </select>
+                      <p class="settings-field-help">
+                        未在「工具策略」单独指定时，分析 / Deep Chat 等使用此处默认模型。
+                      </p>
                       <div
-                        class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                        class="mt-2 flex flex-wrap gap-1.5"
+                        :hidden="modelCapabilityBadges.length === 0"
+                        aria-label="当前路径能力摘要"
                       >
-                        <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                        <template x-for="badge in modelCapabilityBadges" :key="badge.id">
+                          <span
+                            class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium tracking-wide transition-colors"
+                            :class="badge.active
+                              ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200/80'
+                              : 'bg-slate-50 text-slate-400 ring-1 ring-inset ring-slate-200/80'"
+                            :title="badge.title"
+                            x-text="badge.label"
+                          ></span>
+                        </template>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      :aria-label="fetchModelsText"
-                      @click="fetchModels()"
-                      :disabled="llm.isFetching"
-                      class="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 rounded-xl transition duration-200 text-sm font-medium flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    >
-                      <i class="fas text-xs" :class="fetchModelsIconClass"></i>
-                      <span x-text="fetchModelsText"></span>
-                    </button>
-                  </div>
-                  <!-- R7: capability badges for model + effective API path -->
-                  <div
-                    class="mt-2 flex flex-wrap gap-1.5"
-                    x-show="modelCapabilityBadges.length > 0"
-                    x-cloak
-                  >
-                    <template x-for="badge in modelCapabilityBadges" :key="badge.id">
-                      <span
-                        class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium tracking-wide transition-colors"
-                        :class="badge.active
-                          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200/80'
-                          : 'bg-slate-50 text-slate-400 ring-1 ring-inset ring-slate-200/80'"
-                        :title="badge.title"
-                        x-text="badge.label"
-                      ></span>
-                    </template>
-                  </div>
-                </div>
 
-                <!-- Service Tier -->
-                <div class="group">
-                  <label
-                    for="llm-service-tier"
-                    class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
-                    >服务层级</label
-                  >
-                  <div class="relative">
-                    <select
-                      id="llm-service-tier"
-                      name="llm-service-tier"
-                      :value="llm.serviceTier || ''"
-                      @change="setLlmServiceTier($event)"
-                      class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 cursor-pointer"
-                    >
-                      <option value="">不发送 service_tier</option>
-                      <option value="auto">auto</option>
-                      <option value="default">default</option>
-                      <option value="flex">flex</option>
-                      <option value="priority">priority</option>
-                    </select>
+                    <!-- Reasoning: segmented effort, model-paired -->
                     <div
-                      class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                      class="settings-reasoning-card"
+                      :hidden="!showReasoningControls"
+                      role="group"
+                      aria-labelledby="llm-reasoning-heading"
                     >
-                      <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
-                    </div>
-                  </div>
-                  <p class="mt-1.5 text-[10px] leading-relaxed text-slate-500">
-                    默认不发送；仅在网关明确支持时手动选择。
-                  </p>
-                </div>
+                      <div class="settings-reasoning-card__top">
+                        <div class="min-w-0 flex-1">
+                          <div class="flex items-center gap-2">
+                            <span class="settings-reasoning-card__icon" aria-hidden="true">
+                              <i class="fas fa-brain"></i>
+                            </span>
+                            <div class="min-w-0">
+                              <h5
+                                id="llm-reasoning-heading"
+                                class="text-xs font-semibold text-slate-700"
+                              >
+                                推理
+                              </h5>
+                              <p class="mt-0.5 text-[10px] leading-relaxed text-slate-500">
+                                随当前模型能力显示；默认关闭，不向网关发送推理字段
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <label class="settings-reasoning-switch">
+                          <input
+                            id="llm-reasoning-enabled"
+                            name="llm-reasoning-enabled"
+                            type="checkbox"
+                            class="sr-only"
+                            :checked="llm.reasoningPrefs.enabled"
+                            @change="setReasoningEnabled($event)"
+                          />
+                          <span
+                            class="settings-reasoning-switch__track"
+                            :class="llm.reasoningPrefs.enabled ? 'is-on' : ''"
+                            aria-hidden="true"
+                          >
+                            <span class="settings-reasoning-switch__thumb"></span>
+                          </span>
+                          <span class="sr-only">启用推理</span>
+                        </label>
+                      </div>
 
-                <!-- Reasoning (capability-gated; global default) -->
-                <div class="group" x-show="showReasoningControls" x-cloak>
-                  <span class="block text-xs font-semibold text-slate-600 mb-2"
-                    >推理（全局默认）</span
-                  >
-                  <div
-                    class="rounded-xl border border-slate-200 bg-white px-3 py-3 shadow-sm space-y-3"
-                  >
-                    <label class="flex items-center gap-2.5 cursor-pointer select-none">
-                      <input
-                        id="llm-reasoning-enabled"
-                        name="llm-reasoning-enabled"
-                        type="checkbox"
-                        class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                        :checked="llm.reasoningPrefs.enabled"
-                        @change="setReasoningEnabled($event)"
-                      />
-                      <span class="text-sm text-slate-700">启用推理</span>
-                    </label>
-                    <div x-show="llm.reasoningPrefs.enabled">
-                      <label
-                        for="llm-reasoning-effort"
-                        class="block text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-1.5"
-                        >思考强度</label
+                      <div
+                        class="settings-reasoning-card__effort"
+                        :hidden="!llm.reasoningPrefs.enabled"
                       >
-                      <div class="relative">
-                        <select
-                          id="llm-reasoning-effort"
-                          name="llm-reasoning-effort"
-                          class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 cursor-pointer"
-                          :value="llm.reasoningPrefs.effort"
-                          @change="setReasoningEffort($event)"
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400"
+                            >Effort</span
+                          >
+                          <span
+                            class="font-mono text-[11px] font-semibold text-violet-600"
+                            x-text="reasoningEffortLabel"
+                          ></span>
+                        </div>
+                        <div
+                          class="settings-reasoning-effort"
+                          role="radiogroup"
+                          aria-label="Reasoning effort"
                         >
                           <template x-for="level in reasoningEffortOptions" :key="level">
-                            <option
-                              :value="level"
-                              x-text="
-                                level === 'low'
-                                  ? '低 (low)'
-                                  : level === 'high'
-                                    ? '高 (high)'
-                                    : '中 (medium)'
-                              "
-                            ></option>
+                            <button
+                              type="button"
+                              role="radio"
+                              class="settings-reasoning-effort__btn"
+                              :class="llm.reasoningPrefs.effort === level ? 'is-active' : ''"
+                              :aria-checked="llm.reasoningPrefs.effort === level"
+                              @click="setReasoningEffortLevel(level)"
+                              x-text="reasoningEffortButtonLabel(level)"
+                            ></button>
                           </template>
+                        </div>
+                        <p class="settings-field-help mt-2">
+                          使用官方字段 Low / Medium / High。Deep Chat 可在会话内覆盖；网关未透传时启用可能
+                          400，可关闭后重试。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Step 4: 高级选项 -->
+                <section class="settings-llm-step" aria-labelledby="llm-step-4-title">
+                  <header class="settings-llm-step__header">
+                    <span class="settings-llm-step__index" aria-hidden="true">4</span>
+                    <div class="min-w-0">
+                      <h4 id="llm-step-4-title" class="settings-llm-step__title">高级选项</h4>
+                      <p class="settings-llm-step__desc">服务层级等可选上游参数</p>
+                    </div>
+                  </header>
+                  <div class="settings-llm-step__body">
+                    <div class="group">
+                      <label
+                        for="llm-service-tier"
+                        class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                        >服务层级（service_tier）</label
+                      >
+                      <div class="relative">
+                        <select
+                          id="llm-service-tier"
+                          name="llm-service-tier"
+                          :value="llm.serviceTier || ''"
+                          @change="setLlmServiceTier($event)"
+                          class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 cursor-pointer"
+                        >
+                          <option value="">不发送（默认）</option>
+                          <option value="auto">auto</option>
+                          <option value="default">default</option>
+                          <option value="flex">flex</option>
+                          <option value="priority">priority</option>
                         </select>
                         <div
                           class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                          aria-hidden="true"
                         >
                           <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
                         </div>
                       </div>
-                    </div>
-                    <p class="text-[10px] leading-relaxed text-slate-500">
-                      仅在能力目录登记且网关可透传时生效。默认关闭时不发送推理字段；勾选并保存后才会发送。
-                      Claude 等渠道若未开启 extended thinking，启用后可能 400——可关闭推理后重试。
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Model Info Card -->
-                <div
-                  :hidden="!activeModelInfo"
-                  class="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5 shadow-sm"
-                >
-                  <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="flex min-w-0 items-center gap-2.5">
-                      <span
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500 ring-1 ring-blue-100"
-                      >
-                        <i class="fas fa-expand-alt text-[11px]"></i>
-                      </span>
-                      <div class="min-w-0">
-                        <span
-                          class="block text-[10px] font-medium uppercase tracking-wider text-slate-400"
-                          >上下文</span
-                        >
-                        <span
-                          class="block truncate text-sm font-bold leading-tight text-slate-800"
-                          x-text="activeContextText"
-                        ></span>
-                      </div>
-                    </div>
-                    <div class="flex items-center gap-2 sm:justify-end" aria-label="模型特性">
-                      <span class="text-[10px] font-medium uppercase tracking-wider text-slate-400"
-                        >特性</span
-                      >
-                      <div class="flex flex-wrap items-center gap-1.5 sm:justify-end">
-                        <template x-for="feature in activeFeatureBadges" :key="feature.key">
-                          <span
-                            tabindex="0"
-                            role="img"
-                            :aria-label="feature.label"
-                            class="model-feature-icon group relative flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 transition duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                          >
-                            <i class="fas text-[10px]" :class="feature.icon"></i>
-                            <span
-                              aria-hidden="true"
-                              class="model-feature-tooltip pointer-events-none invisible absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus:visible group-focus:translate-y-0 group-focus:opacity-100 group-focus-visible:visible group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
-                              x-text="feature.label"
-                            ></span>
-                          </span>
-                        </template>
-                      </div>
+                      <p class="settings-field-help">
+                        仅当上游 API 文档明确支持 service_tier 时再改；多数场景保持不发送即可。
+                      </p>
                     </div>
                   </div>
-                </div>
+                </section>
 
-                <!-- Action Buttons -->
-                <div class="flex gap-2.5 pt-1">
+                <div class="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:gap-2.5">
                   <button
                     type="button"
                     :aria-label="testConnectionText"
                     @click="testConnection()"
                     :disabled="llm.isTesting"
-                    class="flex-1 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-medium rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    class="flex-1 min-h-[44px] py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-medium rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 cursor-pointer"
                   >
-                    <i class="fas text-xs" :class="testConnectionIconClass"></i>
+                    <i class="fas text-xs" :class="testConnectionIconClass" aria-hidden="true"></i>
                     <span x-text="testConnectionText"></span>
                   </button>
                   <button
                     type="button"
                     @click="saveProviderConfig()"
-                    class="flex-[2] py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    class="flex-[2] min-h-[44px] py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 cursor-pointer"
                   >
-                    <i class="fas fa-check text-xs"></i> 保存配置
+                    <i class="fas fa-check text-xs" aria-hidden="true"></i>
+                    保存配置
                   </button>
                 </div>
+                <p class="settings-field-help">
+                  测试连接不会改写本地配置；保存后各页面才会使用新设置。
+                </p>
               </div>
             </div>
           </section>
@@ -513,47 +595,46 @@
 
           <!-- Section 2: Tool Strategy -->
           <section id="settings-section-tool-strategy" class="settings-panel-section space-y-4">
-            <div class="flex items-center gap-2.5 mb-1">
-              <div class="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center">
-                <i class="fas fa-sliders text-indigo-500 text-[10px]"></i>
+            <div class="settings-section-head">
+              <div class="settings-section-head__icon settings-section-head__icon--indigo" aria-hidden="true">
+                <i class="fas fa-sliders"></i>
               </div>
-              <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                工具策略
-              </h3>
+              <div class="min-w-0">
+                <h3 class="settings-section-head__title">工具策略</h3>
+                <p class="settings-section-head__desc">
+                  为不同页面与任务指定默认模型；未单独指定时跟随「AI 模型与连接」全局配置。
+                </p>
+              </div>
             </div>
 
             <div class="settings-section-frame settings-section-frame--strategy space-y-4">
-              <div
-                class="rounded-xl border border-indigo-100 bg-white/80 px-3 py-2.5 text-[11px] leading-relaxed text-slate-500 shadow-sm"
-              >
-                当前模型池来自
-                <span
-                  class="font-semibold text-slate-700"
-                  x-text="toolStrategyProviderLabel"
-                ></span>
-                。为不同页面和任务设置默认模型，任务执行时会优先使用工具策略；未指定时跟随“AI
-                模型与连接”的全局模型。
+              <div class="settings-coach" role="status">
+                <span class="settings-coach__icon" aria-hidden="true">
+                  <i class="fas fa-circle-info"></i>
+                </span>
+                <div class="min-w-0">
+                  <p class="settings-coach__title">模型池</p>
+                  <p class="settings-coach__text">
+                    当前模型池来自
+                    <span class="font-semibold text-slate-700" x-text="toolStrategyProviderLabel"></span>
+                    。任务执行时优先使用工具策略中的模型。
+                  </p>
+                </div>
               </div>
 
-              <div class="rounded-xl border border-indigo-100 bg-white/85 p-3 shadow-sm">
+              <div class="settings-card">
                 <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h4 class="text-xs font-bold text-slate-700">通用 AI 执行策略</h4>
-                    <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
+                    <h4 class="settings-card__title">通用 AI 执行策略</h4>
+                    <p class="settings-card__desc">
                       控制所有 AI 工具共用的请求超时、重试和连接测试策略。
                     </p>
                   </div>
-                  <span
-                    class="rounded-md bg-indigo-50 px-2 py-1 text-[10px] font-semibold text-indigo-600"
-                  >
-                    全局生效
-                  </span>
+                  <span class="settings-card__badge">全局生效</span>
                 </div>
                 <div class="mt-3 grid gap-3 sm:grid-cols-4">
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
-                      >AI / 工具请求超时（秒）</span
-                    >
+                    <span class="settings-label">AI / 工具请求超时（秒）</span>
                     <input
                       type="number"
                       min="30"
@@ -561,13 +642,11 @@
                       step="5"
                       :value="runtimeAnalysisTimeoutSeconds"
                       @input="setRuntimeNumber('llm.analysisTimeoutMs', $event, 1000)"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                      class="settings-control settings-control--sm"
                     />
                   </label>
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
-                      >模型重试次数</span
-                    >
+                    <span class="settings-label">模型重试次数</span>
                     <input
                       type="number"
                       min="0"
@@ -575,13 +654,11 @@
                       step="1"
                       :value="runtimeStrategy.settings.llm.maxRetries"
                       @input="setRuntimeNumber('llm.maxRetries', $event)"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                      class="settings-control settings-control--sm"
                     />
                   </label>
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
-                      >重试间隔（秒）</span
-                    >
+                    <span class="settings-label">重试间隔（秒）</span>
                     <input
                       type="number"
                       min="0.25"
@@ -589,13 +666,11 @@
                       step="0.25"
                       :value="getRuntimeNumber('llm.retryDelayMs', 1000)"
                       @input="setRuntimeNumber('llm.retryDelayMs', $event, 1000)"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                      class="settings-control settings-control--sm"
                     />
                   </label>
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
-                      >连接测试超时（秒）</span
-                    >
+                    <span class="settings-label">连接测试超时（秒）</span>
                     <input
                       type="number"
                       min="5"
@@ -603,31 +678,29 @@
                       step="5"
                       :value="runtimeTestConnectionTimeoutSeconds"
                       @input="setRuntimeNumber('llm.testConnectionTimeoutMs', $event, 1000)"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                      class="settings-control settings-control--sm"
                     />
                   </label>
                 </div>
               </div>
 
               <div>
-                <h4 class="text-xs font-bold text-slate-700">应用中心</h4>
-                <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
+                <h4 class="settings-card__title">应用中心</h4>
+                <p class="settings-card__desc">
                   按应用与页面模块整理默认模型和执行默认项，避免同类设置分散在多个平级目录。
                 </p>
               </div>
 
-              <details
-                class="settings-tool-app rounded-xl border border-indigo-100 bg-white/85 shadow-sm"
-              >
+              <details class="settings-tool-app">
                 <summary
-                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2 p-3"
+                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div>
-                    <h4 class="text-xs font-bold text-slate-700">Master Analysis</h4>
-                    <p class="mt-1 text-[10px] text-slate-500">AI 智能分析报告生成策略。</p>
+                    <h4 class="settings-card__title">Master Analysis</h4>
+                    <p class="settings-card__desc">AI 智能分析报告生成策略。</p>
                   </div>
                   <span
-                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                    class="settings-card__badge"
                   >
                     1 个模块
                   </span>
@@ -647,17 +720,17 @@
                       >
                         <div class="min-w-0 flex-1">
                           <div class="flex flex-wrap items-center gap-2">
-                            <h5 class="text-xs font-bold text-slate-700" x-text="item.label"></h5>
+                            <h5 class="settings-card__title" x-text="item.label"></h5>
                             <span
                               class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
                               x-text="item.modelHint"
                             ></span>
                           </div>
                           <p
-                            class="mt-1 text-[10px] leading-relaxed text-slate-500"
+                            class="settings-card__desc"
                             x-text="item.description"
                           ></p>
-                          <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
+                          <p class="settings-card__desc">
                             当前执行模型：
                             <span
                               class="font-mono text-slate-700"
@@ -675,7 +748,7 @@
                             :value="item.model"
                             @change="setToolTargetModel(item.id, $event)"
                             :disabled="toolStrategyModelSelectDisabled"
-                            class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                            class="settings-control settings-control--sm"
                           >
                             <option value="">跟随全局模型</option>
                             <template x-for="model in llm.models" :key="getModelValue(model)">
@@ -696,13 +769,13 @@
                   </template>
                   <div class="mt-3 grid gap-3 sm:grid-cols-3">
                     <label class="block">
-                      <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      <span class="settings-label"
                         >调度偏好</span
                       >
                       <select
                         :value="runtimeStrategy.settings.masterAnalysis.schedulingPreference"
                         @change="setRuntimeString('masterAnalysis.schedulingPreference', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                       >
                         <option value="recommended">推荐</option>
                         <option value="reliability">稳定</option>
@@ -710,7 +783,7 @@
                       </select>
                     </label>
                     <label class="block">
-                      <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      <span class="settings-label"
                         >完整报告 Token</span
                       >
                       <input
@@ -720,11 +793,11 @@
                         step="1024"
                         :value="runtimeStrategy.settings.masterAnalysis.fullReportMaxTokens"
                         @input="setRuntimeNumber('masterAnalysis.fullReportMaxTokens', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                       />
                     </label>
                     <label class="block">
-                      <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      <span class="settings-label"
                         >翻译报告 Token</span
                       >
                       <input
@@ -734,7 +807,7 @@
                         step="1024"
                         :value="runtimeStrategy.settings.masterAnalysis.translationMaxTokens"
                         @input="setRuntimeNumber('masterAnalysis.translationMaxTokens', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                       />
                     </label>
                   </div>
@@ -753,7 +826,7 @@
                     <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
                       <label class="block">
                         <span
-                          class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                          class="settings-label"
                           x-text="item.label"
                         ></span>
                         <input
@@ -763,7 +836,7 @@
                           :step="item.step"
                           :value="item.value"
                           @input="setRuntimeNumber(item.path, $event)"
-                          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                          class="settings-control settings-control--sm"
                         />
                       </label>
                     </template>
@@ -772,19 +845,19 @@
               </details>
 
               <details
-                class="settings-tool-app rounded-xl border border-indigo-100 bg-white/85 shadow-sm"
+                class="settings-tool-app"
               >
                 <summary
-                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2 p-3"
+                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div>
-                    <h4 class="text-xs font-bold text-slate-700">Playground</h4>
-                    <p class="mt-1 text-[10px] text-slate-500">
+                    <h4 class="settings-card__title">Playground</h4>
+                    <p class="settings-card__desc">
                       Deep Chat 对话质量、响应速度和本地保留策略。
                     </p>
                   </div>
                   <span
-                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                    class="settings-card__badge"
                   >
                     1 个模块
                   </span>
@@ -804,17 +877,17 @@
                       >
                         <div class="min-w-0 flex-1">
                           <div class="flex flex-wrap items-center gap-2">
-                            <h5 class="text-xs font-bold text-slate-700" x-text="item.label"></h5>
+                            <h5 class="settings-card__title" x-text="item.label"></h5>
                             <span
                               class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
                               x-text="item.modelHint"
                             ></span>
                           </div>
                           <p
-                            class="mt-1 text-[10px] leading-relaxed text-slate-500"
+                            class="settings-card__desc"
                             x-text="item.description"
                           ></p>
-                          <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
+                          <p class="settings-card__desc">
                             当前执行模型：
                             <span
                               class="font-mono text-slate-700"
@@ -832,7 +905,7 @@
                             :value="item.model"
                             @change="setToolTargetModel(item.id, $event)"
                             :disabled="toolStrategyModelSelectDisabled"
-                            class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                            class="settings-control settings-control--sm"
                           >
                             <option value="">跟随全局模型</option>
                             <template x-for="model in llm.models" :key="getModelValue(model)">
@@ -853,7 +926,7 @@
                   </template>
                   <div class="mt-3 grid gap-3 sm:grid-cols-4">
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >请求超时（秒）</span
                       ><input
                         type="number"
@@ -862,10 +935,10 @@
                         step="5"
                         :value="runtimeDeepChatTimeoutSeconds"
                         @input="setRuntimeNumber('deepChat.requestTimeoutMs', $event, 1000)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >输出 Token</span
                       ><input
                         type="number"
@@ -874,10 +947,10 @@
                         step="256"
                         :value="runtimeStrategy.settings.deepChat.maxOutputTokens"
                         @input="setRuntimeNumber('deepChat.maxOutputTokens', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >上下文字符</span
                       ><input
                         type="number"
@@ -886,10 +959,10 @@
                         step="1000"
                         :value="runtimeStrategy.settings.deepChat.maxContextChars"
                         @input="setRuntimeNumber('deepChat.maxContextChars', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >会话保留数</span
                       ><input
                         type="number"
@@ -898,10 +971,10 @@
                         step="1"
                         :value="runtimeStrategy.settings.deepChat.maxThreadCount"
                         @input="setRuntimeNumber('deepChat.maxThreadCount', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >单条消息字符</span
                       ><input
                         type="number"
@@ -910,10 +983,10 @@
                         step="1000"
                         :value="runtimeStrategy.settings.deepChat.maxMessageChars"
                         @input="setRuntimeNumber('deepChat.maxMessageChars', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >系统提示词字符</span
                       ><input
                         type="number"
@@ -922,10 +995,10 @@
                         step="1000"
                         :value="runtimeStrategy.settings.deepChat.maxSystemPromptChars"
                         @input="setRuntimeNumber('deepChat.maxSystemPromptChars', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >每会话消息数</span
                       ><input
                         type="number"
@@ -934,10 +1007,10 @@
                         step="10"
                         :value="runtimeStrategy.settings.deepChat.maxThreadMessageCount"
                         @input="setRuntimeNumber('deepChat.maxThreadMessageCount', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >Prompt 草稿数</span
                       ><input
                         type="number"
@@ -946,26 +1019,26 @@
                         step="1"
                         :value="runtimeStrategy.settings.deepChat.maxPromptDraftCount"
                         @input="setRuntimeNumber('deepChat.maxPromptDraftCount', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                   </div>
                 </div>
               </details>
 
               <details
-                class="settings-tool-app rounded-xl border border-indigo-100 bg-white/85 shadow-sm"
+                class="settings-tool-app"
               >
                 <summary
-                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2 p-3"
+                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div>
-                    <h4 class="text-xs font-bold text-slate-700">Keyword Hunter</h4>
-                    <p class="mt-1 text-[10px] text-slate-500">
+                    <h4 class="settings-card__title">Keyword Hunter</h4>
+                    <p class="settings-card__desc">
                       按 SEO 处理和 Listing 评审分别管理模型、缓存和匹配策略。
                     </p>
                   </div>
                   <span
-                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                    class="settings-card__badge"
                   >
                     2 个模块
                   </span>
@@ -983,17 +1056,17 @@
                       >
                         <div>
                           <div class="flex flex-wrap items-center gap-2">
-                            <h5 class="text-xs font-bold text-slate-700" x-text="item.label"></h5>
+                            <h5 class="settings-card__title" x-text="item.label"></h5>
                             <span
                               class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
                               x-text="item.modelHint"
                             ></span>
                           </div>
                           <p
-                            class="mt-1 text-[10px] leading-relaxed text-slate-500"
+                            class="settings-card__desc"
                             x-text="item.description"
                           ></p>
-                          <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
+                          <p class="settings-card__desc">
                             当前执行模型：
                             <span
                               class="font-mono text-slate-700"
@@ -1010,7 +1083,7 @@
                               :value="item.model"
                               @change="setToolTargetModel(item.id, $event)"
                               :disabled="toolStrategyModelSelectDisabled"
-                              class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                              class="settings-control settings-control--sm"
                             >
                               <option value="">跟随全局模型</option>
                               <template x-for="model in llm.models" :key="getModelValue(model)">
@@ -1030,7 +1103,7 @@
                       </template>
                       <div class="mt-3 grid gap-3 sm:grid-cols-2">
                         <label class="block"
-                          ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                          ><span class="settings-label"
                             >SEO 缓存 TTL（小时）</span
                           ><input
                             type="number"
@@ -1039,10 +1112,10 @@
                             step="1"
                             :value="getRuntimeNumber('keywordHunterSeoProcess.cacheTtlMs', 3600000)"
                             @input="setRuntimeNumber('keywordHunterSeoProcess.cacheTtlMs', $event, 3600000)"
-                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                            class="settings-control settings-control--sm"
                         /></label>
                         <label class="block"
-                          ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                          ><span class="settings-label"
                             >翻译最大 Token</span
                           ><input
                             type="number"
@@ -1051,7 +1124,7 @@
                             step="1024"
                             :value="runtimeStrategy.settings.keywordHunterSeoProcess.translationMaxTokens"
                             @input="setRuntimeNumber('keywordHunterSeoProcess.translationMaxTokens', $event)"
-                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                            class="settings-control settings-control--sm"
                         /></label>
                       </div>
                       <div class="mt-3 grid gap-3 sm:grid-cols-2">
@@ -1104,17 +1177,17 @@
                       >
                         <div>
                           <div class="flex flex-wrap items-center gap-2">
-                            <h5 class="text-xs font-bold text-slate-700" x-text="item.label"></h5>
+                            <h5 class="settings-card__title" x-text="item.label"></h5>
                             <span
                               class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
                               x-text="item.modelHint"
                             ></span>
                           </div>
                           <p
-                            class="mt-1 text-[10px] leading-relaxed text-slate-500"
+                            class="settings-card__desc"
                             x-text="item.description"
                           ></p>
-                          <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
+                          <p class="settings-card__desc">
                             当前执行模型：
                             <span
                               class="font-mono text-slate-700"
@@ -1131,7 +1204,7 @@
                               :value="item.model"
                               @change="setToolTargetModel(item.id, $event)"
                               :disabled="toolStrategyModelSelectDisabled"
-                              class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                              class="settings-control settings-control--sm"
                             >
                               <option value="">跟随全局模型</option>
                               <template x-for="model in llm.models" :key="getModelValue(model)">
@@ -1151,7 +1224,7 @@
                       </template>
                       <div class="mt-3 grid gap-3 sm:grid-cols-2">
                         <label class="block"
-                          ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                          ><span class="settings-label"
                             >Listing 缓存 TTL（小时）</span
                           ><input
                             type="number"
@@ -1160,10 +1233,10 @@
                             step="1"
                             :value="getRuntimeNumber('keywordHunterListingReview.cacheTtlMs', 3600000)"
                             @input="setRuntimeNumber('keywordHunterListingReview.cacheTtlMs', $event, 3600000)"
-                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                            class="settings-control settings-control--sm"
                         /></label>
                         <label class="block"
-                          ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                          ><span class="settings-label"
                             >Listing 评审 Token</span
                           ><input
                             type="number"
@@ -1172,7 +1245,7 @@
                             step="1024"
                             :value="runtimeStrategy.settings.keywordHunterListingReview.listingAnalysisMaxTokens"
                             @input="setRuntimeNumber('keywordHunterListingReview.listingAnalysisMaxTokens', $event)"
-                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                            class="settings-control settings-control--sm"
                         /></label>
                       </div>
                       <label
@@ -1190,19 +1263,19 @@
               </details>
 
               <details
-                class="settings-tool-app rounded-xl border border-indigo-100 bg-white/85 shadow-sm"
+                class="settings-tool-app"
               >
                 <summary
-                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2 p-3"
+                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div>
-                    <h4 class="text-xs font-bold text-slate-700">PPC Tools</h4>
-                    <p class="mt-1 text-[10px] text-slate-500">
+                    <h4 class="settings-card__title">PPC Tools</h4>
+                    <p class="settings-card__desc">
                       PPC 搜索词分析器的模型复核、批处理和阈值策略。
                     </p>
                   </div>
                   <span
-                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                    class="settings-card__badge"
                   >
                     1 个模块
                   </span>
@@ -1222,17 +1295,17 @@
                       >
                         <div class="min-w-0 flex-1">
                           <div class="flex flex-wrap items-center gap-2">
-                            <h5 class="text-xs font-bold text-slate-700" x-text="item.label"></h5>
+                            <h5 class="settings-card__title" x-text="item.label"></h5>
                             <span
                               class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
                               x-text="item.modelHint"
                             ></span>
                           </div>
                           <p
-                            class="mt-1 text-[10px] leading-relaxed text-slate-500"
+                            class="settings-card__desc"
                             x-text="item.description"
                           ></p>
-                          <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
+                          <p class="settings-card__desc">
                             当前执行模型：
                             <span
                               class="font-mono text-slate-700"
@@ -1250,7 +1323,7 @@
                             :value="item.model"
                             @change="setToolTargetModel(item.id, $event)"
                             :disabled="toolStrategyModelSelectDisabled"
-                            class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                            class="settings-control settings-control--sm"
                           >
                             <option value="">跟随全局模型</option>
                             <template x-for="model in llm.models" :key="getModelValue(model)">
@@ -1271,7 +1344,7 @@
                   </template>
                   <div class="mt-3 grid gap-3 sm:grid-cols-4">
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >PPC 批次大小</span
                       ><input
                         type="number"
@@ -1280,10 +1353,10 @@
                         step="10"
                         :value="runtimeStrategy.settings.ppcSearchTerms.batchSize"
                         @input="setRuntimeNumber('ppcSearchTerms.batchSize', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >PPC 并发批次</span
                       ><input
                         type="number"
@@ -1292,10 +1365,10 @@
                         step="1"
                         :value="runtimeStrategy.settings.ppcSearchTerms.maxConcurrentBatches"
                         @input="setRuntimeNumber('ppcSearchTerms.maxConcurrentBatches', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >缓存 TTL（小时）</span
                       ><input
                         type="number"
@@ -1304,10 +1377,10 @@
                         step="1"
                         :value="getRuntimeNumber('ppcSearchTerms.cacheTtlMs', 3600000)"
                         @input="setRuntimeNumber('ppcSearchTerms.cacheTtlMs', $event, 3600000)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >最大输出 Token</span
                       ><input
                         type="number"
@@ -1316,7 +1389,7 @@
                         step="1024"
                         :value="runtimeStrategy.settings.ppcSearchTerms.maxOutputTokens"
                         @input="setRuntimeNumber('ppcSearchTerms.maxOutputTokens', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                   </div>
                   <div class="mt-3 grid gap-3 sm:grid-cols-3">
@@ -1349,7 +1422,7 @@
                     <template x-for="item in ppcThresholdItems" :key="item.key">
                       <label class="block">
                         <span
-                          class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                          class="settings-label"
                           x-text="item.label"
                         ></span>
                         <input
@@ -1359,7 +1432,7 @@
                           :step="item.step"
                           :value="item.value"
                           @input="setRuntimeNumber(item.path, $event)"
-                          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                          class="settings-control settings-control--sm"
                         />
                       </label>
                     </template>
@@ -1403,30 +1476,29 @@
 
           <!-- Section 3: Proxy Config -->
           <section id="settings-section-network" class="settings-panel-section space-y-4">
-            <div class="flex items-center gap-2.5 mb-1">
-              <div class="w-6 h-6 rounded-lg bg-cyan-100 flex items-center justify-center">
-                <i class="fas fa-network-wired text-cyan-500 text-[10px]"></i>
+            <div class="settings-section-head">
+              <div class="settings-section-head__icon settings-section-head__icon--cyan" aria-hidden="true">
+                <i class="fas fa-network-wired"></i>
               </div>
-              <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                采集代理与网络
-              </h3>
+              <div class="min-w-0">
+                <h3 class="settings-section-head__title">采集代理与网络</h3>
+                <p class="settings-section-head__desc">
+                  配置采集任务使用的代理连接方式；与 AI 模型连接相互独立。
+                </p>
+              </div>
             </div>
 
             <div class="settings-section-frame settings-section-frame--network space-y-4">
               <!-- Connection Type -->
               <div class="group">
-                <label
-                  for="proxy-type"
-                  class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
-                  >连接方式</label
-                >
+                <label for="proxy-type" class="settings-label">连接方式</label>
                 <div class="relative">
                   <select
                     id="proxy-type"
                     name="proxy-type"
                     :value="proxy.type"
                     @change="setProxyType($event)"
-                    class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 cursor-pointer"
+                    class="settings-control"
                   >
                     <optgroup label="商业 API (高成功率)">
                       <template x-for="option in commercialProxyOptions" :key="option.type">
@@ -1488,14 +1560,7 @@
                     更新配置
                   </button>
                 </div>
-                <div class="flex items-center gap-2 px-1">
-                  <div
-                    class="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0"
-                  >
-                    <i class="fas fa-info text-slate-400 text-[8px]"></i>
-                  </div>
-                  <p class="text-[11px] text-slate-500 leading-relaxed" x-text="proxyHintText"></p>
-                </div>
+                <p class="settings-field-help" x-text="proxyHintText"></p>
               </div>
 
               <!-- Tip Card -->
@@ -1513,19 +1578,19 @@
               </div>
 
               <details
-                class="settings-collapsible-card rounded-xl border border-cyan-100 bg-white/85 shadow-sm"
+                class="settings-collapsible-card"
               >
                 <summary
-                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2 p-3"
+                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div>
-                    <h4 class="text-xs font-bold text-slate-700">采集运行策略</h4>
-                    <p class="mt-1 text-[10px] text-slate-500">
+                    <h4 class="settings-card__title">采集运行策略</h4>
+                    <p class="settings-card__desc">
                       管理请求超时、并发、重试、批次和缓存策略。
                     </p>
                   </div>
                   <span
-                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                    class="settings-card__badge"
                   >
                     7 项设置
                   </span>
@@ -1537,7 +1602,7 @@
                 <div class="settings-collapsible-body px-3 pb-3">
                   <div class="mt-3 grid gap-3 sm:grid-cols-4">
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >请求超时（秒）</span
                       ><input
                         type="number"
@@ -1546,10 +1611,10 @@
                         step="5"
                         :value="getRuntimeNumber('scraper.requestTimeoutMs', 1000)"
                         @input="setRuntimeNumber('scraper.requestTimeoutMs', $event, 1000)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >最大并发</span
                       ><input
                         type="number"
@@ -1558,10 +1623,10 @@
                         step="1"
                         :value="runtimeStrategy.settings.scraper.maxConcurrent"
                         @input="setRuntimeNumber('scraper.maxConcurrent', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >最大重试</span
                       ><input
                         type="number"
@@ -1570,10 +1635,10 @@
                         step="1"
                         :value="runtimeStrategy.settings.scraper.maxRetries"
                         @input="setRuntimeNumber('scraper.maxRetries', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >重试间隔（秒）</span
                       ><input
                         type="number"
@@ -1582,10 +1647,10 @@
                         step="0.1"
                         :value="getRuntimeNumber('scraper.retryDelayMs', 1000)"
                         @input="setRuntimeNumber('scraper.retryDelayMs', $event, 1000)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >批次大小</span
                       ><input
                         type="number"
@@ -1594,10 +1659,10 @@
                         step="1"
                         :value="runtimeStrategy.settings.scraper.batchSize"
                         @input="setRuntimeNumber('scraper.batchSize', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >批次间隔（秒）</span
                       ><input
                         type="number"
@@ -1606,10 +1671,10 @@
                         step="0.5"
                         :value="getRuntimeNumber('scraper.batchDelayMs', 1000)"
                         @input="setRuntimeNumber('scraper.batchDelayMs', $event, 1000)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                     <label class="block"
-                      ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      ><span class="settings-label"
                         >缓存时长（小时）</span
                       ><input
                         type="number"
@@ -1618,7 +1683,7 @@
                         step="1"
                         :value="getRuntimeNumber('scraper.cacheDurationMs', 3600000)"
                         @input="setRuntimeNumber('scraper.cacheDurationMs', $event, 3600000)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                        class="settings-control settings-control--sm"
                     /></label>
                   </div>
                   <div class="mt-3 flex justify-end">
@@ -1649,44 +1714,29 @@
 
           <!-- Section 4: Data and Backup -->
           <section id="settings-section-data" class="settings-panel-section space-y-4">
-            <div class="flex items-center gap-2.5 mb-1">
-              <div class="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center">
-                <i class="fas fa-database text-blue-500 text-[10px]"></i>
+            <div class="settings-section-head">
+              <div class="settings-section-head__icon settings-section-head__icon--blue" aria-hidden="true">
+                <i class="fas fa-database"></i>
               </div>
-              <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                数据与备份
-              </h3>
+              <div class="min-w-0">
+                <h3 class="settings-section-head__title">数据与备份</h3>
+                <p class="settings-section-head__desc">
+                  查看本机存储占用，导出 / 导入备份，并管理历史保留与清理策略。
+                </p>
+              </div>
             </div>
 
             <div class="settings-section-frame settings-section-frame--data space-y-4">
               <div class="grid grid-cols-2 gap-3">
-                <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                  <span
-                    class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium"
-                    >localStorage</span
-                  >
-                  <span
-                    class="block text-sm font-bold text-slate-700 mt-1"
-                    x-text="localStorageUsedText"
-                  ></span>
-                  <span
-                    class="block text-[10px] text-slate-400 mt-0.5"
-                    x-text="localStorageKeysText"
-                  ></span>
+                <div class="settings-stat-tile">
+                  <span class="settings-stat-tile__label">localStorage</span>
+                  <span class="settings-stat-tile__value" x-text="localStorageUsedText"></span>
+                  <span class="settings-stat-tile__meta" x-text="localStorageKeysText"></span>
                 </div>
-                <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                  <span
-                    class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium"
-                    >IndexedDB</span
-                  >
-                  <span
-                    class="block text-sm font-bold text-slate-700 mt-1"
-                    x-text="indexedDbUsedText"
-                  ></span>
-                  <span
-                    class="block text-[10px] text-slate-400 mt-0.5"
-                    x-text="indexedDbKeysText"
-                  ></span>
+                <div class="settings-stat-tile">
+                  <span class="settings-stat-tile__label">IndexedDB</span>
+                  <span class="settings-stat-tile__value" x-text="indexedDbUsedText"></span>
+                  <span class="settings-stat-tile__meta" x-text="indexedDbKeysText"></span>
                 </div>
               </div>
 
@@ -1710,19 +1760,19 @@
               </div>
 
               <details
-                class="settings-collapsible-card rounded-xl border border-blue-100 bg-white/85 shadow-sm"
+                class="settings-collapsible-card"
               >
                 <summary
-                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2 p-3"
+                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div>
-                    <h4 class="text-xs font-bold text-slate-700">数据保留策略</h4>
-                    <p class="mt-1 text-[10px] text-slate-500">
+                    <h4 class="settings-card__title">数据保留策略</h4>
+                    <p class="settings-card__desc">
                       管理历史保留、缓存清理阈值和缓存清理比例。
                     </p>
                   </div>
                   <span
-                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                    class="settings-card__badge"
                   >
                     3 项设置
                   </span>
@@ -1734,7 +1784,7 @@
                 <div class="settings-collapsible-body px-3 pb-3">
                   <div class="mt-3 grid gap-3 sm:grid-cols-3">
                     <label class="block">
-                      <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      <span class="settings-label"
                         >历史保留条数</span
                       >
                       <input
@@ -1748,7 +1798,7 @@
                       />
                     </label>
                     <label class="block">
-                      <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      <span class="settings-label"
                         >缓存清理阈值</span
                       >
                       <input
@@ -1762,7 +1812,7 @@
                       />
                     </label>
                     <label class="block">
-                      <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      <span class="settings-label"
                         >缓存清理比例</span
                       >
                       <input
@@ -1936,18 +1986,22 @@
             class="settings-panel-section space-y-4"
             :hidden="!showDeveloperDiagnostics"
           >
-            <div class="flex items-center gap-2.5 mb-1">
-              <div class="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <i class="fas fa-chart-line text-emerald-500 text-[10px]"></i>
-              </div>
-              <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                开发者诊断
-              </h3>
-              <span
-                class="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-600"
+            <div class="settings-section-head">
+              <div
+                class="settings-section-head__icon settings-section-head__icon--emerald"
+                aria-hidden="true"
               >
-                开发者模式
-              </span>
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="settings-section-head__title">开发者诊断</h3>
+                  <span class="settings-card__badge">开发者模式</span>
+                </div>
+                <p class="settings-section-head__desc">
+                  性能监控、事件调试与错误追踪；仅开发者入口可见。
+                </p>
+              </div>
             </div>
 
             <div class="settings-section-frame settings-section-frame--performance space-y-4">
@@ -1955,46 +2009,40 @@
               <button
                 type="button"
                 @click="openPerformanceMonitor()"
-                class="w-full p-4 bg-gradient-to-br from-emerald-50 to-teal-50/30 hover:from-emerald-100 hover:to-teal-100/50 border border-emerald-200/60 hover:border-emerald-300 rounded-2xl transition duration-200 shadow-sm hover:shadow-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                class="w-full p-4 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl transition duration-200 shadow-sm group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:shadow-emerald-500/40 transition-shadow duration-200"
+                    class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-100"
                   >
-                    <i class="fas fa-tachometer-alt text-white text-base"></i>
+                    <i class="fas fa-tachometer-alt text-sm"></i>
                   </div>
-                  <div class="flex-1 text-left">
-                    <h4 class="text-sm font-bold text-slate-700 mb-0.5">打开监控面板</h4>
-                    <p class="text-[11px] text-slate-500">查看性能指标、错误追踪和用户行为分析</p>
+                  <div class="flex-1 text-left min-w-0">
+                    <h4 class="settings-card__title">打开监控面板</h4>
+                    <p class="settings-card__desc">查看性能指标、错误追踪和用户行为分析</p>
                   </div>
                   <div
-                    class="w-7 h-7 rounded-lg bg-white/80 flex items-center justify-center group-hover:bg-white transition-colors duration-200"
+                    class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white transition-colors duration-200"
                   >
                     <i
-                      class="fas fa-arrow-right text-emerald-500 text-xs group-hover:translate-x-0.5 transition-transform duration-200"
+                      class="fas fa-arrow-right text-slate-400 text-xs group-hover:translate-x-0.5 transition-transform duration-200"
                     ></i>
                   </div>
                 </div>
               </button>
 
-              <div class="rounded-xl border border-emerald-100 bg-white/85 p-3 shadow-sm">
+              <div class="settings-card">
                 <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h4 class="text-xs font-bold text-slate-700">调试配置</h4>
-                    <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
-                      仅在开发者诊断入口下显示，修改后立即影响当前运行时。
-                    </p>
+                    <h4 class="settings-card__title">调试配置</h4>
+                    <p class="settings-card__desc">修改后立即影响当前运行时。</p>
                   </div>
-                  <span
-                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
-                  >
-                    即时生效
-                  </span>
+                  <span class="settings-card__badge">即时生效</span>
                 </div>
 
                 <div class="mt-3 grid gap-3 sm:grid-cols-2">
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2013,7 +2061,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2032,7 +2080,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2051,7 +2099,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2070,7 +2118,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2089,7 +2137,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2108,7 +2156,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2127,7 +2175,7 @@
                   </label>
 
                   <label class="block rounded-lg border border-slate-100 bg-slate-50/70 p-3">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">
+                    <span class="settings-label">
                       日志级别
                     </span>
                     <select
@@ -2153,7 +2201,7 @@
                     </span>
                     <span class="min-w-0 flex-1">
                       <span class="flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-xs font-bold text-slate-700">端点安全策略</span>
+                        <span class="settings-card__title">端点安全策略</span>
                         <span
                           class="shrink-0 rounded-md bg-white/80 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700"
                           x-text="developerDangerousEndpointText"
@@ -2210,9 +2258,9 @@
       </div>
     </div>
 
-    <!-- Footer -->
+    <!-- Footer: flex-shrink-0 keeps it pinned; never scrolls with section nav -->
     <div
-      class="px-5 py-3.5 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex items-center justify-between"
+      class="settings-panel-footer shrink-0 px-5 py-3.5 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex items-center justify-between"
     >
       <div class="flex items-center gap-2">
         <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>

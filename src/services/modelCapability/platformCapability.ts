@@ -71,7 +71,8 @@ export const OPENAI_PLATFORM_CAPABILITY_MATRIX: PlatformCapabilityRow[] = [
     feature: 'Built-in web_search / file_search / code_interpreter pass-through',
     status: 'partial',
     entry: 'responsesTools.ts RESPONSES_BUILTIN_TOOL_TYPES',
-    notes: 'Client pass-through only; no product UI to enable; gateway may 400',
+    notes:
+      'Client pass-through only; no product operator UI (P2 deferred). Deep Chat custom business tools are opt-in via deepChat.enableBusinessTools (fail-closed default). Gateway may 400 on built-ins.',
   },
   {
     id: 'resp.vision',

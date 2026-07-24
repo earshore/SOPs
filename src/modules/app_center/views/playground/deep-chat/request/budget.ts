@@ -21,6 +21,28 @@ export const DEFAULT_DEEP_CHAT_REQUEST_BUDGET: DeepChatRequestBudget = {
   maxOutputTokens: 2000,
 };
 
+/** Floor for max_output_tokens when reasoning is enabled (reasoning tokens share the budget). */
+export const DEEP_CHAT_REASONING_MAX_OUTPUT_TOKENS_FLOOR = 4096;
+
+/**
+ * Raise effective max_output_tokens when reasoning is on so models are less likely
+ * to finish with only a reasoning channel and empty visible text.
+ * Pure: base from runtime/defaults; reasoning-on is always strictly > base default 2000 floor path.
+ */
+export function resolveDeepChatMaxOutputTokens(
+  baseMaxOutputTokens: number,
+  reasoningEnabled: boolean
+): number {
+  const base =
+    typeof baseMaxOutputTokens === 'number' && Number.isFinite(baseMaxOutputTokens)
+      ? Math.max(1, Math.floor(baseMaxOutputTokens))
+      : DEFAULT_DEEP_CHAT_REQUEST_BUDGET.maxOutputTokens;
+  if (!reasoningEnabled) {
+    return base;
+  }
+  return Math.max(base, DEEP_CHAT_REASONING_MAX_OUTPUT_TOKENS_FLOOR);
+}
+
 export function getDeepChatRequestBudgetDefaults(): DeepChatRequestBudget {
   const settings = getRuntimeStrategySettings().deepChat;
   return {

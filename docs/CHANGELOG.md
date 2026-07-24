@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.11-rc.6] - 2026-07-24
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
-> 收口 `v3.0.11-rc.5` 之后的 Deep Chat 包结构重组与深度思考 / 模型能力线。
+> 收口 `v3.0.11-rc.5` 之后的 Deep Chat 包结构重组、深度思考 / 模型能力线，以及系统设置体验统一。
 > 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
 > 部署目标：https://sops.hongecb.store
 
@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Deep Chat：domain 分包重组；`styles.css` 上提至 playground 层，入口 import 对齐 `../styles.css`。
+- 系统设置：AI 模型与连接改为四步编号（基本信息 / 凭证 / 模型与能力 / 高级选项）；Endpoint 与 API 路径并排（Endpoint 无前置图标以完整展示）；API 路径自定义下拉（路径主色、说明单行省略）；推理区开关 + Low/Medium/High 分段；各板块标题/卡片/表单控件视觉统一。
+
+### Fixed
+
+- 系统设置左侧分类导航：改用内容区局部滚动，避免 `scrollIntoView` 顶起底部状态栏遮挡内容。
+- Deep Chat / Responses：空回复恢复与网关兼容路径继续收口。
 
 ## [3.0.11-rc.5] - 2026-07-23
 

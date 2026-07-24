@@ -16,8 +16,12 @@ vi.mock('@/services/storageService', async importOriginal => {
 });
 
 const { sessionState } = await import('../session/sessionState');
-const { resolveDeepChatResponsesChainOptions, stripResponsesChainForRetry } =
-  await import('./llmCall');
+const {
+  mapDeepChatEmptyResponsesMessage,
+  resolveDeepChatResponsesChainOptions,
+  stripResponsesChainForRetry,
+} = await import('./llmCall');
+const { isDeepChatBusinessToolsEnabled } = await import('./businessTools');
 
 describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
   beforeEach(() => {
@@ -37,7 +41,7 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     };
   });
 
-  it('fail-closes store/previous when capability does not support chain', () => {
+  it('fail-closes store/previous and does not inject tools by default', () => {
     const config = {
       provider: 'new_api',
       endpoint: 'https://example.test/v1',
@@ -46,12 +50,33 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
       apiPath: 'responses',
     } as LLMProviderConfig;
 
+    expect(isDeepChatBusinessToolsEnabled({ enableBusinessTools: false })).toBe(false);
+    expect(isDeepChatBusinessToolsEnabled({})).toBe(false);
+
     const opts = resolveDeepChatResponsesChainOptions(config, 'gpt-5.5');
     expect(opts.apiPath).toBe('responses');
     expect(opts.previousResponseId).toBeUndefined();
     expect(opts.store).toBe(false);
+    // Fail-closed product rule: no tools on every Responses turn unless opted in.
+    expect(opts.tools).toBeUndefined();
+    expect(opts.enableToolLoop).toBeUndefined();
+  });
+
+  it('injects business tools when explicitly opted in', () => {
+    const config = {
+      provider: 'new_api',
+      endpoint: 'https://example.test/v1',
+      apiKey: 'k',
+      model: 'gpt-5.5',
+      apiPath: 'responses',
+    } as LLMProviderConfig;
+
+    const opts = resolveDeepChatResponsesChainOptions(config, 'gpt-5.5', {
+      enableBusinessTools: true,
+    });
     expect(opts.tools).toBeDefined();
     expect(opts.enableToolLoop).toBe(true);
+    expect(typeof opts.executeTool).toBe('function');
   });
 
   it('does not use responses chain fields on chat_completions path', () => {
@@ -83,5 +108,15 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     expect(stripped.previousResponseId).toBeUndefined();
     expect(stripped.tools).toHaveLength(1);
     expect(stripped.enableToolLoop).toBe(true);
+  });
+
+  it('maps incomplete max_output_tokens to a specific empty-body message', () => {
+    const msg = mapDeepChatEmptyResponsesMessage({
+      status: 'incomplete',
+      incomplete_details: { reason: 'max_output_tokens' },
+      output: [],
+    });
+    expect(msg).toMatch(/max_output_tokens|输出未完成/);
+    expect(msg).not.toBe('模型没有返回任何内容，请稍后重试或检查模型/上下文配置。');
   });
 });

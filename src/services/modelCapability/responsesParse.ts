@@ -96,6 +96,52 @@ export function extractAssistantTextFromResponsesOrChat(
   return '';
 }
 
+const REASONING_WITHOUT_TEXT_MSG =
+  '模型完成了推理但未返回可见正文（常见原因：max_output_tokens 过小、网关只推 reasoning、或 /responses 返回了非标准正文格式）。请增大输出上限、关闭推理后重试，或在系统设置将路径改为 chat/completions。';
+
+function readIncompleteReason(data: Record<string, unknown>): string {
+  const details = data.incomplete_details as { reason?: unknown } | undefined;
+  return details && typeof details.reason === 'string' ? details.reason : '';
+}
+
+function describeIncompleteEmptyBody(status: string, reason: string): string | null {
+  if (status !== 'incomplete' && !reason) return null;
+  if (reason === 'max_output_tokens' || /max_output|token/i.test(reason)) {
+    return '模型输出未完成：已达到 max_output_tokens 上限（推理模型会占用大量输出配额）。请增大输出上限或降低推理强度后重试。';
+  }
+  if (reason === 'content_filter') {
+    return '模型输出未完成：内容被安全策略过滤，请调整提示词后重试。';
+  }
+  if (reason) {
+    return `模型输出未完成（incomplete：${reason}）。请稍后重试或调整请求参数。`;
+  }
+  return '模型输出未完成（status=incomplete）。请增大输出上限或稍后重试。';
+}
+
+/**
+ * User-facing explanation when a Responses body has no visible assistant text.
+ * Distinguishes incomplete / token-limit / reasoning-only from generic empty.
+ * Pure helper — used by Deep Chat and optional callLLM diagnostics.
+ */
+export function describeResponsesEmptyBody(
+  data: Record<string, unknown> | null | undefined,
+  options?: { hadStreamedReasoning?: boolean }
+): string | null {
+  if (!data || typeof data !== 'object') {
+    return options?.hadStreamedReasoning ? REASONING_WITHOUT_TEXT_MSG : null;
+  }
+  if (extractAssistantTextFromResponsesOrChat(data).trim()) {
+    return null;
+  }
+  const status = typeof data.status === 'string' ? data.status : '';
+  const incompleteMsg = describeIncompleteEmptyBody(status, readIncompleteReason(data));
+  if (incompleteMsg) return incompleteMsg;
+  if (extractResponsesReasoningSummary(data).trim() || options?.hadStreamedReasoning) {
+    return REASONING_WITHOUT_TEXT_MSG;
+  }
+  return null;
+}
+
 /** Response id for previous_response_id chaining. */
 export function extractResponsesId(
   data: Record<string, unknown> | null | undefined

@@ -42,6 +42,8 @@ export interface RuntimeStrategySettings {
     maxThreadMessageCount: number;
     maxThreadCount: number;
     maxPromptDraftCount: number;
+    /** Opt-in: inject read-only business tools on Responses path (fail-closed default). */
+    enableBusinessTools: boolean;
   };
   ppcSearchTerms: {
     batchSize: number;
@@ -128,6 +130,7 @@ export const DEFAULT_RUNTIME_STRATEGY_SETTINGS: RuntimeStrategySettings = {
     maxThreadMessageCount: 80,
     maxThreadCount: 30,
     maxPromptDraftCount: 12,
+    enableBusinessTools: false,
   },
   ppcSearchTerms: {
     batchSize: 80,
@@ -334,6 +337,8 @@ function normalizeDeepChatSettings(
       1,
       100
     ),
+    // Fail-closed: only explicit true opts into Responses business tools.
+    enableBusinessTools: raw.enableBusinessTools === true,
   };
 }
 

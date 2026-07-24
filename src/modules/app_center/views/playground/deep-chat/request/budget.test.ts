@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import type { ChatMessage } from '@/services/llmService';
 import {
   DEFAULT_DEEP_CHAT_REQUEST_BUDGET,
+  DEEP_CHAT_REASONING_MAX_OUTPUT_TOKENS_FLOOR,
   buildBudgetedDeepChatMessages,
   getDeepChatMessageBudgetError,
   getDeepChatSystemPromptBudgetError,
+  resolveDeepChatMaxOutputTokens,
   resolveDeepChatRequestBudget,
   type DeepChatRequestBudget,
 } from './budget';
@@ -17,6 +19,22 @@ const smallBudget: DeepChatRequestBudget = {
 };
 
 describe('Playground request budget', () => {
+  it('raises max_output_tokens when reasoning is enabled vs default off', () => {
+    const off = resolveDeepChatMaxOutputTokens(
+      DEFAULT_DEEP_CHAT_REQUEST_BUDGET.maxOutputTokens,
+      false
+    );
+    const on = resolveDeepChatMaxOutputTokens(
+      DEFAULT_DEEP_CHAT_REQUEST_BUDGET.maxOutputTokens,
+      true
+    );
+    expect(off).toBe(DEFAULT_DEEP_CHAT_REQUEST_BUDGET.maxOutputTokens);
+    expect(on).toBeGreaterThan(off);
+    expect(on).toBe(DEEP_CHAT_REASONING_MAX_OUTPUT_TOKENS_FLOOR);
+    // Already-high base is preserved (not reduced).
+    expect(resolveDeepChatMaxOutputTokens(8000, true)).toBe(8000);
+  });
+
   it('keeps long prompt inputs sendable under the default dynamic budget', () => {
     const longMessages: ChatMessage[] = [{ role: 'user', content: 'x'.repeat(80000) }];
 

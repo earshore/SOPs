@@ -35,10 +35,11 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
 - 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.6`。
 
-`v3.0.11-rc.6`（2026-07-24，Pre-release）收口 rc.5 之后的 Deep Chat 结构与推理展示线：
+`v3.0.11-rc.6`（2026-07-24，Pre-release）收口 rc.5 之后的 Deep Chat 结构、推理能力与系统设置体验：
 
 - **Deep Chat 包重组**：domain 分包 + `styles.css` 上提 playground 层；结构门禁防根目录回潮。
 - **深度思考 / 模型能力**：推理通道与 chrome 展示路径继续收敛（详见 CHANGELOG）。
+- **系统设置**：AI 连接四步编排、API 路径下拉、全板块视觉统一；分类导航滚动不再顶起底栏。
 - GitHub Latest **仍指向** `v3.0.10`；回滚基线为 `v3.0.10`。
 
 `v3.0.11-rc.5`（2026-07-23，Pre-release）收口 rc.4 之后的技能语义：

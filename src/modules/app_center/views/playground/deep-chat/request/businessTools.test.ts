@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createDeepChatBusinessToolExecutor, DEEP_CHAT_BUSINESS_TOOLS } from './businessTools';
+import {
+  createDeepChatBusinessToolExecutor,
+  DEEP_CHAT_BUSINESS_TOOLS,
+  DEEP_CHAT_BUSINESS_TOOLS_DEFAULT_ENABLED,
+  isDeepChatBusinessToolsEnabled,
+} from './businessTools';
 import type { DeepChatThread } from '../types';
 
 function sampleThread(): DeepChatThread {
@@ -18,6 +23,13 @@ function sampleThread(): DeepChatThread {
 }
 
 describe('deepChatBusinessTools', () => {
+  it('fail-closes business tools injection by default (opt-in only)', () => {
+    expect(DEEP_CHAT_BUSINESS_TOOLS_DEFAULT_ENABLED).toBe(false);
+    expect(isDeepChatBusinessToolsEnabled({ enableBusinessTools: false })).toBe(false);
+    expect(isDeepChatBusinessToolsEnabled({ enableBusinessTools: true })).toBe(true);
+    expect(isDeepChatBusinessToolsEnabled({})).toBe(false);
+  });
+
   it('exposes only allowlisted tools', () => {
     const names = DEEP_CHAT_BUSINESS_TOOLS.map(t => (t as { name?: string }).name).filter(Boolean);
     expect(names).toEqual([

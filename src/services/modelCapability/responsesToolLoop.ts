@@ -8,10 +8,7 @@ import {
   extractResponsesFunctionCalls,
   type ResponsesFunctionCall,
 } from './responsesTools';
-import {
-  extractAssistantTextFromResponsesOrChat,
-  extractResponsesId,
-} from './responsesParse';
+import { extractAssistantTextFromResponsesOrChat, extractResponsesId } from './responsesParse';
 
 export type ResponsesToolExecutor = (call: {
   name: string;
