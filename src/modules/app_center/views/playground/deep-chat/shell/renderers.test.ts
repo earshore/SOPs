@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderThreadList } from './renderers';
-import type { DeepChatThreadStore } from './types';
+import type { DeepChatThreadStore } from '../types';
 
 function makeStore(): DeepChatThreadStore {
   return {

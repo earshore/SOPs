@@ -445,6 +445,13 @@ function installDeepChatTemplateMocks() {
   vi.doMock('@/common/infrastructure/SafeRenderer', () => ({
     SafeRenderer: {
       getInstance: () => ({
+        escapeHtml: (text: string) =>
+          String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;'),
         renderTemplate: (container: HTMLElement, html: string) => {
           const parsed = new DOMParser().parseFromString(html, 'text/html');
           container.replaceChildren(
@@ -526,7 +533,11 @@ async function importDeepChat(options: ImportOptions = {}) {
   vi.doMock('@/modules/app_center/views/master_analysis/services/historyService', () => ({
     HistoryService: historyService,
   }));
-  vi.doMock('./utils/confirmModal', () => ({
+  vi.doMock('./infra/confirmModal', () => ({
+    confirmWithModal,
+    chooseWithModal,
+  }));
+  vi.doMock('@/components/modal/confirmModal', () => ({
     confirmWithModal,
     chooseWithModal,
   }));
@@ -691,7 +702,8 @@ afterEach(() => {
   vi.doUnmock('@/modules/app_center/artifactEnvelopeService');
   vi.doUnmock('@/modules/app_center/keywordHunterListingHandoff');
   vi.doUnmock('@/modules/app_center/workspaceContext');
-  vi.doUnmock('./utils/confirmModal');
+  vi.doUnmock('./infra/confirmModal');
+  vi.doUnmock('@/components/modal/confirmModal');
   vi.useRealTimers();
   vi.restoreAllMocks();
 });

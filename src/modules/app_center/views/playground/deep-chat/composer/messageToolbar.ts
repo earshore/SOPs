@@ -2,13 +2,13 @@ import { copyTextToClipboard } from '@/common/utils/clipboard';
 
 import { setSafeHtml } from '@/common/utils/security';
 import { showToast } from '@/common/ui/notifications';
-import { MESSAGE_TOOLBAR_CLASS } from './constants';
+import { MESSAGE_TOOLBAR_CLASS } from '../constants';
 import {
   hydrateUserMessageBubblesWithSkillChips,
   serializeChipContainingElement,
 } from './skillContextChip';
-import type { DeepChatElement, DeepChatMessage, DeepChatSkillContext } from './types';
-import { getMessageText } from './utils';
+import type { DeepChatElement, DeepChatMessage, DeepChatSkillContext } from '../types';
+import { getMessageText } from '../infra/utils';
 
 /** Live generation progress at toolbar end (正在生成回复 · 已收到 N 字). */
 export const TOOLBAR_LIVE_STATUS_CLASS = 'deep-chat-toolbar-live-status';

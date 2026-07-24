@@ -1,22 +1,19 @@
 import { setSafeHtml } from '@/common/utils/security';
 import type { PromptHistoryItem } from '@/types/state';
-import type { PendingDeepChatRequest } from './requestLifecycle';
+import type { PendingDeepChatRequest } from '../request/lifecycle';
 import { getActivePromptPreviewId, hidePromptPreview, renderPromptPreview } from './promptPreview';
-import { formatPromptDraftMeta, getPromptDrafts } from './promptDrafts';
-import type { DeepChatThread, DeepChatThreadStore } from './types';
-import { escapeHTML, formatThreadTime, truncateText } from './utils';
+import { formatPromptDraftMeta, getPromptDrafts } from '../composer/promptDrafts';
+import type {
+  DeepChatThread,
+  DeepChatThreadStore,
+  ThreadEditingState,
+  ThreadMenuState,
+} from '../types';
+import { escapeHTML, formatThreadTime, truncateText } from '../infra/utils';
+
+export type { ThreadEditingState, ThreadMenuState };
 
 const PROMPT_EMPTY_CLASS = 'is-prompt-empty';
-
-export interface ThreadMenuState {
-  threadId: string;
-  placement: 'above' | 'below';
-}
-
-export interface ThreadEditingState {
-  id: string;
-  value: string;
-}
 
 export function renderThreadList(
   container: HTMLElement,

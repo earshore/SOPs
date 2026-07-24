@@ -5,7 +5,7 @@ import { setSafeHtml } from '@/common/utils/security';
 import { skillRegistry } from '@/services/skillRegistry';
 import type { SkillCategoryId, SkillMeta } from '@/services/skillRegistry';
 import { displaySkillTitle } from '@/modules/app_center/skillDeepChatHandoff';
-import { escapeHTML } from './utils';
+import { escapeHTML } from '../infra/utils';
 
 export type SkillLibraryApplyHandler = (skillId: string) => void | Promise<void>;
 

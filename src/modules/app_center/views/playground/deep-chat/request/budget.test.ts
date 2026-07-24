@@ -7,7 +7,7 @@ import {
   getDeepChatSystemPromptBudgetError,
   resolveDeepChatRequestBudget,
   type DeepChatRequestBudget,
-} from './requestBudget';
+} from './budget';
 
 const smallBudget: DeepChatRequestBudget = {
   maxMessageChars: 12,

@@ -4,8 +4,8 @@ import type {
   DeepChatRequestBody,
   DeepChatSignals,
   DeepChatThread,
-} from './types';
-import type { DeepChatMessage } from './conversationContext';
+} from '../types';
+import type { DeepChatMessage } from '../session/conversationContext';
 
 type DraftUpdater = (threadId: string, draftText: string) => void;
 type RequestHandler = (

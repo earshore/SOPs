@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  createDeepChatBusinessToolExecutor,
-  DEEP_CHAT_BUSINESS_TOOLS,
-} from './deepChatBusinessTools';
-import type { DeepChatThread } from './types';
+import { createDeepChatBusinessToolExecutor, DEEP_CHAT_BUSINESS_TOOLS } from './businessTools';
+import type { DeepChatThread } from '../types';
 
 function sampleThread(): DeepChatThread {
   const now = Date.now();

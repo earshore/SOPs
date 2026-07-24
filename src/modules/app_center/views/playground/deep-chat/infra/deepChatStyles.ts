@@ -1,4 +1,4 @@
-import { MESSAGE_TOOLBAR_CLASS } from './constants';
+import { MESSAGE_TOOLBAR_CLASS } from '../constants';
 
 export const DEEP_CHAT_AUXILIARY_STYLE = `
   :host {

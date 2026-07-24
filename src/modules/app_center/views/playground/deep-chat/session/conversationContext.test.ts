@@ -6,7 +6,7 @@ import {
   mergeThreadHistoryWithRequest,
   normalizeStoredThreadMessages,
   type DeepChatMessage,
-} from './conversationContext';
+} from '../session/conversationContext';
 
 describe('mergeThreadHistoryWithRequest', () => {
   it('prepends saved thread history when Deep Chat only sends the latest request', () => {

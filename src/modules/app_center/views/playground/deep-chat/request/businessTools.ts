@@ -4,8 +4,8 @@
  */
 
 import type { ResponsesToolExecutor } from '@/services/modelCapability';
-import type { DeepChatThread } from './types';
-import { getDeepChatMessageText } from './conversationContext';
+import type { DeepChatThread } from '../types';
+import { getDeepChatMessageText } from '../session/conversationContext';
 
 export const DEEP_CHAT_BUSINESS_TOOLS: unknown[] = [
   {

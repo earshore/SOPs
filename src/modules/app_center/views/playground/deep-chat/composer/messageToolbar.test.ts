@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { DeepChatMessage } from './types';
+import type { DeepChatMessage } from '../types';
 import { findStoredMessageForToolbar, resolveToolbarStatusLabel } from './messageToolbar';
 
 describe('resolveToolbarStatusLabel', () => {

@@ -13,7 +13,7 @@ import {
   markPendingDeepChatRequestSettled,
   shouldPersistPendingDeepChatPartial,
   shouldPreserveStoppedResponse,
-} from './requestLifecycle';
+} from './lifecycle';
 
 const conversationMessages: ChatMessage[] = [{ role: 'user', content: 'hello' }];
 

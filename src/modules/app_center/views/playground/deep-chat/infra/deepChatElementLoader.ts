@@ -1,4 +1,4 @@
-import { DEEP_CHAT_SCRIPT_MARKER } from './constants';
+import { DEEP_CHAT_SCRIPT_MARKER } from '../constants';
 
 const DEEP_CHAT_BUNDLE_PATH = 'assets/vendor/deepChat.bundle.js';
 

@@ -5,8 +5,8 @@ import {
   getDeepChatMessageText,
   type DeepChatMessage,
   type DeepChatRole,
-} from './conversationContext';
-import type { DeepChatRequestBody } from './types';
+} from '../session/conversationContext';
+import type { DeepChatRequestBody } from '../types';
 
 export function createTextInputEvent(prompt: string): Event {
   if (typeof InputEvent === 'function') {

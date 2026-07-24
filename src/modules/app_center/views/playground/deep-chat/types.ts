@@ -1,7 +1,11 @@
 import type { ChatMessage } from '@/services/llmService';
 import type { LLMProviderConfig } from '@/types/state';
-import type { DeepChatMessage, DeepChatMessageStatus, DeepChatRole } from './conversationContext';
-import type { PendingDeepChatRequest } from './requestLifecycle';
+import type {
+  DeepChatMessage,
+  DeepChatMessageStatus,
+  DeepChatRole,
+} from './session/conversationContext';
+import type { PendingDeepChatRequest } from './request/lifecycle';
 import type { ListingPromptWorkflowContext } from '@/modules/app_center/listingWorkflowHandoff';
 import type { SkillDeepChatContext } from '@/modules/app_center/skillDeepChatHandoff';
 
@@ -160,6 +164,18 @@ export interface CreateThreadOptions {
   listingPromptContext?: ListingPromptWorkflowContext;
   skillContexts?: DeepChatSkillContext[];
   draftText?: string;
+}
+
+/** Thread list overflow menu placement (shared by session state + shell renderers). */
+export interface ThreadMenuState {
+  threadId: string;
+  placement: 'above' | 'below';
+}
+
+/** Inline thread title edit state. */
+export interface ThreadEditingState {
+  id: string;
+  value: string;
 }
 
 export interface SaveThreadMessagesOptions {
