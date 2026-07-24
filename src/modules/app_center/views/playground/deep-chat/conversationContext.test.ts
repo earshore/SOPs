@@ -66,6 +66,22 @@ describe('buildStoredThreadMessages', () => {
     expect(history.map(m => m.content)).toEqual(['q', 'answer', 'next']);
   });
 
+  it('omits status when settling so 「未完成」 does not stick after complete reply', () => {
+    const existing: DeepChatMessage[] = [
+      { role: 'user', text: 'q', createdAt: 1000 },
+      { role: 'ai', text: 'half', createdAt: 2000, status: 'partial' },
+    ];
+    const conversation: ChatMessage[] = [{ role: 'user', content: 'q' }];
+    const settled = buildStoredThreadMessages(existing, conversation, 'half full answer', {
+      now: 3000,
+      assistantCreatedAt: 2000,
+      // no assistantStatus → complete
+    });
+    const last = settled[settled.length - 1];
+    expect(last).toMatchObject({ role: 'ai', text: 'half full answer' });
+    expect(last?.status).toBeUndefined();
+  });
+
   it('preserves existing message timestamps and appends stopped assistant text', () => {
     const existing: DeepChatMessage[] = [
       { role: 'user', text: '第一轮问题', createdAt: 1000 },

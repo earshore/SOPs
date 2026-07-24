@@ -10,9 +10,15 @@ import {
 import type { DeepChatElement, DeepChatMessage, DeepChatSkillContext } from './types';
 import { getMessageText } from './utils';
 
+/** Live generation progress at toolbar end (正在生成回复 · 已收到 N 字). */
+export const TOOLBAR_LIVE_STATUS_CLASS = 'deep-chat-toolbar-live-status';
+
 let messageToolbarObserver: MutationObserver | null = null;
 let messageToolbarTimer: number | null = null;
 let messageToolbarFrame: number | null = null;
+let lastToolbarChat: DeepChatElement | null = null;
+let lastGetStoredMessages: (() => DeepChatMessage[]) | null = null;
+let lastToolbarActions: MessageToolbarActions = {};
 
 export interface MessageToolbarActions {
   canSendToKeywordHunter?: () => boolean;
@@ -21,6 +27,11 @@ export interface MessageToolbarActions {
   getSkillContexts?: () => DeepChatSkillContext[];
   /** 将消息正文回填输入框并保持 Chip 样式 */
   refillComposerWithText?: (text: string) => void;
+  /**
+   * Live in-flight status for the latest AI bubble, shown at toolbar end.
+   * e.g. 「正在生成回复... · 已收到 120 字」— not a separate badge design.
+   */
+  getLiveGenerationStatusLabel?: () => string | null;
 }
 
 export function setupMessageToolbars(
@@ -29,6 +40,9 @@ export function setupMessageToolbars(
   actions: MessageToolbarActions = {}
 ): void {
   cleanupMessageToolbars();
+  lastToolbarChat = chat;
+  lastGetStoredMessages = getStoredMessages;
+  lastToolbarActions = actions;
 
   const installToolbars = (): void => {
     const root = chat.shadowRoot;
@@ -49,6 +63,9 @@ export function setupMessageToolbars(
 export function cleanupMessageToolbars(): void {
   messageToolbarObserver?.disconnect();
   messageToolbarObserver = null;
+  lastToolbarChat = null;
+  lastGetStoredMessages = null;
+  lastToolbarActions = {};
 
   if (messageToolbarTimer !== null) {
     window.clearTimeout(messageToolbarTimer);
@@ -95,51 +112,277 @@ function renderMessageToolbars(
   const messages = Array.from(root.querySelectorAll<HTMLElement>('.outer-message-container'));
   const storedMessages = getStoredMessages();
   const usedStoredMessageIndexes = new Set<number>();
-  messages.forEach(message => {
-    if (message.querySelector(`.${MESSAGE_TOOLBAR_CLASS}`)) {
-      return;
-    }
+  const liveLabel = actions.getLiveGenerationStatusLabel?.() ?? null;
 
-    const bubble = message.querySelector<HTMLElement>('.message-bubble');
-    const innerContainer = message.querySelector<HTMLElement>('.inner-message-container');
-    const role = getMessageRole(message);
-    const content = bubble ? getMessageContent(bubble, skillContexts) : '';
-    if (!bubble || !innerContainer || !role || !content) {
-      return;
-    }
+  // 深度思考 / settled 时 liveLabel 为 null：先清掉残留「思考中…」等，
+  // 避免空气泡 early-return 路径留下视觉噪音。
+  if (!liveLabel) {
+    root.querySelectorAll(`.${TOOLBAR_LIVE_STATUS_CLASS}`).forEach(node => node.remove());
+  }
 
-    innerContainer.appendChild(
-      createMessageToolbar(
-        chat,
-        bubble,
-        role,
-        findStoredMessageForToolbar(storedMessages, usedStoredMessageIndexes, role, content),
-        actions
-      )
-    );
+  let lastAiOuterIndex = -1;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const outer = messages[i];
+    if (outer && getMessageRole(outer) === 'ai') {
+      lastAiOuterIndex = i;
+      break;
+    }
+  }
+
+  messages.forEach((message, outerIndex) => {
+    installOrUpdateMessageToolbar({
+      message,
+      outerIndex,
+      lastAiOuterIndex,
+      liveLabel,
+      chat,
+      skillContexts,
+      storedMessages,
+      usedStoredMessageIndexes,
+      actions,
+    });
   });
 }
 
-function findStoredMessageForToolbar(
+function clearLiveToolbarLabelIfEmpty(
+  message: HTMLElement,
+  isLiveAi: boolean,
+  liveLabel: string | null
+): void {
+  // When liveLabel is cleared (e.g. 深度思考 started), still clear leftover waiting text.
+  if (!isLiveAi || liveLabel) {
+    return;
+  }
+  const existing = message.querySelector<HTMLElement>(`.${MESSAGE_TOOLBAR_CLASS}`);
+  if (existing) {
+    syncToolbarLiveGenerationLabel(existing, null);
+  }
+}
+
+function installOrUpdateMessageToolbar(args: {
+  message: HTMLElement;
+  outerIndex: number;
+  lastAiOuterIndex: number;
+  liveLabel: string | null;
+  chat: DeepChatElement;
+  skillContexts: DeepChatSkillContext[];
+  storedMessages: DeepChatMessage[];
+  usedStoredMessageIndexes: Set<number>;
+  actions: MessageToolbarActions;
+}): void {
+  const nodes = readMessageToolbarHostNodes(args.message, args.skillContexts);
+  if (!nodes) {
+    return;
+  }
+  const { bubble, innerContainer, role, content } = nodes;
+  const isLiveAi = role === 'ai' && args.outerIndex === args.lastAiOuterIndex;
+  if (!content && !(isLiveAi && args.liveLabel)) {
+    clearLiveToolbarLabelIfEmpty(args.message, isLiveAi, args.liveLabel);
+    return;
+  }
+
+  const storedMessage = findStoredMessageForToolbar(
+    args.storedMessages,
+    args.usedStoredMessageIndexes,
+    role,
+    content || '\u200b',
+    // Only the live last AI may lag store text; latest-fallback elsewhere steals 「未完成」.
+    { preferLatestFallback: isLiveAi }
+  );
+
+  const toolbar = ensureMessageToolbarElement({
+    message: args.message,
+    innerContainer,
+    chat: args.chat,
+    bubble,
+    role,
+    storedMessage,
+    actions: args.actions,
+  });
+
+  // 「正在生成回复 · 已收到 N 字」 at toolbar end (after copy / tools), not above bubble.
+  syncToolbarLiveGenerationLabel(toolbar, isLiveAi ? args.liveLabel : null);
+}
+
+function readMessageToolbarHostNodes(
+  message: HTMLElement,
+  skillContexts: DeepChatSkillContext[]
+): {
+  bubble: HTMLElement;
+  innerContainer: HTMLElement;
+  role: 'user' | 'ai';
+  content: string;
+} | null {
+  const bubble = message.querySelector<HTMLElement>('.message-bubble');
+  const innerContainer = message.querySelector<HTMLElement>('.inner-message-container');
+  const role = getMessageRole(message);
+  if (!bubble || !innerContainer || !role) {
+    return null;
+  }
+  return {
+    bubble,
+    innerContainer,
+    role,
+    content: getMessageContent(bubble, skillContexts),
+  };
+}
+
+function ensureMessageToolbarElement(args: {
+  message: HTMLElement;
+  innerContainer: HTMLElement;
+  chat: DeepChatElement;
+  bubble: HTMLElement;
+  role: 'user' | 'ai';
+  storedMessage: DeepChatMessage | undefined;
+  actions: MessageToolbarActions;
+}): HTMLElement {
+  let toolbar = args.message.querySelector<HTMLElement>(`.${MESSAGE_TOOLBAR_CLASS}`);
+  if (toolbar) {
+    syncToolbarStatusBadge(toolbar, args.storedMessage);
+    return toolbar;
+  }
+  toolbar = createMessageToolbar(
+    args.chat,
+    args.bubble,
+    args.role,
+    args.storedMessage,
+    args.actions
+  );
+  args.innerContainer.appendChild(toolbar);
+  return toolbar;
+}
+
+/** Append/update/remove live generation text at the end of the toolbar row. */
+function syncToolbarLiveGenerationLabel(toolbar: HTMLElement, label: string | null): void {
+  let el = toolbar.querySelector<HTMLElement>(`.${TOOLBAR_LIVE_STATUS_CLASS}`);
+  if (!label) {
+    el?.remove();
+    return;
+  }
+  if (!el) {
+    el = document.createElement('span');
+    el.className = TOOLBAR_LIVE_STATUS_CLASS;
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    toolbar.appendChild(el);
+  }
+  if (el.textContent !== label) {
+    el.textContent = label;
+  }
+}
+
+/** Map store status → toolbar badge. Live in-flight uses chrome, not this badge. */
+export function resolveToolbarStatusLabel(
+  status: DeepChatMessage['status']
+): { label: string; statusKey: string } | null {
+  if (status === 'stopped') return { label: '已停止', statusKey: 'stopped' };
+  if (status === 'partial') return { label: '未完成', statusKey: 'partial' };
+  return null;
+}
+
+/** Keep/remove status badge: 未完成 | 已停止 (not live 「生成中」) */
+function syncToolbarStatusBadge(
+  toolbar: HTMLElement,
+  storedMessage: DeepChatMessage | undefined
+): void {
+  const existing = toolbar.querySelector<HTMLElement>('.deep-chat-message-status');
+  const resolved = resolveToolbarStatusLabel(storedMessage?.status);
+
+  if (!resolved) {
+    existing?.remove();
+    return;
+  }
+
+  if (existing) {
+    if (existing.textContent !== resolved.label) {
+      existing.textContent = resolved.label;
+    }
+    existing.dataset.status = resolved.statusKey;
+    return;
+  }
+
+  const statusEl = document.createElement('span');
+  statusEl.className = 'deep-chat-message-status';
+  statusEl.dataset.status = resolved.statusKey;
+  statusEl.textContent = resolved.label;
+  // Insert after time (first child) so order stays: time | status | tools
+  const time = toolbar.querySelector('.deep-chat-message-time');
+  if (time?.nextSibling) {
+    toolbar.insertBefore(statusEl, time.nextSibling);
+  } else if (time) {
+    time.insertAdjacentElement('afterend', statusEl);
+  } else {
+    toolbar.prepend(statusEl);
+  }
+}
+
+/** Force toolbar status re-sync (call after settle / stop / thread remount / stream tick). */
+export function refreshMessageToolbarStatuses(
+  chat: DeepChatElement | null,
+  getStoredMessages?: () => DeepChatMessage[]
+): void {
+  const targetChat = chat ?? lastToolbarChat;
+  const getMessages = getStoredMessages ?? lastGetStoredMessages;
+  if (!targetChat?.shadowRoot || !getMessages) {
+    return;
+  }
+  scheduleRenderMessageToolbars(targetChat, getMessages, lastToolbarActions);
+}
+
+function findUnusedRoleIndex(
   storedMessages: DeepChatMessage[],
   usedIndexes: Set<number>,
   role: 'user' | 'ai',
-  content: string
+  preferLatest: boolean
+): number {
+  if (preferLatest) {
+    for (let i = storedMessages.length - 1; i >= 0; i--) {
+      const candidate = storedMessages[i];
+      if (candidate && !usedIndexes.has(i) && getToolbarMessageRole(candidate) === role) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  // Pair left-to-right so earlier bubbles never steal the latest 「未完成/已停止」.
+  for (let i = 0; i < storedMessages.length; i++) {
+    const candidate = storedMessages[i];
+    if (candidate && !usedIndexes.has(i) && getToolbarMessageRole(candidate) === role) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Pair a DOM bubble with a store message for status badges.
+ * - Exact content match first (stable across switch thread / remount).
+ * - Fallback: chronological first unused of role (historical bubbles).
+ * - preferLatestFallback: only for the live last AI (stream text can lag store).
+ */
+export function findStoredMessageForToolbar(
+  storedMessages: DeepChatMessage[],
+  usedIndexes: Set<number>,
+  role: 'user' | 'ai',
+  content: string,
+  options: { preferLatestFallback?: boolean } = {}
 ): DeepChatMessage | undefined {
   const normalizedContent = normalizeToolbarContent(content);
-  const exactIndex = storedMessages.findIndex(
-    (message, index) =>
-      !usedIndexes.has(index) &&
+  let index = storedMessages.findIndex(
+    (message, messageIndex) =>
+      !usedIndexes.has(messageIndex) &&
       getToolbarMessageRole(message) === role &&
       normalizeToolbarContent(getMessageText(message)) === normalizedContent
   );
-  const index =
-    exactIndex >= 0
-      ? exactIndex
-      : storedMessages.findIndex(
-          (message, candidateIndex) =>
-            !usedIndexes.has(candidateIndex) && getToolbarMessageRole(message) === role
-        );
+
+  if (index < 0) {
+    index = findUnusedRoleIndex(
+      storedMessages,
+      usedIndexes,
+      role,
+      Boolean(options.preferLatestFallback)
+    );
+  }
 
   if (index < 0) {
     return undefined;
@@ -184,12 +427,7 @@ function createMessageToolbar(
   time.className = 'deep-chat-message-time';
   time.textContent = formatToolbarTime(storedMessage?.createdAt);
   toolbar.appendChild(time);
-  if (storedMessage?.status === 'stopped' || storedMessage?.status === 'partial') {
-    const status = document.createElement('span');
-    status.className = 'deep-chat-message-status';
-    status.textContent = storedMessage.status === 'stopped' ? '已停止' : '未完成';
-    toolbar.appendChild(status);
-  }
+  syncToolbarStatusBadge(toolbar, storedMessage);
   const skillContexts = actions.getSkillContexts?.() || [];
 
   toolbar.appendChild(

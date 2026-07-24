@@ -4,7 +4,7 @@
  */
 
 import {
-  buildFunctionCallOutputItems,
+  buildToolFollowUpInputItems,
   extractResponsesFunctionCalls,
   type ResponsesFunctionCall,
 } from './responsesTools';
@@ -20,6 +20,11 @@ export interface ResponsesToolLoopRoundInput {
   /** Full Responses JSON body from last request */
   responseData: Record<string, unknown>;
   executeTool: ResponsesToolExecutor;
+  /**
+   * When true, nextInputItems are function_call_output only (server keeps function_call via previous_id).
+   * When false/omit, nextInputItems replay function_call + function_call_output (stateless).
+   */
+  useStatefulFollowUp?: boolean;
 }
 
 export interface ResponsesToolLoopRoundResult {
@@ -70,12 +75,17 @@ export async function processResponsesToolRound(
     }
   }
 
+  const mode = input.useStatefulFollowUp === true ? 'stateful' : 'stateless';
   return {
     done: false,
     text,
     responseId,
     functionCalls,
-    nextInputItems: buildFunctionCallOutputItems(results),
+    nextInputItems: buildToolFollowUpInputItems({
+      functionCalls,
+      results,
+      mode,
+    }),
   };
 }
 

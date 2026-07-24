@@ -65,7 +65,9 @@ export {
   type ResponsesJsonSchemaFormat,
 } from './applyToRequest';
 export {
+  buildFunctionCallItemsForReplay,
   buildFunctionCallOutputItems,
+  buildToolFollowUpInputItems,
   extractResponsesFunctionCalls,
   isResponsesBuiltInToolType,
   normalizeToolsForResponses,

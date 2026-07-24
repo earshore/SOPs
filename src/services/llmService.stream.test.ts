@@ -480,10 +480,97 @@ describe('callLLM streaming', () => {
     expect(text).toBe('5');
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const secondBody = JSON.parse(String((fetchMock.mock.calls[1]?.[1] as RequestInit).body));
-    expect(secondBody.previous_response_id).toBe('resp_tool_1');
+    // Fail-closed registry: no store/previous_id — replay function_call + output in input.
+    expect(secondBody.previous_response_id).toBeUndefined();
+    expect(secondBody.store).not.toBe(true);
     expect(secondBody.input).toEqual([
+      { role: 'user', content: '2+3?' },
+      {
+        type: 'function_call',
+        call_id: 'call_1',
+        name: 'add',
+        arguments: '{"a":2,"b":3}',
+      },
       { type: 'function_call_output', call_id: 'call_1', output: '5' },
     ]);
+  });
+
+  it('runs non-stream responses tool loop with item replay when store unsupported', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(
+        async () =>
+          new Response(
+            JSON.stringify({
+              id: 'resp_tool_a',
+              output: [
+                {
+                  type: 'function_call',
+                  call_id: 'call_9',
+                  name: 'add',
+                  arguments: '{"a":1,"b":4}',
+                },
+              ],
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
+      )
+      .mockImplementationOnce(
+        async () =>
+          new Response(
+            JSON.stringify({
+              id: 'resp_tool_b',
+              output_text: '5',
+              output: [
+                {
+                  type: 'message',
+                  content: [{ type: 'output_text', text: '5' }],
+                },
+              ],
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [{ role: 'user', content: '1+4?' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'gpt-5.5',
+      {
+        stream: false,
+        retries: 0,
+        apiPath: 'responses',
+        tools: [
+          {
+            type: 'function',
+            name: 'add',
+            description: 'add two numbers',
+            parameters: {
+              type: 'object',
+              properties: { a: { type: 'number' }, b: { type: 'number' } },
+            },
+          },
+        ],
+        enableToolLoop: true,
+        executeTool: async ({ arguments: args }) => {
+          const parsed = JSON.parse(args) as { a: number; b: number };
+          return String(parsed.a + parsed.b);
+        },
+      }
+    );
+
+    expect(text).toBe('5');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const secondBody = JSON.parse(String((fetchMock.mock.calls[1]?.[1] as RequestInit).body));
+    expect(secondBody.previous_response_id).toBeUndefined();
+    expect(secondBody.input).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'function_call_output', call_id: 'call_9', output: '5' }),
+      ])
+    );
   });
 
   it('posts Responses body to /responses when apiPath is responses', async () => {

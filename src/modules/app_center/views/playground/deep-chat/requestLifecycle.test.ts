@@ -7,6 +7,7 @@ import {
   createPendingDeepChatRequest,
   getDeepChatGenerationPhase,
   isPendingDeepChatDisplayComplete,
+  liveGenerationPhaseNeedsBubbleChrome,
   markPendingDeepChatAssistantTextDisplayed,
   markPendingDeepChatPartialPersisted,
   markPendingDeepChatRequestSettled,
@@ -179,5 +180,29 @@ describe('Deep Chat generation phases', () => {
     const pending = createPendingDeepChatRequest('thread-1', conversationMessages, { now: 1000 });
     appendPendingDeepChatAssistantText(pending, 'direct', 1100);
     expect(getDeepChatGenerationPhase(pending)).toBe('generating');
+  });
+
+  /**
+   * Regression: edit message → resend freezes the page when history already has AI bubbles.
+   * waiting / generating-without-reasoning intentionally have no above-bubble streaming chrome
+   * (status lives on the toolbar). Requiring `.is-streaming` in the MutationObserver skip check
+   * caused create/remove thrash → infinite remount → hard freeze.
+   */
+  it('does not require bubble chrome while waiting or generating without reasoning', () => {
+    expect(liveGenerationPhaseNeedsBubbleChrome('waiting', false)).toBe(false);
+    expect(liveGenerationPhaseNeedsBubbleChrome('waiting', true)).toBe(false);
+    expect(liveGenerationPhaseNeedsBubbleChrome('generating', false)).toBe(false);
+    expect(liveGenerationPhaseNeedsBubbleChrome('reasoning', true)).toBe(true);
+    expect(liveGenerationPhaseNeedsBubbleChrome('generating', true)).toBe(true);
+    expect(liveGenerationPhaseNeedsBubbleChrome('settled', false)).toBe(true);
+  });
+
+  it('treats first reasoning chunk as leaving waiting (hides 思考中 / 等待模型响应)', () => {
+    const pending = createPendingDeepChatRequest('thread-1', conversationMessages, { now: 1000 });
+    expect(getDeepChatGenerationPhase(pending)).toBe('waiting');
+    appendPendingDeepChatReasoningText(pending, '开始推理', 1100);
+    // Toolbar live labels only for waiting/generating; reasoning phase must not show them
+    expect(getDeepChatGenerationPhase(pending)).toBe('reasoning');
+    expect(liveGenerationPhaseNeedsBubbleChrome('reasoning', true)).toBe(true);
   });
 });

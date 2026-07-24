@@ -38,8 +38,10 @@ function surfaceResponses(opts?: { temperatureIgnored?: boolean }): SurfaceCapab
     supportsStructuredOutput: true,
     supportsTools: true,
     supportsVision: true,
-    supportsPreviousResponseId: true,
-    supportsStore: true,
+    // Fail-closed: many OpenAI-compatible gateways reject store/previous_response_id (400).
+    // Opt-in only when a gateway probe or explicit rule enables them.
+    supportsPreviousResponseId: false,
+    supportsStore: false,
     supportsBuiltInTools: true,
     supportsReasoningSummary: true,
   };

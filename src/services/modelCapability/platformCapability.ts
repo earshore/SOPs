@@ -86,7 +86,8 @@ export const OPENAI_PLATFORM_CAPABILITY_MATRIX: PlatformCapabilityRow[] = [
     feature: 'store:true stateful responses',
     status: 'gateway_dependent',
     entry: 'applyToRequest.ts applyResponsesStoreField',
-    notes: 'new.hongecb probe: fail 400; client degrades chain',
+    notes:
+      'Registry fail-closed (supportsStore=false). Never force store:true when unsupported. new.hongecb probe: 400.',
   },
   {
     id: 'resp.previous_id',
@@ -94,7 +95,8 @@ export const OPENAI_PLATFORM_CAPABILITY_MATRIX: PlatformCapabilityRow[] = [
     feature: 'previous_response_id multi-turn',
     status: 'gateway_dependent',
     entry: 'Deep Chat lastResponseId + applyToRequest',
-    notes: 'Code ready; gateway probe fail 400',
+    notes:
+      'Registry fail-closed; chain only when supportsPreviousResponseId+supportsStore. Else full messages / tool item replay. Resends instructions on chain turns.',
   },
   {
     id: 'resp.parallel_tools',

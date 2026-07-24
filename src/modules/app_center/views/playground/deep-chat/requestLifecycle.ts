@@ -50,6 +50,24 @@ export function getDeepChatGenerationPhase(
   return 'waiting';
 }
 
+/**
+ * Whether the live (last) AI host needs above-bubble generation chrome.
+ * waiting / generating-without-reasoning use toolbar end status only —
+ * requiring streaming chrome there causes MutationObserver remount thrash (page freeze).
+ */
+export function liveGenerationPhaseNeedsBubbleChrome(
+  phase: DeepChatGenerationPhase,
+  hasReasoningText: boolean
+): boolean {
+  if (phase === 'settled' || phase === 'reasoning') {
+    return true;
+  }
+  if (phase === 'generating' && hasReasoningText) {
+    return true;
+  }
+  return false;
+}
+
 interface CreatePendingDeepChatRequestOptions {
   now?: number;
   controller?: AbortController;

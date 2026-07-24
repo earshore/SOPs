@@ -11,9 +11,9 @@
 | 层                                                                | 状态                                                    |
 | ----------------------------------------------------------------- | ------------------------------------------------------- |
 | 协议：text / reasoning / structured / tools / vision / chain 代码 | ✅                                                      |
-| R1 tool loop                                                      | ✅（stream-first 混合路径，见下）                       |
+| R1 tool loop                                                      | ✅ stream-first + **stateless item 回放**（无 store 网关） |
 | R2 built-in 透传                                                  | ✅ partial（无产品 UI 开关）                            |
-| R3–R4 Deep Chat previous_id + latest-user                         | ✅ 代码就绪；**网关常 400** 自动降级                    |
+| R3–R4 Deep Chat previous_id + latest-user                         | ✅ 代码就绪；**registry fail-closed**；网关 400 降级   |
 | R5 json_schema                                                    | ✅                                                      |
 | R6 实网 probe                                                     | ✅ `npm run probe:responses`                            |
 | R7 设置徽章                                                       | ✅                                                      |
@@ -71,7 +71,7 @@ npm run probe:responses
 | 类别                                                                        | SOPs 立场                          |
 | --------------------------------------------------------------------------- | ---------------------------------- |
 | Responses 文本/推理/结构化/自定义 tools/vision                              | **已实现**（客户端）               |
-| store / previous_response_id                                                | **网关依赖**；代码有，本网关不可用 |
+| store / previous_response_id                                                | **fail-closed 默认关**；capability 开启后才链式；否则 item 回放 |
 | Built-in tools 产品化 UI                                                    | **partial** 协议透传，无运营配置页 |
 | Conversations / Assistants / Realtime / Batch / Fine-tune / Vector store UI | **明确不做**（产品边界）           |
 

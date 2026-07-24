@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildFunctionCallOutputItems,
+  buildToolFollowUpInputItems,
   extractResponsesFunctionCalls,
   normalizeToolsForResponses,
 } from './responsesTools';
@@ -81,7 +82,7 @@ describe('processResponsesToolRound', () => {
     expect(result.responseId).toBe('resp_x');
   });
 
-  it('executes tools and builds function_call_output items', async () => {
+  it('executes tools and builds stateless replay items by default', async () => {
     const result = await processResponsesToolRound({
       responseData: {
         id: 'resp_2',
@@ -101,6 +102,31 @@ describe('processResponsesToolRound', () => {
       },
     });
     expect(result.done).toBe(false);
+    expect(result.nextInputItems).toEqual(
+      buildToolFollowUpInputItems({
+        functionCalls: [{ callId: 'call_1', name: 'add', arguments: '{"a":1,"b":2}' }],
+        results: [{ callId: 'call_1', output: '3' }],
+        mode: 'stateless',
+      })
+    );
+  });
+
+  it('builds stateful function_call_output only when requested', async () => {
+    const result = await processResponsesToolRound({
+      responseData: {
+        id: 'resp_2',
+        output: [
+          {
+            type: 'function_call',
+            call_id: 'call_1',
+            name: 'add',
+            arguments: '{"a":1,"b":2}',
+          },
+        ],
+      },
+      useStatefulFollowUp: true,
+      executeTool: async () => '3',
+    });
     expect(result.nextInputItems).toEqual(
       buildFunctionCallOutputItems([{ callId: 'call_1', output: '3' }])
     );

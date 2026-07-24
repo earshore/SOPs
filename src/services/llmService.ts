@@ -646,11 +646,50 @@ async function readOpenAIStreamBody(
   return rawText;
 }
 
+function isResponsesLikePayload(data: Record<string, unknown> | null | undefined): boolean {
+  if (!data || typeof data !== 'object') return false;
+  if (data.object === 'response') return true;
+  if (typeof data.output_text === 'string') return true;
+  if (Array.isArray(data.output)) return true;
+  return false;
+}
+
 function createOpenAIStreamResult(
   state: OpenAIStreamState,
-  rawText: string
+  rawText: string,
+  apiSurface: ApiSurface
 ): OpenAIStreamReadResult {
   const fallbackJson = state.content ? null : parseBufferedJsonCompletion(rawText);
+  const fallbackRecord = fallbackJson as unknown as Record<string, unknown> | null;
+
+  // Gateways sometimes ignore stream:true and return a full Responses JSON body.
+  if (
+    apiSurface === 'responses' &&
+    !state.content &&
+    fallbackRecord &&
+    isResponsesLikePayload(fallbackRecord)
+  ) {
+    const content = extractResponsesOutputText(fallbackRecord);
+    const functionCalls = mergeStreamFunctionCalls(
+      state.functionCalls,
+      extractResponsesFunctionCalls(fallbackRecord)
+    );
+    const responseId = extractResponsesId(fallbackRecord);
+    if (responseId && !state.responseIdReported) {
+      state.responseIdReported = true;
+    }
+    return {
+      content,
+      // Do not feed Responses JSON into Chat Completions validators.
+      fallbackJson: null,
+      firstChunkMs: state.firstChunkMs,
+      chunkCount: state.chunkCount,
+      lastResponsesPayload: state.lastResponsesPayload ?? fallbackRecord,
+      functionCalls,
+      reasoningContent: state.reasoningContent,
+    };
+  }
+
   return {
     content: state.content || getCompletionContent(fallbackJson),
     fallbackJson,
@@ -671,7 +710,20 @@ async function readOpenAIStream(
   const reader = response.body?.getReader();
 
   if (!reader) {
-    return readBufferedOpenAIResponse(response);
+    const buffered = await readBufferedOpenAIResponse(response);
+    if (apiSurface === 'responses' && buffered.fallbackJson) {
+      return createOpenAIStreamResult(
+        {
+          content: '',
+          reasoningContent: '',
+          chunkCount: 0,
+          responseIdReported: false,
+        },
+        JSON.stringify(buffered.fallbackJson),
+        apiSurface
+      );
+    }
+    return buffered;
   }
 
   const state: OpenAIStreamState = {
@@ -688,7 +740,15 @@ async function readOpenAIStream(
     apiSurface,
   };
   const rawText = await readOpenAIStreamBody(reader, lineContext);
-  return createOpenAIStreamResult(state, rawText);
+  const result = createOpenAIStreamResult(state, rawText, apiSurface);
+  // Buffered Responses JSON (non-SSE) may carry id without stream events.
+  if (apiSurface === 'responses' && result.lastResponsesPayload && !state.responseIdReported) {
+    const responseId = extractResponsesId(result.lastResponsesPayload);
+    if (responseId) {
+      options.onResponseId?.(responseId);
+    }
+  }
+  return result;
 }
 
 interface ResolvedLLMOptions {
@@ -1274,6 +1334,15 @@ function assertValidLLMResponse(
   response: Response,
   context: LLMCallContext
 ): void {
+  // Non-chat surfaces return typed payloads via content / rawResponsesData — not choices[].
+  if (
+    context.apiSurface === 'responses' ||
+    context.apiSurface === 'anthropic_messages' ||
+    context.apiSurface === 'gemini_generate'
+  ) {
+    return;
+  }
+
   const { data } = payload;
   if (!data) {
     return;
@@ -1482,6 +1551,118 @@ function buildToolLoopContext(
   };
 }
 
+function resolveResponsesToolCapability(
+  request: LLMCallRequest,
+  options: ResolvedLLMOptions
+): { supportsPreviousResponseId: boolean; supportsStore: boolean } {
+  const cap = resolveModelCapability({
+    provider: request.provider,
+    modelId: request.model,
+    modelsEntry: options.modelsEntry,
+    preferredSurface: 'responses',
+  });
+  return {
+    supportsPreviousResponseId: cap.supportsPreviousResponseId,
+    supportsStore: cap.supportsStore,
+  };
+}
+
+function synthesizeResponsesDataFromFunctionCalls(
+  calls: import('./modelCapability').ResponsesFunctionCall[],
+  responseId?: string
+): Record<string, unknown> {
+  return {
+    ...(responseId ? { id: responseId } : {}),
+    output: calls.map(c => ({
+      type: 'function_call',
+      call_id: c.callId,
+      name: c.name,
+      arguments: c.arguments,
+      ...(c.itemId ? { id: c.itemId } : {}),
+    })),
+  };
+}
+
+async function processToolRoundFromPayload(args: {
+  request: LLMCallRequest;
+  baseOptions: ResolvedLLMOptions;
+  raw: Record<string, unknown>;
+  executeTool: ResponsesToolExecutor;
+  previousResponseId?: string;
+}): Promise<{
+  lastText: string;
+  done: boolean;
+  previousResponseId?: string;
+  followUpInputItems?: Array<Record<string, unknown>>;
+}> {
+  const cap = resolveResponsesToolCapability(args.request, args.baseOptions);
+  const canUsePrevious =
+    cap.supportsPreviousResponseId &&
+    Boolean(args.previousResponseId || extractResponsesId(args.raw));
+  const roundResult = await processResponsesToolRound({
+    responseData: args.raw,
+    executeTool: args.executeTool,
+    useStatefulFollowUp: canUsePrevious,
+  });
+  let previousResponseId = args.previousResponseId;
+  if (roundResult.responseId) {
+    args.baseOptions.onResponseId?.(roundResult.responseId);
+    previousResponseId = roundResult.responseId;
+  }
+  if (roundResult.done) {
+    return {
+      lastText: roundResult.text,
+      done: true,
+      previousResponseId: canUsePrevious ? previousResponseId : undefined,
+    };
+  }
+  return {
+    lastText: roundResult.text,
+    done: false,
+    // Only keep previous id when capability allows stateful follow-up.
+    previousResponseId: canUsePrevious ? previousResponseId : undefined,
+    followUpInputItems: roundResult.nextInputItems,
+  };
+}
+
+function resolveToolRoundStoreFlag(args: {
+  hasFollowUp: boolean;
+  usePrevious: boolean;
+  supportsStore: boolean;
+  baseStore?: boolean;
+}): boolean {
+  if (!args.supportsStore) {
+    return false;
+  }
+  if (args.hasFollowUp && args.usePrevious) {
+    return true;
+  }
+  return args.baseStore === true;
+}
+
+function buildToolRoundOptions(
+  baseOptions: ResolvedLLMOptions,
+  args: {
+    previousResponseId?: string;
+    followUpInputItems?: Array<Record<string, unknown>>;
+    usePrevious: boolean;
+    supportsStore: boolean;
+  }
+): ResolvedLLMOptions {
+  return {
+    ...baseOptions,
+    stream: false,
+    previousResponseId: args.usePrevious ? args.previousResponseId : undefined,
+    followUpInputItems: args.followUpInputItems,
+    store: resolveToolRoundStoreFlag({
+      hasFollowUp: Boolean(args.followUpInputItems?.length),
+      usePrevious: args.usePrevious,
+      supportsStore: args.supportsStore,
+      baseStore: baseOptions.store,
+    }),
+  };
+}
+
 async function runOneResponsesToolRound(args: {
   request: LLMCallRequest;
   baseOptions: ResolvedLLMOptions;
@@ -1495,13 +1676,14 @@ async function runOneResponsesToolRound(args: {
   previousResponseId?: string;
   followUpInputItems?: Array<Record<string, unknown>>;
 }> {
-  const roundOptions: ResolvedLLMOptions = {
-    ...args.baseOptions,
-    stream: false,
+  const cap = resolveResponsesToolCapability(args.request, args.baseOptions);
+  const usePrevious = cap.supportsPreviousResponseId && Boolean(args.previousResponseId?.trim());
+  const roundOptions = buildToolRoundOptions(args.baseOptions, {
     previousResponseId: args.previousResponseId,
     followUpInputItems: args.followUpInputItems,
-    store: args.followUpInputItems?.length ? true : args.baseOptions.store,
-  };
+    usePrevious,
+    supportsStore: cap.supportsStore,
+  });
   const context = buildToolLoopContext(args.request, roundOptions, args.normalizedEndpoint);
   const payload = await executeLLMAttemptPayload(context, 0, {
     timedOut: false,
@@ -1510,30 +1692,25 @@ async function runOneResponsesToolRound(args: {
   const lastText = getLLMResponseContent(payload);
   const raw = payload.rawResponsesData;
   if (!raw) {
-    return { lastText, done: true, previousResponseId: args.previousResponseId };
-  }
-
-  const roundResult = await processResponsesToolRound({
-    responseData: raw,
-    executeTool: args.executeTool,
-  });
-  let previousResponseId = args.previousResponseId;
-  if (roundResult.responseId) {
-    args.baseOptions.onResponseId?.(roundResult.responseId);
-    previousResponseId = roundResult.responseId;
-  }
-  if (roundResult.done || !previousResponseId) {
     return {
-      lastText: roundResult.text || lastText,
+      lastText,
       done: true,
-      previousResponseId,
+      previousResponseId: usePrevious ? args.previousResponseId : undefined,
     };
   }
+
+  const roundResult = await processToolRoundFromPayload({
+    request: args.request,
+    baseOptions: args.baseOptions,
+    raw,
+    executeTool: args.executeTool,
+    previousResponseId: extractResponsesId(raw) || args.previousResponseId,
+  });
   return {
-    lastText,
-    done: false,
-    previousResponseId,
-    followUpInputItems: roundResult.nextInputItems,
+    lastText: roundResult.lastText || lastText,
+    done: roundResult.done,
+    previousResponseId: roundResult.previousResponseId,
+    followUpInputItems: roundResult.followUpInputItems,
   };
 }
 
@@ -1572,8 +1749,87 @@ async function callLLMResponsesToolLoop(
 }
 
 /**
+ * Continue tool loop after a first hop already returned function_call items
+ * (stream-first hybrid or non-stream seed payload).
+ */
+async function continueResponsesToolLoopFromRaw(
+  request: LLMCallRequest,
+  baseOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string,
+  raw: Record<string, unknown>
+): Promise<string> {
+  const executeTool = baseOptions.executeTool;
+  if (!executeTool) {
+    return extractResponsesOutputText(raw);
+  }
+
+  const maxRounds = baseOptions.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS;
+  let previousResponseId = extractResponsesId(raw) || baseOptions.previousResponseId;
+  let followUpInputItems: Array<Record<string, unknown>> | undefined;
+  let lastText = extractResponsesOutputText(raw);
+
+  const first = await processToolRoundFromPayload({
+    request,
+    baseOptions,
+    raw,
+    executeTool,
+    previousResponseId,
+  });
+  if (first.done) {
+    return first.lastText || lastText;
+  }
+  previousResponseId = first.previousResponseId;
+  followUpInputItems = first.followUpInputItems;
+  lastText = first.lastText || lastText;
+
+  for (let round = 1; round < maxRounds; round++) {
+    const result = await runOneResponsesToolRound({
+      request,
+      baseOptions: { ...baseOptions, stream: false, enableToolLoop: true },
+      normalizedEndpoint,
+      previousResponseId,
+      followUpInputItems,
+      executeTool,
+    });
+    lastText = result.lastText || lastText;
+    previousResponseId = result.previousResponseId;
+    followUpInputItems = result.followUpInputItems;
+    if (result.done) return lastText;
+  }
+
+  return lastText;
+}
+
+function resolveRawFromStreamFirstPayload(
+  payload: LLMResponsePayload
+): Record<string, unknown> | undefined {
+  if (payload.rawResponsesData) {
+    return payload.rawResponsesData;
+  }
+  if (payload.streamFunctionCalls?.length) {
+    return synthesizeResponsesDataFromFunctionCalls(payload.streamFunctionCalls);
+  }
+  const data = payload.data as unknown as Record<string, unknown> | null;
+  if (data && isResponsesLikePayload(data)) {
+    return data;
+  }
+  return undefined;
+}
+
+function resolveFunctionCallsFromStreamFirstPayload(
+  payload: LLMResponsePayload,
+  raw: Record<string, unknown> | undefined
+): import('./modelCapability').ResponsesFunctionCall[] {
+  if (payload.streamFunctionCalls?.length) {
+    return payload.streamFunctionCalls;
+  }
+  return raw ? extractResponsesFunctionCalls(raw) : [];
+}
+
+/**
  * Stream-first tool path: keep reasoning/text SSE for Deep Chat UX; if the model
- * only emitted function_call items (empty assistant text), fall back to non-stream tool loop.
+ * only emitted function_call items (empty assistant text), continue tool loop
+ * from the first payload (or cold-start non-stream loop when nothing was captured).
  */
 async function callLLMStreamFirstThenToolLoop(
   request: LLMCallRequest,
@@ -1583,24 +1839,29 @@ async function callLLMStreamFirstThenToolLoop(
   const streamOptions: ResolvedLLMOptions = {
     ...baseOptions,
     stream: true,
-    // Do not enter pure non-stream tool-loop entry for the first hop.
     enableToolLoop: false,
   };
-  const streamed = await callLLMWithRetry(request, streamOptions, normalizedEndpoint);
+  const context = createInitialLLMContext(request, streamOptions, normalizedEndpoint);
+  const firstPayload = await executeLLMAttemptPayload(context, 0, {
+    timedOut: false,
+    externallyAborted: false,
+  });
+  const streamed = getLLMResponseContent(firstPayload);
+  const raw = resolveRawFromStreamFirstPayload(firstPayload);
+  const functionCalls = resolveFunctionCallsFromStreamFirstPayload(firstPayload, raw);
+  const toolOptions: ResolvedLLMOptions = {
+    ...baseOptions,
+    stream: false,
+    enableToolLoop: true,
+  };
+
+  if (raw && functionCalls.length > 0) {
+    return continueResponsesToolLoopFromRaw(request, toolOptions, normalizedEndpoint, raw);
+  }
   if (streamed.trim()) {
     return streamed;
   }
-
-  // Empty stream text: model may have requested tools only — run non-stream tool loop.
-  return callLLMResponsesToolLoop(
-    request,
-    {
-      ...baseOptions,
-      stream: false,
-      enableToolLoop: true,
-    },
-    normalizedEndpoint
-  );
+  return callLLMResponsesToolLoop(request, toolOptions, normalizedEndpoint);
 }
 
 /**

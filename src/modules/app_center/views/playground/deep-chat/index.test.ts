@@ -2266,6 +2266,184 @@ describe('deep-chat playground concurrent sessions', () => {
   });
 });
 
+describe('deep-chat playground reasoning stream stability', () => {
+  it('keeps accumulating reasoning while switching threads and restores full text on return', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    let releaseStream = (): void => {};
+    const streamGate = new Promise<void>(resolve => {
+      releaseStream = resolve;
+    });
+    const onStreamUpdateCalls: Array<{ delta: string; reasoningDelta?: string }> = [];
+    const { mount, unmount, mocks } = await importDeepChat({
+      callLLM: async (...args: unknown[]) => {
+        const callOptions = args[5] as
+          | {
+              onStreamUpdate?: (update: { delta: string; reasoningDelta?: string }) => void;
+              signal?: AbortSignal;
+            }
+          | undefined;
+        const push = (update: { delta: string; reasoningDelta?: string }) => {
+          onStreamUpdateCalls.push(update);
+          callOptions?.onStreamUpdate?.(update);
+        };
+        push({ delta: '', reasoningDelta: 'Step A. ' });
+        push({ delta: '', reasoningDelta: 'Step B before switch. ' });
+        await streamGate;
+        // Continues after user left the generating thread
+        push({ delta: '', reasoningDelta: 'Step C after switch. ' });
+        push({ delta: 'Final answer' });
+        return 'Final answer';
+      },
+    });
+
+    await mount(container);
+    const onClose = vi.fn();
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Think carefully' }] },
+      {
+        onResponse: vi.fn(async () => undefined),
+        onClose,
+        stopClicked: { listener: vi.fn() },
+      }
+    );
+
+    await vi.waitFor(() => {
+      expect(onStreamUpdateCalls.length).toBeGreaterThanOrEqual(2);
+    });
+
+    queryRequired<HTMLButtonElement>(container, '[data-thread-id="thread-2"]').click();
+    await vi.waitFor(() => {
+      expect(container.querySelector('.deep-chat-thread-item.is-active')?.textContent).toContain(
+        'Other thread'
+      );
+    });
+
+    releaseStream();
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    queryRequired<HTMLButtonElement>(container, '[data-thread-id="thread-1"]').click();
+    await vi.waitFor(() => {
+      expect(
+        container.querySelector('.deep-chat-thread-item.is-active [data-thread-id="thread-1"]')
+      ).not.toBeNull();
+    });
+    await vi.advanceTimersByTimeAsync(400);
+
+    const saved = mocks.localDataStore.set.mock.calls
+      .map(
+        call =>
+          call[1] as {
+            threads?: Array<{
+              id: string;
+              messages?: Array<{ reasoning?: string; text?: string }>;
+            }>;
+          }
+      )
+      .filter(Boolean)
+      .at(-1);
+    const thread1 = saved?.threads?.find(thread => thread.id === 'thread-1');
+    const aiWithReasoning = thread1?.messages?.find(
+      message => typeof message.reasoning === 'string' && message.reasoning.includes('Step C')
+    );
+    expect(aiWithReasoning?.reasoning).toContain('Step A.');
+    expect(aiWithReasoning?.reasoning).toContain('Step B before switch.');
+    expect(aiWithReasoning?.reasoning).toContain('Step C after switch.');
+    expect(aiWithReasoning?.text || '').toContain('Final answer');
+
+    unmount();
+  });
+
+  it('keeps reasoning stream across page unmount without aborting', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    let releaseStream = (): void => {};
+    const streamGate = new Promise<void>(resolve => {
+      releaseStream = resolve;
+    });
+    let sawAbort = false;
+    const { mount, unmount, mocks } = await importDeepChat({
+      callLLM: async (...args: unknown[]) => {
+        const callOptions = args[5] as
+          | {
+              onStreamUpdate?: (update: { delta: string; reasoningDelta?: string }) => void;
+              signal?: AbortSignal;
+            }
+          | undefined;
+        callOptions?.signal?.addEventListener(
+          'abort',
+          () => {
+            sawAbort = true;
+          },
+          { once: true }
+        );
+        callOptions?.onStreamUpdate?.({ delta: '', reasoningDelta: 'Reason before leave. ' });
+        await streamGate;
+        callOptions?.onStreamUpdate?.({
+          delta: '',
+          reasoningDelta: 'Reason after leave. ',
+        });
+        callOptions?.onStreamUpdate?.({ delta: 'Done' });
+        return 'Done';
+      },
+    });
+
+    await mount(container);
+    const onClose = vi.fn();
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Leave mid-think' }] },
+      {
+        onResponse: vi.fn(async () => undefined),
+        onClose,
+        stopClicked: { listener: vi.fn() },
+      }
+    );
+
+    await vi.waitFor(() => {
+      expect(
+        container.querySelector('.deep-chat-thread-item.is-active .deep-chat-thread-meta')
+          ?.textContent
+      ).toMatch(/生成中|输出中/);
+    });
+
+    unmount();
+    expect(sawAbort).toBe(false);
+
+    releaseStream();
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+    expect(sawAbort).toBe(false);
+
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(400);
+
+    const saved = mocks.localDataStore.set.mock.calls
+      .map(
+        call =>
+          call[1] as {
+            threads?: Array<{
+              id: string;
+              messages?: Array<{ reasoning?: string; text?: string }>;
+            }>;
+          }
+      )
+      .filter(Boolean)
+      .at(-1);
+    const thread1 = saved?.threads?.find(thread => thread.id === 'thread-1');
+    const ai = thread1?.messages?.find(
+      message => typeof message.reasoning === 'string' && message.reasoning.includes('after leave')
+    );
+    expect(ai?.reasoning).toContain('Reason before leave.');
+    expect(ai?.reasoning).toContain('Reason after leave.');
+    expect(ai?.text || '').toContain('Done');
+
+    unmount();
+  });
+});
+
 describe('deep-chat playground remount streaming display', () => {
   it('keeps generating state across unmount and resumes display on remount', async () => {
     const container = document.createElement('main');

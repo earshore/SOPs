@@ -69,6 +69,7 @@ import {
   getDeepChatGenerationPhase,
   getPendingReasoningDurationSec,
   isPendingDeepChatDisplayComplete,
+  liveGenerationPhaseNeedsBubbleChrome,
   markPendingDeepChatAssistantTextDisplayed,
   markPendingDeepChatPartialPersisted,
   markPendingDeepChatRequestSettled,
@@ -101,7 +102,11 @@ import {
   configureDeepChatStyles,
 } from './deepChatConfig';
 import { ensureDeepChatElementDefined } from './deepChatElementLoader';
-import { cleanupMessageToolbars, setupMessageToolbars } from './messageToolbar';
+import {
+  cleanupMessageToolbars,
+  refreshMessageToolbarStatuses,
+  setupMessageToolbars,
+} from './messageToolbar';
 import { getPromptDrafts } from './promptDrafts';
 import { resetPromptPreviewState, setupPromptPreview } from './promptPreview';
 import { renderPromptDraftList, renderThreadList, type ThreadMenuState } from './renderers';
@@ -141,7 +146,6 @@ const WAITING_STATUS_LABELS = ['思考中...', '等待模型响应...', '正在�
 const WAITING_STATUS_ROTATE_MS = 1600;
 const GENERATION_CHROME_CLASS = 'deep-chat-generation-chrome';
 const INLINE_PENDING_STATUS_ID = 'deep-chat-inline-pending-status';
-const INLINE_PENDING_STATUS_CLASS = 'deep-chat-inline-pending-status';
 const PENDING_GENERATION_HOST_CLASS = 'is-pending-generation';
 const STREAMING_DT_KEY = 'pending';
 /** Shadow DOM rebuild retries when deep-chat recreates loading/AI slots */
@@ -181,8 +185,13 @@ const pendingRequests = new Map<string, PendingDeepChatRequest>();
 const pendingDisplayTimers = new Map<string, number>();
 /** Re-attach inline generation chrome when deep-chat rebuilds shadow children */
 let pendingChromeObserver: MutationObserver | null = null;
+/** The deep-chat host currently observed — must rebind after replaceChat */
+let pendingChromeObservedChat: DeepChatElement | null = null;
 let pendingChromeRetryRaf: number | null = null;
+let pendingChromeRetryTimeouts: number[] = [];
 let reasoningTypewriterTimer: number | null = null;
+/** Live typewriter target — restart when chrome remounts a new `<pre>`. */
+let reasoningTypewriterTextEl: HTMLElement | null = null;
 let waitingStatusRotateTimer: number | null = null;
 /** Settled 深度思考 expand state keyed by message (`threadId:aiIndex:…`). */
 const settledDeepThinkingUi = new Map<
@@ -414,10 +423,14 @@ function initDeepChat(container: HTMLElement): void {
   }
 
   const activeThread = getActiveThread();
-  // 切回页面时先把已接收 stream 同步到 displayed，避免 history 只有占位/长时间打字机追赶
+  // 切会话/切回页面：已接收 stream 直接对齐到 displayed，避免 history 占位或长时间打字机追赶。
+  // 深度思考同理对齐 cursor，后台攒下的 reasoning 立刻完整可见，新 chunk 才继续打字。
   pendingRequests.forEach(request => {
     if (request.assistantText) {
       markPendingDeepChatAssistantTextDisplayed(request, request.assistantText);
+    }
+    if (request.reasoningText) {
+      request.reasoningDisplayedLength = request.reasoningText.length;
     }
   });
   configureDeepChatBase(chat, activeThread, updateThreadDraft, getThreadDisplayMessages);
@@ -435,12 +448,15 @@ function initDeepChat(container: HTMLElement): void {
     // 气泡 Chip / 编辑回填：优先会话挂载；发送后已消费则从历史消息标记重建展示上下文
     getSkillContexts: () => collectDisplaySkillContexts(getActiveThread()),
     refillComposerWithText: text => refillComposerWithSkillChips(container, text),
+    // 「正在生成回复 · 已收到 N 字」挂在 toolbar 末尾，不占气泡上方
+    getLiveGenerationStatusLabel: () => getActiveLiveGenerationStatusLabel(),
   });
   setConversationActive(
     container,
     activeThread.messages.length > 0 || pendingRequests.has(activeThread.id)
   );
-  syncPendingStatus(container);
+  // New deep-chat element every replaceChat — rebind observer and remount chrome hard
+  remountDeepThinkingChromeAfterChatReplace(container);
   setupDraftInputHeightSync(container, chat);
   setupSubmitStopButtonSync(container, chat);
   // 恢复所有在飞/待输出会话（切出页面再回来时「生成中」不丢）
@@ -2097,12 +2113,19 @@ async function handleDeepChatRequest(
       threadId: activeThread.id,
       assistantReasoning: pendingRequest.reasoningText,
       assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
+      // Explicitly omit assistantStatus so partial 「未完成」 is cleared in store.
     });
     markPendingDeepChatRequestSettled(pendingRequest);
     // Paint 「已完成」 immediately (before body typewriter finishes draining).
     {
       const mount = getMountedRenderContainer();
-      if (mount) syncAllDeepThinkingChrome(mount);
+      if (mount) {
+        syncAllDeepThinkingChrome(mount);
+        // Clear toolbar 「未完成」 without waiting for thread switch / refresh.
+        refreshMessageToolbarStatuses(getChat(mount), () =>
+          getThreadDisplayMessages(getActiveThread())
+        );
+      }
     }
     // 后台会话：LLM 一完成就标未读并刷新列表（不等打字机 drain）
     notifyBackgroundPendingSettled(activeThread.id);
@@ -2231,11 +2254,19 @@ function preserveTimedOutPartialResponse(threadId: string | null, error: unknown
       assistantCreatedAt: pendingRequest.startedAt,
       assistantReasoning: pendingRequest.reasoningText,
       assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
+      // Keep partial marker only when we intentionally stop mid-stream; timeout
+      // content is treated as final retained text (no sticky 「未完成」).
     }
   );
   markPendingDeepChatRequestSettled(pendingRequest);
   notifyBackgroundPendingSettled(threadId);
   schedulePendingAssistantDisplay(threadId);
+  const mount = getRenderContainerForThread(threadId);
+  if (mount) {
+    refreshMessageToolbarStatuses(getChat(mount), () =>
+      getThreadDisplayMessages(getActiveThread())
+    );
+  }
   showToast('模型响应超时，已保留已生成内容', { type: 'warning' });
   return true;
 }
@@ -2459,10 +2490,14 @@ function resolveDeepChatResponsesChainOptions(
       }
     : {};
 
-  // Only request store when chaining; many new-api gateways reject store=true.
+  // Only request store/previous_id when capability allows (fail-closed registry + gateway).
+  const canChain =
+    Boolean(previousResponseId) &&
+    cap.supportsPreviousResponseId === true &&
+    cap.supportsStore === true;
   return {
     apiPath,
-    ...(previousResponseId ? { previousResponseId, store: true } : { store: false }),
+    ...(canChain ? { previousResponseId, store: true } : { store: false }),
     ...toolOptions,
   };
 }
@@ -2532,8 +2567,12 @@ function createDeepChatStreamHandler(
       appendPendingAssistantText(pendingRequest, update.delta);
       void emitPendingAssistantDelta(signals, pendingRequest, sourceChat, update.delta);
     } else if (update.reasoningDelta) {
-      const container = getMountedRenderContainer();
-      if (container) syncPendingStatus(container);
+      // Only paint chrome for *this* request's thread (not whatever is currently mounted).
+      // Background reasoning must keep accumulating without thrashing another session's UI.
+      const container = getRenderContainerForThread(pendingRequest.threadId);
+      if (container) {
+        syncPendingStatus(container);
+      }
     }
   };
 }
@@ -3752,7 +3791,12 @@ function switchThread(container: HTMLElement, threadId: string): void {
   if (pendingRequests.has(threadId)) {
     schedulePendingAssistantDisplay(threadId);
   }
-  syncPendingStatus(container);
+  // replaceChat 换了 deep-chat 节点：必须重绑 observer + 多帧补挂 已完成/深度思考
+  remountDeepThinkingChromeAfterChatReplace(container);
+  // Re-sync toolbar badges (e.g. clear stale 「未完成」 from store after settle)
+  refreshMessageToolbarStatuses(getChat(container), () =>
+    getThreadDisplayMessages(getActiveThread())
+  );
 }
 
 async function deleteThread(container: HTMLElement, threadId: string): Promise<void> {
@@ -3805,6 +3849,9 @@ function replaceChat(container: HTMLElement): void {
   }
 
   rescueSkillLoadBannerToStage(container);
+  // Detached bubble DOM must not keep receiving typewriter ticks.
+  stopReasoningTypewriter();
+  disconnectChromeMutationObserver();
 
   if (typeof chat.clearMessages === 'function') {
     chat.clearMessages(true);
@@ -4203,6 +4250,12 @@ function threadExists(threadId: string): boolean {
   return threadStore.threads.some(thread => thread.id === threadId);
 }
 
+/**
+ * Messages shown in deep-chat history + message toolbars.
+ * Live pending: no toolbar status badge — progress is only via generation chrome
+ * (思考中 / 深度思考 / 正在生成回复 · 已收到 N 字).
+ * Interrupted recovery (no pending): store may keep status 「未完成」.
+ */
 function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessage[] {
   const pendingRequest = pendingRequests.get(thread.id);
   if (!pendingRequest) {
@@ -4216,22 +4269,57 @@ function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessage[] {
     {
       now: pendingRequest.startedAt,
       assistantCreatedAt: pendingRequest.startedAt,
+      // Keep reasoning metadata on the live AI slot so remount after switchThread
+      // can still paint 深度思考 / 已完成 even before the next stream delta.
+      assistantReasoning: pendingRequest.reasoningText,
+      assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
     }
   );
 
+  // Live request: strip 「未完成」 only on the live trailing AI (chrome owns progress).
+  // Historical partial/stopped badges must remain stable across switch/remount.
+  const withoutLivePartial = stripLiveTrailingPartialStatus(displayMessages);
+
   if (pendingRequest.displayedAssistantText.trim()) {
-    return displayMessages;
+    return withoutLivePartial;
   }
 
-  // 占位用零宽字符占 AI 槽位，文案改由消息下方 inline status 展示（取代 loading 三点）
+  // 占位 AI 槽位；进行中状态只走 chrome（正在生成回复...），不打 toolbar 徽章
   return [
-    ...displayMessages,
+    ...withoutLivePartial,
     {
       role: 'ai',
       text: '\u200b',
       createdAt: pendingRequest.startedAt,
+      ...(pendingRequest.reasoningText.trim() ? { reasoning: pendingRequest.reasoningText } : {}),
+      reasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
     },
   ];
+}
+
+/**
+ * While a request is in flight, hide 「未完成」 on the trailing AI only.
+ * Keep older partial/stopped badges so switch-thread does not erase history status.
+ */
+function stripLiveTrailingPartialStatus(messages: DeepChatMessage[]): DeepChatMessage[] {
+  let lastAiIndex = -1;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (isAssistantMessageRole(messages[i]?.role)) {
+      lastAiIndex = i;
+      break;
+    }
+  }
+  if (lastAiIndex < 0) {
+    return messages;
+  }
+
+  return messages.map((message, index) => {
+    if (index !== lastAiIndex || message.status !== 'partial') {
+      return message;
+    }
+    const { status: _partial, ...rest } = message;
+    return rest;
+  });
 }
 
 function createPendingRequest(
@@ -4402,9 +4490,15 @@ function completeSettledPendingDisplay(
     // or two frames after addMessage overwrite, which drops settled chrome.
     syncAllDeepThinkingChrome(container);
     scheduleDeepThinkingChromeRetry(container);
+    refreshMessageToolbarStatuses(getChat(container), () =>
+      getThreadDisplayMessages(getActiveThread())
+    );
     window.setTimeout(() => {
       if (getRenderContainerForThread(threadId) === container) {
         syncAllDeepThinkingChrome(container);
+        refreshMessageToolbarStatuses(getChat(container), () =>
+          getThreadDisplayMessages(getActiveThread())
+        );
       }
     }, 80);
   }
@@ -4479,11 +4573,22 @@ function applyPendingRequestsToThreadStore(store: DeepChatThreadStore): DeepChat
 
   pendingRequests.forEach(pendingRequest => {
     const existingThread = nextStore.threads.find(thread => thread.id === pendingRequest.threadId);
+    // Soft remount after switch-page: keep partial assistant text + status for recovery.
+    // Empty assistant used to wipe force-persisted 「未完成」 mid-stream.
+    const assistantText = pendingRequest.assistantText.trim();
     const storedMessages = buildStoredThreadMessages(
       existingThread?.messages || [],
       pendingRequest.conversationMessages,
-      '',
-      { now: pendingRequest.startedAt }
+      assistantText,
+      {
+        now: pendingRequest.startedAt,
+        assistantCreatedAt: pendingRequest.startedAt,
+        ...(assistantText && !pendingRequest.isSettled
+          ? { assistantStatus: 'partial' as const }
+          : {}),
+        assistantReasoning: pendingRequest.reasoningText,
+        assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
+      }
     );
     const nextThread: DeepChatThread = {
       ...(existingThread || {
@@ -4545,13 +4650,26 @@ function syncPendingRequestView(threadId: string, options: { replaceChat?: boole
   syncPendingStatus(container);
 }
 
-function clearPendingChromeObserver(): void {
+function disconnectChromeMutationObserver(): void {
   pendingChromeObserver?.disconnect();
   pendingChromeObserver = null;
+  pendingChromeObservedChat = null;
+}
+
+function clearChromeRetrySchedule(): void {
   if (pendingChromeRetryRaf !== null) {
     window.cancelAnimationFrame(pendingChromeRetryRaf);
     pendingChromeRetryRaf = null;
   }
+  for (const id of pendingChromeRetryTimeouts) {
+    window.clearTimeout(id);
+  }
+  pendingChromeRetryTimeouts = [];
+}
+
+function clearPendingChromeObserver(): void {
+  disconnectChromeMutationObserver();
+  clearChromeRetrySchedule();
   if (reasoningTypewriterTimer !== null) {
     window.clearTimeout(reasoningTypewriterTimer);
     reasoningTypewriterTimer = null;
@@ -4626,11 +4744,6 @@ function listAiMessageHosts(root: ShadowRoot): HTMLElement[] {
     }
   }
   return fallback;
-}
-
-function findInlinePendingStatusHost(root: ShadowRoot): HTMLElement | null {
-  const hosts = listAiMessageHosts(root);
-  return hosts[hosts.length - 1] ?? null;
 }
 
 function buildSettledDtKey(threadId: string, aiIndex: number, message: DeepChatMessage): string {
@@ -4714,6 +4827,7 @@ function stopReasoningTypewriter(): void {
     window.clearTimeout(reasoningTypewriterTimer);
     reasoningTypewriterTimer = null;
   }
+  reasoningTypewriterTextEl = null;
 }
 
 /**
@@ -4728,10 +4842,14 @@ function scheduleReasoningTypewriter(
   isActive: () => boolean
 ): void {
   stopReasoningTypewriter();
+  reasoningTypewriterTextEl = textEl;
 
   const run = (): void => {
-    if (!isActive()) {
+    if (!isActive() || reasoningTypewriterTextEl !== textEl || !textEl.isConnected) {
       reasoningTypewriterTimer = null;
+      if (reasoningTypewriterTextEl === textEl) {
+        reasoningTypewriterTextEl = null;
+      }
       return;
     }
     const full = getFullText();
@@ -4772,6 +4890,16 @@ function resumeStreamingReasoningTypewriter(
 ): void {
   if (pending.reasoningDisplayedLength === undefined) {
     pending.reasoningDisplayedLength = 0;
+  }
+  // Already driving this live `<pre>`: each tick re-reads pending.reasoningText.
+  // Skip restart on every reasoning chunk (avoids jank). Remounted nodes rebind.
+  if (
+    reasoningTypewriterTimer !== null &&
+    reasoningTypewriterTextEl === textEl &&
+    textEl.isConnected &&
+    isStreamingReasoningTypewriterActive(pending)
+  ) {
+    return;
   }
   scheduleReasoningTypewriter(
     textEl,
@@ -4901,27 +5029,6 @@ function paintOrResumeStreamingReasoning(
   resumeStreamingReasoningTypewriter(textEl, pending);
 }
 
-function ensureStatusInChrome(chrome: HTMLElement, statusText: string): void {
-  const doc = chrome.ownerDocument;
-  let statusEl = chrome.querySelector<HTMLElement>('#' + INLINE_PENDING_STATUS_ID);
-  if (!statusEl) {
-    statusEl = doc.createElement('div');
-    statusEl.id = INLINE_PENDING_STATUS_ID;
-    statusEl.className = INLINE_PENDING_STATUS_CLASS;
-    statusEl.setAttribute('role', 'status');
-    statusEl.setAttribute('aria-live', 'polite');
-    const text = doc.createElement('span');
-    text.className = 'deep-chat-inline-pending-text';
-    statusEl.append(text);
-    chrome.append(statusEl);
-  }
-  const textEl = statusEl.querySelector<HTMLElement>('.deep-chat-inline-pending-text');
-  if (textEl && textEl.textContent !== statusText) {
-    textEl.textContent = statusText;
-  }
-  statusEl.hidden = false;
-}
-
 function hideStatusInChrome(chrome: HTMLElement): void {
   const statusEl = chrome.querySelector<HTMLElement>('#' + INLINE_PENDING_STATUS_ID);
   if (statusEl) {
@@ -4946,45 +5053,82 @@ function getGeneratingStatusLabel(pending: PendingDeepChatRequest): string {
 }
 
 /**
- * Phase-driven streaming chrome:
- * waiting  → 思考中 / 等待模型响应… (no 深度思考 yet)
- * reasoning → 深度思考 only (hide waiting status)
- * generating → 深度思考 (if any) + 正在生成回复 · 已收到 N 字
- * body typewriter sits below chrome (message bubble)
+ * Live status for toolbar end — waiting / generating only.
+ * Once 深度思考 starts (phase === reasoning), hide 「思考中… / 等待模型响应…」
+ * so waiting copy does not sit next to the reasoning chrome as visual noise.
+ */
+function getActiveLiveGenerationStatusLabel(): string | null {
+  const pending = pendingRequests.get(threadStore.activeThreadId);
+  if (!pending || pending.isSettled) {
+    return null;
+  }
+  const phase = getDeepChatGenerationPhase(pending);
+  if (phase === 'waiting') {
+    return getWaitingStatusLabel(pending);
+  }
+  if (phase === 'generating') {
+    return getGeneratingStatusLabel(pending);
+  }
+  // reasoning | settled: no toolbar live status (深度思考 / 已完成 own the UI)
+  return null;
+}
+
+/**
+ * Phase-driven streaming chrome (above bubble):
+ * waiting  → no bubble chrome (status lives on toolbar end only)
+ * reasoning → 深度思考 only
+ * generating → 深度思考 (if any); 「正在生成回复 · 已收到 N 字」 on toolbar end
+ * body typewriter sits in message bubble
+ *
+ * Critical: never create-then-remove empty chrome on waiting/no-reasoning paths.
+ * That thrash + MutationObserver remount freezes the page (edit → resend repro).
  */
 function mountStreamingGenerationChrome(host: HTMLElement, pending: PendingDeepChatRequest): void {
-  const chrome = ensureGenerationChromeOnHost(host, STREAMING_DT_KEY, 'streaming');
-  // Drop settled nodes only on this generating host (history 已完成 stays on earlier hosts)
-  chrome.querySelector('.deep-chat-dt-settled')?.remove();
-
   const phase = getDeepChatGenerationPhase(pending);
+  const hasReasoning = Boolean(pending.reasoningText.trim());
 
   if (phase === 'waiting') {
-    chrome.querySelector('.deep-chat-dt-stream')?.remove();
-    ensureStatusInChrome(chrome, getWaitingStatusLabel(pending));
+    // Do not touch bubble chrome DOM — toolbar owns waiting status.
     ensureWaitingStatusRotateTimer();
-    placeGenerationChromeRoot(host, chrome);
+    refreshLiveGenerationToolbarStatus();
     return;
   }
 
   clearWaitingStatusRotateTimer();
 
-  if (phase === 'reasoning') {
-    // 深度思考出现后：彻底去掉「思考中 / 等待模型响应…」
-    hideStatusInChrome(chrome);
-    ensureStreamingDeepThinkingBlock(chrome, pending.reasoningText, pending);
-    placeGenerationChromeRoot(host, chrome);
+  if (!liveGenerationPhaseNeedsBubbleChrome(phase, hasReasoning)) {
+    // generating without reasoning: drop stray empty streaming chrome once, idempotently
+    const existing = getChromeOnHost(host);
+    if (
+      existing?.classList.contains('is-streaming') &&
+      !existing.querySelector('.deep-chat-dt-stream') &&
+      !existing.querySelector('.deep-chat-dt-settled')
+    ) {
+      existing.remove();
+    }
+    refreshLiveGenerationToolbarStatus();
     return;
   }
 
-  // generating (and non-settled)
-  if (pending.reasoningText.trim()) {
+  const chrome = ensureGenerationChromeOnHost(host, STREAMING_DT_KEY, 'streaming');
+  // Drop settled nodes only on this generating host (history 已完成 stays on earlier hosts)
+  chrome.querySelector('.deep-chat-dt-settled')?.remove();
+  // Status line no longer sits above the bubble — toolbar end owns it.
+  hideStatusInChrome(chrome);
+
+  if (phase === 'reasoning' || hasReasoning) {
     ensureStreamingDeepThinkingBlock(chrome, pending.reasoningText, pending);
-  } else {
-    chrome.querySelector('.deep-chat-dt-stream')?.remove();
+    placeGenerationChromeRoot(host, chrome);
   }
-  ensureStatusInChrome(chrome, getGeneratingStatusLabel(pending));
-  placeGenerationChromeRoot(host, chrome);
+  refreshLiveGenerationToolbarStatus();
+}
+
+function refreshLiveGenerationToolbarStatus(): void {
+  const container = getMountedRenderContainer();
+  if (!container) return;
+  refreshMessageToolbarStatuses(getChat(container), () =>
+    getThreadDisplayMessages(getActiveThread())
+  );
 }
 
 function formatCompletedDurationLabel(durationSec: number): string {
@@ -5113,9 +5257,16 @@ function applySettledDeepThinkingUi(
   }
 
   const full = fullText.trim();
-  nodes.doneLabel.textContent = formatCompletedDurationLabel(durationSec);
+  const doneLabelText = formatCompletedDurationLabel(durationSec);
+  // Only write when changed — avoid childList MutationObserver thrash on remount.
+  if (nodes.doneLabel.textContent !== doneLabelText) {
+    nodes.doneLabel.textContent = doneLabelText;
+  }
   nodes.doneToggle.classList.toggle('is-static', !full);
-  nodes.doneToggle.setAttribute('aria-disabled', full ? 'false' : 'true');
+  const disabled = full ? 'false' : 'true';
+  if (nodes.doneToggle.getAttribute('aria-disabled') !== disabled) {
+    nodes.doneToggle.setAttribute('aria-disabled', disabled);
+  }
 
   // No reasoning channel: show 「已完成 Xs」 only (non-expandable).
   if (!full) {
@@ -5177,19 +5328,30 @@ function readSettledDeepThinkingNodes(settled: HTMLElement): {
   return { doneToggle, doneLabel, donePanel, deepToggle, deepBody, deepText };
 }
 
+/**
+ * Bind MutationObserver to the *current* deep-chat instance.
+ * replaceChat() destroys the previous element; without rebind, chrome never remounts
+ * after thread switches (已完成 / 深度思考 disappear until refresh).
+ */
 function observePendingGenerationChrome(chat: DeepChatElement): void {
   const root = chat.shadowRoot;
-  if (!root || pendingChromeObserver) {
+  if (!root) {
     return;
   }
 
+  if (pendingChromeObserver && pendingChromeObservedChat === chat) {
+    return;
+  }
+
+  disconnectChromeMutationObserver();
+  pendingChromeObservedChat = chat;
   pendingChromeObserver = new MutationObserver(() => {
     const container = getMountedRenderContainer();
-    if (!container || !chat.shadowRoot) {
+    const liveChat = container ? getChat(container) : null;
+    // Drop stale callbacks from a replaced deep-chat node
+    if (!container || liveChat !== chat || !chat.isConnected || !chat.shadowRoot) {
       return;
     }
-    // Any missing chrome on hosts that should have it → full reattach.
-    // Cheap check first: last AI host during/after generation must keep chrome.
     if (shouldSkipChromeRemount(chat.shadowRoot)) {
       return;
     }
@@ -5198,24 +5360,71 @@ function observePendingGenerationChrome(chat: DeepChatElement): void {
   pendingChromeObserver.observe(root, { childList: true, subtree: true });
 }
 
+function liveHostHasRequiredGenerationChrome(
+  liveHost: Element,
+  pending: PendingDeepChatRequest
+): boolean {
+  const phase = getDeepChatGenerationPhase(pending);
+  const hasReasoning = Boolean(pending.reasoningText.trim());
+  // waiting / generating-without-reasoning never mount streaming chrome — requiring
+  // `.is-streaming` here caused infinite MutationObserver remount (page freeze on resend).
+  if (!liveGenerationPhaseNeedsBubbleChrome(phase, hasReasoning)) {
+    return true;
+  }
+  const selector =
+    phase === 'settled'
+      ? `:scope > .${GENERATION_CHROME_CLASS}.is-settled`
+      : `:scope > .${GENERATION_CHROME_CLASS}.is-streaming`;
+  return Boolean(liveHost.querySelector(selector));
+}
+
+function hostsHaveSettledChromeWhereRequired(
+  hosts: Element[],
+  storedAi: DeepChatMessage[],
+  streamHostIndex: number
+): boolean {
+  for (let hostIndex = 0; hostIndex < streamHostIndex; hostIndex++) {
+    const host = hosts[hostIndex];
+    const mapped = resolveStoredAiForHost(hostIndex, streamHostIndex, storedAi);
+    if (!mapped || !messageHasSettledChrome(mapped.message)) {
+      continue;
+    }
+    if (!host?.querySelector(`:scope > .${GENERATION_CHROME_CLASS}.is-settled`)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /** True when generation chrome already present where required (avoid thrash). */
 function shouldSkipChromeRemount(root: ShadowRoot): boolean {
   const pending = pendingRequests.get(threadStore.activeThreadId);
-  const host = findInlinePendingStatusHost(root);
-  if (!host) {
+  const hosts = listAiMessageHosts(root);
+  if (hosts.length === 0) {
     return false;
   }
+
   if (pending) {
-    const phase = getDeepChatGenerationPhase(pending);
-    const selector =
-      phase === 'settled'
-        ? `:scope > .${GENERATION_CHROME_CLASS}.is-settled`
-        : `:scope > .${GENERATION_CHROME_CLASS}.is-streaming`;
-    return Boolean(host.querySelector(selector));
+    const liveHost = hosts[hosts.length - 1];
+    if (!liveHost) return false;
+    if (!liveHostHasRequiredGenerationChrome(liveHost, pending)) {
+      return false;
+    }
+
+    // Historical AI hosts (exclude live slot) must keep 已完成 while a request is in flight.
+    const streamHostIndex = hosts.length - 1;
+    const storedAi = getActiveThread().messages.filter(message =>
+      isAssistantMessageRole(message.role)
+    );
+    const historicalStored = storedAi.length >= hosts.length ? storedAi.slice(0, -1) : storedAi;
+    return hostsHaveSettledChromeWhereRequired(hosts, historicalStored, streamHostIndex);
   }
-  // No pending: every finished AI host should keep settled chrome.
-  // If the last one is missing it, remount (deep-chat rebuild dropped it).
-  return Boolean(host.querySelector(`:scope > .${GENERATION_CHROME_CLASS}.is-settled`));
+
+  // Finished thread: every AI host that should show 已完成 must still have it.
+  // Checking only the last host missed mid-list drops after history rebuild.
+  const thread = getActiveThread();
+  const storedAi = thread.messages.filter(message => isAssistantMessageRole(message.role));
+  return hostsHaveSettledChromeWhereRequired(hosts, storedAi, hosts.length);
 }
 
 function scheduleDeepThinkingChromeRetry(container: HTMLElement, attempt = 0): void {
@@ -5228,14 +5437,39 @@ function scheduleDeepThinkingChromeRetry(container: HTMLElement, attempt = 0): v
     if (!chat) {
       return;
     }
-    if (chat.shadowRoot && listAiMessageHosts(chat.shadowRoot).length > 0) {
-      syncAllDeepThinkingChrome(container);
-      return;
+    // Always attempt remount when hosts exist; also rebind observer to this chat
+    if (chat.shadowRoot) {
+      observePendingGenerationChrome(chat);
+      if (listAiMessageHosts(chat.shadowRoot).length > 0) {
+        syncAllDeepThinkingChrome(container);
+        return;
+      }
     }
     if (attempt + 1 < PENDING_CHROME_MAX_RETRIES) {
       scheduleDeepThinkingChromeRetry(container, attempt + 1);
     }
   });
+}
+
+/**
+ * After replaceChat / switchThread: force observer rebind + multi-phase remount.
+ * deep-chat paints history async; a single sync often races empty shadow DOM.
+ */
+function remountDeepThinkingChromeAfterChatReplace(container: HTMLElement): void {
+  disconnectChromeMutationObserver();
+  clearChromeRetrySchedule();
+  syncAllDeepThinkingChrome(container);
+  scheduleDeepThinkingChromeRetry(container, 0);
+  for (const delayMs of [32, 80, 160, 320]) {
+    const id = window.setTimeout(() => {
+      pendingChromeRetryTimeouts = pendingChromeRetryTimeouts.filter(t => t !== id);
+      if (getMountedRenderContainer() !== container) {
+        return;
+      }
+      syncAllDeepThinkingChrome(container);
+    }, delayMs);
+    pendingChromeRetryTimeouts.push(id);
+  }
 }
 
 function hideLegacyLightDomGenerationChrome(container: HTMLElement): void {

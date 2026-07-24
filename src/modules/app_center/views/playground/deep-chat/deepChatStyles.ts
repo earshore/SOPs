@@ -41,32 +41,26 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     box-sizing: border-box !important;
   }
 
-  /* 状态行（等待 / 正在生成）：无边框，位于深度思考下方 */
+  /* 状态行（等待 / 正在生成）：挂在 message-toolbar 末尾，不在气泡上方 */
   .deep-chat-inline-pending-status {
+    display: none !important;
+  }
+
+  .deep-chat-toolbar-live-status {
     display: inline-flex !important;
     align-items: center !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0.1rem 0 !important;
+    min-width: 0 !important;
+    margin: 0 0 0 auto !important;
+    padding: 0 !important;
     border: none !important;
-    border-radius: 0 !important;
     background: transparent !important;
-    box-shadow: none !important;
     color: #94a3b8 !important;
     font-family: inherit !important;
     font-size: 12px !important;
     font-weight: 400 !important;
     line-height: 1.4 !important;
+    white-space: nowrap !important;
     user-select: none !important;
-  }
-
-  /* Beat display:inline-flex !important so reasoning phase fully hides waiting status */
-  .deep-chat-inline-pending-status[hidden] {
-    display: none !important;
-  }
-
-  .deep-chat-inline-pending-text {
-    min-width: 0 !important;
   }
 
   .deep-chat-dt-stream,
@@ -443,6 +437,15 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .deep-chat-message-status {
     color: #b45309;
     font-weight: 600;
+  }
+
+  /* Distinct incomplete vs user-stopped so status stays readable after switch/remount */
+  .deep-chat-message-status[data-status='partial'] {
+    color: #b45309;
+  }
+
+  .deep-chat-message-status[data-status='stopped'] {
+    color: #b91c1c;
   }
 
   .deep-chat-message-tool {

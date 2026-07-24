@@ -208,7 +208,7 @@ describe('buildResponsesBody', () => {
     expect(Array.isArray(first?.content)).toBe(true);
   });
 
-  it('R4: previous_response_id chain sends only latest user (keeps server reasoning items)', () => {
+  it('R4: previous_response_id chain sends only latest user and resends instructions', () => {
     const capability = {
       apiSurface: 'responses' as const,
       temperatureIgnored: true,
@@ -234,8 +234,116 @@ describe('buildResponsesBody', () => {
 
     expect(body.previous_response_id).toBe('resp_prev');
     expect(body.store).toBe(true);
-    expect(body.instructions).toBeUndefined();
+    // Official rule: previous_response_id does not carry instructions — resend them.
+    expect(body.instructions).toBe('sys');
     expect(body.input).toBe('second turn');
+  });
+
+  it('never emits store:true when supportsStore is false', () => {
+    const capability = {
+      apiSurface: 'responses' as const,
+      temperatureIgnored: true,
+      mapRequest: null,
+      supportsReasoning: true,
+      supportsPreviousResponseId: true,
+      supportsStore: false,
+      supportsStructuredOutput: false,
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildResponsesBody({
+      model: 'gpt-5.5',
+      messages: [
+        { role: 'system', content: 'sys' },
+        { role: 'user', content: 'second' },
+      ],
+      previousResponseId: 'resp_prev',
+      store: true,
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+    });
+
+    expect(body.previous_response_id).toBe('resp_prev');
+    expect(body.store).toBe(false);
+    expect(body.instructions).toBe('sys');
+  });
+
+  it('stateful tool follow-up uses previous_response_id and function_call_output only', () => {
+    const capability = {
+      apiSurface: 'responses' as const,
+      temperatureIgnored: true,
+      mapRequest: null,
+      supportsReasoning: false,
+      supportsPreviousResponseId: true,
+      supportsStore: true,
+      supportsTools: true,
+      supportsStructuredOutput: false,
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildResponsesBody({
+      model: 'gpt-5.5',
+      messages: [
+        { role: 'system', content: 'sys' },
+        { role: 'user', content: '2+3?' },
+      ],
+      previousResponseId: 'resp_1',
+      store: true,
+      followUpInputItems: [{ type: 'function_call_output', call_id: 'call_1', output: '5' }],
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+    });
+
+    expect(body.previous_response_id).toBe('resp_1');
+    expect(body.store).toBe(true);
+    expect(body.instructions).toBeUndefined();
+    expect(body.input).toEqual([{ type: 'function_call_output', call_id: 'call_1', output: '5' }]);
+  });
+
+  it('stateless tool follow-up replays function_call + output without previous_id', () => {
+    const capability = {
+      apiSurface: 'responses' as const,
+      temperatureIgnored: true,
+      mapRequest: null,
+      supportsReasoning: false,
+      supportsPreviousResponseId: false,
+      supportsStore: false,
+      supportsTools: true,
+      supportsStructuredOutput: false,
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildResponsesBody({
+      model: 'gpt-5.5',
+      messages: [
+        { role: 'system', content: 'sys' },
+        { role: 'user', content: '2+3?' },
+      ],
+      followUpInputItems: [
+        {
+          type: 'function_call',
+          call_id: 'call_1',
+          name: 'add',
+          arguments: '{"a":2,"b":3}',
+        },
+        { type: 'function_call_output', call_id: 'call_1', output: '5' },
+      ],
+      previousResponseId: 'resp_ignored',
+      store: true,
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+    });
+
+    expect(body.previous_response_id).toBeUndefined();
+    expect(body.store).toBe(false);
+    expect(body.instructions).toBe('sys');
+    expect(body.input).toEqual([
+      { role: 'user', content: '2+3?' },
+      {
+        type: 'function_call',
+        call_id: 'call_1',
+        name: 'add',
+        arguments: '{"a":2,"b":3}',
+      },
+      { type: 'function_call_output', call_id: 'call_1', output: '5' },
+    ]);
   });
 
   it('R5: text.format json_schema with strict', () => {

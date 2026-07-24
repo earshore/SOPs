@@ -254,13 +254,12 @@ function applyResponsesStoreField(
   store: boolean | undefined,
   supportsStore: boolean
 ): void {
-  if (store === true && supportsStore) {
-    body.store = true;
+  // BYOK default: store false. Never emit store:true when unsupported.
+  if (!supportsStore) {
+    body.store = false;
     return;
   }
-  if (store === false) {
-    body.store = false;
-  }
+  body.store = store === true;
 }
 
 function applyResponsesToolsFields(
@@ -331,6 +330,48 @@ function applyResponsesOptionalFields(
   applyResponsesToolsFields(body, args.tools, args.toolChoice, args.capability.supportsTools);
 }
 
+type ResponsesBodyMode = {
+  /** Stateful tool follow-up: input = function_call_output only + previous_response_id */
+  useFollowUpStateful: boolean;
+  /** Stateless tool follow-up: conversation input + function_call(+output) items */
+  useFollowUpStateless: boolean;
+  /** Conversational chain: latest user only + previous_response_id */
+  useConversationChain: boolean;
+};
+
+function resolveResponsesBodyMode(args: {
+  previousResponseId?: string;
+  followUpInputItems?: Array<Record<string, unknown>>;
+  capability: ResolvedModelCapability;
+}): ResponsesBodyMode {
+  const prevId = args.previousResponseId?.trim();
+  const canChain = Boolean(prevId) && args.capability.supportsPreviousResponseId === true;
+  const hasFollowUp = Boolean(args.followUpInputItems?.length);
+  return {
+    useFollowUpStateful: hasFollowUp && canChain,
+    useFollowUpStateless: hasFollowUp && !canChain,
+    useConversationChain: !hasFollowUp && canChain,
+  };
+}
+
+/** Resolve store flag: never true when unsupported; chain may request store when allowed. */
+function resolveResponsesStoreOption(
+  store: boolean | undefined,
+  mode: ResponsesBodyMode,
+  supportsStore: boolean
+): boolean | undefined {
+  if (!supportsStore) {
+    return false;
+  }
+  if (store === true || store === false) {
+    return store;
+  }
+  if (mode.useFollowUpStateful || mode.useConversationChain) {
+    return true;
+  }
+  return store;
+}
+
 /**
  * OpenAI Responses API body builder.
  * Subset + expanding parity: text.format, store, previous_response_id, tools, vision parts.
@@ -346,22 +387,29 @@ export function buildResponsesBody(
     reasoning: EffectiveReasoningPrefs;
   } & ResponsesBodyExtras
 ): Record<string, unknown> {
-  const prevId = args.previousResponseId?.trim();
-  const useFollowUp =
-    Boolean(args.followUpInputItems?.length) &&
-    Boolean(prevId) &&
-    args.capability.supportsPreviousResponseId;
-  /** R4: conversational chain — server keeps reasoning items via previous_response_id */
-  const useConversationChain =
-    !useFollowUp && Boolean(prevId) && args.capability.supportsPreviousResponseId;
-
-  const body = createResponsesBodyBase(args, {
-    useFollowUp,
-    useConversationChain,
+  const mode = resolveResponsesBodyMode(args);
+  const body = createResponsesBodyBase(args, mode);
+  applyResponsesOptionalFields(body, {
+    ...args,
+    store: resolveResponsesStoreOption(args.store, mode, args.capability.supportsStore),
   });
-  applyResponsesOptionalFields(body, args);
   applyResponsesReasoningMapper(body, args.capability, args.reasoning);
   return body;
+}
+
+function normalizeResponsesInputToArray(input: unknown): Array<Record<string, unknown>> {
+  if (input === undefined || input === null || input === '') {
+    return [];
+  }
+  if (typeof input === 'string') {
+    return [{ role: 'user', content: input }];
+  }
+  if (!Array.isArray(input)) {
+    return [];
+  }
+  return input
+    .filter(item => item && typeof item === 'object')
+    .map(item => ({ ...(item as Record<string, unknown>) }));
 }
 
 function resolveResponsesInput(
@@ -370,11 +418,18 @@ function resolveResponsesInput(
     visionUserParts?: Array<Record<string, unknown>>;
     followUpInputItems?: Array<Record<string, unknown>>;
   },
-  mode: { useFollowUp: boolean; useConversationChain: boolean },
+  mode: ResponsesBodyMode,
   baseInput: unknown
 ): unknown {
-  if (mode.useFollowUp) {
+  if (mode.useFollowUpStateful) {
     return args.followUpInputItems;
+  }
+  if (mode.useFollowUpStateless) {
+    const conversation = normalizeResponsesInputToArray(
+      applyVisionPartsToResponsesInput(baseInput, args.visionUserParts)
+    );
+    const followUp = Array.isArray(args.followUpInputItems) ? args.followUpInputItems : [];
+    return [...conversation, ...followUp];
   }
   if (mode.useConversationChain) {
     const latestUser = extractLatestUserInputForResponsesChain(args.messages);
@@ -394,17 +449,17 @@ function createResponsesBodyBase(
     visionUserParts?: Array<Record<string, unknown>>;
     followUpInputItems?: Array<Record<string, unknown>>;
   },
-  mode: { useFollowUp: boolean; useConversationChain: boolean }
+  mode: ResponsesBodyMode
 ): Record<string, unknown> {
   const { instructions, input: baseInput } = splitMessagesForResponses(args.messages);
   const input = resolveResponsesInput(args, mode, baseInput);
   const body: Record<string, unknown> = {
     model: args.model,
     input,
-    store: mode.useFollowUp || mode.useConversationChain,
   };
-  // First turn only: system → instructions. Chain turns omit (kept server-side).
-  if (!mode.useFollowUp && !mode.useConversationChain && instructions) {
+  // Official multi-turn rule: previous_response_id does NOT carry top-level instructions —
+  // resend stable instructions on chain turns. Stateful tool follow-up only sends outputs.
+  if (instructions && !mode.useFollowUpStateful) {
     body.instructions = instructions;
   }
   if (args.stream) body.stream = true;

@@ -126,3 +126,33 @@ export function buildFunctionCallOutputItems(
     output: r.output,
   }));
 }
+
+/** Rebuild function_call items for stateless tool follow-up (no previous_response_id). */
+export function buildFunctionCallItemsForReplay(
+  calls: ResponsesFunctionCall[]
+): Array<Record<string, unknown>> {
+  return calls.map(c => ({
+    type: 'function_call',
+    call_id: c.callId,
+    name: c.name,
+    arguments: c.arguments,
+    ...(c.itemId ? { id: c.itemId } : {}),
+  }));
+}
+
+/**
+ * Tool follow-up input items.
+ * - stateful (previous_response_id): only function_call_output
+ * - stateless: function_call items + function_call_output (item replay)
+ */
+export function buildToolFollowUpInputItems(args: {
+  functionCalls: ResponsesFunctionCall[];
+  results: Array<{ callId: string; output: string }>;
+  mode: 'stateful' | 'stateless';
+}): Array<Record<string, unknown>> {
+  const outputs = buildFunctionCallOutputItems(args.results);
+  if (args.mode === 'stateful') {
+    return outputs;
+  }
+  return [...buildFunctionCallItemsForReplay(args.functionCalls), ...outputs];
+}

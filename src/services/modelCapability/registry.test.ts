@@ -71,6 +71,17 @@ describe('multi-protocol flagship catalog', () => {
     });
   });
 
+  it('fail-closes store and previous_response_id on default responses surface', () => {
+    const cap = resolveModelCapability(
+      { provider: 'new_api', modelId: 'gpt-5.5', preferredSurface: 'responses' },
+      getModelCapabilityRules()
+    );
+    expect(cap.supportsStore).toBe(false);
+    expect(cap.supportsPreviousResponseId).toBe(false);
+    expect(cap.supportsTools).toBe(true);
+    expect(cap.supportsStructuredOutput).toBe(true);
+  });
+
   it('uses anthropic thinking mapper for Claude on anthropic_messages', () => {
     const cap = resolveModelCapability(
       { provider: 'new_api', modelId: 'claude-sonnet-4-5-20250929' },

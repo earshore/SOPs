@@ -2,6 +2,11 @@ import type { ChatMessage } from '@/services/llmService';
 import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
 
 export type DeepChatRole = 'user' | 'ai' | 'assistant' | 'system';
+/**
+ * - stopped: user stopped mid-stream
+ * - partial: interrupted recovery (no live request; half-reply kept)
+ * Live in-flight progress uses generation chrome (正在生成回复...), not a toolbar status.
+ */
 export type DeepChatMessageStatus = 'stopped' | 'partial';
 
 export interface DeepChatMessage {
@@ -115,7 +120,10 @@ export function buildStoredThreadMessages(
       role: 'ai',
       text: truncateStoredMessage(trimmedAssistantText, options.maxMessageChars),
       createdAt: getFiniteTimestamp(options.assistantCreatedAt, now),
-      status: options.assistantStatus,
+      // Only persist incomplete markers; omit status when settled (clears 「未完成」).
+      ...(options.assistantStatus === 'stopped' || options.assistantStatus === 'partial'
+        ? { status: options.assistantStatus }
+        : {}),
       ...(reasoning
         ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) }
         : {}),

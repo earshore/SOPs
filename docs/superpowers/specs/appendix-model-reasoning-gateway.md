@@ -107,5 +107,7 @@ npm run probe:responses
 | 2026-07-24 | deepseek-v4-flash | new.hongecb.store | store=true              | **fail** 400 stored Responses not supported |
 | 2026-07-24 | deepseek-v4-flash | new.hongecb.store | previous_response_id    | **fail** 400 not supported                  |
 | 2026-07-24 | deepseek-v4-flash | new.hongecb.store | stream SSE              | **pass** hasTextDelta                       |
+| 2026-07-24 | deepseek-v4-flash | new.hongecb.store | re-probe store/previous | **pass** 200 (gateway may have improved)    |
+| 2026-07-24 | deepseek-v4-flash | new.hongecb.store | tools function schema   | **pass** 200                                |
 
-**Client adaptation:** Deep Chat only sends `store`/`previous_response_id` when chaining; on 400 clears chain and retries without them.
+**Client adaptation:** Registry **fail-closes** `supportsStore` / `supportsPreviousResponseId` (badges stay honest). Tool loop uses **stateless item replay** without store. When capability is later enabled, chain fields are sent; on 400 Deep Chat still clears chain and retries without them.
