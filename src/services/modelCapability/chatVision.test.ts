@@ -3,9 +3,9 @@ import { applyVisionPartsToChatMessages, toChatImageUrlParts } from './chatVisio
 
 describe('chatVision', () => {
   it('maps responses input_image to chat image_url parts', () => {
-    expect(
-      toChatImageUrlParts([{ type: 'input_image', image_url: 'https://x/a.png' }])
-    ).toEqual([{ type: 'image_url', image_url: { url: 'https://x/a.png' } }]);
+    expect(toChatImageUrlParts([{ type: 'input_image', image_url: 'https://x/a.png' }])).toEqual([
+      { type: 'image_url', image_url: { url: 'https://x/a.png' } },
+    ]);
   });
 
   it('applies vision parts to last user message', () => {

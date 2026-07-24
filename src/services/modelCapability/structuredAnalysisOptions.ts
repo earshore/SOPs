@@ -70,10 +70,7 @@ export function withStructuredAnalysisOptions<T extends object>(
   } as T & StructuredAnalysisLlmFields;
 
   // Responses text.format and chat response_format.json_schema when surface supports it.
-  if (
-    (pathId === 'responses' || pathId === 'chat_completions') &&
-    cap.supportsStructuredOutput
-  ) {
+  if ((pathId === 'responses' || pathId === 'chat_completions') && cap.supportsStructuredOutput) {
     next.jsonSchema =
       ctx.jsonSchema ?? buildLooseAnalysisJsonSchema(ctx.schemaName || 'analysis_result');
   }

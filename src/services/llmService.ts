@@ -562,10 +562,7 @@ function harvestChatStreamToolCalls(
   if (context.apiSurface !== 'chat_completions') return;
   const deltas = extractChatStreamToolCallDeltas(payload);
   if (deltas.length === 0) return;
-  context.state.chatToolCalls = mergeChatStreamToolCallDeltas(
-    context.state.chatToolCalls,
-    deltas
-  );
+  context.state.chatToolCalls = mergeChatStreamToolCallDeltas(context.state.chatToolCalls, deltas);
 }
 
 function collectStreamFunctionCalls(
@@ -2187,12 +2184,11 @@ async function callLLMChatToolLoop(
       externallyAborted: false,
     });
     lastText = getLLMResponseContent(payload);
-    const toolCalls =
-      payload.chatToolCalls?.length
-        ? payload.chatToolCalls
-        : extractChatToolCallsFromCompletion(
-            payload.data as unknown as Record<string, unknown> | null
-          );
+    const toolCalls = payload.chatToolCalls?.length
+      ? payload.chatToolCalls
+      : extractChatToolCallsFromCompletion(
+          payload.data as unknown as Record<string, unknown> | null
+        );
     if (!toolCalls.length) {
       return lastText;
     }
@@ -2242,12 +2238,11 @@ async function callLLMChatStreamFirstThenToolLoop(
     externallyAborted: false,
   });
   const streamed = getLLMResponseContent(firstPayload);
-  const toolCalls =
-    firstPayload.chatToolCalls?.length
-      ? firstPayload.chatToolCalls
-      : extractChatToolCallsFromCompletion(
-          firstPayload.data as unknown as Record<string, unknown> | null
-        );
+  const toolCalls = firstPayload.chatToolCalls?.length
+    ? firstPayload.chatToolCalls
+    : extractChatToolCallsFromCompletion(
+        firstPayload.data as unknown as Record<string, unknown> | null
+      );
 
   if (toolCalls.length > 0) {
     // Seed assistant tool_calls into messages then run remaining non-stream rounds.
@@ -2269,10 +2264,7 @@ async function callLLMChatStreamFirstThenToolLoop(
         results.push({ callId: call.id, output: JSON.stringify({ error: message }) });
       }
     }
-    const transportMessages = normalizeMessagesForTransport(
-      request.messages,
-      'chat_completions'
-    );
+    const transportMessages = normalizeMessagesForTransport(request.messages, 'chat_completions');
     const nextMessages = appendChatToolRoundMessages(
       transportMessages,
       toolCalls,
