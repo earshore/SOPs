@@ -87,6 +87,7 @@
 | **SS-O7** | 主题/动画等外观偏好纳入系统设置，与现有 store 同源 |
 | **SS-O8** | P3 后设置代码可按 section 演进，CI 有契约与 e2e 回归锁 |
 | **SS-O9** | 系统设置视觉与全站工作台 **同源**：token、层级、控件、确认弹窗、焦点环一致；新增 UI 不引入第二套设计语言（§14） |
+| **SS-O10** | **测试闭环**：§5 每个需求 ID 在 §7.3 有对应用例且阶段出口全 `passing`；设置相关 PR 跑通 §7.5 / §7.6 门禁 |
 
 ### 2.2 Non-goals
 
@@ -102,8 +103,9 @@
 2. 模块内无法再独立持久化 PPC 阈值 / AI 调度到旁路 key（或旁路 key 只读迁移后删除写路径）  
 3. 刷新后 Runtime / 外观 / 连接配置与保存时一致  
 4. 导入坏文件不破坏现有数据；replace 前完成校验  
-5. `tests/unit/systemSettingsCurrent.test.ts` + release-smoke 设置断言持续绿  
+5. `tests/unit/systemSettings*.test.ts` + release-smoke + `system-settings` E2E 持续绿（§7）  
 6. 设置面板主色/表面/边框/控件/危险区符合 §14；新增区块无「另一套 UI」感；模块深链摘要卡与设置内 card 同族  
+7. 任一阶段完成时 §7.7 出口条件满足；无「已实现未测」项  
 
 ---
 
@@ -370,41 +372,276 @@ src/components/settings/
 
 ---
 
-## 7. Testing Strategy
+## 7. Testing & Regression（闭环强制）
 
-### 7.1 单测（扩展 `tests/unit/systemSettingsCurrent.test.ts` 或拆分）
+> **原则：没有对应测试的需求不算完成。**  
+> 每个 PR 必须形成闭环：`实现 → 单测/契约 →（阶段）E2E → 门禁命令全绿 → 再宣称完成`。  
+> **禁止**「先合功能、测试后补」；**禁止**将核心路径标为 optional 后跳过。
 
-| 用例主题 | 断言 |
+### 7.0 闭环模型
+
+```text
+          ┌─────────────────────────────────────────────┐
+          │  Spec 需求 ID (P0-x / P1-x / …)              │
+          └───────────────────┬─────────────────────────┘
+                              ▼
+          ┌─────────────────────────────────────────────┐
+          │  自动化测试用例 ID (UT / CT / E2E / MAN)     │
+          └───────────────────┬─────────────────────────┘
+                              ▼
+          ┌─────────────────────────────────────────────┐
+          │  PR 门禁命令通过 + 回归矩阵勾选              │
+          └───────────────────┬─────────────────────────┘
+                              ▼
+                    允许 merge / 宣称阶段完成
+```
+
+| 层级 | 代号 | 职责 | 工具/目录 |
+| --- | --- | --- | --- |
+| 单元 | **UT** | 行为、契约、迁移、normalize、dirty/diff | Vitest：`tests/unit/systemSettings*.ts`、相关 service/module 测例 |
+| 模板/CSS 契约 | **CT** | HTML 结构、绑定 path、导航文案、token 变量存在 | 现有 `systemSettingsCurrent.test.ts` 风格字符串/快照断言 |
+| 端到端 | **E2E** | 真浏览器：打开、保存、刷新保持、关闭确认、深链 | Playwright：`tests/e2e/release-smoke.spec.ts` + **新建** `tests/e2e/system-settings.spec.ts` |
+| 静态门禁 | **GATE** | type-check / lint 相关 / 既有 quality | npm scripts |
+| 手工 | **MAN** | 仅自动化极不稳定或需肉眼的项；**必须**有步骤与通过标准，不得空口「测过了」 | §7.8 清单 |
+
+**覆盖率规则（本 Spec 范围）：**
+
+1. §5 每个需求 ID ≥ 1 条自动化用例（UT 或 E2E）；纯文案微调可用 CT。  
+2. §4 保存契约每条「写入/不得写入」≥ 1 条 UT。  
+3. §14.12 视觉清单：P1-0 以 CT + 可选截图；功能 PR 勾选清单作为 PR 描述必填项。  
+4. 修 bug 必须附 regression 用例（先红后绿优先）。
+
+### 7.1 测试资产规划（文件级）
+
+| 文件 | 阶段引入 | 内容 |
+| --- | --- | --- |
+| `tests/unit/systemSettingsCurrent.test.ts` | 已有；持续扩展 | 面板行为、保存、导入导出、模板结构 |
+| `tests/unit/systemSettingsDirty.test.ts` | **P0-2 同 PR** | dirty 快照、分区、关闭确认 mock |
+| `tests/unit/systemSettingsHealth.test.ts` | **P0-4 同 PR** | 坏 JSON / normalize / coach 状态 |
+| `tests/unit/systemSettingsPresets.test.ts` | **P1-6 同 PR** | 三套预设字段映射 |
+| `tests/unit/systemSettingsDeepLink.test.ts` | **P1-1 同 PR** | `SETTINGS_OPEN` payload、scroll/focus |
+| `tests/unit/runtimeStrategyService` 既有/扩展 | P0–P1 | normalize、读写 |
+| `tests/unit/.../thresholdSettings*.test.ts`（扩展） | **P1-1** | 不再写旧 key；只写 Runtime |
+| `tests/unit/.../analysisSettings*.test.ts`（扩展） | **P1-1** | 同上 |
+| `tests/unit/.../PerformanceSettings.test.ts` | **P1-1** | 写路径移除或仅 deep link |
+| `tests/e2e/release-smoke.spec.ts` | 扩展 | 保持打开设置 + 分区标题；**不得变弱** |
+| `tests/e2e/system-settings.spec.ts` | **P0 起新建** | 设置专项 E2E（见 §7.4） |
+| `tests/e2e/pages/SystemSettingsPage.ts`（建议） | P0/P1 | Page Object：open / section / save / dirty confirm |
+
+> 文件可合并，但 **用例 ID 与需求 ID 映射不得丢**（§7.3 矩阵）。
+
+### 7.2 基线：现有必须守住的回归（不得破坏）
+
+以下在改设置相关代码时 **必须仍通过**（基线回归）：
+
+| 基线 ID | 来源 | 断言摘要 |
+| --- | --- | --- |
+| BASE-UT-01 | `systemSettingsCurrent` | Alpine `settingsPanel` 注册；OPEN/CLOSE 事件 |
+| BASE-UT-02 | 同上 | LLM 保存 / fetch models / test connection |
+| BASE-UT-03 | 同上 | tool strategy 保存与 reload |
+| BASE-UT-04 | 同上 | runtime strategy 保存；Deep Chat 业务工具模板绑定 |
+| BASE-UT-05 | 同上 | proxy 保存与 key 缓存 |
+| BASE-UT-06 | 同上 | 导出警告、导入 replace/merge/cancel、分桶清理、清空全部二次确认 |
+| BASE-UT-07 | 同上 | `scrollToSection` 不改 URL hash；PC 导航结构 |
+| BASE-UT-08 | `PerformanceSettings.test` | 读 Runtime 调度/缓存语义（P1 改写入口后仍读 SSOT） |
+| BASE-E2E-01 | `release-smoke` | 经「全局设置」打开；可见「系统设置」「AI 模型与连接」 |
+
+**门禁命令（基线，每个设置相关 PR 必跑）：**
+
+```bash
+npm run type-check
+npx vitest run tests/unit/systemSettingsCurrent.test.ts tests/unit/systemSettingsModelMetadata.test.ts
+npx playwright test tests/e2e/release-smoke.spec.ts --project=chromium
+```
+
+P1-1 触及 PPC/Performance 时追加对应 unit 文件；全量设置专项见 §7.6。
+
+### 7.3 需求 → 测试矩阵（闭环主表）
+
+> 状态列在实施计划中勾选：`pending` → `implemented` → `passing`。  
+> **任一 `passing` 缺失则对应需求不得标完成。**
+
+#### 7.3.1 P0 — 可靠性
+
+| 需求 | 用例 ID | 层 | 断言（可执行） |
+| --- | --- | --- | --- |
+| P0-1 保存契约 | UT-P0-01 | UT | mock storage：`saveProviderConfig` 调用 LLM 写、**不**调用 `saveRuntimeStrategySettings` |
+| P0-1 | UT-P0-02 | UT | `saveToolStrategy` 调用 tool save **且** `saveRuntimeStrategySettings`（整包） |
+| P0-1 | UT-P0-03 | UT | `saveProxyConfig` 不写 toolStrategy；不写 LLM key |
+| P0-1 | CT-P0-01 | CT | 工具策略主按钮文案含「运行策略」或现行契约文案；采集/数据次要保存有整包提示文案 |
+| P0-2 Dirty | UT-P0-04 | UT | 改 `llm.analysisTimeoutMs` → `dirtyPartitions` 含 `runtime`；save 后 empty |
+| P0-2 | UT-P0-05 | UT | 仅切换密码可见 / 展开清理列表 → **不** dirty |
+| P0-2 | UT-P0-06 | UT | dirty 时 `close()` 调用确认；取消则 `isOpen===true`；确认丢弃则 `isOpen===false` 且内存回滚或重载 baseline |
+| P0-2 | E2E-P0-01 | E2E | 打开设置 → 改一数字 → Esc/遮罩 → 出现确认 → 取消仍打开 |
+| P0-2 | E2E-P0-02 | E2E | 保存后关闭无确认（或确认不出现） |
+| P0-3 双源 | UT-P0-07 | UT | scraper/llm 业务读路径使用 `getRuntime*Options`（对关键 service 单测或依赖注入断言） |
+| P0-3 | UT-P0-08 | UT | ConfigCenter 注释/导出类型标明 fallback（契约或源码断言，避免静默回归） |
+| P0-4 健康检查 | UT-P0-09 | UT | storage 注入非法 runtime → open 不抛；normalize 后有默认值；health 标志/文案非空 |
+| P0-5 代理测试 | UT-P0-10 | UT | 测试失败设置错误态；成功 clear；不关闭面板 |
+| P0-5 | E2E-P0-03 | E2E | 网络区可见测试入口（或按钮）；点击有反馈（成功 mock / 失败文案二选一稳定测） |
+
+#### 7.3.2 P1 — 入口 / 体验 / 视觉
+
+| 需求 | 用例 ID | 层 | 断言 |
+| --- | --- | --- | --- |
+| P1-0 视觉基线 | CT-P1-00 | CT | CSS 含 `--settings-surface`（或根映射变量）；新增关键 class 无裸 `#` 色值回归扫（允许存量渐进，**新增行**禁止） |
+| P1-0 | MAN-P1-00 | MAN | §14.12 清单全勾；并排截图「设置 vs 工作台」无第二套皮肤感 |
+| P1-1 唯一入口 | UT-P1-01 | UT | `saveThresholds` **不** `StorageService.set('ppc_search_terms_thresholds_v1')` |
+| P1-1 | UT-P1-02 | UT | `saveAnalysisSettings` **不**写 `ppc_search_terms_analysis_settings_v1` 的策略字段（或整键停写） |
+| P1-1 | UT-P1-03 | UT | Performance 保存入口移除或转为 openSettings；模块不再直接 `saveRuntimeStrategySettings` 于 UI action（grep 门禁可辅助） |
+| P1-1 | E2E-P1-01 | E2E | 模块页「在系统设置中配置」打开设置并落到工具策略区 |
+| P1-1b 摘要卡 | CT-P1-01 | CT | 模块模板含 `settings-card` 或 `settings-summary-card` |
+| P1-2 density | UT-P1-04 | UT | 默认 simple；切换 advanced 持久化再读回 |
+| P1-2 | CT-P1-02 | CT | 存在 segmented / density 控件 |
+| P1-2 | E2E-P1-02 | E2E | simple 下专家 token 输入不可见或折叠；切 advanced 可见 |
+| P1-3 搜索 | UT-P1-05 | UT | 查询「ACOS」命中 PPC 相关 focus id |
+| P1-3 | E2E-P1-03 | E2E | 搜索框输入后滚动到对应区（允许 data-testid） |
+| P1-4 徽章 | CT-P1-03 | CT | 模板含影响范围 badge 文案关键字 |
+| P1-5 外观 | UT-P1-06 | UT | 改主题走既有 theme API；不写 runtimeStrategy |
+| P1-5 | E2E-P1-04 | E2E | 外观区可见；切换「减少动效」或主题后 UI 有可见变化（稳定选择器） |
+| P1-6 预设 | UT-P1-07 | UT | 「成本优先」字段 === §5.2 表；且 dirty；未自动 save storage |
+| P1-6 | UT-P1-08 | UT | 「稳定优先」「速度优先」关键字段抽样断言 |
+
+#### 7.3.3 P2 — 本机 HA
+
+| 需求 | 用例 ID | 层 | 断言 |
+| --- | --- | --- | --- |
+| P2-1 分桶导出 | UT-P2-01 | UT | 仅选 cache 时 payload.buckets 仅含 cache；schemaVersion 存在 |
+| P2-2 导入预检 | UT-P2-02 | UT | 非法 JSON / 缺 version → 不调用 importAll |
+| P2-2 | UT-P2-03 | UT | 合法包 summarize 含 keys/secrets 标记 |
+| P2-2 | E2E-P2-01 | E2E | 可选：fixture 文件导入 cancel 路径（若 file chooser 可 mock） |
+| P2-3 回滚 | UT-P2-04 | UT | save 前快照数 ≤ N；撤销恢复上一版 runtime |
+| P2-4 多标签 | UT-P2-05 | UT | 模拟 storage 事件 → 冲突标志 true；dirty 时不自动 reload |
+| P2-5 配额 | UT-P2-06 | UT | usage 超阈值 → 告警可见标志 |
+
+#### 7.3.4 P3 — 拆分
+
+| 需求 | 用例 ID | 层 | 断言 |
+| --- | --- | --- | --- |
+| P3-1 拆分 | UT-P3-01 | UT | 既有 BASE-UT-* 全绿；对外 `openSettings`/`initAlpineSettings` API 不变 |
+| P3-2 Domain | UT-P3-02 | UT | `diff/savePartition/validate` 单测 |
+| P3-3 金字塔 | GATE-P3-01 | GATE | §7.6 全量命令进入 CI 文档/脚本说明 |
+
+### 7.4 E2E 专项规格（`system-settings.spec.ts`）
+
+**必须新建**（P0 第一个含 UI 行为的 PR 起具备骨架，其后按矩阵补满），不得长期只靠 smoke 里「能打开」一条。
+
+| E2E ID | 步骤摘要 | 期望 | 最早阶段 |
+| --- | --- | --- | --- |
+| E2E-P0-01 | 改 runtime 字段 → 关闭 | 确认框出现 | P0-2 |
+| E2E-P0-02 | 保存 runtime → 关闭 | 无丢弃确认 | P0-2 |
+| E2E-P0-04 | 改工具超时 → 保存工具与运行策略 → reload → 再开设置 | 值保持 | P0-1 |
+| E2E-P0-05 | 导航点击「数据与备份」 | section 进入可视区 | P0 |
+| E2E-P1-01 | 从模块深链进入 | section tool-strategy 可见 | P1-1 |
+| E2E-P1-02 | density 切换 | 高级字段显隐 | P1-2 |
+| E2E-P1-03 | 搜索 | 定位成功 | P1-3 |
+| E2E-SMOKE-EXT | 六区导航文案（含外观，P1-5 后） | 可见 | P1-5 |
+
+稳定选择器约定（实现时加入，测例依赖）：
+
+- 根：`[data-testid="settings-panel"]` 或既有 `[x-data="settingsPanel"]`  
+- 分区：既有 `#settings-section-*`  
+- 主保存：`[data-testid="settings-save-tool-strategy"]` 等（P0 起为关键按钮补 testid，避免纯文案脆）  
+- Dirty 确认：复用共享 modal 的 role/标题
+
+**禁止**：E2E 依赖真实外部 LLM/代理网络；连接测试用 mock 路由或跳过真网（UT 覆盖失败路径即可）。
+
+### 7.5 回归套件分层
+
+| 套件名 | 何时跑 | 命令 |
+| --- | --- | --- |
+| **settings-unit** | 每个设置相关 PR、本地提交前 | `npx vitest run tests/unit/systemSettingsCurrent.test.ts tests/unit/systemSettingsModelMetadata.test.ts tests/unit/systemSettingsDirty.test.ts tests/unit/systemSettingsHealth.test.ts tests/unit/systemSettingsPresets.test.ts tests/unit/systemSettingsDeepLink.test.ts`（文件按落地情况存在则加入；可用 vitest 路径 glob：`tests/unit/systemSettings*.test.ts`） |
+| **settings-module-unit** | P1-1 及之后触及模块写路径时 | PPC threshold/analysis + PerformanceSettings 相关 unit |
+| **settings-e2e** | P0-2 起每个设置 PR；release 前 | `npx playwright test tests/e2e/system-settings.spec.ts --project=chromium` |
+| **settings-smoke** | 每个 PR + CI | `npm run test:e2e:smoke`（或等价 release-smoke chromium） |
+| **settings-gate** | 每个 PR | `npm run type-check` + settings-unit + settings-smoke |
+| **settings-full** | 阶段完成 / RC | settings-gate + settings-e2e + settings-module-unit + `npm run lint:warning-gate`（若改动触碰 eslint 范围） |
+
+推荐增加 npm script（实施 P0 时落地，写入 package.json）：
+
+```json
+{
+  "test:unit:settings": "vitest run tests/unit/systemSettings*.test.ts",
+  "test:e2e:settings": "playwright test tests/e2e/system-settings.spec.ts --project=chromium",
+  "test:settings": "npm run type-check && npm run test:unit:settings && npm run test:e2e:smoke && npm run test:e2e:settings"
+}
+```
+
+`test:settings` = **本 Spec 的闭环完成命令**；阶段宣称完成前必须绿。
+
+### 7.6 PR Definition of Done（强制）
+
+每个实现 PR 的描述必须包含：
+
+```markdown
+## Spec coverage
+- Requirements: P0-2, …
+- Tests added/updated: UT-P0-04, E2E-P0-01, …
+
+## Commands run (paste output summary)
+- [ ] npm run type-check
+- [ ] npm run test:unit:settings   # 或 vitest 等价
+- [ ] npm run test:e2e:smoke
+- [ ] npm run test:e2e:settings   # 若本 PR 改关闭/保存/导航行为
+- [ ] §14.12 visual checklist      # 若本 PR 含 UI
+
+## Risk
+- 未覆盖项：无 / 列出 + 跟进 issue
+```
+
+**Reviewer 拒绝条件：**
+
+- 需求在 §7.3 有用例 ID 但 PR 无对应测例  
+- 只改生产代码、测试红或未跑  
+- 删除/弱化 BASE-* 断言且无替代  
+- 将 E2E 标 skip 超过 1 个迭代无 ticket  
+
+### 7.7 阶段出口（Phase Exit Criteria）
+
+| 阶段 | 出口条件（全部满足） |
 | --- | --- |
-| Dirty | 编辑 runtime → dirty；save → clean；reset → dirty |
-| Close guard | dirty 时 close 走确认；确认丢弃后 isOpen false |
-| Save contract | `saveProviderConfig` 不调用 runtime save；`saveToolStrategy` 调用 tool+runtime save |
-| Health | 损坏 payload normalize 后可打开 |
-| Presets | 应用「成本优先」后字段等于 §5.2 表 |
-| Deep link | `openSettings({ sectionId, focus })` 调用 scroll/expand |
-| PPC 迁移 | 旧 `ppc_search_terms_thresholds_v1` 读入 Runtime 后不再 set 旧 key |
-| Appearance | 改主题调用既有 API，不写 runtime |
+| **P0 done** | §7.3.1 全部用例 `passing`；`test:settings`（含当时已有 e2e）绿；BASE-* 绿 |
+| **P1 done** | §7.3.2 全部 `passing`；模块旁路写路径 grep 为 0（策略字段）；视觉 MAN-P1-00 勾选 |
+| **P2 done** | §7.3.3 全部 `passing` |
+| **P3 done** | §7.3.4 全部 `passing`；拆分后 `test:settings` 绿 |
+| **Spec done** | P0–P3 出口均满足；矩阵无 `pending`/`failing` |
 
-### 7.2 模板契约
+### 7.8 手工回归清单（MAN — 自动化补位）
 
-延续现有 HTML 字符串断言风格：
+仅以下允许 MAN，且 **每次 RC / 阶段出口执行一次**，结果记入 PR 或阶段报告：
 
-- 六区导航含「外观与体验」  
-- `saveToolStrategy` 文案含运行策略  
-- density / search 控件存在（P1 后）  
-- 根节点或 CSS 含 `--settings-surface` 等局部语义变量（P1-0 后）  
-- 模块摘要入口 class 与 `settings-card` / `settings-summary-card` 契约（P1-1b）
+| MAN ID | 步骤 | 通过标准 | 对应 |
+| --- | --- | --- | --- |
+| MAN-P1-00 | 打开设置与任意工具页并排截图 | 无第二套设计语言；控件圆角/主色一致 | P1-0 / §14 |
+| MAN-P0-01 | 真实代理（若有）点测试连接 | 失败可读；不白屏 | P0-5 补充 |
+| MAN-P2-01 | 导出真实备份到磁盘再导入 merge | 数据可恢复；密钥警告出现 | P2 |
+| MAN-A11Y-01 | 仅键盘：打开设置、Tab 到保存、Esc | 焦点可见；dirty 确认可键盘操作 | §14.10 |
 
-### 7.3 E2E
+MAN **不能**替代 UT-P0-04 / E2E-P0-01 等核心自动化。
 
-- `tests/e2e/release-smoke.spec.ts`：打开设置、可见分区、基础保存路径  
-- 可选：dirty 关闭拦截（若 e2e 稳定可测 confirm modal）  
+### 7.9 缺陷回流
 
-### 7.4 回归门禁
+1. 生产/测试发现设置缺陷 → 先补 **失败用例**（UT 优先）→ 再修代码 → 用例变绿。  
+2. 用例 ID 写入 changelog 或 PR：`Fixes regression for UT-P0-xx`。  
+3. 若缺陷暴露矩阵遗漏 → **先改 Spec §7.3 补行** 再修（保持 Spec 为测试真相源）。
 
-- `npm run type-check`  
-- 相关 unit + release-smoke  
-- 不要求本 Spec 单独引入新 CI job；挂现有 quality gate  
+### 7.10 与 CI 的关系
+
+- **不强制**本 Spec 单独新建 CI workflow；必须挂现有 pipeline 可跑的 script。  
+- 最低：PR CI 已跑 unit 全量或 path filter 时，settings 变更触发 `test:unit:settings` + smoke。  
+- Release：`test:settings` 或 `settings-full` 写入 release checklist（`docs/superpowers/plans` 实施计划中引用）。  
+- 若 CI 暂不能跑 Playwright：本地/RC **必须**跑 E2E；并在 PR 贴摘要；不得以「CI 没跑」免责。
+
+### 7.11 反模式（测试）
+
+| 禁止 | 原因 |
+| --- | --- |
+| 只手点不写测 | 不可回归 |
+| `it.skip` / `test.fix` 长期残留 | 假绿 |
+| E2E 依赖公网 LLM | 不稳定 |
+| 断言过宽（仅 `toBeTruthy`） | 不锁定契约 |
+| 为让测过而删 BASE 断言 | 掩盖回归 |
+| 实现与测例分两个「有空再做」PR | 打断闭环 |
 
 ---
 
@@ -421,6 +658,8 @@ src/components/settings/
 | 双写清除遗漏 | 状态分叉 | 全仓 grep `saveRuntimeStrategySettings` / 旧 STORAGE_KEY |
 | 功能 PR 绕过视觉基线 | 二次孤岛 | P1 功能增量依赖 PR-P1-visual 或同 PR 含 §14.12 清单 |
 | Token 迁移范围过大 | 回归/冲突 | §14.13 渐进；先映射变量再替换调用点 |
+| 只开发不测试 | 回归债务 | §7 强制矩阵 + DoD；Reviewer 拒合无测 PR |
+| E2E 不稳定导致跳过 | 假绿 | 禁止长期 skip；mock 网络；testid 稳定选择器 |
 
 ---
 
@@ -441,7 +680,10 @@ src/components/settings/
 | `src/modules/.../ppc_search_terms/settings/*` | P1-1 |
 | `src/stores/animation-settings.ts` / theme | P1-5 |
 | `src/main.ts`（openSettings 传参） | P1 |
-| `tests/unit/systemSettings*.ts`、`tests/e2e/release-smoke.spec.ts` | 全程 |
+| `tests/unit/systemSettings*.test.ts`（含 Dirty/Health/Presets/DeepLink 等） | 全程，与功能同 PR |
+| `tests/e2e/system-settings.spec.ts`、可选 `pages/SystemSettingsPage.ts` | P0 起新建并随阶段补满 |
+| `tests/e2e/release-smoke.spec.ts` | 全程不得弱化 |
+| `package.json` scripts：`test:unit:settings` / `test:e2e:settings` / `test:settings` | P0 落地 |
 
 ### 9.2 明确不改
 
@@ -468,20 +710,22 @@ P0-5 代理测试 ──┘         └──► P1-6 预设
 
 **建议交付切片（可落地 PR 序列）：**
 
-1. PR-P0a：Dirty + 关闭确认 + 保存契约测例  
-2. PR-P0b：ConfigCenter 审计 + 健康检查 + 代理测试  
-3. PR-P1-visual：§14 视觉基线（token 化 + 控件/导航/CTA 统一）；**先于或并行于** P1 功能增量，避免新功能继续孤岛  
-4. PR-P1a：深链 API（SETTINGS_OPEN payload）+ PPC thresholds/analysis + Performance 去写路径 + 模块摘要卡样式  
-5. PR-P1b：density + 搜索 + 徽章（严格复用 §14 组件）  
-6. PR-P1c：外观区 + 预设  
-7. PR-P2a：导入预检 + 分桶导出  
-8. PR-P2b：回滚点 + 多标签 + 配额条（顶栏告警样式用 §14.7 状态条）  
-9. PR-P3：domain 拆分（可多 PR）；拆分时 **禁止** 各 section 私自引入新视觉语言  
+1. PR-P0a：Dirty + 关闭确认 + 保存契约 + **UT-P0-01..06 + E2E 骨架 + npm scripts**  
+2. PR-P0b：ConfigCenter 审计 + 健康检查 + 代理测试 + **UT-P0-07..10 + E2E-P0-0x**  
+3. PR-P1-visual：§14 视觉基线 + **CT-P1-00 + MAN-P1-00**  
+4. PR-P1a：深链 + 去双写 + 摘要卡 + **UT-P1-01..03 + E2E-P1-01**  
+5. PR-P1b：density + 搜索 + 徽章 + **UT/CT/E2E-P1-02..03**  
+6. PR-P1c：外观区 + 预设 + **UT-P1-06..08 + E2E-P1-04**  
+7. PR-P2a：导入预检 + 分桶导出 + **UT-P2-01..03**  
+8. PR-P2b：回滚 + 多标签 + 配额 + **UT-P2-04..06**  
+9. PR-P3：domain 拆分 + **BASE 全绿 + UT-P3-***；拆分时禁止新视觉语言  
+
+**每个 PR 出口：** §7.6 DoD 勾选完成；`npm run test:settings`（或当时子集）绿。
 
 ```text
-P0 可靠性 ──► P1-visual 视觉基线 ──► P1 功能增量（深链/搜索/外观…）
-                    │
-                    └── 所有后续 PR 的 UI 验收包含 §14 检查清单
+P0 可靠性+测试骨架 ──► P1-visual ──► P1 功能+测例 ──► P2+测例 ──► P3+全量回归
+         │                                    │
+         └──── 禁止无测例合入 ─────────────────┘
 ```
 
 ---
@@ -512,6 +756,7 @@ P0 可靠性 ──► P1-visual 视觉基线 ──► P1 功能增量（深链
 | 模块深链摘要卡视觉同族 | P1 |
 | 分桶导出、导入预检、回滚、多标签、配额 | P2 |
 | 代码拆分与 Domain | P3 |
+| 回归测试矩阵 / npm scripts / E2E 专项 / PR DoD | **全程强制（§7）** |
 
 ### 11.3 明确排除或延后
 
@@ -600,6 +845,19 @@ P0 可靠性 ──► P1-visual 视觉基线 ──► P1 功能增量（深链
 | 是否覆盖模块深链侧视觉？ | 是（§14.8 / P1-1b） |
 | 是否可分 PR 落地？ | 是（PR-P1-visual 优先） |
 | 是否要求重做全站主题？ | 否；仅收敛设置抽屉 + 模块摘要 |
+
+### 12.8 回归测试补充自审（本轮增补）
+
+| 检查项 | 结果 |
+| --- | --- |
+| 是否仅有原则无用例？ | 否；§7.3 按 P0–P3 需求展开 UT/CT/E2E/MAN ID |
+| 是否可「只开发不测」合入？ | 否；§7.6 DoD + Reviewer 拒绝条件 |
+| 是否有阶段出口？ | 是；§7.7 |
+| 是否有可复制命令？ | 是；§7.2 / §7.5 / 建议 npm scripts |
+| 是否弱化 BASE 回归？ | 否；明确不得破坏既有 systemSettings + smoke |
+| 是否依赖公网 LLM 做 E2E？ | 否；禁止 |
+| 手工是否替代核心自动化？ | 否；MAN 仅补位 |
+| 缺陷是否回流测例？ | 是；§7.9 |
 
 ---
 
@@ -892,10 +1150,11 @@ Panel chrome
 
 ## 15. Approval Gate
 
-**请审查本 Spec（含 §14 视觉规范）。** 确认后：
+**请审查本 Spec（含 §14 视觉规范 + §7 完整回归闭环）。** 确认后：
 
 1. 将 `Status` 改为 `approved`  
-2. 调用 `writing-plans` 产出 `docs/superpowers/plans/2026-07-25-system-settings-enterprise-hardening.md`（建议先写 **PR-P0a/P0b**，体验增量前插入 **PR-P1-visual**）  
-3. 再进入 subagent-driven 或 inline 实施  
+2. 调用 `writing-plans` 产出实施计划：每个 Task 必须含 **对应用例 ID + 红绿命令**（TDD 友好）；顺序建议 **PR-P0a（功能+测试骨架）→ P0b → P1-visual → …**  
+3. 实施时严格执行 §7.6 DoD；阶段完成跑 §7.7  
+4. 再进入 subagent-driven 或 inline 实施  
 
 未批准前 **不修改业务代码**。
