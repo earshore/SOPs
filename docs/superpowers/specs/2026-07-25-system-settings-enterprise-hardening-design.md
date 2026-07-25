@@ -7,8 +7,12 @@
 
 - 归档审查：`docs/archive/ui-audit/SYSTEM_SETTINGS_STRUCTURE_REVIEW_2026-07-06.md`
 - Runtime UI：`docs/superpowers/specs/2026-07-25-runtime-strategy-settings-ui-completeness-design.md`
+- 全站视觉：`docs/VISUAL_DESIGN_GUIDELINES.md`
+- 主题分层：`docs/THEME_SYSTEM_GUIDELINES.md`
+- 弹窗/抽屉：`docs/MODAL_DEVELOPMENT_GUIDELINES.md`
 - 实现入口：`src/components/settings/systemSettings.{ts,html,css}`
 - SSOT：`src/services/runtimeStrategyService.ts`、`src/services/toolStrategyService.ts`
+- Token 源：`src/common/config/design-tokens.ts` → `src/css/foundation/variables.generated.css`
 
 ---
 
@@ -21,6 +25,7 @@
 | 模块关系 | **系统设置为唯一写入口**；模块内改为只读摘要 + 深链 |
 | 技术路线 | **A 分阶段硬化**：P0 可靠性 → P1 体验与唯一入口 → P2 备份 HA → P3 拆分可维护性 |
 | 外观偏好 | 新增一级目录 **「外观与体验」**（主题 / 动画 / 减少动效） |
+| 视觉策略 | **反孤岛**：系统设置必须挂靠全站主题/token/弹窗规范；禁止另起一套颜色、字号、圆角、按钮语言（详见 §14） |
 
 ---
 
@@ -56,6 +61,7 @@
 | **用户友好** | 无精简/高级；无设置内搜索；专家参数与基础项混排；主题/动画偏好未进入系统设置；影响范围标签不完整 |
 | **本机 HA** | 无分桶导出；导入预检可加强；无「上次保存」回滚点；无多标签页冲突提示；配额告警偏被动 |
 | **可维护性** | 单体文件过大，演进与评审成本高，回归面集中 |
+| **视觉一致性** | 抽屉内大量 Tailwind 裸色值 + `systemSettings.css` 硬编码 hex；分区各用一套 tint；与模块页 card/button/badge 语言不完全同源；新增「外观/搜索/预设」时易再造局部样式 |
 
 ### 1.4 非问题（本 Spec 不解决）
 
@@ -80,12 +86,15 @@
 | **SS-O6** | 本机备份：可预检、可分桶、关键保存可回滚；多标签冲突可感知 |
 | **SS-O7** | 主题/动画等外观偏好纳入系统设置，与现有 store 同源 |
 | **SS-O8** | P3 后设置代码可按 section 演进，CI 有契约与 e2e 回归锁 |
+| **SS-O9** | 系统设置视觉与全站工作台 **同源**：token、层级、控件、确认弹窗、焦点环一致；新增 UI 不引入第二套设计语言（§14） |
 
 ### 2.2 Non-goals
 
 - 账号体系、云同步、远程 feature flag 管理台
 - 新建「安全与凭据」「危险区」等空一级目录（危险操作保留在数据与备份内）
 - 本阶段实现完整 Settings Profile 平台（可作为未来演进，不阻塞 A 路线）
+- 把设置抽屉改造成营销 hero / 全屏 settings 站点视觉
+- 为设置单独引入新的图标库、字体栈或第三方 UI 套件
 
 ### 2.3 成功标准（可验证）
 
@@ -94,6 +103,7 @@
 3. 刷新后 Runtime / 外观 / 连接配置与保存时一致  
 4. 导入坏文件不破坏现有数据；replace 前完成校验  
 5. `tests/unit/systemSettingsCurrent.test.ts` + release-smoke 设置断言持续绿  
+6. 设置面板主色/表面/边框/控件/危险区符合 §14；新增区块无「另一套 UI」感；模块深链摘要卡与设置内 card 同族  
 
 ---
 
@@ -262,16 +272,18 @@ if (dirtyPartitions.length) confirmDiscard()
 | **P0-4** | 打开设置时健康检查 | `systemSettings.ts` + normalize | 坏 JSON 不白屏；coach 提示 |
 | **P0-5** | 代理连通性最小测试 | network section | 失败有明确 toast/行内错误 |
 
-### 5.2 P1 — 唯一入口 + 用户友好
+### 5.2 P1 — 唯一入口 + 用户友好 + 视觉收敛
 
 | ID | 需求 | 验收 |
 | --- | --- | --- |
+| **P1-0** | **视觉基线收敛**（§14）：settings CSS/HTML 去硬编码 hex 优先改 token；统一控件/卡片/徽章/导航/CTA 层级；与全站 surface 对齐 | 关键样式走 CSS 变量；无新增裸色值；焦点环与全站一致 |
 | **P1-1** | 系统设置唯一写入口 + 深链 | 模块无旁路写；深链可打开并聚焦 |
-| **P1-2** | 精简/高级 density | 默认 simple；持久化 |
-| **P1-3** | 设置内搜索 | 关键词可定位 |
-| **P1-4** | 影响范围标签 | 关键卡片徽章齐全 |
-| **P1-5** | 外观与体验一级区 | theme + animation 同源；无第二套 storage 语义 |
-| **P1-6** | 一键预设（稳定/速度/成本） | 只改内存 runtime 表单 → dirty；需保存 |
+| **P1-1b** | 模块「只读摘要 + 配置入口」视觉 | 使用与设置内 `settings-card` 同族或共享 card 样式；按钮为次要/文字链，非第三套 CTA |
+| **P1-2** | 精简/高级 density | 默认 simple；持久化；切换控件符合 §14.6 分段控件 |
+| **P1-3** | 设置内搜索 | 关键词可定位；搜索框用 `settings-control` 变体 |
+| **P1-4** | 影响范围标签 | 徽章语义见 §14.5；禁止每区自定义 badge 色盘 |
+| **P1-5** | 外观与体验一级区 | theme + animation 同源；无第二套 storage 语义；frame 变体见 §14.3 |
+| **P1-6** | 一键预设（稳定/速度/成本） | 只改内存 runtime 表单 → dirty；需保存；预设按钮组符合 §14.6 |
 
 #### P1-6 预设映射（明确值，避免歧义）
 
@@ -380,6 +392,8 @@ src/components/settings/
 - 六区导航含「外观与体验」  
 - `saveToolStrategy` 文案含运行策略  
 - density / search 控件存在（P1 后）  
+- 根节点或 CSS 含 `--settings-surface` 等局部语义变量（P1-0 后）  
+- 模块摘要入口 class 与 `settings-card` / `settings-summary-card` 契约（P1-1b）
 
 ### 7.3 E2E
 
@@ -405,6 +419,8 @@ src/components/settings/
 | P3 拆分回归 | 稳定性 | 契约测先行；垂直切片 PR |
 | 导出含密钥 | 安全 | 维持警告；P2 分桶默认可排除 secrets |
 | 双写清除遗漏 | 状态分叉 | 全仓 grep `saveRuntimeStrategySettings` / 旧 STORAGE_KEY |
+| 功能 PR 绕过视觉基线 | 二次孤岛 | P1 功能增量依赖 PR-P1-visual 或同 PR 含 §14.12 清单 |
+| Token 迁移范围过大 | 回归/冲突 | §14.13 渐进；先映射变量再替换调用点 |
 
 ---
 
@@ -416,7 +432,7 @@ src/components/settings/
 | --- | --- |
 | `src/components/settings/systemSettings.ts` | P0–P3 |
 | `src/components/settings/systemSettings.html` | P0–P3 |
-| `src/components/settings/systemSettings.css` | P1+ |
+| `src/components/settings/systemSettings.css` | **P1-0 起**（token 映射与组件族）；P1+ 增量 |
 | `src/services/runtimeStrategyService.ts` | P0/P1（注释、只读 helper、如需） |
 | `src/services/toolStrategyService.ts` | 按需 |
 | `src/common/config/ConfigCenter.ts` | P0-3 |
@@ -454,12 +470,19 @@ P0-5 代理测试 ──┘         └──► P1-6 预设
 
 1. PR-P0a：Dirty + 关闭确认 + 保存契约测例  
 2. PR-P0b：ConfigCenter 审计 + 健康检查 + 代理测试  
-3. PR-P1a：深链 API（SETTINGS_OPEN payload）+ PPC thresholds/analysis + Performance 去写路径  
-4. PR-P1b：density + 搜索 + 徽章  
-5. PR-P1c：外观区 + 预设  
-6. PR-P2a：导入预检 + 分桶导出  
-7. PR-P2b：回滚点 + 多标签 + 配额条  
-8. PR-P3：domain 拆分（可多 PR）  
+3. PR-P1-visual：§14 视觉基线（token 化 + 控件/导航/CTA 统一）；**先于或并行于** P1 功能增量，避免新功能继续孤岛  
+4. PR-P1a：深链 API（SETTINGS_OPEN payload）+ PPC thresholds/analysis + Performance 去写路径 + 模块摘要卡样式  
+5. PR-P1b：density + 搜索 + 徽章（严格复用 §14 组件）  
+6. PR-P1c：外观区 + 预设  
+7. PR-P2a：导入预检 + 分桶导出  
+8. PR-P2b：回滚点 + 多标签 + 配额条（顶栏告警样式用 §14.7 状态条）  
+9. PR-P3：domain 拆分（可多 PR）；拆分时 **禁止** 各 section 私自引入新视觉语言  
+
+```text
+P0 可靠性 ──► P1-visual 视觉基线 ──► P1 功能增量（深链/搜索/外观…）
+                    │
+                    └── 所有后续 PR 的 UI 验收包含 §14 检查清单
+```
 
 ---
 
@@ -482,9 +505,11 @@ P0-5 代理测试 ──┘         └──► P1-6 预设
 | 代理测试 | P0 |
 | ConfigCenter 双源收敛 | P0 |
 | 模块唯一写入口 | P1 |
+| 视觉基线（token / 反孤岛 / 组件族） | P1-0 |
 | 精简/高级、搜索、徽章 | P1 |
 | 主题 / 动画 | P1 |
 | 稳定/速度/成本预设 | P1 |
+| 模块深链摘要卡视觉同族 | P1 |
 | 分桶导出、导入预检、回滚、多标签、配额 | P2 |
 | 代码拆分与 Domain | P3 |
 
@@ -524,11 +549,13 @@ P0-5 代理测试 ──┘         └──► P1-6 预设
 - 唯一入口与 Performance/PPC 改造一致  
 - 保存模型：明确「Runtime 整包」避免与多按钮文案冲突  
 - 外观：即时生效且不进入 discard dirty，与诊断一致  
+- 视觉：§14 挂靠全站 VISUAL / THEME / MODAL 规范，不另立色盘  
 
 ### 12.3 范围是否可执行
 
 - 单 Spec 覆盖 P0–P3，但 **按 PR 切片** 可独立交付；不要求一个迭代做完  
 - 若资源紧张：最低可行集 = **P0 全部 + P1-1**（可靠性 + 去双写）  
+- 若同步做体验增量：必须先或同 PR 落地 **P1-0 视觉基线**，禁止「功能先堆、样式后补」导致二次孤岛  
 
 ### 12.4 可落地性检查
 
@@ -538,8 +565,9 @@ P0-5 代理测试 ──┘         └──► P1-6 预设
 | 是否可在现有 Alpine 抽屉内完成？ | 是 |
 | 是否有明确文件与测例锚点？ | 是 |
 | 是否与近期 Runtime UI 工作冲突？ | 否，继承并硬化契约 |
-| 最大风险点 | Dirty 实现细节 + 去模块写路径的产品路径变长 → 深链缓解 |
+| 最大风险点 | Dirty 实现细节 + 去模块写路径的产品路径变长 → 深链缓解；视觉 PR 过大 → 按 §14.13 渐进 token 化 |
 | 是否可在不改存储 key 语义下启动 P0？ | 是 |
+| 视觉是否可独立验收？ | 是：§14.12 清单 + PR-P1-visual |
 
 ### 12.5 完整性缺口（已关闭）
 
@@ -551,6 +579,8 @@ P0-5 代理测试 ──┘         └──► P1-6 预设
 | openSettings 深链参数 | §3.6 类型 + EventBus payload |
 | 模块双写清单 | §4.4 / §11.4（含 analysisSettings） |
 | PPC 上下文文本是否进系统设置 | §3.6：否，仅策略开关/阈值 |
+| 视觉是否另起炉灶 | §14：否；挂靠全站 token + 设置组件族 |
+| 分区 tint 是否算孤岛 | §14.3：允许轻度 section accent，禁止整页重色盘 |
 
 ### 12.6 落地时注意（非阻塞）
 
@@ -558,6 +588,18 @@ P0-5 代理测试 ──┘         └──► P1-6 预设
 2. `scrollToSection` 已存在，深链复用  
 3. 导出敏感提示与 `SECURE_STORAGE_SECURITY_BOUNDARY` 已存在，P2 分桶应沿用  
 4. 修改 `saveThresholds` 时同步更新 PPC 模块测例  
+5. 任何 HTML 新增 `bg-gradient-to-*` / 硬编码 `from-*-500` 须对照 §14.9 反模式表  
+
+### 12.7 视觉补充自审（本轮增补）
+
+| 检查项 | 结果 |
+| --- | --- |
+| 是否引用全站 VISUAL / THEME / MODAL 文档？ | 是（Related + §14.1） |
+| 是否规定 token 优先级而非只写「好看」？ | 是（§14.2） |
+| 是否定义组件族与 CTA 层级？ | 是（§14.4–§14.6） |
+| 是否覆盖模块深链侧视觉？ | 是（§14.8 / P1-1b） |
+| 是否可分 PR 落地？ | 是（PR-P1-visual 优先） |
+| 是否要求重做全站主题？ | 否；仅收敛设置抽屉 + 模块摘要 |
 
 ---
 
@@ -567,15 +609,293 @@ P0-5 代理测试 ──┘         └──► P1-6 预设
 2. 加密备份口令（导出文件密码）  
 3. 设置变更本地审计日志（谁在何时改了何项——单机用户场景价值有限）  
 4. 将抽屉升级为可分享 URL 的 settings 路由  
+5. 设置抽屉暗色模式完整适配（若全站暗色未完成，设置不单独先行一套 dark skin）  
 
 ---
 
-## 14. Approval Gate
+## 14. Visual Design System（反孤岛规范）
 
-**请审查本 Spec。** 确认后：
+> **定位：** 系统设置是 **全局工作台配置层**，不是独立产品。视觉必须让用户感觉「仍在 SOPs 内改配置」，而不是打开了另一个 Admin 皮肤。  
+> **上位法：** `docs/VISUAL_DESIGN_GUIDELINES.md`、`docs/THEME_SYSTEM_GUIDELINES.md`、`docs/MODAL_DEVELOPMENT_GUIDELINES.md`。本节只规定 **设置抽屉 + 模块深链摘要** 的落地细则；冲突时以上位法与 design-tokens 为准。
+
+### 15.1 设计原则
+
+| # | 原则 | 含义 |
+| --- | --- | --- |
+| V1 | **先归属，再表达** | 设置归属 `context: sys` / 工作台全局层；主强调色使用 **slate + blue 中性工作台**，不用 App Center 的 purple hero、不用各业务模块 banner 色抢戏 |
+| V2 | **工具优先，装饰克制** | 无粒子、无大面积高饱和渐变、无营销 hero；分区仅允许 **低饱和 tint** |
+| V3 | **组件族优先** | 新 UI 必须复用 `settings-*` 组件类或全站共享 card/button；禁止 section 内联「一次性」样式 |
+| V4 | **Token 单源** | 颜色/圆角/阴影/间距优先 `var(--*)` / design-tokens；禁止在新增代码中写死 `#64748b`、`rgba(59,130,246,0.2)` 等 |
+| V5 | **交互同源** | 危险确认用 `confirmWithModal`；焦点环、Esc、遮罩关闭与全站 modal/drawer 习惯一致 |
+| V6 | **状态色语义固定** | 成功/警告/危险/信息使用全站语义色，不跟 section accent 走 |
+
+### 15.2 Token 与样式来源（优先级）
+
+实现时按序选用，**禁止跳级发明**：
+
+1. **Design tokens / 生成变量**  
+   `design-tokens.ts` → `variables.generated.css`（如 `--color-slate-*`、`--shadow-sm`、`--radius-*`、字号阶梯）
+2. **语义变量**  
+   `variables.css` 的 `--surface-*`、`--border-*`、`--color-text-*`、`--color-primary` 等
+3. **设置局部语义 token**（仅允许在 `systemSettings.css` 顶部用变量映射一次）  
+
+```css
+/* 允许：映射到全局 token，供设置组件族使用 */
+.settings-panel-root {
+  --settings-surface: var(--color-bg-elevated, #fff);
+  --settings-surface-muted: var(--color-slate-50, #f8fafc);
+  --settings-border: var(--color-slate-200, #e2e8f0);
+  --settings-text: var(--color-slate-700, #334155);
+  --settings-text-muted: var(--color-slate-500, #64748b);
+  --settings-accent: var(--color-blue-600, #2563eb);
+  --settings-accent-soft: var(--color-blue-50, #eff6ff);
+  --settings-danger: var(--color-red-600, #dc2626);
+  --settings-radius-card: var(--radius-xl, 0.875rem);
+  --settings-radius-control: var(--radius-lg, 0.75rem);
+  --settings-focus-ring: 0 0 0 3px color-mix(in srgb, var(--settings-accent) 25%, transparent);
+}
+```
+
+4. **Tailwind 工具类** — 仅用于布局（flex/grid/gap/padding），颜色类优先 `slate`/`blue`/`red` 语义阶；**新增**避免 `from-violet-500 via-indigo-500` 等装饰渐变堆叠  
+5. **硬编码 hex** — **禁止新增**；存量在 P1-0 迁移清单中消除
+
+### 15.3 全局壳与分区层级
+
+#### 15.3.1 抽屉壳（Chrome）
+
+| 元素 | 规范 |
+| --- | --- |
+| 形态 | 右侧抽屉（已有）；`max-w` 保持可读宽度；不改为居中大 modal 除非全站统一改 drawer 规范 |
+| 遮罩 | 半透明深色 + 轻 blur；点击关闭（dirty 时先确认，见 P0-2） |
+| 顶栏 | 左：图标（中性 slate/blue 渐变 **小面积**）+ 标题 15px/bold + 副标题 11px muted；右：关闭按钮 32×32、hover 浅底 |
+| 顶部分割 | 1px 中性线或极淡渐变线；**禁止**彩虹进度条式强装饰（若保留 3px accent bar，颜色须来自 `--settings-accent` 单色/双色，不得每版换主题） |
+| 背景 | 白 → 极浅 slate 的垂直微渐变即可；不用业务模块 banner 图 |
+
+#### 15.3.2 信息层级（由外到内）
+
+```text
+Panel chrome
+└── Nav (分类) + Sections
+    └── Section head（uppercase 小标题 + 图标）
+        └── Section frame（浅 tint 容器）
+            ├── Coach（提示条）
+            ├── Card / Step / Collapsible（内容单元）
+            └── Actions row（保存 / 次要 / 危险）
+```
+
+#### 15.3.3 Section accent（允许的「个性」，不是新皮肤）
+
+| Section | Accent 角色 | 允许 | 禁止 |
+| --- | --- | --- | --- |
+| AI 模型与连接 | violet/indigo **点缀** | head icon、frame 极淡 tint | 整区紫底、紫色主按钮全局化 |
+| 工具策略 | indigo | 同上 | 与 LLM 区完全两套 card 圆角 |
+| 采集网络 | cyan | 同上 | 商业插画/复杂图标墙 |
+| 数据与备份 | blue | 同上 | 把危险按钮做成与主 CTA 同视觉权重 |
+| 外观与体验 | slate | 中性为主 | 用当前用户主题色「染满」设置壳 |
+| 开发者诊断 | emerald | 仅该区；且 dev-only | 对普通用户露出绿色「高级」错觉 |
+
+**规则：** accent 只作用于 `settings-section-head__icon`、`settings-section-frame--*` 背景/边框 **α ≤ ~0.9 浅色**；正文、label、输入框边框保持中性 slate。
+
+实现：frame 变体改为 CSS 变量，例如：
+
+```css
+.settings-section-frame--llm {
+  --settings-frame-tint: color-mix(in srgb, var(--color-violet-100) 55%, white);
+  --settings-frame-border: color-mix(in srgb, var(--color-violet-200) 70%, var(--settings-border));
+  background: linear-gradient(135deg, var(--settings-frame-tint), var(--settings-surface-muted));
+  border-color: var(--settings-frame-border);
+}
+```
+
+### 15.4 组件族目录（必须复用）
+
+| 组件类 | 用途 | 不得平行发明 |
+| --- | --- | --- |
+| `.settings-section-head` + `__icon` `__title` `__desc` | 区标题 | 各区手写 h3+任意 icon 盒 |
+| `.settings-section-frame` + `--*` | 区容器 | 裸 `border rounded-2xl p-4` 复制体 |
+| `.settings-coach` | 配置提示 / 健康检查结果 | 新 alert 皮肤（除非危险/警告用 §15.7） |
+| `.settings-card` + `__title` `__desc` `__badge` | 通用内容卡 | 模块摘要另起 card 名且不同 padding |
+| `.settings-control` + `--sm` | input/select | 混用无类原生控件样式 |
+| `.settings-label` / `.settings-field-help` | 表单标签与说明 | 字号随手 `text-[11px]` 无规范 |
+| `.settings-tool-app` / collapsible | 可折叠工具组 | 新手风琴交互 |
+| `.settings-stat-tile` | 存储用量等统计 | 仪表盘风大数字卡 |
+| `.settings-llm-step` | 有序配置步骤 | 仅 LLM 使用；其它区不要复制数字徽章彩虹 |
+
+**P1 新增组件（纳入同族，不新建 BEM 方言）：**
+
+| 新需求 | 类名建议 | 说明 |
+| --- | --- | --- |
+| 精简/高级切换 | `.settings-segmented` | 分段控件；选中态用 accent soft |
+| 设置内搜索 | `.settings-search`（基于 control） | 左侧 magnifier 图标槽与 secret input 图标槽对齐 |
+| 影响范围徽章 | `.settings-badge` + 修饰符 | 见 §15.5 |
+| 预设按钮组 | `.settings-preset-group` | 次要按钮并排；选中态 outline accent |
+| Dirty 顶栏提示 | `.settings-status-bar` | 见 §15.7 |
+| 模块深链摘要 | `.settings-summary-card` 或复用 `.settings-card` | 见 §15.8 |
+
+### 15.5 徽章与影响范围（视觉语义）
+
+与 §3.5 标签对应的样式（颜色取语义 token，不按 section accent）：
+
+| Badge | 表面 | 文字 | 备注 |
+| --- | --- | --- | --- |
+| 仅本浏览器 | slate-100 | slate-600 | 默认中性 |
+| 影响 AI 成本 | amber-50 | amber-800 | 成本敏感 |
+| 影响采集 | cyan-50 | cyan-800 | 与网络区呼应但浅 |
+| 破坏性 | red-50 | red-700 | 仅危险动作附近 |
+| 开发者模式 | emerald-50 | emerald-800 | 仅诊断 |
+| 即时生效 | violet-50 | violet-700 | 诊断/外观即时项 |
+| 全局生效 / 需保存 | indigo-50 | indigo-700 | 策略卡 |
+
+禁止：同一屏超过 **3** 种高饱和 badge；badge 不使用渐变底。
+
+### 15.6 排版 · 间距 · 控件 · CTA
+
+#### 排版阶梯（设置内）
+
+| 角色 | 规格 | 应用 |
+| --- | --- | --- |
+| Panel title | 15px / 700 / slate-800 | 顶栏「系统设置」 |
+| Panel subtitle | 11px / 400 / slate-500 | 顶栏说明 |
+| Section title | 12px / 600 / slate-500 / tracking wide / uppercase | `settings-section-head__title` |
+| Section desc | 11px / 400 / slate-400–500 | 区说明 |
+| Card title | 12px / 700 / slate-700 | 卡片标题 |
+| Card desc | 10–11px / 400 / slate-400 | 辅助说明 |
+| Label | 12px / 600 / slate-600 | 表单 label |
+| Control text | 14px（默认）/ 12px（`--sm`） | 输入与下拉 |
+| Helper | 10px / 400 / slate-500 | field-help |
+| Mono | font-mono 12px | endpoint、key 掩码、模型 id |
+
+不在设置内使用 welcome banner 的 20–22px 标题体系。
+
+#### 间距与圆角
+
+| 令牌 | 建议 |
+| --- | --- |
+| Section 垂直节奏 | `space-y-7` 级（约 1.75rem）保持 |
+| Frame 内 padding | 1rem |
+| Card padding | 0.75rem |
+| 表单栅格 gap | 0.75rem |
+| 控件高 | 默认 ≥ 40px；sm ≥ 36px；触控目标关闭/图标按钮 ≥ 32px |
+| 圆角 | 卡片 ~14px；控件 ~12px；badge ~6px；与 token radius 对齐 |
+
+#### CTA 层级（严格）
+
+| 层级 | 样式 | 场景（每区最多） |
+| --- | --- | --- |
+| **Primary** | solid accent（blue/indigo 渐变可保留但 **同族**） | 1 个主保存：如「保存连接配置」「保存工具与运行策略」 |
+| **Secondary** | 白底 + slate 边框 | 导出、导入、测试连接、恢复默认 |
+| **Tertiary / Ghost** | 文字或浅底 | 展开清理项、导航 |
+| **Danger** | 白底红字红边 或 浅红底 | 清空全部、清理密钥；**永不**做成主色实心大按钮与 Primary 并排争抢 |
+
+主按钮 loading：图标 spin + disabled opacity；成功态 toast 用全站 toast，不在按钮上做第三套 success 皮肤。
+
+#### 分段控件 / 预设
+
+- 高度与 `settings-control--sm` 对齐  
+- 选中：`background: var(--settings-accent-soft); color: var(--settings-accent); font-weight: 600`  
+- 未选中：透明 + muted 文字  
+- 键盘：左右方向键可切换（P1 体验加分，建议纳入）
+
+### 15.7 状态条与反馈
+
+| 状态 | 容器 | 行为 |
+| --- | --- | --- |
+| Dirty 未保存 | 顶栏下方或滚动区顶 `settings-status-bar--warning` | 文案列出脏分区；不自动保存 |
+| 健康检查失败 | coach 变体或 `status-bar--danger` | 可操作（恢复默认 / 查看） |
+| 配额告警（P2） | `status-bar--warning` + CTA 导出/清理 | 固定在数据区顶或全局顶 |
+| 多标签冲突（P2） | `status-bar--info` | 主按钮「重新加载」 |
+| 成功/失败短反馈 | 全站 `showToast` | 禁止 section 内自定义 snackbar |
+
+警告/危险条：左边 3px 语义色条 + 浅底；图标固定 28–32px 圆角盒。
+
+### 15.8 模块深链与「唯一入口」的视觉连续
+
+模块内（PPC / AI Analysis 等）替换原编辑面板后：
+
+```text
+┌ settings-card / settings-summary-card ─────────────┐
+│ 标题：PPC 业务阈值          badge：在系统设置中管理   │
+│ 只读：目标 ACOS 35% · 高 ACOS 55% · …               │
+│ [在系统设置中配置 →]  secondary 或 text link         │
+└────────────────────────────────────────────────────┘
+```
+
+规则：
+
+1. 摘要卡 padding、标题字号、边框与设置内 card **一致或共享 class**  
+2. 不在模块里保留「可编辑表单 + 另一套保存按钮」的视觉（即使后端已改读 Runtime）  
+3. 深链打开后，目标 section **短暂高亮**（2s outline 或 ring，用 accent，尊重 `prefers-reduced-motion`）  
+4. 模块主题色（emerald PPC 等）**仅**可用于模块页 banner/入口；摘要卡本身保持中性，避免「模块绿卡 vs 设置紫卡」割裂
+
+### 15.9 反模式清单（PR 拒绝项）
+
+| 反模式 | 原因 |
+| --- | --- |
+| 新增裸 `#hex` / 未映射 rgba | 破坏 token 单源 |
+| 新 section 自定义全套 button 渐变色 | 孤岛 CTA |
+| 设置内再做 welcome banner / 粒子 | 违反工具页原则 |
+| 用业务模块 `wb-theme-*` 包装整个设置壳 | 归属错误（设置是 sys/全局） |
+| 平行实现 confirm / 自定义 Escape 栈 | 违反 MODAL 规范 |
+| 精简/高级用两套完全不同 layout 皮肤 | 应是显隐，不是换肤 |
+| 每个工具 details 不同圆角/阴影 | 破坏组件族 |
+| 危险操作使用 Primary 实心蓝/绿 | 安全认知错误 |
+| 为暗色模式在设置内写死反色补丁 | 等全站 dark，不单开 |
+
+### 15.10 无障碍与动效
+
+| 项 | 要求 |
+| --- | --- |
+| 焦点 | 可见 `focus-visible` ring（`--settings-focus-ring`）；关闭/导航/保存均可键盘到达 |
+| 对比度 | 正文与 mute 文案满足 WCAG AA（mute 仅用于非必要说明） |
+| 标签 | 图标按钮有 `aria-label`；分区 `aria-controls` 已有则保持 |
+| 动效 | 面板开合、高亮脉冲遵循 `prefers-reduced-motion`（现有 CSS 已有 reduce 块则扩展而非删除） |
+| 滚动 | `scrollToSection` 仅滚动 `.settings-panel-scroll`，不带动整页（已有约束，保持） |
+
+### 15.11 与外观设置区的关系
+
+- 「外观与体验」**改变的是应用主题/动效**，不是设置抽屉自己的设计系统  
+- 用户选择深色主题时：设置抽屉跟随全站 surface token；**禁止**设置壳写死 `bg-white` 导致「外黑内白」孤岛（P1-0 将硬编码白底改为 `var(--settings-surface)`）  
+- 动画关闭时：设置内过渡降级，但不隐藏结构
+
+### 15.12 视觉验收清单（每个含 UI 的 PR）
+
+- [ ] 无新增未映射硬编码色值  
+- [ ] 新控件使用 `settings-control` / 同族变体  
+- [ ] Primary CTA ≤ 1 / 可见动作区  
+- [ ] 危险动作视觉 ≠ Primary  
+- [ ] 徽章仅使用 §15.5 语义  
+- [ ] 确认框走共享 modal  
+- [ ] 模块摘要卡与设置 card 同族  
+- [ ] `prefers-reduced-motion` 下无关键动画  
+- [ ] 截图对比：设置抽屉与相邻工作台页并排时，无「第二套产品」感  
+
+### 15.13 存量迁移范围（P1-0）
+
+| 位置 | 动作 |
+| --- | --- |
+| `systemSettings.css` 中 `#ede9fe`、`#8b5cf6` 等 | 改为 token / color-mix |
+| `systemSettings.html` 中大量 `bg-gradient-to-*`、`shadow-*-500/25` | 收敛主 CTA 与顶栏；次要按钮去渐变 |
+| 各 section 重复的 Tailwind 卡片 class | 尽量回到 `.settings-card` |
+| 新增外观 section | **只**用组件族搭建，禁止复制 LLM step 彩虹序号 |
+
+**非目标：** 一次 PR 删光所有 Tailwind 颜色类；允许布局类保留，颜色类逐步替换。
+
+### 15.14 测试与文档挂钩
+
+| 类型 | 内容 |
+| --- | --- |
+| 单测/契约 | HTML 含 `settings-segmented` / `settings-search` 等关键 class（随功能加） |
+| 视觉 | 可选：设置面板打开态截图纳入现有 visual / smoke；不强制新工具链 |
+| 文档 | 若 `VISUAL_DESIGN_GUIDELINES.md` 增补「全局抽屉」小节，链回本节；**不必**复制全文 |
+
+---
+
+## 15. Approval Gate
+
+**请审查本 Spec（含 §14 视觉规范）。** 确认后：
 
 1. 将 `Status` 改为 `approved`  
-2. 调用 `writing-plans` 产出 `docs/superpowers/plans/2026-07-25-system-settings-enterprise-hardening.md`（建议先写 **PR-P0a/P0b** 详细步骤）  
+2. 调用 `writing-plans` 产出 `docs/superpowers/plans/2026-07-25-system-settings-enterprise-hardening.md`（建议先写 **PR-P0a/P0b**，体验增量前插入 **PR-P1-visual**）  
 3. 再进入 subagent-driven 或 inline 实施  
 
 未批准前 **不修改业务代码**。
