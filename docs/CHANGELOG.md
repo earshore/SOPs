@@ -12,11 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - PPC 搜索词：模型失败路径接入 `formatLlmFailureUx`（配置/鉴权可点「打开设置」；本地降级仍提示规则回退）。
+- Keyword Hunter Process：翻译模型同步/缺配置走可行动 LLM Toast。
+- Deep Chat：缺模型配置与调用失败补充可行动 Toast（会话内错误文案仍保留）。
 
 ### Fixed
 
 - Home 粒子：ResizeObserver 调度的 rAF 在 unmount 时取消，并清空 particles/canvas 引用。
 - EventBus `emit`：监听器快照分发，避免回调内 on/off 导致漏调或乱序副作用。
+- PromptlabPanel：EventBus / appStore 订阅 init-once，避免重复 init 堆监听。
 
 ## [3.0.11-rc.9] - 2026-07-26
 

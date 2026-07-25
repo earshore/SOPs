@@ -24,6 +24,8 @@ import { callDeepChatLLM } from './llmCall';
 import type { ChatMessage } from '@/services/llmService';
 
 import { StorageService } from '@/services/storageService';
+import { ValidationError } from '@/common/errors/AppError';
+import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
 
 import { normalizeSkillChipDraftText } from '@/modules/app_center/skillDeepChatHandoff';
 
@@ -141,6 +143,8 @@ export async function handleDeepChatRequest(
     const message = error instanceof Error ? error.message : '模型调用失败';
     const responseText = formatDeepChatErrorResponse(message);
     nativeLoggerConsole.error('[Deep Chat] LLM 调用失败:', redactSensitiveError(error));
+    // Surface config/auth failures with settings deep-link; in-chat still shows full text.
+    showLlmFailureToast(error, { titlePrefix: '模型调用失败: ' });
     saveFailedDeepChatResponse(pendingThreadId, responseText);
     await emitDeepChatResponse(signals, { text: responseText });
   } finally {
@@ -155,7 +159,16 @@ export async function prepareDeepChatRequest(
 ): Promise<PreparedDeepChatRequest | null> {
   const { config, model } = await getDeepChatRequestModelConfig();
   if (!config || !config.apiKey || !model) {
-    await rejectDeepChatRequest(signals, '请先在系统设置中配置可用的 LLM 模型。');
+    const configError = new ValidationError(
+      '请先在系统设置中配置可用的 LLM 模型。',
+      'BIZ_NO_MODEL_CONFIGURED',
+      undefined,
+      undefined,
+      { module: 'DeepChat', action: 'prepareDeepChatRequest' }
+    );
+    // Actionable global toast + in-chat reject text (settings button may be hidden on some shells).
+    showLlmFailureToast(configError);
+    await rejectDeepChatRequest(signals, configError.message);
     return null;
   }
 

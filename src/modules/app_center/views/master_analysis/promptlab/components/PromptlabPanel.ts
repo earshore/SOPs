@@ -256,10 +256,13 @@ type PromptlabPanelState = Pick<
   | '_appStoreUnsubscribe'
 > & {
   reportRevision: number;
+  /** EventBus + appStore subscriptions are init-once until destroy. */
+  _subscriptionsInitialized: boolean;
 };
 
 type PromptlabPanelThis = PromptlabAlpineContext & {
   $nextTick?: (callback: () => void) => void;
+  _subscriptionsInitialized: boolean;
   currentPrompt: string;
   isReady: boolean;
   isListingReady: boolean;
@@ -313,6 +316,7 @@ function createPromptlabPanelState(): PromptlabPanelState {
     reportRevision: 0,
     _unsubscribers: [] as Array<() => void>,
     _appStoreUnsubscribe: null,
+    _subscriptionsInitialized: false,
   };
 }
 
@@ -546,62 +550,65 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     // 初始化 textarea 高度自适应
     initAutoHeightInputs(this.originalHeights);
 
-    // 监听 EventBus 事件
-    const unsubScrape = eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, () => {
-      this.restoreState();
-      this.renderReportAnalysis();
-    });
+    // EventBus + appStore: init-once (Alpine may re-call init without destroy).
+    if (!this._subscriptionsInitialized) {
+      const unsubScrape = eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, () => {
+        this.restoreState();
+        this.renderReportAnalysis();
+      });
 
-    const unsubHistory = eventBus.on(APP_EVENTS.HISTORY_UPDATED, () => {
-      this.restoreState();
-      this.renderReportAnalysis();
-    });
+      const unsubHistory = eventBus.on(APP_EVENTS.HISTORY_UPDATED, () => {
+        this.restoreState();
+        this.renderReportAnalysis();
+      });
 
-    this._unsubscribers = [unsubScrape, unsubHistory];
+      this._unsubscribers = [unsubScrape, unsubHistory];
 
-    // 订阅 appStore，分析报告变化时刷新渲染
-    if (appStore && typeof appStore.subscribe === 'function') {
-      this._appStoreUnsubscribe = appStore.subscribe((state, previousState) => {
-        const currentReportFingerprint = getReportFingerprint(state.analysis?.analysisReport);
-        const previousReportFingerprint = getReportFingerprint(
-          previousState?.analysis?.analysisReport
-        );
-        if (currentReportFingerprint === previousReportFingerprint) {
-          return;
-        }
+      if (appStore && typeof appStore.subscribe === 'function') {
+        this._appStoreUnsubscribe = appStore.subscribe((state, previousState) => {
+          const currentReportFingerprint = getReportFingerprint(state.analysis?.analysisReport);
+          const previousReportFingerprint = getReportFingerprint(
+            previousState?.analysis?.analysisReport
+          );
+          if (currentReportFingerprint === previousReportFingerprint) {
+            return;
+          }
 
-        this.reportRevision += 1;
+          this.reportRevision += 1;
 
-        const hasUsableReport = computeHasReport();
-        if (!hasUsableReport) {
-          this.profile = withoutReportDna(this.profile);
-          this.dnaConfidence = createDefaultDnaConfidence();
-          this.dnaExtractionSummary = null;
-          this.hasRenderedReportOnce = false;
-          this.expandedDimensions.clear();
-          this.expandedSubItems.clear();
-          this.saveState();
-        } else {
-          if (!hasMatchingReportFingerprint(this.profile, currentReportFingerprint)) {
-            this.profile = currentReportFingerprint
-              ? withReportFingerprint(withoutReportDna(this.profile), currentReportFingerprint)
-              : withoutReportDna(this.profile);
+          const hasUsableReport = computeHasReport();
+          if (!hasUsableReport) {
+            this.profile = withoutReportDna(this.profile);
             this.dnaConfidence = createDefaultDnaConfidence();
+            this.dnaExtractionSummary = null;
             this.hasRenderedReportOnce = false;
             this.expandedDimensions.clear();
             this.expandedSubItems.clear();
             this.saveState();
+          } else {
+            if (!hasMatchingReportFingerprint(this.profile, currentReportFingerprint)) {
+              this.profile = currentReportFingerprint
+                ? withReportFingerprint(withoutReportDna(this.profile), currentReportFingerprint)
+                : withoutReportDna(this.profile);
+              this.dnaConfidence = createDefaultDnaConfidence();
+              this.hasRenderedReportOnce = false;
+              this.expandedDimensions.clear();
+              this.expandedSubItems.clear();
+              this.saveState();
+            }
+            this.refreshDnaExtractionSummary();
           }
-          this.refreshDnaExtractionSummary();
-        }
 
-        const nextTick = (this as { $nextTick?: (callback: () => void) => void }).$nextTick;
-        if (typeof nextTick === 'function') {
-          nextTick(() => this.renderReportAnalysis());
-        } else {
-          setTimeout(() => this.renderReportAnalysis(), 0);
-        }
-      });
+          const nextTick = (this as { $nextTick?: (callback: () => void) => void }).$nextTick;
+          if (typeof nextTick === 'function') {
+            nextTick(() => this.renderReportAnalysis());
+          } else {
+            setTimeout(() => this.renderReportAnalysis(), 0);
+          }
+        });
+      }
+
+      this._subscriptionsInitialized = true;
     }
   },
 
@@ -620,6 +627,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       this._appStoreUnsubscribe = null;
     }
 
+    this._subscriptionsInitialized = false;
     this.originalHeights.clear();
   },
 

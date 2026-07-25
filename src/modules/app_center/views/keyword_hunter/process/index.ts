@@ -14,6 +14,7 @@ import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import BaseModule from '@/common/BaseModule';
 import { showToast } from '@/common/ui';
 import { ValidationError } from '@/common/errors/AppError';
+import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
@@ -351,7 +352,9 @@ function selectTranslationModel(event: Event): void {
 
   const provider = getActiveLlmProvider();
   if (!provider) {
-    showToast('请先在全局设置中选择 LLM 提供商', { type: 'warning' });
+    showLlmFailureToast(
+      new ValidationError('请先在全局设置中选择 LLM 提供商', 'ERR_LLM_PROVIDER_NOT_SELECTED')
+    );
     renderTranslationModelSelector();
     return;
   }
@@ -364,13 +367,16 @@ function selectTranslationModel(event: Event): void {
   showToast(`AI 翻译模型已切换为 ${model}`, { type: 'success' });
 }
 
-function getModelFetchErrorMessage(error: unknown): string {
-  if (error instanceof Error && error.message) return error.message;
-  return String(error || '未知错误');
-}
-
 function warnTranslationModelRefreshBlocked(message: string): void {
-  showToast(message, { type: 'warning' });
+  if (message.includes('提供商') || message.includes('选择 LLM')) {
+    showLlmFailureToast(new ValidationError(message, 'ERR_LLM_PROVIDER_NOT_SELECTED'));
+  } else if (message.includes('API Key') || message.includes('密钥')) {
+    showLlmFailureToast(new ValidationError(message, 'ERR_LLM_API_KEY_MISSING'));
+  } else if (message.includes('端点') || message.includes('Endpoint')) {
+    showLlmFailureToast(new ValidationError(message, 'BIZ_NO_MODEL_CONFIGURED'));
+  } else {
+    showToast(message, { type: 'warning' });
+  }
   setTranslationModelStatus(message, 'alert');
 }
 
@@ -446,9 +452,8 @@ async function refreshTranslationModels(): Promise<void> {
       module: 'keywordHunter',
       notify: false,
     });
-    const message = getModelFetchErrorMessage(error);
-    showToast(`获取模型失败: ${message}`, { type: 'error' });
-    setTranslationModelStatus(`获取模型失败: ${message}`, 'alert');
+    const ux = showLlmFailureToast(error, { titlePrefix: '获取模型失败: ' });
+    setTranslationModelStatus(`获取模型失败: ${ux.title}`, 'alert');
   } finally {
     isRefreshingTranslationModels = false;
     renderTranslationModelRefreshButton();
