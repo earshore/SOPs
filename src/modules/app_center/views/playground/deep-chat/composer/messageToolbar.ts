@@ -32,6 +32,26 @@ export interface MessageToolbarActions {
    * e.g. 「正在生成回复... · 已收到 120 字」— not a separate badge design.
    */
   getLiveGenerationStatusLabel?: () => string | null;
+  /**
+   * True when the active thread has a non-settled pending generation.
+   * Used so remount + ZWSP live bubble still gets a toolbar shell (TB-O1).
+   */
+  hasActivePendingGeneration?: () => boolean;
+}
+
+/**
+ * Whether to create/keep a toolbar shell on a message outer.
+ * Live AI + in-flight pending must mount even for ZWSP-only bubbles and null liveLabel.
+ */
+export function shouldMountMessageToolbarShell(args: {
+  isLiveAi: boolean;
+  hasMeaningfulContent: boolean;
+  liveLabel: string | null;
+  hasActivePending: boolean;
+}): boolean {
+  if (args.hasMeaningfulContent) return true;
+  if (args.isLiveAi && (Boolean(args.liveLabel) || args.hasActivePending)) return true;
+  return false;
 }
 
 export function setupMessageToolbars(
@@ -176,10 +196,17 @@ function installOrUpdateMessageToolbar(args: {
   }
   const { bubble, innerContainer, role, content } = nodes;
   const isLiveAi = role === 'ai' && args.outerIndex === args.lastAiOuterIndex;
-  // ZWSP-only is the live placeholder after remount — treat as empty so toolbar
-  // does not sit on a blank row under 深度思考.
+  // ZWSP-only is the live placeholder after remount — content empty, but shell may still mount.
   const meaningfulContent = isZwspOnlyText(content) ? '' : content;
-  if (!meaningfulContent && !(isLiveAi && args.liveLabel)) {
+  const hasActivePending = Boolean(args.actions.hasActivePendingGeneration?.());
+  if (
+    !shouldMountMessageToolbarShell({
+      isLiveAi,
+      hasMeaningfulContent: Boolean(meaningfulContent),
+      liveLabel: args.liveLabel,
+      hasActivePending,
+    })
+  ) {
     clearLiveToolbarLabelIfEmpty(args.message, isLiveAi, args.liveLabel);
     return;
   }

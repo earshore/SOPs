@@ -1,6 +1,45 @@
 import { describe, expect, it } from 'vitest';
 import type { DeepChatMessage } from '../types';
-import { findStoredMessageForToolbar, resolveToolbarStatusLabel } from './messageToolbar';
+import {
+  findStoredMessageForToolbar,
+  resolveToolbarStatusLabel,
+  shouldMountMessageToolbarShell,
+} from './messageToolbar';
+
+describe('shouldMountMessageToolbarShell', () => {
+  it('mounts shell for live AI with pending even when ZWSP and no liveLabel (TB-O1)', () => {
+    expect(
+      shouldMountMessageToolbarShell({
+        isLiveAi: true,
+        hasMeaningfulContent: false,
+        liveLabel: null,
+        hasActivePending: true,
+      })
+    ).toBe(true);
+  });
+
+  it('mounts when liveLabel is present without pending flag', () => {
+    expect(
+      shouldMountMessageToolbarShell({
+        isLiveAi: true,
+        hasMeaningfulContent: false,
+        liveLabel: '深度思考中…',
+        hasActivePending: false,
+      })
+    ).toBe(true);
+  });
+
+  it('does not mount empty non-live bubbles without content', () => {
+    expect(
+      shouldMountMessageToolbarShell({
+        isLiveAi: false,
+        hasMeaningfulContent: false,
+        liveLabel: null,
+        hasActivePending: false,
+      })
+    ).toBe(false);
+  });
+});
 
 describe('resolveToolbarStatusLabel', () => {
   it('maps store statuses to stable user-facing badges', () => {

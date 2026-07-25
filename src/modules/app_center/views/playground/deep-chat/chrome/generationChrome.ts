@@ -743,9 +743,9 @@ export function getGeneratingStatusLabel(pending: PendingDeepChatRequest): strin
 }
 
 /**
- * Live status for toolbar end — waiting / generating only.
- * Once 深度思考 starts (phase === reasoning), hide 「思考中… / 等待模型响应…」
- * so waiting copy does not sit next to the reasoning chrome as visual noise.
+ * Live status for toolbar end (waiting / reasoning / generating / tools).
+ * Must stay non-null while in-flight so remount + ZWSP bubbles still mount toolbar shell.
+ * 「思考中…」rotates only in waiting; reasoning uses a fixed short label beside 深度思考 chrome.
  */
 
 export function getActiveLiveGenerationStatusLabel(): string | null {
@@ -761,10 +761,12 @@ export function getActiveLiveGenerationStatusLabel(): string | null {
   if (phase === 'waiting') {
     return getWaitingStatusLabel(pending);
   }
+  if (phase === 'reasoning') {
+    return '深度思考中…';
+  }
   if (phase === 'generating') {
     return getGeneratingStatusLabel(pending);
   }
-  // reasoning | settled: no toolbar live status (深度思考 / 已完成 own the UI)
   return null;
 }
 

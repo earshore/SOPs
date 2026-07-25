@@ -72,7 +72,7 @@ import {
   configureDeepChatStyles,
 } from '../infra/deepChatConfig';
 
-import { setupMessageToolbars } from '../composer/messageToolbar';
+import { refreshMessageToolbarStatuses, setupMessageToolbars } from '../composer/messageToolbar';
 
 import { setupPromptPreview } from './promptPreview';
 import { renderPromptDraftList, renderThreadList } from './renderers';
@@ -1069,6 +1069,10 @@ export function initDeepChat(container: HTMLElement): void {
     refillComposerWithText: text => refillComposerWithSkillChips(container, text),
     // 「正在生成回复 · 已收到 N 字」挂在 toolbar 末尾，不占气泡上方
     getLiveGenerationStatusLabel: () => getActiveLiveGenerationStatusLabel(),
+    hasActivePendingGeneration: () => {
+      const pending = sessionState.pendingRequests.get(sessionState.threadStore.activeThreadId);
+      return Boolean(pending && !pending.isSettled);
+    },
   });
   setConversationActive(
     container,
@@ -1076,6 +1080,14 @@ export function initDeepChat(container: HTMLElement): void {
   );
   // New deep-chat element every replaceChat — rebind observer and remount chrome hard
   remountDeepThinkingChromeAfterChatReplace(container);
+  // Shadow hosts may appear a frame later; refresh so toolbar is not stuck empty after remount.
+  refreshMessageToolbarStatuses(chat, () => getThreadDisplayMessages(getActiveThread()));
+  for (const ms of [32, 80] as const) {
+    window.setTimeout(() => {
+      if (getChat(container) !== chat) return;
+      refreshMessageToolbarStatuses(chat, () => getThreadDisplayMessages(getActiveThread()));
+    }, ms);
+  }
   setupDraftInputHeightSync(container, chat);
   setupSubmitStopButtonSync(container, chat);
   // 恢复所有在飞/待输出会话（切出页面再回来时「生成中」不丢）
