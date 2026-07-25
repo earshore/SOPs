@@ -350,7 +350,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
 
   /*
    * Live generation placeholder: history remount injects text "\u200b" so deep-chat
-   * still creates an AI host for 深度思考 chrome. Collapse the empty <p>​</p> so it
+   * still creates an AI host for 深度思考 chrome. Collapse the empty ZWSP paragraph so it
    * does not leave a blank row between toolbar and chrome after page switch.
    */
   .message-bubble.ai-message.is-live-placeholder {

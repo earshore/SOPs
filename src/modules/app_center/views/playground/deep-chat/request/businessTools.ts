@@ -139,70 +139,71 @@ function clip(text: string, max = 240): string {
   return `${t.slice(0, max)}…`;
 }
 
+async function executeSessionSummary(ctx: DeepChatBusinessToolContext): Promise<string> {
+  const thread = ctx.getThread();
+  const lastUser = [...thread.messages]
+    .reverse()
+    .find(m => m.role === 'user' || m.role === undefined);
+  return JSON.stringify({
+    threadId: thread.id,
+    title: thread.title,
+    messageCount: thread.messages.length,
+    hasUnread: Boolean(thread.hasUnread),
+    lastUserSnippet: lastUser ? clip(getDeepChatMessageText(lastUser)) : '',
+  });
+}
+
+async function executeListRecentUserQuestions(
+  ctx: DeepChatBusinessToolContext,
+  argsJson: string
+): Promise<string> {
+  let limit = 5;
+  try {
+    const parsed = JSON.parse(argsJson || '{}') as { limit?: unknown };
+    if (typeof parsed.limit === 'number' && Number.isFinite(parsed.limit)) {
+      limit = Math.min(12, Math.max(1, Math.round(parsed.limit)));
+    }
+  } catch {
+    // ignore bad args
+  }
+  const thread = ctx.getThread();
+  const users = thread.messages
+    .filter(m => m.role === 'user')
+    .map(m => clip(getDeepChatMessageText(m), 400))
+    .filter(Boolean)
+    .slice(-limit);
+  return JSON.stringify({ count: users.length, questions: users });
+}
+
+async function executeSearchX(argsJson: string): Promise<string> {
+  const args = parseToolArgsObject(argsJson);
+  const query = typeof args.query === 'string' ? args.query : '';
+  const limit =
+    typeof args.limit === 'number' && Number.isFinite(args.limit)
+      ? Math.min(20, Math.max(1, Math.round(args.limit)))
+      : undefined;
+  const mode = typeof args.mode === 'string' ? args.mode : undefined;
+  const from_date = typeof args.from_date === 'string' ? args.from_date : undefined;
+  return JSON.stringify(await runSearchX({ query, limit, mode, from_date }));
+}
+
 export function createDeepChatBusinessToolExecutor(
   ctx: DeepChatBusinessToolContext
 ): ResponsesToolExecutor {
   return async ({ name, arguments: argsJson }) => {
-    if (name === 'get_session_summary') {
-      const thread = ctx.getThread();
-      const lastUser = [...thread.messages]
-        .reverse()
-        .find(m => m.role === 'user' || m.role === undefined);
-      return JSON.stringify({
-        threadId: thread.id,
-        title: thread.title,
-        messageCount: thread.messages.length,
-        hasUnread: Boolean(thread.hasUnread),
-        lastUserSnippet: lastUser ? clip(getDeepChatMessageText(lastUser)) : '',
-      });
-    }
-
+    if (name === 'get_session_summary') return executeSessionSummary(ctx);
     if (name === 'get_active_model') {
-      return JSON.stringify({
-        provider: ctx.getProvider(),
-        model: ctx.getModel(),
-      });
+      return JSON.stringify({ provider: ctx.getProvider(), model: ctx.getModel() });
     }
-
     if (name === 'list_recent_user_questions') {
-      let limit = 5;
-      try {
-        const parsed = JSON.parse(argsJson || '{}') as { limit?: unknown };
-        if (typeof parsed.limit === 'number' && Number.isFinite(parsed.limit)) {
-          limit = Math.min(12, Math.max(1, Math.round(parsed.limit)));
-        }
-      } catch {
-        // ignore bad args
-      }
-      const thread = ctx.getThread();
-      const users = thread.messages
-        .filter(m => m.role === 'user')
-        .map(m => clip(getDeepChatMessageText(m), 400))
-        .filter(Boolean)
-        .slice(-limit);
-      return JSON.stringify({ count: users.length, questions: users });
+      return executeListRecentUserQuestions(ctx, argsJson);
     }
-
     if (name === 'web_search') {
       const args = parseToolArgsObject(argsJson);
       const query = typeof args.query === 'string' ? args.query : '';
-      const result = await runWebSearch(query);
-      return JSON.stringify(result);
+      return JSON.stringify(await runWebSearch(query));
     }
-
-    if (name === 'search_x') {
-      const args = parseToolArgsObject(argsJson);
-      const query = typeof args.query === 'string' ? args.query : '';
-      const limit =
-        typeof args.limit === 'number' && Number.isFinite(args.limit)
-          ? Math.min(20, Math.max(1, Math.round(args.limit)))
-          : undefined;
-      const mode = typeof args.mode === 'string' ? args.mode : undefined;
-      const from_date = typeof args.from_date === 'string' ? args.from_date : undefined;
-      const result = await runSearchX({ query, limit, mode, from_date });
-      return JSON.stringify(result);
-    }
-
+    if (name === 'search_x') return executeSearchX(argsJson);
     return JSON.stringify({
       error: 'unknown_tool',
       message: `Tool not allowed: ${name}`,

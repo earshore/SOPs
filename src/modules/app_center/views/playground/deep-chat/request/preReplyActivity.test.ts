@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildPreReplyActivityTimeline,
   formatToolActivityLabel,
+  formatToolResultDetail,
   normalizePreReplyActivitySteps,
   upsertPreReplyActivityStep,
 } from './preReplyActivity';
@@ -57,8 +58,25 @@ describe('preReplyActivity', () => {
     const steps = normalizePreReplyActivitySteps([
       { id: 'c1', kind: 'tool', label: '搜索 X', status: 'done', detail: 'ok', order: 1 },
       { junk: true },
+      { kind: 'status', label: '  准备中  ', status: 'running' },
+      null,
+      'skip',
     ]);
-    expect(steps).toHaveLength(1);
+    expect(steps).toHaveLength(2);
     expect(steps?.[0]?.id).toBe('c1');
+    expect(steps?.[1]?.label).toBe('准备中');
+    expect(steps?.[1]?.status).toBe('running');
+    expect(normalizePreReplyActivitySteps([])).toBeUndefined();
+    expect(normalizePreReplyActivitySteps(null)).toBeUndefined();
+  });
+
+  it('formats tool result details for UI', () => {
+    expect(formatToolResultDetail('')).toContain('无返回');
+    expect(formatToolResultDetail(JSON.stringify({ resultsText: '  hit A  ' }))).toBe('hit A');
+    expect(
+      formatToolResultDetail(JSON.stringify({ error: 'timeout', message: 'gateway' }))
+    ).toContain('timeout');
+    expect(formatToolResultDetail(JSON.stringify({ count: 2 }))).toContain('"count"');
+    expect(formatToolResultDetail('plain text result')).toBe('plain text result');
   });
 });

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.11-rc.7] - 2026-07-25
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.6` 之后的双路径 tools 闭环、Deep Chat 生成 chrome / 已完成时间线，以及 Create 字段透传。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
 ### Added
 
 - **Responses Create 字段透传收敛：** `top_p` / `top_logprobs` / `metadata` / `prompt_cache_key` / `safety_identifier` / `user` / `truncation` / `background` / `max_tool_calls` / `include`；探针 `tools/verify-responses-create-parity.mts`。
@@ -16,16 +23,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Spec：`docs/superpowers/specs/2026-07-24-chat-completions-true-full-parity.md`（含不可完成项理由）。
 - **双路径官方 Create 对齐（chat + responses）**：tools / tool loop、vision、json_schema、stream_options 等。
 - `chatTools.ts` / `chatVision.ts`：官方 `tool_calls` 多轮与多模态映射。
+- Deep Chat 业务工具：`web_search` / `search_x` 等；文本态 tool dump 解析与恢复（XML / JSON 数组）。
 
 ### Changed
 
 - Registry chat surface：`supportsTools` / `supportsVision` = true（与 Responses 并行，非互斥子集）。
 - `enableToolLoop` 在 **chat_completions** 与 **responses** 均可；不再把 tools 锁死在 Responses。
 - API 路径与设置文案：双路径均为官方 Create 能力，fallback 仅为传输降级。
+- Deep Chat：工具 / 状态时间线收口到「已完成」折叠区；stream-first + 末轮 `tool_choice: none` 防止空转。
+- 系统设置：`scrollToSection` 仅滚动设置内容区，避免 `scrollIntoView` 顶起底栏。
 
 ### Fixed
 
 - 模型列表 string id 默认 context 与能力目录对齐为 `32768`（单测期望同步）。
+- Tool loop：空最终文本时从工具结果合成可见回答；文本 dump 的 tool_calls 可恢复并继续多轮。
+- Deep Chat chrome：续聊不再闪「已完成 0s」；ZWSP 占位气泡折叠；深度思考 / 活动行 body 高度与 remount 稳定。
+- `web_search`：剥离 DuckDuckGo / jina reader 站点 chrome（region / date 等噪声）。
+- 质量门禁：ESLint complexity 拆分使 warning gate 归零；单测对齐 `callLLM` 扩展 options（`apiPath` / `reasoningPrefs`）。
 
 ## [3.0.11-rc.6] - 2026-07-24
 

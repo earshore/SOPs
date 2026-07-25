@@ -20,43 +20,98 @@ const TOOLISH_NAME_RE = /^(search_x|web_search|function|[a-z][a-z0-9_]{1,40})$/i
  * Proprietary multi-tool content format seen on some gateways:
  * [{"search_x":[{"query":"...","limit":15}]},{"web_search":[{"query":"..."}]}]
  */
+const NON_TOOL_ARG_KEYS = new Set(['query', 'limit', 'mode', 'num_results']);
+
+function isToolMapValue(value: unknown): boolean {
+  return (
+    Array.isArray(value) ||
+    (Boolean(value) && typeof value === 'object') ||
+    typeof value === 'string'
+  );
+}
+
+function looksLikeToolMapEntries(entries: [string, unknown][]): boolean {
+  return entries.every(
+    ([name, value]) =>
+      TOOLISH_NAME_RE.test(name) && !NON_TOOL_ARG_KEYS.has(name) && isToolMapValue(value)
+  );
+}
+
+function toolCallsFromMapEntries(entries: [string, unknown][], raw: string): TextEmittedToolCall[] {
+  const calls: TextEmittedToolCall[] = [];
+  for (const [name, value] of entries) {
+    if (!name.trim()) continue;
+    const argsPayload = Array.isArray(value) && value.length === 1 ? value[0] : value;
+    calls.push({
+      name: name.trim(),
+      arguments: typeof argsPayload === 'string' ? argsPayload : JSON.stringify(argsPayload ?? {}),
+      raw,
+    });
+  }
+  return calls;
+}
+
+function toolCallsFromParsedArray(parsed: unknown[], raw: string): TextEmittedToolCall[] {
+  const calls: TextEmittedToolCall[] = [];
+  for (const item of parsed) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+    const entries = Object.entries(item as Record<string, unknown>);
+    // Tool-map items look like { "search_x": [ {...} ] } — not { "query": "..." }.
+    if (entries.length === 0 || !looksLikeToolMapEntries(entries)) continue;
+    calls.push(...toolCallsFromMapEntries(entries, raw));
+  }
+  return calls;
+}
+
 function tryParseJsonToolArray(text: string): TextEmittedToolCall[] {
   const trimmed = text.trim();
   if (!trimmed.startsWith('[')) return [];
   try {
     const parsed = JSON.parse(trimmed) as unknown;
     if (!Array.isArray(parsed) || parsed.length === 0) return [];
-    const calls: TextEmittedToolCall[] = [];
-    for (const item of parsed) {
-      if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
-      const entries = Object.entries(item as Record<string, unknown>);
-      // Tool-map items look like { "search_x": [ {...} ] } — not { "query": "..." }.
-      if (entries.length === 0) continue;
-      const looksLikeToolMap = entries.every(
-        ([name, value]) =>
-          TOOLISH_NAME_RE.test(name) &&
-          name !== 'query' &&
-          name !== 'limit' &&
-          name !== 'mode' &&
-          name !== 'num_results' &&
-          (Array.isArray(value) || (value && typeof value === 'object') || typeof value === 'string')
-      );
-      if (!looksLikeToolMap) continue;
-      for (const [name, value] of entries) {
-        if (!name.trim()) continue;
-        const argsPayload = Array.isArray(value) && value.length === 1 ? value[0] : value;
-        calls.push({
-          name: name.trim(),
-          arguments:
-            typeof argsPayload === 'string' ? argsPayload : JSON.stringify(argsPayload ?? {}),
-          raw: trimmed,
-        });
-      }
-    }
-    return calls;
+    return toolCallsFromParsedArray(parsed, trimmed);
   } catch {
     return [];
   }
+}
+
+/** Walk string contents while scanning balanced JSON arrays. */
+function advanceJsonStringScan(ch: string, state: { escape: boolean }): 'stay' | 'exit' {
+  if (state.escape) {
+    state.escape = false;
+    return 'stay';
+  }
+  if (ch === '\\') {
+    state.escape = true;
+    return 'stay';
+  }
+  return ch === '"' ? 'exit' : 'stay';
+}
+
+/** Find end index of a balanced `[...]` starting at `start` (must be `[`). */
+function findBalancedArrayEnd(text: string, start: number): number {
+  let depth = 0;
+  let inString = false;
+  const stringState = { escape: false };
+  for (let j = start; j < text.length; j++) {
+    const ch = text[j];
+    if (ch === undefined) break;
+    if (inString) {
+      if (advanceJsonStringScan(ch, stringState) === 'exit') inString = false;
+      continue;
+    }
+    if (ch === '"') {
+      inString = true;
+      stringState.escape = false;
+      continue;
+    }
+    if (ch === '[') depth += 1;
+    else if (ch === ']') {
+      depth -= 1;
+      if (depth === 0) return j;
+    }
+  }
+  return -1;
 }
 
 /** Extract balanced `[...]` slices from text (handles nested arrays/objects). */
@@ -64,37 +119,26 @@ function extractBalancedJsonArrays(text: string): string[] {
   const out: string[] = [];
   for (let i = 0; i < text.length; i++) {
     if (text[i] !== '[') continue;
-    let depth = 0;
-    let inString = false;
-    let escape = false;
-    for (let j = i; j < text.length; j++) {
-      const ch = text[j]!;
-      if (inString) {
-        if (escape) {
-          escape = false;
-        } else if (ch === '\\') {
-          escape = true;
-        } else if (ch === '"') {
-          inString = false;
-        }
-        continue;
-      }
-      if (ch === '"') {
-        inString = true;
-        continue;
-      }
-      if (ch === '[') depth += 1;
-      else if (ch === ']') {
-        depth -= 1;
-        if (depth === 0) {
-          out.push(text.slice(i, j + 1));
-          i = j;
-          break;
-        }
-      }
-    }
+    const end = findBalancedArrayEnd(text, i);
+    if (end < 0) continue;
+    out.push(text.slice(i, end + 1));
+    i = end;
   }
   return out;
+}
+
+function pushUniqueToolCalls(
+  calls: TextEmittedToolCall[],
+  seen: Set<string>,
+  parsed: TextEmittedToolCall[],
+  raw: string
+): void {
+  for (const call of parsed) {
+    const key = `${call.name}:${call.arguments}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    calls.push({ ...call, raw });
+  }
 }
 
 /**
@@ -111,13 +155,7 @@ function extractEmbeddedJsonToolArrays(text: string): TextEmittedToolCall[] {
     const block = (fenceMatch[1] ?? '').trim();
     const candidates = block.startsWith('[') ? [block] : extractBalancedJsonArrays(block);
     for (const candidate of candidates) {
-      const parsed = tryParseJsonToolArray(candidate);
-      for (const call of parsed) {
-        const key = `${call.name}:${call.arguments}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        calls.push({ ...call, raw: fenceMatch[0] });
-      }
+      pushUniqueToolCalls(calls, seen, tryParseJsonToolArray(candidate), fenceMatch[0]);
     }
   }
 
@@ -127,13 +165,7 @@ function extractEmbeddedJsonToolArrays(text: string): TextEmittedToolCall[] {
     if (!/"search_x"|"web_search"|_search"/.test(block) && !/"query"\s*:/.test(block)) {
       continue;
     }
-    const parsed = tryParseJsonToolArray(block);
-    for (const call of parsed) {
-      const key = `${call.name}:${call.arguments}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      calls.push({ ...call, raw: block });
-    }
+    pushUniqueToolCalls(calls, seen, tryParseJsonToolArray(block), block);
   }
 
   return calls;

@@ -216,7 +216,8 @@ export const createApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =
  */
 export const LLMMessageSchema = z
   .object({
-    role: z.union([z.enum(['system', 'user', 'assistant', 'tool', 'developer']), z.string()]),
+    // Official roles only — do not widen to z.string() (would accept invalid roles).
+    role: z.enum(['system', 'user', 'assistant', 'tool', 'developer']),
     // Official: string | null | content parts array (some gateways omit / vary).
     content: z.union([z.string(), z.null(), z.array(z.unknown())]).optional(),
     name: z.string().optional(),

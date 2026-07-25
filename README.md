@@ -26,14 +26,21 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本           | 说明                                               |
 | ---------------------------- | -------------- | -------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.0.10`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.11-rc.6` | Deep Chat 包重组 + 深度思考 / 模型能力线；**勿**默认当生产 |
-| package.json                 | `3.0.11-rc.6`  | 与 RC tag / Release 一致（GA 前）                  |
+| **当前 Pre-release 候选**    | `v3.0.11-rc.7` | 双路径 tools 闭环 + Create 透传 + 生成 chrome；**勿**默认当生产 |
+| package.json                 | `3.0.11-rc.7`  | 与 RC tag / Release 一致（GA 前）                  |
 | 上一 GA                      | `v3.0.10`      | 回滚参考                                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.6` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.7` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.6`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.7`。
+
+`v3.0.11-rc.7`（2026-07-25，Pre-release）收口 rc.6 之后的 tools 与 Create 对齐：
+
+- **双路径 tools**：chat / responses 均可 tool loop；文本 dump 恢复；末轮 `tool_choice: none`；空答合成。
+- **Deep Chat UX**：「已完成」时间线、chrome remount、ZWSP 占位、DDG 结果去噪。
+- **Create 透传**：Responses / Chat Completions 字段与探针（详见 CHANGELOG）。
+- GitHub Latest **仍指向** `v3.0.10`；回滚基线为 `v3.0.10`。
 
 `v3.0.11-rc.6`（2026-07-24，Pre-release）收口 rc.5 之后的 Deep Chat 结构、推理能力与系统设置体验：
 

@@ -35,7 +35,7 @@ function createScannerCliProject(): { projectRoot: string; scannerPath: string }
   const scannerPath = join(toolsDirectory, 'tech-debt-scanner.ts');
   copyFileSync(resolve('tools/tech-debt-scanner.ts'), scannerPath);
   const repeatedLines = Array.from(
-    { length: 10 },
+    { length: 20 },
     (_, index) => `duplicateCall${String(index + 1).padStart(2, '0')}();`
   );
   writeFileSync(
@@ -198,7 +198,7 @@ describe('TechDebtScanner duplicate emission', () => {
     const directory = mkdtempSync(join(tmpdir(), 'sops-tech-debt-scanner-'));
     temporaryDirectories.push(directory);
     const repeatedLines = Array.from(
-      { length: 12 },
+      { length: 22 },
       (_, index) => `duplicateStep${String(index + 1).padStart(2, '0')}();`
     );
     writeFileSync(
@@ -223,7 +223,7 @@ describe('TechDebtScanner duplicate emission', () => {
       severity: 'medium',
       line: 2,
       column: 1,
-      message: '发现重复代码块（共 2 处，行数 ≥ 12）',
+      message: '发现重复代码块（共 2 处，行数 ≥ 22）',
     });
   });
 
@@ -260,45 +260,17 @@ describe('TechDebtScanner duplicate emission', () => {
     const directory = mkdtempSync(join(tmpdir(), 'sops-tech-debt-scanner-uneven-'));
     temporaryDirectories.push(directory);
     const lines = Array.from(
-      { length: 118 },
+      { length: 160 },
       (_, index) => `uniqueLine${String(index + 1).padStart(3, '0')}();`
     );
-    const firstPattern = [
-      'patternA();',
-      'patternB();',
-      'patternC();',
-      'patternD();',
-      'patternE();',
-      'patternF();',
-      'patternG();',
-      'patternH();',
-      'patternI();',
-      'patternB();',
-      'patternJ();',
-    ];
-    const secondPattern = [
-      'patternA();',
-      'patternB();',
-      'patternC();',
-      'patternD();',
-      'patternE();',
-      'patternF();',
-      'patternG();',
-      'patternH();',
-      'patternI();',
-      'patternB();',
-      'patternC();',
-      'patternD();',
-      'patternE();',
-      'patternF();',
-      'patternG();',
-      'patternH();',
-      'patternI();',
-      'patternB();',
-      'patternJ();',
-    ];
-    lines.splice(9, firstPattern.length, ...firstPattern);
-    lines.splice(99, secondPattern.length, ...secondPattern);
+    // Shared 21-line core appears twice with uneven neighboring unique lines so
+    // sliding windows at offset 0 and 1 are real separate clone groups.
+    const sharedCore = Array.from(
+      { length: 21 },
+      (_, index) => `sharedCore${String(index + 1).padStart(2, '0')}();`
+    );
+    lines.splice(9, sharedCore.length, ...sharedCore);
+    lines.splice(99, sharedCore.length, ...sharedCore);
     writeFileSync(join(directory, 'uneven-shifts.ts'), lines.join('\n'));
 
     const scanner = new TechDebtScanner();
@@ -308,8 +280,7 @@ describe('TechDebtScanner duplicate emission', () => {
       .issues.filter(issue => issue.ruleId === 'duplicate-code');
 
     expect(duplicateIssues.map(issue => ({ line: issue.line, message: issue.message }))).toEqual([
-      { line: 10, message: '发现重复代码块（共 2 处，行数 ≥ 10）' },
-      { line: 11, message: '发现重复代码块（共 2 处，行数 ≥ 10）' },
+      { line: 10, message: '发现重复代码块（共 2 处，行数 ≥ 21）' },
     ]);
   });
 });

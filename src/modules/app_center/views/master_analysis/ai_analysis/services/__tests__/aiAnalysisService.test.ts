@@ -36,6 +36,12 @@ vi.mock('@/services/storageService', () => ({
   StorageService: {
     get: mocks.storageGet,
     getLLMConfigWithKey: mocks.getLLMConfigWithKey,
+    // withStructuredAnalysisOptions hydrates apiPath from stored provider config
+    getLLMConfig: vi.fn(() => ({
+      apiPath: 'chat_completions',
+      endpoint: 'https://llm.example/v1',
+      model: 'gpt-test',
+    })),
   },
 }));
 
@@ -222,7 +228,7 @@ describe('runAIAnalysis results', () => {
       'https://llm.example/v1',
       'test-key',
       'gpt-test',
-      {
+      expect.objectContaining({
         temperature: 0.3,
         jsonMode: true,
         maxTokens: 4096,
@@ -230,7 +236,7 @@ describe('runAIAnalysis results', () => {
         timeout: 120000,
         retries: 2,
         retryDelay: 1000,
-      }
+      })
     );
     expect(report['title-keywords']).toEqual({
       primary_keywords: [],

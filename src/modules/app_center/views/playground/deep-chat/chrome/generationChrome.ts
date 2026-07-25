@@ -161,7 +161,7 @@ export function findMessageBubbleAnchor(host: HTMLElement): HTMLElement | null {
 
 /**
  * Live in-flight AI slot uses `\u200b` so deep-chat still creates a host for chrome.
- * After page/thread remount, history rehydration renders that as `<p>​</p>` between
+ * After page/thread remount, history rehydration renders that as empty ZWSP `<p>` between
  * toolbar and 深度思考 — collapse it until real assistant text arrives.
  */
 export function syncLivePlaceholderBubble(
@@ -174,9 +174,9 @@ export function syncLivePlaceholderBubble(
   if (!bubble) return;
 
   const inFlightPlaceholder =
-    Boolean(pending) &&
-    !pending!.isSettled &&
-    isZwspOnlyText(pending!.displayedAssistantText) &&
+    pending != null &&
+    !pending.isSettled &&
+    isZwspOnlyText(pending.displayedAssistantText) &&
     isZwspOnlyText(bubble.textContent);
 
   bubble.classList.toggle('is-live-placeholder', inFlightPlaceholder);
@@ -708,6 +708,18 @@ export function stripSettledChromeFromHost(host: HTMLElement): void {
   }
 }
 
+function removeStaleStreamingChrome(
+  host: HTMLElement,
+  opts: { keepActivityList?: boolean } = {}
+): void {
+  stripSettledChromeFromHost(host);
+  const existing = getChromeOnHost(host);
+  if (!existing?.classList.contains('is-streaming')) return;
+  if (existing.querySelector('.deep-chat-dt-stream')) return;
+  if (opts.keepActivityList && existing.querySelector('.deep-chat-dt-activity-list')) return;
+  existing.remove();
+}
+
 export function mountStreamingGenerationChrome(
   host: HTMLElement,
   pending: PendingDeepChatRequest
@@ -719,11 +731,7 @@ export function mountStreamingGenerationChrome(
   if (phase === 'waiting' && !hasActivity) {
     // Toolbar owns waiting status. Clear any stale settled chrome so continue-chat
     // does not flash 「已完成 0s」 on the live slot before 深度思考 mounts.
-    stripSettledChromeFromHost(host);
-    const existing = getChromeOnHost(host);
-    if (existing?.classList.contains('is-streaming') && !existing.querySelector('.deep-chat-dt-stream')) {
-      existing.remove();
-    }
+    removeStaleStreamingChrome(host);
     ensureWaitingStatusRotateTimer();
     refreshLiveGenerationToolbarStatus();
     return;
@@ -733,15 +741,7 @@ export function mountStreamingGenerationChrome(
 
   if (!liveGenerationPhaseNeedsBubbleChrome(phase, hasReasoning, hasActivity)) {
     // generating without reasoning: drop stray chrome once, including leftover 已完成
-    stripSettledChromeFromHost(host);
-    const existing = getChromeOnHost(host);
-    if (
-      existing?.classList.contains('is-streaming') &&
-      !existing.querySelector('.deep-chat-dt-stream') &&
-      !existing.querySelector('.deep-chat-dt-activity-list')
-    ) {
-      existing.remove();
-    }
+    removeStaleStreamingChrome(host, { keepActivityList: true });
     refreshLiveGenerationToolbarStatus();
     return;
   }
@@ -916,6 +916,32 @@ export function createSettledDeepThinkingDom(doc: Document, uiKey: string): HTML
   return settled;
 }
 
+function resolveSettledActivitySteps(
+  fullText: string,
+  activitySteps?: PreReplyActivityStep[]
+): PreReplyActivityStep[] {
+  if (activitySteps && activitySteps.length) return activitySteps;
+  return buildPreReplyActivityTimeline({ reasoningText: fullText });
+}
+
+function syncSettledDoneChrome(
+  doneToggle: HTMLElement,
+  doneLabel: HTMLElement,
+  durationSec: number,
+  hasActivity: boolean
+): void {
+  const doneLabelText = formatCompletedDurationLabel(durationSec);
+  // Only write when changed — avoid childList MutationObserver thrash on remount.
+  if (doneLabel.textContent !== doneLabelText) {
+    doneLabel.textContent = doneLabelText;
+  }
+  doneToggle.classList.toggle('is-static', !hasActivity);
+  const disabled = hasActivity ? 'false' : 'true';
+  if (doneToggle.getAttribute('aria-disabled') !== disabled) {
+    doneToggle.setAttribute('aria-disabled', disabled);
+  }
+}
+
 export function applySettledDeepThinkingUi(
   settled: HTMLElement,
   fullText: string,
@@ -934,21 +960,9 @@ export function applySettledDeepThinkingUi(
     return;
   }
 
-  const steps =
-    activitySteps && activitySteps.length
-      ? activitySteps
-      : buildPreReplyActivityTimeline({ reasoningText: fullText });
+  const steps = resolveSettledActivitySteps(fullText, activitySteps);
   const hasActivity = steps.length > 0;
-  const doneLabelText = formatCompletedDurationLabel(durationSec);
-  // Only write when changed — avoid childList MutationObserver thrash on remount.
-  if (doneLabel.textContent !== doneLabelText) {
-    doneLabel.textContent = doneLabelText;
-  }
-  doneToggle.classList.toggle('is-static', !hasActivity);
-  const disabled = hasActivity ? 'false' : 'true';
-  if (doneToggle.getAttribute('aria-disabled') !== disabled) {
-    doneToggle.setAttribute('aria-disabled', disabled);
-  }
+  syncSettledDoneChrome(doneToggle, doneLabel, durationSec, hasActivity);
 
   // No pre-reply activity: show 「已完成 Xs」 only (non-expandable).
   if (!hasActivity) {
@@ -987,6 +1001,125 @@ export function applySettledDeepThinkingUi(
   state.displayedLength = (fullText || '').length;
 }
 
+type ActivityListDomOptions = {
+  getExpanded: (id: string) => boolean;
+  setExpanded: (id: string, open: boolean) => void;
+  showStatusBadge?: boolean;
+};
+
+function createActivityRow(
+  doc: Document,
+  stepId: string,
+  options: ActivityListDomOptions
+): HTMLElement {
+  const row = doc.createElement('div');
+  row.className = 'deep-chat-dt-activity';
+  row.dataset.stepId = stepId;
+
+  const toggle = doc.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'deep-chat-dt-toggle';
+  toggle.setAttribute('aria-expanded', 'false');
+
+  const label = doc.createElement('span');
+  label.className = 'deep-chat-dt-label';
+  const meta = doc.createElement('span');
+  meta.className = 'deep-chat-dt-activity-meta';
+  toggle.append(label, meta, createChevronIcon(doc));
+
+  const body = doc.createElement('div');
+  body.className = 'deep-chat-dt-body';
+  body.hidden = true;
+  const text = doc.createElement('pre');
+  text.className = 'deep-chat-dt-text';
+  body.append(text);
+
+  toggle.addEventListener('click', () => {
+    const id = row.dataset.stepId || '';
+    const next = !options.getExpanded(id);
+    options.setExpanded(id, next);
+    setToggleExpanded(toggle, next);
+    body.hidden = !next;
+    const bodyNode = row.querySelector<HTMLElement>('.deep-chat-dt-body');
+    if (!bodyNode) return;
+    if (next) {
+      syncDeepChatDtBodyScrollCap(bodyNode);
+    } else {
+      bodyNode.scrollTop = 0;
+    }
+  });
+
+  row.append(toggle, body);
+  return row;
+}
+
+function syncActivityRowMeta(
+  row: HTMLElement,
+  step: PreReplyActivityStep,
+  label: HTMLElement,
+  meta: HTMLElement,
+  showStatusBadge: boolean
+): void {
+  if (label.textContent !== step.label) {
+    label.textContent = step.label;
+  }
+  const badge = activityStatusBadge(step.status, showStatusBadge);
+  if (meta.textContent !== badge) {
+    meta.textContent = badge;
+  }
+  meta.hidden = !badge;
+  row.dataset.status = step.status;
+  row.dataset.kind = step.kind;
+}
+
+function syncActivityRowExpansion(
+  toggle: HTMLElement,
+  body: HTMLElement,
+  text: HTMLElement,
+  step: PreReplyActivityStep,
+  options: ActivityListDomOptions
+): void {
+  const detail = (step.detail || '').trim();
+  const expandable = Boolean(detail);
+  toggle.classList.toggle('is-static', !expandable);
+  if (!expandable) {
+    options.setExpanded(step.id, false);
+    setToggleExpanded(toggle, false);
+    body.hidden = true;
+    if (text.textContent) text.textContent = '';
+    return;
+  }
+
+  const expanded = options.getExpanded(step.id);
+  setToggleExpanded(toggle, expanded);
+  body.hidden = !expanded;
+  if (text.textContent !== detail) {
+    text.textContent = detail;
+  }
+  // Settled activity rows: fit-content + max-height via CSS; stick scroll if long.
+  if (expanded) {
+    syncDeepChatDtBodyScrollCap(body);
+  } else {
+    body.scrollTop = 0;
+  }
+}
+
+function applyActivityRowState(
+  row: HTMLElement,
+  step: PreReplyActivityStep,
+  options: ActivityListDomOptions
+): void {
+  const toggle = row.querySelector<HTMLElement>('.deep-chat-dt-toggle');
+  const label = row.querySelector<HTMLElement>('.deep-chat-dt-label');
+  const meta = row.querySelector<HTMLElement>('.deep-chat-dt-activity-meta');
+  const body = row.querySelector<HTMLElement>('.deep-chat-dt-body');
+  const text = row.querySelector<HTMLElement>('.deep-chat-dt-text');
+  if (!toggle || !label || !meta || !body || !text) return;
+
+  syncActivityRowMeta(row, step, label, meta, options.showStatusBadge === true);
+  syncActivityRowExpansion(toggle, body, text, step, options);
+}
+
 /**
  * Render ordered activity rows (depth-thinking style toggles).
  * Reuses rows by data-step-id to limit MutationObserver thrash.
@@ -994,11 +1127,7 @@ export function applySettledDeepThinkingUi(
 export function syncActivityListDom(
   list: HTMLElement,
   steps: PreReplyActivityStep[],
-  options: {
-    getExpanded: (id: string) => boolean;
-    setExpanded: (id: string, open: boolean) => void;
-    showStatusBadge?: boolean;
-  }
+  options: ActivityListDomOptions
 ): void {
   const doc = list.ownerDocument;
   const seen = new Set<string>();
@@ -1009,45 +1138,7 @@ export function syncActivityListDom(
       `:scope > .deep-chat-dt-activity[data-step-id="${cssEscapeAttr(step.id)}"]`
     );
     if (!row) {
-      row = doc.createElement('div');
-      row.className = 'deep-chat-dt-activity';
-      row.dataset.stepId = step.id;
-
-      const toggle = doc.createElement('button');
-      toggle.type = 'button';
-      toggle.className = 'deep-chat-dt-toggle';
-      toggle.setAttribute('aria-expanded', 'false');
-
-      const label = doc.createElement('span');
-      label.className = 'deep-chat-dt-label';
-      const meta = doc.createElement('span');
-      meta.className = 'deep-chat-dt-activity-meta';
-      toggle.append(label, meta, createChevronIcon(doc));
-
-      const body = doc.createElement('div');
-      body.className = 'deep-chat-dt-body';
-      body.hidden = true;
-      const text = doc.createElement('pre');
-      text.className = 'deep-chat-dt-text';
-      body.append(text);
-
-      toggle.addEventListener('click', () => {
-        const id = row!.dataset.stepId || '';
-        const next = !options.getExpanded(id);
-        options.setExpanded(id, next);
-        setToggleExpanded(toggle, next);
-        body.hidden = !next;
-        const bodyNode = row!.querySelector<HTMLElement>('.deep-chat-dt-body');
-        if (bodyNode) {
-          if (next) {
-            syncDeepChatDtBodyScrollCap(bodyNode);
-          } else {
-            bodyNode.scrollTop = 0;
-          }
-        }
-      });
-
-      row.append(toggle, body);
+      row = createActivityRow(doc, step.id, options);
       list.append(row);
     }
 
@@ -1057,47 +1148,7 @@ export function syncActivityListDom(
       list.insertBefore(row, expected ?? null);
     }
 
-    const toggle = row.querySelector<HTMLElement>('.deep-chat-dt-toggle');
-    const label = row.querySelector<HTMLElement>('.deep-chat-dt-label');
-    const meta = row.querySelector<HTMLElement>('.deep-chat-dt-activity-meta');
-    const body = row.querySelector<HTMLElement>('.deep-chat-dt-body');
-    const text = row.querySelector<HTMLElement>('.deep-chat-dt-text');
-    if (!toggle || !label || !meta || !body || !text) return;
-
-    if (label.textContent !== step.label) {
-      label.textContent = step.label;
-    }
-    const badge = activityStatusBadge(step.status, options.showStatusBadge === true);
-    if (meta.textContent !== badge) {
-      meta.textContent = badge;
-    }
-    meta.hidden = !badge;
-    row.dataset.status = step.status;
-    row.dataset.kind = step.kind;
-
-    const detail = (step.detail || '').trim();
-    const expandable = Boolean(detail);
-    toggle.classList.toggle('is-static', !expandable);
-    if (!expandable) {
-      options.setExpanded(step.id, false);
-      setToggleExpanded(toggle, false);
-      body.hidden = true;
-      if (text.textContent) text.textContent = '';
-      return;
-    }
-
-    const expanded = options.getExpanded(step.id);
-    setToggleExpanded(toggle, expanded);
-    body.hidden = !expanded;
-    if (text.textContent !== detail) {
-      text.textContent = detail;
-    }
-    // Settled activity rows: fit-content + max-height via CSS; stick scroll if long.
-    if (expanded) {
-      syncDeepChatDtBodyScrollCap(body);
-    } else {
-      body.scrollTop = 0;
-    }
+    applyActivityRowState(row, step, options);
   });
 
   // Remove stale rows
@@ -1109,10 +1160,7 @@ export function syncActivityListDom(
   });
 }
 
-function activityStatusBadge(
-  status: PreReplyActivityStep['status'],
-  show: boolean
-): string {
+function activityStatusBadge(status: PreReplyActivityStep['status'], show: boolean): string {
   if (!show) return '';
   if (status === 'running') return '进行中';
   if (status === 'error') return '失败';

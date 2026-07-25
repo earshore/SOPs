@@ -16,18 +16,26 @@ function clip(text: string, max = 2000): string {
   return `${t.slice(0, max)}\n…[truncated]`;
 }
 
+function preferToolResultBody(parsed: Record<string, unknown>): string | null {
+  if (typeof parsed.resultsText === 'string' && parsed.resultsText.trim()) {
+    return parsed.resultsText;
+  }
+  if (typeof parsed.message === 'string' && parsed.message.trim()) {
+    return parsed.message;
+  }
+  if (typeof parsed.error === 'string') {
+    const msg = typeof parsed.message === 'string' ? parsed.message : '';
+    return `错误：${parsed.error}${msg ? ` — ${msg}` : ''}`;
+  }
+  return null;
+}
+
 function formatOneToolOutput(item: CollectedToolOutput, index: number): string {
   let body = item.output;
   try {
-    const parsed = JSON.parse(item.output) as Record<string, unknown>;
-    if (parsed && typeof parsed === 'object') {
-      if (typeof parsed.resultsText === 'string' && parsed.resultsText.trim()) {
-        body = parsed.resultsText;
-      } else if (typeof parsed.message === 'string' && parsed.message.trim()) {
-        body = parsed.message;
-      } else if (typeof parsed.error === 'string') {
-        body = `错误：${parsed.error}${parsed.message ? ` — ${parsed.message}` : ''}`;
-      }
+    const parsed = JSON.parse(item.output) as unknown;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      body = preferToolResultBody(parsed as Record<string, unknown>) ?? body;
     }
   } catch {
     // keep raw

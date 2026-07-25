@@ -583,7 +583,13 @@ it('uses production new_api direct gateway with a browser API key', async () => 
     'https://new.hongecb.store/v1',
     'browser-key',
     'gpt-5.5',
-    { temperature: 0.1, jsonMode: false, maxTokens: 32, stream: true, timeout: 15000 }
+    expect.objectContaining({
+      temperature: 0.1,
+      jsonMode: false,
+      maxTokens: 32,
+      stream: true,
+      timeout: 15000,
+    })
   );
 
   vi.mocked(StorageService.setSecure).mockClear();
@@ -637,7 +643,13 @@ it('tests LLM connectivity with configured timeout', async () => {
     'https://gateway.example/v1',
     'key',
     'model-a',
-    { temperature: 0.1, jsonMode: false, maxTokens: 32, stream: true, timeout: 22000 }
+    expect.objectContaining({
+      temperature: 0.1,
+      jsonMode: false,
+      maxTokens: 32,
+      stream: true,
+      timeout: 22000,
+    })
   );
   expect(showToast).toHaveBeenCalledWith('连接成功！', { type: 'success' });
 
@@ -996,19 +1008,29 @@ it('emits settings bridge events through EventBus', () => {
 
 it('scrolls settings sections without changing the URL hash', () => {
   const panel = createPanel();
+  const scroller = document.createElement('div');
+  scroller.className = 'settings-panel-scroll';
+  Object.defineProperty(scroller, 'scrollTop', { value: 0, writable: true });
+  scroller.getBoundingClientRect = () =>
+    ({ top: 0, bottom: 400, left: 0, right: 300, width: 300, height: 400 }) as DOMRect;
+  const scrollTo = vi.fn();
+  scroller.scrollTo = scrollTo as typeof scroller.scrollTo;
+
   const section = document.createElement('section');
-  const scrollIntoView = vi.fn();
+  section.id = 'settings-section-network';
+  section.getBoundingClientRect = () =>
+    ({ top: 120, bottom: 200, left: 0, right: 300, width: 300, height: 80 }) as DOMRect;
+  scroller.append(section);
 
   window.location.hash = '#/more';
-  section.id = 'settings-section-network';
-  section.scrollIntoView = scrollIntoView;
-  document.body.append(section);
+  document.body.append(scroller);
 
   panel.scrollToSection('settings-section-network');
 
-  expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+  expect(scrollTo).toHaveBeenCalledWith({ top: 112, behavior: 'smooth' });
   expect(window.location.hash).toBe('#/more');
   window.location.hash = '';
+  scroller.remove();
 });
 
 it('keeps the real settings template optimized for PC category scanning', () => {
@@ -1074,7 +1096,7 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain(':aria-label="fetchModelsText"');
   expect(template).toContain(':aria-label="testConnectionText"');
   expect(template).toContain('id="llm-service-tier"');
-  expect(template).toContain('<option value="">不发送 service_tier</option>');
+  expect(template).toContain('<option value="">不发送（默认）</option>');
 
   const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
   const implicitButtons = buttonOpenings.filter(

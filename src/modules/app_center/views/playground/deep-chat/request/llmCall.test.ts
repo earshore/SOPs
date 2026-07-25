@@ -163,10 +163,7 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     expect(shouldTypewriteFinalAssistantText('正在搜索', '完整新闻摘要')).toBe(true);
     expect(shouldTypewriteFinalAssistantText('完整新闻摘要', '完整新闻摘要')).toBe(false);
     expect(
-      shouldTypewriteFinalAssistantText(
-        '[{"search_x":[{"query":"AI"}]}]',
-        '根据工具结果…'
-      )
+      shouldTypewriteFinalAssistantText('[{"search_x":[{"query":"AI"}]}]', '根据工具结果…')
     ).toBe(true);
   });
 });

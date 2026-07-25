@@ -181,6 +181,23 @@ function normalizeReasoningDurationSec(value: unknown): number | undefined {
   return Math.max(0, Math.round(value));
 }
 
+function optionalStoredMessageFields(
+  message: DeepChatMessage,
+  maxMessageChars: number | undefined
+): Partial<DeepChatMessage> {
+  const reasoning = typeof message.reasoning === 'string' ? message.reasoning.trim() : '';
+  const durationSec = normalizeReasoningDurationSec(message.reasoningDurationSec);
+  const status =
+    message.status === 'stopped' || message.status === 'partial' ? message.status : undefined;
+  const preReplySteps = normalizePreReplyActivitySteps(message.preReplySteps, maxMessageChars);
+  return {
+    ...(reasoning ? { reasoning: truncateStoredMessage(reasoning, maxMessageChars) } : {}),
+    ...(durationSec !== undefined ? { reasoningDurationSec: durationSec } : {}),
+    ...(status ? { status } : {}),
+    ...(preReplySteps ? { preReplySteps } : {}),
+  };
+}
+
 function normalizeStoredMessage(
   message: DeepChatMessage,
   options: Required<Pick<NormalizeStoredThreadMessagesOptions, 'fallbackCreatedAt'>> &
@@ -191,22 +208,11 @@ function normalizeStoredMessage(
     return null;
   }
 
-  const reasoning = typeof message.reasoning === 'string' ? message.reasoning.trim() : '';
-  const durationSec = normalizeReasoningDurationSec(message.reasoningDurationSec);
-  const status =
-    message.status === 'stopped' || message.status === 'partial' ? message.status : undefined;
-  const preReplySteps = normalizePreReplyActivitySteps(
-    message.preReplySteps,
-    options.maxMessageChars
-  );
   return {
     role: message.role === 'user' ? 'user' : 'ai',
     text,
     createdAt: getFiniteTimestamp(message.createdAt, options.fallbackCreatedAt),
-    ...(reasoning ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) } : {}),
-    ...(durationSec !== undefined ? { reasoningDurationSec: durationSec } : {}),
-    ...(status ? { status } : {}),
-    ...(preReplySteps ? { preReplySteps } : {}),
+    ...optionalStoredMessageFields(message, options.maxMessageChars),
   };
 }
 

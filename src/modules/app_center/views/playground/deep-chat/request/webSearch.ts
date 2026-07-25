@@ -118,22 +118,27 @@ function clip(text: string, max = MAX_RESULT_CHARS): { text: string; truncated: 
   return { text: `${t.slice(0, max)}\n…[truncated]`, truncated: true };
 }
 
+const CHROME_LINE_PATTERNS: RegExp[] = [
+  /^https?:\/\/r\.jina\.ai\//i,
+  /^URL Source:\s*/i,
+  /^Markdown Content:\s*/i,
+  /^Published Time:\s*/i,
+  /^(Settings|Privacy|Themes|All|News|Images|Videos|Maps|Shopping)\s*$/i,
+  /^Region\s*$/i,
+  /^Safe Search\s*$/i,
+  /^Date\s*$/i,
+];
+
 function isChromeOnlyLine(line: string): boolean {
   const t = line.trim();
   if (!t) return true;
-  if (/^https?:\/\/r\.jina\.ai\//i.test(t)) return true;
   if (/^Title:\s*/i.test(t) && /duckduckgo/i.test(t)) return true;
-  if (/^URL Source:\s*/i.test(t)) return true;
-  if (/^Markdown Content:\s*/i.test(t)) return true;
-  if (/^Published Time:\s*/i.test(t)) return true;
   if (/^\[?DuckDuckGo\]?/i.test(t) && t.length < 40) return true;
-  if (/^(Settings|Privacy|Themes|All|News|Images|Videos|Maps|Shopping)\s*$/i.test(t)) return true;
-  if (/^Region\s*$/i.test(t) || /^Safe Search\s*$/i.test(t) || /^Date\s*$/i.test(t)) return true;
+  if (CHROME_LINE_PATTERNS.some(re => re.test(t))) return true;
   if ((DDG_REGION_MARKERS as readonly string[]).includes(t)) return true;
   if ((DDG_TIME_MARKERS as readonly string[]).includes(t)) return true;
   // Lone region list fragment lines
-  if (/^\(?[a-z]{2}(?:-[a-z]{2})?\)?$/i.test(t) && t.length <= 8) return true;
-  return false;
+  return /^\(?[a-z]{2}(?:-[a-z]{2})?\)?$/i.test(t) && t.length <= 8;
 }
 
 /**
@@ -149,9 +154,7 @@ export function sanitizeDuckDuckGoReaderText(raw: string): string {
   const regionStart = text.search(/(?:^|\n)\s*All Regions\s*(?:\n|$)/);
   if (regionStart >= 0) {
     const afterRegions = text.slice(regionStart);
-    const timeEnd = afterRegions.search(
-      /(?:^|\n)\s*Past Year\s*(?:\n|$)/i
-    );
+    const timeEnd = afterRegions.search(/(?:^|\n)\s*Past Year\s*(?:\n|$)/i);
     if (timeEnd >= 0) {
       const endIdx = regionStart + timeEnd + afterRegions.slice(timeEnd).indexOf('\n') + 1;
       // Prefer cutting from "All Regions" through "Past Year"

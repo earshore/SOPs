@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   DEEP_CHAT_DT_BODY_MAX_HEIGHT_PX,
+  applySettledDeepThinkingUi,
   resolveDeepChatDtBodyEl,
   stripSettledChromeFromHost,
+  syncActivityListDom,
   syncDeepChatDtBodyScrollCap,
   syncLivePlaceholderBubble,
 } from './generationChrome';
@@ -80,8 +82,13 @@ describe('stripSettledChromeFromHost (continue-chat flash)', () => {
     chrome.className = `${GENERATION_CHROME_CLASS} is-settled`;
     const settled = document.createElement('div');
     settled.className = 'deep-chat-dt-settled';
-    settled.innerHTML =
-      '<button class="deep-chat-dt-done-toggle"><span class="deep-chat-dt-done-label">已完成 0s</span></button>';
+    const doneToggle = document.createElement('button');
+    doneToggle.className = 'deep-chat-dt-done-toggle';
+    const doneLabel = document.createElement('span');
+    doneLabel.className = 'deep-chat-dt-done-label';
+    doneLabel.textContent = '已完成 0s';
+    doneToggle.appendChild(doneLabel);
+    settled.appendChild(doneToggle);
     chrome.appendChild(settled);
     host.appendChild(chrome);
     document.body.appendChild(host);
@@ -132,5 +139,79 @@ describe('syncLivePlaceholderBubble (ZWSP remount row)', () => {
 
     syncLivePlaceholderBubble(host, pending);
     expect(bubble.classList.contains('is-live-placeholder')).toBe(false);
+  });
+});
+
+describe('settled activity list DOM', () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+  });
+
+  it('renders expandable activity rows and applies settled chrome labels', () => {
+    const list = document.createElement('div');
+    list.className = 'deep-chat-dt-activity-list is-settled-list';
+    document.body.appendChild(list);
+
+    const expanded: Record<string, boolean> = { t1: true };
+    syncActivityListDom(
+      list,
+      [
+        {
+          id: 't1',
+          kind: 'tool',
+          label: '网页搜索',
+          detail: 'result body',
+          status: 'done',
+          order: 0,
+        },
+        {
+          id: 't2',
+          kind: 'status',
+          label: '准备中',
+          status: 'running',
+          order: 1,
+        },
+      ],
+      {
+        getExpanded: id => Boolean(expanded[id]),
+        setExpanded: (id, open) => {
+          expanded[id] = open;
+        },
+        showStatusBadge: true,
+      }
+    );
+
+    expect(list.querySelectorAll('.deep-chat-dt-activity')).toHaveLength(2);
+    expect(list.querySelector('[data-step-id="t1"] .deep-chat-dt-text')?.textContent).toBe(
+      'result body'
+    );
+    expect(
+      list
+        .querySelector('[data-step-id="t2"] .deep-chat-dt-toggle')
+        ?.classList.contains('is-static')
+    ).toBe(true);
+
+    const settled = document.createElement('div');
+    settled.className = 'deep-chat-dt-settled';
+    const doneToggle = document.createElement('button');
+    doneToggle.type = 'button';
+    doneToggle.className = 'deep-chat-dt-done-toggle';
+    const doneLabel = document.createElement('span');
+    doneLabel.className = 'deep-chat-dt-done-label';
+    doneToggle.appendChild(doneLabel);
+    const donePanel = document.createElement('div');
+    donePanel.className = 'deep-chat-dt-done-panel';
+    donePanel.hidden = true;
+    const settledList = document.createElement('div');
+    settledList.className = 'deep-chat-dt-activity-list is-settled-list';
+    donePanel.appendChild(settledList);
+    settled.append(doneToggle, donePanel);
+    document.body.appendChild(settled);
+
+    applySettledDeepThinkingUi(settled, '', 3, 'test-ui-key', []);
+    expect(settled.querySelector('.deep-chat-dt-done-label')?.textContent).toMatch(/已完成/);
+    expect(
+      settled.querySelector('.deep-chat-dt-done-toggle')?.classList.contains('is-static')
+    ).toBe(true);
   });
 });

@@ -2173,6 +2173,58 @@ async function callLLMResponsesToolLoop(
  * Continue tool loop after a first hop already returned function_call items
  * (stream-first hybrid or non-stream seed payload).
  */
+function createTrackingToolExecutor(
+  executeTool: ResponsesToolExecutor,
+  collected: CollectedToolOutput[]
+): ResponsesToolExecutor {
+  return async call => {
+    const output = await executeTool(call);
+    collected.push({
+      name: call.name,
+      callId: call.callId,
+      output: String(output ?? ''),
+    });
+    return output;
+  };
+}
+
+async function runResponsesToolFollowUpRounds(args: {
+  request: LLMCallRequest;
+  baseOptions: ResolvedLLMOptions;
+  normalizedEndpoint: string;
+  previousResponseId: string | undefined;
+  followUpInputItems: Array<Record<string, unknown>> | undefined;
+  lastText: string;
+  maxRounds: number;
+  trackingExecutor: ResponsesToolExecutor;
+  collected: CollectedToolOutput[];
+}): Promise<string> {
+  let { previousResponseId, followUpInputItems, lastText } = args;
+  for (let round = 1; round < args.maxRounds; round++) {
+    const isLastRound = round >= args.maxRounds - 1;
+    const result = await runOneResponsesToolRound({
+      request: args.request,
+      baseOptions: {
+        ...args.baseOptions,
+        stream: false,
+        enableToolLoop: true,
+        ...(isLastRound ? { toolChoice: 'none' as const } : {}),
+      },
+      normalizedEndpoint: args.normalizedEndpoint,
+      previousResponseId,
+      followUpInputItems,
+      executeTool: args.trackingExecutor,
+    });
+    lastText = result.lastText || lastText;
+    previousResponseId = result.previousResponseId;
+    followUpInputItems = isLastRound ? undefined : result.followUpInputItems;
+    if (result.done || isLastRound) {
+      return lastText.trim() || synthesizeAnswerFromToolOutputs(args.collected);
+    }
+  }
+  return lastText.trim() || synthesizeAnswerFromToolOutputs(args.collected);
+}
+
 async function continueResponsesToolLoopFromRaw(
   request: LLMCallRequest,
   baseOptions: ResolvedLLMOptions,
@@ -2205,16 +2257,7 @@ async function continueResponsesToolLoopFromRaw(
   let followUpInputItems: Array<Record<string, unknown>> | undefined;
   let lastText = extractAssistantTextFromResponsesOrChat(raw);
   const collected: CollectedToolOutput[] = [];
-
-  const trackingExecutor: ResponsesToolExecutor = async call => {
-    const output = await executeTool(call);
-    collected.push({
-      name: call.name,
-      callId: call.callId,
-      output: String(output ?? ''),
-    });
-    return output;
-  };
+  const trackingExecutor = createTrackingToolExecutor(executeTool, collected);
 
   const first = await processToolRoundFromPayload({
     request,
@@ -2230,30 +2273,17 @@ async function continueResponsesToolLoopFromRaw(
   followUpInputItems = first.followUpInputItems;
   lastText = first.lastText || lastText;
 
-  for (let round = 1; round < maxRounds; round++) {
-    const isLastRound = round >= maxRounds - 1;
-    const result = await runOneResponsesToolRound({
-      request,
-      baseOptions: {
-        ...baseOptions,
-        stream: false,
-        enableToolLoop: true,
-        ...(isLastRound ? { toolChoice: 'none' as const } : {}),
-      },
-      normalizedEndpoint,
-      previousResponseId,
-      followUpInputItems,
-      executeTool: trackingExecutor,
-    });
-    lastText = result.lastText || lastText;
-    previousResponseId = result.previousResponseId;
-    followUpInputItems = isLastRound ? undefined : result.followUpInputItems;
-    if (result.done || isLastRound) {
-      return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
-    }
-  }
-
-  return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
+  return runResponsesToolFollowUpRounds({
+    request,
+    baseOptions,
+    normalizedEndpoint,
+    previousResponseId,
+    followUpInputItems,
+    lastText,
+    maxRounds,
+    trackingExecutor,
+    collected,
+  });
 }
 
 function resolveRawFromStreamFirstPayload(
@@ -2288,6 +2318,71 @@ function resolveFunctionCallsFromStreamFirstPayload(
  * from the first payload (or cold-start non-stream loop when nothing was captured).
  * Also recovers when models dump tool calls as plain text (XML / JSON arrays).
  */
+function plainStreamNoToolsOptions(baseOptions: ResolvedLLMOptions): ResolvedLLMOptions {
+  return {
+    ...baseOptions,
+    stream: true,
+    enableToolLoop: false,
+    tools: undefined,
+    executeTool: undefined,
+    toolChoice: undefined,
+  };
+}
+
+async function tryRecoverResponsesTextTools(
+  request: LLMCallRequest,
+  baseOptions: ResolvedLLMOptions,
+  toolOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string,
+  streamed: string
+): Promise<string | null> {
+  if (!baseOptions.executeTool || !textLooksLikeEmittedToolCalls(streamed)) return null;
+  return recoverResponsesFromTextToolCalls(request, toolOptions, normalizedEndpoint, streamed);
+}
+
+function textFromStreamOrRaw(streamed: string, raw: Record<string, unknown> | undefined): string {
+  if (streamed.trim()) return streamed;
+  // Terminal SSE payload may carry output_text without per-token deltas or tool calls.
+  if (!raw) return '';
+  return extractAssistantTextFromResponsesOrChat(raw).trim();
+}
+
+async function resolveStreamFirstResponsesResult(args: {
+  request: LLMCallRequest;
+  baseOptions: ResolvedLLMOptions;
+  toolOptions: ResolvedLLMOptions;
+  normalizedEndpoint: string;
+  streamed: string;
+  raw: Record<string, unknown> | undefined;
+  functionCalls: import('./modelCapability').ResponsesFunctionCall[];
+}): Promise<string> {
+  const { request, baseOptions, toolOptions, normalizedEndpoint, streamed, raw, functionCalls } =
+    args;
+
+  if (raw && isResponsesInProgressEmpty(raw)) {
+    // Tools unsupported / stuck gateway: plain completion without tools.
+    return callLLMWithRetry(request, plainStreamNoToolsOptions(baseOptions), normalizedEndpoint);
+  }
+
+  if (raw && functionCalls.length > 0) {
+    return continueResponsesToolLoopFromRaw(request, toolOptions, normalizedEndpoint, raw);
+  }
+
+  // Text-as-tool recovery (responses): model wrote <tool_call> / JSON tools as content.
+  const recovered = await tryRecoverResponsesTextTools(
+    request,
+    baseOptions,
+    toolOptions,
+    normalizedEndpoint,
+    streamed
+  );
+  if (recovered !== null) return recovered;
+
+  const text = textFromStreamOrRaw(streamed, raw);
+  if (text) return text;
+  return callLLMResponsesToolLoop(request, toolOptions, normalizedEndpoint);
+}
+
 async function callLLMStreamFirstThenToolLoop(
   request: LLMCallRequest,
   baseOptions: ResolvedLLMOptions,
@@ -2312,46 +2407,15 @@ async function callLLMStreamFirstThenToolLoop(
     enableToolLoop: true,
   };
 
-  if (raw && isResponsesInProgressEmpty(raw)) {
-    // Tools unsupported / stuck gateway: plain completion without tools.
-    return callLLMWithRetry(
-      request,
-      {
-        ...baseOptions,
-        stream: true,
-        enableToolLoop: false,
-        tools: undefined,
-        executeTool: undefined,
-        toolChoice: undefined,
-      },
-      normalizedEndpoint
-    );
-  }
-
-  if (raw && functionCalls.length > 0) {
-    return continueResponsesToolLoopFromRaw(request, toolOptions, normalizedEndpoint, raw);
-  }
-
-  // Text-as-tool recovery (responses): model wrote <tool_call> / JSON tools as content.
-  if (baseOptions.executeTool && textLooksLikeEmittedToolCalls(streamed)) {
-    const recovered = await recoverResponsesFromTextToolCalls(
-      request,
-      toolOptions,
-      normalizedEndpoint,
-      streamed
-    );
-    if (recovered !== null) return recovered;
-  }
-
-  if (streamed.trim()) {
-    return streamed;
-  }
-  // Terminal SSE payload may carry output_text without per-token deltas or tool calls.
-  if (raw) {
-    const fromRaw = extractAssistantTextFromResponsesOrChat(raw).trim();
-    if (fromRaw) return fromRaw;
-  }
-  return callLLMResponsesToolLoop(request, toolOptions, normalizedEndpoint);
+  return resolveStreamFirstResponsesResult({
+    request,
+    baseOptions,
+    toolOptions,
+    normalizedEndpoint,
+    streamed,
+    raw,
+    functionCalls,
+  });
 }
 
 /**
@@ -2384,6 +2448,43 @@ async function recoverResponsesFromTextToolCalls(
  * Last round forces tool_choice=none so models cannot infinite-loop tools.
  * Empty final text falls back to synthesized tool-result summary.
  */
+async function executeChatToolCalls(
+  toolCalls: ChatFunctionToolCall[],
+  executeTool: ResponsesToolExecutor,
+  collected: CollectedToolOutput[]
+): Promise<Array<{ callId: string; output: string }>> {
+  const results: Array<{ callId: string; output: string }> = [];
+  for (const call of toolCalls) {
+    try {
+      const output = await executeTool({
+        name: call.function.name,
+        arguments: call.function.arguments,
+        callId: call.id,
+      });
+      const out = String(output ?? '');
+      results.push({ callId: call.id, output: out });
+      collected.push({ name: call.function.name, callId: call.id, output: out });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const out = JSON.stringify({ error: message });
+      results.push({ callId: call.id, output: out });
+      collected.push({ name: call.function.name, callId: call.id, output: out });
+    }
+  }
+  return results;
+}
+
+function resolveChatToolCallsFromPayload(
+  payload: LLMResponsePayload,
+  isLastRound: boolean
+): ChatFunctionToolCall[] {
+  if (isLastRound) return [];
+  if (payload.chatToolCalls?.length) return payload.chatToolCalls;
+  return extractChatToolCallsFromCompletion(
+    payload.data as unknown as Record<string, unknown> | null
+  );
+}
+
 async function callLLMChatToolLoop(
   request: LLMCallRequest,
   baseOptions: ResolvedLLMOptions,
@@ -2404,9 +2505,7 @@ async function callLLMChatToolLoop(
       stream: false,
       enableToolLoop: false,
       // Force a visible answer instead of endless tool_calls.
-      ...(isLastRound
-        ? { toolChoice: 'none' as const, tools: baseOptions.tools }
-        : {}),
+      ...(isLastRound ? { toolChoice: 'none' as const, tools: baseOptions.tools } : {}),
     };
     const roundRequest: LLMCallRequest = { ...request, messages, options: roundOptions };
     const context = createInitialLLMContext(roundRequest, roundOptions, normalizedEndpoint);
@@ -2415,36 +2514,12 @@ async function callLLMChatToolLoop(
       externallyAborted: false,
     });
     lastText = getLLMResponseContent(payload);
-    const toolCalls = isLastRound
-      ? []
-      : payload.chatToolCalls?.length
-        ? payload.chatToolCalls
-        : extractChatToolCallsFromCompletion(
-            payload.data as unknown as Record<string, unknown> | null
-          );
+    const toolCalls = resolveChatToolCallsFromPayload(payload, isLastRound);
     if (!toolCalls.length) {
       return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
     }
 
-    const results: Array<{ callId: string; output: string }> = [];
-    for (const call of toolCalls) {
-      try {
-        const output = await executeTool({
-          name: call.function.name,
-          arguments: call.function.arguments,
-          callId: call.id,
-        });
-        const out = String(output ?? '');
-        results.push({ callId: call.id, output: out });
-        collected.push({ name: call.function.name, callId: call.id, output: out });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        const out = JSON.stringify({ error: message });
-        results.push({ callId: call.id, output: out });
-        collected.push({ name: call.function.name, callId: call.id, output: out });
-      }
-    }
-
+    const results = await executeChatToolCalls(toolCalls, executeTool, collected);
     const transportMessages = normalizeMessagesForTransport(messages, 'chat_completions');
     const nextRecords = appendChatToolRoundMessages(transportMessages, toolCalls, results);
     messages = nextRecords as unknown as ChatMessage[];
@@ -2484,46 +2559,26 @@ async function callLLMChatStreamFirstThenToolLoop(
     toolCalls = textEmittedToChatToolCalls(parseTextEmittedToolCalls(streamed));
   }
 
-  if (toolCalls.length > 0) {
-    // Seed assistant tool_calls into messages then run remaining non-stream rounds.
-    const executeTool = baseOptions.executeTool;
-    if (!executeTool) {
-      return streamed;
-    }
-    const results: Array<{ callId: string; output: string }> = [];
-    const seedCollected: CollectedToolOutput[] = [];
-    for (const call of toolCalls) {
-      try {
-        const output = await executeTool({
-          name: call.function.name,
-          arguments: call.function.arguments,
-          callId: call.id,
-        });
-        const out = String(output ?? '');
-        results.push({ callId: call.id, output: out });
-        seedCollected.push({ name: call.function.name, callId: call.id, output: out });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        const out = JSON.stringify({ error: message });
-        results.push({ callId: call.id, output: out });
-        seedCollected.push({ name: call.function.name, callId: call.id, output: out });
-      }
-    }
-    const transportMessages = normalizeMessagesForTransport(request.messages, 'chat_completions');
-    const nextMessages = appendChatToolRoundMessages(
-      transportMessages,
-      toolCalls,
-      results
-    ) as unknown as ChatMessage[];
-    const finalText = await callLLMChatToolLoop(
-      { ...request, messages: nextMessages },
-      { ...baseOptions, stream: false, enableToolLoop: true },
-      normalizedEndpoint
-    );
-    return finalText.trim() || synthesizeAnswerFromToolOutputs(seedCollected);
-  }
+  if (toolCalls.length === 0) return streamed;
 
-  return streamed;
+  // Seed assistant tool_calls into messages then run remaining non-stream rounds.
+  const executeTool = baseOptions.executeTool;
+  if (!executeTool) return streamed;
+
+  const seedCollected: CollectedToolOutput[] = [];
+  const results = await executeChatToolCalls(toolCalls, executeTool, seedCollected);
+  const transportMessages = normalizeMessagesForTransport(request.messages, 'chat_completions');
+  const nextMessages = appendChatToolRoundMessages(
+    transportMessages,
+    toolCalls,
+    results
+  ) as unknown as ChatMessage[];
+  const finalText = await callLLMChatToolLoop(
+    { ...request, messages: nextMessages },
+    { ...baseOptions, stream: false, enableToolLoop: true },
+    normalizedEndpoint
+  );
+  return finalText.trim() || synthesizeAnswerFromToolOutputs(seedCollected);
 }
 
 /**

@@ -1269,8 +1269,7 @@ describe('callLLM streaming', () => {
 
   it('recovers when stream dumps text-emitted search_x JSON instead of tool_calls', async () => {
     const encoder = new TextEncoder();
-    const dump =
-      '正在搜索。\n\n[{"search_x":[{"query":"AI news","limit":5,"mode":"Latest"}]}]';
+    const dump = '正在搜索。\n\n[{"search_x":[{"query":"AI news","limit":5,"mode":"Latest"}]}]';
     const stream = new ReadableStream({
       start(controller) {
         controller.enqueue(

@@ -86,6 +86,9 @@ describe('chatTools', () => {
         type: 'function',
         function: { name: 'already', parameters: {} },
       },
+      { type: 'web_search' },
+      'skip-me',
+      { type: 'function' },
     ]);
     expect(tools?.[0]).toEqual({
       type: 'function',
@@ -99,5 +102,10 @@ describe('chatTools', () => {
       type: 'function',
       function: { name: 'already', parameters: {} },
     });
+    expect(tools?.[2]).toEqual({ type: 'web_search' });
+    expect(tools?.[3]).toBe('skip-me');
+    expect(tools?.[4]).toEqual({ type: 'function' });
+    expect(normalizeToolsForChat(undefined)).toBeUndefined();
+    expect(normalizeToolsForChat([])).toEqual([]);
   });
 });

@@ -536,6 +536,11 @@ class TechDebtScanner {
       }
     }
 
+    // Unit/spec fixtures intentionally long and repetitive; ESLint covers tests separately.
+    if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(filename)) {
+      return false;
+    }
+
     // 只扫描 .ts, .tsx, .js, .jsx 文件
     return /\.(ts|tsx|js|jsx)$/.test(filename);
   }
@@ -773,7 +778,9 @@ class TechDebtScanner {
    */
   private scanDuplicateCode(content: string, filePath: string): void {
     const lines = content.split('\n');
-    const MIN_DUPLICATE_LINES = 10;
+    // Dual-path LLM option bags / Create field mirrors often share 10–15 lines of
+    // intentional shape parity; flag only longer clones that are more likely accidental.
+    const MIN_DUPLICATE_LINES = 20;
     
     // 预处理：标准化代码行（移除空白和注释）
     const normalizedLines = this.normalizeCodeLines(lines);

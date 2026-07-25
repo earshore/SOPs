@@ -152,30 +152,36 @@ export function appendChatToolRoundMessages(
  * { type:'function', function: { name, description, parameters } }
  * Accepts flat Responses shape or already-nested chat shape.
  */
+function isNestedChatFunctionTool(t: Record<string, unknown>): boolean {
+  return t.type === 'function' && Boolean(t.function) && typeof t.function === 'object';
+}
+
+function toChatFunctionToolFromFlat(t: Record<string, unknown>): unknown {
+  if (typeof t.name !== 'string' || !t.name.trim()) return null;
+  return {
+    type: 'function',
+    function: {
+      name: t.name,
+      ...(typeof t.description === 'string' ? { description: t.description } : {}),
+      ...(t.parameters !== undefined ? { parameters: t.parameters } : {}),
+      ...(typeof t.strict === 'boolean' ? { strict: t.strict } : {}),
+    },
+  };
+}
+
+function normalizeOneToolForChat(tool: unknown): unknown {
+  if (!tool || typeof tool !== 'object') return tool;
+  const t = tool as Record<string, unknown>;
+  // Built-ins / non-function: pass through
+  if (t.type && t.type !== 'function') return t;
+  if (isNestedChatFunctionTool(t)) return t;
+  // Flat Responses-style function tool
+  return toChatFunctionToolFromFlat(t) ?? tool;
+}
+
 export function normalizeToolsForChat(tools: unknown[] | undefined): unknown[] | undefined {
   if (!tools || tools.length === 0) return tools;
-  return tools.map(tool => {
-    if (!tool || typeof tool !== 'object') return tool;
-    const t = tool as Record<string, unknown>;
-    // Built-ins / non-function: pass through
-    if (t.type && t.type !== 'function') return t;
-    if (t.type === 'function' && t.function && typeof t.function === 'object') {
-      return t;
-    }
-    // Flat Responses-style function tool
-    if (typeof t.name === 'string' && t.name.trim()) {
-      return {
-        type: 'function',
-        function: {
-          name: t.name,
-          ...(typeof t.description === 'string' ? { description: t.description } : {}),
-          ...(t.parameters !== undefined ? { parameters: t.parameters } : {}),
-          ...(typeof t.strict === 'boolean' ? { strict: t.strict } : {}),
-        },
-      };
-    }
-    return tool;
-  });
+  return tools.map(normalizeOneToolForChat);
 }
 
 /** Convert text-emitted tool calls into ChatFunctionToolCall[] with synthetic ids. */

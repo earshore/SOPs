@@ -49,20 +49,24 @@ export function formatToolArgsDetail(argsJson: string): string {
   }
 }
 
+function formatParsedToolResult(parsed: Record<string, unknown>): string {
+  if (typeof parsed.resultsText === 'string' && parsed.resultsText.trim()) {
+    return clipDetail(parsed.resultsText);
+  }
+  if (typeof parsed.error === 'string') {
+    const msg = typeof parsed.message === 'string' ? parsed.message : '';
+    return clipDetail(`错误：${parsed.error}${msg ? ` — ${msg}` : ''}`);
+  }
+  return clipDetail(JSON.stringify(parsed, null, 2));
+}
+
 export function formatToolResultDetail(output: string): string {
   const raw = (output || '').trim();
   if (!raw) return '（无返回）';
   try {
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    if (parsed && typeof parsed === 'object') {
-      if (typeof parsed.resultsText === 'string' && parsed.resultsText.trim()) {
-        return clipDetail(parsed.resultsText);
-      }
-      if (typeof parsed.error === 'string') {
-        const msg = typeof parsed.message === 'string' ? parsed.message : '';
-        return clipDetail(`错误：${parsed.error}${msg ? ` — ${msg}` : ''}`);
-      }
-      return clipDetail(JSON.stringify(parsed, null, 2));
+    const parsed = JSON.parse(raw) as unknown;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return formatParsedToolResult(parsed as Record<string, unknown>);
     }
   } catch {
     // plain text
@@ -77,7 +81,10 @@ export function upsertPreReplyActivityStep(
   const list = [...steps];
   const index = list.findIndex(s => s.id === next.id);
   if (index >= 0) {
-    list[index] = { ...list[index], ...next, order: list[index]!.order };
+    const prev = list[index];
+    if (prev) {
+      list[index] = { ...prev, ...next, order: prev.order };
+    }
     return list;
   }
   return [...list, { ...next, order: next.order ?? list.length }];
@@ -115,6 +122,49 @@ export function buildPreReplyActivityTimeline(args: {
   return out;
 }
 
+function parsePreReplyActivityKind(value: unknown): PreReplyActivityStep['kind'] | null {
+  return value === 'reasoning' || value === 'tool' || value === 'status' ? value : null;
+}
+
+function parsePreReplyActivityStatus(value: unknown): PreReplyActivityStatus {
+  return value === 'running' || value === 'error' || value === 'done' ? value : 'done';
+}
+
+function readTrimmedString(value: unknown): string {
+  return typeof value === 'string' && value.trim() ? value.trim() : '';
+}
+
+function readStepOrder(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function readStepDetail(value: unknown, maxDetailChars: number): string | undefined {
+  const detail = readTrimmedString(value);
+  return detail ? clipDetail(detail, maxDetailChars) : undefined;
+}
+
+function parseOnePreReplyActivityStep(
+  raw: unknown,
+  index: number,
+  maxDetailChars: number
+): PreReplyActivityStep | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const row = raw as Record<string, unknown>;
+  const kind = parsePreReplyActivityKind(row.kind);
+  const label = readTrimmedString(row.label);
+  // Require a known kind or explicit label so junk objects are dropped.
+  if (!kind && !label) return null;
+  const detail = readStepDetail(row.detail, maxDetailChars);
+  return {
+    id: readTrimmedString(row.id) || `step_${index}`,
+    kind: kind ?? 'status',
+    label: label || formatToolActivityLabel(''),
+    status: parsePreReplyActivityStatus(row.status),
+    order: readStepOrder(row.order, index),
+    ...(detail ? { detail } : {}),
+  };
+}
+
 export function normalizePreReplyActivitySteps(
   value: unknown,
   maxDetailChars = 2400
@@ -122,31 +172,8 @@ export function normalizePreReplyActivitySteps(
   if (!Array.isArray(value) || value.length === 0) return undefined;
   const steps: PreReplyActivityStep[] = [];
   for (let i = 0; i < value.length; i++) {
-    const raw = value[i];
-    if (!raw || typeof raw !== 'object') continue;
-    const row = raw as Record<string, unknown>;
-    const kind =
-      row.kind === 'reasoning' || row.kind === 'tool' || row.kind === 'status' ? row.kind : null;
-    const label = typeof row.label === 'string' && row.label.trim() ? row.label.trim() : '';
-    // Require a known kind or explicit label so junk objects are dropped.
-    if (!kind && !label) continue;
-    const id = typeof row.id === 'string' && row.id.trim() ? row.id.trim() : `step_${i}`;
-    const status: PreReplyActivityStatus =
-      row.status === 'running' || row.status === 'error' || row.status === 'done'
-        ? row.status
-        : 'done';
-    const detail =
-      typeof row.detail === 'string' && row.detail.trim()
-        ? clipDetail(row.detail, maxDetailChars)
-        : undefined;
-    steps.push({
-      id,
-      kind: kind ?? 'status',
-      label: label || formatToolActivityLabel(''),
-      status,
-      order: typeof row.order === 'number' && Number.isFinite(row.order) ? row.order : i,
-      ...(detail ? { detail } : {}),
-    });
+    const step = parseOnePreReplyActivityStep(value[i], i, maxDetailChars);
+    if (step) steps.push(step);
   }
   return steps.length ? steps : undefined;
 }

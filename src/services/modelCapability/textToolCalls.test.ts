@@ -59,4 +59,47 @@ describe('textToolCalls', () => {
     // Default collapsed: no open attribute
     expect(collapsed).not.toMatch(/<details[^>]*\sopen[\s>]/);
   });
+
+  it('parses fenced JSON tool arrays embedded in prose', () => {
+    const text = `先查一下：
+
+\`\`\`json
+[{"web_search":[{"query":"amazon FBA fees"}]}]
+\`\`\`
+
+再总结。`;
+    const calls = parseTextEmittedToolCalls(text);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.name).toBe('web_search');
+    expect(collapseTextEmittedToolCallsForDisplay(text)).toContain('工具调用 · web_search');
+  });
+
+  it('parses nested balanced arrays and ignores non-tool JSON', () => {
+    const nested = `prefix [{"search_x":[{"query":"q","filters":{"a":[1,2]}}]}] suffix`;
+    const calls = parseTextEmittedToolCalls(nested);
+    expect(calls.some(c => c.name === 'search_x')).toBe(true);
+
+    expect(textLooksLikeEmittedToolCalls('')).toBe(false);
+    expect(textLooksLikeEmittedToolCalls('[{"query":"just data"}]')).toBe(false);
+    expect(parseTextEmittedToolCalls('not tools')).toEqual([]);
+    expect(stripTextEmittedToolCalls('')).toBe('');
+  });
+
+  it('handles empty tool_args and non-JSON arg bodies in XML dumps', () => {
+    const emptyArgs = `<tool_call>
+<tool_name>web_search</tool_name>
+<tool_args>
+</tool_args>
+</tool_call>`;
+    expect(parseTextEmittedToolCalls(emptyArgs)[0]?.arguments).toBe('{}');
+
+    const plainArgs = `<tool_call>
+<tool_name>web_search</tool_name>
+<tool_args>
+not-json-args
+</tool_args>
+</tool_call>`;
+    const plain = parseTextEmittedToolCalls(plainArgs);
+    expect(JSON.parse(plain[0]!.arguments)).toEqual({ raw: 'not-json-args' });
+  });
 });

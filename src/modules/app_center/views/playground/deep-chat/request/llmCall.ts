@@ -153,12 +153,7 @@ function buildDeepChatToolOptions(
         return output;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        recordToolActivityEnd(
-          call.name,
-          callId,
-          JSON.stringify({ error: message }),
-          'error'
-        );
+        recordToolActivityEnd(call.name, callId, JSON.stringify({ error: message }), 'error');
         throw error;
       }
     },

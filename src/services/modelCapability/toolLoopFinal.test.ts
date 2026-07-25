@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  isResponsesInProgressEmpty,
-  synthesizeAnswerFromToolOutputs,
-} from './toolLoopFinal';
+import { isResponsesInProgressEmpty, synthesizeAnswerFromToolOutputs } from './toolLoopFinal';
 
 describe('toolLoopFinal', () => {
   it('synthesizes a non-empty answer from tool outputs', () => {
