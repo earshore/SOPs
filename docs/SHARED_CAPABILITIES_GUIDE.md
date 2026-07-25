@@ -215,6 +215,8 @@ async function copyReport(text: string): Promise<void> {
 
 业务侧保留 prompt / schema；不要再复制「读 active provider → getLLMConfigWithKey → applyToolTargetModel → 校验」样板。
 
+配置失败统一使用 `ERR_LLM_*`（见 [工具 LLM 错误码速查](./troubleshooting/LLM_ERROR_CODES.md)）；勿再引入 `AI_ANALYSIS_001`～`003`。
+
 ### 3.2.1 LLM 请求缓存 / in-flight
 
 **唯一实现**：`src/services/llmRequestCache.ts`
