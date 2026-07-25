@@ -466,7 +466,7 @@
   content: '';
   position: absolute;
   inset: 6px;
-  border-radius: 14px;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   border: 2px dashed transparent;
   transition: border-color var(--duration-normal);
 }
@@ -676,7 +676,8 @@
   top: 0;
   bottom: 0;
   width: 0;
-  border-radius: var(--rounded-lg) 0 0 12px;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px)) 0 0
+    var(--workbench-radius, var(--panel-radius, 8px));
   transition: width var(--duration-fast) ease;
 }
 .strategy-item:hover::before {
@@ -906,7 +907,7 @@
 /* ---- Manual Collection Configuration ---- */
 [x-data='scraperPanel'] .manual-config-panel {
   --scraper-border: var(--border-muted, var(--color-slate-200, #e2e8f0));
-  --scraper-radius: var(--rounded-card, var(--rounded-md));
+  --scraper-radius: var(--workbench-radius, var(--card-radius, 8px));
   --scraper-surface: var(--surface-card, var(--color-white, #ffffff));
   container-type: inline-size;
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.72), rgba(255, 255, 255, 1) 42%);
@@ -1369,7 +1370,7 @@ textarea:focus-visible {
       .strategy-item,
       .analyzed-badge
     ) {
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, var(--panel-radius, 8px)) !important;
   }
 
   [x-data='scraperPanel']
@@ -1396,20 +1397,20 @@ textarea:focus-visible {
   }
 
   [x-data='scraperPanel'] .upload-area::before {
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, var(--panel-radius, 8px)) !important;
   }
 
   [x-data='scraperPanel'] .scraper-strategy-card.rounded-2xl,
   [x-data='scraperPanel'] .scraper-strategy-card .strategy-card {
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, var(--panel-radius, 8px)) !important;
   }
 
   [x-data='scraperPanel'] .scraper-strategy-card .rounded-xl {
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, var(--panel-radius, 8px)) !important;
   }
 
   [x-data='scraperPanel'] .scraper-strategy-card .rounded-lg {
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, var(--panel-radius, 8px)) !important;
   }
 
   [x-data='scraperPanel'] .scraper-strategy-card .strategy-item {

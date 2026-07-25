@@ -34,6 +34,7 @@ npm run prebuild
 2. **代码质量检查** (`npm run ci:quality`)
    - 架构 / CSS / 命名审计
    - 壳层 `blue-*` 硬编码基线门禁 (D6)
+   - D1 原子 token 覆盖 allowlist 门禁
    - TypeScript类型检查
    - ESLint代码规范检查
    - ESLint warning baseline gate
@@ -265,7 +266,31 @@ npm run theme:hardcode-baseline:update
 
 报告（不阻断）: `npm run theme:hardcode-baseline`；全量 `src/` 扫描: `npm run theme:hardcode-baseline:all`。
 
-### 5. Prettier 格式检查
+### 5. D1 原子 token 覆盖 allowlist 门禁
+
+**命令**: `npm run token:override-audit:gate`
+
+**工具**: `scripts/quality/audit-token-overrides.ts --fail-on-unallowlisted-atomic`
+
+**检查内容**:
+
+- 对比 `variables.generated.css` 与手写 `variables.css` 的同名原子 token
+- **仅**在 unallowlisted 原子冲突时失败（allowlist 内的 intentional 覆盖不阻断）
+- 不使用 `--fail-on-atomic-override`（会误杀全部 intentional 覆盖）
+
+**通过标准**:
+
+- unallowlisted atomic conflicts = 0
+
+**有意新增覆盖时更新 allowlist**:
+
+1. 确认该原子同名覆盖是产品意图，不是漂移
+2. 在 `config/token-atomic-override-allowlist.json` 增加 `token` + `reason`（可选 `category`）
+3. 本地跑 `npm run token:override-audit:gate` 确认 exit 0
+
+报告（不阻断）: `npm run token:override-audit`。
+
+### 6. Prettier 格式检查
 
 **命令**: `npm run format:check`
 
@@ -323,6 +348,7 @@ npm run lint               # 代码规范
 npm run lint:tests         # 测试代码规范
 npm run lint:warning-gate  # ESLint warning 基线门
 npm run theme:hardcode-baseline:gate  # 壳层 blue-* 硬编码门 (D6)
+npm run token:override-audit:gate     # D1 原子 token 覆盖 allowlist 门
 npm run format:check       # 格式检查
 npm run build              # 构建验证
 ```

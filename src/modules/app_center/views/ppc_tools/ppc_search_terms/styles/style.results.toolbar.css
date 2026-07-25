@@ -6,7 +6,7 @@
   margin-bottom: 12px;
   padding: 12px;
   border: 1px solid var(--color-blue-200, #bfdbfe);
-  border-radius: 8px;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: var(--color-blue-50, #eff6ff);
   color: var(--color-slate-900, #0f172a);
 }
@@ -32,7 +32,7 @@
   min-height: 44px;
   padding: 8px 10px;
   border: 1px solid var(--color-slate-300, #cbd5e1);
-  border-radius: 8px;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: var(--color-white, #ffffff);
   color: var(--color-slate-900, #0f172a);
   font: inherit;
@@ -80,7 +80,7 @@
   gap: 9px;
   padding: 0 12px;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: rgba(255, 255, 255, 0.86);
   color: #64748b;
   transition:

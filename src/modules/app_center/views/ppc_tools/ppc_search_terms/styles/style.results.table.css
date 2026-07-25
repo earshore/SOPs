@@ -1,20 +1,20 @@
 .ppc-search-terms-empty-state {
   padding: 32px;
   border: 1px dashed rgba(148, 163, 184, 0.54);
-  border-radius: 8px;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: var(--surface-card-hover, var(--color-slate-50));
   text-align: center;
 }
 
 .ppc-search-terms-table-wrapper {
   border: 1px solid rgb(226, 232, 240);
-  border-radius: 8px;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
 }
 
 .ppc-search-terms-delivery-note {
   padding: 12px;
   border: 1px solid var(--color-emerald-100, #d1fae5);
-  border-radius: 8px;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: linear-gradient(180deg, var(--color-emerald-50, #ecfdf5), #ffffff);
 }
 
@@ -143,7 +143,7 @@
 .ppc-search-terms-review-reason {
   padding: 8px 10px;
   border: 1px solid rgba(20, 184, 166, 0.28);
-  border-radius: 8px;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: rgba(240, 253, 250, 0.9);
 }
 

@@ -5,7 +5,7 @@
   min-height: 38px;
   padding: 0 10px;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: #ffffff;
   color: #475569;
   font-size: 13px;
