@@ -4,21 +4,35 @@
 
 **Goal:** 将 Appearance 运行时收敛为 `ThemeManager` 单一事实源，落实 A2 双层契约，新增工业素色 `minimal` preset，并同步收紧主题/视觉设计语言文档。
 
-**Architecture:** Layer A（`THEME_PRESETS` + `ThemeManager`）只写 `--color-primary*` / `--color-focus-ring`；Layer B（`menuConfig` / `wb-theme-*`）不受 Appearance 切换影响。删除无引用的 `themes.ts`。`minimal` 使用 `colorScheme: 'slate'` + `customVars` 将 primary/focus 抬到 `slate-700` 工业档。
+**Architecture:** Layer A（`THEME_PRESETS` + `ThemeManager`）只写 `--color-primary*` / `--color-focus-ring`；Layer B（`menuConfig` / `wb-theme-*`）不受 Appearance 切换影响。删除无引用的 `themes.ts`。`minimal` 使用 `colorScheme: 'slate'` + `customVars` 将 primary/focus 抬到 `slate-700` 工业档。`applyTheme` 不再调用 `ColorContext.setModuleColor`。
 
 **Tech Stack:** TypeScript, Vitest, CSS custom properties via `updateRuntimeCssRule`, existing `StorageService` / `EventBus`.
 
-**Spec:** `docs/superpowers/specs/2026-07-25-theme-architecture-enterprise-design.md`（第 1–3 节均已确认）
+**Spec:** `docs/superpowers/specs/2026-07-25-theme-architecture-enterprise-design.md`（第 1–3 节已确认；**审查补丁 2026-07-25 已合入**）
+
+## Review Gate (2026-07-25)
+
+执行前审查结论已合入。用户确认：
+
+1. **P0 验收收窄（A）**：Appearance 只验收 token 化全局壳层，不承诺硬编码 `blue-*` 全站变色。  
+2. **ColorContext 解耦纳入本轮**。  
+3. **授权修订 plan + spec 后再选执行方式**。
+
+---
 
 ## Global Constraints
 
-- 范围：架构收口优先；不做 `variables.css` 全量迁移、dark 重构、banner 大扫除、Deep Chat 色改、换字体。
+- 范围：架构收口优先；不做 `variables.css` 全量迁移、硬编码 blue 迁移、dark 重构、新增 `wb-theme-orange`、banner 大扫除、Deep Chat 色改、换字体。
 - A2：Appearance 可换全局 primary 色相；模块归属色独立；冲突优先级：状态色 > 模块归属 > Appearance primary > 中性 surface。
+- **A2 补丁**：`ThemeManager.applyTheme` **禁止**调用 `ColorContext.setModuleColor`（模块色由 menu/路由推断）。
+- **影响面（验收）**：仅 `--color-primary*` / `--color-focus-ring` 及其派生消费者；侧栏/`wb-theme-*`/状态色不变。
 - `minimal`：工业 `slate-700` + 显式 focus；禁止营销措辞与展示字体。
 - Token：`customVars` 只引用 `var(--color-slate-*)`，禁止散落新 hex。
 - 存储 key：`app-theme`（勿改回 `app_theme`）。
+- **D3**：`data-theme` 上 Appearance id 与 `dark` 互斥；`applyTheme` 会覆盖 `dark`；本轮不修，文档写清；**禁止**验收 dark+appearance 联用。
 - 测试：TDD；每个 Task 结束时相关单测绿；最终 `type-check` 通过。
 - 文档权威链：`THEME_SYSTEM_GUIDELINES` > `VISUAL_DESIGN_GUIDELINES` > CSS 速查。
+- **Shell**：实现与验证命令须兼容 **Windows PowerShell**（勿依赖 bash `test`/`cat <<EOF`  alone）。
 
 ---
 
@@ -29,9 +43,9 @@
 | `src/common/config/themeConfig.ts` | `THEME_PRESETS`（含 `minimal`）、排序、企业化描述、A2：不再调用 `ColorContext.setModuleColor` |
 | `src/common/config/themeConfig.test.ts` | minimal 应用/变量/存储；A2 不调用 setModuleColor；preset 顺序 |
 | `src/common/config/themes.ts` | **删除**（无运行时引用） |
-| `docs/THEME_SYSTEM_GUIDELINES.md` | 宪法：A2、presets、运行时、债务 D1–D4、验收 |
-| `docs/VISUAL_DESIGN_GUIDELINES.md` | 消冲突：圆角二分、Playground=orange、appearance/`minimal` 短节 |
-| `src/components/settings/systemSettings.ts` | 无需改逻辑（已 `Object.values(THEME_PRESETS)`）；Task 1 后手工/单测确认选项含 minimal |
+| `docs/THEME_SYSTEM_GUIDELINES.md` | 宪法：A2、presets、运行时、债务 D1–D6、影响面、D3 互斥、验收 |
+| `docs/VISUAL_DESIGN_GUIDELINES.md` | 消冲突：圆角二分、Playground **配置 orange + 实现例外**、appearance/`minimal` 短节 |
+| `src/components/settings/systemSettings.ts` | 无需改逻辑（已 `Object.values(THEME_PRESETS)`）；minimal 描述含影响面暗示 |
 
 ---
 
@@ -133,7 +147,7 @@ export const THEME_PRESETS: Record<string, ThemeConfig> = {
     id: 'minimal',
     name: '极简素色',
     description:
-      '工业中性主色，低刺激、高对比，适合长时间运营作业；不改变模块归属色',
+      '工业中性主色，低刺激、高对比，适合长时间运营作业；仅调整全局主色 token，不改变模块归属与页面 banner',
     colorScheme: 'slate',
     customVars: {
       '--color-primary': 'var(--color-slate-700)',
@@ -201,17 +215,16 @@ npx vitest run src/common/config/themeConfig.test.ts
 
 Expected: PASS (all tests in file).
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Commit** (PowerShell)
 
-```bash
+```powershell
 git add src/common/config/themeConfig.ts src/common/config/themeConfig.test.ts
-git commit -m "$(cat <<'EOF'
+git commit -m @"
 feat(theme): add minimal preset and decouple appearance from ColorContext
 
 Introduce industrial slate minimal appearance theme and stop ThemeManager
 from overwriting module ColorContext so A2 ownership colors stay independent.
-EOF
-)"
+"@
 ```
 
 ---
@@ -228,10 +241,10 @@ EOF
 
 - [ ] **Step 1: Confirm zero runtime imports**
 
-Run:
+Run (from repo root; `rg` or project search):
 
-```bash
-rg -n "config/themes|from ['\"].*/themes['\"]|from ['\"]@/common/config/themes" --glob "*.{ts,js,tsx,jsx}" src tests
+```powershell
+rg -n "config/themes|from ['\"].*/themes['\"]|from ['\"]@/common/config/themes" -g "*.ts" -g "*.js" src tests
 ```
 
 Expected: no matches under `src/` or `tests/` (docs may still mention historically).
@@ -244,22 +257,21 @@ Delete `src/common/config/themes.ts`.
 
 Run:
 
-```bash
+```powershell
 npm run type-check
 ```
 
 Expected: exit 0 (no missing-module errors for themes).
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Commit** (PowerShell)
 
-```bash
+```powershell
 git add src/common/config/themes.ts
-git commit -m "$(cat <<'EOF'
+git commit -m @"
 chore(theme): remove unused themes.ts dual runtime
 
 ThemeManager in themeConfig.ts is the only appearance theme entry point.
-EOF
-)"
+"@
 ```
 
 ---
@@ -312,7 +324,16 @@ Table:
 | purple | 紫罗兰 | purple | |
 | rose | 玫瑰 | rose | |
 
-Document `minimal` customVars mapping (slate-700/100/800/900 + focus-ring). Explicitly: 切换 Appearance **不得**调用/覆盖模块 `ColorContext` 归属（由路由/menu 推断）。
+Document `minimal` customVars mapping (slate-700/100/800/900 + focus-ring). Explicitly:
+
+- 切换 Appearance **不得**调用/覆盖模块 `ColorContext` 归属（由路由/menu 推断）。
+- **影响面**：仅 token 化全局壳层（`--color-primary*` / focus 及派生）；硬编码 `blue-*` 本轮可不随 Appearance 变化（债务 D6）。
+
+Also fix Playground row in any theme-mapping table in this file:
+
+- **配置**：`menuConfig` category/themeColor = `orange`
+- **实现**：Deep Chat 等可为 terracotta / `wb-theme-supply` / hidden banner；**不**写「`wb-theme-orange`」（本轮不新增该类）
+- 删除旧的 indigo / cyan 作为 Playground 归属的表述
 
 - [ ] **Step 4: Insert section「已知债务」**
 
@@ -320,30 +341,34 @@ Document `minimal` customVars mapping (slate-700/100/800/900 + focus-ring). Expl
 | --- | --- |
 | D1 | `variables.css` 重定义基础色阶/字号覆盖 generated |
 | D2 | 圆角语义名像素不一致；工作台行为写死 ≤8px |
-| D3 | `[data-theme='dark']` 与 appearance preset id 共用 `data-theme` |
+| D3 | `[data-theme='dark']` 与 appearance preset id **互斥共用** `data-theme`；`applyTheme` 覆盖 dark；后续拆 `data-appearance` / `data-color-mode` |
 | D4 | `colorSchemes` 营销向 hover 与工作台底线冲突 |
+| D5 | `--focus-ring-soft` 等可能残留蓝系硬编码 |
+| D6 | 大量 UI 硬编码 `blue-*`，Appearance 可见影响有限 |
 
 - [ ] **Step 5: Extend 验收标准**
 
 Add checklist bullets:
 
 - Appearance 切换后模块 banner/`wb-theme-*` 归属色不变  
+- Appearance 只保证 token 化壳层变色，不要求硬编码 blue 全站变色  
+- **不**验收 dark + Appearance 联用（D3）  
 - `npx vitest run src/common/config/themeConfig.test.ts` 通过  
 - 仓库无 `src/common/config/themes.ts`  
+- `applyTheme` 不调用 `ColorContext.setModuleColor`  
 
 Keep existing `css:audit` / `ui:audit` / `generate:tokens` guidance.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Commit** (PowerShell)
 
-```bash
+```powershell
 git add docs/THEME_SYSTEM_GUIDELINES.md
-git commit -m "$(cat <<'EOF'
+git commit -m @"
 docs(theme): codify A2 layers, minimal preset, and runtime SSOT
 
 Expand THEME_SYSTEM_GUIDELINES with appearance vs ownership contract,
-preset inventory, debts D1–D4, and acceptance checks.
-EOF
-)"
+preset inventory, debts D1–D6, and acceptance checks.
+"@
 ```
 
 ---
@@ -359,17 +384,17 @@ EOF
 
 - [ ] **Step 1: Bump 更新时间 to `2026-07-25`**
 
-- [ ] **Step 2: Fix color mapping table for Playground**
+- [ ] **Step 2: Fix Playground mapping (config vs implementation)**
 
-Wherever Playground / banner mapping appears, set:
+Wherever Playground appears in color tables, use **two-layer wording** (do not invent `wb-theme-orange`):
 
-- 目录 `color`: **`orange`**
-- Banner theme: 与 orange 归属一致（`wb-theme` 或等价 orange 系；**删除** indigo/cyan 作为 Playground 归属的表述）
+| 层 | 权威 | 写法 |
+| --- | --- | --- |
+| 配置归属 | `menuConfig` | `themeColor` / category `color` = **`orange`** |
+| 页面实现 | 模板/CSS 现状 | Deep Chat：terracotta + `wb-theme-supply` / `wb-container--hidden` 等；**本轮不新增** `wb-theme-orange` |
 
-Align with `menuConfig.ts`:
-
-- `modules.playground.themeColor: 'orange'`
-- `categories.playground.color: 'orange'`
+Delete indigo / cyan as Playground **归属**（`VISUAL` 表中 `cyan` / `wb-theme-cyan` 行必须改掉）。  
+Keep Deep Chat §7.4 terracotta 特例不变。
 
 - [ ] **Step 3: Tighten 圆角 section**
 
@@ -384,25 +409,25 @@ Replace ambiguous “普通卡片 8px 到 16px” with two rows:
 
 Content requirements:
 
-- 系统设置外观主题只改全局 `--color-primary*` / focus  
+- 系统设置外观主题只改全局 `--color-primary*` / focus 及派生 token  
 - **不**改左侧目录色、welcome banner 归属、`wb-theme-*`  
-- `minimal`（极简素色）：工业 slate-700，适合长时作业；反例：用 Appearance 冲掉模块归属、引入展示字体、彩色 glow  
+- **不**保证硬编码 Tailwind `blue-*` 随 Appearance 变化（见 D6）  
+- `minimal`（极简素色）：工业 slate-700，适合长时作业；反例：用 Appearance 冲掉模块归属、引入展示字体、彩色 glow、承诺整站换肤  
 
 - [ ] **Step 5: Note colorSchemes motion boundary**
 
 In 组件优先 or 卡片相关段落加一句：`colorSchemes` 的 scale / 彩色阴影仅用于总览/入口卡；工作台面板禁止 hover 位移与 scale。
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Commit** (PowerShell)
 
-```bash
+```powershell
 git add docs/VISUAL_DESIGN_GUIDELINES.md
-git commit -m "$(cat <<'EOF'
+git commit -m @"
 docs(visual): resolve theme conflicts and document appearance layer
 
-Fix Playground ownership to orange, split workbench vs entry radii,
-and document minimal appearance behavior for long-session ops.
-EOF
-)"
+Fix Playground config vs implementation wording, split workbench vs entry
+radii, and document minimal appearance token-only impact.
+"@
 ```
 
 ---
@@ -414,7 +439,7 @@ EOF
 
 - [ ] **Step 1: Unit tests**
 
-```bash
+```powershell
 npx vitest run src/common/config/themeConfig.test.ts
 ```
 
@@ -422,41 +447,41 @@ Expected: PASS.
 
 - [ ] **Step 2: Type-check**
 
-```bash
+```powershell
 npm run type-check
 ```
 
 Expected: exit 0.
 
-- [ ] **Step 3: Structural checks**
+- [ ] **Step 3: Structural checks** (PowerShell)
 
-```bash
-# dead dual runtime gone
-test ! -f src/common/config/themes.ts && echo "themes.ts absent OK"
-
-# minimal present in source
+```powershell
+if (-not (Test-Path "src/common/config/themes.ts")) { "themes.ts absent OK" } else { throw "themes.ts still exists" }
 rg -n "id: 'minimal'|极简素色" src/common/config/themeConfig.ts
-
-# docs mention A2 / minimal / Playground orange
-rg -n "双层主题|Appearance|minimal|极简素色" docs/THEME_SYSTEM_GUIDELINES.md
-rg -n "Playground|orange|Appearance|极简素色|≤ 8px|12–16px" docs/VISUAL_DESIGN_GUIDELINES.md
+rg -n "setModuleColor" src/common/config/themeConfig.ts  # expect no matches in applyTheme path
+rg -n "双层主题|Appearance|minimal|极简素色|D3|D6" docs/THEME_SYSTEM_GUIDELINES.md
+rg -n "Playground|orange|Appearance|极简素色|≤ 8px|12–16px|menuConfig" docs/VISUAL_DESIGN_GUIDELINES.md
+# must NOT reintroduce false wb-theme-orange as the only Playground banner class
+rg -n "wb-theme-orange" docs/VISUAL_DESIGN_GUIDELINES.md docs/THEME_SYSTEM_GUIDELINES.md
+# expect: no hits, or only "do not invent / not this round" wording
 ```
 
-Expected: file absent; source + docs hits as planned.
+Expected: file absent; source + docs hits as planned; no false sole mapping to `wb-theme-orange`.
 
 - [ ] **Step 4: Optional settings smoke (if app running)**
 
-Open 系统设置 → 外观 → 确认下拉含「极简素色」且排在默认后。切换后控制台/计算样式中 primary 为 slate-700 引用；进入 Keyword Hunter 等模块 banner 归属色仍为菜单色。
+Open 系统设置 → 外观 → 确认下拉含「极简素色」且排在默认后。  
+切换后：计算样式中 `--color-primary` 为 slate-700 引用（token 化按钮/链接应变化）。  
+进入 Keyword Hunter：banner / 侧栏归属色仍为菜单色。  
+**不**测 dark 模式联用。
 
 - [ ] **Step 5: Final commit only if uncommitted doc/code fixes from verification**
 
-If clean:
-
-```bash
+```powershell
 git status
 ```
 
-No extra commit required.
+No extra commit required if clean.
 
 ---
 
@@ -465,15 +490,16 @@ No extra commit required.
 | Spec requirement | Task |
 | --- | --- |
 | A2 双层模型 + 优先级 | Task 1 (code: no ColorContext), Task 3 (docs) |
+| ColorContext 解耦（审查纳入） | Task 1 |
 | 唯一 ThemeManager / 删 themes.ts | Task 1–2 |
 | `minimal` slate-700 + focus customVars | Task 1 |
+| 影响面收窄（选项 A） | Task 1 文案, Task 3–4, Task 5 |
 | Preset 顺序 default → minimal → … | Task 1 |
 | 设置面板自动出现 | Task 1（既有 `Object.values`）+ Task 5 smoke |
-| THEME_SYSTEM 大修 | Task 3 |
-| VISUAL 消冲突 + Playground orange | Task 4 |
-| 债务 D1–D4 登记不修 | Task 3 |
-| 非目标：token 全量迁移 / dark / banner / Deep Chat / 字体 | 全任务不触碰 |
-| 验收 vitest + type-check | Task 5 |
+| THEME_SYSTEM 大修 + D1–D6 + D3 互斥 | Task 3 |
+| VISUAL 消冲突 + Playground 配置/实现分层 | Task 4 |
+| 非目标：token 全量 / blue 迁移 / dark / banner / Deep Chat / 字体 | 全任务不触碰 |
+| 验收 vitest + type-check + PowerShell 结构检查 | Task 5 |
 
 **Placeholder scan:** none intentional.  
 **Type consistency:** `ThemeConfig.customVars?: Record<string, string>`; storage `'app-theme'`; runtime rule id `'theme-manager-vars'`.
@@ -482,7 +508,7 @@ No extra commit required.
 
 ## Execution Handoff
 
-Plan complete and saved to `docs/superpowers/plans/2026-07-25-theme-architecture-enterprise.md`.
+Plan + spec review patches saved. **Audit status: PASS with patches applied.**
 
 **Two execution options:**
 

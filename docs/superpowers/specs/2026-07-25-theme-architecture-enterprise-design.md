@@ -134,27 +134,34 @@ minimal: {
 - 动效 150–250ms；遵守 `prefers-reduced-motion`。
 - 禁止：粒子、彩色 glow、彩虹渐变、展示字体、无限 pulse/bounce 作主题卖点。
 
-### 3.6 切换契约
+### 3.6 切换契约与影响面（审查收窄 · 选项 A）
 
-| 区域 | `minimal` 开启后 |
-| --- | --- |
-| 全局 Primary / 链接强调 / focus | → 工业 slate |
-| 侧栏模块色、`wb-theme-*` | 不变 |
-| success / warning / error | 不变 |
-| Deep Chat terracotta | 不变 |
-| 工作台圆角 8px / 字体族 | 不变 |
+**诚实边界（验收以此为准，禁止过度承诺整站换肤）：**
+
+Appearance **仅**影响绑定 CSS 变量 `--color-primary*`、`--color-focus-ring` 及其派生语义（如 `--color-text-link`、`--color-border-focus`、`.action-btn-primary` 等使用这些变量的控件）。
+
+| 区域 | `minimal` 开启后 | 验收 |
+| --- | --- | --- |
+| Token 化全局壳层：primary 按钮、链接色、focus ring | → 工业 slate（700 档） | **必验** |
+| 硬编码 Tailwind `blue-*` / 模块色 class 的控件 | **可能不变** | 本轮 **不**要求迁移 |
+| 侧栏模块色、`wb-theme-*`、menu 归属 | 不变 | **必验** |
+| success / warning / error | 不变 | **必验** |
+| Deep Chat terracotta | 不变 | **必验** |
+| 工作台圆角 8px / 字体族 | 不变 | **必验** |
 
 ### 3.7 设置面板
 
 - 排序：`default` → **`minimal`** → `ocean` → `forest` → `sunset` → `purple` → `rose`。
 - 文案强调清晰/克制/长时作业；避免「时尚 / 氛围 / 高级感」营销措辞。
+- 描述中须暗示影响面：只调整全局主色 token，**不**改变模块归属色与页面 banner 主题。
 
 ### 3.8 测试要求
 
 1. `applyTheme('minimal')` → `data-theme="minimal"`。
 2. primary/focus 为上表 token 引用。
 3. `StorageService.set('app-theme', 'minimal')`。
-4. 切换前后模块 banner 归属 class 不变（文档 checklist；可选后续 e2e）。
+4. `applyTheme` **不得**调用 `ColorContext.setModuleColor`（A2 补丁）。
+5. 切换前后模块 banner 归属 class 不变（文档 checklist；可选后续 e2e）。
 
 ---
 
@@ -186,25 +193,27 @@ minimal: {
 | --- | --- |
 | 工作台圆角 | 面板/表单工作区 **≤ 8px** |
 | 入口/banner 圆角 | 允许 **12–16px**，不得用于工具面板 |
-| Playground 归属 | 以 `menuConfig` 为准：**`themeColor` / category `color` = `orange`**（消除旧文档 indigo/cyan 分歧） |
+| Playground 归属 | **配置层** `menuConfig` = `orange`；**实现层** Deep Chat 为 terracotta / `wb-theme-supply` 等例外。禁止文档写死「Playground banner = wb-theme-orange」（该类本轮不存在且不新增） |
 | colorSchemes 动效 | 仅总览/入口卡；工作台禁止 scale/translateY |
-| 外观主题 | 换肤只影响全局 primary/focus；点名 `minimal` 行为 |
+| 外观主题 | 只影响 token 化全局 primary/focus；点名 `minimal`；硬编码 blue 控件本轮可不迁 |
 
 ### 4.4 模块归属色（文档应与 menuConfig 对齐的要点）
 
-实现时以 `menuConfig.ts` 为权威；文档中 Playground 写 **orange**，不再写 indigo 或 cyan。
+- 配置权威：`menuConfig.ts`；Playground **配置**写 orange，旧文档 indigo/cyan 作废。  
+- 页面实现可与配置暂不一致时，文档必须分两行写清，不得捏造不存在的 `wb-theme-*`。
 
 ---
 
 ## 5. 实现范围（本轮代码）
 
-1. `themeConfig.ts`：新增 `minimal`；preset 顺序与企业化描述；确保 `customVars` 覆盖 primary/focus。  
-2. `themeConfig.test.ts`：覆盖 `minimal` 应用、变量、存储。  
-3. 删除 `themes.ts`（确认无引用与测试依赖）。  
-4. 更新 `THEME_SYSTEM_GUIDELINES.md` 与 `VISUAL_DESIGN_GUIDELINES.md`。  
-5. 设置面板自动读 `THEME_PRESETS` — 无需硬编码选项列表（已 `Object.values`）。  
+1. `themeConfig.ts`：新增 `minimal`；preset 顺序与企业化描述；`customVars` 覆盖 primary/focus。  
+2. **A2 补丁**：`ThemeManager.applyTheme` **删除** `ColorContext.setModuleColor` 调用（模块归属改由 menu/路由推断，不因 Appearance 被覆盖）。  
+3. `themeConfig.test.ts`：minimal 变量/存储 + 不调用 `setModuleColor` + preset 顺序。  
+4. 删除 `themes.ts`（确认无引用与测试依赖）。  
+5. 更新 `THEME_SYSTEM_GUIDELINES.md` 与 `VISUAL_DESIGN_GUIDELINES.md`。  
+6. 设置面板自动读 `THEME_PRESETS` — 无需硬编码选项列表（已 `Object.values`）。  
 
-**不做**: token 全量迁移、dark 重构、banner/CSS 大扫除。
+**不做**: token 全量迁移、硬编码 blue 控件迁移、dark 重构、新增 `wb-theme-orange`、banner/CSS 大扫除、Deep Chat 色改、换字体。
 
 ---
 
@@ -214,8 +223,10 @@ minimal: {
 | --- | --- | --- |
 | D1 | `variables.css` 重定义基础色阶/字号 | 覆盖 generated；长期迁回 `design-tokens.ts` |
 | D2 | 圆角语义名像素不一致 | design-tokens `lg=8px` vs variables `md=8px/lg=12px`；工作台文档写死 8px 行为 |
-| D3 | `[data-theme='dark']` 与 appearance id | 同属性两义；需后续模式分离 |
+| D3 | `[data-theme='dark']` 与 appearance id | **同一 `data-theme` 属性两义**；`applyTheme` 会写入 appearance id 并覆盖 `dark`。当前视为 **Appearance 与 dark 互斥，Appearance 优先**。后续应拆属性（如 `data-appearance` + `data-color-mode`） |
 | D4 | `colorSchemes` 营销向 hover | scale/彩色阴影与工作台底线冲突；入口允许、工作台禁止（文档约束） |
+| D5 | `--focus-ring-soft` 等仍可能残留蓝系硬编码 | Appearance 改 ring 色后 soft 阴影可能不完全跟手；低优先级 |
+| D6 | 大量 UI 硬编码 `blue-*` 不走 `--color-primary` | 导致 Appearance 可见影响面有限；长期迁移，本轮不修 |
 
 ---
 
@@ -232,9 +243,11 @@ git diff --check
 ### 7.2 通过定义
 
 - 全局仅 `ThemeManager` 作为 Appearance 应用入口；无 `themes.ts`。  
-- `minimal` 可选且变量符合 §3.3。  
-- 文档：无双重 apply 指引；Playground = orange；工作台 vs 入口圆角二分清楚；A2 优先级写死。  
+- `minimal` 可选且变量符合 §3.3；**影响面符合 §3.6 收窄边界**（不要求硬编码 blue 全站变色）。  
+- `applyTheme` 不调用 `ColorContext.setModuleColor`。  
+- 文档：无双重 apply 指引；Playground **配置** = orange 且实现例外写清；工作台 vs 入口圆角二分清楚；A2 优先级写死；D3 互斥写清。  
 - 切换 Appearance 不改变模块归属色（checklist）。  
+- **不**宣称 dark + Appearance 可同时正确工作。  
 
 ---
 
@@ -247,6 +260,9 @@ git diff --check
 | 实现路径 | 方案 1 双层契约 + 单一运行时 | 可控、可测、兼容设置 UI |
 | 极简主题 | 工业 slate-700 + 显式 focus | ui-ux-pro-max 裁剪；长时作业、非营销 |
 | 字体 | 不更换 | 避免营销展示体与外链依赖 |
+| 验收影响面 | **收窄为 token 化壳层（审查选项 A）** | 避免过度承诺；硬编码 blue 记 D6 |
+| ColorContext | **本轮从 applyTheme 解耦** | A2 补丁；侧栏已用 menu 推断 |
+| 审查补丁 | 2026-07-25 用户确认 A + 纳入 + 改 plan/spec | 执行前闸门 |
 
 ---
 
