@@ -33,7 +33,11 @@ export class SystemSettingsPage {
   }
 
   async goToSection(label: string): Promise<void> {
-    await this.page.getByRole('button', { name: label }).click();
+    // Prefer side nav only — tip icons use generic "查看说明" aria-label to avoid clashes.
+    await this.page
+      .locator('nav.settings-panel-nav')
+      .getByRole('button', { name: label, exact: true })
+      .click();
   }
 
   saveToolStrategy(): Locator {

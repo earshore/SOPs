@@ -18,8 +18,10 @@ test.describe('system settings', () => {
     // Expert runtime fields are advanced density — switch first, then dirty maxRetries
     await settings.setDensity('advanced');
     await settings.goToSection('工具策略');
-    // Index: 0 = analysis timeout, 1 = maxRetries (advanced grid)
-    const maxRetries = page.locator('#settings-section-tool-strategy input[type="number"]').nth(1);
+    const maxRetries = page
+      .locator('#settings-section-tool-strategy label')
+      .filter({ hasText: '模型重试次数' })
+      .locator('input[type="number"]');
     await maxRetries.waitFor({ state: 'visible' });
     await maxRetries.fill('9');
 
@@ -41,7 +43,10 @@ test.describe('system settings', () => {
     await settings.setDensity('advanced');
     await settings.goToSection('工具策略');
 
-    const maxRetries = page.locator('#settings-section-tool-strategy input[type="number"]').nth(1);
+    const maxRetries = page
+      .locator('#settings-section-tool-strategy label')
+      .filter({ hasText: '模型重试次数' })
+      .locator('input[type="number"]');
     await maxRetries.waitFor({ state: 'visible' });
     await maxRetries.fill('3');
     await settings.saveToolStrategy().click();
@@ -99,7 +104,7 @@ test.describe('system settings', () => {
     await expect(thresholds).toBeVisible({ timeout: 5000 });
   });
 
-  test('E2E-P1-04 appearance section and presets are reachable', async ({ page }) => {
+  test('E2E-P1-04 appearance section is reachable without runtime presets', async ({ page }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
     await settings.goToSection('外观与体验');
@@ -108,20 +113,46 @@ test.describe('system settings', () => {
     await expect(page.getByTestId('settings-appearance-theme')).toBeVisible();
     await expect(page.getByTestId('settings-theme-select')).toBeVisible();
     await expect(page.getByTestId('settings-animations-enabled')).toBeVisible();
-    await expect(page.getByTestId('settings-runtime-presets')).toBeVisible();
+    // Presets moved to 工具策略
+    await expect(
+      page.locator('#settings-section-appearance [data-testid="settings-runtime-presets"]')
+    ).toHaveCount(0);
+  });
+
+  test('E2E-P1-06 runtime presets live under tool strategy and tool apps start open', async ({
+    page,
+  }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+    await settings.goToSection('工具策略');
+
+    const presets = page.locator(
+      '#settings-section-tool-strategy [data-testid="settings-runtime-presets"]'
+    );
+    await expect(presets).toBeVisible();
     await expect(page.getByTestId('settings-preset-reliability')).toBeVisible();
-    await expect(page.getByTestId('settings-preset-speed')).toBeVisible();
     await expect(page.getByTestId('settings-preset-cost')).toBeVisible();
 
-    // Applying a preset should not auto-close the panel
+    // Tool app groups default open so users see model selects without hunting
+    const master = page.locator(
+      '#settings-section-tool-strategy details.settings-tool-app[data-settings-focus="master-analysis"]'
+    );
+    await expect(master).toHaveAttribute('open', '');
+
+    await page.getByTestId('settings-tool-apps-collapse').click();
+    await expect(master).not.toHaveAttribute('open', '');
+    await page.getByTestId('settings-tool-apps-expand').click();
+    await expect(master).toHaveAttribute('open', '');
+
     await page.getByTestId('settings-preset-cost').click();
-    await expect(settings.appearanceSection()).toBeVisible();
+    await expect(presets).toBeVisible();
   });
 
   test('E2E-P1-nav six primary sections are listed', async ({ page }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
 
+    const nav = page.locator('nav.settings-panel-nav');
     for (const label of [
       'AI 模型与连接',
       '工具策略',
@@ -129,7 +160,7 @@ test.describe('system settings', () => {
       '数据与备份',
       '外观与体验',
     ]) {
-      await expect(page.getByRole('button', { name: label })).toBeVisible();
+      await expect(nav.getByRole('button', { name: label, exact: true })).toBeVisible();
     }
   });
 });

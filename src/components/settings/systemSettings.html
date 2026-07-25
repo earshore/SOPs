@@ -88,11 +88,7 @@
           @input="onSettingsSearch($event)"
         />
       </div>
-      <p
-        class="settings-search-empty"
-        :hidden="!searchQuery || searchHitId"
-        role="status"
-      >
+      <p class="settings-search-empty" :hidden="!searchQuery || searchHitId" role="status">
         无匹配设置项
       </p>
     </div>
@@ -237,39 +233,37 @@
               >
                 <i class="fas fa-robot"></i>
               </div>
-              <div class="min-w-0">
-                <h3 class="settings-section-head__title">AI 模型与连接</h3>
-                <p class="settings-section-head__desc">
-                  配置全局 AI 连接：Endpoint、API Key 与默认模型。可对接官方 API 或兼容中转（如
-                  new-api）；各工具可在「工具策略」中单独覆盖模型。
-                </p>
-                <div class="mt-1.5 flex flex-wrap gap-1.5">
+              <div class="settings-section-head__main">
+                <div class="settings-section-head__title-row">
+                  <h3 class="settings-section-head__title">AI 模型与连接</h3>
                   <span class="settings-badge settings-badge--ai-cost">影响 AI 成本</span>
                   <span class="settings-badge settings-badge--local">仅本浏览器</span>
+                  <div
+                    class="settings-section-tip"
+                    :class="{ 'is-warn': healthMessages.length > 0 }"
+                  >
+                    <button
+                      type="button"
+                      class="settings-section-tip__btn"
+                      aria-label="查看说明"
+                    >
+                      <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    </button>
+                    <div class="settings-section-tip__popover" role="tooltip">
+                      <p x-text="llmSetupReadinessText"></p>
+                      <ul x-show="healthMessages.length > 0" role="list">
+                        <template x-for="msg in healthMessages" :key="msg">
+                          <li x-text="msg"></li>
+                        </template>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
+                <p class="settings-section-head__desc">Endpoint、密钥与默认模型</p>
               </div>
             </div>
 
             <div class="settings-section-frame settings-section-frame--llm space-y-4">
-              <div class="settings-coach" role="status">
-                <span class="settings-coach__icon" aria-hidden="true">
-                  <i class="fas fa-circle-info"></i>
-                </span>
-                <div class="min-w-0">
-                  <p class="settings-coach__title">配置提示</p>
-                  <p class="settings-coach__text" x-text="llmSetupReadinessText"></p>
-                  <ul
-                    class="settings-coach__health mt-1.5 space-y-0.5"
-                    x-show="healthMessages.length > 0"
-                    role="list"
-                  >
-                    <template x-for="msg in healthMessages" :key="msg">
-                      <li class="settings-coach__text text-amber-700" x-text="msg"></li>
-                    </template>
-                  </ul>
-                </div>
-              </div>
-
               <div
                 :hidden="!showDangerousEndpointWarning"
                 class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl shadow-sm"
@@ -283,7 +277,7 @@
                     <i class="fas fa-exclamation-triangle text-amber-500 text-xs"></i>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <h4 class="font-bold text-amber-800 text-sm mb-1.5">安全提示</h4>
+                    <h4 class="font-semibold text-amber-800 text-sm mb-1.5">安全提示</h4>
                     <p class="text-xs text-amber-700/80 leading-relaxed mb-2.5">
                       生产环境不建议在浏览器中直接调用公有云厂商 API（密钥易暴露）。推荐通过兼容
                       OpenAI 协议的中转或企业网关访问；密钥始终仅保存在本机。
@@ -751,32 +745,108 @@
               >
                 <i class="fas fa-sliders"></i>
               </div>
-              <div class="min-w-0">
-                <h3 class="settings-section-head__title">工具策略</h3>
-                <p class="settings-section-head__desc">
-                  为各页面指定默认模型与运行限额；Deep Chat
-                  业务工具开关也在此。未单独指定模型时跟随「AI
-                  模型与连接」。修改后须点击底部保存才会写入本机。
-                </p>
+              <div class="settings-section-head__main">
+                <div class="settings-section-head__title-row">
+                  <h3 class="settings-section-head__title">工具策略</h3>
+                  <span class="settings-badge settings-badge--global">需保存</span>
+                  <span class="settings-badge settings-badge--ai-cost">影响 AI 成本</span>
+                  <div class="settings-section-tip">
+                    <button
+                      type="button"
+                      class="settings-section-tip__btn"
+                      aria-label="查看说明"
+                    >
+                      <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    </button>
+                    <div class="settings-section-tip__popover" role="tooltip">
+                      <p>
+                        模型池来自
+                        <span
+                          class="font-medium text-slate-600"
+                          x-text="toolStrategyProviderLabel"
+                        ></span>
+                        。未单独指定模型时跟随「AI 模型与连接」。改后点底部保存。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <p class="settings-section-head__desc">各工具默认模型与运行限额；改后需保存</p>
               </div>
             </div>
 
             <div class="settings-section-frame settings-section-frame--strategy space-y-4">
-              <div class="settings-coach" role="status">
-                <span class="settings-coach__icon" aria-hidden="true">
-                  <i class="fas fa-circle-info"></i>
-                </span>
-                <div class="min-w-0">
-                  <p class="settings-coach__title">模型池</p>
-                  <p class="settings-coach__text">
-                    当前模型池来自
-                    <span
-                      class="font-semibold text-slate-700"
-                      x-text="toolStrategyProviderLabel"
-                    ></span>
-                    。任务执行时优先使用工具策略中的模型。
-                  </p>
+              <!-- Runtime presets (moved from 外观与体验) -->
+              <div
+                class="settings-card"
+                id="settings-runtime-presets"
+                data-settings-focus="settings-runtime-presets"
+                data-testid="settings-runtime-presets"
+              >
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h4 class="settings-card__title">运行策略一键预设</h4>
+                    <p class="settings-card__desc">
+                      稳定 / 速度 / 成本；不改 Key、代理与工具模型。应用后需保存。
+                    </p>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="settings-badge settings-badge--global">需保存</span>
+                  </div>
                 </div>
+                <div class="settings-preset-group mt-3" role="group" aria-label="运行策略预设">
+                  <button
+                    type="button"
+                    class="settings-preset-group__btn"
+                    data-testid="settings-preset-reliability"
+                    :class="{ 'is-active': activeRuntimePresetId === 'reliability' }"
+                    :aria-pressed="(activeRuntimePresetId === 'reliability').toString()"
+                    @click="applyRuntimePresetById('reliability')"
+                  >
+                    <i class="fas fa-shield-halved" aria-hidden="true"></i>
+                    稳定优先
+                  </button>
+                  <button
+                    type="button"
+                    class="settings-preset-group__btn"
+                    data-testid="settings-preset-speed"
+                    :class="{ 'is-active': activeRuntimePresetId === 'speed' }"
+                    :aria-pressed="(activeRuntimePresetId === 'speed').toString()"
+                    @click="applyRuntimePresetById('speed')"
+                  >
+                    <i class="fas fa-bolt" aria-hidden="true"></i>
+                    速度优先
+                  </button>
+                  <button
+                    type="button"
+                    class="settings-preset-group__btn"
+                    data-testid="settings-preset-cost"
+                    :class="{ 'is-active': activeRuntimePresetId === 'cost' }"
+                    :aria-pressed="(activeRuntimePresetId === 'cost').toString()"
+                    @click="applyRuntimePresetById('cost')"
+                  >
+                    <i class="fas fa-coins" aria-hidden="true"></i>
+                    成本优先
+                  </button>
+                </div>
+              </div>
+
+              <div class="settings-expand-bar">
+                <button
+                  type="button"
+                  class="settings-expand-bar__btn"
+                  data-testid="settings-tool-apps-expand"
+                  @click="setToolAppDetailsOpen(true)"
+                >
+                  全部展开
+                </button>
+                <button
+                  type="button"
+                  class="settings-expand-bar__btn"
+                  data-testid="settings-tool-apps-collapse"
+                  @click="setToolAppDetailsOpen(false)"
+                >
+                  全部收起
+                </button>
               </div>
 
               <div
@@ -850,18 +920,21 @@
 
               <div>
                 <h4 class="settings-card__title">应用中心</h4>
-                <p class="settings-card__desc">
-                  按应用与页面模块整理默认模型和执行默认项，避免同类设置分散在多个平级目录。
-                </p>
+                <p class="settings-card__desc">按应用分组的默认模型</p>
               </div>
 
-              <details class="settings-tool-app" data-settings-focus="master-analysis">
+              <details
+                class="settings-tool-app"
+                data-settings-focus="master-analysis"
+                data-settings-tool-app
+                open
+              >
                 <summary
                   class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div>
                     <h4 class="settings-card__title">Master Analysis</h4>
-                    <p class="settings-card__desc">AI 智能分析报告生成策略。</p>
+                    <p class="settings-card__desc">默认模型与分析限额</p>
                   </div>
                   <span class="settings-card__badge"> 1 个模块 </span>
                   <i
@@ -1002,15 +1075,13 @@
                 </div>
               </details>
 
-              <details class="settings-tool-app">
+              <details class="settings-tool-app" data-settings-tool-app open>
                 <summary
                   class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div>
                     <h4 class="settings-card__title">Playground · Deep Chat</h4>
-                    <p class="settings-card__desc">
-                      对话模型、业务工具（搜索）、超时与本地保留。改后需点底部「保存工具与运行策略」。
-                    </p>
+                    <p class="settings-card__desc">默认模型、业务工具与限额</p>
                   </div>
                   <span
                     class="settings-card__badge"
@@ -1207,15 +1278,13 @@
                 </div>
               </details>
 
-              <details class="settings-tool-app">
+              <details class="settings-tool-app" data-settings-tool-app open>
                 <summary
                   class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div>
                     <h4 class="settings-card__title">Keyword Hunter</h4>
-                    <p class="settings-card__desc">
-                      按 SEO 处理和 Listing 评审分别管理模型、缓存和匹配策略。
-                    </p>
+                    <p class="settings-card__desc">SEO 与 Listing 默认模型</p>
                   </div>
                   <span class="settings-card__badge"> 2 个模块 </span>
                   <i
@@ -1442,15 +1511,18 @@
                 </div>
               </details>
 
-              <details class="settings-tool-app" data-settings-focus="ppc-analysis-flags">
+              <details
+                class="settings-tool-app"
+                data-settings-focus="ppc-analysis-flags"
+                data-settings-tool-app
+                open
+              >
                 <summary
                   class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div>
                     <h4 class="settings-card__title">PPC Tools</h4>
-                    <p class="settings-card__desc">
-                      PPC 搜索词分析器的模型复核、批处理和阈值策略。
-                    </p>
+                    <p class="settings-card__desc">搜索词模型与阈值</p>
                   </div>
                   <span class="settings-card__badge"> 1 个模块 </span>
                   <i
@@ -1679,15 +1751,25 @@
               >
                 <i class="fas fa-network-wired"></i>
               </div>
-              <div class="min-w-0">
-                <h3 class="settings-section-head__title">采集代理与网络</h3>
-                <p class="settings-section-head__desc">
-                  配置采集任务使用的代理连接方式；与 AI 模型连接相互独立。
-                </p>
-                <div class="mt-1.5 flex flex-wrap gap-1.5">
+              <div class="settings-section-head__main">
+                <div class="settings-section-head__title-row">
+                  <h3 class="settings-section-head__title">采集代理与网络</h3>
                   <span class="settings-badge settings-badge--scrape">影响采集</span>
                   <span class="settings-badge settings-badge--local">仅本浏览器</span>
+                  <div class="settings-section-tip">
+                    <button
+                      type="button"
+                      class="settings-section-tip__btn"
+                      aria-label="查看说明"
+                    >
+                      <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    </button>
+                    <div class="settings-section-tip__popover" role="tooltip">
+                      <p>商业 API 适合大批量采集；与 AI 连接相互独立。</p>
+                    </div>
+                  </div>
                 </div>
+                <p class="settings-section-head__desc">代理与采集超时/并发</p>
               </div>
             </div>
 
@@ -1939,15 +2021,25 @@
               >
                 <i class="fas fa-database"></i>
               </div>
-              <div class="min-w-0">
-                <h3 class="settings-section-head__title">数据与备份</h3>
-                <p class="settings-section-head__desc">
-                  查看本机存储占用，导出 / 导入备份，并管理历史保留与清理策略。
-                </p>
-                <div class="mt-1.5 flex flex-wrap gap-1.5">
+              <div class="settings-section-head__main">
+                <div class="settings-section-head__title-row">
+                  <h3 class="settings-section-head__title">数据与备份</h3>
                   <span class="settings-badge settings-badge--local">仅本浏览器</span>
                   <span class="settings-badge settings-badge--destructive">破坏性</span>
+                  <div class="settings-section-tip">
+                    <button
+                      type="button"
+                      class="settings-section-tip__btn"
+                      aria-label="查看说明"
+                    >
+                      <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    </button>
+                    <div class="settings-section-tip__popover" role="tooltip">
+                      <p>导出可能含密钥；清理前建议先备份。</p>
+                    </div>
+                  </div>
                 </div>
+                <p class="settings-section-head__desc">导出、导入与清理</p>
               </div>
             </div>
 
@@ -2125,7 +2217,7 @@
                     <i class="fas fa-list-check text-[11px]"></i>
                   </span>
                   <span class="min-w-0 flex-1">
-                    <span class="block text-xs font-bold text-slate-700">清理项</span>
+                    <span class="block text-xs font-medium text-slate-700">清理项</span>
                     <span
                       class="block truncate text-[10px] text-slate-400"
                       x-text="localDataCleanupSummaryText"
@@ -2154,7 +2246,7 @@
                             <div class="min-w-0">
                               <div class="flex items-center gap-2">
                                 <h4
-                                  class="truncate text-xs font-bold text-slate-700"
+                                  class="truncate text-xs font-medium text-slate-700"
                                   x-text="bucket.label"
                                 ></h4>
                                 <span
@@ -2169,7 +2261,7 @@
                             </div>
                             <div class="shrink-0 text-right">
                               <span
-                                class="block text-xs font-bold text-slate-700"
+                                class="block text-xs font-medium text-slate-700"
                                 x-text="bucket.usedText"
                               ></span>
                               <span
@@ -2222,7 +2314,7 @@
                         <i class="fas fa-exclamation-triangle text-[11px]"></i>
                       </span>
                       <div>
-                        <h4 class="text-xs font-bold text-red-800">危险操作</h4>
+                        <h4 class="text-xs font-semibold text-red-800">危险操作</h4>
                         <p class="mt-0.5 text-[10px] leading-relaxed text-red-700/75">
                           破坏性操作会删除本浏览器保存的配置、凭据、历史和缓存。请先导出备份。
                         </p>
@@ -2253,7 +2345,7 @@
             ></div>
           </div>
 
-          <!-- Section 5: Appearance & Experience (P1-5) + runtime presets (P1-6) -->
+          <!-- Section 5: Appearance & Experience -->
           <section id="settings-section-appearance" class="settings-panel-section space-y-4">
             <div class="settings-section-head">
               <div
@@ -2262,14 +2354,20 @@
               >
                 <i class="fas fa-palette"></i>
               </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-2">
+              <div class="settings-section-head__main">
+                <div class="settings-section-head__title-row">
                   <h3 class="settings-section-head__title">外观与体验</h3>
                   <span class="settings-badge settings-badge--instant">即时生效</span>
+                  <div class="settings-section-tip">
+                    <button type="button" class="settings-section-tip__btn" aria-label="查看说明">
+                      <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    </button>
+                    <div class="settings-section-tip__popover" role="tooltip">
+                      <p>主题与动效立即写入本机，无需点保存。</p>
+                    </div>
+                  </div>
                 </div>
-                <p class="settings-section-head__desc">
-                  主题与动效立即写入本机；运行策略一键预设仅改内存表单，需保存后生效。
-                </p>
+                <p class="settings-section-head__desc">主题与动效</p>
               </div>
             </div>
 
@@ -2278,9 +2376,8 @@
                 <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h4 class="settings-card__title">主题</h4>
-                    <p class="settings-card__desc">切换全站配色主题，立即生效并自动保存。</p>
+                    <p class="settings-card__desc">全站配色，立即生效</p>
                   </div>
-                  <span class="settings-badge settings-badge--instant">即时生效</span>
                 </div>
                 <label class="mt-3 block">
                   <span class="settings-label">当前主题</span>
@@ -2305,15 +2402,12 @@
                 <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h4 class="settings-card__title">动画与动效</h4>
-                    <p class="settings-card__desc">
-                      控制全局动画开关、速度，以及是否遵循系统「减少动效」。
-                    </p>
+                    <p class="settings-card__desc">开关、速度与系统减少动效</p>
                   </div>
-                  <span class="settings-badge settings-badge--instant">即时生效</span>
                 </div>
                 <div class="mt-3 space-y-3">
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2323,7 +2417,7 @@
                       class="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-600 focus:ring-slate-500"
                     />
                     <span>
-                      <span class="block">启用界面动画</span>
+                      <span class="block font-medium">启用界面动画</span>
                       <span
                         class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
                       >
@@ -2333,7 +2427,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2343,25 +2437,18 @@
                       class="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-600 focus:ring-slate-500"
                     />
                     <span>
-                      <span class="block">遵循系统「减少动效」</span>
+                      <span class="block font-medium">遵循系统「减少动效」</span>
                       <span
                         class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
                       >
-                        当系统开启 prefers-reduced-motion 时自动降低动效
+                        跟随系统 prefers-reduced-motion
                       </span>
                     </span>
                   </label>
 
-                  <div
-                    data-settings-density="advanced"
-                    :hidden="settingsDensity === 'simple'"
-                  >
+                  <div data-settings-density="advanced" :hidden="settingsDensity === 'simple'">
                     <span class="settings-label">动画速度</span>
-                    <div
-                      class="settings-segmented mt-1.5"
-                      role="group"
-                      aria-label="动画速度"
-                    >
+                    <div class="settings-segmented mt-1.5" role="group" aria-label="动画速度">
                       <button
                         type="button"
                         class="settings-segmented__btn"
@@ -2393,68 +2480,6 @@
                   </div>
                 </div>
               </div>
-
-              <div
-                class="settings-card"
-                id="settings-runtime-presets"
-                data-settings-focus="settings-runtime-presets"
-                data-testid="settings-runtime-presets"
-              >
-                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h4 class="settings-card__title">运行策略一键预设</h4>
-                    <p class="settings-card__desc">
-                      稳定 / 速度 / 成本优先仅覆盖运行策略关键字段（不改 API Key、代理、工具模型）；应用后标记为未保存。
-                    </p>
-                  </div>
-                  <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="settings-badge settings-badge--global">需保存</span>
-                    <span class="settings-badge settings-badge--ai-cost">影响 AI 成本</span>
-                  </div>
-                </div>
-                <div
-                  class="settings-preset-group mt-3"
-                  role="group"
-                  aria-label="运行策略预设"
-                >
-                  <button
-                    type="button"
-                    class="settings-preset-group__btn"
-                    data-testid="settings-preset-reliability"
-                    :class="{ 'is-active': activeRuntimePresetId === 'reliability' }"
-                    :aria-pressed="(activeRuntimePresetId === 'reliability').toString()"
-                    @click="applyRuntimePresetById('reliability')"
-                  >
-                    <i class="fas fa-shield-halved" aria-hidden="true"></i>
-                    稳定优先
-                  </button>
-                  <button
-                    type="button"
-                    class="settings-preset-group__btn"
-                    data-testid="settings-preset-speed"
-                    :class="{ 'is-active': activeRuntimePresetId === 'speed' }"
-                    :aria-pressed="(activeRuntimePresetId === 'speed').toString()"
-                    @click="applyRuntimePresetById('speed')"
-                  >
-                    <i class="fas fa-bolt" aria-hidden="true"></i>
-                    速度优先
-                  </button>
-                  <button
-                    type="button"
-                    class="settings-preset-group__btn"
-                    data-testid="settings-preset-cost"
-                    :class="{ 'is-active': activeRuntimePresetId === 'cost' }"
-                    :aria-pressed="(activeRuntimePresetId === 'cost').toString()"
-                    @click="applyRuntimePresetById('cost')"
-                  >
-                    <i class="fas fa-coins" aria-hidden="true"></i>
-                    成本优先
-                  </button>
-                </div>
-                <p class="settings-field-help mt-2">
-                  应用后请到「工具策略」或网络区点击保存，才会写入本机运行策略。
-                </p>
-              </div>
             </div>
           </section>
 
@@ -2482,14 +2507,20 @@
               >
                 <i class="fas fa-chart-line"></i>
               </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-2">
+              <div class="settings-section-head__main">
+                <div class="settings-section-head__title-row">
                   <h3 class="settings-section-head__title">开发者诊断</h3>
                   <span class="settings-badge settings-badge--dev">开发者模式</span>
+                  <div class="settings-section-tip">
+                    <button type="button" class="settings-section-tip__btn" aria-label="查看说明">
+                      <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    </button>
+                    <div class="settings-section-tip__popover" role="tooltip">
+                      <p>仅开发者模式可见；调试开关即时生效。</p>
+                    </div>
+                  </div>
                 </div>
-                <p class="settings-section-head__desc">
-                  性能监控、事件调试与错误追踪；仅开发者入口可见。
-                </p>
+                <p class="settings-section-head__desc">监控与调试开关</p>
               </div>
             </div>
 
@@ -2531,7 +2562,7 @@
 
                 <div class="mt-3 grid gap-3 sm:grid-cols-2">
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2550,7 +2581,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2569,7 +2600,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2588,7 +2619,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2607,7 +2638,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2626,7 +2657,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"
@@ -2645,7 +2676,7 @@
                   </label>
 
                   <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700 shadow-sm"
+                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                   >
                     <input
                       type="checkbox"

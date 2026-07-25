@@ -22,6 +22,11 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
     labels: ['工具策略', '默认模型', '运行策略', '通用 AI 执行策略', '重试'],
   },
   {
+    id: 'settings-runtime-presets',
+    sectionId: 'settings-section-tool-strategy',
+    labels: ['运行策略一键预设', '预设', '稳定优先', '速度优先', '成本优先'],
+  },
+  {
     id: 'master-analysis',
     sectionId: 'settings-section-tool-strategy',
     labels: [
@@ -65,17 +70,7 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'settings-section-appearance',
     sectionId: 'settings-section-appearance',
-    labels: [
-      '外观与体验',
-      '主题',
-      '动画',
-      '减少动效',
-      '动效',
-      '预设',
-      '稳定优先',
-      '速度优先',
-      '成本优先',
-    ],
+    labels: ['外观与体验', '主题', '动画', '减少动效', '动效'],
   },
   {
     id: 'settings-runtime-presets',

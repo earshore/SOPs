@@ -456,6 +456,7 @@ interface SettingsPanelData {
   clearAllLocalData(): Promise<void>;
   scrollToSection(sectionId: string): void;
   setDensity(density: SettingsDensity): void;
+  setToolAppDetailsOpen(open: boolean): void;
   onSettingsSearch(event?: Event): void;
   scrollToSearchHit(hitId: string): void;
   loadAppearanceSettings(): void;
@@ -1894,6 +1895,16 @@ const settingsPanelBehavior: SettingsPanelPart = {
     const next: SettingsDensity = density === 'advanced' ? 'advanced' : 'simple';
     this.settingsDensity = next;
     saveSettingsUiPreferences({ density: next });
+  },
+
+  setToolAppDetailsOpen(open: boolean): void {
+    document
+      .querySelectorAll<HTMLDetailsElement>(
+        '#settings-section-tool-strategy details.settings-tool-app[data-settings-tool-app]'
+      )
+      .forEach(el => {
+        el.open = open;
+      });
   },
 
   get appearanceThemeOptions(): Array<{ id: string; name: string; description?: string }> {

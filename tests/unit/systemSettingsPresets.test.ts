@@ -180,6 +180,11 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(html).toContain('id="settings-section-appearance"');
     expect(html).toContain('外观与体验');
     expect(html).toContain('settings-section-frame--appearance');
+    // Runtime presets live under tool strategy (not appearance)
+    expect(html).toContain('id="settings-section-tool-strategy"');
     expect(html).toContain('settings-preset-group');
+    expect(html).toContain('data-testid="settings-runtime-presets"');
+    expect(html).toContain('settings-section-tip');
+    expect(html).not.toContain('class="settings-coach"');
   });
 });

@@ -1217,7 +1217,11 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template.match(/<details\s+[^>]*class="settings-tool-app/g) || []).toHaveLength(4);
   expect(template).toContain('settings-tool-app-summary');
   expect(template).toContain('settings-tool-app-chevron');
-  expect(template).not.toMatch(/<details[^>]*settings-tool-app[^>]*\sopen(\s|=|>)/);
+  // Tool app groups default open to reduce discovery cost
+  expect(template).toMatch(/<details[^>]*settings-tool-app[^>]*\bopen\b/);
+  expect(template).toContain('data-settings-tool-app');
+  expect(template).toContain('settings-section-tip');
+  expect(template).not.toContain('class="settings-coach"');
   expect(template.indexOf('通用 AI 执行策略')).toBeLessThan(template.indexOf('应用中心'));
   expect(template.indexOf('Master Analysis')).toBeLessThan(template.indexOf('Playground'));
   expect(template.indexOf('Playground')).toBeLessThan(template.indexOf('Keyword Hunter'));
