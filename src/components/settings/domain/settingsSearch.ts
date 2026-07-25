@@ -63,6 +63,26 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
     labels: ['数据与备份', '导出', '导入', '清理', 'localStorage', 'IndexedDB', '数据保留'],
   },
   {
+    id: 'settings-section-appearance',
+    sectionId: 'settings-section-appearance',
+    labels: [
+      '外观与体验',
+      '主题',
+      '动画',
+      '减少动效',
+      '动效',
+      '预设',
+      '稳定优先',
+      '速度优先',
+      '成本优先',
+    ],
+  },
+  {
+    id: 'settings-runtime-presets',
+    sectionId: 'settings-section-appearance',
+    labels: ['一键预设', '运行策略预设', '稳定', '速度', '成本', 'reliability', 'speed', 'cost'],
+  },
+  {
     id: 'settings-section-performance',
     sectionId: 'settings-section-performance',
     labels: ['开发者诊断', '性能监控', '调试配置'],

@@ -103,9 +103,21 @@ import {
   type SettingsDensity,
 } from '@/components/settings/domain/settingsUiPreferences';
 import { findFirstSettingsSearchMatch } from '@/components/settings/domain/settingsSearch';
+import {
+  applyRuntimePreset,
+  isRuntimePresetId,
+  type RuntimePresetId,
+} from '@/components/settings/domain/settingsPresets';
+import { ThemeManager, THEME_PRESETS } from '@/common/config/themeConfig';
+import {
+  animationSettingsStore,
+  getAnimationSettings,
+} from '@/stores/animation-settings';
+import type { AnimationSpeed } from '@/types/animation-types';
 
 export type { SettingsOpenOptions } from '@/components/settings/domain/settingsDeepLink';
 export type { SettingsDensity } from '@/components/settings/domain/settingsUiPreferences';
+export type { RuntimePresetId } from '@/components/settings/domain/settingsPresets';
 
 let alpineRetryCount = 0;
 
@@ -260,6 +272,16 @@ interface SettingsPanelData {
   searchQuery: string;
   /** Last search hit id (section or focus target) */
   searchHitId: string;
+  /** Appearance: current theme id (instant apply; not dirty) */
+  appearanceThemeId: string;
+  /** Appearance: animations master switch */
+  appearanceAnimationsEnabled: boolean;
+  /** Appearance: animation speed */
+  appearanceAnimationSpeed: AnimationSpeed;
+  /** Appearance: respect prefers-reduced-motion */
+  appearanceRespectSystemPreference: boolean;
+  /** Last applied runtime preset id (UI highlight only; not persisted) */
+  activeRuntimePresetId: RuntimePresetId | null;
   /** API path custom dropdown open state */
   llmApiPathMenuOpen: boolean;
   llm: LLMState;
@@ -404,9 +426,17 @@ interface SettingsPanelData {
   setDensity(density: SettingsDensity): void;
   onSettingsSearch(event?: Event): void;
   scrollToSearchHit(hitId: string): void;
+  loadAppearanceSettings(): void;
+  setAppearanceTheme(themeId: string): void;
+  setAppearanceThemeFromEvent(event: Event): void;
+  setAppearanceAnimationsEnabled(event: Event): void;
+  setAppearanceAnimationSpeed(speed: AnimationSpeed): void;
+  setAppearanceRespectSystemPreference(event: Event): void;
+  applyRuntimePresetById(id: RuntimePresetId | string): void;
   formatBytes(bytes: number): string;
   getProxyDisplayName(type: string): string;
   isDangerousEndpoint(endpoint: string): boolean;
+  appearanceThemeOptions: Array<{ id: string; name: string; description?: string }>;
 }
 
 interface AlpineWatchContext {
@@ -774,7 +804,7 @@ function buildSettingsDirtyInput(panel: {
       type: panel.proxy.type,
       customUrl: panel.proxy.customUrl,
     },
-    // Appearance partition reserved for Task 9
+    // Appearance is instant-write (theme/animation stores); never discard-dirty — Spec §5.5
     appearance: {},
   };
 }
@@ -1013,6 +1043,11 @@ function createSettingsState(): Pick<
   | 'settingsDensity'
   | 'searchQuery'
   | 'searchHitId'
+  | 'appearanceThemeId'
+  | 'appearanceAnimationsEnabled'
+  | 'appearanceAnimationSpeed'
+  | 'appearanceRespectSystemPreference'
+  | 'activeRuntimePresetId'
   | '_unsubscribers'
   | '_settingsBaseline'
   | '_runtimeHealthNormalized'
@@ -1031,6 +1066,12 @@ function createSettingsState(): Pick<
     settingsDensity: getSettingsUiPreferences().density,
     searchQuery: '',
     searchHitId: '',
+
+    appearanceThemeId: ThemeManager.getCurrentTheme(),
+    appearanceAnimationsEnabled: true,
+    appearanceAnimationSpeed: 'normal',
+    appearanceRespectSystemPreference: true,
+    activeRuntimePresetId: null,
 
     // 新增：清理函数数组
     _unsubscribers: [],
@@ -1502,6 +1543,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   // Lifecycle
   init() {
     this.loadRuntimeStrategy();
+    this.loadAppearanceSettings();
     this.developerDiagnostics = getDeveloperDiagnosticSettings();
     void this.loadProxyConfig();
     this.loadProviderConfig(this.llm.provider);
@@ -1531,9 +1573,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.settingsDensity = getSettingsUiPreferences().density;
     this.searchQuery = '';
     this.searchHitId = '';
+    this.activeRuntimePresetId = null;
     const rawRuntime = StorageService.get(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS);
     this._runtimeHealthNormalized = isRuntimeRawInvalid(rawRuntime);
     this.loadRuntimeStrategy();
+    this.loadAppearanceSettings();
     this.developerDiagnostics = getDeveloperDiagnosticSettings();
     await this.loadProviderConfig(this.llm.provider);
     await this.loadProxyConfig();
@@ -1635,6 +1679,63 @@ const settingsPanelBehavior: SettingsPanelPart = {
     const next: SettingsDensity = density === 'advanced' ? 'advanced' : 'simple';
     this.settingsDensity = next;
     saveSettingsUiPreferences({ density: next });
+  },
+
+  get appearanceThemeOptions(): Array<{ id: string; name: string; description?: string }> {
+    return Object.values(THEME_PRESETS).map(theme => ({
+      id: theme.id,
+      name: theme.name,
+      description: theme.description,
+    }));
+  },
+
+  loadAppearanceSettings(): void {
+    this.appearanceThemeId = ThemeManager.getCurrentTheme();
+    const anim = getAnimationSettings();
+    this.appearanceAnimationsEnabled = anim.enabled;
+    this.appearanceAnimationSpeed = anim.speed;
+    this.appearanceRespectSystemPreference = anim.respectSystemPreference;
+  },
+
+  setAppearanceTheme(themeId: string): void {
+    ThemeManager.applyTheme(themeId);
+    this.appearanceThemeId = ThemeManager.getCurrentTheme();
+  },
+
+  setAppearanceThemeFromEvent(event: Event): void {
+    const value = (event.target as HTMLSelectElement | null)?.value;
+    if (typeof value === 'string' && value) {
+      this.setAppearanceTheme(value);
+    }
+  },
+
+  setAppearanceAnimationsEnabled(event: Event): void {
+    const checked = Boolean((event.target as HTMLInputElement | null)?.checked);
+    if (checked) {
+      animationSettingsStore.getState().enableAnimations();
+    } else {
+      animationSettingsStore.getState().disableAnimations();
+    }
+    this.loadAppearanceSettings();
+  },
+
+  setAppearanceAnimationSpeed(speed: AnimationSpeed): void {
+    if (speed !== 'fast' && speed !== 'normal' && speed !== 'slow') return;
+    animationSettingsStore.getState().setAnimationSpeed(speed);
+    this.loadAppearanceSettings();
+  },
+
+  setAppearanceRespectSystemPreference(event: Event): void {
+    const checked = Boolean((event.target as HTMLInputElement | null)?.checked);
+    animationSettingsStore.getState().setRespectSystemPreference(checked);
+    this.loadAppearanceSettings();
+  },
+
+  applyRuntimePresetById(id: RuntimePresetId | string): void {
+    if (!isRuntimePresetId(id)) return;
+    this.runtimeStrategy.settings = applyRuntimePreset(this.runtimeStrategy.settings, id);
+    this.activeRuntimePresetId = id;
+    showToast('已应用运行策略预设（未保存，请点击保存写入本机）', { type: 'info' });
   },
 
   onSettingsSearch(event?: Event): void {
