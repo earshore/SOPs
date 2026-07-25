@@ -22,10 +22,7 @@ const PRESET_OVERLAYS: Record<
       RuntimeStrategySettings['ppcSearchTerms'],
       'maxConcurrentBatches' | 'enableLlmCache'
     >;
-    deepChat: Pick<
-      RuntimeStrategySettings['deepChat'],
-      'maxOutputTokens' | 'enableBusinessTools'
-    >;
+    deepChat: Pick<RuntimeStrategySettings['deepChat'], 'maxOutputTokens' | 'enableBusinessTools'>;
   }
 > = {
   reliability: {

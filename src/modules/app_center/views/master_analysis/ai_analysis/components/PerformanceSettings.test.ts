@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { showToast } from '@/common/ui/index';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
   createPerformanceSettingsPanel,

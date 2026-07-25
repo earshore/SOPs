@@ -120,10 +120,7 @@ import {
   type SettingsRollbackPartition,
 } from '@/components/settings/domain/settingsRollback';
 import { ThemeManager, THEME_PRESETS } from '@/common/config/themeConfig';
-import {
-  animationSettingsStore,
-  getAnimationSettings,
-} from '@/stores/animation-settings';
+import { animationSettingsStore, getAnimationSettings } from '@/stores/animation-settings';
 import type { AnimationSpeed } from '@/types/animation-types';
 
 export type { SettingsOpenOptions } from '@/components/settings/domain/settingsDeepLink';
@@ -860,6 +857,60 @@ function formatLocalDataBytes(bytes: number): string {
   const units = ['B', 'KB', 'MB', 'GB'];
   const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   return `${(bytes / Math.pow(1024, index)).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+}
+
+function applyProxyProbeFailure(
+  proxy: ProxyState,
+  message: string,
+  toastType: 'warning' | 'error' = 'error'
+): void {
+  proxy.testError = message;
+  proxy.testMessage = message;
+  proxy.status = 'error';
+  showToast(message, { type: toastType });
+}
+
+function applyProxyProbeSuccess(proxy: ProxyState): void {
+  proxy.status = 'ok';
+  proxy.testError = '';
+  proxy.testMessage = '代理连接成功';
+  showToast('代理连接成功', { type: 'success' });
+}
+
+function formatProxyProbeError(error: unknown): string {
+  const raw = error instanceof Error ? error.message : '代理连接失败';
+  if (error instanceof Error && (error.name === 'AbortError' || /timeout|aborted/i.test(raw))) {
+    return '代理连接超时';
+  }
+  return raw || '代理连接失败';
+}
+
+function buildLocalDataExportConfirm(selectedBuckets: string[] | undefined): {
+  title: string;
+  content: string;
+} {
+  if (selectedBuckets) {
+    return {
+      title: '导出分桶本地数据',
+      content: `将仅导出已选分类（${selectedBuckets.join('、')}）。备份可能仍含敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`,
+    };
+  }
+  return {
+    title: '导出本地数据',
+    content: `导出的备份文件可能包含本地加密的 API Key、代理凭据、配置和历史记录等敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`,
+  };
+}
+
+function downloadJsonBackup(payload: string, filename: string): void {
+  const blob = new Blob([payload], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 function buildLocalDataImportChoiceContent(summary: LocalDataExportSummary): string {
@@ -1632,9 +1683,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     // 订阅 EventBus 事件，保存清理函数
     const unsubOpen = eventBus.on(APP_EVENTS.SETTINGS_OPEN, payload => {
       void this.open(
-        normalizeSettingsOpenOptions(
-          payload as SettingsOpenOptions | null | undefined
-        )
+        normalizeSettingsOpenOptions(payload as SettingsOpenOptions | null | undefined)
       );
     });
 
@@ -1905,10 +1954,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   onSettingsSearch(event?: Event): void {
-    const value =
-      event?.target instanceof HTMLInputElement
-        ? event.target.value
-        : this.searchQuery;
+    const value = event?.target instanceof HTMLInputElement ? event.target.value : this.searchQuery;
     this.searchQuery = value;
     const match = findFirstSettingsSearchMatch(value);
     this.searchHitId = match?.id ?? '';
@@ -2114,9 +2160,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
       const previous = StorageService.getLLMConfig(this.llm.provider);
       pushSettingsRollbackSnapshot('llm', {
         provider: this.llm.provider,
-        config: previous
-          ? { ...previous, apiKey: '' }
-          : { ...newConfig, apiKey: '' },
+        config: previous ? { ...previous, apiKey: '' } : { ...newConfig, apiKey: '' },
       });
 
       if (this.llm.apiKey) {
@@ -2243,11 +2287,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.proxy.status = '';
 
     if (scraperProxyNeedsInput(this.proxy.type) && !this.proxy.customUrl.trim()) {
-      const message = '请先填写 API Key 或代理地址';
-      this.proxy.testError = message;
-      this.proxy.testMessage = message;
-      this.proxy.status = 'error';
-      showToast(message, { type: 'warning' });
+      applyProxyProbeFailure(this.proxy, '请先填写 API Key 或代理地址', 'warning');
       return;
     }
 
@@ -2257,45 +2297,25 @@ const settingsPanelBehavior: SettingsPanelPart = {
       this.proxy.customUrl
     );
     if (!fetchUrl) {
-      const message = '不支持的代理类型';
-      this.proxy.testError = message;
-      this.proxy.testMessage = message;
-      this.proxy.status = 'error';
-      showToast(message, { type: 'error' });
+      applyProxyProbeFailure(this.proxy, '不支持的代理类型');
       return;
     }
 
     this.proxy.isTesting = true;
     this.proxy.status = 'testing';
-
     const timeoutMs = this.runtimeStrategy.settings.scraper.requestTimeoutMs;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       showToast('正在测试代理连接...', { type: 'info' });
-      const response = await fetch(fetchUrl, {
-        method: 'GET',
-        signal: controller.signal,
-      });
+      const response = await fetch(fetchUrl, { method: 'GET', signal: controller.signal });
       if (!response.ok) {
         throw new Error(`代理响应异常 (HTTP ${response.status})`);
       }
-      this.proxy.status = 'ok';
-      this.proxy.testError = '';
-      this.proxy.testMessage = '代理连接成功';
-      showToast('代理连接成功', { type: 'success' });
+      applyProxyProbeSuccess(this.proxy);
     } catch (error) {
-      const raw = error instanceof Error ? error.message : '代理连接失败';
-      const message =
-        error instanceof Error &&
-        (error.name === 'AbortError' || /timeout|aborted/i.test(raw))
-          ? '代理连接超时'
-          : raw || '代理连接失败';
-      this.proxy.testError = message;
-      this.proxy.testMessage = message;
-      this.proxy.status = 'error';
-      showToast(message, { type: 'error' });
+      applyProxyProbeFailure(this.proxy, formatProxyProbeError(error));
     } finally {
       clearTimeout(timeoutId);
       this.proxy.isTesting = false;
@@ -2453,11 +2473,10 @@ const settingsPanelBehavior: SettingsPanelPart = {
     const selectedBuckets = this.isPartialLocalDataExport
       ? [...this.localData.selectedExportBuckets]
       : undefined;
+    const confirmCopy = buildLocalDataExportConfirm(selectedBuckets);
     const confirmed = await confirmSettingsAction(
-      selectedBuckets ? '导出分桶本地数据' : '导出本地数据',
-      selectedBuckets
-        ? `将仅导出已选分类（${selectedBuckets.join('、')}）。备份可能仍含敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`
-        : `导出的备份文件可能包含本地加密的 API Key、代理凭据、配置和历史记录等敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`,
+      confirmCopy.title,
+      confirmCopy.content,
       '继续导出'
     );
     if (!confirmed) return;
@@ -2478,16 +2497,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
         if (!sizeConfirmed) return;
       }
 
-      const blob = new Blob([payload], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
       const suffix = selectedBuckets ? `-partial-${selectedBuckets.join('-')}` : '';
-      link.download = `sops-local-data${suffix}-${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      downloadJsonBackup(
+        payload,
+        `sops-local-data${suffix}-${new Date().toISOString().slice(0, 10)}.json`
+      );
       showToast(selectedBuckets ? '分桶本地数据已导出' : '本地数据已导出', { type: 'success' });
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'exportLocalData', module: 'settings' });
@@ -2507,7 +2521,10 @@ const settingsPanelBehavior: SettingsPanelPart = {
       try {
         this.localData.isBusy = true;
         const text = await file.text();
-        let prechecked: { data: Parameters<typeof LocalDataStore.importAll>[0]; summary: LocalDataExportSummary };
+        let prechecked: {
+          data: Parameters<typeof LocalDataStore.importAll>[0];
+          summary: LocalDataExportSummary;
+        };
         try {
           prechecked = precheckLocalDataImportText(text);
         } catch (error) {

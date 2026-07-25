@@ -34,12 +34,6 @@ export function diffSettingsPartitions(
   baseline: SettingsDirtySnapshot,
   current: SettingsDirtySnapshot
 ): SettingsDirtyPartition[] {
-  const keys: SettingsDirtyPartition[] = [
-    'llm',
-    'toolStrategy',
-    'runtime',
-    'proxy',
-    'appearance',
-  ];
+  const keys: SettingsDirtyPartition[] = ['llm', 'toolStrategy', 'runtime', 'proxy', 'appearance'];
   return keys.filter(key => baseline[key] !== current[key]);
 }

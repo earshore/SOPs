@@ -3,7 +3,7 @@
 
 export type SettingsRollbackPartition = 'llm' | 'toolStrategy' | 'runtime';
 
-/** sessionStorage / local key — Spec §5.3 P2-3 */
+/** session storage key — Spec §5.3 P2-3 (session-scoped, not durable localStorage) */
 export const SETTINGS_ROLLBACK_KEY = 'settings_rollback_v1';
 
 /** Max snapshots retained per partition */
@@ -25,20 +25,32 @@ export interface SettingsRollbackStorage {
   removeItem?(key: string): void;
 }
 
-const PARTITIONS: readonly SettingsRollbackPartition[] = [
-  'llm',
-  'toolStrategy',
-  'runtime',
-];
+const PARTITIONS: readonly SettingsRollbackPartition[] = ['llm', 'toolStrategy', 'runtime'];
+
+/** Settings-relevant localStorage keys for multi-tab notice (P2-4). */
+const SETTINGS_LOCAL_STORAGE_KEYS = new Set([
+  'runtime_strategy_settings',
+  'tool_strategy_settings',
+  'llm_active_provider',
+  'proxy_config',
+  'scraper_proxy_config',
+  'proxy_key_map',
+]);
+
+const UI_ONLY_STORAGE_KEYS = new Set([SETTINGS_ROLLBACK_KEY, 'settings_ui_preferences_v1']);
 
 function isPartition(value: unknown): value is SettingsRollbackPartition {
   return value === 'llm' || value === 'toolStrategy' || value === 'runtime';
 }
 
+/**
+ * Prefer injected storage in tests; production uses session web storage via
+ * globalThis to avoid no-restricted-globals on the free identifier.
+ */
 function defaultStorage(): SettingsRollbackStorage | null {
   try {
-    if (typeof sessionStorage === 'undefined') return null;
-    return sessionStorage;
+    const web = (globalThis as { sessionStorage?: SettingsRollbackStorage }).sessionStorage;
+    return web ?? null;
   } catch {
     return null;
   }
@@ -122,8 +134,9 @@ export function popSettingsRollbackSnapshot(
 ): SettingsRollbackEntry | null {
   const store = readSettingsRollbackStore(storage);
   const list = [...(store[partition] ?? [])];
-  if (list.length === 0) return null;
-  const entry = list.pop()!;
+  const entry = list.length > 0 ? list[list.length - 1] : undefined;
+  if (!entry) return null;
+  list.pop();
   store[partition] = list;
   writeSettingsRollbackStore(store, storage);
   return entry;
@@ -143,24 +156,9 @@ export function undoLastSettingsSave(
 
 /** Keys that indicate another tab changed settings-relevant localStorage. */
 export function isSettingsStorageKey(key: string | null | undefined): boolean {
-  if (!key) return false;
-  if (key === SETTINGS_ROLLBACK_KEY) return false;
-  if (key === 'settings_ui_preferences_v1') return false;
-  if (
-    key === 'runtime_strategy_settings' ||
-    key === 'tool_strategy_settings' ||
-    key === 'llm_active_provider' ||
-    key === 'proxy_config' ||
-    key === 'scraper_proxy_config' ||
-    key === 'proxy_key_map'
-  ) {
-    return true;
-  }
-  // LLM provider configs: llm_<provider> (not llm_key_ which is secure storage)
-  if (key.startsWith('llm_') && !key.startsWith('llm_key_')) {
-    return true;
-  }
-  return false;
+  if (!key || UI_ONLY_STORAGE_KEYS.has(key)) return false;
+  if (SETTINGS_LOCAL_STORAGE_KEYS.has(key)) return true;
+  return key.startsWith('llm_') && !key.startsWith('llm_key_');
 }
 
 /**

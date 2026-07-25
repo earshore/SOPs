@@ -8,8 +8,8 @@
   --settings-accent: var(--color-blue-600, #2563eb);
   --settings-accent-soft: var(--color-blue-50, #eff6ff);
   --settings-danger: var(--color-red-600, #dc2626);
-  --settings-radius-card: var(--radius-xl, 0.875rem);
-  --settings-radius-control: var(--radius-lg, 0.75rem);
+  --settings-radius-card: var(--rounded-xl, 0.875rem);
+  --settings-radius-control: var(--rounded-lg, 0.75rem);
   --settings-focus-ring: 0 0 0 3px color-mix(in srgb, var(--settings-accent) 25%, transparent);
 }
 
@@ -308,7 +308,11 @@
 }
 
 .settings-preset-group__btn:hover {
-  border-color: color-mix(in srgb, var(--settings-accent, #2563eb) 35%, var(--settings-border, #e2e8f0));
+  border-color: color-mix(
+    in srgb,
+    var(--settings-accent, #2563eb) 35%,
+    var(--settings-border, #e2e8f0)
+  );
   color: var(--settings-accent, #2563eb);
 }
 
@@ -422,7 +426,11 @@
 }
 
 .settings-status-bar__btn--primary {
-  border-color: color-mix(in srgb, var(--settings-accent, #2563eb) 35%, var(--settings-border, #e2e8f0));
+  border-color: color-mix(
+    in srgb,
+    var(--settings-accent, #2563eb) 35%,
+    var(--settings-border, #e2e8f0)
+  );
   background: var(--settings-accent-soft, #eff6ff);
   color: var(--settings-accent, #2563eb);
 }

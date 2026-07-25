@@ -90,9 +90,8 @@ function escapeAttrSelector(value: string): string {
 
 function expandSettingsFocusTarget(focus: string): void {
   const el =
-    document.querySelector<HTMLElement>(
-      `[data-settings-focus="${escapeAttrSelector(focus)}"]`
-    ) || document.getElementById(focus);
+    document.querySelector<HTMLElement>(`[data-settings-focus="${escapeAttrSelector(focus)}"]`) ||
+    document.getElementById(focus);
   if (!el) {
     return;
   }

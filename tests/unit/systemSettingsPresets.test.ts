@@ -168,7 +168,7 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(panelTs).toContain('ThemeManager.applyTheme');
     // Implementation body (not the interface signature)
     const themeFn = panelTs.match(
-      /setAppearanceTheme\(themeId: string\): void \{\n[\s\S]*?\n  \},/
+      /setAppearanceTheme\(themeId: string\): void \{\n[\s\S]*?\n {2}\},/
     );
     expect(themeFn?.[0] ?? '').toContain('ThemeManager.applyTheme');
     expect(themeFn?.[0] ?? '').not.toContain('saveRuntimeStrategySettings');

@@ -10,11 +10,7 @@ export const STORAGE_USAGE_WARN_RATIO = 0.8;
 
 /** True when localStorage usage ratio should show the quota warning bar. */
 export function isStorageQuotaWarning(ratio: number | undefined | null): boolean {
-  return (
-    typeof ratio === 'number' &&
-    Number.isFinite(ratio) &&
-    ratio >= STORAGE_USAGE_WARN_RATIO
-  );
+  return typeof ratio === 'number' && Number.isFinite(ratio) && ratio >= STORAGE_USAGE_WARN_RATIO;
 }
 
 /**

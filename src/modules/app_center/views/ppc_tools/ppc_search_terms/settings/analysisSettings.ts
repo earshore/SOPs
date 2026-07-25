@@ -60,6 +60,16 @@ export function saveAnalysisSettings(settings: AnalysisSettings): void {
   });
 }
 
+function pickBoolean(value: unknown, fallback: boolean): boolean {
+  return typeof value === 'boolean' ? value : fallback;
+}
+
+function hasRuntimePpcSearchTerms(raw: unknown): boolean {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
+  const ppc = (raw as Record<string, unknown>).ppcSearchTerms;
+  return typeof ppc === 'object' && ppc !== null;
+}
+
 function migrateLegacyAnalysisStrategyIfNeeded(): void {
   const legacy = StorageService.get<{
     useAgent?: boolean;
@@ -71,32 +81,16 @@ function migrateLegacyAnalysisStrategyIfNeeded(): void {
   }
 
   const rawRuntime = StorageService.get(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS);
-  const hasRuntimePpc =
-    rawRuntime !== null &&
-    typeof rawRuntime === 'object' &&
-    !Array.isArray(rawRuntime) &&
-    'ppcSearchTerms' in (rawRuntime as Record<string, unknown>) &&
-    typeof (rawRuntime as Record<string, unknown>).ppcSearchTerms === 'object' &&
-    (rawRuntime as Record<string, unknown>).ppcSearchTerms !== null;
-
-  if (!hasRuntimePpc) {
+  if (!hasRuntimePpcSearchTerms(rawRuntime)) {
     const runtimeSettings = getRuntimeStrategySettings();
+    const current = runtimeSettings.ppcSearchTerms;
     saveRuntimeStrategySettings({
       ...runtimeSettings,
       ppcSearchTerms: {
-        ...runtimeSettings.ppcSearchTerms,
-        useAgent:
-          typeof legacy.useAgent === 'boolean'
-            ? legacy.useAgent
-            : runtimeSettings.ppcSearchTerms.useAgent,
-        allowLocalFallback:
-          typeof legacy.allowLocalFallback === 'boolean'
-            ? legacy.allowLocalFallback
-            : runtimeSettings.ppcSearchTerms.allowLocalFallback,
-        useContext:
-          typeof legacy.useContext === 'boolean'
-            ? legacy.useContext
-            : runtimeSettings.ppcSearchTerms.useContext,
+        ...current,
+        useAgent: pickBoolean(legacy.useAgent, current.useAgent),
+        allowLocalFallback: pickBoolean(legacy.allowLocalFallback, current.allowLocalFallback),
+        useContext: pickBoolean(legacy.useContext, current.useContext),
       },
     });
   }

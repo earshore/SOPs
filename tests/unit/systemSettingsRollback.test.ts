@@ -129,7 +129,7 @@ describe('multi-tab storage notice (P2-4)', () => {
     expect(src).toContain('externalChangeConflict');
     // handleStorageEvent body must not call reload (only sets flags)
     const handler = src.match(
-      /handleStorageEvent\(event: StorageEvent\):\s*void\s*\{([\s\S]*?)\n  \},/
+      /handleStorageEvent\(event: StorageEvent\):\s*void\s*\{([\s\S]*?)\n {2}\},/
     )?.[1];
     expect(handler).toBeTruthy();
     expect(handler).toContain('externalChangeNotice = true');

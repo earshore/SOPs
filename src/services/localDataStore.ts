@@ -613,9 +613,7 @@ class LocalDataStoreClass {
 
     const indexedRecords = await this.getAllRecords();
     const indexedDB = bucketSet
-      ? indexedRecords.filter(record =>
-          bucketSet.has(classifyKey(record.key, record.storageClass))
-        )
+      ? indexedRecords.filter(record => bucketSet.has(classifyKey(record.key, record.storageClass)))
       : indexedRecords;
 
     const payload: LocalDataExport = {
