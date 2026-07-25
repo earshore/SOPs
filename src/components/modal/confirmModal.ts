@@ -223,7 +223,12 @@ function mountConfirmModal(request: ConfirmModalRequest): void {
       if (event.target === elements.backdrop) finish(false);
     },
     handleEscape: event => {
-      if (event.key === 'Escape') finish(false);
+      if (event.key !== 'Escape') return;
+      // Prevent host surfaces (e.g. settings panel @keydown.escape.window) from
+      // re-opening confirm after this dismiss resolves.
+      event.preventDefault();
+      event.stopPropagation();
+      finish(false);
     },
   };
 
@@ -351,7 +356,10 @@ function mountChoiceModal(request: ChoiceModalRequest): void {
       if (event.target === elements.backdrop) finish('cancel');
     },
     handleEscape: (event: KeyboardEvent) => {
-      if (event.key === 'Escape') finish('cancel');
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      finish('cancel');
     },
   };
 

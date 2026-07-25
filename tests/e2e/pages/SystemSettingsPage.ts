@@ -28,7 +28,27 @@ export class SystemSettingsPage {
     await expect(this.page.locator('#settings-section-llm')).toBeVisible();
   }
 
+  async setDensity(mode: 'simple' | 'advanced'): Promise<void> {
+    await this.page.getByTestId(`settings-density-${mode}`).click();
+  }
+
+  async goToSection(label: string): Promise<void> {
+    await this.page.getByRole('button', { name: label }).click();
+  }
+
   saveToolStrategy(): Locator {
     return this.page.getByTestId('settings-save-tool-strategy');
+  }
+
+  proxyTestButton(): Locator {
+    return this.page.getByTestId('settings-test-proxy');
+  }
+
+  appearanceSection(): Locator {
+    return this.page.locator('#settings-section-appearance');
+  }
+
+  closeButton(): Locator {
+    return this.page.getByRole('button', { name: '关闭系统设置' });
   }
 }

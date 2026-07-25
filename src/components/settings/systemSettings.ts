@@ -1782,19 +1782,32 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   async close(): Promise<void> {
     if (!this.isOpen) return;
+    // Shared confirm/choice modal owns Escape while its backdrop is mounted.
+    // Do not match idle app-modals / page dialogs that stay in the DOM.
+    if (document.querySelector('.app-confirm-modal-backdrop')) {
+      return;
+    }
     const dirty = this.dirtyPartitions;
     if (dirty.length > 0) {
+      const partitionLabels: Record<SettingsDirtyPartition, string> = {
+        llm: 'AI 模型与连接',
+        toolStrategy: '工具策略',
+        runtime: '运行时策略',
+        proxy: '采集代理',
+        appearance: '外观与体验',
+      };
+      const dirtyLabels = dirty.map(p => partitionLabels[p] || p).join('、');
       const ok = await confirmSettingsAction(
         '放弃未保存的更改？',
-        `以下分区有未保存修改：${dirty.join('、')}。关闭将丢失这些更改。`,
+        `以下分区有未保存修改：${dirtyLabels}。关闭将丢失这些更改。`,
         '放弃更改'
       );
       if (!ok) return;
       // discard: reload authoritative state so baseline matches closed panel
       this.loadRuntimeStrategy();
       this.loadToolStrategyDefaults();
-      void this.loadProviderConfig(this.llm.provider);
-      void this.loadProxyConfig();
+      await this.loadProviderConfig(this.llm.provider);
+      await this.loadProxyConfig();
       this.captureSettingsBaseline();
     }
     this.isOpen = false;
