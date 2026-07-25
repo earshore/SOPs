@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.11-rc.8] - 2026-07-25
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.7` 之后的**系统设置企业级硬化**：保存契约、侧栏二级导航、采集/外观 UX、推理 5 档与回归闭环。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- 系统设置企业级硬化 Spec / Plan 与测试闭环（dirty 关闭确认、健康检查、回滚点、分桶导出、多标签提示、配额告警）。
+- 侧栏分类 **一级 + 二级** 导航（点击展开并滚动定位 / 展开祖先 details）。
+- 推理等级 **5 档**：`low` / `medium` / `high` / `xhigh` / `max`（分段控件，即时保存）。
+- 运行策略一键预设（稳定 / 速度 / 成本）并入通用 AI 执行策略；点击后即时写入 runtime。
+- 调度偏好自定义下拉：选项后附「并发 · 缓存 · 失败」浅色提示。
+- 设置内搜索、外观与体验区、数据采集扁平运行策略字段。
+
+### Changed
+
+- 系统设置：保存后**不再自动关闭**面板；按钮型控件（推理、预设、调度偏好、动画）即时保存。
+- 精简/高级 density 模式移除；全部设置项默认可见（折叠子菜单默认收起）。
+- 采集代理并入 Master Analysis → 数据采集；采集策略保存归一到「保存工具与运行策略」。
+- 数据区：分桶导出更名为「数据导入与导出」，导入/导出按钮收入该折叠框底部。
+- 文案去 AI 味；badge 每区收敛为主徽章。
+- Master Analysis 页去掉 workflow-strip；分析设置入口改为极简「清除缓存」。
+
+### Fixed
+
+- 推理设置无法持久化：Zod schema 补齐 `xhigh`/`max`，避免读盘校验失败删库。
+- 搜索框放大镜与 placeholder 重叠。
+- LLM 子菜单折叠图标（改用真实 FA chevron）。
+- 保存相关 ESLint complexity 门禁。
+- density 死代码清理；`lint:warning-gate` 归零。
+
 ## [3.0.11-rc.7] - 2026-07-25
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
