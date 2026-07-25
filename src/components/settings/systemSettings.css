@@ -1298,11 +1298,27 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   border-top: 1px solid rgba(221, 214, 254, 0.65);
 }
 
+/* Label + effort segmented side-by-side (like appearance animation speed) */
+.settings-reasoning-effort-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  min-height: 2.25rem;
+}
+
+.settings-reasoning-effort-row__label {
+  flex: 0 1 auto;
+  min-width: 4rem;
+}
+
 /* 5-tier effort control — same visual language as appearance animation speed */
 .settings-segmented--effort {
-  flex: 1 1 16rem;
-  min-width: 14rem;
+  flex: 1 1 14rem;
+  min-width: 12rem;
   max-width: 22rem;
+  margin-left: auto;
 }
 
 .settings-segmented--effort .settings-segmented__btn {

@@ -552,9 +552,6 @@
                               >
                                 推理
                               </h5>
-                              <p class="mt-0.5 text-[10px] leading-relaxed text-slate-500">
-                                随当前模型能力显示；默认关闭，不向网关发送推理字段
-                              </p>
                             </div>
                           </div>
                         </div>
@@ -582,14 +579,9 @@
                         class="settings-reasoning-card__effort"
                         :hidden="!llm.reasoningPrefs.enabled"
                       >
-                        <div
-                          class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2"
-                        >
-                          <div class="min-w-0">
+                        <div class="settings-reasoning-effort-row">
+                          <div class="min-w-0 settings-reasoning-effort-row__label">
                             <span class="settings-label mb-0">推理等级</span>
-                            <p class="settings-field-help mt-0.5 mb-0">
-                              low → max 共 5 档；网关未透传时可能 400，可关闭后重试
-                            </p>
                           </div>
                           <div
                             class="settings-segmented settings-segmented--inline settings-segmented--effort"
