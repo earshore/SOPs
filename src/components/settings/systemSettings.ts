@@ -912,6 +912,24 @@ function formatProxyProbeError(error: unknown): string {
   return raw || '代理连接失败';
 }
 
+function buildAutoSaveLlmConfig(
+  llm: LLMState,
+  previous: Partial<LLMProviderConfig> | null
+): LLMProviderConfig {
+  const serviceTier = llm.serviceTier || previous?.serviceTier;
+  return {
+    provider: llm.provider,
+    endpoint: llm.endpoint || previous?.endpoint || '',
+    model: llm.model || previous?.model || '',
+    models: llm.models?.length ? llm.models : previous?.models,
+    ...(serviceTier ? { serviceTier } : {}),
+    reasoningPrefs: normalizeReasoningUserPrefs(llm.reasoningPrefs),
+    apiPath: normalizeApiPathId(llm.apiPath || previous?.apiPath),
+    enabled: true,
+    apiKey: '',
+  };
+}
+
 function buildLocalDataExportConfirm(selectedBuckets: string[] | undefined): {
   title: string;
   content: string;
@@ -2474,27 +2492,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   /**
    * Instant-save LLM config for button/switch controls (no panel close).
-   * Skips validation toast when apiKey already empty but secure storage may hold it —
-   * still requires endpoint+model for a meaningful config write.
+   * Requires endpoint+model (from form or last saved config).
    */
   async autoSaveProviderConfig(successToast: string): Promise<void> {
     try {
       const previous = StorageService.getLLMConfig(this.llm.provider);
-      const newConfig: LLMProviderConfig = {
-        provider: this.llm.provider,
-        endpoint: this.llm.endpoint || previous?.endpoint || '',
-        model: this.llm.model || previous?.model || '',
-        models: this.llm.models?.length ? this.llm.models : previous?.models,
-        ...(this.llm.serviceTier
-          ? { serviceTier: this.llm.serviceTier }
-          : previous?.serviceTier
-            ? { serviceTier: previous.serviceTier }
-            : {}),
-        reasoningPrefs: normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
-        apiPath: normalizeApiPathId(this.llm.apiPath || previous?.apiPath),
-        enabled: true,
-        apiKey: '',
-      };
+      const newConfig = buildAutoSaveLlmConfig(this.llm, previous);
       if (!newConfig.endpoint || !newConfig.model) {
         showToast('请先配置 Endpoint 与模型后再保存推理设置', { type: 'warning' });
         return;
