@@ -26,30 +26,32 @@
 
 ## 2. 页面入口：共享壳选型
 
-| 场景 | 使用 | 路径 |
-|------|------|------|
-| SOP 模板页（负责人字段 + 复制模板 + actions） | `createSopTemplateModule` | `src/modules/sops/utils/sopTemplateModule.ts` |
-| 纯静态 HTML 页 | `createStaticTemplateModule` | `src/common/utils/createStaticTemplateModule.ts` |
-| More 业务场景案例页 | `createBusinessScenarioModule` | `src/modules/more/views/business_scenarios/createBusinessScenarioModule.ts` |
-| Alpine 作业面板页（AI Analysis / PromptLab / Scraper） | `createAlpinePanelModule` | `src/modules/app_center/views/master_analysis/utils/createAlpinePanelModule.ts` |
-| 复杂交互页 | `extends BaseModule` | `src/common/BaseModule.ts` |
+| 场景                                                   | 使用                           | 路径                                                                            |
+| ------------------------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------- |
+| SOP 模板页（负责人字段 + 复制模板 + actions）          | `createSopTemplateModule`      | `src/modules/sops/utils/sopTemplateModule.ts`                                   |
+| 纯静态 HTML 页                                         | `createStaticTemplateModule`   | `src/common/utils/createStaticTemplateModule.ts`                                |
+| More 业务场景案例页                                    | `createBusinessScenarioModule` | `src/modules/more/views/business_scenarios/createBusinessScenarioModule.ts`     |
+| Alpine 作业面板页（AI Analysis / PromptLab / Scraper） | `createAlpinePanelModule`      | `src/modules/app_center/views/master_analysis/utils/createAlpinePanelModule.ts` |
+| 复杂交互页                                             | `extends BaseModule`           | `src/common/BaseModule.ts`                                                      |
 
 ### 2.1 静态模板页
 
 ```ts
-import { createStaticTemplateModule } from '@/common/utils/createStaticTemplateModule';
-import './styles.css';
+import { createStaticTemplateModule } from "@/common/utils/createStaticTemplateModule";
+import "./styles.css";
 
 const instance = createStaticTemplateModule({
-  moduleId: 'amz_quality_listing',
-  templatePath: 'src/modules/amz_hub/views/practice/quality_listing/template.html',
+  moduleId: "amz_quality_listing",
+  templatePath:
+    "src/modules/amz_hub/views/practice/quality_listing/template.html",
   // 可选：挂载后绑定事件
   // onInit: (container) => { ... },
   // 可选：卸载清理
   // onUnmount: () => { ... },
 });
 
-export const mount = (container: HTMLElement): Promise<void> => instance.mount(container);
+export const mount = (container: HTMLElement): Promise<void> =>
+  instance.mount(container);
 export const unmount = (): void => {
   instance.unmount();
 };
@@ -60,15 +62,17 @@ export const unmount = (): void => {
 ### 2.2 业务场景案例页
 
 ```ts
-import { createBusinessScenarioModule } from '../createBusinessScenarioModule';
+import { createBusinessScenarioModule } from "../createBusinessScenarioModule";
 
 const scenarioModule = createBusinessScenarioModule({
-  moduleId: 'more_ziniao_usage_notice',
-  templatePath: 'src/modules/more/views/business_scenarios/usage_notice/template.html',
-  caseId: 'usage_notice',
+  moduleId: "more_ziniao_usage_notice",
+  templatePath:
+    "src/modules/more/views/business_scenarios/usage_notice/template.html",
+  caseId: "usage_notice",
 });
 
-export const mount = (container: HTMLElement) => scenarioModule.mount(container);
+export const mount = (container: HTMLElement) =>
+  scenarioModule.mount(container);
 export const unmount = () => scenarioModule.unmount();
 ```
 
@@ -81,31 +85,31 @@ export const unmount = () => scenarioModule.unmount();
 ### 2.3 SOP 模板页
 
 ```ts
-import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
-import { createOwnerField } from '../../../utils/ownerField';
-import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
+import { createSopTemplateModule } from "../../../utils/sopTemplateModule";
+import { createOwnerField } from "../../../utils/ownerField";
+import { createTemplateCopyAction } from "../../../utils/templateCopyAction";
 
 const ownerField = createOwnerField({
-  storageKey: 'listing_review_owner_v1',
-  defaultOwner: '内容负责人',
-  inputId: 'listing-review-owner',
+  storageKey: "listing_review_owner_v1",
+  defaultOwner: "内容负责人",
+  inputId: "listing-review-owner",
 });
 
-export function buildListingReviewTemplate(owner = '内容负责人'): string {
+export function buildListingReviewTemplate(owner = "内容负责人"): string {
   // 业务模板字符串...
   return `# Listing 复盘 - ${owner}`;
 }
 
 const module = createSopTemplateModule({
-  moduleId: 'listing_seo',
-  templatePath: 'src/modules/sops/views/growth/listing_seo/template.html',
+  moduleId: "listing_seo",
+  templatePath: "src/modules/sops/views/growth/listing_seo/template.html",
   ownerFields: [ownerField],
   actions: {
     copyListingReviewTemplate: createTemplateCopyAction({
       ownerField,
       buildTemplate: buildListingReviewTemplate,
-      successMessage: '已复制 Listing 复盘模板',
-      failureMessage: '复制失败，请手动复制模板或稍后重试。',
+      successMessage: "已复制 Listing 复盘模板",
+      failureMessage: "复制失败，请手动复制模板或稍后重试。",
     }),
   },
 });
@@ -117,22 +121,22 @@ export const unmount = () => module.unmount();
 ### 2.4 复杂交互页
 
 ```ts
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
+import BaseModule from "@/common/BaseModule";
+import { SafeTemplateLoader } from "@/common/infrastructure/SafeModuleLoader";
+import { setSafeHtml } from "@/common/utils/security";
 
 class MyToolModule extends BaseModule {
   constructor() {
-    super('my_tool');
+    super("my_tool");
   }
 
   protected async render(): Promise<void> {
     if (!this.container) return;
     const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/.../template.html'
+      "src/modules/.../template.html",
     );
     setSafeHtml(this.container, html);
-    this.container.classList.add('fade-in');
+    this.container.classList.add("fade-in");
   }
 
   protected async init(): Promise<void> {
@@ -162,17 +166,17 @@ export const unmount = () => instance.unmount();
 - `readTextFromClipboard(): Promise<string | null>`
 
 ```ts
-import { copyTextToClipboard } from '@/common/utils/clipboard';
-import { showToast } from '@/common/ui/notifications';
+import { copyTextToClipboard } from "@/common/utils/clipboard";
+import { showToast } from "@/common/ui/notifications";
 
 async function copyReport(text: string): Promise<void> {
   try {
     if (!(await copyTextToClipboard(text))) {
-      throw new Error('clipboard unavailable');
+      throw new Error("clipboard unavailable");
     }
-    showToast('已复制', { type: 'success' });
+    showToast("已复制", { type: "success" });
   } catch {
-    showToast('复制失败，请手动选择文本复制', { type: 'error' });
+    showToast("复制失败，请手动选择文本复制", { type: "error" });
   }
 }
 ```
@@ -217,6 +221,20 @@ async function copyReport(text: string): Promise<void> {
 
 配置失败统一使用 `ERR_LLM_*`（见 [工具 LLM 错误码速查](./troubleshooting/LLM_ERROR_CODES.md)）；勿再引入 `AI_ANALYSIS_001`～`003`。
 
+用户可见失败统一：
+
+```ts
+import { showLlmFailureToast } from "@/common/errors/llmFailureUx";
+
+try {
+  // resolveToolLlmConfig + callLLM ...
+} catch (error) {
+  showLlmFailureToast(error, { titlePrefix: "分析失败: " });
+}
+```
+
+已知 `ERR_LLM_*` / `API_*` / 超时 / 存储满会带 **打开设置** 深链；未知错误才使用 `titlePrefix`。场景对照见 [降级矩阵](./troubleshooting/DEGRADATION_MATRIX.md)。
+
 ### 3.2.1 LLM 请求缓存 / in-flight
 
 **唯一实现**：`src/services/llmRequestCache.ts`
@@ -241,14 +259,14 @@ async function copyReport(text: string): Promise<void> {
 
 **唯一实现**：`src/common/utils/parseLlmJson.ts`
 
-| 函数 | 用途 |
-|------|------|
-| `parseLlmJson(text)` | 返回 `{ value, wasRepaired }` |
-| `parseLlmJsonObject(text)` | 必须是 object，否则 throw |
-| `stripCodeFence` / `extractJsonObject` | 需要细粒度控制时使用 |
+| 函数                                   | 用途                          |
+| -------------------------------------- | ----------------------------- |
+| `parseLlmJson(text)`                   | 返回 `{ value, wasRepaired }` |
+| `parseLlmJsonObject(text)`             | 必须是 object，否则 throw     |
+| `stripCodeFence` / `extractJsonObject` | 需要细粒度控制时使用          |
 
 ```ts
-import { parseLlmJson, parseLlmJsonObject } from '@/common/utils/parseLlmJson';
+import { parseLlmJson, parseLlmJsonObject } from "@/common/utils/parseLlmJson";
 
 // 宽松：允许非 object
 const { value, wasRepaired } = parseLlmJson(llmText);
@@ -284,20 +302,20 @@ import {
   bindCategoryFilterButtons,
   filterSectionsByCategory,
   scrollToModuleSection,
-} from '@/common/utils/overviewInteractions';
+} from "@/common/utils/overviewInteractions";
 
 // 绑定分类按钮（互斥 active + 按 data-category 显隐 section）
 const dispose = bindCategoryFilterButtons(container);
 this.addDisposable(dispose); // BaseModule / SOP context 内
 
 // 或手动筛选
-filterSectionsByCategory(container, 'growth');
+filterSectionsByCategory(container, "growth");
 
 // 滚动到区块并高亮
 export function scrollToModule(categoryId: string): void {
   scrollToModuleSection(categoryId, {
-    idPrefix: 'sop-module-', // amz: hub-module- / more: more-module-
-    highlightClass: 'sop-module-highlight',
+    idPrefix: "sop-module-", // amz: hub-module- / more: more-module-
+    highlightClass: "sop-module-highlight",
   });
 }
 ```
@@ -323,14 +341,14 @@ DOM 约定：
 - `languageFlagMap`
 
 ```ts
-import { SITE_DOMAIN_MAP, SITE_NAME_MAP } from '@/common/constants/constants';
+import { SITE_DOMAIN_MAP, SITE_NAME_MAP } from "@/common/constants/constants";
 
 export function getSiteName(site: string): string {
   return SITE_NAME_MAP[site] || site;
 }
 
 export function getSiteDomain(site: string): string {
-  return SITE_DOMAIN_MAP[site] || 'amazon.com';
+  return SITE_DOMAIN_MAP[site] || "amazon.com";
 }
 ```
 
@@ -344,13 +362,13 @@ export function getSiteDomain(site: string): string {
 
 ## 7. 确认弹窗 / 安全渲染（相关既有轮子）
 
-| 能力 | 路径 | 说明 |
-|------|------|------|
-| 确认弹窗 | `@/components/modal/confirmModal` 的 `confirmWithModal` | 见 `docs/MODAL_DEVELOPMENT_GUIDELINES.md` |
-| 安全 HTML | `@/common/utils/security` 的 `setSafeHtml` / `escapeHtml` | 模板挂载必用 |
-| 模板加载 | `SafeTemplateLoader` | 禁止 `?raw` 直灌未审计用户内容 |
-| Prompt 清洗 | `@/common/utils/promptSanitizer` | 拼 LLM prompt 前必用 |
-| Toast | `@/common/ui/notifications` 的 `showToast` | 统一反馈 |
+| 能力        | 路径                                                      | 说明                                      |
+| ----------- | --------------------------------------------------------- | ----------------------------------------- |
+| 确认弹窗    | `@/components/modal/confirmModal` 的 `confirmWithModal`   | 见 `docs/MODAL_DEVELOPMENT_GUIDELINES.md` |
+| 安全 HTML   | `@/common/utils/security` 的 `setSafeHtml` / `escapeHtml` | 模板挂载必用                              |
+| 模板加载    | `SafeTemplateLoader`                                      | 禁止 `?raw` 直灌未审计用户内容            |
+| Prompt 清洗 | `@/common/utils/promptSanitizer`                          | 拼 LLM prompt 前必用                      |
+| Toast       | `@/common/ui/notifications` 的 `showToast`                | 统一反馈                                  |
 
 不要：
 
@@ -365,7 +383,7 @@ export function getSiteDomain(site: string): string {
 3. **安全**：`SafeTemplateLoader` + `setSafeHtml`；无直接 `innerHTML =`
 4. **复制 / 粘贴**：只用 `copyTextToClipboard` / `readTextFromClipboard`
 5. **AI**：配置用 `resolveToolLlmConfig`；解析用 `parseLlmJson*`；输入用 `sanitizePromptInput*`
-5b. **导出**：只用 `download*` + `formatCsvRows`
+   5b. **导出**：只用 `download*` + `formatCsvRows`
 6. **站点**：只用 `SITE_*` / scraper formatters
 7. **Overview**：只用 `overviewInteractions`
 8. **验证**：
@@ -379,15 +397,15 @@ export function getSiteDomain(site: string): string {
 
 ## 9. 常见反模式 → 正确做法
 
-| 反模式 | 正确做法 |
-|--------|---------|
-| 页面内复制一套 `writeText` + `execCommand` | `copyTextToClipboard` |
-| 每个 AI 工具自写 fence + jsonrepair | `parseLlmJson` / `parseLlmJsonObject` |
-| overview 三份 filter/scroll | `bindCategoryFilterButtons` / `scrollToModuleSection` |
-| 静态页手写 BaseModule 样板 30 行 | `createStaticTemplateModule` |
-| 场景页 5 份几乎相同 index | `createBusinessScenarioModule` |
-| 各模块硬编码 amazon.de 映射 | `SITE_DOMAIN_MAP` / `SITE_NAME_MAP` |
-| 为骗审计写“空壳工厂”不挂 BaseModule | 工厂内部必须真正 `extends BaseModule`（`createStaticTemplateModule` 已满足） |
+| 反模式                                     | 正确做法                                                                     |
+| ------------------------------------------ | ---------------------------------------------------------------------------- |
+| 页面内复制一套 `writeText` + `execCommand` | `copyTextToClipboard`                                                        |
+| 每个 AI 工具自写 fence + jsonrepair        | `parseLlmJson` / `parseLlmJsonObject`                                        |
+| overview 三份 filter/scroll                | `bindCategoryFilterButtons` / `scrollToModuleSection`                        |
+| 静态页手写 BaseModule 样板 30 行           | `createStaticTemplateModule`                                                 |
+| 场景页 5 份几乎相同 index                  | `createBusinessScenarioModule`                                               |
+| 各模块硬编码 amazon.de 映射                | `SITE_DOMAIN_MAP` / `SITE_NAME_MAP`                                          |
+| 为骗审计写“空壳工厂”不挂 BaseModule        | 工厂内部必须真正 `extends BaseModule`（`createStaticTemplateModule` 已满足） |
 
 ---
 

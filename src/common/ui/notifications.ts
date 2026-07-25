@@ -12,6 +12,14 @@ import { getEl } from './utils';
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 /**
+ * Optional CTA on a toast (e.g. open settings).
+ */
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
+/**
  * Toast 配置选项
  */
 export interface ToastOptions {
@@ -21,6 +29,8 @@ export interface ToastOptions {
   description?: string;
   /** 显示时长（毫秒），默认 3500ms */
   duration?: number;
+  /** Optional action button (label + click) */
+  action?: ToastAction;
 }
 
 /**
@@ -29,7 +39,7 @@ export interface ToastOptions {
  * @param options 配置选项
  */
 export function showToast(title: string, options: ToastOptions = {}): void {
-  const { type = 'info', description, duration = 3500 } = options;
+  const { type = 'info', description, duration = 3500, action } = options;
 
   const container = getEl('toast-container');
   if (!container) return;
@@ -72,6 +82,24 @@ export function showToast(title: string, options: ToastOptions = {}): void {
   }
 
   toast.appendChild(contentEl);
+
+  if (action?.label && typeof action.onClick === 'function') {
+    const actionBtn = document.createElement('button');
+    actionBtn.type = 'button';
+    actionBtn.className = 'toast-action';
+    actionBtn.textContent = action.label;
+    actionBtn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      try {
+        action.onClick();
+      } finally {
+        toast.remove();
+      }
+    });
+    toast.appendChild(actionBtn);
+  }
+
   container.appendChild(toast);
 
   setTimeout(() => {

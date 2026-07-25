@@ -7,6 +7,7 @@ import { downloadJson as downloadJsonFile } from '@/common/utils/download';
  */
 
 import { showToast } from '@/common/ui/index';
+import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
 import { analysisTargets } from '../config/analysisTargets';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { parseAnalysisReport } from '../services/analysisService';
@@ -461,7 +462,9 @@ async function runPreparedParallelAnalysis(
 
   if (!isCurrentAnalysisSource(preparedRun.sourceBinding)) {
     resetAnalysisReport(context);
-    showToast('采集数据已变更，本次分析结果已丢弃，请重新分析', { type: 'warning' });
+    showToast('采集数据已变更，本次分析结果已丢弃，请重新分析', {
+      type: 'warning',
+    });
     return null;
   }
 
@@ -480,10 +483,9 @@ async function completeAnalysisAction(
 }
 
 function handleAnalysisActionError(context: AlpineContext, error: unknown): void {
-  const message = (error as Error).message;
-  syncAnalysisProgress(context, context.progress, `分析失败: ${message}`);
+  const ux = showLlmFailureToast(error, { titlePrefix: '分析失败: ' });
+  syncAnalysisProgress(context, context.progress, `分析失败: ${ux.title}`);
   console.error('[用户动作] 分析失败:', error);
-  showToast(`分析失败: ${message}`, { type: 'error' });
 }
 
 /**

@@ -15,6 +15,7 @@ import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import BaseModule from '@/common/BaseModule';
 import { showToast } from '@/common/ui';
 import { ValidationError } from '@/common/errors/AppError';
+import { formatLlmFailureUx, showLlmFailureToast } from '@/common/errors/llmFailureUx';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { appStore } from '@/stores/useAppStore';
 import { ErrorService } from '@/services/errorService';
@@ -572,6 +573,10 @@ function handleAnalysisFailure(
   btn: HTMLButtonElement | null
 ): void {
   const isValidation = isValidationAnalysisError(error);
+  const ux = formatLlmFailureUx(error);
+  const panelMessage = createAnalysisUserMessage(
+    ux.description ? `${ux.title}。${ux.description}` : ux.title
+  );
 
   if (!isValidation) {
     ErrorService.handle(error, {
@@ -581,8 +586,11 @@ function handleAnalysisFailure(
     });
   }
 
+  // Always surface actionable toast (settings deep-link when applicable).
+  showLlmFailureToast(error);
+
   if (resultDiv) {
-    renderAnalysisError(resultDiv, createAnalysisUserMessage(error.message), isValidation);
+    renderAnalysisError(resultDiv, panelMessage, isValidation);
   }
 
   // 恢复按钮为可点击
@@ -1071,6 +1079,8 @@ function handleAnalysisMountError(error: unknown): never {
 class KeywordHunterAnalysisModule extends BaseModule {
   constructor() {
     super('keyword_hunter_analysis');
+    // Module helpers need a stable handle for trackDomEvent/trackTimeout bridges.
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- lifecycle registry, not a closure alias
     analysisLifecycle = this;
   }
 

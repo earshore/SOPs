@@ -30,6 +30,7 @@ import {
   type ScraperProxyProviderConfig,
 } from '@/common/config/scraperProxies';
 import { showToast } from '@/common/ui';
+import { formatLlmFailureUx, showLlmFailureToast } from '@/common/errors/llmFailureUx';
 import { chooseWithModal, confirmWithModal } from '@/components/modal/confirmModal';
 import { initEventLogger } from '@/common/utils/eventLogger';
 import { downloadJson } from '@/common/utils/download';
@@ -94,7 +95,7 @@ import { appStore } from '@/stores/useAppStore';
 import type { ProxyConfig } from '@/types/modules-business';
 import type { LLMProviderConfig } from '@/types/state';
 import eventBus from '@/common/EventBus';
-import { ApiError } from '@/common/errors/AppError';
+import { ApiError, isAppError } from '@/common/errors/AppError';
 import {
   diffSettingsPartitions,
   snapshotSettingsPartitions,
@@ -1146,12 +1147,44 @@ function getModelFetchErrorMessage(error: Error): string {
     return 'API Key 无效或已过期，请检查配置';
   if (message.includes('HTTP 403') || message.includes('Forbidden'))
     return 'API Key 没有访问权限，请检查配置';
+  if (message.includes('HTTP 429') || /rate limit/i.test(message))
+    return '请求过于频繁，请稍后再试';
   if (message.includes('HTTP 404')) return 'API端点地址不正确，请检查配置';
   if (message.includes('Failed to fetch') || message.includes('NetworkError'))
     return '网络连接失败，请检查网络或端点地址';
   if (message.includes('timeout') || message.includes('AbortError'))
     return '请求超时，请检查网络连接';
   return message;
+}
+
+function notifyModelFetchFailure(error: Error): void {
+  const mapped = getModelFetchErrorMessage(error);
+  const signal = `${mapped} ${error.message}`;
+  // Prefer unified actionable UX for known auth/rate/timeout; keep prefix for other failures.
+  if (/401|Unauthorized|API Key 无效|API_INVALID_KEY/i.test(signal)) {
+    const payload = isAppError(error)
+      ? error
+      : Object.assign(new Error(mapped), { code: 'API_INVALID_KEY' });
+    showLlmFailureToast(payload);
+    return;
+  }
+  if (/429|rate limit|过于频繁|API_RATE_LIMIT/i.test(signal)) {
+    const payload = isAppError(error)
+      ? error
+      : Object.assign(new Error(mapped), { code: 'API_RATE_LIMIT' });
+    showLlmFailureToast(payload);
+    return;
+  }
+  const ux = formatLlmFailureUx(error);
+  if (
+    ux.code === 'LLM_TIMEOUT' ||
+    ux.code === 'NET_TIMEOUT' ||
+    /超时|timeout|AbortError/i.test(signal)
+  ) {
+    showLlmFailureToast(error, { titlePrefix: '获取模型失败: ' });
+    return;
+  }
+  showToast(`获取模型失败: ${mapped}`, { type: 'error' });
 }
 
 // ==========================================
@@ -2151,11 +2184,15 @@ const settingsPanelBehavior: SettingsPanelPart = {
       showToast(`成功同步 ${this.llm.models.length} 个模型`, { type: 'success' });
     } catch (e) {
       const error = e as Error;
-      showToast(`获取模型失败: ${getModelFetchErrorMessage(error)}`, { type: 'error' });
-      // Abort/timeout 已在 UI toast 提示；避免再走 ErrorTracker 造成 console high 级噪音
+      notifyModelFetchFailure(error);
+      // UI already toasted; log without a second user notification.
       const isAbort = error?.name === 'AbortError' || /timeout|aborted/i.test(error?.message || '');
       if (!isAbort) {
-        ErrorService.handle(error, { action: 'fetchModels', module: 'settings' });
+        ErrorService.handle(error, {
+          action: 'fetchModels',
+          module: 'settings',
+          notify: false,
+        });
       }
     } finally {
       this.llm.isFetching = false;

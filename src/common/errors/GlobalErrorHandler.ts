@@ -7,6 +7,7 @@
 import eventBus from '../EventBus';
 import { APP_EVENTS } from '../constants/eventConstants';
 import { AppError, ErrorLevel, ErrorContext, isAppError, toAppError } from './AppError';
+import { formatLlmFailureUx, showLlmFailureToast } from './llmFailureUx';
 import { errorTracker } from '@/services/errorTracker';
 
 const nativeLoggerConsole = globalThis.console;
@@ -187,24 +188,46 @@ export class GlobalErrorHandler {
     }
   }
 
+  private shouldUseLlmFailureToast(error: AppError, customMessage?: string): boolean {
+    if (customMessage) return false;
+    const ux = formatLlmFailureUx(error);
+    if (ux.openSettings) return true;
+    const code = ux.code ?? '';
+    return (
+      code.startsWith('ERR_LLM_') ||
+      code.startsWith('API_') ||
+      code === 'LLM_TIMEOUT' ||
+      code === 'NET_TIMEOUT' ||
+      code === 'SYS_STORAGE_FULL' ||
+      code === 'SYS_STORAGE_ERROR' ||
+      code === 'BIZ_NO_MODEL_CONFIGURED'
+    );
+  }
+
+  private resolveToastType(level: ErrorLevel): 'error' | 'warning' | 'info' {
+    if (level === ErrorLevel.WARNING) return 'warning';
+    if (level === ErrorLevel.INFO) return 'info';
+    return 'error';
+  }
+
   /**
    * 通知用户
    */
   private notifyUser(error: AppError, customMessage?: string): void {
-    const message = customMessage || error.toUserMessage();
-
-    // 根据错误级别选择Toast类型
-    let toastType: 'error' | 'warning' | 'info' = 'error';
-    if (error.level === ErrorLevel.WARNING) {
-      toastType = 'warning';
-    } else if (error.level === ErrorLevel.INFO) {
-      toastType = 'info';
+    if (this.shouldUseLlmFailureToast(error, customMessage)) {
+      showLlmFailureToast(error);
+      return;
     }
 
-    // 显示Toast
-    const windowWithToast = window as unknown as Record<string, unknown>;
+    const message = customMessage || error.toUserMessage();
+    const toastType = this.resolveToastType(error.level);
+
+    // showToast(title, options) — options object, not a bare type string
+    const windowWithToast = window as unknown as {
+      showToast?: (msg: string, options?: { type?: string }) => void;
+    };
     if (typeof window !== 'undefined' && typeof windowWithToast.showToast === 'function') {
-      (windowWithToast.showToast as (msg: string, type: string) => void)(message, toastType);
+      windowWithToast.showToast(message, { type: toastType });
     }
   }
 

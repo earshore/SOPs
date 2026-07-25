@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- 共享 LLM 失败体验：`formatLlmFailureUx` / `showLlmFailureToast`（配置/401/429/超时/存储满等可行动 Toast，支持「打开设置」深链）。
+- Toast 可选 `action` 按钮（`notifications` + `.toast-action` 样式）。
+- 运维文档：`docs/troubleshooting/DEGRADATION_MATRIX.md`（LLM / 存储 / chunk 降级与代码路径对照）。
+- 工具 LLM 错误码速查：`docs/troubleshooting/LLM_ERROR_CODES.md`（`ERR_LLM_*` 与历史码映射）。
+
+### Changed
+
+- 收敛下载 / CSV / 剪贴板 / 一次性 handoff / `llmToolBridge` / `llmRequestCache` / Alpine panel 工厂，业务模块改复用共享实现。
+- Keyword Hunter：DOM/定时器经 BaseModule disposable；离开时拆除 body 浮动 chrome。
+- 系统设置：EventBus / storage / `$watch` 订阅 init-once，避免重复打开堆监听。
+
+### Fixed
+
+- 设置 E2E smoke：展开 LLM 折叠步骤后再操作凭证与模型列表。
+- `GlobalErrorHandler` 通知用户时按 `showToast(title, { type })` 调用，并走 LLM actionable UX。
+- AI Analysis / Keyword Hunter 分析失败提示统一为可行动 LLM 失败 Toast。
+
 ## [3.0.11-rc.8] - 2026-07-25
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。

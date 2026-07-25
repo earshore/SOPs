@@ -73,6 +73,32 @@
   line-height: 1.4;
 }
 
+/* Optional CTA (e.g. open settings) */
+.toast-action {
+  flex-shrink: 0;
+  margin-left: 4px;
+  padding: 4px 10px;
+  border-radius: var(--rounded-sm);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-secondary, transparent);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toast-action:hover {
+  border-color: var(--color-border-strong, var(--color-border-default));
+  background: var(--color-bg-elevated);
+}
+
+.toast-action:focus-visible {
+  outline: 2px solid var(--color-info);
+  outline-offset: 2px;
+}
+
 /* ========================================
    Toast 变体 - Success
    ======================================== */

@@ -26,6 +26,14 @@ export type { ErrorCode } from './errorCodes';
 export { GlobalErrorHandler, globalErrorHandler } from './GlobalErrorHandler';
 export type { ErrorHandlerOptions } from './GlobalErrorHandler';
 
+// LLM 失败体验（可行动 toast / 设置深链）
+export {
+  formatLlmFailureUx,
+  openSettingsFromLlmFailure,
+  showLlmFailureToast,
+} from './llmFailureUx';
+export type { LlmFailureUx, ShowLlmFailureToastOptions } from './llmFailureUx';
+
 // 导出类型
 export type { ApiErrorOptions, AppErrorOptions, ErrorContext } from './AppError';
 

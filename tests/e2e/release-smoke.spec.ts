@@ -1100,18 +1100,15 @@ test.describe('release candidate smoke', () => {
     await prepareLlmConnectionControls(page);
 
     const llmSection = page.locator('#settings-section-llm');
-    const errorToast = page
-      .locator('#toast-container .toast.toast-error .toast-content strong')
-      .last();
+    const toastTitle = page.locator('#toast-container .toast .toast-content strong');
     await llmSection.locator('#llm-api-key').fill('fake-browser-key');
 
     await llmSection.getByRole('button', { name: '获取模型列表' }).click();
-    await expect(errorToast).toContainText('获取模型失败');
-    await expect(errorToast).toContainText('API Key 无效或已过期');
+    await expect(toastTitle.filter({ hasText: 'API Key 无效或已过期' }).last()).toBeVisible();
 
     await llmSection.getByRole('button', { name: '获取模型列表' }).click();
-    await expect(errorToast).toContainText('获取模型失败');
-    await expect(errorToast).toContainText('Rate limit exceeded');
+    // Rate-limit uses warning toast + actionable LLM UX title (not raw gateway body).
+    await expect(toastTitle.filter({ hasText: '请求过于频繁' }).last()).toBeVisible();
 
     expect(modelRequests).toEqual([DEFAULT_LLM_MODELS_URL, DEFAULT_LLM_MODELS_URL]);
   });

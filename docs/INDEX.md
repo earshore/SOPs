@@ -30,6 +30,7 @@
 - [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md) - 弹窗选型、实现、可访问性、测试与验证门禁。
 - [共享能力复用指南](./SHARED_CAPABILITIES_GUIDE.md) - 页面壳、剪贴板、LLM JSON、Overview、站点映射等高回报轮子。
 - [工具 LLM 错误码速查](./troubleshooting/LLM_ERROR_CODES.md) - `ERR_LLM_*` 配置失败、历史码迁移与支持排查。
+- [运行时降级矩阵](./troubleshooting/DEGRADATION_MATRIX.md) - LLM / 存储 / chunk 故障与代码路径、可继续能力。
 - [AI 辅助开发上下文](./development/CLAUDE.md) - 供 AI 工具使用的项目上下文。
 
 ## 功能指南
@@ -51,6 +52,7 @@
 - [Lighthouse CI 指南](./testing/lighthouse-ci-guide.md)
 - [通用故障排查指南](./troubleshooting/troubleshooting-guide.md)
 - [工具 LLM 错误码速查](./troubleshooting/LLM_ERROR_CODES.md)
+- [运行时降级矩阵](./troubleshooting/DEGRADATION_MATRIX.md)
 - [置信度显示问题排查](./troubleshooting/confidence-troubleshooting.md)
 
 ## API 文档

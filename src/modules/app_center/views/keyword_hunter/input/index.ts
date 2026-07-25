@@ -954,6 +954,8 @@ function setupEventListeners(container: HTMLElement): void {
 class KeywordHunterInputModule extends BaseModule {
   constructor() {
     super('keyword_hunter_input');
+    // Module helpers need a stable handle for trackDomEvent/trackTimeout bridges.
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- lifecycle registry, not a closure alias
     inputLifecycle = this;
   }
 
