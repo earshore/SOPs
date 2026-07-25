@@ -75,7 +75,11 @@ test.describe('system settings', () => {
     await settings.openFromNav();
     await settings.goToSection('工具策略');
 
-    // Nested under Master Analysis — expand scrape details if needed
+    // Expand Master Analysis → 数据采集 (all closed by default)
+    const master = page.locator(
+      '#settings-section-tool-strategy details[data-settings-focus="master-analysis"]'
+    );
+    await master.locator(':scope > summary').click();
     const scrape = page.locator('#settings-section-network');
     await scrape.scrollIntoViewIfNeeded();
     await scrape.locator(':scope > summary').click();
@@ -158,6 +162,7 @@ test.describe('system settings', () => {
       '#settings-section-tool-strategy details[data-settings-focus="master-analysis"]'
     );
     await expect(master).toBeVisible();
+    await master.locator(':scope > summary').click();
     const body = await master.innerHTML();
     expect(body.indexOf('settings-section-network')).toBeLessThan(
       body.indexOf('master-analysis-ai')

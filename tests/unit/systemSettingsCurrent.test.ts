@@ -1218,8 +1218,8 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template.match(/<details\s+[^>]*class="settings-tool-app/g) || []).toHaveLength(4);
   expect(template).toContain('settings-tool-app-summary');
   expect(template).toContain('settings-tool-app-chevron');
-  // Tool app groups default open to reduce discovery cost
-  expect(template).toMatch(/<details[^>]*settings-tool-app[^>]*\bopen\b/);
+  // Tool app groups stay collapsed by default
+  expect(template).not.toMatch(/settings-tool-app[^>]*\bopen\b/);
   expect(template).toContain('data-settings-tool-app');
   expect(template).toContain('settings-section-tip');
   expect(template).not.toContain('class="settings-coach"');
