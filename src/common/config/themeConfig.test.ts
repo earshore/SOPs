@@ -103,7 +103,7 @@ describe('ThemeManager', () => {
     expect(rule).toContain('--color-focus-ring:var(--color-slate-700)');
     expect(StorageService.set).toHaveBeenCalledWith('app-theme', 'minimal');
     expect(ThemeManager.getCurrentTheme()).toBe('minimal');
-    expect(THEME_PRESETS.minimal.colorScheme).toBe('slate');
+    expect(THEME_PRESETS.minimal?.colorScheme).toBe('slate');
   });
 
   it('lists appearance presets in exact enterprise order', () => {
