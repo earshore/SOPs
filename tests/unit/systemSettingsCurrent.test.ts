@@ -408,7 +408,8 @@ it('loads and saves LLM provider configuration', async () => {
       enabled: true,
     })
   );
-  expect(panel.isOpen).toBe(false);
+  // Unified save: panel stays open after save
+  expect(panel.isOpen).toBe(true);
 });
 
 it('saves and reloads tool strategy target default models', async () => {
@@ -1421,9 +1422,10 @@ it('CT-P0-01 tool strategy save copy mentions runtime strategy', () => {
     resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
     'utf8'
   );
-  expect(template).toMatch(/运行时策略|运行策略|本页全部策略/);
+  expect(template).toMatch(/运行时策略|运行策略|采集运行策略/);
   expect(template).toContain('settings-save-tool-strategy');
-  expect(template).toContain('保存：本页全部策略');
+  expect(template).toContain('含采集运行策略');
+  expect(template).not.toContain('保存采集策略');
 });
 
 it('UT-P0-09 open with invalid runtime normalizes and sets healthMessages', async () => {

@@ -417,9 +417,11 @@ interface SettingsPanelData {
   fetchModels(): Promise<void>;
   testConnection(): Promise<void>;
   saveProviderConfig(): Promise<void>;
+  autoSaveProviderConfig(successToast: string): Promise<void>;
   loadToolStrategyDefaults(): void;
   saveToolStrategy(): Promise<void>;
   loadRuntimeStrategy(): void;
+  persistRuntimeStrategySettings(options?: { toast?: string }): Promise<void>;
   saveRuntimeStrategy(): Promise<void>;
   resetRuntimeStrategy(): void;
   loadProxyConfig(): Promise<void>;
@@ -2043,7 +2045,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
     if (!isRuntimePresetId(id)) return;
     this.runtimeStrategy.settings = applyRuntimePreset(this.runtimeStrategy.settings, id);
     this.activeRuntimePresetId = id;
-    showToast('已应用运行策略预设（未保存，请点击保存写入本机）', { type: 'info' });
+    // Button control: auto-persist runtime strategy
+    void this.persistRuntimeStrategySettings({ toast: '已应用并保存运行策略预设' });
   },
 
   onSettingsSearch(event?: Event): void {
@@ -2262,7 +2265,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
       showToast('LLM 配置已保存', { type: 'success' });
       this.captureSettingsBaseline();
-      setTimeout(() => void this.close(), 500);
+      // Keep panel open after save — user may continue editing other sections.
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'saveProviderConfig', module: 'settings' });
     }
@@ -2307,21 +2310,28 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.runtimeStrategy.settings = getRuntimeStrategySettings();
   },
 
-  async saveRuntimeStrategy(): Promise<void> {
+  async persistRuntimeStrategySettings(options?: { toast?: string }): Promise<void> {
     try {
       this.runtimeStrategy.isSaving = true;
-      // P2-3: pre-save snapshot of persisted runtime
       pushSettingsRollbackSnapshot('runtime', getRuntimeStrategySettings());
       saveRuntimeStrategySettings(this.runtimeStrategy.settings);
       this.loadRuntimeStrategy();
       this.captureSettingsBaseline();
       this.refreshRollbackUi();
-      showToast('策略已保存', { type: 'success' });
+      showToast(options?.toast ?? '已保存', { type: 'success' });
     } catch (error) {
-      ErrorService.handle(error as Error, { action: 'saveRuntimeStrategy', module: 'settings' });
+      ErrorService.handle(error as Error, {
+        action: 'persistRuntimeStrategySettings',
+        module: 'settings',
+      });
     } finally {
       this.runtimeStrategy.isSaving = false;
     }
+  },
+
+  async saveRuntimeStrategy(): Promise<void> {
+    // Explicit form save (e.g. data retention) — panel stays open
+    await this.persistRuntimeStrategySettings({ toast: '策略已保存' });
   },
 
   resetRuntimeStrategy(): void {
@@ -2445,6 +2455,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
       ...normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
       enabled: checked,
     };
+    void this.autoSaveProviderConfig('推理设置已保存');
   },
 
   setReasoningEffort(event: Event): void {
@@ -2458,6 +2469,50 @@ const settingsPanelBehavior: SettingsPanelPart = {
       ...normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
       effort,
     };
+    void this.autoSaveProviderConfig('推理等级已保存');
+  },
+
+  /**
+   * Instant-save LLM config for button/switch controls (no panel close).
+   * Skips validation toast when apiKey already empty but secure storage may hold it —
+   * still requires endpoint+model for a meaningful config write.
+   */
+  async autoSaveProviderConfig(successToast: string): Promise<void> {
+    try {
+      const previous = StorageService.getLLMConfig(this.llm.provider);
+      const newConfig: LLMProviderConfig = {
+        provider: this.llm.provider,
+        endpoint: this.llm.endpoint || previous?.endpoint || '',
+        model: this.llm.model || previous?.model || '',
+        models: this.llm.models?.length ? this.llm.models : previous?.models,
+        ...(this.llm.serviceTier
+          ? { serviceTier: this.llm.serviceTier }
+          : previous?.serviceTier
+            ? { serviceTier: previous.serviceTier }
+            : {}),
+        reasoningPrefs: normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
+        apiPath: normalizeApiPathId(this.llm.apiPath || previous?.apiPath),
+        enabled: true,
+        apiKey: '',
+      };
+      if (!newConfig.endpoint || !newConfig.model) {
+        showToast('请先配置 Endpoint 与模型后再保存推理设置', { type: 'warning' });
+        return;
+      }
+      pushSettingsRollbackSnapshot('llm', {
+        provider: this.llm.provider,
+        config: previous ? { ...previous, apiKey: '' } : { ...newConfig },
+      });
+      StorageService.setLLMConfig(this.llm.provider, newConfig);
+      updateModelStatus();
+      this.captureSettingsBaseline();
+      showToast(successToast, { type: 'success' });
+    } catch (error) {
+      ErrorService.handle(error as Error, {
+        action: 'autoSaveProviderConfig',
+        module: 'settings',
+      });
+    }
   },
 
   setToolTargetModel(targetId: ToolStrategyTargetId, event: Event): void {
@@ -2498,6 +2553,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     if (!isSchedulingPreference(preference)) return;
     this.runtimeStrategy.settings.masterAnalysis.schedulingPreference = preference;
     this.schedulePreferenceMenuOpen = false;
+    void this.persistRuntimeStrategySettings({ toast: '调度偏好已保存' });
   },
 
   setDeveloperDiagnosticBoolean(

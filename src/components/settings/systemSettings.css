@@ -1439,6 +1439,28 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   transform: rotate(180deg);
 }
 
+/* Scraper runtime fields (flat, under proxy actions) */
+.settings-scrape-runtime {
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.settings-scrape-runtime__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.settings-scrape-runtime__title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #334155;
+}
+
 /* ---- 数据采集：连接方式 | 密钥 + 测试 | 保存（dense dual-column form） ---- */
 .settings-proxy-form {
   display: flex;
