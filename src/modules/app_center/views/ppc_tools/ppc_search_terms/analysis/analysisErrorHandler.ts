@@ -1,9 +1,26 @@
 import { showToast } from '@/common/ui/notifications';
+import {
+  formatLlmFailureUx,
+  openSettingsFromLlmFailure,
+  type LlmFailureUx,
+} from '@/common/errors/llmFailureUx';
 import { isSearchTermReportType } from '../columns/columns';
 import type { AnalysisResult } from './analysisEngine';
 import type { AnalysisFlowCallbacks } from './analysisFlowTypes';
 import { readAnalysisSettings, type AnalysisSettings } from '../settings/settings';
 import { setPasteInputError } from './analysisInput';
+
+function detailFromLlmFailure(ux: LlmFailureUx): string {
+  return ux.description ? `${ux.title}。${ux.description}` : ux.title;
+}
+
+function toastActionFromUx(ux: LlmFailureUx) {
+  if (!ux.openSettings) return undefined;
+  return {
+    label: ux.actionLabel ?? '打开设置',
+    onClick: () => openSettingsFromLlmFailure(ux.openSettings),
+  };
+}
 
 export function handleAnalysisError(
   container: HTMLElement,
@@ -11,7 +28,8 @@ export function handleAnalysisError(
   localResult: AnalysisResult | null,
   callbacks: AnalysisFlowCallbacks
 ): void {
-  const message = error instanceof Error ? error.message : '报表解析失败';
+  const ux = formatLlmFailureUx(error);
+  const detail = detailFromLlmFailure(ux);
   const settings = readAnalysisSettings(container);
 
   const fallbackResult = getLocalFallbackResult(settings, localResult);
@@ -26,7 +44,11 @@ export function handleAnalysisError(
       '已使用本地规则降级'
     );
     callbacks.renderResults(container, fallbackResult.rows);
-    showToast('模型分析失败，已使用本地规则', { type: 'warning', description: message });
+    // Keep title stable for UI tests / operators; detail may include settings CTA.
+    showToast('模型分析失败，已使用本地规则', {
+      type: 'warning',
+      description: detail,
+    });
     return;
   }
 
@@ -42,10 +64,17 @@ export function handleAnalysisError(
   } else {
     callbacks.setAnalyzedRows([]);
     callbacks.renderResults(container, []);
-    setPasteInputError(container, message);
-    callbacks.setStatus(container, `分析失败：${message}`, 'error');
+    setPasteInputError(container, detail);
+    callbacks.setStatus(container, `分析失败：${detail}`, 'error');
   }
-  showToast('分析失败', { type: 'error', description: message });
+
+  // Config/auth failures: lead with actionable title; unknown LLM errors keep short "分析失败".
+  const action = toastActionFromUx(ux);
+  showToast(ux.openSettings ? ux.title : '分析失败', {
+    type: ux.openSettings ? ux.toastType : 'error',
+    description: ux.openSettings ? (ux.description ?? detail) : detail,
+    ...(action ? { action } : {}),
+  });
 }
 
 function getLocalFallbackResult(

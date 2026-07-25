@@ -103,6 +103,8 @@ class Particle {
 
 class HomeModule extends BaseModule {
   private animationFrameId: number | null = null;
+  /** rAF scheduled from ResizeObserver — cancelled on unmount to avoid post-leave work. */
+  private resizeRafId: number | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private particles: Particle[] = [];
   private mouse: MousePosition = { x: -1000, y: -1000 };
@@ -161,10 +163,20 @@ class HomeModule extends BaseModule {
       this.animationFrameId = null;
     }
 
+    if (this.resizeRafId !== null) {
+      cancelAnimationFrame(this.resizeRafId);
+      this.resizeRafId = null;
+    }
+
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
+
+    this.particles = [];
+    this.grid.clear();
+    this.canvas = null;
+    this.ctx = null;
   }
 
   private initResizeObserver(): void {
@@ -172,7 +184,12 @@ class HomeModule extends BaseModule {
     if (!container) return;
 
     this.resizeObserver = new ResizeObserver(entries => {
-      window.requestAnimationFrame(() => {
+      if (this.resizeRafId !== null) {
+        cancelAnimationFrame(this.resizeRafId);
+      }
+      this.resizeRafId = window.requestAnimationFrame(() => {
+        this.resizeRafId = null;
+        if (!this.isMounted) return;
         if (!entries.length || !entries[0]) return;
         const rect = entries[0].contentRect;
         this.width = rect.width;

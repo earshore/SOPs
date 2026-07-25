@@ -218,15 +218,18 @@ class EventBus {
    * 发布事件实现
    */
   emit(event: string, data?: unknown): void {
-    if (!this.events[event]) return;
+    const listeners = this.events[event];
+    if (!listeners?.length) return;
 
-    this.events[event].forEach(callback => {
+    // Snapshot so subscribe/unsubscribe during dispatch does not skip or double-call.
+    const snapshot = listeners.slice();
+    for (const callback of snapshot) {
       try {
         (callback as GenericEventHandler)(data);
       } catch (error) {
         this.recordListenerError(event, error);
       }
-    });
+    }
   }
 
   private recordListenerError(event: string, error: unknown): void {

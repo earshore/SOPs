@@ -52,6 +52,26 @@ describe('事件订阅和发布', () => {
 
     expect(callback).not.toHaveBeenCalled();
   });
+
+  it('dispatch 期间取消后续监听器仍调用已快照的列表', () => {
+    const second = vi.fn();
+    let unsubSecond: (() => void) | undefined;
+    const first = vi.fn(() => {
+      unsubSecond?.();
+    });
+
+    eventBus.on('test-event', first);
+    unsubSecond = eventBus.on('test-event', second);
+
+    eventBus.emit('test-event', { data: 1 });
+
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).toHaveBeenCalledTimes(1);
+
+    eventBus.emit('test-event', { data: 2 });
+    expect(first).toHaveBeenCalledTimes(2);
+    expect(second).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('内存泄漏检测', () => {
