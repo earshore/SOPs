@@ -870,107 +870,119 @@
                       ></i>
                     </summary>
                     <div class="settings-collapsible-body px-3 pb-3 space-y-3 mt-2">
-                      <!-- Connection Type -->
-                      <!-- 连接方式 + API Key 并排 -->
-                      <div class="settings-proxy-row">
-                        <div class="group settings-proxy-row__field">
-                          <label for="proxy-type" class="settings-label">连接方式</label>
-                          <div class="relative">
-                            <select
-                              id="proxy-type"
-                              name="proxy-type"
-                              :value="proxy.type"
-                              @change="setProxyType($event)"
-                              class="settings-control"
-                            >
-                              <optgroup label="商业 API (高成功率)">
-                                <template
-                                  x-for="option in commercialProxyOptions"
-                                  :key="option.type"
-                                >
-                                  <option :value="option.type" x-text="option.displayName"></option>
-                                </template>
-                              </optgroup>
-                              <optgroup label="直连">
-                                <template x-for="option in directProxyOptions" :key="option.type">
-                                  <option :value="option.type" x-text="option.displayName"></option>
-                                </template>
-                              </optgroup>
-                            </select>
+                      <!--
+                        连接方式 | 密钥 始终双列并排；
+                        无需密钥时右侧禁用占位，避免并排塌陷
+                      -->
+                      <div class="settings-proxy-form">
+                        <div class="settings-proxy-form__fields">
+                          <div class="settings-proxy-form__col">
+                            <label for="proxy-type" class="settings-label">连接方式</label>
+                            <div class="settings-proxy-form__control-wrap">
+                              <select
+                                id="proxy-type"
+                                name="proxy-type"
+                                :value="proxy.type"
+                                @change="setProxyType($event)"
+                                class="settings-control settings-proxy-form__control"
+                              >
+                                <optgroup label="商业 API (高成功率)">
+                                  <template
+                                    x-for="option in commercialProxyOptions"
+                                    :key="option.type"
+                                  >
+                                    <option
+                                      :value="option.type"
+                                      x-text="option.displayName"
+                                    ></option>
+                                  </template>
+                                </optgroup>
+                                <optgroup label="直连">
+                                  <template x-for="option in directProxyOptions" :key="option.type">
+                                    <option
+                                      :value="option.type"
+                                      x-text="option.displayName"
+                                    ></option>
+                                  </template>
+                                </optgroup>
+                              </select>
+                              <span class="settings-proxy-form__chevron" aria-hidden="true">
+                                <i class="fas fa-chevron-down"></i>
+                              </span>
+                            </div>
+                          </div>
+
+                          <div class="settings-proxy-form__col">
+                            <label
+                              for="proxy-custom-url"
+                              class="settings-label"
+                              x-text="proxyNeedsInput ? proxyInputLabel : 'API Key'"
+                            ></label>
                             <div
-                              class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                              class="settings-proxy-form__control-wrap"
+                              :class="{ 'is-disabled': !proxyNeedsInput }"
                             >
-                              <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                              <input
+                                :type="proxyNeedsInput ? proxyInputType : 'text'"
+                                id="proxy-custom-url"
+                                name="proxy-custom-url"
+                                :value="proxyNeedsInput ? proxy.customUrl : ''"
+                                @input="setProxyCustomUrl($event)"
+                                :disabled="!proxyNeedsInput"
+                                class="settings-control settings-proxy-form__control settings-proxy-form__secret"
+                                :class="{ 'is-masked': proxyNeedsInput }"
+                                :placeholder="proxyNeedsInput ? proxyInputPlaceholder : '当前方式无需密钥'"
+                                autocomplete="off"
+                              />
+                              <button
+                                type="button"
+                                :hidden="!proxyNeedsInput"
+                                @click="toggleProxyKeyVisibility()"
+                                :aria-label="proxyKeyVisibilityLabel"
+                                :title="proxyKeyVisibilityLabel"
+                                class="settings-proxy-form__eye"
+                              >
+                                <i class="fas text-xs" :class="proxyKeyIconClass"></i>
+                              </button>
                             </div>
                           </div>
                         </div>
 
-                        <div class="group settings-proxy-row__field" :hidden="!proxyNeedsInput">
-                          <label
-                            for="proxy-custom-url"
-                            class="settings-label"
-                            x-text="proxyInputLabel"
-                          ></label>
-                          <div class="relative">
-                            <div
-                              class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-cyan-100 flex items-center justify-center"
-                            >
-                              <i class="fas fa-globe text-cyan-500 text-[9px]"></i>
-                            </div>
-                            <input
-                              :type="proxyInputType"
-                              id="proxy-custom-url"
-                              name="proxy-custom-url"
-                              :value="proxy.customUrl"
-                              @input="setProxyCustomUrl($event)"
-                              class="settings-proxy-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
-                              :placeholder="proxyInputPlaceholder"
-                            />
-                            <button
-                              type="button"
-                              @click="toggleProxyKeyVisibility()"
-                              :aria-label="proxyKeyVisibilityLabel"
-                              :title="proxyKeyVisibilityLabel"
-                              class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                            >
-                              <i class="fas text-xs" :class="proxyKeyIconClass"></i>
-                            </button>
-                          </div>
+                        <!-- 测试连接 | 保存配置：等宽并排 -->
+                        <div class="settings-proxy-form__actions">
+                          <button
+                            type="button"
+                            data-testid="settings-test-proxy"
+                            @click="testProxyConnection()"
+                            :disabled="proxy.isTesting"
+                            class="settings-proxy-form__btn settings-proxy-form__btn--test"
+                          >
+                            <i
+                              class="fas text-[11px]"
+                              :class="proxy.isTesting ? 'fa-circle-notch fa-spin' : 'fa-plug'"
+                              aria-hidden="true"
+                            ></i>
+                            <span x-text="proxy.isTesting ? '测试中...' : '测试连接'"></span>
+                          </button>
+                          <button
+                            type="button"
+                            data-testid="settings-save-proxy"
+                            @click="saveProxyConfig()"
+                            class="settings-proxy-form__btn settings-proxy-form__btn--save"
+                          >
+                            <i class="fas fa-check text-[11px]" aria-hidden="true"></i>
+                            <span>保存配置</span>
+                          </button>
                         </div>
-                      </div>
-                      <p
-                        class="settings-field-help"
-                        :hidden="!proxyNeedsInput"
-                        x-text="proxyHintText"
-                      ></p>
 
-                      <!-- 测试连接 + 保存配置 并排 -->
-                      <div class="settings-proxy-actions">
-                        <button
-                          type="button"
-                          data-testid="settings-test-proxy"
-                          @click="testProxyConnection()"
-                          :disabled="proxy.isTesting"
-                          class="settings-proxy-actions__btn settings-proxy-actions__btn--secondary"
-                        >
-                          <span x-text="proxy.isTesting ? '测试中...' : '测试连接'"></span>
-                        </button>
-                        <button
-                          type="button"
-                          data-testid="settings-save-proxy"
-                          @click="saveProxyConfig()"
-                          class="settings-proxy-actions__btn settings-proxy-actions__btn--primary"
-                        >
-                          保存配置
-                        </button>
+                        <p
+                          class="settings-proxy-form__status"
+                          :class="proxy.status === 'ok' ? 'is-ok' : 'is-err'"
+                          x-show="proxy.testMessage"
+                          x-text="proxy.testMessage"
+                          data-testid="settings-proxy-test-message"
+                        ></p>
                       </div>
-                      <p
-                        class="text-xs"
-                        :class="proxy.status === 'ok' ? 'text-emerald-600' : 'text-rose-600'"
-                        x-show="proxy.testMessage"
-                        x-text="proxy.testMessage"
-                        data-testid="settings-proxy-test-message"
-                      ></p>
 
                       <details class="settings-collapsible-card">
                         <summary

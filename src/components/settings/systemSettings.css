@@ -31,15 +31,12 @@
   transform: translate(-50%, 0);
 }
 
-#llm-api-key.settings-secret-input,
-#proxy-custom-url.settings-proxy-secret-input {
+#llm-api-key.settings-secret-input {
   padding-left: 3rem;
-}
-
-#llm-api-key.settings-secret-input,
-#proxy-custom-url.settings-proxy-secret-input {
   padding-right: 3rem;
 }
+
+/* Proxy form secret uses settings-proxy-form__secret padding (aligned with select height) */
 
 .settings-section-frame {
   border: 1px solid rgba(226, 232, 240, 0.85);
@@ -1440,34 +1437,126 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   transform: rotate(180deg);
 }
 
-/* Proxy connection row + actions */
-.settings-proxy-row {
-  display: grid;
-  grid-template-columns: 1fr;
+/* ---- 数据采集：连接方式 | 密钥 + 测试 | 保存（dense dual-column form） ---- */
+.settings-proxy-form {
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
 }
 
-@media (min-width: 640px) {
-  .settings-proxy-row {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-    align-items: start;
-  }
+.settings-proxy-form__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.625rem 0.75rem;
+  align-items: start;
 }
 
-.settings-proxy-row__field {
+.settings-proxy-form__col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.settings-proxy-form__col .settings-label {
+  margin-bottom: 0;
+}
+
+.settings-proxy-form__control-wrap {
+  position: relative;
   min-width: 0;
 }
 
-.settings-proxy-actions {
-  display: flex;
-  flex-wrap: wrap;
+.settings-proxy-form__control-wrap.is-disabled {
+  opacity: 0.55;
+}
+
+/* Unified control height for select + secret input */
+.settings-proxy-form__control.settings-control,
+.settings-control.settings-proxy-form__control {
+  width: 100%;
+  min-height: 2.5rem;
+  height: 2.5rem;
+  box-sizing: border-box;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 0.75rem;
+  padding-right: 2rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+}
+
+.settings-proxy-form__secret.settings-control {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  padding-right: 2.25rem;
+}
+
+.settings-proxy-form__secret.is-masked {
+  /* room for eye button only; no left icon to keep height aligned with select */
+  padding-left: 0.75rem;
+}
+
+.settings-proxy-form__chevron {
+  pointer-events: none;
+  position: absolute;
+  right: 0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.375rem;
+  background: #f1f5f9;
+  color: #94a3b8;
+  font-size: 0.5625rem;
+}
+
+.settings-proxy-form__eye {
+  position: absolute;
+  right: 0.375rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.settings-proxy-form__eye:hover {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.settings-proxy-form__eye:focus-visible {
+  outline: none;
+  box-shadow: var(--settings-focus-ring);
+}
+
+/* Equal-width action pair — always side by side */
+.settings-proxy-form__actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.5rem;
 }
 
-.settings-proxy-actions__btn {
-  min-height: 2.5rem;
-  padding: 0.5rem 1rem;
+.settings-proxy-form__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: 100%;
+  min-height: 2.75rem; /* ≥44px touch target */
+  padding: 0.5rem 0.75rem;
   border-radius: 0.75rem;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -1475,33 +1564,60 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   transition:
     background 150ms ease,
     border-color 150ms ease,
+    color 150ms ease,
     opacity 150ms ease;
 }
 
-.settings-proxy-actions__btn--secondary {
+.settings-proxy-form__btn--test {
   border: 1px solid #e2e8f0;
   background: #fff;
   color: #334155;
 }
 
-.settings-proxy-actions__btn--secondary:hover {
+.settings-proxy-form__btn--test:hover:not(:disabled) {
   background: #f8fafc;
   border-color: #cbd5e1;
 }
 
-.settings-proxy-actions__btn--secondary:disabled {
-  opacity: 0.5;
+.settings-proxy-form__btn--test:disabled {
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
-.settings-proxy-actions__btn--primary {
+.settings-proxy-form__btn--save {
   border: 1px solid transparent;
-  background: #334155;
+  background: #0f172a;
   color: #fff;
 }
 
-.settings-proxy-actions__btn--primary:hover {
+.settings-proxy-form__btn--save:hover {
   background: #1e293b;
+}
+
+.settings-proxy-form__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--settings-focus-ring);
+}
+
+.settings-proxy-form__status {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.settings-proxy-form__status.is-ok {
+  color: #059669;
+}
+
+.settings-proxy-form__status.is-err {
+  color: #e11d48;
+}
+
+/* Narrow panel: stack fields, keep actions dual-column */
+@media (max-width: 520px) {
+  .settings-proxy-form__fields {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Tool strategy footer actions */
