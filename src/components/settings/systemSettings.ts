@@ -1141,20 +1141,37 @@ function applyFetchedModels(panel: SettingsPanelData, models: ModelOption[]): vo
   }
 }
 
+const MODEL_FETCH_ERROR_RULES: ReadonlyArray<{ test: (message: string) => boolean; text: string }> =
+  [
+    {
+      test: message => message.includes('HTTP 401') || message.includes('Unauthorized'),
+      text: 'API Key 无效或已过期，请检查配置',
+    },
+    {
+      test: message => message.includes('HTTP 403') || message.includes('Forbidden'),
+      text: 'API Key 没有访问权限，请检查配置',
+    },
+    {
+      test: message => message.includes('HTTP 429') || /rate limit/i.test(message),
+      text: '请求过于频繁，请稍后再试',
+    },
+    {
+      test: message => message.includes('HTTP 404'),
+      text: 'API端点地址不正确，请检查配置',
+    },
+    {
+      test: message => message.includes('Failed to fetch') || message.includes('NetworkError'),
+      text: '网络连接失败，请检查网络或端点地址',
+    },
+    {
+      test: message => message.includes('timeout') || message.includes('AbortError'),
+      text: '请求超时，请检查网络连接',
+    },
+  ];
+
 function getModelFetchErrorMessage(error: Error): string {
   const message = error.message;
-  if (message.includes('HTTP 401') || message.includes('Unauthorized'))
-    return 'API Key 无效或已过期，请检查配置';
-  if (message.includes('HTTP 403') || message.includes('Forbidden'))
-    return 'API Key 没有访问权限，请检查配置';
-  if (message.includes('HTTP 429') || /rate limit/i.test(message))
-    return '请求过于频繁，请稍后再试';
-  if (message.includes('HTTP 404')) return 'API端点地址不正确，请检查配置';
-  if (message.includes('Failed to fetch') || message.includes('NetworkError'))
-    return '网络连接失败，请检查网络或端点地址';
-  if (message.includes('timeout') || message.includes('AbortError'))
-    return '请求超时，请检查网络连接';
-  return message;
+  return MODEL_FETCH_ERROR_RULES.find(rule => rule.test(message))?.text ?? message;
 }
 
 function notifyModelFetchFailure(error: Error): void {
