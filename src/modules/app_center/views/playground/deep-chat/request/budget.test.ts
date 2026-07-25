@@ -31,8 +31,9 @@ describe('Playground request budget', () => {
     expect(off).toBe(DEFAULT_DEEP_CHAT_REQUEST_BUDGET.maxOutputTokens);
     expect(on).toBeGreaterThan(off);
     expect(on).toBe(DEEP_CHAT_REASONING_MAX_OUTPUT_TOKENS_FLOOR);
+    expect(DEEP_CHAT_REASONING_MAX_OUTPUT_TOKENS_FLOOR).toBeGreaterThanOrEqual(8192);
     // Already-high base is preserved (not reduced).
-    expect(resolveDeepChatMaxOutputTokens(8000, true)).toBe(8000);
+    expect(resolveDeepChatMaxOutputTokens(16000, true)).toBe(16000);
   });
 
   it('keeps long prompt inputs sendable under the default dynamic budget', () => {

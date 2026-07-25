@@ -21,8 +21,14 @@ export const DEFAULT_DEEP_CHAT_REQUEST_BUDGET: DeepChatRequestBudget = {
   maxOutputTokens: 2000,
 };
 
-/** Floor for max_output_tokens when reasoning is enabled (reasoning tokens share the budget). */
-export const DEEP_CHAT_REASONING_MAX_OUTPUT_TOKENS_FLOOR = 4096;
+/**
+ * Floor for max_output_tokens when reasoning is enabled.
+ * Reasoning tokens share the same budget; 4k often exhausts before visible answer.
+ */
+export const DEEP_CHAT_REASONING_MAX_OUTPUT_TOKENS_FLOOR = 8192;
+
+/** Floor used on recovery retry after reasoning-only empty body. */
+export const DEEP_CHAT_RECOVERY_MAX_OUTPUT_TOKENS_FLOOR = 8192;
 
 /**
  * Raise effective max_output_tokens when reasoning is on so models are less likely

@@ -13,7 +13,7 @@ import {
   schedulePendingAssistantDisplay,
 } from '../session/pendingRuntime';
 
-import { callLLM } from '@/services/llmService';
+import { callLLM, type ChatMessage } from '@/services/llmService';
 import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
 import {
   createDeepChatBusinessToolExecutor,
@@ -31,7 +31,11 @@ import {
 import type { LLMProviderConfig } from '@/types/state';
 
 import { appendPendingDeepChatReasoningText, type PendingDeepChatRequest } from './lifecycle';
-import { getDeepChatRequestBudgetDefaults, resolveDeepChatMaxOutputTokens } from './budget';
+import {
+  DEEP_CHAT_RECOVERY_MAX_OUTPUT_TOKENS_FLOOR,
+  getDeepChatRequestBudgetDefaults,
+  resolveDeepChatMaxOutputTokens,
+} from './budget';
 import {
   formatToolActivityLabel,
   formatToolArgsDetail,
@@ -337,22 +341,140 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
     return pendingRequest.assistantText.trim();
   }
 
+  return finalizeDeepChatAssistantText({
+    finalText,
+    streamState,
+    pendingRequest,
+    messages,
+    config,
+    model,
+    controller,
+    signals,
+    sourceChat,
+    apiPath: responsesChain.apiPath,
+    maxTokens,
+  });
+}
+
+async function finalizeDeepChatAssistantText(args: {
+  finalText: string;
+  streamState: DeepChatStreamState;
+  pendingRequest: PendingDeepChatRequest;
+  messages: ChatMessage[];
+  config: LLMProviderConfig;
+  model: string;
+  controller: AbortController;
+  signals: DeepChatSignals;
+  sourceChat: DeepChatElement | null;
+  apiPath?: ReturnType<typeof normalizeApiPathId>;
+  maxTokens: number;
+}): Promise<string> {
   // Prefer tool-loop final text over streamed tool-syntax dumps.
-  let assistantText = (finalText || streamState.streamedText).trim();
+  let assistantText = (args.finalText || args.streamState.streamedText).trim();
   if (textLooksLikeEmittedToolCalls(assistantText)) {
     assistantText = collapseTextEmittedToolCallsForDisplay(assistantText);
   }
 
+  // Gateway/model often finishes reasoning with empty visible body — one recovery hop.
+  if (!assistantText && args.pendingRequest.reasoningText.trim()) {
+    const recovered = await recoverDeepChatAfterReasoningOnly({
+      messages: args.messages,
+      config: args.config,
+      model: args.model,
+      controller: args.controller,
+      pendingRequest: args.pendingRequest,
+      signals: args.signals,
+      sourceChat: args.sourceChat,
+      apiPath: args.apiPath,
+      priorMaxTokens: args.maxTokens,
+    });
+    if (recovered.trim()) {
+      assistantText = recovered.trim();
+      args.streamState.streamedText = '';
+    }
+  }
+
   // Tool-loop / non-stream follow-ups return one blob. Do NOT one-shot onResponse
   // (that flashes the full answer). Typewrite via pending display drain instead.
-  if (shouldTypewriteFinalAssistantText(streamState.streamedText, assistantText)) {
-    revealAssistantTextWithTypewriter(pendingRequest, assistantText);
+  if (shouldTypewriteFinalAssistantText(args.streamState.streamedText, assistantText)) {
+    revealAssistantTextWithTypewriter(args.pendingRequest, assistantText);
   }
 
   syncMountedDeepThinkingChrome();
-
-  assertDeepChatAssistantText(assistantText, pendingRequest);
+  assertDeepChatAssistantText(assistantText, args.pendingRequest);
   return assistantText;
+}
+
+/** Follow-up user turn used when the model only emitted reasoning. */
+export const DEEP_CHAT_REASONING_ONLY_RECOVERY_PROMPT =
+  '你刚才完成了推理但没有输出可见的最终回答。请现在直接输出完整最终答案（不要只输出思考过程，不要输出工具调用标记）。';
+
+export function buildReasoningOnlyRecoveryMessages(messages: ChatMessage[]): ChatMessage[] {
+  return [...messages, { role: 'user', content: DEEP_CHAT_REASONING_ONLY_RECOVERY_PROMPT }];
+}
+
+/**
+ * One-shot recovery: disable reasoning + tools, raise max tokens, ask for visible answer.
+ * Returns empty string if recovery also fails (caller keeps original error path).
+ */
+export async function recoverDeepChatAfterReasoningOnly(args: {
+  messages: ChatMessage[];
+  config: LLMProviderConfig;
+  model: string;
+  controller: AbortController;
+  pendingRequest: PendingDeepChatRequest;
+  signals: DeepChatSignals;
+  sourceChat: DeepChatElement | null;
+  apiPath?: ReturnType<typeof normalizeApiPathId>;
+  priorMaxTokens: number;
+}): Promise<string> {
+  if (args.controller.signal.aborted || args.pendingRequest.abortReason) {
+    return '';
+  }
+  const recoveryState: DeepChatStreamState = { streamedText: '' };
+  const onStreamUpdate = createDeepChatStreamHandler(
+    args.pendingRequest,
+    args.signals,
+    args.sourceChat,
+    recoveryState
+  );
+  const recoveryMax = Math.max(
+    args.priorMaxTokens,
+    DEEP_CHAT_RECOVERY_MAX_OUTPUT_TOKENS_FLOOR,
+    resolveDeepChatMaxOutputTokens(args.priorMaxTokens, true)
+  );
+  try {
+    const text = await callLLM(
+      buildReasoningOnlyRecoveryMessages(args.messages),
+      args.config.provider,
+      args.config.endpoint,
+      args.config.apiKey,
+      args.model,
+      {
+        temperature: sessionState.sessionTemperature,
+        maxTokens: recoveryMax,
+        ...(args.config.serviceTier && { serviceTier: args.config.serviceTier }),
+        // Force visible answer path: no reasoning channel, no tools.
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+        reasoningSessionOverride: { enabled: false },
+        apiPath: args.apiPath,
+        store: false,
+        tools: undefined,
+        executeTool: undefined,
+        enableToolLoop: false,
+        toolChoice: undefined,
+        modelsEntry: findConfigModelsEntry(args.config, args.model),
+        retries: 0,
+        ...getRuntimeDeepChatOptions(),
+        signal: args.controller.signal,
+        stream: true,
+        onStreamUpdate,
+      }
+    );
+    return (text || recoveryState.streamedText || args.pendingRequest.assistantText || '').trim();
+  } catch {
+    return (recoveryState.streamedText || args.pendingRequest.assistantText || '').trim();
+  }
 }
 
 /**

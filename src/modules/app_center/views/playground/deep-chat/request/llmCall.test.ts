@@ -17,6 +17,8 @@ vi.mock('@/services/storageService', async importOriginal => {
 
 const { sessionState } = await import('../session/sessionState');
 const {
+  buildReasoningOnlyRecoveryMessages,
+  DEEP_CHAT_REASONING_ONLY_RECOVERY_PROMPT,
   mapDeepChatEmptyResponsesMessage,
   resolveDeepChatResponsesChainOptions,
   shouldTypewriteFinalAssistantText,
@@ -165,5 +167,15 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     expect(
       shouldTypewriteFinalAssistantText('[{"search_x":[{"query":"AI"}]}]', '根据工具结果…')
     ).toBe(true);
+  });
+
+  it('builds a recovery user turn after reasoning-only empty bodies', () => {
+    const base = [{ role: 'user' as const, content: '今日新闻' }];
+    const next = buildReasoningOnlyRecoveryMessages(base);
+    expect(next).toHaveLength(2);
+    expect(next[0]).toEqual(base[0]);
+    expect(next[1]?.role).toBe('user');
+    expect(next[1]?.content).toBe(DEEP_CHAT_REASONING_ONLY_RECOVERY_PROMPT);
+    expect(String(next[1]?.content)).toMatch(/最终答案|可见/);
   });
 });
