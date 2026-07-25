@@ -8,12 +8,45 @@ import type {
 } from './types';
 import { DEFAULT_REASONING_PREFS, isReasoningEffortLevel } from './types';
 
+const EFFORT_TIER_ORDER: readonly ReasoningEffortLevel[] = [
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+  'max',
+];
+
+function nearestAllowedEffort(
+  preferred: ReasoningEffortLevel,
+  allowed: readonly ReasoningEffortLevel[]
+): ReasoningEffortLevel | null {
+  const idx = EFFORT_TIER_ORDER.indexOf(preferred);
+  if (idx < 0) return null;
+  for (let i = idx; i >= 0; i--) {
+    const tier = EFFORT_TIER_ORDER[i];
+    if (tier && allowed.includes(tier)) return tier;
+  }
+  for (let i = idx + 1; i < EFFORT_TIER_ORDER.length; i++) {
+    const tier = EFFORT_TIER_ORDER[i];
+    if (tier && allowed.includes(tier)) return tier;
+  }
+  return null;
+}
+
+/**
+ * Map a preferred effort onto what the model/surface allows.
+ * - Exact match when allowed.
+ * - Otherwise nearest lower-or-equal tier (max→high when high is top), then walk up.
+ */
 export function clampEffort(
   effort: ReasoningEffort | undefined,
   allowed: readonly ReasoningEffortLevel[]
 ): ReasoningEffortLevel {
-  if (effort && effort !== 'off' && allowed.includes(effort)) {
-    return effort;
+  if (allowed.length === 0) return 'medium';
+  if (effort && effort !== 'off' && allowed.includes(effort)) return effort;
+  if (effort && effort !== 'off') {
+    const nearest = nearestAllowedEffort(effort, allowed);
+    if (nearest) return nearest;
   }
   if (allowed.includes('medium')) return 'medium';
   return allowed[0] ?? 'medium';

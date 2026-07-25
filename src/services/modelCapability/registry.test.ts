@@ -60,6 +60,39 @@ describe('multi-protocol flagship catalog', () => {
     }
   });
 
+  it('scopes reasoning efforts per model (product 5-tier is not forced on every model)', () => {
+    const grok = resolveModelCapability(
+      { provider: 'new_api', modelId: 'grok-4.5' },
+      getModelCapabilityRules()
+    );
+    // xAI docs: low|medium|high, default high — not max/xhigh
+    expect(grok.reasoningEfforts).toEqual(['low', 'medium', 'high']);
+    expect(grok.defaultEffort).toBe('high');
+    expect(grok.reasoningEfforts).not.toContain('max');
+    expect(grok.reasoningEfforts).not.toContain('xhigh');
+
+    const multi = resolveModelCapability(
+      { provider: 'new_api', modelId: 'grok-4.20-multi-agent' },
+      getModelCapabilityRules()
+    );
+    expect(multi.reasoningEfforts).toEqual(['low', 'medium', 'high', 'xhigh']);
+
+    const claude = resolveModelCapability(
+      { provider: 'new_api', modelId: 'claude-sonnet-4.5' },
+      getModelCapabilityRules()
+    );
+    // Budget mappers expose full product scale
+    expect(claude.reasoningEfforts).toEqual(['low', 'medium', 'high', 'xhigh', 'max']);
+
+    expect(MODEL_CAPABILITY_CATALOG_META.productReasoningEfforts).toEqual([
+      'low',
+      'medium',
+      'high',
+      'xhigh',
+      'max',
+    ]);
+  });
+
   it('uses responses preferred surface for o-series / gpt-5', () => {
     const cap = resolveModelCapability(
       { provider: 'new_api', modelId: 'gpt-5.6' },

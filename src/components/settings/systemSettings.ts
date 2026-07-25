@@ -312,6 +312,7 @@ interface SettingsPanelData {
   activeModelCapability: import('@/services/modelCapability').ResolvedModelCapability | null;
   showReasoningControls: boolean;
   reasoningEffortOptions: ReasoningEffortLevel[];
+  clampReasoningPrefsToActiveModel(): void;
   apiPathOptions: readonly ApiPathOption[];
   fullApiUrlPreview: string;
   apiPathCapabilityHint: string;
@@ -1366,16 +1367,27 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   get reasoningEffortOptions(): ReasoningEffortLevel[] {
     const cap = this.activeModelCapability;
+    // Product scale remains low…max; UI lists only what the active model can send.
     if (!cap || cap.reasoningEfforts.length === 0) {
       return [...DEFAULT_REASONING_EFFORTS];
     }
-    // Prefer full 5-tier UI; keep model-reported list if it already includes extras
-    const fromCap = cap.reasoningEfforts.filter(isReasoningEffortLevel);
-    const merged = [...DEFAULT_REASONING_EFFORTS];
-    for (const level of fromCap) {
-      if (!merged.includes(level)) merged.push(level);
+    return cap.reasoningEfforts.filter(isReasoningEffortLevel);
+  },
+
+  /**
+   * When model changes or prefs load, keep effort inside active model allowlist
+   * (nearest high end of model tiers — e.g. stored max → high on grok-4.5).
+   */
+  clampReasoningPrefsToActiveModel(): void {
+    const prefs = normalizeReasoningUserPrefs(this.llm.reasoningPrefs);
+    const allowed = this.reasoningEffortOptions;
+    if (allowed.length === 0) return;
+    const effort = allowed.includes(prefs.effort)
+      ? prefs.effort
+      : (allowed[allowed.length - 1] ?? prefs.effort);
+    if (effort !== prefs.effort) {
+      this.llm.reasoningPrefs = { ...prefs, effort };
     }
-    return merged;
   },
 
   get apiPathOptions(): readonly ApiPathOption[] {
@@ -2179,6 +2191,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.llm.serviceTier = savedConfig?.serviceTier;
     this.llm.reasoningPrefs = normalizeReasoningUserPrefs(savedConfig?.reasoningPrefs);
     this.llm.apiPath = normalizeApiPathId(savedConfig?.apiPath);
+    // Match stored effort to the selected model's allowlist (do not keep orphan max/xhigh).
+    this.clampReasoningPrefsToActiveModel();
     this.loadToolStrategyDefaults();
   },
 
@@ -2479,6 +2493,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   setLlmModel(event: Event): void {
     this.llm.model = (event.target as HTMLSelectElement).value;
+    this.clampReasoningPrefsToActiveModel();
   },
 
   setLlmServiceTier(event: Event): void {
@@ -2503,7 +2518,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   setReasoningEffortLevel(level: ReasoningEffortLevel | string): void {
-    const effort = isReasoningEffortLevel(level) ? level : DEFAULT_REASONING_PREFS.effort;
+    const raw = isReasoningEffortLevel(level) ? level : DEFAULT_REASONING_PREFS.effort;
+    // Only persist efforts the current model can actually send.
+    const effort = this.reasoningEffortOptions.includes(raw)
+      ? raw
+      : (this.reasoningEffortOptions[this.reasoningEffortOptions.length - 1] ??
+        DEFAULT_REASONING_PREFS.effort);
     this.llm.reasoningPrefs = {
       ...normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
       effort,

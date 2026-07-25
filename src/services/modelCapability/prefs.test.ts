@@ -24,6 +24,39 @@ describe('clampEffort', () => {
     expect(clampEffort('off', ['low', 'medium', 'high'])).toBe('medium');
     expect(clampEffort('high', ['low'])).toBe('low');
   });
+
+  it('maps max/xhigh down to highest supported tier (not always medium)', () => {
+    // grok-4.5 docs: low|medium|high — product max is kept but clamped per model
+    expect(clampEffort('max', ['low', 'medium', 'high'])).toBe('high');
+    expect(clampEffort('xhigh', ['low', 'medium', 'high'])).toBe('high');
+    expect(clampEffort('max', ['low', 'medium'])).toBe('medium');
+  });
+
+  it('keeps xhigh when model allowlist includes it (multi-agent / full scale)', () => {
+    expect(clampEffort('xhigh', ['low', 'medium', 'high', 'xhigh'])).toBe('xhigh');
+    expect(clampEffort('max', ['low', 'medium', 'high', 'xhigh', 'max'])).toBe('max');
+    expect(clampEffort('max', ['low', 'medium', 'high', 'xhigh'])).toBe('xhigh');
+  });
+});
+
+describe('resolveEffectiveReasoning clamp with global max', () => {
+  it('sends high for grok-4.5-like caps when user saved max', () => {
+    const r = resolveEffectiveReasoning(
+      capable({ reasoningEfforts: ['low', 'medium', 'high'], defaultEffort: 'high' }),
+      { enabled: true, effort: 'max' },
+      null
+    );
+    expect(r).toEqual({ enabled: true, effort: 'high' });
+  });
+
+  it('sends max when model allowlist includes max', () => {
+    const r = resolveEffectiveReasoning(
+      capable({ reasoningEfforts: ['low', 'medium', 'high', 'xhigh', 'max'] }),
+      { enabled: true, effort: 'max' },
+      null
+    );
+    expect(r).toEqual({ enabled: true, effort: 'max' });
+  });
 });
 
 describe('normalizeReasoningUserPrefs', () => {

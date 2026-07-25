@@ -15,13 +15,54 @@ import {
   mapOpenAiReasoningEffort,
   mapResponsesReasoning,
 } from './mappers';
-import type { ApiSurface, ModelCapabilityRule, SurfaceCapability } from './types';
+import type {
+  ApiSurface,
+  ModelCapabilityRule,
+  ReasoningEffortLevel,
+  SurfaceCapability,
+} from './types';
+import { DEFAULT_REASONING_EFFORTS } from './types';
 
-function surfaceOpenAiEffort(opts?: { temperatureIgnored?: boolean }): SurfaceCapability {
+/** Per-surface effort profile — product keeps 5 tiers; each model lists what it can send. */
+type EffortProfile = {
+  temperatureIgnored?: boolean;
+  reasoningEfforts?: readonly ReasoningEffortLevel[];
+  defaultEffort?: ReasoningEffortLevel;
+};
+
+/** xAI grok-4.5 official: low|medium|high (default high); no xhigh/max/none. */
+const GROK_45_EFFORTS: readonly ReasoningEffortLevel[] = ['low', 'medium', 'high'];
+/** xAI multi-agent: low|medium|high|xhigh (agent count, not depth). */
+const GROK_MULTI_AGENT_EFFORTS: readonly ReasoningEffortLevel[] = [
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+];
+/** OpenAI-compatible effort triad (conservative default). */
+const OPENAI_TRIAD_EFFORTS: readonly ReasoningEffortLevel[] = ['low', 'medium', 'high'];
+
+function resolveEffortFields(opts?: EffortProfile): {
+  reasoningEfforts: ReasoningEffortLevel[];
+  defaultEffort: ReasoningEffortLevel;
+} {
+  const reasoningEfforts = [...(opts?.reasoningEfforts ?? OPENAI_TRIAD_EFFORTS)];
+  const preferred = opts?.defaultEffort;
+  const defaultEffort =
+    preferred && reasoningEfforts.includes(preferred)
+      ? preferred
+      : reasoningEfforts.includes('medium')
+        ? 'medium'
+        : (reasoningEfforts[0] ?? 'medium');
+  return { reasoningEfforts, defaultEffort };
+}
+
+function surfaceOpenAiEffort(opts?: EffortProfile): SurfaceCapability {
+  const { reasoningEfforts, defaultEffort } = resolveEffortFields(opts);
   return {
     supportsReasoning: true,
-    reasoningEfforts: ['low', 'medium', 'high'],
-    defaultEffort: 'medium',
+    reasoningEfforts,
+    defaultEffort,
     temperatureIgnored: opts?.temperatureIgnored ?? true,
     mapRequest: mapOpenAiReasoningEffort,
     // Official Chat Completions Create parity: structured + tools + vision
@@ -31,11 +72,12 @@ function surfaceOpenAiEffort(opts?: { temperatureIgnored?: boolean }): SurfaceCa
   };
 }
 
-function surfaceResponses(opts?: { temperatureIgnored?: boolean }): SurfaceCapability {
+function surfaceResponses(opts?: EffortProfile): SurfaceCapability {
+  const { reasoningEfforts, defaultEffort } = resolveEffortFields(opts);
   return {
     supportsReasoning: true,
-    reasoningEfforts: ['low', 'medium', 'high'],
-    defaultEffort: 'medium',
+    reasoningEfforts,
+    defaultEffort,
     temperatureIgnored: opts?.temperatureIgnored ?? true,
     mapRequest: mapResponsesReasoning,
     // OpenAI Responses capability matrix (text-first SOPs subset + declared parity flags)
@@ -51,11 +93,17 @@ function surfaceResponses(opts?: { temperatureIgnored?: boolean }): SurfaceCapab
   };
 }
 
-function surfaceAnthropic(): SurfaceCapability {
+function surfaceAnthropic(opts?: EffortProfile): SurfaceCapability {
+  // Budget mapper supports full product scale (low…max).
+  const { reasoningEfforts, defaultEffort } = resolveEffortFields({
+    reasoningEfforts: DEFAULT_REASONING_EFFORTS,
+    defaultEffort: 'medium',
+    ...opts,
+  });
   return {
     supportsReasoning: true,
-    reasoningEfforts: ['low', 'medium', 'high'],
-    defaultEffort: 'medium',
+    reasoningEfforts,
+    defaultEffort,
     temperatureIgnored: true,
     mapRequest: mapAnthropicThinking,
     supportsStructuredOutput: true,
@@ -64,11 +112,17 @@ function surfaceAnthropic(): SurfaceCapability {
   };
 }
 
-function surfaceGemini(): SurfaceCapability {
+function surfaceGemini(opts?: EffortProfile): SurfaceCapability {
+  // Budget mapper supports full product scale (low…max).
+  const { reasoningEfforts, defaultEffort } = resolveEffortFields({
+    reasoningEfforts: DEFAULT_REASONING_EFFORTS,
+    defaultEffort: 'medium',
+    ...opts,
+  });
   return {
     supportsReasoning: true,
-    reasoningEfforts: ['low', 'medium', 'high'],
-    defaultEffort: 'medium',
+    reasoningEfforts,
+    defaultEffort,
     temperatureIgnored: false,
     mapRequest: mapGeminiThinking,
     supportsStructuredOutput: true,
@@ -111,11 +165,17 @@ function openaiReasoning(modelPattern: string, contextWindow: number): ModelCapa
 function chatEffort(
   modelPattern: string,
   contextWindow: number,
-  preferred: ApiSurface = 'chat_completions'
+  preferred: ApiSurface = 'chat_completions',
+  effort?: Pick<EffortProfile, 'reasoningEfforts' | 'defaultEffort'>
 ): ModelCapabilityRule {
+  const profile: EffortProfile = {
+    temperatureIgnored: false,
+    reasoningEfforts: effort?.reasoningEfforts ?? OPENAI_TRIAD_EFFORTS,
+    defaultEffort: effort?.defaultEffort,
+  };
   return entry(modelPattern, contextWindow, preferred, {
-    chat_completions: surfaceOpenAiEffort({ temperatureIgnored: false }),
-    responses: surfaceResponses({ temperatureIgnored: false }),
+    chat_completions: surfaceOpenAiEffort(profile),
+    responses: surfaceResponses(profile),
   });
 }
 
@@ -181,14 +241,55 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   openaiReasoning('gpt-5.6-*', 256_000),
   openaiReasoning('gpt-5-*', 256_000),
 
-  // xAI Grok — completions verified; responses also live on new-api
-  chatEffort('grok-4.5', 256_000, 'chat_completions'),
-  chatEffort('grok-4.5-*', 256_000),
-  chatEffort('grok-4*', 256_000),
-  chatEffort('grok-3-mini', 128_000),
-  chatEffort('grok-3-mini-*', 128_000),
-  chatEffort('grok-3', 128_000),
-  chatEffort('grok-3-*', 128_000),
+  // xAI Grok — efforts from docs.x.ai (model-scoped; product still has low…max)
+  // grok-4.5: low|medium|high default high; cannot disable; no xhigh/max
+  chatEffort('grok-4.5', 256_000, 'chat_completions', {
+    reasoningEfforts: GROK_45_EFFORTS,
+    defaultEffort: 'high',
+  }),
+  chatEffort('grok-4.5-*', 256_000, 'chat_completions', {
+    reasoningEfforts: GROK_45_EFFORTS,
+    defaultEffort: 'high',
+  }),
+  // multi-agent: effort controls agent count; includes xhigh
+  chatEffort('grok-4.20-multi-agent', 256_000, 'chat_completions', {
+    reasoningEfforts: GROK_MULTI_AGENT_EFFORTS,
+    defaultEffort: 'medium',
+  }),
+  chatEffort('grok-4.20-multi-agent-*', 256_000, 'chat_completions', {
+    reasoningEfforts: GROK_MULTI_AGENT_EFFORTS,
+    defaultEffort: 'medium',
+  }),
+  // grok-4.3 chat: none|low|medium|high — product "none" = prefs.enabled false
+  chatEffort('grok-4.3', 256_000, 'chat_completions', {
+    reasoningEfforts: GROK_45_EFFORTS,
+    defaultEffort: 'low',
+  }),
+  chatEffort('grok-4.3-*', 256_000, 'chat_completions', {
+    reasoningEfforts: GROK_45_EFFORTS,
+    defaultEffort: 'low',
+  }),
+  // remaining grok-4* (e.g. grok-4-0709 aliases): triad, default medium
+  chatEffort('grok-4*', 256_000, 'chat_completions', {
+    reasoningEfforts: OPENAI_TRIAD_EFFORTS,
+    defaultEffort: 'medium',
+  }),
+  chatEffort('grok-3-mini', 128_000, 'chat_completions', {
+    reasoningEfforts: OPENAI_TRIAD_EFFORTS,
+    defaultEffort: 'medium',
+  }),
+  chatEffort('grok-3-mini-*', 128_000, 'chat_completions', {
+    reasoningEfforts: OPENAI_TRIAD_EFFORTS,
+    defaultEffort: 'medium',
+  }),
+  chatEffort('grok-3', 128_000, 'chat_completions', {
+    reasoningEfforts: OPENAI_TRIAD_EFFORTS,
+    defaultEffort: 'medium',
+  }),
+  chatEffort('grok-3-*', 128_000, 'chat_completions', {
+    reasoningEfforts: OPENAI_TRIAD_EFFORTS,
+    defaultEffort: 'medium',
+  }),
 
   // DeepSeek
   chatEffort('deepseek-v4-flash', 128_000),
@@ -249,8 +350,10 @@ export function getModelCapabilityRules(): readonly ModelCapabilityRule[] {
 }
 
 export const MODEL_CAPABILITY_CATALOG_META = {
-  asOf: '2026-07-23',
+  asOf: '2026-07-26',
   surfaces: ['chat_completions', 'responses'] as const,
+  /** Product UI scale (filter per model via reasoningEfforts). */
+  productReasoningEfforts: DEFAULT_REASONING_EFFORTS,
   controlFieldBySurface: {
     chat_completions: 'reasoning_effort | thinking | extra_body.google.thinking_config',
     responses: 'reasoning.effort',
