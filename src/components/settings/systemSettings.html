@@ -432,7 +432,7 @@
                     <div class="group">
                       <label
                         for="llm-provider"
-                        class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                        class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
                         >AI 厂商 / 配置档</label
                       >
                       <div class="relative">
@@ -441,7 +441,7 @@
                           name="llm-provider"
                           :value="llm.provider"
                           @change="setLlmProvider($event)"
-                          class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm transition duration-200 shadow-sm hover:border-slate-300 cursor-pointer"
+                          class="settings-control w-full pl-4 pr-10 py-2.5 appearance-none text-sm transition duration-200 cursor-pointer"
                         >
                           <template x-for="option in llmProviderOptions" :key="option.id">
                             <option :value="option.id" x-text="option.label"></option>
@@ -465,7 +465,7 @@
                         <div class="settings-endpoint-field">
                           <label
                             for="llm-endpoint"
-                            class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                            class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
                             >API Endpoint</label
                           >
                           <input
@@ -475,7 +475,7 @@
                             autocomplete="off"
                             :value="llm.endpoint"
                             @input="setLlmEndpoint($event)"
-                            class="settings-endpoint-input w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                            class="settings-control settings-endpoint-input w-full px-3 py-2.5 text-sm font-mono text-slate-600 transition duration-200 placeholder:text-slate-300"
                             :placeholder="defaultLlmEndpoint"
                           />
                         </div>
@@ -575,7 +575,7 @@
                     <div class="group">
                       <label
                         for="llm-api-key"
-                        class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                        class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
                         >API Key</label
                       >
                       <div class="relative">
@@ -593,7 +593,7 @@
                           spellcheck="false"
                           :value="llm.apiKey"
                           @input="setLlmApiKey($event)"
-                          class="settings-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                          class="settings-control settings-secret-input w-full pl-12 pr-12 py-2.5 text-sm font-mono text-slate-600 transition duration-200 placeholder:text-slate-300"
                           placeholder="sk-..."
                         />
                         <button
@@ -601,7 +601,7 @@
                           @click="toggleLlmKeyVisibility()"
                           :aria-label="llmApiKeyVisibilityLabel"
                           :title="llmApiKeyVisibilityLabel"
-                          class="absolute right-2.5 top-1/2 -translate-y-1/2 min-h-[28px] min-w-[28px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 cursor-pointer"
+                          class="settings-focus-ring absolute right-2.5 top-1/2 -translate-y-1/2 min-h-[28px] min-w-[28px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 cursor-pointer"
                         >
                           <i class="fas text-xs" :class="llmApiKeyIconClass" aria-hidden="true"></i>
                         </button>
@@ -627,7 +627,7 @@
                     <div class="group">
                       <label
                         for="llm-model"
-                        class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                        class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
                         >默认模型</label
                       >
                       <div class="flex gap-2">
@@ -637,7 +637,7 @@
                             name="llm-model"
                             :value="llm.model"
                             @change="setLlmModel($event)"
-                            class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer"
+                            class="settings-control w-full pl-4 pr-10 py-2.5 appearance-none text-sm transition duration-200 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer"
                             :disabled="modelSelectDisabled"
                           >
                             <option value="">— 请选择 —</option>
@@ -657,7 +657,7 @@
                           :aria-label="fetchModelsText"
                           @click="fetchModels()"
                           :disabled="llm.isFetching"
-                          class="px-4 py-2.5 min-h-[42px] bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 rounded-xl transition duration-200 text-sm font-medium flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 cursor-pointer"
+                          class="settings-focus-ring px-4 py-2.5 min-h-[42px] bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 rounded-xl transition duration-200 text-sm font-medium flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:translate-y-px cursor-pointer"
                         >
                           <i
                             class="fas text-xs"
@@ -777,7 +777,7 @@
                     <div class="group">
                       <label
                         for="llm-service-tier"
-                        class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                        class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
                         >服务层级（service_tier）</label
                       >
                       <div class="relative">
@@ -786,7 +786,7 @@
                           name="llm-service-tier"
                           :value="llm.serviceTier || ''"
                           @change="setLlmServiceTier($event)"
-                          class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 cursor-pointer"
+                          class="settings-control w-full pl-4 pr-10 py-2.5 appearance-none text-sm transition duration-200 cursor-pointer"
                         >
                           <option value="">不发送（默认）</option>
                           <option value="auto">auto</option>
@@ -812,7 +812,7 @@
                     :aria-label="testConnectionText"
                     @click="testConnection()"
                     :disabled="llm.isTesting"
-                    class="flex-1 min-h-[44px] py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-medium rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 cursor-pointer"
+                    class="settings-focus-ring flex-1 min-h-[44px] py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-medium rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 active:translate-y-px cursor-pointer"
                   >
                     <i class="fas text-xs" :class="testConnectionIconClass" aria-hidden="true"></i>
                     <span x-text="testConnectionText"></span>
@@ -821,7 +821,7 @@
                     type="button"
                     data-testid="settings-save-provider"
                     @click="saveProviderConfig()"
-                    class="flex-[2] min-h-[44px] py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 cursor-pointer"
+                    class="settings-btn-primary flex-[2]"
                   >
                     <i class="fas fa-check text-xs" aria-hidden="true"></i>
                     保存配置
@@ -2138,7 +2138,7 @@
                       >
                         <input
                           type="checkbox"
-                          class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          class="settings-checkbox h-3.5 w-3.5 rounded border-slate-300"
                           :checked="isExportBucketSelected(bucket.id)"
                           @change="toggleExportBucket(bucket.id)"
                           :disabled="localData.isBusy"
@@ -2155,7 +2155,7 @@
                       :disabled="localData.isBusy"
                       class="settings-data-io-actions__btn"
                     >
-                      <i class="fas fa-file-export text-blue-500" aria-hidden="true"></i>
+                      <i class="fas fa-file-export settings-text-accent" aria-hidden="true"></i>
                       <span x-text="exportLocalDataButtonText"></span>
                     </button>
                     <button
@@ -2194,7 +2194,7 @@
                         step="10"
                         :value="runtimeStrategy.settings.storage.historyMaxItems"
                         @input="setRuntimeNumber('storage.historyMaxItems', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                        class="settings-control settings-control--sm w-full px-3 py-2 text-xs"
                       />
                     </label>
                     <label class="block">
@@ -2206,7 +2206,7 @@
                         step="0.05"
                         :value="runtimeStrategy.settings.storage.lruWarningThreshold"
                         @input="setRuntimeNumber('storage.lruWarningThreshold', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                        class="settings-control settings-control--sm w-full px-3 py-2 text-xs"
                       />
                     </label>
                     <label class="block">
@@ -2218,7 +2218,7 @@
                         step="0.05"
                         :value="runtimeStrategy.settings.storage.lruCleanupRatio"
                         @input="setRuntimeNumber('storage.lruCleanupRatio', $event)"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                        class="settings-control settings-control--sm w-full px-3 py-2 text-xs"
                       />
                     </label>
                   </div>
@@ -2227,7 +2227,7 @@
                       type="button"
                       @click="saveRuntimeStrategy()"
                       :disabled="runtimeStrategy.isSaving"
-                      class="min-h-[36px] rounded-xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-blue-500/15 transition duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      class="settings-btn-primary settings-btn-primary--sm"
                     >
                       保存数据策略
                     </button>
@@ -2240,10 +2240,10 @@
                   type="button"
                   @click="toggleLocalDataCleanupItems()"
                   :aria-expanded="localData.cleanupItemsExpanded"
-                  class="flex min-h-[44px] w-full items-center gap-3 rounded-xl border border-white/80 bg-white/85 p-3 text-left shadow-sm transition duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  class="settings-focus-ring flex min-h-[44px] w-full items-center gap-3 rounded-xl border border-white/80 bg-white/85 p-3 text-left shadow-sm transition duration-200 hover:bg-white"
                 >
                   <span
-                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-blue-100"
+                    class="settings-icon-chip--accent flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
                   >
                     <i class="fas fa-list-check text-[11px]"></i>
                   </span>
@@ -2316,7 +2316,7 @@
                               type="button"
                               @click="clearLocalDataBucket(bucket.id)"
                               :disabled="localData.isBusy || bucket.isEmpty"
-                              class="min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                              class="settings-focus-ring min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-45"
                               :class="bucket.buttonClass"
                             >
                               <span :hidden="bucket.isClearing" x-text="bucket.actionLabel"></span>
@@ -2617,7 +2617,7 @@
               <button
                 type="button"
                 @click="openPerformanceMonitor()"
-                class="w-full p-4 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl transition duration-200 shadow-sm group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                class="settings-focus-ring w-full p-4 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl transition duration-200 shadow-sm group"
               >
                 <div class="flex items-center gap-3">
                   <div

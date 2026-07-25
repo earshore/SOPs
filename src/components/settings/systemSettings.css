@@ -680,6 +680,100 @@ select.settings-control {
   color: #475569;
 }
 
+/* X6 shell chrome helpers — accent/focus follow Appearance primary via --settings-* */
+.group:focus-within .settings-label--focus-accent {
+  color: var(--settings-accent);
+}
+
+.settings-label--focus-accent {
+  transition: color 200ms ease;
+}
+
+.settings-focus-ring:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--settings-surface, #fff),
+    0 0 0 4px var(--settings-focus-color);
+}
+
+.settings-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.625rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  background: linear-gradient(90deg, var(--settings-accent), var(--settings-accent-strong));
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--settings-accent) 25%, transparent);
+  cursor: pointer;
+  transition:
+    background 200ms ease,
+    box-shadow 200ms ease,
+    transform 150ms ease,
+    opacity 150ms ease;
+}
+
+.settings-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(
+    90deg,
+    var(--settings-accent-strong),
+    color-mix(in srgb, var(--settings-accent-strong) 88%, #0f172a)
+  );
+  box-shadow: 0 12px 18px -3px color-mix(in srgb, var(--settings-accent) 40%, transparent);
+}
+
+.settings-btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.settings-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-btn-primary:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--settings-surface, #fff),
+    0 0 0 4px var(--settings-focus-color),
+    0 10px 15px -3px color-mix(in srgb, var(--settings-accent) 25%, transparent);
+}
+
+.settings-btn-primary--sm {
+  min-height: 2.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  box-shadow: 0 8px 14px -3px color-mix(in srgb, var(--settings-accent) 15%, transparent);
+}
+
+.settings-checkbox {
+  accent-color: var(--settings-accent);
+}
+
+.settings-checkbox:focus {
+  outline: none;
+}
+
+.settings-checkbox:focus-visible {
+  outline: 2px solid var(--settings-focus-color);
+  outline-offset: 2px;
+}
+
+.settings-text-accent {
+  color: var(--settings-accent);
+}
+
+.settings-icon-chip--accent {
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--settings-accent) 18%, transparent);
+}
+
 /* Helper / description under form controls (not mono body copy) */
 .settings-field-help {
   margin-top: 0.375rem;

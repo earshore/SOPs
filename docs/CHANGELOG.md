@@ -18,13 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 系统设置外观：**颜色模式** 分段控件（浅色 / 深色 / 跟随系统）。
 - D1 审计：`npm run token:override-audit` + 清单文档；移除 variables.css 中 **192** 条与 generated 值相等的原子重复声明。
 - D2：引入语义 `--workbench-radius` / `--workbench-radius-lg`（工作台 8px SSOT）；决策文档入档。
+- D1/D2 治理：`config/token-atomic-override-allowlist.json` + `token:override-audit` 报告 unallowlisted 原子冲突；可选 `--fail-on-unallowlisted-atomic`。
 - 系统设置壳层 accent/focus/主 CTA 绑 Appearance primary token（X6 部分）。
 - E2E smoke：Appearance `minimal` + 颜色模式 dark 文档根属性独立断言。
 - Settings Appearance：颜色模式（浅色 / 深色 / 跟随系统）UI，即时调用 `ThemeManager.applyColorMode`，与主题色选择独立。
 
 ### Changed
 
+- D2 R2/R3：高流量工作台面板圆角收敛到 `var(--workbench-radius)` / panel|card 别名（`analysis-widget-card`、PromptLab/AI Analysis 覆盖、Keyword Hunter textarea、PPC import 面板）；未改 entry/overview 卡。
 - Settings 壳层 chrome：`--settings-accent` / focus / 分段 active / 主 CTA 映射 Appearance primary token（X6 partial）。
+- Settings X6 收尾：`systemSettings` 主保存 CTA、通用输入 focus、brand accent 标签/勾选改 `--settings-*` / `settings-btn-primary`（保留 section indigo 与进度桶色）。
 - D1 Phase 2 prep：从 `variables.css` 移除与 generated 值完全相同的原子重复（色板 / 字号字重 / leading / tracking / 数字 spacing），语义与 intentional 冲突尺度保留。
 - Phase 1：Appearance 写 `data-appearance`（兼容 `data-theme`=appearance id），**不再**用 Appearance 覆盖 dark；legacy `data-theme=dark` 一次性迁移到 color mode。
 - 壳层 chrome（modal/navigation/search）primary/focus 改语义 token；megaMenu 模块色板保留（归属层，13 处）。

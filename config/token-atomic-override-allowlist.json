@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "description": "Intentional atomic same-name overrides: handwritten variables.css wins over variables.generated.css. New atomic conflicts must be allowlisted here with a reason, or resolved by removing the handwritten override / aligning values.",
+  "updatedAt": "2026-07-26",
+  "overrides": [
+    {
+      "token": "--ease-smooth",
+      "category": "easing",
+      "reason": "Product ease-smooth curve (emphasized out); not the generated default ease"
+    },
+    {
+      "token": "--rounded-sm",
+      "category": "radius",
+      "reason": "D2 product radius ladder (4px); keep handwritten until migration uses workbench tokens"
+    },
+    {
+      "token": "--rounded-md",
+      "category": "radius",
+      "reason": "D2 product radius ladder (8px workbench SSOT peer); keep handwritten until migration uses workbench tokens"
+    },
+    {
+      "token": "--rounded-lg",
+      "category": "radius",
+      "reason": "D2 product radius ladder (12px); keep handwritten until migration uses workbench tokens"
+    },
+    {
+      "token": "--rounded-xl",
+      "category": "radius",
+      "reason": "D2 product radius ladder (16px); keep handwritten until migration uses workbench tokens"
+    },
+    {
+      "token": "--rounded-2xl",
+      "category": "radius",
+      "reason": "D2 product radius ladder (24px); keep handwritten until migration uses workbench tokens"
+    },
+    {
+      "token": "--rounded-3xl",
+      "category": "radius",
+      "reason": "D2 product radius ladder (32px); keep handwritten until migration uses workbench tokens"
+    },
+    {
+      "token": "--shadow-sm",
+      "category": "shadow",
+      "reason": "Product elevation: softer multi-layer shadow than generated Tailwind default"
+    },
+    {
+      "token": "--shadow-md",
+      "category": "shadow",
+      "reason": "Product elevation: lighter opacity ladder than generated"
+    },
+    {
+      "token": "--shadow-lg",
+      "category": "shadow",
+      "reason": "Product elevation: softer spread/opacity than generated"
+    },
+    {
+      "token": "--shadow-xl",
+      "category": "shadow",
+      "reason": "Product elevation: simplified single-layer soft shadow"
+    },
+    {
+      "token": "--shadow-2xl",
+      "category": "shadow",
+      "reason": "Product elevation: reduced opacity vs generated"
+    },
+    {
+      "token": "--shadow-inner",
+      "category": "shadow",
+      "reason": "Product inset shadow: slightly softer than generated"
+    },
+    {
+      "token": "--z-dropdown",
+      "category": "z-index",
+      "reason": "Compact product z-index ladder (not Bootstrap 1000+ scale)"
+    },
+    {
+      "token": "--z-sticky",
+      "category": "z-index",
+      "reason": "Compact product z-index ladder (not Bootstrap 1000+ scale)"
+    },
+    {
+      "token": "--z-modal-backdrop",
+      "category": "z-index",
+      "reason": "Compact product z-index ladder (not Bootstrap 1000+ scale)"
+    },
+    {
+      "token": "--z-modal",
+      "category": "z-index",
+      "reason": "Compact product z-index ladder (not Bootstrap 1000+ scale)"
+    },
+    {
+      "token": "--z-popover",
+      "category": "z-index",
+      "reason": "Compact product z-index ladder (not Bootstrap 1000+ scale)"
+    },
+    {
+      "token": "--z-toast",
+      "category": "z-index",
+      "reason": "Compact product z-index ladder (not Bootstrap 1000+ scale)"
+    },
+    {
+      "token": "--z-tooltip",
+      "category": "z-index",
+      "reason": "Compact product z-index ladder (not Bootstrap 1000+ scale)"
+    }
+  ]
+}

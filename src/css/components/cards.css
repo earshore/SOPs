@@ -150,7 +150,7 @@
 
 .analysis-widget-card {
   background: white;
-  border-radius: var(--rounded-xl);
+  border-radius: var(--workbench-radius, var(--card-radius, 8px));
   border: 1px solid var(--color-slate-200);
   box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
   transition:
@@ -206,7 +206,7 @@
   color: var(--color-slate-600);
   background: white;
   border: 1px solid var(--color-slate-200);
-  border-radius: var(--rounded-lg);
+  border-radius: var(--workbench-radius, var(--card-radius, 8px));
   transition:
     border-color var(--duration-fast),
     box-shadow var(--duration-fast),
@@ -1618,7 +1618,7 @@
 @media (max-width: 768px) {
   .card {
     --card-padding: var(--spacing-md, 16px);
-    --card-radius: var(--rounded-lg, 12px);
+    --card-radius: var(--workbench-radius, 8px);
   }
 
   .card-spacious {

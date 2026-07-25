@@ -10,6 +10,8 @@
  *   - same-name, same value (redundant identical overrides)
  *   - only-in-handwritten (semantic / migration candidates)
  *   - only-in-generated
+ *   - atomic conflicts split into allowlisted vs unallowlisted
+ *     (config/token-atomic-override-allowlist.json)
  *
  * Usage:
  *   npx tsx scripts/quality/audit-token-overrides.ts
@@ -17,14 +19,17 @@
  *   npx tsx scripts/quality/audit-token-overrides.ts --markdown
  *   npx tsx scripts/quality/audit-token-overrides.ts --write path.md
  *   npx tsx scripts/quality/audit-token-overrides.ts --fail-on-atomic-override
+ *   npx tsx scripts/quality/audit-token-overrides.ts --fail-on-unallowlisted-atomic
  *   npm run token:override-audit
  *
  * Exit:
  *   report modes → always 0 on successful parse
- *   --fail-on-atomic-override → 1 when an atomic same-name value conflict exists
+ *   --fail-on-atomic-override → 1 when any atomic same-name value conflict exists
+ *   --fail-on-unallowlisted-atomic → 1 when atomic conflict is not in allowlist
+ *     (default off; intended for future CI once allowlist is authoritative)
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -34,6 +39,7 @@ const repoRoot = join(__dirname, '..', '..');
 
 const GENERATED_PATH = join(repoRoot, 'src/css/foundation/variables.generated.css');
 const HANDWRITTEN_PATH = join(repoRoot, 'src/css/foundation/variables.css');
+const ALLOWLIST_PATH = join(repoRoot, 'config/token-atomic-override-allowlist.json');
 
 interface CssVar {
   name: string;
@@ -52,9 +58,23 @@ interface TokenPair {
   category: string;
 }
 
+interface AllowlistEntry {
+  token: string;
+  category?: string;
+  reason: string;
+}
+
+interface AllowlistFile {
+  version: number;
+  description?: string;
+  updatedAt?: string;
+  overrides: AllowlistEntry[];
+}
+
 interface AuditReport {
   generatedPath: string;
   handwrittenPath: string;
+  allowlistPath: string;
   generatedRootCount: number;
   handwrittenRootCount: number;
   handwrittenDarkCount: number;
@@ -64,6 +84,13 @@ interface AuditReport {
   onlyGenerated: Array<{ name: string; value: string; line: number; category: string }>;
   identicalAtomic: TokenPair[];
   conflictAtomic: TokenPair[];
+  /** Atomic conflicts present in config allowlist (intentional). */
+  conflictAtomicAllowlisted: Array<TokenPair & { reason: string }>;
+  /** Atomic conflicts not listed in allowlist (action needed). */
+  conflictAtomicUnallowlisted: TokenPair[];
+  /** Allowlist token names with no current atomic conflict (stale entries). */
+  allowlistUnused: string[];
+  allowlistSize: number;
 }
 
 /** Collapse CSS declaration value for equality checks (conservative). */
@@ -408,9 +435,25 @@ function mapLatestByName(vars: CssVar[]): Map<string, CssVar> {
   return map;
 }
 
+function loadAllowlist(): { path: string; entries: Map<string, AllowlistEntry> } {
+  const rel = relative(repoRoot, ALLOWLIST_PATH).replace(/\\/g, '/');
+  if (!existsSync(ALLOWLIST_PATH)) {
+    return { path: rel, entries: new Map() };
+  }
+  const raw = JSON.parse(readFileSync(ALLOWLIST_PATH, 'utf8')) as AllowlistFile;
+  const entries = new Map<string, AllowlistEntry>();
+  for (const entry of raw.overrides ?? []) {
+    if (entry?.token) {
+      entries.set(entry.token, entry);
+    }
+  }
+  return { path: rel, entries };
+}
+
 function buildReport(): AuditReport {
   const generatedCss = readFileSync(GENERATED_PATH, 'utf8');
   const handwrittenCss = readFileSync(HANDWRITTEN_PATH, 'utf8');
+  const allowlist = loadAllowlist();
 
   const generatedVars = parseCustomProperties(generatedCss).filter(v => isRootSelector(v.selector));
   const handwrittenAll = parseCustomProperties(handwrittenCss);
@@ -460,9 +503,27 @@ function buildReport(): AuditReport {
   onlyHandwritten.sort((a, b) => a.name.localeCompare(b.name));
   onlyGenerated.sort((a, b) => a.name.localeCompare(b.name));
 
+  const conflictAtomic = conflicts.filter(p => p.atomic);
+  const conflictAtomicAllowlisted: AuditReport['conflictAtomicAllowlisted'] = [];
+  const conflictAtomicUnallowlisted: TokenPair[] = [];
+  for (const p of conflictAtomic) {
+    const entry = allowlist.entries.get(p.name);
+    if (entry) {
+      conflictAtomicAllowlisted.push({ ...p, reason: entry.reason });
+    } else {
+      conflictAtomicUnallowlisted.push(p);
+    }
+  }
+
+  const conflictAtomicNames = new Set(conflictAtomic.map(p => p.name));
+  const allowlistUnused = [...allowlist.entries.keys()]
+    .filter(name => !conflictAtomicNames.has(name))
+    .sort((a, b) => a.localeCompare(b));
+
   return {
     generatedPath: relative(repoRoot, GENERATED_PATH).replace(/\\/g, '/'),
     handwrittenPath: relative(repoRoot, HANDWRITTEN_PATH).replace(/\\/g, '/'),
+    allowlistPath: allowlist.path,
     generatedRootCount: genMap.size,
     handwrittenRootCount: handMap.size,
     handwrittenDarkCount: mapLatestByName(handwrittenDark).size,
@@ -471,7 +532,11 @@ function buildReport(): AuditReport {
     onlyHandwritten,
     onlyGenerated,
     identicalAtomic: identical.filter(p => p.atomic),
-    conflictAtomic: conflicts.filter(p => p.atomic),
+    conflictAtomic,
+    conflictAtomicAllowlisted,
+    conflictAtomicUnallowlisted,
+    allowlistUnused,
+    allowlistSize: allowlist.entries.size,
   };
 }
 
@@ -485,7 +550,14 @@ function toMarkdown(report: AuditReport): string {
   lines.push('');
   lines.push(`Generated: \`${report.generatedPath}\``);
   lines.push(`Handwritten: \`${report.handwrittenPath}\``);
+  lines.push(`Allowlist: \`${report.allowlistPath}\``);
   lines.push('Date: 2026-07-26');
+  lines.push('');
+  lines.push('Phase 2 prep (safe first cut). Source of truth for runtime cascade remains:');
+  lines.push('');
+  lines.push(
+    '`main.css` → `variables.generated.css` then `variables.css` (handwritten wins on same name).'
+  );
   lines.push('');
   lines.push('## Summary');
   lines.push('');
@@ -511,11 +583,80 @@ function toMarkdown(report: AuditReport): string {
   );
   lines.push(
     formatTableRow([
+      '↳ atomic conflicts **allowlisted**',
+      String(report.conflictAtomicAllowlisted.length),
+    ])
+  );
+  lines.push(
+    formatTableRow([
+      '↳ atomic conflicts **unallowlisted**',
+      String(report.conflictAtomicUnallowlisted.length),
+    ])
+  );
+  lines.push(formatTableRow(['Allowlist entries', String(report.allowlistSize)]));
+  lines.push(formatTableRow(['Allowlist unused (stale)', String(report.allowlistUnused.length)]));
+  lines.push(
+    formatTableRow([
       'Only in handwritten (semantic candidates)',
       String(report.onlyHandwritten.length),
     ])
   );
   lines.push(formatTableRow(['Only in generated', String(report.onlyGenerated.length)]));
+  lines.push('');
+  lines.push('## Atomic override allowlist');
+  lines.push('');
+  lines.push(
+    'Intentional atomic same-name overrides are recorded in `config/token-atomic-override-allowlist.json` with a short reason. New atomic conflicts must be allowlisted or removed/aligned — do not mass-align product radii/shadows/z-index until workbench migration.'
+  );
+  lines.push('');
+  if (report.conflictAtomicAllowlisted.length === 0) {
+    lines.push('_No allowlisted atomic conflicts currently match._');
+  } else {
+    lines.push(formatTableRow(['Token', 'Generated', 'Handwritten', 'Category', 'Reason']));
+    lines.push(formatTableRow(['---', '---', '---', '---', '---']));
+    for (const p of report.conflictAtomicAllowlisted) {
+      lines.push(
+        formatTableRow([
+          '`' + p.name + '`',
+          '`' + normalizeValue(p.generated) + '`',
+          '`' + normalizeValue(p.handwritten) + '`',
+          p.category,
+          p.reason,
+        ])
+      );
+    }
+  }
+  lines.push('');
+  lines.push('## Unallowlisted atomic conflicts');
+  lines.push('');
+  lines.push(
+    'These atomic overrides are **not** in the allowlist. Either add a reason to the allowlist or resolve by removing the handwritten declaration / migrating consumers.'
+  );
+  lines.push('');
+  if (report.conflictAtomicUnallowlisted.length === 0) {
+    lines.push('_None — allowlist covers all current atomic conflicts._');
+  } else {
+    lines.push(formatTableRow(['Token', 'Generated', 'Handwritten', 'Category']));
+    lines.push(formatTableRow(['---', '---', '---', '---']));
+    for (const p of report.conflictAtomicUnallowlisted) {
+      lines.push(
+        formatTableRow([
+          '`' + p.name + '`',
+          '`' + normalizeValue(p.generated) + '`',
+          '`' + normalizeValue(p.handwritten) + '`',
+          p.category,
+        ])
+      );
+    }
+  }
+  if (report.allowlistUnused.length > 0) {
+    lines.push('');
+    lines.push('### Stale allowlist entries (no current atomic conflict)');
+    lines.push('');
+    for (const name of report.allowlistUnused) {
+      lines.push(`- \`${name}\``);
+    }
+  }
   lines.push('');
   lines.push('## Atomic identical duplicates (safe-removal candidates)');
   lines.push('');
@@ -531,8 +672,8 @@ function toMarkdown(report: AuditReport): string {
     for (const p of report.identicalAtomic) {
       lines.push(
         formatTableRow([
-          `\`${p.name}\``,
-          `\`${normalizeValue(p.handwritten)}\``,
+          '`' + p.name + '`',
+          '`' + normalizeValue(p.handwritten) + '`',
           p.category,
           String(p.generatedLine),
           String(p.handwrittenLine),
@@ -546,15 +687,17 @@ function toMarkdown(report: AuditReport): string {
   if (report.conflictAtomic.length === 0) {
     lines.push('_None found._');
   } else {
-    lines.push(formatTableRow(['Token', 'Generated', 'Handwritten', 'Category']));
-    lines.push(formatTableRow(['---', '---', '---', '---']));
+    lines.push(formatTableRow(['Token', 'Generated', 'Handwritten', 'Category', 'Allowlisted']));
+    lines.push(formatTableRow(['---', '---', '---', '---', '---']));
     for (const p of report.conflictAtomic.slice(0, 80)) {
+      const allowed = report.conflictAtomicAllowlisted.some(a => a.name === p.name);
       lines.push(
         formatTableRow([
-          `\`${p.name}\``,
-          `\`${normalizeValue(p.generated)}\``,
-          `\`${normalizeValue(p.handwritten)}\``,
+          '`' + p.name + '`',
+          '`' + normalizeValue(p.generated) + '`',
+          '`' + normalizeValue(p.handwritten) + '`',
           p.category,
+          allowed ? 'yes' : '**no**',
         ])
       );
     }
@@ -575,9 +718,9 @@ function toMarkdown(report: AuditReport): string {
     for (const p of topConflicts) {
       lines.push(
         formatTableRow([
-          `\`${p.name}\``,
-          `\`${normalizeValue(p.generated)}\``,
-          `\`${normalizeValue(p.handwritten)}\``,
+          '`' + p.name + '`',
+          '`' + normalizeValue(p.generated) + '`',
+          '`' + normalizeValue(p.handwritten) + '`',
           p.atomic ? 'yes' : 'no',
           p.category,
         ])
@@ -623,7 +766,7 @@ function toMarkdown(report: AuditReport): string {
     '1. **Safe now**: remove atomic identical palette / font-weight / font-size / leading / tracking re-declarations from `variables.css` only when value-equal and not dark-scoped (script lists them above).'
   );
   lines.push(
-    '2. **Do not auto-remove**: radius, shadow, z-index, duration, easing conflicts — intentional product scale vs generated Tailwind-like scale (D2).'
+    '2. **Do not auto-remove**: radius, shadow, z-index, duration, easing conflicts — intentional product scale vs generated Tailwind-like scale (D2). Documented in allowlist.'
   );
   lines.push(
     '3. **Migrate later**: palette scales missing from handwritten but present in generated (gray/sky/violet/…) already win from generated unless something redefines them.'
@@ -632,7 +775,7 @@ function toMarkdown(report: AuditReport): string {
     '4. **Semantic keep**: surfaces, status, layout aliases, micro-interaction, dark mode block stay handwritten until Phase 2 split to `variables.semantic.css`.'
   );
   lines.push(
-    '5. **Gate later**: enable `--fail-on-atomic-override` in CI after identical atomics are cleared and intentional conflicts are allowlisted.'
+    '5. **Gate later**: enable `--fail-on-unallowlisted-atomic` in CI (prefer over full `--fail-on-atomic-override`) once allowlist is the source of intentional exceptions.'
   );
   lines.push('');
   lines.push('## Script');
@@ -640,6 +783,7 @@ function toMarkdown(report: AuditReport): string {
   lines.push('```bash');
   lines.push('npm run token:override-audit');
   lines.push('npx tsx scripts/quality/audit-token-overrides.ts --markdown');
+  lines.push('npx tsx scripts/quality/audit-token-overrides.ts --fail-on-unallowlisted-atomic');
   lines.push('npx tsx scripts/quality/audit-token-overrides.ts --fail-on-atomic-override');
   lines.push('```');
   lines.push('');
@@ -655,14 +799,25 @@ function printHuman(report: AuditReport): void {
   console.log(`  identical (same name, same value): ${report.identical.length}`);
   console.log(`    atomic identical: ${report.identicalAtomic.length}`);
   console.log(`    atomic conflicts: ${report.conflictAtomic.length}`);
+  console.log(`      allowlisted: ${report.conflictAtomicAllowlisted.length}`);
+  console.log(`      unallowlisted: ${report.conflictAtomicUnallowlisted.length}`);
+  console.log(`  allowlist entries: ${report.allowlistSize} (${report.allowlistPath})`);
+  if (report.allowlistUnused.length > 0) {
+    console.log(`  allowlist unused (stale): ${report.allowlistUnused.length}`);
+  }
   console.log(`  only-handwritten: ${report.onlyHandwritten.length}`);
   console.log(`  only-generated: ${report.onlyGenerated.length}`);
-  if (report.conflictAtomic.length > 0) {
-    console.log('\nTop atomic conflicts:');
-    for (const p of report.conflictAtomic.slice(0, 12)) {
+  if (report.conflictAtomicUnallowlisted.length > 0) {
+    console.log('\nUnallowlisted atomic conflicts:');
+    for (const p of report.conflictAtomicUnallowlisted.slice(0, 20)) {
       console.log(
         `  ${p.name}: gen=${normalizeValue(p.generated)} | hand=${normalizeValue(p.handwritten)} (${p.category})`
       );
+    }
+  } else if (report.conflictAtomicAllowlisted.length > 0) {
+    console.log('\nAllowlisted atomic conflicts (sample):');
+    for (const p of report.conflictAtomicAllowlisted.slice(0, 8)) {
+      console.log(`  ${p.name} (${p.category}): ${p.reason}`);
     }
   }
   if (report.identicalAtomic.length > 0) {
@@ -678,6 +833,7 @@ function parseArgs(argv: string[]) {
     json: argv.includes('--json'),
     markdown: argv.includes('--markdown'),
     failOnAtomicOverride: argv.includes('--fail-on-atomic-override'),
+    failOnUnallowlistedAtomic: argv.includes('--fail-on-unallowlisted-atomic'),
     write: (() => {
       const i = argv.indexOf('--write');
       return i >= 0 ? argv[i + 1] : null;
@@ -707,14 +863,21 @@ function main(): void {
     }
   }
 
+  let failed = false;
   if (args.failOnAtomicOverride && report.conflictAtomic.length > 0) {
     console.error(
       `\n[fail-on-atomic-override] ${report.conflictAtomic.length} atomic same-name value conflicts`
     );
-    process.exit(1);
+    failed = true;
+  }
+  if (args.failOnUnallowlistedAtomic && report.conflictAtomicUnallowlisted.length > 0) {
+    console.error(
+      `\n[fail-on-unallowlisted-atomic] ${report.conflictAtomicUnallowlisted.length} atomic conflicts not in allowlist`
+    );
+    failed = true;
   }
 
-  process.exit(0);
+  process.exit(failed ? 1 : 0);
 }
 
 main();

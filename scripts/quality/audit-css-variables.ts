@@ -76,6 +76,10 @@ const NAMING_PATTERNS = {
 
   // 圆角: --rounded-{size}
   borderRadius: /^--rounded(-none|-xs|-sm|-md|-lg|-xl|-2xl|-3xl|-full|-card|-panel)?$/,
+  // D2 workbench semantic radius SSOT (not the atom rounded-* scale)
+  workbenchRadius: /^--workbench-radius(-lg)?$/,
+  // Semantic panel/card radius aliases used by workbench consumers
+  panelCardRadius: /^--(panel|card)-radius$/,
 
   // 阴影: --shadow-{size}
   boxShadow:

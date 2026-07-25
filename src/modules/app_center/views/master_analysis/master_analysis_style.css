@@ -718,7 +718,7 @@
 .widget-content-area .group\/card {
   background: white;
   border: 1px solid var(--color-slate-200);
-  border-radius: var(--rounded-lg);
+  border-radius: var(--workbench-radius, var(--card-radius, 8px));
   transition:
     background-color var(--duration-fast) ease,
     border-color var(--duration-fast) ease,
@@ -735,7 +735,7 @@
 .edit-row {
   background: white;
   border: 1px solid var(--color-slate-200);
-  border-radius: var(--rounded-lg);
+  border-radius: var(--workbench-radius, var(--card-radius, 8px));
   transition:
     background-color var(--duration-fast) ease,
     border-color var(--duration-fast) ease,
@@ -837,7 +837,7 @@
     > *
     + *
     :where(.rounded-xl, .rounded-2xl, .rounded-3xl, input, select, textarea, button) {
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, 8px) !important;
   }
 
   [x-data='promptlabPanel'] > * + * [class*='bg-gradient-to-'] {
@@ -868,7 +868,7 @@
   }
 
   [x-data='promptlabPanel'] > * + * :where(#embed-toggle-container, #mode-toggle-glider) {
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: none !important;
   }
 
@@ -899,7 +899,7 @@
   #console-card-inner > div:first-child > div {
     background: var(--color-slate-50, #f8fafc) !important;
     border: 1px solid var(--color-slate-200, #e2e8f0) !important;
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
     color: var(--color-slate-700, #334155) !important;
   }
@@ -907,7 +907,7 @@
   #console-card-inner > div:last-child > div {
     background: var(--color-slate-50, #f8fafc) !important;
     border: 1px solid var(--color-slate-200, #e2e8f0) !important;
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
     color: var(--color-slate-700, #334155) !important;
   }
@@ -957,13 +957,13 @@
 
   #console-card-inner #btn-generate-prompt:not(:disabled) {
     background: var(--ma-accent, #6257f5) !important;
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: none !important;
   }
 
   #console-card-inner #btn-generate-visual:not(:disabled) {
     background: var(--ma-accent, #6257f5) !important;
-    border-radius: 8px !important;
+    border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: none !important;
   }
 

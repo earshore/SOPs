@@ -88,6 +88,7 @@
 - [主题 XO 签字状态](./superpowers/plans/2026-07-26-theme-system-xo-signoff-status.md) — code-aware 状态 + 30 分钟人工脚本
 - [Token 覆盖清单 D1](./superpowers/plans/2026-07-26-token-override-inventory.md) — generated vs handwritten
 - [工作台圆角决策 D2](./superpowers/plans/2026-07-26-workbench-radius-decision.md) — `--workbench-radius` SSOT
+- Token 原子冲突 allowlist：`config/token-atomic-override-allowlist.json`（`token:override-audit`）
 - [视觉设计规范指南](./VISUAL_DESIGN_GUIDELINES.md)
 - [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md)
 - [页面访问动画规范](./PAGE_ENTRY_ANIMATION_GUIDELINES.md)
