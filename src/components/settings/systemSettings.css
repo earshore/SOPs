@@ -1763,6 +1763,49 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   border-top: 1px solid #f1f5f9;
 }
 
+/* Import / export actions at bottom of 数据导入与导出 */
+.settings-data-io-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.settings-data-io-actions__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease;
+}
+
+.settings-data-io-actions__btn:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.settings-data-io-actions__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-data-io-actions__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--settings-focus-ring);
+}
+
 .settings-stat-tile {
   padding: 0.75rem;
   border-radius: 0.75rem;
