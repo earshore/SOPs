@@ -1,22 +1,34 @@
 /**
- * Appearance theme runtime (Layer A) — ThemeManager SSOT.
+ * Appearance theme runtime (Layer A) + Color Mode (Layer M) — ThemeManager SSOT.
  *
- * A2 dual-layer model (see docs/THEME_SYSTEM_GUIDELINES.md §2.2):
+ * A2 dual-layer model (see docs/THEME_SYSTEM_GUIDELINES.md §2.2) plus Phase 1 Mode axis:
  *   1. Semantic status colors (success / warning / error / info) — not Appearance
  *   2. Module ownership (menuConfig / wb-theme-* / ColorContext.infer) — not Appearance
  *   3. Appearance primary / focus (this file) — user-selectable presets
- *   4. Neutral surface / text / border
+ *   4. Neutral surface / text / border (Color Mode light/dark/system)
  *
  * Runtime contract:
  * - Unique Appearance API: ThemeManager (no parallel themes.ts).
- * - Persistence key: `app-theme` (StorageService).
+ * - Appearance persistence key: `app-theme` (StorageService).
+ * - Color Mode persistence key: `app-color-mode` (StorageService).
  * - applyTheme writes only global primary-family (+ optional focus) CSS vars and
- *   `document.documentElement.dataset.theme` (= appearance id).
- * - applyTheme MUST NOT call ColorContext.setModuleColor or rewrite module ownership.
+ *   `data-appearance` (= appearance id). Backward-compat: also writes `data-theme`
+ *   with the same appearance id so older readers keep working.
+ * - applyTheme MUST NOT call ColorContext.setModuleColor, rewrite module ownership,
+ *   or overwrite `data-color-mode` / effective dark markers.
+ * - applyColorMode owns `data-color-mode` and the effective dark marker (`.dark` class).
  *
- * Caveat (debt D3): `data-theme` currently carries the Appearance preset id and is
- * also used by dark-mode selectors (`[data-theme='dark']`). Appearance apply can
- * clobber dark. Phase 1 should split `data-appearance` + `data-color-mode`.
+ * System mode design:
+ * - Preference stays explicit on `document.documentElement.dataset.colorMode`
+ *   as `light | dark | system` (stored in `app-color-mode`).
+ * - Effective surface mode is resolved to light|dark:
+ *   - light/dark preference → itself
+ *   - system → matchMedia('(prefers-color-scheme: dark)')
+ * - Effective dark is applied by toggling the legacy `.dark` class on <html>
+ *   so existing `.dark, [data-theme='dark']` CSS keeps working without a mass rewrite.
+ * - Optional attribute `data-color-mode-resolved` mirrors the effective light|dark
+ *   for attribute-based consumers; dual selectors in variables.css also match
+ *   `[data-color-mode='dark']`.
  *
  * Debt D10: preview / types only promise primary-family + focus — not secondary
  * or status colors. Those live outside Appearance control.
@@ -26,6 +38,17 @@ import type { ColorSchemeName } from '../constants/colorSchemes';
 import { updateRuntimeCssRule } from '../utils/runtimeStyles';
 import { StorageService } from '@/services/storageService';
 import eventBus from '../EventBus';
+
+/** User preference for surface color mode (Layer M). */
+export type ColorMode = 'light' | 'dark' | 'system';
+
+/** Resolved surface mode after system preference evaluation. */
+export type ResolvedColorMode = 'light' | 'dark';
+
+const APPEARANCE_STORAGE_KEY = 'app-theme';
+const COLOR_MODE_STORAGE_KEY = 'app-color-mode';
+const DEFAULT_COLOR_MODE: ColorMode = 'light';
+const COLOR_MODES: readonly ColorMode[] = ['light', 'dark', 'system'];
 
 /**
  * Colors actually controlled / previewed by Appearance (Layer A).
@@ -122,20 +145,23 @@ export const THEME_PRESETS: Record<string, ThemeConfig> = {
 };
 
 /**
- * 主题管理器 — Appearance-only runtime.
- * Does not own module colors, status colors, or color-mode (dark).
+ * Theme runtime — Appearance presets (Layer A) + Color Mode (Layer M).
+ * Does not own module colors or status colors.
  */
 export class ThemeManager {
   private static currentTheme: string = 'default';
+  private static currentColorMode: ColorMode = DEFAULT_COLOR_MODE;
   private static customThemes: Map<string, ThemeConfig> = new Map();
+  private static systemColorSchemeMql: MediaQueryList | null = null;
+  private static systemColorSchemeListener: ((event: MediaQueryListEvent) => void) | null = null;
 
   /**
    * Apply an Appearance preset.
-   * Writes primary-family (+ optional focus) CSS vars and data-theme = appearance id.
+   * Writes primary-family (+ optional focus) CSS vars and data-appearance = appearance id.
+   * Backward-compat: also writes data-theme = appearance id (never 'dark').
    * Does **not** call ColorContext.setModuleColor (A2 / Layer B remains ownership-only).
+   * Does **not** change data-color-mode or the effective dark class.
    * Persistence: StorageService key `app-theme`.
-   *
-   * Note (D3): overwriting data-theme can clear a concurrent dark-mode marker.
    */
   static applyTheme(themeId: string, options: { animate?: boolean } = {}): void {
     const theme = this.getTheme(themeId);
@@ -148,6 +174,10 @@ export class ThemeManager {
     const previousTheme = this.currentTheme;
     const root = document.documentElement;
 
+    // One-shot: if legacy code left data-theme='dark' as a color-mode marker,
+    // migrate it before overwriting data-theme with the appearance id.
+    this.migrateLegacyDarkThemeAttribute();
+
     // 更新CSS变量（primary 族 + customVars；不含状态色 / 模块色）
     const colorVars: Record<string, string> = this.getColorVars(theme.colorScheme);
 
@@ -158,16 +188,19 @@ export class ThemeManager {
       });
     }
 
-    // 更新data属性（appearance id；D3: shared with dark until Phase 1 split）
+    // Appearance axis only — do not touch data-color-mode
+    root.dataset.appearance = themeId;
+    // Backward-compatible write for older readers of data-theme
     root.dataset.theme = themeId;
-    const themeSelector = getThemeSelector(themeId);
+
+    const themeSelector = getAppearanceSelector(themeId);
     updateRuntimeCssRule('theme-manager-vars', themeSelector, {
       ...colorVars,
       ...(animate ? { '--theme-transition-duration': '200ms' } : {}),
     });
 
-    // 持久化
-    StorageService.set('app-theme', themeId);
+    // 持久化 appearance only
+    StorageService.set(APPEARANCE_STORAGE_KEY, themeId);
     this.currentTheme = themeId;
 
     // 移除过渡
@@ -188,6 +221,28 @@ export class ThemeManager {
 
     // 触发事件
     eventBus.emit('theme-changed', { themeId, theme });
+  }
+
+  /**
+   * Apply color mode preference (Layer M).
+   * Writes `data-color-mode`, syncs effective dark via `.dark` + `data-color-mode-resolved`.
+   * Does **not** change appearance / app-theme / primary CSS vars.
+   * Persistence: StorageService key `app-color-mode`.
+   */
+  static applyColorMode(mode: ColorMode): void {
+    if (!isColorMode(mode)) {
+      console.error(`颜色模式不存在: ${String(mode)}`);
+      return;
+    }
+
+    this.currentColorMode = mode;
+    StorageService.set(COLOR_MODE_STORAGE_KEY, mode);
+    this.syncColorModeToDocument(mode);
+
+    eventBus.emit('color-mode-changed', {
+      mode,
+      resolved: this.getResolvedColorMode(),
+    });
   }
 
   /**
@@ -232,13 +287,49 @@ export class ThemeManager {
   }
 
   /**
+   * Current color-mode preference (may be `system`).
+   */
+  static getCurrentColorMode(): ColorMode {
+    return this.currentColorMode;
+  }
+
+  /**
+   * Effective light|dark after resolving `system` against prefers-color-scheme.
+   */
+  static getResolvedColorMode(): ResolvedColorMode {
+    if (this.currentColorMode === 'system') {
+      return resolveSystemColorMode();
+    }
+    return this.currentColorMode;
+  }
+
+  /**
    * 从本地存储恢复主题（key: `app-theme`）
+   * Does not restore or alter color mode.
    */
   static restoreTheme(): void {
-    const savedTheme = StorageService.get<string>('app-theme', null);
+    this.migrateLegacyDarkThemeAttribute();
+    const savedTheme = StorageService.get<string>(APPEARANCE_STORAGE_KEY, null);
     if (savedTheme && this.getTheme(savedTheme)) {
       this.applyTheme(savedTheme, { animate: false });
     }
+  }
+
+  /**
+   * Restore color mode from `app-color-mode` (default light).
+   * Independent of restoreTheme / app-theme.
+   * Also migrates legacy `data-theme="dark"` once when storage is empty.
+   */
+  static restoreColorMode(): void {
+    this.migrateLegacyDarkThemeAttribute();
+    const saved = StorageService.get<string>(COLOR_MODE_STORAGE_KEY, null);
+    if (isColorMode(saved)) {
+      this.currentColorMode = saved;
+      this.syncColorModeToDocument(saved);
+      return;
+    }
+    // Migration may already have set in-memory mode + DOM when storage is empty/unreadable.
+    this.syncColorModeToDocument(this.currentColorMode);
   }
 
   /**
@@ -270,6 +361,110 @@ export class ThemeManager {
       focusRing,
     };
   }
+
+  /**
+   * If older code marked dark solely via data-theme='dark', migrate once to
+   * data-color-mode / app-color-mode and clear the theme marker so Appearance
+   * can own data-theme again.
+   */
+  private static migrateLegacyDarkThemeAttribute(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const root = document.documentElement;
+    if (root.dataset.theme !== 'dark') {
+      return;
+    }
+
+    const savedMode = StorageService.get<string>(COLOR_MODE_STORAGE_KEY, null);
+    if (!isColorMode(savedMode)) {
+      StorageService.set(COLOR_MODE_STORAGE_KEY, 'dark');
+      this.currentColorMode = 'dark';
+      this.syncColorModeToDocument('dark');
+    }
+
+    // Free the shared slot for Appearance ids
+    delete root.dataset.theme;
+  }
+
+  /**
+   * Write preference + effective dark markers to the document root.
+   * Preference: data-color-mode = light|dark|system
+   * Effective: data-color-mode-resolved + classList 'dark'
+   */
+  private static syncColorModeToDocument(mode: ColorMode): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const root = document.documentElement;
+    root.dataset.colorMode = mode;
+
+    const resolved: ResolvedColorMode = mode === 'system' ? resolveSystemColorMode() : mode;
+    root.dataset.colorModeResolved = resolved;
+
+    if (resolved === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+
+    this.ensureSystemColorModeListener(mode === 'system');
+  }
+
+  private static ensureSystemColorModeListener(enabled: boolean): void {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
+    if (!enabled) {
+      this.teardownSystemColorModeListener();
+      return;
+    }
+
+    if (this.systemColorSchemeListener) {
+      return;
+    }
+
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    const listener = () => {
+      if (this.currentColorMode === 'system') {
+        this.syncColorModeToDocument('system');
+        eventBus.emit('color-mode-changed', {
+          mode: 'system',
+          resolved: this.getResolvedColorMode(),
+        });
+      }
+    };
+
+    if (typeof mql.addEventListener === 'function') {
+      mql.addEventListener('change', listener);
+    } else if (typeof mql.addListener === 'function') {
+      mql.addListener(listener);
+    }
+
+    this.systemColorSchemeMql = mql;
+    this.systemColorSchemeListener = listener;
+  }
+
+  private static teardownSystemColorModeListener(): void {
+    const mql = this.systemColorSchemeMql;
+    const listener = this.systemColorSchemeListener;
+    if (!mql || !listener) {
+      this.systemColorSchemeMql = null;
+      this.systemColorSchemeListener = null;
+      return;
+    }
+
+    if (typeof mql.removeEventListener === 'function') {
+      mql.removeEventListener('change', listener);
+    } else if (typeof mql.removeListener === 'function') {
+      mql.removeListener(listener);
+    }
+
+    this.systemColorSchemeMql = null;
+    this.systemColorSchemeListener = null;
+  }
 }
 
 /**
@@ -288,13 +483,34 @@ function resolveCssColorToken(style: CSSStyleDeclaration, declaration: string | 
   return trimmed;
 }
 
-function getThemeSelector(themeId: string): string {
-  return `:root[data-theme="${themeId.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"]`;
+function escapeAttrValue(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-// 初始化时恢复主题
+/**
+ * Runtime CSS selector for Appearance primary vars.
+ * Dual attribute for transition: data-appearance (Phase 1) + data-theme (legacy readers).
+ */
+function getAppearanceSelector(themeId: string): string {
+  const escaped = escapeAttrValue(themeId);
+  return `:root[data-appearance="${escaped}"], :root[data-theme="${escaped}"]`;
+}
+
+function isColorMode(value: unknown): value is ColorMode {
+  return typeof value === 'string' && (COLOR_MODES as readonly string[]).includes(value);
+}
+
+function resolveSystemColorMode(): ResolvedColorMode {
+  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return 'light';
+}
+
+// 初始化时恢复外观与颜色模式（main.ts 也会在 boot 路径再调一次）
 if (typeof window !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
+    ThemeManager.restoreColorMode();
     ThemeManager.restoreTheme();
   });
 }

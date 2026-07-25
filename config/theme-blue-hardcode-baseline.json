@@ -1,15 +1,11 @@
 {
   "version": 1,
   "scope": "shell",
-  "total": 42,
+  "total": 13,
   "filesScanned": 26,
-  "filesWithHits": 5,
-  "updatedAt": "2026-07-25T17:43:45.266Z",
+  "filesWithHits": 1,
+  "updatedAt": "2026-07-25T17:50:26.935Z",
   "files": {
-    "src/components/modal/sharedModals.html": 17,
-    "src/common/ui/megaMenu.ts": 13,
-    "src/common/ui/navigation.ts": 8,
-    "src/common/ui/search.ts": 3,
-    "src/components/modal/confirmModal.ts": 1
+    "src/common/ui/megaMenu.ts": 13
   }
 }

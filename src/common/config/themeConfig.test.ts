@@ -39,21 +39,34 @@ vi.mock('../EventBus', () => ({
 function resetThemeManager(): void {
   const manager = ThemeManager as unknown as {
     currentTheme: string;
+    currentColorMode: string;
     customThemes: Map<string, ThemeConfig>;
+    systemColorSchemeMql: MediaQueryList | null;
+    systemColorSchemeListener: ((event: MediaQueryListEvent) => void) | null;
+    teardownSystemColorModeListener: () => void;
   };
+  manager.teardownSystemColorModeListener();
   manager.currentTheme = 'default';
+  manager.currentColorMode = 'light';
   manager.customThemes = new Map();
+  manager.systemColorSchemeMql = null;
+  manager.systemColorSchemeListener = null;
 }
 
 beforeEach(() => {
   vi.useFakeTimers();
   document.documentElement.removeAttribute('data-theme');
+  document.documentElement.removeAttribute('data-appearance');
+  document.documentElement.removeAttribute('data-color-mode');
+  document.documentElement.removeAttribute('data-color-mode-resolved');
+  document.documentElement.classList.remove('dark');
   document.documentElement.removeAttribute('style');
   resetThemeManager();
   mocks.setModuleColor.mockReset();
   mocks.storageGet.mockReset();
   mocks.storageSet.mockReset();
   mocks.emit.mockReset();
+  mocks.storageGet.mockReturnValue(null);
   delete (window as unknown as Record<string, unknown>).__CSS_PERF__;
 });
 
@@ -74,10 +87,12 @@ describe('ThemeManager', () => {
     ThemeManager.applyTheme('ocean');
 
     expect(ColorContext.setModuleColor).not.toHaveBeenCalled();
+    expect(document.documentElement.dataset.appearance).toBe('ocean');
     expect(document.documentElement.dataset.theme).toBe('ocean');
     expect(getRuntimeCssRuleText('theme-manager-vars')).toContain(
       '--color-primary:var(--color-cyan-500)'
     );
+    expect(getRuntimeCssRuleText('theme-manager-vars')).toContain('[data-appearance="ocean"]');
     expect(StorageService.set).toHaveBeenCalledWith('app-theme', 'ocean');
     expect(cssPerf.trackThemeSwitch).toHaveBeenCalledWith('default', 'ocean');
     expect(eventBus.emit).toHaveBeenCalledWith('theme-changed', {
@@ -98,6 +113,7 @@ describe('ThemeManager', () => {
   it('applies minimal with industrial slate customVars and does not touch ColorContext', () => {
     ThemeManager.applyTheme('minimal');
 
+    expect(document.documentElement.dataset.appearance).toBe('minimal');
     expect(document.documentElement.dataset.theme).toBe('minimal');
     expect(ColorContext.setModuleColor).not.toHaveBeenCalled();
     const rule = getRuntimeCssRuleText('theme-manager-vars');
@@ -133,6 +149,7 @@ describe('ThemeManager', () => {
     mocks.storageGet.mockReturnValueOnce('ops');
     ThemeManager.restoreTheme();
 
+    expect(document.documentElement.dataset.appearance).toBe('ops');
     expect(document.documentElement.dataset.theme).toBe('ops');
     expect(getRuntimeCssRuleText('theme-manager-vars')).toContain('--surface-critical:#f00');
 
@@ -223,5 +240,108 @@ describe('ThemeManager', () => {
 
     expect(errorSpy).toHaveBeenCalledWith('主题不存在: missing');
     expect(mocks.storageSet).not.toHaveBeenCalled();
+  });
+
+  it('applyTheme does not change data-color-mode or wipe an existing dark mode', () => {
+    ThemeManager.applyColorMode('dark');
+    mocks.storageSet.mockClear();
+    mocks.emit.mockClear();
+
+    ThemeManager.applyTheme('minimal');
+
+    expect(document.documentElement.dataset.colorMode).toBe('dark');
+    expect(document.documentElement.dataset.colorModeResolved).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(document.documentElement.dataset.appearance).toBe('minimal');
+    // backward-compat appearance id on data-theme — never the dark marker
+    expect(document.documentElement.dataset.theme).toBe('minimal');
+    expect(document.documentElement.dataset.theme).not.toBe('dark');
+    expect(StorageService.set).toHaveBeenCalledWith('app-theme', 'minimal');
+    expect(StorageService.set).not.toHaveBeenCalledWith('app-color-mode', expect.anything());
+  });
+
+  it('applyColorMode persists app-color-mode and sets document markers', () => {
+    ThemeManager.applyColorMode('dark');
+
+    expect(StorageService.set).toHaveBeenCalledWith('app-color-mode', 'dark');
+    expect(document.documentElement.dataset.colorMode).toBe('dark');
+    expect(document.documentElement.dataset.colorModeResolved).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(ThemeManager.getCurrentColorMode()).toBe('dark');
+    expect(ThemeManager.getResolvedColorMode()).toBe('dark');
+    expect(eventBus.emit).toHaveBeenCalledWith('color-mode-changed', {
+      mode: 'dark',
+      resolved: 'dark',
+    });
+
+    mocks.storageSet.mockClear();
+    ThemeManager.applyColorMode('light');
+
+    expect(StorageService.set).toHaveBeenCalledWith('app-color-mode', 'light');
+    expect(document.documentElement.dataset.colorMode).toBe('light');
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(ThemeManager.getResolvedColorMode()).toBe('light');
+  });
+
+  it('applyColorMode system resolves via prefers-color-scheme and keeps preference as system', () => {
+    const matchMedia = vi.fn().mockReturnValue({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    });
+    vi.stubGlobal('matchMedia', matchMedia);
+
+    ThemeManager.applyColorMode('system');
+
+    expect(StorageService.set).toHaveBeenCalledWith('app-color-mode', 'system');
+    expect(document.documentElement.dataset.colorMode).toBe('system');
+    expect(document.documentElement.dataset.colorModeResolved).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(ThemeManager.getCurrentColorMode()).toBe('system');
+    expect(ThemeManager.getResolvedColorMode()).toBe('dark');
+    expect(matchMedia).toHaveBeenCalledWith('(prefers-color-scheme: dark)');
+  });
+
+  it('restoreTheme and restoreColorMode are independent', () => {
+    mocks.storageGet.mockImplementation((key: string) => {
+      if (key === 'app-theme') return 'ocean';
+      if (key === 'app-color-mode') return 'dark';
+      return null;
+    });
+
+    ThemeManager.restoreColorMode();
+    expect(document.documentElement.dataset.colorMode).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(document.documentElement.dataset.appearance).toBeUndefined();
+
+    ThemeManager.restoreTheme();
+    expect(document.documentElement.dataset.appearance).toBe('ocean');
+    expect(document.documentElement.dataset.theme).toBe('ocean');
+    // color mode untouched by appearance restore
+    expect(document.documentElement.dataset.colorMode).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(ThemeManager.getCurrentTheme()).toBe('ocean');
+    expect(ThemeManager.getCurrentColorMode()).toBe('dark');
+  });
+
+  it('migrates legacy data-theme=dark once into color mode', () => {
+    document.documentElement.dataset.theme = 'dark';
+    mocks.storageGet.mockReturnValue(null);
+
+    ThemeManager.restoreColorMode();
+
+    expect(StorageService.set).toHaveBeenCalledWith('app-color-mode', 'dark');
+    expect(document.documentElement.dataset.colorMode).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    // legacy dark marker cleared so Appearance can own data-theme
+    expect(document.documentElement.dataset.theme).toBeUndefined();
+
+    mocks.storageSet.mockClear();
+    ThemeManager.applyTheme('minimal');
+    expect(document.documentElement.dataset.appearance).toBe('minimal');
+    expect(document.documentElement.dataset.theme).toBe('minimal');
+    expect(document.documentElement.dataset.colorMode).toBe('dark');
   });
 });

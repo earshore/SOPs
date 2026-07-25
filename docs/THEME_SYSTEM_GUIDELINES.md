@@ -75,9 +75,11 @@ npm run generate:tokens
 **运行时 SSOT：**
 
 - 唯一主题 API：`ThemeManager`（`src/common/config/themeConfig.ts`）。
-- 持久化存储 key：`app-theme`。
+- 持久化：`app-theme`（Appearance id）；`app-color-mode`（`light` | `dark` | `system`）。
+- DOM：`data-appearance` + 兼容 `data-theme`=appearance id；Color Mode 用 `data-color-mode`（及 resolved / `.dark`），**禁止**再把 `data-theme` 当作 dark 槽位。
 - **已删除** `src/common/config/themes.ts`；不得再引入平行主题配置文件。
-- `applyTheme` 只写全局 primary / focus 相关 CSS 变量与 `data-theme`（appearance id）；**不得**调用 `ColorContext.setModuleColor` 或改写模块归属。
+- `applyTheme` 只写 Appearance（primary / focus + appearance 标记）；**不得**改 color mode，**不得**调用 `ColorContext.setModuleColor` 或改写模块归属。
+- `applyColorMode` / `restoreColorMode` 与 Appearance 独立；启动时先 restore color mode 再 restore appearance。
 
 ### 2.3 Appearance Presets
 

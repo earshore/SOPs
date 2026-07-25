@@ -701,9 +701,12 @@
 /* ========================================
    18. 暗色模式覆盖
    仅覆盖语义令牌，基础色板不变
+   Phase 1: dual selectors — .dark / [data-theme='dark'] (legacy)
+   + [data-color-mode='dark'] (explicit mode; system uses .dark when resolved)
    ======================================== */
 .dark,
-[data-theme='dark'] {
+[data-theme='dark'],
+[data-color-mode='dark'] {
   /* ---- 主色 ---- */
   --color-primary: var(--color-indigo-400);
   --color-primary-light: rgba(129, 140, 248, 0.12);

@@ -120,7 +120,7 @@
     "ci:security": "npm run xss:gate && npm run secret:scan && npm run circular:check",
     "ci:test-quality": "npm run type-check:tests && npm run lint:tests",
     "ci:format": "npm run format:check",
-    "ci:quality": "npm run architecture:audit && npm run css:audit && npm run action-names:audit && npm run import-paths:audit && npm run source-names:audit && npm run type-check && npm run lint && npm run lint:warning-gate && npm run ci:test-quality && npm run ci:format",
+    "ci:quality": "npm run architecture:audit && npm run css:audit && npm run theme:hardcode-baseline:gate && npm run action-names:audit && npm run import-paths:audit && npm run source-names:audit && npm run type-check && npm run lint && npm run lint:warning-gate && npm run ci:test-quality && npm run ci:format",
     "ci:all": "npm run ci:security && npm run ci:quality && npm run build:app",
     "release:artifact-contract": "tsx scripts/release/static-artifact-contract.ts dist",
     "release:validate": "tsx scripts/release/prepare-release.ts validate",

@@ -32,6 +32,8 @@ npm run prebuild
    - 循环依赖检查
 
 2. **代码质量检查** (`npm run ci:quality`)
+   - 架构 / CSS / 命名审计
+   - 壳层 `blue-*` 硬编码基线门禁 (D6)
    - TypeScript类型检查
    - ESLint代码规范检查
    - ESLint warning baseline gate
@@ -239,7 +241,31 @@ $ npm run type-check
 - 当前 warning 数量不超过基线
 - 当前结果: `0/0 warning(s)`
 
-### 4. Prettier 格式检查
+### 4. 壳层 blue-* 硬编码基线门禁 (D6)
+
+**命令**: `npm run theme:hardcode-baseline:gate`
+
+**工具**: `scripts/quality/theme-hardcode-baseline.ts`
+
+**检查内容**:
+
+- 扫描壳层 (shell) 范围内 Tailwind `blue-*` 硬编码
+- 与 `config/theme-blue-hardcode-baseline.json` 的 total 对比
+- 阻止 shell `blue-*` 计数回升（只允许下降或持平）
+
+**通过标准**:
+
+- 当前 shell total ≤ 基线 total
+
+**有意迁移后更新基线**（计数下降时）:
+
+```bash
+npm run theme:hardcode-baseline:update
+```
+
+报告（不阻断）: `npm run theme:hardcode-baseline`；全量 `src/` 扫描: `npm run theme:hardcode-baseline:all`。
+
+### 5. Prettier 格式检查
 
 **命令**: `npm run format:check`
 
@@ -295,6 +321,8 @@ npm run type-check         # 类型检查
 npm run type-check:tests   # 测试类型检查
 npm run lint               # 代码规范
 npm run lint:tests         # 测试代码规范
+npm run lint:warning-gate  # ESLint warning 基线门
+npm run theme:hardcode-baseline:gate  # 壳层 blue-* 硬编码门 (D6)
 npm run format:check       # 格式检查
 npm run build              # 构建验证
 ```
@@ -536,4 +564,4 @@ error  Do not use 'innerHTML' directly  no-restricted-syntax
 
 ---
 
-_最后更新: 2026-06-07_
+_最后更新: 2026-07-26_

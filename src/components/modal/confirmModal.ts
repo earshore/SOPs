@@ -298,7 +298,7 @@ function buildChoiceModalContent(
 ): string {
   const safeContent = renderer.escapeHtml(request.content).replace(/\r\n|\n|\r/g, '<br>');
   const secondaryButton = `
-                    <button type="button" id="btn-secondary-${modalId}" class="min-h-10 px-4 py-2 border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                    <button type="button" id="btn-secondary-${modalId}" class="min-h-10 px-4 py-2 border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2">
                         ${renderer.escapeHtml(request.secondaryLabel)}
                     </button>`;
 

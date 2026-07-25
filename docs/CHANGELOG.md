@@ -11,11 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
 - 主题落地团队作战手册 + 体验验收矩阵（`docs/superpowers/plans/2026-07-26-theme-system-*`）。
-- D6 壳层 `blue-*` 硬编码基线门禁：`npm run theme:hardcode-baseline`（shell 基线 42）。
+- D6 壳层 `blue-*` 硬编码基线门禁：`npm run theme:hardcode-baseline`（已并入 `ci:quality`；当前 shell 基线 13）。
 - Appearance 预览类型收窄为 `AppearanceThemeColors`（primary 族 + focus；D10）。
+- Color Mode API：`ThemeManager.applyColorMode` / `restoreColorMode`（存储 `app-color-mode`；`data-color-mode` + resolved / `.dark`）。
 
 ### Changed
 
+- Phase 1：Appearance 写 `data-appearance`（兼容 `data-theme`=appearance id），**不再**用 Appearance 覆盖 dark；legacy `data-theme=dark` 一次性迁移到 color mode。
+- 壳层 chrome（modal/navigation/search）primary/focus 改语义 token；megaMenu 模块色板保留（归属层，13 处）。
 - 主题宪法债务表扩展 D7–D12，并链到上述路线图。
 - PPC 搜索词：模型失败路径接入 `formatLlmFailureUx`（配置/鉴权可点「打开设置」；本地降级仍提示规则回退）。
 - Keyword Hunter Process：翻译模型同步/缺配置走可行动 LLM Toast。

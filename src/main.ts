@@ -543,6 +543,7 @@ async function continueStartup(
 
   await loadCriticalViewsAndNavigate(homeViewReady, shouldWaitForHomeView);
   initializeStartupUtilities();
+  ThemeManager.restoreColorMode();
   ThemeManager.restoreTheme();
   initializeAnimationSystem();
   initializeLazyEnhancements();

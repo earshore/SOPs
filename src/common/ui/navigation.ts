@@ -168,13 +168,13 @@ function renderDefaultSidebar(
               .map(route => {
                 const isActive = currentTab === route.id;
                 const activeClasses = isActive
-                  ? 'bg-blue-50 text-blue-600 font-semibold'
+                  ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)] font-semibold'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900';
 
                 return `
                 <button type="button" data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
                   ${isActive ? 'aria-current="page"' : ''}
-                  class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${activeClasses} transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                  class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${activeClasses} transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2">
                   <i class="${route.icon} w-5 text-center"></i> 
                   ${route.label}
                 </button>
@@ -206,16 +206,13 @@ function renderDefaultSidebar(
  * 更新头部导航高亮
  */
 function updateHeaderNav(fullConfig: RouteFullConfig): void {
+  // Active color is tokenized in header-main.css via [aria-current='page']
   document.querySelectorAll<HTMLElement>('.nav-trigger').forEach(el => {
-    el.classList.remove('text-blue-600', 'text-blue-700', 'border-blue-600');
-    el.classList.add('text-slate-600', 'border-transparent');
     el.removeAttribute('aria-current');
   });
 
   const targetBtn = getEl(`nav-${fullConfig.context.id}`);
   if (targetBtn) {
-    targetBtn.classList.remove('text-slate-600', 'border-transparent');
-    targetBtn.classList.add('text-blue-700', 'border-blue-600');
     targetBtn.setAttribute('aria-current', 'page');
   }
 }
