@@ -1,7 +1,7 @@
 # 视觉设计规范指南
 
 **适用范围**: SOPs 项目 Web 端界面，优先约束 PC 端  
-**更新时间**: 2026-07-22  
+**更新时间**: 2026-07-25  
 **目标**: 为后续页面开发、重构和视觉修复提供统一判断标准，避免新增孤岛式设计。
 
 > 上层主题分层、token 来源、组件视觉底线和验收规则见 [稳定主题系统规范](./THEME_SYSTEM_GUIDELINES.md)。本文继续作为页面视觉和 welcome banner 的细则。
@@ -62,6 +62,8 @@
 - `src/css/components/welcome-banner.css`
 - 各模块的总览样式文件，例如 `app_center_style.css`、`amz_hub_style.css`、`more_style.css`、`sops_style.css`
 
+`colorSchemes` 的 scale / 彩色阴影仅用于总览/入口卡；工作台面板禁止 hover 位移与 scale。
+
 ### 2.2 一级目录和 banner 色系映射
 
 | 模块 | 一级目录 | 目录 color | Banner theme / 主色 |
@@ -73,7 +75,7 @@
 | 应用中心 | Master Analysis | `indigo` | `wb-theme-indigo` |
 | 应用中心 | Keyword Hunter | `fuchsia` | `wb-theme-fuchsia` |
 | 应用中心 | PPC Tools | `emerald` | PPC hero 使用 emerald / teal |
-| 应用中心 | Playground | `cyan` | `wb-theme-cyan` |
+| 应用中心 | Playground | **配置** `orange`（`menuConfig` 的 `themeColor` / category `color`） | **实现例外**（模板/CSS 现状）：Deep Chat 使用 terracotta + `wb-theme-supply` / `wb-container--hidden` 等；**本轮不新增** `wb-theme-orange` 作为唯一 banner class。归属**不是** indigo / cyan |
 | Amazon 智库 | Amazon知识早知道 | `indigo` | `wb-theme-indigo` |
 | Amazon 智库 | 入门实操宝典 | `green` | `wb-theme-growth` |
 | Amazon 智库 | 运营提升全攻略 | `violet` | `wb-theme-violet` |
@@ -132,6 +134,24 @@
 - 主图标渐变。
 - 主图标阴影。
 - 小徽章渐变。
+
+### 2.5 用户 Appearance 主题
+
+系统设置中的外观主题（Appearance）只改全局 `--color-primary*`、focus 环及由其派生的 token。
+
+边界：
+
+- **不**改左侧目录色、welcome banner 归属、`wb-theme-*`。
+- **不**保证硬编码 Tailwind `blue-*` 等工具类随 Appearance 变化。
+- `minimal`（极简素色）：工业 slate-700 主色档，适合长时作业。
+
+反例：
+
+- 用 Appearance 冲掉模块归属色。
+- 用 Appearance 引入展示字体、彩色 glow。
+- 承诺 Appearance 为「整站换肤」。
+
+上层分层与验收见 [稳定主题系统规范](./THEME_SYSTEM_GUIDELINES.md) 的 A2 双层模型。
 
 ---
 
@@ -301,15 +321,15 @@ PC 端常规结构：
 
 ### 4.2 圆角
 
-| 元素 | 建议圆角 |
+| 元素 | 圆角 |
 | --- | --- |
-| Welcome banner | `12px` 到 `16px` |
-| 普通卡片 | `8px` 到 `16px` |
+| 工作台面板 / 表单工作区 | **≤ 8px** |
+| Welcome banner / 模块总览入口卡 | **12–16px**（不得复制到工具面板） |
 | 表单输入 | `8px` 到 `12px` |
 | Tag / pill | `999px` |
 | 图标容器 | `8px` 到 `12px` |
 
-不要在同一页面混用过多圆角风格。工具页卡片优先克制，不使用过大的圆角。
+不要在同一页面混用过多圆角风格。工具页卡片优先克制，不使用过大的圆角；总览入口卡的大圆角不得套用到工作台面板。
 
 ### 4.3 阴影
 
