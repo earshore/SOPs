@@ -34,6 +34,20 @@ export function getRuntimeCssRuleText(key: string): string | null {
   return runtimeRuleTexts.get(key) ?? null;
 }
 
+/** Remove a previously registered runtime rule by key (idempotent). */
+export function clearRuntimeCssRule(key: string): void {
+  if (typeof document === 'undefined') {
+    return;
+  }
+
+  const selector = runtimeRuleSelectors.get(key);
+  if (selector) {
+    deleteRuntimeCssRule(selector);
+  }
+  runtimeRuleSelectors.delete(key);
+  runtimeRuleTexts.delete(key);
+}
+
 function serializeDeclarations(declarations: RuntimeCssDeclarations): string {
   return Object.entries(declarations)
     .filter(

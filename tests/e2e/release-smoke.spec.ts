@@ -597,6 +597,14 @@ test.describe('release candidate smoke', () => {
     await expect(page.locator('#keyword-hunter-module-process')).toBeVisible();
     await expect(page.locator('#keyword-hunter-stat-matched')).toHaveText('2');
     await expect(page.locator('#keyword-hunter-stat-unmatched')).toHaveText('0');
+
+    // Floating chrome is moved onto document.body while process is mounted.
+    // Leaving the route must tear it down (lifecycle / leak guard).
+    await openRoute(page, '/#/home');
+    await expect(page.locator('#panel-home:not(.hidden)')).toBeVisible();
+    await expect(page.locator('#keyword-hunter-keywords-floating')).toHaveCount(0);
+    await expect(page.locator('#keyword-hunter-keywords-minimized')).toHaveCount(0);
+
     expect(
       consoleListener.getErrors(),
       'Keyword Hunter smoke should not emit console/page errors'

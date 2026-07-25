@@ -28,7 +28,7 @@ import {
 } from '@/services/toolStrategyService';
 import { getRuntimeKeywordHunterSeoOptions } from '@/services/runtimeStrategyService';
 import { createSafeFragment } from '@/common/utils/security';
-import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
+import { clearRuntimeCssRule, updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
 import type { LLMProviderConfig } from '@/types/state';
 import '../styles.css';
 
@@ -133,8 +133,19 @@ function addTimeout(callback: () => void, delay: number): number {
   return id;
 }
 
+const KEYWORD_HUNTER_FLOATING_WINDOW_ID = 'keyword-hunter-keywords-floating';
+const KEYWORD_HUNTER_MINIMIZED_BUTTON_ID = 'keyword-hunter-keywords-minimized';
+const KEYWORD_FLOATING_WINDOW_POSITION_RULE = 'keyword-floating-window-position';
+
+/** Idempotent: remove body-level floating chrome left after process mount. */
+function removeKeywordHunterFloatingChrome(): void {
+  document.getElementById(KEYWORD_HUNTER_FLOATING_WINDOW_ID)?.remove();
+  document.getElementById(KEYWORD_HUNTER_MINIMIZED_BUTTON_ID)?.remove();
+  clearRuntimeCssRule(KEYWORD_FLOATING_WINDOW_POSITION_RULE);
+}
+
 /**
- * 清理所有事件监听器和定时器
+ * 清理所有事件监听器、定时器，以及挂到 body 的浮动窗
  */
 function cleanup(): void {
   // 清理事件监听器
@@ -146,6 +157,9 @@ function cleanup(): void {
   // 清理定时器
   timeouts.forEach(id => clearTimeout(id));
   timeouts = [];
+
+  // 浮动窗在 mount 时可能被 append 到 body，必须与监听器一并拆除
+  removeKeywordHunterFloatingChrome();
 
   // 重置浮动窗口状态
   floatWinState = {
@@ -1833,8 +1847,8 @@ function isInteractiveDragTarget(target: EventTarget | null): boolean {
 
 function updateFloatingWindowPosition(left: number, top: number): void {
   updateRuntimeCssRule(
-    'keyword-floating-window-position',
-    '#keyword-hunter-keywords-floating.keyword-hunter-floating-window--positioned',
+    KEYWORD_FLOATING_WINDOW_POSITION_RULE,
+    `#${KEYWORD_HUNTER_FLOATING_WINDOW_ID}.keyword-hunter-floating-window--positioned`,
     {
       left: `${Math.round(left)}px`,
       top: `${Math.round(top)}px`,
@@ -2036,19 +2050,15 @@ class KeywordHunterProcessModule extends BaseModule {
       // 1. 保存状态到 state
       saveProcessStateToState();
 
-      // 2. 移除浮动窗口和最小化按钮（从 DOM 中完全移除）
-      const floatWin = document.getElementById('keyword-hunter-keywords-floating');
-      const minBtn = document.getElementById('keyword-hunter-keywords-minimized');
-      if (floatWin) {
-        floatWin.remove();
-      }
-      if (minBtn) {
-        minBtn.remove();
-      }
-
-      // 3. 清理事件监听器和定时器
+      // 2. 清理监听器/定时器，并幂等拆除 body 级浮动窗与定位样式
       cleanup();
     } catch (error) {
+      // Best-effort surface teardown even if state save failed mid-unmount.
+      try {
+        removeKeywordHunterFloatingChrome();
+      } catch {
+        // ignore secondary cleanup failures
+      }
       ErrorService.handle(error as Error, {
         action: 'unmountProcessModule',
         module: 'keywordHunter',
