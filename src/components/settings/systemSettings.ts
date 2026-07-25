@@ -81,6 +81,12 @@ import type { ProxyConfig } from '@/types/modules-business';
 import type { LLMProviderConfig } from '@/types/state';
 import eventBus from '@/common/EventBus';
 import { ApiError } from '@/common/errors/AppError';
+import {
+  diffSettingsPartitions,
+  snapshotSettingsPartitions,
+  type SettingsDirtyPartition,
+  type SettingsDirtySnapshot,
+} from '@/components/settings/domain/settingsDirty';
 
 let alpineRetryCount = 0;
 
@@ -301,10 +307,13 @@ interface SettingsPanelData {
   localDataCleanupToggleIconClass: string;
   localDataBucketItems: LocalDataBucketView[];
   _unsubscribers?: Array<() => void>; // 新增：存储清理函数
+  _settingsBaseline: SettingsDirtySnapshot | null;
+  dirtyPartitions: SettingsDirtyPartition[];
   init(): void;
-  open(): void;
-  close(): void;
+  open(): Promise<void>;
+  close(): Promise<void>;
   destroy(): void; // 新增：清理方法
+  captureSettingsBaseline(): void;
   openPerformanceMonitor(): Promise<void>;
   loadProviderConfig(provider: string): Promise<void>;
   fetchModels(): Promise<void>;
@@ -693,6 +702,40 @@ function confirmSettingsAction(
   return confirmWithModal(title, content, '', confirmLabel);
 }
 
+/** Plain partition payloads for dirty detection (excludes UI-only flags). */
+function buildSettingsDirtyInput(panel: {
+  llm: LLMState;
+  toolStrategy: ToolStrategyState;
+  runtimeStrategy: RuntimeStrategyState;
+  proxy: ProxyState;
+}): {
+  llm: unknown;
+  toolStrategy: unknown;
+  runtime: unknown;
+  proxy: unknown;
+  appearance: unknown;
+} {
+  return {
+    llm: {
+      provider: panel.llm.provider,
+      endpoint: panel.llm.endpoint,
+      model: panel.llm.model,
+      apiKey: panel.llm.apiKey,
+      serviceTier: panel.llm.serviceTier,
+      reasoningPrefs: panel.llm.reasoningPrefs,
+      apiPath: panel.llm.apiPath,
+    },
+    toolStrategy: panel.toolStrategy.targetModels,
+    runtime: panel.runtimeStrategy.settings,
+    proxy: {
+      type: panel.proxy.type,
+      customUrl: panel.proxy.customUrl,
+    },
+    // Appearance partition reserved for Task 9
+    appearance: {},
+  };
+}
+
 function formatLocalDataBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
   const units = ['B', 'KB', 'MB', 'GB'];
@@ -925,6 +968,7 @@ function createSettingsState(): Pick<
   SettingsPanelData,
   | 'isOpen'
   | '_unsubscribers'
+  | '_settingsBaseline'
   | 'llm'
   | 'proxy'
   | 'toolStrategy'
@@ -938,6 +982,8 @@ function createSettingsState(): Pick<
 
     // 新增：清理函数数组
     _unsubscribers: [],
+
+    _settingsBaseline: null,
 
     llmApiPathMenuOpen: false,
 
@@ -1403,11 +1449,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
     // 订阅 EventBus 事件，保存清理函数
     const unsubOpen = eventBus.on(APP_EVENTS.SETTINGS_OPEN, () => {
-      this.open();
+      void this.open();
     });
 
     const unsubClose = eventBus.on(APP_EVENTS.SETTINGS_CLOSE, () => {
-      this.close();
+      void this.close();
     });
 
     // 保存清理函数
@@ -1416,16 +1462,38 @@ const settingsPanelBehavior: SettingsPanelPart = {
     registerSettingsWatchers(this as SettingsPanelData & AlpineWatchContext);
   },
 
-  open() {
+  async open() {
     this.isOpen = true;
     this.loadRuntimeStrategy();
     this.developerDiagnostics = getDeveloperDiagnosticSettings();
-    this.loadProviderConfig(this.llm.provider);
-    void this.loadProxyConfig();
+    await this.loadProviderConfig(this.llm.provider);
+    await this.loadProxyConfig();
     void this.refreshLocalDataUsage();
+    this.captureSettingsBaseline();
   },
 
-  close() {
+  captureSettingsBaseline(): void {
+    this._settingsBaseline = snapshotSettingsPartitions(buildSettingsDirtyInput(this));
+  },
+
+  get dirtyPartitions(): SettingsDirtyPartition[] {
+    if (!this._settingsBaseline) return [];
+    return diffSettingsPartitions(
+      this._settingsBaseline,
+      snapshotSettingsPartitions(buildSettingsDirtyInput(this))
+    );
+  },
+
+  async close(): Promise<void> {
+    const dirty = this.dirtyPartitions;
+    if (dirty.length > 0) {
+      const ok = await confirmSettingsAction(
+        '放弃未保存的更改？',
+        `以下分区有未保存修改：${dirty.join('、')}。关闭将丢失这些更改。`,
+        '放弃更改'
+      );
+      if (!ok) return;
+    }
     this.isOpen = false;
   },
 
@@ -1609,7 +1677,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
       updateModelStatus();
 
       showToast('LLM 配置已保存', { type: 'success' });
-      setTimeout(() => this.close(), 500);
+      this.captureSettingsBaseline();
+      setTimeout(() => void this.close(), 500);
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'saveProviderConfig', module: 'settings' });
     }
@@ -1637,6 +1706,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
       });
       saveRuntimeStrategySettings(this.runtimeStrategy.settings);
       this.loadRuntimeStrategy();
+      this.captureSettingsBaseline();
       showToast('工具与运行策略已保存', { type: 'success' });
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'saveToolStrategy', module: 'settings' });
@@ -1654,6 +1724,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
       this.runtimeStrategy.isSaving = true;
       saveRuntimeStrategySettings(this.runtimeStrategy.settings);
       this.loadRuntimeStrategy();
+      this.captureSettingsBaseline();
       showToast('策略已保存', { type: 'success' });
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'saveRuntimeStrategy', module: 'settings' });
@@ -1698,6 +1769,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     };
     await StorageService.setProxyConfigWithCredential(config);
 
+    this.captureSettingsBaseline();
     showToast('网络配置已更新', { type: 'success' });
   },
 

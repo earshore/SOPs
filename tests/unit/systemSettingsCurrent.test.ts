@@ -1215,3 +1215,34 @@ it('CT-P0-01 tool strategy save copy mentions runtime strategy', () => {
   expect(template).toContain('settings-save-tool-strategy');
   expect(template).toContain('将保存当前面板中的全部运行时策略');
 });
+
+it('UT-P0-06 close confirms when runtime dirty and stays open on cancel', async () => {
+  deps.confirmWithModal.mockResolvedValueOnce(false);
+  const panel = createPanel();
+  await panel.open();
+  panel.captureSettingsBaseline();
+  panel.runtimeStrategy.settings.llm.maxRetries = 9;
+  await panel.close();
+  expect(deps.confirmWithModal).toHaveBeenCalled();
+  expect(panel.isOpen).toBe(true);
+});
+
+it('UT-P0-06b close discards when confirmed', async () => {
+  deps.confirmWithModal.mockResolvedValueOnce(true);
+  const panel = createPanel();
+  await panel.open();
+  panel.captureSettingsBaseline();
+  panel.runtimeStrategy.settings.llm.maxRetries = 9;
+  await panel.close();
+  expect(panel.isOpen).toBe(false);
+});
+
+it('UT-P0-06c close without dirty skips confirm', async () => {
+  deps.confirmWithModal.mockClear();
+  const panel = createPanel();
+  await panel.open();
+  panel.captureSettingsBaseline();
+  await panel.close();
+  expect(deps.confirmWithModal).not.toHaveBeenCalled();
+  expect(panel.isOpen).toBe(false);
+});
