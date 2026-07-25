@@ -39,6 +39,7 @@ This review keeps the application layout intact and only documents the current s
 - Removed empty local directories that were not part of git tracking: `guides/`, `testing/`, and `docs/verification/`.
 - Moved one-off root reports and completed content/UI review documents into `docs/archive/knowledge-review/`, `docs/archive/ui-audit/`, and `docs/archive/quality/`.
 - Moved completed Deep Chat, Keyword Hunter, and PC UI one-off plans from the repository root into `docs/archive/ui-audit/`.
+- 2026-07-26 batch B: moved root one-off `code-review-deepchat-skills.md` and `ux-review-deepchat-skills.md` into `docs/archive/ui-audit/` (zero inbound links; not design SSOT).
 - Kept active references in the root and `docs/` top level: README, changelog, deployment, current quality/security reports, product roadmap, and active design/architecture guidelines.
 - Kept local AI tool state, generated quality reports, exported sample data, and local plugin bundles out of Git through `.gitignore`.
 

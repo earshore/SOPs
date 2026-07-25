@@ -23,3 +23,5 @@ Current visual and theme guidance lives in:
 - `DEEP_CHAT_DELETE_MODAL_PLAN.md` - Completed Deep Chat delete-confirm modal plan.
 - `DEEP_CHAT_INLINE_RENAME_OVERVIEW.md` - Completed Deep Chat inline rename overview.
 - `SYSTEM_SETTINGS_STRUCTURE_REVIEW_2026-07-06.md` - Historical system settings information architecture review.
+- `code-review-deepchat-skills.md` - One-off Deep Chat / Skills code-review notes (2026-07-21); moved from repo root (batch B structure cleanup).
+- `ux-review-deepchat-skills.md` - One-off Deep Chat / Skills UX review notes (2026-07-21); moved from repo root (batch B structure cleanup).
