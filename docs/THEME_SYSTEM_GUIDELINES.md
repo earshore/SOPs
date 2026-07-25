@@ -156,7 +156,7 @@ npm run generate:tokens
 
 | 项 | 标准 |
 | --- | --- |
-| 圆角 | 默认 `8px`，最大不超过 `8px` |
+| 圆角 | 默认 `8px`，最大不超过 `8px`；SSOT：`var(--workbench-radius)`（或 `var(--panel-radius)` / `var(--card-radius)`） |
 | 背景 | `var(--surface-card)` 或 `var(--surface-panel)` |
 | 边框 | `var(--border-subtle)` 或 `var(--border-muted)` |
 | 阴影 | `var(--shadow-card)`，不使用强彩色阴影 |
@@ -164,6 +164,8 @@ npm run generate:tokens
 | 动效 | 150-250ms，仅用于状态反馈 |
 
 大圆角、彩色阴影、hover 上浮只允许出现在模块总览入口卡片或营销式介绍卡片，不进入工作台面板。
+
+**圆角 SSOT（D2）：** 工作台表面使用 `--workbench-radius: 8px`，不要新写「工作台 = `--rounded-md`」的口头约定（generated 与 handwritten 对 md/lg 像素不一致）。决策与迁移顺序见 [workbench-radius-decision](./superpowers/plans/2026-07-26-workbench-radius-decision.md)。
 
 ### 4.2 卡片
 
@@ -340,7 +342,7 @@ npm run generate:tokens
 | ID | 内容 |
 | --- | --- |
 | D1 | `variables.css` 重定义基础色阶 / 字号，覆盖 generated |
-| D2 | 圆角语义名与像素不一致；工作台行为写死 ≤8px |
+| D2 | 圆角语义名与像素不一致；工作台行为写死 ≤8px。决策：`--workbench-radius` SSOT，见 [workbench-radius-decision](./superpowers/plans/2026-07-26-workbench-radius-decision.md) |
 | D3 | `[data-theme='dark']` 与 appearance id **互斥共用** `data-theme`；`applyTheme` 会覆盖 dark；后续应拆 `data-appearance` / `data-color-mode` |
 | D4 | colorSchemes 营销向 hover 与工作台底线冲突 |
 | D5 | `--focus-ring-soft` 等可能残留蓝系硬编码 |

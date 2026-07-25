@@ -18,18 +18,14 @@
   <div
     class="relative h-full w-full max-w-[min(860px,calc(100vw-48px))] bg-gradient-to-b from-white to-slate-50/80 shadow-[-8px_0_30px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col"
   >
-    <!-- Decorative top accent line -->
-    <div
-      class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500"
-    ></div>
+    <!-- Decorative top accent line (Appearance primary) -->
+    <div class="settings-panel-chrome-bar" aria-hidden="true"></div>
 
     <!-- Header -->
     <div class="relative p-5 pb-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div
-          class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25"
-        >
-          <i class="fas fa-sliders-h text-white text-sm"></i>
+        <div class="settings-panel-chrome-icon" aria-hidden="true">
+          <i class="fas fa-sliders-h"></i>
         </div>
         <div>
           <h2 class="text-[15px] font-bold text-slate-800 tracking-tight">系统设置</h2>
@@ -40,7 +36,7 @@
         @click="close()"
         aria-label="关闭系统设置"
         title="关闭系统设置"
-        class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        class="settings-panel-close-btn w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none"
       >
         <i class="fas fa-times text-sm"></i>
       </button>
@@ -411,7 +407,8 @@
                       <span
                         class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700"
                       >
-                        <i class="fas fa-shield-alt" aria-hidden="true"></i> 密钥仅存本机
+                        <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                        密钥仅存本机
                       </span>
                     </div>
                   </div>
@@ -957,7 +954,8 @@
                         :aria-pressed="(activeRuntimePresetId === 'reliability').toString()"
                         @click="applyRuntimePresetById('reliability')"
                       >
-                        <i class="fas fa-shield-halved" aria-hidden="true"></i> 稳定优先
+                        <i class="fas fa-shield-halved" aria-hidden="true"></i>
+                        稳定优先
                       </button>
                       <button
                         type="button"
@@ -2326,7 +2324,8 @@
                                 :hidden="!bucket.isClearing"
                                 class="inline-flex items-center gap-1"
                               >
-                                <i class="fas fa-circle-notch fa-spin"></i> 清理中
+                                <i class="fas fa-circle-notch fa-spin"></i>
+                                清理中
                               </span>
                             </button>
                           </div>

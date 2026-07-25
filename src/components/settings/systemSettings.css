@@ -1,16 +1,53 @@
-/* Settings component semantic tokens — map once to global design tokens (§14.2) */
+/* Settings component semantic tokens — map once to global design tokens (§14.2)
+ * Accent/focus follow Appearance primary (A2 shell), not hard-coded blue. */
 .settings-panel-root {
   --settings-surface: var(--color-bg-elevated, #fff);
   --settings-surface-muted: var(--color-slate-50, #f8fafc);
   --settings-border: var(--color-slate-200, #e2e8f0);
   --settings-text: var(--color-slate-700, #334155);
   --settings-text-muted: var(--color-slate-500, #64748b);
-  --settings-accent: var(--color-blue-600, #2563eb);
-  --settings-accent-soft: var(--color-blue-50, #eff6ff);
+  --settings-accent: var(--color-primary, #3b82f6);
+  --settings-accent-soft: var(--color-primary-light, #dbeafe);
+  --settings-accent-strong: var(--color-primary-dark, #1d4ed8);
   --settings-danger: var(--color-red-600, #dc2626);
   --settings-radius-card: var(--rounded-xl, 0.875rem);
   --settings-radius-control: var(--rounded-lg, 0.75rem);
-  --settings-focus-ring: 0 0 0 3px color-mix(in srgb, var(--settings-accent) 25%, transparent);
+  --settings-focus-color: var(--color-focus-ring, var(--color-primary, #3b82f6));
+  --settings-focus-ring: 0 0 0 3px color-mix(in srgb, var(--settings-focus-color) 25%, transparent);
+}
+
+/* Drawer chrome: top accent + title icon follow Appearance primary */
+.settings-panel-chrome-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--settings-accent), var(--settings-accent-strong));
+}
+
+.settings-panel-chrome-icon {
+  display: flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, var(--settings-accent), var(--settings-accent-strong));
+  color: #fff;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--settings-accent) 25%, transparent);
+}
+
+.settings-panel-chrome-icon i {
+  font-size: 0.875rem;
+  color: #fff;
+}
+
+.settings-panel-close-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--settings-surface, #fff),
+    0 0 0 4px var(--settings-focus-color);
 }
 
 .model-feature-tooltip {
@@ -276,7 +313,7 @@
 
 /* Temporary highlight when opened via deep link focus */
 .settings-deep-link-highlight {
-  outline: 2px solid color-mix(in srgb, var(--settings-accent, #6366f1) 55%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--settings-accent) 55%, transparent);
   outline-offset: 3px;
   border-radius: 0.75rem;
   transition: outline-color 0.3s ease;
@@ -389,20 +426,16 @@
 }
 
 .settings-preset-group__btn:hover {
-  border-color: color-mix(
-    in srgb,
-    var(--settings-accent, #2563eb) 35%,
-    var(--settings-border, #e2e8f0)
-  );
-  color: var(--settings-accent, #2563eb);
+  border-color: color-mix(in srgb, var(--settings-accent) 35%, var(--settings-border, #e2e8f0));
+  color: var(--settings-accent);
 }
 
 .settings-preset-group__btn.is-active,
 .settings-preset-group__btn[aria-pressed='true'] {
-  border-color: var(--settings-accent, #2563eb);
-  background: var(--settings-accent-soft, #eff6ff);
-  color: var(--settings-accent, #2563eb);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--settings-accent, #2563eb) 20%, transparent);
+  border-color: var(--settings-accent);
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--settings-accent) 20%, transparent);
 }
 
 .settings-preset-group__btn:focus-visible {
@@ -434,8 +467,8 @@
 }
 
 .settings-status-bar--info {
-  border-left-color: var(--settings-accent, #2563eb);
-  background: var(--settings-accent-soft, #eff6ff);
+  border-left-color: var(--settings-accent);
+  background: var(--settings-accent-soft);
 }
 
 .settings-status-bar--warning {
@@ -457,7 +490,7 @@
 }
 
 .settings-status-bar--info .settings-status-bar__icon {
-  color: var(--settings-accent, #2563eb);
+  color: var(--settings-accent);
 }
 
 .settings-status-bar--warning .settings-status-bar__icon {
@@ -507,13 +540,9 @@
 }
 
 .settings-status-bar__btn--primary {
-  border-color: color-mix(
-    in srgb,
-    var(--settings-accent, #2563eb) 35%,
-    var(--settings-border, #e2e8f0)
-  );
-  background: var(--settings-accent-soft, #eff6ff);
-  color: var(--settings-accent, #2563eb);
+  border-color: color-mix(in srgb, var(--settings-accent) 35%, var(--settings-border, #e2e8f0));
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
 }
 
 .settings-status-bar__btn:focus-visible {
@@ -552,8 +581,8 @@
 
 .settings-segmented__btn.is-active,
 .settings-segmented__btn[aria-pressed='true'] {
-  background: var(--settings-accent-soft, #eff6ff);
-  color: var(--settings-accent, #2563eb);
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
   font-weight: 600;
 }
 
@@ -622,7 +651,7 @@
 .settings-control:focus,
 .settings-control:focus-visible {
   outline: none;
-  border-color: var(--settings-accent, #2563eb);
+  border-color: var(--settings-focus-color);
   box-shadow: var(--settings-focus-ring);
 }
 
@@ -953,11 +982,11 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 }
 
 .settings-schedule-select__option.is-active {
-  background: #eff6ff;
+  background: var(--settings-accent-soft);
 }
 
 .settings-schedule-select__option.is-active .settings-schedule-select__label {
-  color: #1d4ed8;
+  color: var(--settings-accent-strong);
 }
 
 /* ---- LLM setup: numbered steps 1–4 (collapsible, default closed) ---- */
@@ -1104,13 +1133,13 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 .settings-api-path-trigger:focus,
 .settings-api-path-trigger:focus-visible {
   outline: none;
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--settings-focus-color);
+  box-shadow: var(--settings-focus-ring);
 }
 
 .settings-api-path-group.is-menu-open .settings-api-path-trigger {
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--settings-focus-color);
+  box-shadow: var(--settings-focus-ring);
 }
 
 .settings-api-path-trigger__path {
@@ -1724,14 +1753,18 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   flex: 2 1 12rem;
   min-width: 10rem;
   border: 1px solid transparent;
-  background: linear-gradient(90deg, #4f46e5, #2563eb);
+  background: linear-gradient(90deg, var(--settings-accent-strong), var(--settings-accent));
   color: #fff;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--settings-accent) 22%, transparent);
 }
 
 .settings-strategy-footer__btn--primary:hover:not(:disabled) {
-  background: linear-gradient(90deg, #4338ca, #1d4ed8);
-  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-darker, var(--settings-accent-strong)),
+    var(--settings-accent-strong)
+  );
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--settings-accent) 28%, transparent);
 }
 
 .settings-strategy-footer__btn--primary:disabled {
@@ -2024,13 +2057,13 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   }
 
   .settings-panel-nav-group.is-open > .settings-panel-nav-link--primary {
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: var(--settings-accent-soft);
+    color: var(--settings-accent-strong);
   }
 
   .settings-panel-nav-group.is-open > .settings-panel-nav-link--primary .settings-panel-nav-caret {
     transform: rotate(180deg);
-    color: #3b82f6;
+    color: var(--settings-accent);
   }
 
   .settings-panel-nav-children {
@@ -2053,14 +2086,14 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   .settings-panel-nav-link:hover,
   .settings-panel-nav-link:focus-visible {
     background: #f1f5f9;
-    color: #1d4ed8;
+    color: var(--settings-accent-strong);
     outline: none;
   }
 
   .settings-panel-nav-link--secondary:hover,
   .settings-panel-nav-link--secondary:focus-visible {
     background: #f8fafc;
-    color: #2563eb;
+    color: var(--settings-accent);
   }
 
   .settings-panel-nav-link i:not(.settings-panel-nav-caret) {

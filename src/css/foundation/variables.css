@@ -198,7 +198,10 @@
      6. 圆角
      工作台 px 尺度（sm/md/…）有意覆盖 generated rem 尺度（D2）。
      --rounded-none / --rounded-full 与 generated 相同，已去重复。
+     工作台面板 SSOT：--workbench-radius（见 workbench-radius-decision）。
      ======================================== */
+  --workbench-radius: 8px;
+  --workbench-radius-lg: 12px;
   --rounded-xs: 2px;
   --rounded-sm: 4px;
   --rounded-md: 8px;
@@ -206,8 +209,8 @@
   --rounded-xl: 16px;
   --rounded-2xl: 24px;
   --rounded-3xl: 32px;
-  --rounded-card: var(--rounded-md);
-  --rounded-panel: var(--rounded-md);
+  --rounded-card: var(--workbench-radius);
+  --rounded-panel: var(--workbench-radius);
 
   /* ========================================
      7. 阴影

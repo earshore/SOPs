@@ -271,6 +271,40 @@ async function prepareLlmConnectionControls(page: Page): Promise<void> {
   await expect(llmSection.getByRole('button', { name: '获取模型列表' })).toBeVisible();
 }
 
+/**
+ * Appearance settings are further down the panel; open the side-nav group so
+ * theme + color-mode controls are visible and interactable.
+ */
+async function openAppearanceSettings(page: Page): Promise<void> {
+  const appearanceSection = page.locator('#settings-section-appearance');
+  await page
+    .locator('nav.settings-panel-nav')
+    .getByRole('button', { name: '外观与体验', exact: true })
+    .click();
+
+  await expect(appearanceSection).toBeVisible();
+  await expect(page.getByTestId('settings-appearance-theme')).toBeVisible();
+  await expect(page.getByTestId('settings-theme-select')).toBeVisible();
+  await expect(page.getByTestId('settings-color-mode')).toBeVisible();
+}
+
+async function expectDocumentThemeState(
+  page: Page,
+  expected: { appearance: string; colorMode: string; darkClass?: boolean }
+): Promise<void> {
+  const root = page.locator('html');
+  await expect(root).toHaveAttribute('data-appearance', expected.appearance);
+  // Backward-compat: data-theme mirrors appearance id (never 'dark').
+  await expect(root).toHaveAttribute('data-theme', expected.appearance);
+  await expect(root).toHaveAttribute('data-color-mode', expected.colorMode);
+
+  if (expected.darkClass === true) {
+    await expect(root).toHaveClass(/\bdark\b/);
+  } else if (expected.darkClass === false) {
+    await expect(root).not.toHaveClass(/\bdark\b/);
+  }
+}
+
 type SwitchTabTarget =
   | { kind: 'sops'; targetActionSelector: string | null }
   | { kind: 'sidebar'; menu: string; overview: string; trigger: string };
@@ -1111,5 +1145,58 @@ test.describe('release candidate smoke', () => {
     await expect(toastTitle.filter({ hasText: '请求过于频繁' }).last()).toBeVisible();
 
     expect(modelRequests).toEqual([DEFAULT_LLM_MODELS_URL, DEFAULT_LLM_MODELS_URL]);
+  });
+
+  test('settings appearance theme and color mode update document root attributes independently', async ({
+    page,
+  }) => {
+    const consoleListener = setupConsoleErrorListener(page);
+
+    await page.addInitScript(() => {
+      window.localStorage.removeItem('app-theme');
+      window.localStorage.removeItem('app-color-mode');
+    });
+
+    await openGlobalSettings(page);
+    await openAppearanceSettings(page);
+
+    const themeSelect = page.getByTestId('settings-theme-select');
+    await themeSelect.selectOption('minimal');
+    await expect(themeSelect).toHaveValue('minimal');
+    await expectDocumentThemeState(page, {
+      appearance: 'minimal',
+      colorMode: 'light',
+      darkClass: false,
+    });
+
+    await page.getByTestId('settings-color-mode-dark').click();
+    await expect(page.getByTestId('settings-color-mode-dark')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    // Dark mode must not wipe Appearance (Layer A stays independent of Layer M).
+    await expectDocumentThemeState(page, {
+      appearance: 'minimal',
+      colorMode: 'dark',
+      darkClass: true,
+    });
+
+    await themeSelect.selectOption('default');
+    await expect(themeSelect).toHaveValue('default');
+    await page.getByTestId('settings-color-mode-light').click();
+    await expect(page.getByTestId('settings-color-mode-light')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    await expectDocumentThemeState(page, {
+      appearance: 'default',
+      colorMode: 'light',
+      darkClass: false,
+    });
+
+    expect(
+      consoleListener.getErrors(),
+      'settings appearance smoke should not emit console/page errors'
+    ).toEqual([]);
   });
 });

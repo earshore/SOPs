@@ -17,10 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Color Mode API：`ThemeManager.applyColorMode` / `restoreColorMode`（存储 `app-color-mode`；`data-color-mode` + resolved / `.dark`）。
 - 系统设置外观：**颜色模式** 分段控件（浅色 / 深色 / 跟随系统）。
 - D1 审计：`npm run token:override-audit` + 清单文档；移除 variables.css 中 **192** 条与 generated 值相等的原子重复声明。
+- D2：引入语义 `--workbench-radius` / `--workbench-radius-lg`（工作台 8px SSOT）；决策文档入档。
+- 系统设置壳层 accent/focus/主 CTA 绑 Appearance primary token（X6 部分）。
+- E2E smoke：Appearance `minimal` + 颜色模式 dark 文档根属性独立断言。
 - Settings Appearance：颜色模式（浅色 / 深色 / 跟随系统）UI，即时调用 `ThemeManager.applyColorMode`，与主题色选择独立。
 
 ### Changed
 
+- Settings 壳层 chrome：`--settings-accent` / focus / 分段 active / 主 CTA 映射 Appearance primary token（X6 partial）。
 - D1 Phase 2 prep：从 `variables.css` 移除与 generated 值完全相同的原子重复（色板 / 字号字重 / leading / tracking / 数字 spacing），语义与 intentional 冲突尺度保留。
 - Phase 1：Appearance 写 `data-appearance`（兼容 `data-theme`=appearance id），**不再**用 Appearance 覆盖 dark；legacy `data-theme=dark` 一次性迁移到 color mode。
 - 壳层 chrome（modal/navigation/search）primary/focus 改语义 token；megaMenu 模块色板保留（归属层，13 处）。
