@@ -1,6 +1,10 @@
 // src/components/settings/domain/settingsDeepLink.ts
 // Deep-link options for system settings open (section scroll + focus expand).
 
+import type { SettingsDensity } from '@/components/settings/domain/settingsUiPreferences';
+
+export type { SettingsDensity } from '@/components/settings/domain/settingsUiPreferences';
+
 export type SettingsSectionId =
   | 'settings-section-llm'
   | 'settings-section-tool-strategy'
@@ -8,8 +12,6 @@ export type SettingsSectionId =
   | 'settings-section-data'
   | 'settings-section-appearance'
   | 'settings-section-performance';
-
-export type SettingsDensity = 'simple' | 'advanced';
 
 export interface SettingsOpenOptions {
   sectionId?: SettingsSectionId;

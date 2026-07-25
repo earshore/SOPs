@@ -50,6 +50,53 @@
     <!-- Subtle separator -->
     <div class="mx-5 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
 
+    <!-- Density + in-panel search (P1-2 / P1-3) -->
+    <div class="settings-toolbar">
+      <div class="settings-segmented" role="group" aria-label="显示密度">
+        <button
+          type="button"
+          class="settings-segmented__btn"
+          data-testid="settings-density-simple"
+          :class="{ 'is-active': settingsDensity === 'simple' }"
+          :aria-pressed="(settingsDensity === 'simple').toString()"
+          @click="setDensity('simple')"
+        >
+          精简
+        </button>
+        <button
+          type="button"
+          class="settings-segmented__btn"
+          data-testid="settings-density-advanced"
+          :class="{ 'is-active': settingsDensity === 'advanced' }"
+          :aria-pressed="(settingsDensity === 'advanced').toString()"
+          @click="setDensity('advanced')"
+        >
+          高级
+        </button>
+      </div>
+      <div class="settings-search">
+        <span class="settings-search__icon" aria-hidden="true">
+          <i class="fas fa-search"></i>
+        </span>
+        <input
+          type="search"
+          class="settings-control settings-control--sm settings-search__input"
+          data-testid="settings-search"
+          placeholder="搜索设置…"
+          aria-label="搜索设置"
+          :value="searchQuery"
+          @input="onSettingsSearch($event)"
+        />
+      </div>
+      <p
+        class="settings-search-empty"
+        :hidden="!searchQuery || searchHitId"
+        role="status"
+      >
+        无匹配设置项
+      </p>
+    </div>
+
     <!-- Scrollable Content -->
     <div class="settings-panel-scroll flex-1 overflow-y-auto px-5 py-6">
       <div class="settings-panel-body">
@@ -118,6 +165,10 @@
                   配置全局 AI 连接：Endpoint、API Key 与默认模型。可对接官方 API 或兼容中转（如
                   new-api）；各工具可在「工具策略」中单独覆盖模型。
                 </p>
+                <div class="mt-1.5 flex flex-wrap gap-1.5">
+                  <span class="settings-badge settings-badge--ai-cost">影响 AI 成本</span>
+                  <span class="settings-badge settings-badge--local">仅本浏览器</span>
+                </div>
               </div>
             </div>
 
@@ -650,7 +701,11 @@
                 </div>
               </div>
 
-              <div class="settings-card">
+              <div
+                class="settings-card"
+                data-settings-density="advanced"
+                :hidden="settingsDensity === 'simple'"
+              >
                 <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h4 class="settings-card__title">通用 AI 执行策略</h4>
@@ -658,7 +713,10 @@
                       控制所有 AI 工具共用的请求超时、重试和连接测试策略。
                     </p>
                   </div>
-                  <span class="settings-card__badge">全局生效</span>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="settings-badge settings-badge--global">全局生效</span>
+                    <span class="settings-badge settings-badge--ai-cost">影响 AI 成本</span>
+                  </div>
                 </div>
                 <div class="mt-3 grid gap-3 sm:grid-cols-4">
                   <label class="block">
@@ -788,7 +846,11 @@
                       </div>
                     </div>
                   </template>
-                  <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                  <div
+                    class="mt-3 grid gap-3 sm:grid-cols-3"
+                    data-settings-density="advanced"
+                    :hidden="settingsDensity === 'simple'"
+                  >
                     <label class="block">
                       <span class="settings-label">调度偏好</span>
                       <select
@@ -828,6 +890,8 @@
                   </div>
                   <label
                     class="mt-3 flex min-h-[36px] items-center gap-2 text-xs font-semibold text-slate-700"
+                    data-settings-density="advanced"
+                    :hidden="settingsDensity === 'simple'"
                   >
                     <input
                       type="checkbox"
@@ -837,7 +901,11 @@
                     />
                     启用分析缓存
                   </label>
-                  <div class="mt-3 grid gap-3 sm:grid-cols-4">
+                  <div
+                    class="mt-3 grid gap-3 sm:grid-cols-4"
+                    data-settings-density="advanced"
+                    :hidden="settingsDensity === 'simple'"
+                  >
                     <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
                       <label class="block">
                         <span class="settings-label" x-text="item.label"></span>
@@ -964,7 +1032,11 @@
                     </label>
                   </div>
 
-                  <div class="mt-3 grid gap-3 sm:grid-cols-4">
+                  <div
+                    class="mt-3 grid gap-3 sm:grid-cols-4"
+                    data-settings-density="advanced"
+                    :hidden="settingsDensity === 'simple'"
+                  >
                     <label class="block"
                       ><span class="settings-label">请求超时（秒）</span
                       ><input
@@ -1124,7 +1196,11 @@
                           </div>
                         </div>
                       </template>
-                      <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                      <div
+                        class="mt-3 grid gap-3 sm:grid-cols-2"
+                        data-settings-density="advanced"
+                        :hidden="settingsDensity === 'simple'"
+                      >
                         <label class="block"
                           ><span class="settings-label">SEO 缓存 TTL（小时）</span
                           ><input
@@ -1148,7 +1224,11 @@
                             class="settings-control settings-control--sm"
                         /></label>
                       </div>
-                      <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                      <div
+                        class="mt-3 grid gap-3 sm:grid-cols-2"
+                        data-settings-density="advanced"
+                        :hidden="settingsDensity === 'simple'"
+                      >
                         <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
                           ><input
                             type="checkbox"
@@ -1240,7 +1320,11 @@
                           </div>
                         </div>
                       </template>
-                      <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                      <div
+                        class="mt-3 grid gap-3 sm:grid-cols-2"
+                        data-settings-density="advanced"
+                        :hidden="settingsDensity === 'simple'"
+                      >
                         <label class="block"
                           ><span class="settings-label">Listing 缓存 TTL（小时）</span
                           ><input
@@ -1266,6 +1350,8 @@
                       </div>
                       <label
                         class="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-700"
+                        data-settings-density="advanced"
+                        :hidden="settingsDensity === 'simple'"
                         ><input
                           type="checkbox"
                           :checked="runtimeStrategy.settings.keywordHunterListingReview.enableLlmCache"
@@ -1349,7 +1435,11 @@
                       </div>
                     </div>
                   </template>
-                  <div class="mt-3 grid gap-3 sm:grid-cols-4">
+                  <div
+                    class="mt-3 grid gap-3 sm:grid-cols-4"
+                    data-settings-density="advanced"
+                    :hidden="settingsDensity === 'simple'"
+                  >
                     <label class="block"
                       ><span class="settings-label">PPC 批次大小</span
                       ><input
@@ -1395,7 +1485,11 @@
                         class="settings-control settings-control--sm"
                     /></label>
                   </div>
-                  <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                  <div
+                    class="mt-3 grid gap-3 sm:grid-cols-3"
+                    data-settings-density="advanced"
+                    :hidden="settingsDensity === 'simple'"
+                  >
                     <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
                       ><input
                         type="checkbox"
@@ -1425,6 +1519,8 @@
                     class="mt-3 grid gap-3 sm:grid-cols-3"
                     data-settings-focus="ppc-thresholds"
                     id="ppc-thresholds"
+                    data-settings-density="advanced"
+                    :hidden="settingsDensity === 'simple'"
                   >
                     <template x-for="item in ppcThresholdItems" :key="item.key">
                       <label class="block">
@@ -1501,6 +1597,10 @@
                 <p class="settings-section-head__desc">
                   配置采集任务使用的代理连接方式；与 AI 模型连接相互独立。
                 </p>
+                <div class="mt-1.5 flex flex-wrap gap-1.5">
+                  <span class="settings-badge settings-badge--scrape">影响采集</span>
+                  <span class="settings-badge settings-badge--local">仅本浏览器</span>
+                </div>
               </div>
             </div>
 
@@ -1609,7 +1709,11 @@
                 </p>
               </div>
 
-              <details class="settings-collapsible-card">
+              <details
+                class="settings-collapsible-card"
+                data-settings-density="advanced"
+                :hidden="settingsDensity === 'simple'"
+              >
                 <summary
                   class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
                 >
@@ -1617,7 +1721,10 @@
                     <h4 class="settings-card__title">采集运行策略</h4>
                     <p class="settings-card__desc">管理请求超时、并发、重试、批次和缓存策略。</p>
                   </div>
-                  <span class="settings-card__badge"> 7 项设置 </span>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="settings-badge settings-badge--scrape">影响采集</span>
+                    <span class="settings-card__badge">7 项设置</span>
+                  </div>
                   <i
                     class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
                     aria-hidden="true"
@@ -1746,6 +1853,10 @@
                 <p class="settings-section-head__desc">
                   查看本机存储占用，导出 / 导入备份，并管理历史保留与清理策略。
                 </p>
+                <div class="mt-1.5 flex flex-wrap gap-1.5">
+                  <span class="settings-badge settings-badge--local">仅本浏览器</span>
+                  <span class="settings-badge settings-badge--destructive">破坏性</span>
+                </div>
               </div>
             </div>
 
@@ -1782,7 +1893,11 @@
                 </button>
               </div>
 
-              <details class="settings-collapsible-card">
+              <details
+                class="settings-collapsible-card"
+                data-settings-density="advanced"
+                :hidden="settingsDensity === 'simple'"
+              >
                 <summary
                   class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
                 >
@@ -1790,7 +1905,10 @@
                     <h4 class="settings-card__title">数据保留策略</h4>
                     <p class="settings-card__desc">管理历史保留、缓存清理阈值和缓存清理比例。</p>
                   </div>
-                  <span class="settings-card__badge"> 3 项设置 </span>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="settings-badge settings-badge--local">仅本浏览器</span>
+                    <span class="settings-card__badge">3 项设置</span>
+                  </div>
                   <i
                     class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
                     aria-hidden="true"
@@ -2008,7 +2126,7 @@
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
                   <h3 class="settings-section-head__title">开发者诊断</h3>
-                  <span class="settings-card__badge">开发者模式</span>
+                  <span class="settings-badge settings-badge--dev">开发者模式</span>
                 </div>
                 <p class="settings-section-head__desc">
                   性能监控、事件调试与错误追踪；仅开发者入口可见。
@@ -2049,7 +2167,7 @@
                     <h4 class="settings-card__title">调试配置</h4>
                     <p class="settings-card__desc">修改后立即影响当前运行时。</p>
                   </div>
-                  <span class="settings-card__badge">即时生效</span>
+                  <span class="settings-badge settings-badge--instant">即时生效</span>
                 </div>
 
                 <div class="mt-3 grid gap-3 sm:grid-cols-2">

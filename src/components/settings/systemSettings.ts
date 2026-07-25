@@ -97,8 +97,15 @@ import {
   normalizeSettingsOpenOptions,
   type SettingsOpenOptions,
 } from '@/components/settings/domain/settingsDeepLink';
+import {
+  getSettingsUiPreferences,
+  saveSettingsUiPreferences,
+  type SettingsDensity,
+} from '@/components/settings/domain/settingsUiPreferences';
+import { findFirstSettingsSearchMatch } from '@/components/settings/domain/settingsSearch';
 
 export type { SettingsOpenOptions } from '@/components/settings/domain/settingsDeepLink';
+export type { SettingsDensity } from '@/components/settings/domain/settingsUiPreferences';
 
 let alpineRetryCount = 0;
 
@@ -247,6 +254,12 @@ interface RuntimeStrategyState {
 
 interface SettingsPanelData {
   isOpen: boolean;
+  /** simple | advanced — Spec §3.3; not a dirty partition */
+  settingsDensity: SettingsDensity;
+  /** In-panel search query (P1-3) */
+  searchQuery: string;
+  /** Last search hit id (section or focus target) */
+  searchHitId: string;
   /** API path custom dropdown open state */
   llmApiPathMenuOpen: boolean;
   llm: LLMState;
@@ -388,6 +401,9 @@ interface SettingsPanelData {
   clearLocalDataBucket(bucketId: LocalDataBucketId): Promise<void>;
   clearAllLocalData(): Promise<void>;
   scrollToSection(sectionId: string): void;
+  setDensity(density: SettingsDensity): void;
+  onSettingsSearch(event?: Event): void;
+  scrollToSearchHit(hitId: string): void;
   formatBytes(bytes: number): string;
   getProxyDisplayName(type: string): string;
   isDangerousEndpoint(endpoint: string): boolean;
@@ -994,6 +1010,9 @@ type SettingsPanelPart = Partial<SettingsPanelData> & ThisType<SettingsPanelData
 function createSettingsState(): Pick<
   SettingsPanelData,
   | 'isOpen'
+  | 'settingsDensity'
+  | 'searchQuery'
+  | 'searchHitId'
   | '_unsubscribers'
   | '_settingsBaseline'
   | '_runtimeHealthNormalized'
@@ -1008,6 +1027,10 @@ function createSettingsState(): Pick<
 > {
   return {
     isOpen: false,
+
+    settingsDensity: getSettingsUiPreferences().density,
+    searchQuery: '',
+    searchHitId: '',
 
     // 新增：清理函数数组
     _unsubscribers: [],
@@ -1505,6 +1528,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   async open(options?: SettingsOpenOptions) {
     this.isOpen = true;
+    this.settingsDensity = getSettingsUiPreferences().density;
+    this.searchQuery = '';
+    this.searchHitId = '';
     const rawRuntime = StorageService.get(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS);
     this._runtimeHealthNormalized = isRuntimeRawInvalid(rawRuntime);
     this.loadRuntimeStrategy();
@@ -1523,6 +1549,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
       queueMicrotask(() => {
         applySettingsDeepLink(deepLink, {
           scrollToSection: sectionId => this.scrollToSection(sectionId),
+          setDensity: density => this.setDensity(density),
         });
       });
     }
@@ -1602,6 +1629,80 @@ const settingsPanelBehavior: SettingsPanelPart = {
       top: Math.max(0, nextTop),
       behavior: 'smooth',
     });
+  },
+
+  setDensity(density: SettingsDensity): void {
+    const next: SettingsDensity = density === 'advanced' ? 'advanced' : 'simple';
+    this.settingsDensity = next;
+    saveSettingsUiPreferences({ density: next });
+  },
+
+  onSettingsSearch(event?: Event): void {
+    const value =
+      event?.target instanceof HTMLInputElement
+        ? event.target.value
+        : this.searchQuery;
+    this.searchQuery = value;
+    const match = findFirstSettingsSearchMatch(value);
+    this.searchHitId = match?.id ?? '';
+    if (!match) {
+      return;
+    }
+    // Expert focus targets live under advanced density — surface them for scroll.
+    if (
+      this.settingsDensity === 'simple' &&
+      (match.id === 'ppc-thresholds' ||
+        match.id === 'ppc-analysis-flags' ||
+        match.id === 'master-analysis')
+    ) {
+      this.setDensity('advanced');
+    }
+    queueMicrotask(() => {
+      this.scrollToSearchHit(match.id);
+    });
+  },
+
+  scrollToSearchHit(hitId: string): void {
+    const el =
+      document.getElementById(hitId) ||
+      document.querySelector<HTMLElement>(
+        `[data-settings-focus="${typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(hitId) : hitId.replace(/"/g, '\\"')}"]`
+      );
+    if (!el) {
+      // Fall back to section scroll via index entry
+      const match = findFirstSettingsSearchMatch(this.searchQuery);
+      if (match?.sectionId) {
+        this.scrollToSection(match.sectionId);
+      }
+      return;
+    }
+
+    // Expand ancestor details so advanced/focus content is reachable
+    let node: HTMLElement | null = el;
+    while (node) {
+      if (node instanceof HTMLDetailsElement) {
+        node.open = true;
+      }
+      node = node.parentElement;
+    }
+
+    const scroller = el.closest('.settings-panel-scroll');
+    if (scroller instanceof HTMLElement) {
+      const scrollerRect = scroller.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const nextTop = scroller.scrollTop + (elRect.top - scrollerRect.top) - 8;
+      scroller.scrollTo({
+        top: Math.max(0, nextTop),
+        behavior: 'smooth',
+      });
+    } else if (el.id) {
+      this.scrollToSection(el.id);
+    }
+
+    el.classList.add('settings-deep-link-highlight');
+    window.setTimeout(() => {
+      el.classList.remove('settings-deep-link-highlight');
+    }, 2000);
   },
 
   // 打开性能监控面板

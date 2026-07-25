@@ -222,6 +222,137 @@
   white-space: nowrap;
 }
 
+/* Scope / impact badges (Spec §3.5 / §15.5) */
+.settings-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.375rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.settings-badge--local {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.settings-badge--ai-cost {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.settings-badge--scrape {
+  background: #ecfeff;
+  color: #155e75;
+}
+
+.settings-badge--destructive {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.settings-badge--dev {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.settings-badge--instant {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.settings-badge--global {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+/* Toolbar: density segmented + in-panel search */
+.settings-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1.25rem 0;
+}
+
+.settings-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.125rem;
+  border: 1px solid var(--settings-border, #e2e8f0);
+  border-radius: var(--settings-radius-control, 0.75rem);
+  background: var(--settings-surface-muted, #f8fafc);
+}
+
+.settings-segmented__btn {
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  border: none;
+  border-radius: calc(var(--settings-radius-control, 0.75rem) - 0.125rem);
+  background: transparent;
+  color: var(--settings-text-muted, #64748b);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.settings-segmented__btn:hover {
+  color: var(--settings-text, #334155);
+}
+
+.settings-segmented__btn.is-active,
+.settings-segmented__btn[aria-pressed='true'] {
+  background: var(--settings-accent-soft, #eff6ff);
+  color: var(--settings-accent, #2563eb);
+  font-weight: 600;
+}
+
+.settings-segmented__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--settings-focus-ring);
+}
+
+.settings-search {
+  position: relative;
+  flex: 1 1 10rem;
+  min-width: 8rem;
+  max-width: 18rem;
+}
+
+.settings-search__icon {
+  pointer-events: none;
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  z-index: 1;
+  display: flex;
+  width: 1.25rem;
+  height: 1.25rem;
+  transform: translateY(-50%);
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 0.625rem;
+}
+
+.settings-search__input {
+  padding-left: 2.25rem;
+}
+
+.settings-search-empty {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: #94a3b8;
+}
+
 /* Unified form controls across all sections */
 .settings-control {
   width: 100%;

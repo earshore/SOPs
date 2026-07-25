@@ -13,7 +13,8 @@ test.describe('system settings', () => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
 
-    // Navigate to tool strategy and change maxRetries (runtime partition)
+    // Expert runtime fields are advanced density — switch first, then dirty maxRetries
+    await page.getByTestId('settings-density-advanced').click();
     await page.getByRole('button', { name: '工具策略' }).click();
     const maxRetries = page.locator('#settings-section-tool-strategy input[type="number"]').nth(1);
     await maxRetries.waitFor({ state: 'visible' });
@@ -27,5 +28,26 @@ test.describe('system settings', () => {
       timeout: 5000,
     });
     await expect(page.getByText(/未保存修改/)).toBeVisible();
+  });
+
+  test('E2E-P1-02 density hides expert fields in simple mode', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+
+    await page.getByTestId('settings-density-simple').click();
+    await page.getByRole('button', { name: '工具策略' }).click();
+    await expect(page.getByText('通用 AI 执行策略')).toBeHidden();
+
+    await page.getByTestId('settings-density-advanced').click();
+    await expect(page.getByText('通用 AI 执行策略')).toBeVisible();
+  });
+
+  test('E2E-P1-03 search locates PPC ACOS thresholds', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+
+    await page.getByTestId('settings-search').fill('ACOS');
+    const thresholds = page.locator('#ppc-thresholds');
+    await expect(thresholds).toBeVisible({ timeout: 5000 });
   });
 });
