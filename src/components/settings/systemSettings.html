@@ -142,54 +142,212 @@
     <!-- Scrollable Content -->
     <div class="settings-panel-scroll flex-1 overflow-y-auto px-5 py-6">
       <div class="settings-panel-body">
-        <nav class="settings-panel-nav" aria-label="系统设置分类">
+        <nav class="settings-panel-nav" aria-label="系统设置分类" data-testid="settings-side-nav">
           <div class="settings-panel-nav-title">分类</div>
-          <button
-            type="button"
-            class="settings-panel-nav-link"
-            aria-controls="settings-section-llm"
-            @click="scrollToSection('settings-section-llm')"
+
+          <!-- AI 模型与连接 -->
+          <div class="settings-panel-nav-group" :class="{ 'is-open': isNavGroupOpen('llm') }">
+            <button
+              type="button"
+              class="settings-panel-nav-link settings-panel-nav-link--primary"
+              aria-controls="settings-section-llm"
+              :aria-expanded="isNavGroupOpen('llm').toString()"
+              @click="toggleNavGroup('llm', 'settings-section-llm')"
+            >
+              <i class="fas fa-robot" aria-hidden="true"></i>
+              <span class="settings-panel-nav-link__label">AI 模型与连接</span>
+              <i class="settings-panel-nav-caret fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="settings-panel-nav-children" :hidden="!isNavGroupOpen('llm')">
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('llm-step-1-title', 'llm')"
+              >
+                基本信息
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('llm-step-2-title', 'llm')"
+              >
+                凭证
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('llm-step-3-title', 'llm')"
+              >
+                模型与能力
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('llm-step-4-title', 'llm')"
+              >
+                高级选项
+              </button>
+            </div>
+          </div>
+
+          <!-- 工具策略 -->
+          <div class="settings-panel-nav-group" :class="{ 'is-open': isNavGroupOpen('tool') }">
+            <button
+              type="button"
+              class="settings-panel-nav-link settings-panel-nav-link--primary"
+              aria-controls="settings-section-tool-strategy"
+              :aria-expanded="isNavGroupOpen('tool').toString()"
+              @click="toggleNavGroup('tool', 'settings-section-tool-strategy')"
+            >
+              <i class="fas fa-sliders" aria-hidden="true"></i>
+              <span class="settings-panel-nav-link__label">工具策略</span>
+              <i class="settings-panel-nav-caret fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="settings-panel-nav-children" :hidden="!isNavGroupOpen('tool')">
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('general-ai-runtime', 'tool')"
+              >
+                通用 AI 策略
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('master-analysis', 'tool')"
+              >
+                Master Analysis
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('master-analysis-scrape', 'tool')"
+              >
+                数据采集
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('master-analysis-ai', 'tool')"
+              >
+                AI 智能分析
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('deep-chat-business-tools-title', 'tool')"
+              >
+                Deep Chat
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('ppc-analysis-flags', 'tool')"
+              >
+                PPC Tools
+              </button>
+            </div>
+          </div>
+
+          <!-- 数据与备份 -->
+          <div class="settings-panel-nav-group" :class="{ 'is-open': isNavGroupOpen('data') }">
+            <button
+              type="button"
+              class="settings-panel-nav-link settings-panel-nav-link--primary"
+              aria-controls="settings-section-data"
+              :aria-expanded="isNavGroupOpen('data').toString()"
+              @click="toggleNavGroup('data', 'settings-section-data')"
+            >
+              <i class="fas fa-database" aria-hidden="true"></i>
+              <span class="settings-panel-nav-link__label">数据与备份</span>
+              <i class="settings-panel-nav-caret fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="settings-panel-nav-children" :hidden="!isNavGroupOpen('data')">
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('settings-export-buckets', 'data')"
+              >
+                分桶导出
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('settings-data-retention', 'data')"
+              >
+                数据保留策略
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('settings-data-danger', 'data')"
+              >
+                危险操作
+              </button>
+            </div>
+          </div>
+
+          <!-- 外观与体验 -->
+          <div
+            class="settings-panel-nav-group"
+            :class="{ 'is-open': isNavGroupOpen('appearance') }"
           >
-            <i class="fas fa-robot" aria-hidden="true"></i>
-            <span>AI 模型与连接</span>
-          </button>
-          <button
-            type="button"
-            class="settings-panel-nav-link"
-            aria-controls="settings-section-tool-strategy"
-            @click="scrollToSection('settings-section-tool-strategy')"
-          >
-            <i class="fas fa-sliders" aria-hidden="true"></i>
-            <span>工具策略</span>
-          </button>
-          <button
-            type="button"
-            class="settings-panel-nav-link"
-            aria-controls="settings-section-data"
-            @click="scrollToSection('settings-section-data')"
-          >
-            <i class="fas fa-database" aria-hidden="true"></i>
-            <span>数据与备份</span>
-          </button>
-          <button
-            type="button"
-            class="settings-panel-nav-link"
-            aria-controls="settings-section-appearance"
-            @click="scrollToSection('settings-section-appearance')"
-          >
-            <i class="fas fa-palette" aria-hidden="true"></i>
-            <span>外观与体验</span>
-          </button>
-          <button
-            type="button"
-            class="settings-panel-nav-link"
+            <button
+              type="button"
+              class="settings-panel-nav-link settings-panel-nav-link--primary"
+              aria-controls="settings-section-appearance"
+              :aria-expanded="isNavGroupOpen('appearance').toString()"
+              @click="toggleNavGroup('appearance', 'settings-section-appearance')"
+            >
+              <i class="fas fa-palette" aria-hidden="true"></i>
+              <span class="settings-panel-nav-link__label">外观与体验</span>
+              <i class="settings-panel-nav-caret fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="settings-panel-nav-children" :hidden="!isNavGroupOpen('appearance')">
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('settings-appearance-theme', 'appearance')"
+              >
+                主题
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('settings-appearance-animation', 'appearance')"
+              >
+                动画与动效
+              </button>
+            </div>
+          </div>
+
+          <!-- 开发者诊断 -->
+          <div
+            class="settings-panel-nav-group"
+            :class="{ 'is-open': isNavGroupOpen('dev') }"
             :hidden="!showDeveloperDiagnostics"
-            aria-controls="settings-section-performance"
-            @click="scrollToSection('settings-section-performance')"
           >
-            <i class="fas fa-chart-line" aria-hidden="true"></i>
-            <span>开发者诊断</span>
-          </button>
+            <button
+              type="button"
+              class="settings-panel-nav-link settings-panel-nav-link--primary"
+              aria-controls="settings-section-performance"
+              :aria-expanded="isNavGroupOpen('dev').toString()"
+              @click="toggleNavGroup('dev', 'settings-section-performance')"
+            >
+              <i class="fas fa-chart-line" aria-hidden="true"></i>
+              <span class="settings-panel-nav-link__label">开发者诊断</span>
+              <i class="settings-panel-nav-caret fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="settings-panel-nav-children" :hidden="!isNavGroupOpen('dev')">
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                @click="navigateToNavTarget('settings-section-performance', 'dev')"
+              >
+                监控与调试
+              </button>
+            </div>
+          </div>
         </nav>
         <div class="settings-panel-sections space-y-7">
           <!-- Section 1: AI Model Connection -->
@@ -1999,7 +2157,11 @@
                 </button>
               </div>
 
-              <details class="settings-collapsible-card" data-testid="settings-export-buckets">
+              <details
+                id="settings-export-buckets"
+                class="settings-collapsible-card"
+                data-testid="settings-export-buckets"
+              >
                 <summary
                   class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
                 >
@@ -2032,7 +2194,7 @@
                 </div>
               </details>
 
-              <details class="settings-collapsible-card">
+              <details id="settings-data-retention" class="settings-collapsible-card">
                 <summary
                   class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
                 >
@@ -2196,7 +2358,10 @@
                 </div>
               </div>
 
-              <div class="rounded-2xl border border-red-100 bg-red-50/75 p-3.5 shadow-sm">
+              <div
+                id="settings-data-danger"
+                class="rounded-2xl border border-red-100 bg-red-50/75 p-3.5 shadow-sm"
+              >
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div class="min-w-0">
                     <div class="flex items-center gap-2">

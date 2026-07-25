@@ -1193,10 +1193,13 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('max-w-[min(860px,calc(100vw-48px))]');
   expect(template).toContain('aria-label="系统设置分类"');
   expect(template).not.toContain('href="#settings-section-');
-  expect(template).toContain('@click="scrollToSection(\'settings-section-llm\')"');
-  expect(template).toContain('@click="scrollToSection(\'settings-section-tool-strategy\')"');
-  expect(template).toContain('@click="scrollToSection(\'settings-section-data\')"');
-  expect(template).toContain('@click="scrollToSection(\'settings-section-performance\')"');
+  // Hierarchical side nav: primary toggles + secondary targets
+  expect(template).toContain("toggleNavGroup('llm', 'settings-section-llm')");
+  expect(template).toContain("toggleNavGroup('tool', 'settings-section-tool-strategy')");
+  expect(template).toContain("toggleNavGroup('data', 'settings-section-data')");
+  expect(template).toContain("navigateToNavTarget('llm-step-1-title', 'llm')");
+  expect(template).toContain("navigateToNavTarget('master-analysis-scrape', 'tool')");
+  expect(template).toContain('settings-panel-nav-link--secondary');
   expect(template).toContain('id="settings-section-llm"');
   expect(template).toContain('id="settings-section-tool-strategy"');
   // network id kept for deep-link, nested under Master Analysis 数据采集
@@ -1225,9 +1228,11 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('settings-section-tip');
   expect(template).not.toContain('class="settings-coach"');
   expect(template.indexOf('通用 AI 执行策略')).toBeLessThan(template.indexOf('应用中心'));
-  expect(template.indexOf('Master Analysis')).toBeLessThan(template.indexOf('Playground'));
-  expect(template.indexOf('Playground')).toBeLessThan(template.indexOf('Keyword Hunter'));
-  expect(template.indexOf('Keyword Hunter')).toBeLessThan(template.indexOf('PPC Tools'));
+  // Content order (exclude side-nav secondary labels which may mention the same names)
+  const sectionsChunk = template.slice(template.indexOf('settings-panel-sections'));
+  expect(sectionsChunk.indexOf('Master Analysis')).toBeLessThan(sectionsChunk.indexOf('Playground'));
+  expect(sectionsChunk.indexOf('Playground')).toBeLessThan(sectionsChunk.indexOf('Keyword Hunter'));
+  expect(sectionsChunk.indexOf('Keyword Hunter')).toBeLessThan(sectionsChunk.indexOf('PPC Tools'));
   // 采集代理并入 Master Analysis → 数据采集
   expect(template).toContain('数据采集');
   expect(template).toContain('采集运行策略');

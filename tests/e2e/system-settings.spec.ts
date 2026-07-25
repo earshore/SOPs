@@ -178,7 +178,7 @@ test.describe('system settings', () => {
     await expect(aiBlock.locator('.settings-submodule__body')).toBeVisible();
   });
 
-  test('E2E-P1-nav six primary sections are listed', async ({ page }) => {
+  test('E2E-P1-nav primary and secondary menu levels', async ({ page }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
 
@@ -186,7 +186,16 @@ test.describe('system settings', () => {
     for (const label of ['AI 模型与连接', '工具策略', '数据与备份', '外观与体验']) {
       await expect(nav.getByRole('button', { name: label, exact: true })).toBeVisible();
     }
-    // 采集代理已并入工具策略 → Master Analysis → 数据采集
     await expect(nav.getByRole('button', { name: '采集代理与网络', exact: true })).toHaveCount(0);
+
+    // Secondary hidden until primary expanded
+    await expect(nav.getByRole('button', { name: '基本信息', exact: true })).toBeHidden();
+    await nav.getByRole('button', { name: 'AI 模型与连接', exact: true }).click();
+    await expect(nav.getByRole('button', { name: '基本信息', exact: true })).toBeVisible();
+    await expect(nav.getByRole('button', { name: '模型与能力', exact: true })).toBeVisible();
+
+    await nav.getByRole('button', { name: '工具策略', exact: true }).click();
+    await expect(nav.getByRole('button', { name: '数据采集', exact: true })).toBeVisible();
+    await expect(nav.getByRole('button', { name: 'Master Analysis', exact: true })).toBeVisible();
   });
 });

@@ -88,12 +88,20 @@ function escapeAttrSelector(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-function expandSettingsFocusTarget(focus: string): void {
-  const el =
-    document.querySelector<HTMLElement>(`[data-settings-focus="${escapeAttrSelector(focus)}"]`) ||
-    document.getElementById(focus);
+/** Resolve a settings target by id or data-settings-focus. */
+export function findSettingsNavTarget(targetId: string): HTMLElement | null {
+  if (!targetId) return null;
+  return (
+    document.getElementById(targetId) ||
+    document.querySelector<HTMLElement>(`[data-settings-focus="${escapeAttrSelector(targetId)}"]`)
+  );
+}
+
+/** Open all ancestor <details> for a target (nav secondary / deep-link). */
+export function expandSettingsFocusTarget(focus: string): HTMLElement | null {
+  const el = findSettingsNavTarget(focus);
   if (!el) {
-    return;
+    return null;
   }
 
   let node: HTMLElement | null = el;
@@ -108,4 +116,6 @@ function expandSettingsFocusTarget(focus: string): void {
   window.setTimeout(() => {
     el.classList.remove('settings-deep-link-highlight');
   }, 2000);
+
+  return el;
 }

@@ -107,6 +107,7 @@ import {
 } from '@/components/settings/domain/settingsHealth';
 import {
   applySettingsDeepLink,
+  expandSettingsFocusTarget,
   normalizeSettingsOpenOptions,
   type SettingsOpenOptions,
 } from '@/components/settings/domain/settingsDeepLink';
@@ -473,6 +474,11 @@ interface SettingsPanelData {
   clearLocalDataBucket(bucketId: LocalDataBucketId): Promise<void>;
   clearAllLocalData(): Promise<void>;
   scrollToSection(sectionId: string): void;
+  scrollToElementInPanel(el: HTMLElement): void;
+  navOpenGroup: string | null;
+  isNavGroupOpen(groupId: string): boolean;
+  toggleNavGroup(groupId: string, sectionId: string): void;
+  navigateToNavTarget(targetId: string, groupId?: string): void;
   setDensity(density: SettingsDensity): void;
   setToolAppDetailsOpen(open: boolean): void;
   onSettingsSearch(event?: Event): void;
@@ -1178,6 +1184,7 @@ function createSettingsState(): Pick<
   | 'localData'
   | 'llmApiPathMenuOpen'
   | 'schedulePreferenceMenuOpen'
+  | 'navOpenGroup'
 > {
   return {
     isOpen: false,
@@ -1185,6 +1192,7 @@ function createSettingsState(): Pick<
     settingsDensity: getSettingsUiPreferences().density,
     searchQuery: '',
     searchHitId: '',
+    navOpenGroup: null as string | null,
 
     appearanceThemeId: ThemeManager.getCurrentTheme(),
     appearanceAnimationsEnabled: true,
@@ -1915,25 +1923,53 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this._unsubscribers = [];
   },
 
-  scrollToSection(sectionId: string): void {
-    const section = document.getElementById(sectionId);
-    if (!section) {
-      return;
-    }
-
+  scrollToElementInPanel(el: HTMLElement): void {
     // Only scroll the settings content pane — never use scrollIntoView, which can
     // move outer ancestors and push the sticky footer up over the content.
-    const scroller = section.closest('.settings-panel-scroll');
+    const scroller = el.closest('.settings-panel-scroll');
     if (!(scroller instanceof HTMLElement)) {
       return;
     }
 
     const scrollerRect = scroller.getBoundingClientRect();
-    const sectionRect = section.getBoundingClientRect();
-    const nextTop = scroller.scrollTop + (sectionRect.top - scrollerRect.top) - 8;
+    const elRect = el.getBoundingClientRect();
+    const nextTop = scroller.scrollTop + (elRect.top - scrollerRect.top) - 8;
     scroller.scrollTo({
       top: Math.max(0, nextTop),
       behavior: 'smooth',
+    });
+  },
+
+  scrollToSection(sectionId: string): void {
+    const section = document.getElementById(sectionId);
+    if (!section) {
+      return;
+    }
+    this.scrollToElementInPanel(section);
+  },
+
+  isNavGroupOpen(groupId: string): boolean {
+    return this.navOpenGroup === groupId;
+  },
+
+  toggleNavGroup(groupId: string, sectionId: string): void {
+    this.navOpenGroup = this.navOpenGroup === groupId ? null : groupId;
+    this.scrollToSection(sectionId);
+  },
+
+  navigateToNavTarget(targetId: string, groupId?: string): void {
+    if (groupId) {
+      this.navOpenGroup = groupId;
+    }
+    // Open collapsed details first so layout height is correct before scroll.
+    const el = expandSettingsFocusTarget(targetId);
+    if (!el) {
+      this.scrollToSection(targetId);
+      return;
+    }
+    // Defer scroll one frame so expanded details contribute to offset.
+    requestAnimationFrame(() => {
+      this.scrollToElementInPanel(el);
     });
   },
 
