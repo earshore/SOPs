@@ -1,7 +1,7 @@
 # 系统设置企业级硬化设计 Spec
 
 **Date:** 2026-07-25  
-**Status:** draft-for-review  
+**Status:** approved  
 **Route:** A — 分阶段硬化（Reliability-first phased hardening）  
 **Related:**
 
