@@ -332,6 +332,8 @@ npm run generate:tokens
 ## 8. 已知债务
 
 以下债务在主题整改中**承认现状**，不在本规范要求“本轮一次清零”；新增代码应避免扩大。
+深度审查、企业级目标架构与分期收敛见：
+[主题系统企业级审查与收敛路线图](./superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md)。
 
 | ID | 内容 |
 | --- | --- |
@@ -341,6 +343,12 @@ npm run generate:tokens
 | D4 | colorSchemes 营销向 hover 与工作台底线冲突 |
 | D5 | `--focus-ring-soft` 等可能残留蓝系硬编码 |
 | D6 | 大量 UI 硬编码 `blue-*`，Appearance 可见影响有限 |
+| D7 | `ColorContext.setModuleColor` 全局写入与 DOM `wb-theme-*` 双通道 |
+| D8 | `wb-theme-*` 混用角色名与色名，缺统一 Role→Palette 表 |
+| D9 | 局部 token 前缀多，缺「升全局 / 归档」生命周期 |
+| D10 | `ThemeColors` 接口含状态色字段，但 Appearance 实际不切换 |
+| D11 | 暗色覆盖依赖 `data-theme='dark'`，与 D3 同源 |
+| D12 | 缺 Appearance preset 壳层视觉回归矩阵 |
 
 ---
 

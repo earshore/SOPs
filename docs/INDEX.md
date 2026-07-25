@@ -82,6 +82,7 @@
 （完整权威见上方「现行规范」。）
 
 - [稳定主题系统规范](./THEME_SYSTEM_GUIDELINES.md)
+- [主题系统企业级审查与收敛路线图](./superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md) — As-Is/To-Be、D1–D12、分期收敛
 - [视觉设计规范指南](./VISUAL_DESIGN_GUIDELINES.md)
 - [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md)
 - [页面访问动画规范](./PAGE_ENTRY_ANIMATION_GUIDELINES.md)

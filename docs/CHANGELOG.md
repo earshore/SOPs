@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
+
 ### Changed
 
+- 主题宪法债务表扩展 D7–D12，并链到上述路线图。
 - PPC 搜索词：模型失败路径接入 `formatLlmFailureUx`（配置/鉴权可点「打开设置」；本地降级仍提示规则回退）。
 - Keyword Hunter Process：翻译模型同步/缺配置走可行动 LLM Toast。
 - Deep Chat：缺模型配置与调用失败补充可行动 Toast（会话内错误文案仍保留）。
