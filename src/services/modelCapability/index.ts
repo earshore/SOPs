@@ -102,8 +102,12 @@ export {
   type TextEmittedToolCall,
 } from './textToolCalls';
 export {
+  buildModelToolSynthesisUserMessage,
+  isLocalToolFallbackText,
   isResponsesInProgressEmpty,
   synthesizeAnswerFromToolOutputs,
+  TOOL_LOOP_LOCAL_FALLBACK_FOOTER,
+  TOOL_LOOP_LOCAL_FALLBACK_HEADER,
   type CollectedToolOutput,
 } from './toolLoopFinal';
 export {

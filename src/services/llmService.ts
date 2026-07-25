@@ -42,6 +42,7 @@ import {
   mergeChatStreamToolCallDeltas,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
+  buildModelToolSynthesisUserMessage,
   isResponsesInProgressEmpty,
   parseTextEmittedToolCalls,
   processResponsesToolRound,
@@ -2124,6 +2125,73 @@ async function runOneResponsesToolRound(args: {
  * Responses agent tool loop: non-stream rounds until no function_call items.
  * Last round forces tool_choice=none; empty text synthesizes from tool outputs.
  */
+/**
+ * Enterprise finalization after tool rounds: model text → one synthesis hop → local fallback.
+ * Synthesis never enables tools (TF-O4).
+ */
+async function tryModelSynthesizeFromToolOutputs(
+  request: LLMCallRequest,
+  baseOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string,
+  collected: CollectedToolOutput[]
+): Promise<string> {
+  if (!collected.length) return '';
+  const synthesisMessages: ChatMessage[] = [
+    ...request.messages,
+    { role: 'user', content: buildModelToolSynthesisUserMessage(collected) },
+  ];
+  const maxTokens = Math.max(
+    typeof baseOptions.maxTokens === 'number' && Number.isFinite(baseOptions.maxTokens)
+      ? Math.floor(baseOptions.maxTokens)
+      : 0,
+    2048
+  );
+  try {
+    return (
+      await callLLMWithRetry(
+        { ...request, messages: synthesisMessages },
+        {
+          ...baseOptions,
+          stream: false,
+          enableToolLoop: false,
+          tools: undefined,
+          executeTool: undefined,
+          toolChoice: undefined,
+          maxToolRounds: undefined,
+          previousResponseId: undefined,
+          reasoningPrefs: { enabled: false, effort: 'medium' },
+          reasoningSessionOverride: { enabled: false },
+          maxTokens,
+          retries: 0,
+        },
+        normalizedEndpoint
+      )
+    ).trim();
+  } catch {
+    return '';
+  }
+}
+
+async function resolveToolLoopFinalAnswer(args: {
+  lastText: string;
+  collected: CollectedToolOutput[];
+  request: LLMCallRequest;
+  baseOptions: ResolvedLLMOptions;
+  normalizedEndpoint: string;
+}): Promise<string> {
+  const trimmed = args.lastText.trim();
+  if (trimmed) return trimmed;
+  if (!args.collected.length) return '';
+  const synthesized = await tryModelSynthesizeFromToolOutputs(
+    args.request,
+    args.baseOptions,
+    args.normalizedEndpoint,
+    args.collected
+  );
+  if (synthesized) return synthesized;
+  return synthesizeAnswerFromToolOutputs(args.collected);
+}
+
 async function callLLMResponsesToolLoop(
   request: LLMCallRequest,
   baseOptions: ResolvedLLMOptions,
@@ -2162,11 +2230,23 @@ async function callLLMResponsesToolLoop(
     previousResponseId = result.previousResponseId;
     followUpInputItems = isLastRound ? undefined : result.followUpInputItems;
     if (result.done || isLastRound) {
-      return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
+      return resolveToolLoopFinalAnswer({
+        lastText,
+        collected,
+        request,
+        baseOptions,
+        normalizedEndpoint,
+      });
     }
   }
 
-  return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
+  return resolveToolLoopFinalAnswer({
+    lastText,
+    collected,
+    request,
+    baseOptions,
+    normalizedEndpoint,
+  });
 }
 
 /**
@@ -2219,10 +2299,22 @@ async function runResponsesToolFollowUpRounds(args: {
     previousResponseId = result.previousResponseId;
     followUpInputItems = isLastRound ? undefined : result.followUpInputItems;
     if (result.done || isLastRound) {
-      return lastText.trim() || synthesizeAnswerFromToolOutputs(args.collected);
+      return resolveToolLoopFinalAnswer({
+        lastText,
+        collected: args.collected,
+        request: args.request,
+        baseOptions: args.baseOptions,
+        normalizedEndpoint: args.normalizedEndpoint,
+      });
     }
   }
-  return lastText.trim() || synthesizeAnswerFromToolOutputs(args.collected);
+  return resolveToolLoopFinalAnswer({
+    lastText,
+    collected: args.collected,
+    request: args.request,
+    baseOptions: args.baseOptions,
+    normalizedEndpoint: args.normalizedEndpoint,
+  });
 }
 
 async function continueResponsesToolLoopFromRaw(
@@ -2267,7 +2359,13 @@ async function continueResponsesToolLoopFromRaw(
     previousResponseId,
   });
   if (first.done) {
-    return (first.lastText || lastText).trim() || synthesizeAnswerFromToolOutputs(collected);
+    return resolveToolLoopFinalAnswer({
+      lastText: first.lastText || lastText,
+      collected,
+      request,
+      baseOptions,
+      normalizedEndpoint,
+    });
   }
   previousResponseId = first.previousResponseId;
   followUpInputItems = first.followUpInputItems;
@@ -2516,7 +2614,13 @@ async function callLLMChatToolLoop(
     lastText = getLLMResponseContent(payload);
     const toolCalls = resolveChatToolCallsFromPayload(payload, isLastRound);
     if (!toolCalls.length) {
-      return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
+      return resolveToolLoopFinalAnswer({
+        lastText,
+        collected,
+        request,
+        baseOptions,
+        normalizedEndpoint,
+      });
     }
 
     const results = await executeChatToolCalls(toolCalls, executeTool, collected);
@@ -2525,7 +2629,13 @@ async function callLLMChatToolLoop(
     messages = nextRecords as unknown as ChatMessage[];
   }
 
-  return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
+  return resolveToolLoopFinalAnswer({
+    lastText,
+    collected,
+    request,
+    baseOptions,
+    normalizedEndpoint,
+  });
 }
 
 /**
@@ -2578,7 +2688,17 @@ async function callLLMChatStreamFirstThenToolLoop(
     { ...baseOptions, stream: false, enableToolLoop: true },
     normalizedEndpoint
   );
-  return finalText.trim() || synthesizeAnswerFromToolOutputs(seedCollected);
+  // callLLMChatToolLoop already runs resolveToolLoopFinalAnswer; re-run only if empty
+  // but seedCollected may hold first-hop tools not passed into nested loop.
+  const nested = finalText.trim();
+  if (nested) return nested;
+  return resolveToolLoopFinalAnswer({
+    lastText: '',
+    collected: seedCollected,
+    request: { ...request, messages: nextMessages },
+    baseOptions: { ...baseOptions, stream: false, enableToolLoop: false },
+    normalizedEndpoint,
+  });
 }
 
 /**
