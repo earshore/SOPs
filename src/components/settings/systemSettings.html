@@ -1875,15 +1875,13 @@
                 </div>
               </details>
 
-              <div class="settings-actions-bar">
-                <p class="settings-actions-bar__hint">
-                  保存：本页全部策略。恢复默认：仅表单，需再保存。
-                </p>
-                <div class="settings-actions-bar__btns">
+              <!-- 底部操作：与 AI 连接区同层级 — 次要等宽 + 主保存更宽 -->
+              <div class="settings-strategy-footer">
+                <div class="settings-strategy-footer__row">
                   <button
                     type="button"
                     @click="resetRuntimeStrategy()"
-                    class="settings-actions-bar__btn settings-actions-bar__btn--ghost"
+                    class="settings-strategy-footer__btn settings-strategy-footer__btn--secondary"
                   >
                     恢复默认
                   </button>
@@ -1892,7 +1890,7 @@
                     data-testid="settings-undo-runtime-save"
                     :hidden="!canUndoRuntimeSave"
                     @click="undoLastSettingsSave('runtime')"
-                    class="settings-actions-bar__btn settings-actions-bar__btn--ghost"
+                    class="settings-strategy-footer__btn settings-strategy-footer__btn--secondary"
                   >
                     撤销上次
                   </button>
@@ -1901,14 +1899,19 @@
                     data-testid="settings-save-tool-strategy"
                     @click="saveToolStrategy()"
                     :disabled="toolStrategy.isSaving"
-                    class="settings-actions-bar__btn settings-actions-bar__btn--primary"
+                    class="settings-strategy-footer__btn settings-strategy-footer__btn--primary"
                   >
-                    <span class="inline-flex items-center gap-2">
-                      <i class="fas" :class="toolStrategySaveIconClass"></i>
-                      <span x-text="toolStrategySaveText"></span>
-                    </span>
+                    <i
+                      class="fas text-xs"
+                      :class="toolStrategySaveIconClass"
+                      aria-hidden="true"
+                    ></i>
+                    <span x-text="toolStrategySaveText"></span>
                   </button>
                 </div>
+                <p class="settings-strategy-footer__hint">
+                  保存：本页全部策略。恢复默认：仅表单，需再保存。
+                </p>
               </div>
             </div>
           </section>
