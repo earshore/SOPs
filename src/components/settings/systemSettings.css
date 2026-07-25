@@ -582,11 +582,13 @@
   align-items: center;
   justify-content: center;
   color: #94a3b8;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
 }
 
-.settings-search__input {
-  padding-left: 2.25rem;
+/* Must beat .settings-control / .settings-control--sm padding shorthand */
+.settings-search .settings-control.settings-search__input {
+  padding-left: 2.5rem;
+  padding-right: 0.75rem;
 }
 
 .settings-search-empty {
