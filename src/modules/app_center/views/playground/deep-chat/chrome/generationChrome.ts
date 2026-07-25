@@ -464,6 +464,17 @@ export function stopReasoningTypewriter(pendingKey?: string | null): void {
   sessionState.reasoningTypewriterKey = null;
 }
 
+/**
+ * Expand flag for settle handoff: prefer snapshot taken in markPendingDeepChatRequestSettled
+ * (production order is mark → sync chrome; live flag is already false by then).
+ */
+export function resolvePendingExpandForHandoff(pending: PendingDeepChatRequest): boolean {
+  if (pending.reasoningExpandedAtSettle !== undefined) {
+    return pending.reasoningExpandedAtSettle === true;
+  }
+  return pending.reasoningUiExpanded === true;
+}
+
 /** Flush stream display cursor then apply settle expand inheritance (spec O1/O3). */
 export function preparePendingSettledHandoff(pending: PendingDeepChatRequest, uiKey: string): void {
   const fullLen = pending.reasoningText.length;
@@ -474,7 +485,7 @@ export function preparePendingSettledHandoff(pending: PendingDeepChatRequest, ui
   stopReasoningTypewriter(pendingTypewriterKey(pending));
 
   const handoff = resolveSettledHandoffExpand({
-    reasoningUiExpanded: pending.reasoningUiExpanded,
+    reasoningUiExpanded: resolvePendingExpandForHandoff(pending),
     hasReasoningText: Boolean(pending.reasoningText.trim()),
   });
   const state = getOrCreateSettledUiState(uiKey);

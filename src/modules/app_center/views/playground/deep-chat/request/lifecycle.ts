@@ -20,6 +20,11 @@ export interface PendingDeepChatRequest {
   reasoningText: string;
   /** Streaming UI: 深度思考 expanded */
   reasoningUiExpanded?: boolean;
+  /**
+   * Snapshot of reasoningUiExpanded at settle time (before stream flag is cleared).
+   * Used by settle chrome handoff so O1 expand inheritance still works after mark.
+   */
+  reasoningExpandedAtSettle?: boolean;
   /** Streaming typewriter cursor into reasoningText */
   reasoningDisplayedLength?: number;
   /**
@@ -147,10 +152,12 @@ export function markPendingDeepChatRequestSettled(
   pendingRequest: PendingDeepChatRequest,
   now = Date.now()
 ): void {
+  // Capture expand state before clearing — settle chrome handoff reads this (spec O1/A1).
+  pendingRequest.reasoningExpandedAtSettle = pendingRequest.reasoningUiExpanded === true;
   pendingRequest.isSettled = true;
   pendingRequest.settledAt = now;
   pendingRequest.updatedAt = now;
-  // Collapse 深度思考 into 「已完成 Xs」 after the formal reply settles.
+  // Collapse live stream toggle; settled UI uses doneOpen/activityOpen via handoff.
   pendingRequest.reasoningUiExpanded = false;
 }
 

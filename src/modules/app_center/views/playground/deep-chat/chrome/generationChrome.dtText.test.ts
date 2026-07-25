@@ -17,7 +17,10 @@ import {
 } from './generationChrome';
 import { GENERATION_CHROME_CLASS, sessionState } from '../session/sessionState';
 import type { PendingDeepChatRequest } from '../request/lifecycle';
-import { createPendingDeepChatRequest } from '../request/lifecycle';
+import {
+  createPendingDeepChatRequest,
+  markPendingDeepChatRequestSettled,
+} from '../request/lifecycle';
 
 describe('syncDeepChatDtBodyScrollCap', () => {
   afterEach(() => {
@@ -239,7 +242,12 @@ describe('preparePendingSettledHandoff + mountSettledDeepThinkingChrome', () => 
     pending.reasoningText = 'visible reasoning body line';
     pending.reasoningUiExpanded = true;
     pending.reasoningDisplayedLength = 4; // mid-typewriter
-    pending.isSettled = true;
+
+    // Production order: mark (clears live expand) then handoff/sync chrome.
+    markPendingDeepChatRequestSettled(pending);
+    expect(pending.reasoningUiExpanded).toBe(false);
+    expect(pending.reasoningExpandedAtSettle).toBe(true);
+    expect(pending.isSettled).toBe(true);
 
     const uiKey = `thread-handoff:pending-settled:${pending.startedAt}`;
     preparePendingSettledHandoff(pending, uiKey);
@@ -263,7 +271,9 @@ describe('preparePendingSettledHandoff + mountSettledDeepThinkingChrome', () => 
     pending.reasoningText = 'hidden while collapsed';
     pending.reasoningUiExpanded = false;
     pending.reasoningDisplayedLength = 3;
-    pending.isSettled = true;
+
+    markPendingDeepChatRequestSettled(pending);
+    expect(pending.reasoningExpandedAtSettle).toBe(false);
 
     const uiKey = `thread-collapsed:pending-settled:${pending.startedAt}`;
     preparePendingSettledHandoff(pending, uiKey);
