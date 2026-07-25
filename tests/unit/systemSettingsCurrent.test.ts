@@ -1265,6 +1265,25 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(styles).toContain('flex-direction: column');
 });
 
+it('saveProviderConfig persists five-tier reasoningPrefs', async () => {
+  const panel = createPanel();
+  panel.llm.provider = 'new_api';
+  panel.llm.endpoint = 'https://new.hongecb.store/v1';
+  panel.llm.apiKey = 'key';
+  panel.llm.model = 'model-a';
+  panel.setReasoningEnabled({ target: { checked: true } } as unknown as Event);
+  panel.setReasoningEffortLevel('xhigh');
+
+  await panel.saveProviderConfig();
+
+  expect(StorageService.setLLMConfig).toHaveBeenCalledWith(
+    'new_api',
+    expect.objectContaining({
+      reasoningPrefs: { enabled: true, effort: 'xhigh' },
+    })
+  );
+});
+
 it('UT-P0-01 saveProviderConfig does not persist runtime strategy', async () => {
   const runtime = await import('@/services/runtimeStrategyService');
   const saveRuntime = vi.spyOn(runtime, 'saveRuntimeStrategySettings');

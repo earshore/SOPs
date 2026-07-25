@@ -163,7 +163,8 @@ export const LLMProviderConfigSchema = z.object({
   reasoningPrefs: z
     .object({
       enabled: z.boolean(),
-      effort: z.enum(['low', 'medium', 'high']),
+      // Keep in sync with ReasoningEffortLevel (modelCapability/types.ts)
+      effort: z.enum(['low', 'medium', 'high', 'xhigh', 'max']),
     })
     .optional(),
   apiPath: z
