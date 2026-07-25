@@ -2433,6 +2433,58 @@
 
                 <div class="settings-appearance-divider" role="separator"></div>
 
+                <!-- Color mode (independent of Appearance theme) -->
+                <div class="settings-appearance-row" data-testid="settings-appearance-color-mode">
+                  <div class="settings-appearance-row__meta">
+                    <span class="settings-appearance-row__icon" aria-hidden="true">
+                      <i class="fas fa-circle-half-stroke"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-appearance-row__title">颜色模式</h4>
+                      <p class="settings-appearance-row__hint">浅色 / 深色，独立于主题色</p>
+                    </div>
+                  </div>
+                  <div
+                    class="settings-segmented settings-segmented--inline settings-segmented--color-mode"
+                    role="group"
+                    aria-label="颜色模式"
+                    data-testid="settings-color-mode"
+                  >
+                    <button
+                      type="button"
+                      class="settings-segmented__btn"
+                      data-testid="settings-color-mode-light"
+                      :class="{ 'is-active': appearanceColorMode === 'light' }"
+                      :aria-pressed="(appearanceColorMode === 'light').toString()"
+                      @click="setAppearanceColorMode('light')"
+                    >
+                      浅色
+                    </button>
+                    <button
+                      type="button"
+                      class="settings-segmented__btn"
+                      data-testid="settings-color-mode-dark"
+                      :class="{ 'is-active': appearanceColorMode === 'dark' }"
+                      :aria-pressed="(appearanceColorMode === 'dark').toString()"
+                      @click="setAppearanceColorMode('dark')"
+                    >
+                      深色
+                    </button>
+                    <button
+                      type="button"
+                      class="settings-segmented__btn"
+                      data-testid="settings-color-mode-system"
+                      :class="{ 'is-active': appearanceColorMode === 'system' }"
+                      :aria-pressed="(appearanceColorMode === 'system').toString()"
+                      @click="setAppearanceColorMode('system')"
+                    >
+                      跟随系统
+                    </button>
+                  </div>
+                </div>
+
+                <div class="settings-appearance-divider" role="separator"></div>
+
                 <!-- Motion toggles -->
                 <div class="settings-appearance-row" data-testid="settings-appearance-animation">
                   <div class="settings-appearance-row__meta">

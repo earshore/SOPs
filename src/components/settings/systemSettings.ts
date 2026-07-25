@@ -126,7 +126,7 @@ import {
   undoLastSettingsSave as popLastSettingsSave,
   type SettingsRollbackPartition,
 } from '@/components/settings/domain/settingsRollback';
-import { ThemeManager, THEME_PRESETS } from '@/common/config/themeConfig';
+import { ThemeManager, THEME_PRESETS, type ColorMode } from '@/common/config/themeConfig';
 import { animationSettingsStore, getAnimationSettings } from '@/stores/animation-settings';
 import type { AnimationSpeed } from '@/types/animation-types';
 
@@ -287,6 +287,8 @@ interface SettingsPanelData {
   searchHitId: string;
   /** Appearance: current theme id (instant apply; not dirty) */
   appearanceThemeId: string;
+  /** Appearance: color mode preference light|dark|system (instant; not dirty) */
+  appearanceColorMode: ColorMode;
   /** Appearance: animations master switch */
   appearanceAnimationsEnabled: boolean;
   /** Appearance: animation speed */
@@ -483,6 +485,7 @@ interface SettingsPanelData {
   loadAppearanceSettings(): void;
   setAppearanceTheme(themeId: string): void;
   setAppearanceThemeFromEvent(event: Event): void;
+  setAppearanceColorMode(mode: ColorMode): void;
   setAppearanceAnimationsEnabled(event: Event): void;
   setAppearanceAnimationSpeed(speed: AnimationSpeed): void;
   setAppearanceRespectSystemPreference(event: Event): void;
@@ -1217,6 +1220,7 @@ function createSettingsState(): Pick<
   | 'searchQuery'
   | 'searchHitId'
   | 'appearanceThemeId'
+  | 'appearanceColorMode'
   | 'appearanceAnimationsEnabled'
   | 'appearanceAnimationSpeed'
   | 'appearanceRespectSystemPreference'
@@ -1246,6 +1250,7 @@ function createSettingsState(): Pick<
     navOpenGroup: null as string | null,
 
     appearanceThemeId: ThemeManager.getCurrentTheme(),
+    appearanceColorMode: ThemeManager.getCurrentColorMode(),
     appearanceAnimationsEnabled: true,
     appearanceAnimationSpeed: 'normal',
     appearanceRespectSystemPreference: true,
@@ -2048,6 +2053,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   loadAppearanceSettings(): void {
     this.appearanceThemeId = ThemeManager.getCurrentTheme();
+    this.appearanceColorMode = ThemeManager.getCurrentColorMode();
     const anim = getAnimationSettings();
     this.appearanceAnimationsEnabled = anim.enabled;
     this.appearanceAnimationSpeed = anim.speed;
@@ -2064,6 +2070,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
     if (typeof value === 'string' && value) {
       this.setAppearanceTheme(value);
     }
+  },
+
+  setAppearanceColorMode(mode: ColorMode): void {
+    if (mode !== 'light' && mode !== 'dark' && mode !== 'system') return;
+    ThemeManager.applyColorMode(mode);
+    this.appearanceColorMode = ThemeManager.getCurrentColorMode();
   },
 
   setAppearanceAnimationsEnabled(event: Event): void {

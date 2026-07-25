@@ -9,14 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- D1 token 覆盖清点：`npm run token:override-audit`（`scripts/quality/audit-token-overrides.ts`）+ 库存报告 `docs/superpowers/plans/2026-07-26-token-override-inventory.md`。
 - 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
 - 主题落地团队作战手册 + 体验验收矩阵（`docs/superpowers/plans/2026-07-26-theme-system-*`）。
 - D6 壳层 `blue-*` 硬编码基线门禁：`npm run theme:hardcode-baseline`（已并入 `ci:quality`；当前 shell 基线 13）。
 - Appearance 预览类型收窄为 `AppearanceThemeColors`（primary 族 + focus；D10）。
 - Color Mode API：`ThemeManager.applyColorMode` / `restoreColorMode`（存储 `app-color-mode`；`data-color-mode` + resolved / `.dark`）。
+- 系统设置外观：**颜色模式** 分段控件（浅色 / 深色 / 跟随系统）。
+- D1 审计：`npm run token:override-audit` + 清单文档；移除 variables.css 中 **192** 条与 generated 值相等的原子重复声明。
+- Settings Appearance：颜色模式（浅色 / 深色 / 跟随系统）UI，即时调用 `ThemeManager.applyColorMode`，与主题色选择独立。
 
 ### Changed
 
+- D1 Phase 2 prep：从 `variables.css` 移除与 generated 值完全相同的原子重复（色板 / 字号字重 / leading / tracking / 数字 spacing），语义与 intentional 冲突尺度保留。
 - Phase 1：Appearance 写 `data-appearance`（兼容 `data-theme`=appearance id），**不再**用 Appearance 覆盖 dark；legacy `data-theme=dark` 一次性迁移到 color mode。
 - 壳层 chrome（modal/navigation/search）primary/focus 改语义 token；megaMenu 模块色板保留（归属层，13 处）。
 - 主题宪法债务表扩展 D7–D12，并链到上述路线图。

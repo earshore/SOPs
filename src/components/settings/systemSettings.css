@@ -808,6 +808,13 @@ select.settings-control {
   padding: 0.25rem 0.5rem;
 }
 
+/* Color mode: three labels including 跟随系统 need a bit more width */
+.settings-segmented--color-mode {
+  flex: 0 1 16rem;
+  min-width: 13.5rem;
+  max-width: 18rem;
+}
+
 /* App group + submodule under tool strategy */
 .settings-app-group-label {
   padding: 0.25rem 0.15rem 0;

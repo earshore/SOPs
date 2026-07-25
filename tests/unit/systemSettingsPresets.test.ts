@@ -187,4 +187,34 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(html).toContain('settings-section-tip');
     expect(html).not.toContain('class="settings-coach"');
   });
+
+  it('UT-P1-06 color mode uses applyColorMode and stays independent of applyTheme', () => {
+    expect(panelTs).toContain('ThemeManager.applyColorMode');
+    expect(panelTs).toContain('ThemeManager.getCurrentColorMode');
+    expect(panelTs).toContain('appearanceColorMode');
+    const colorFn = panelTs.match(
+      /setAppearanceColorMode\(mode: ColorMode\): void \{\n[\s\S]*?\n {2}\},/
+    );
+    expect(colorFn?.[0] ?? '').toContain('ThemeManager.applyColorMode');
+    expect(colorFn?.[0] ?? '').not.toContain('ThemeManager.applyTheme');
+    expect(colorFn?.[0] ?? '').not.toContain('saveRuntimeStrategySettings');
+    // load reflects preference (getCurrentColorMode), not only resolved
+    const loadFn = panelTs.match(/loadAppearanceSettings\(\): void \{\n[\s\S]*?\n {2}\},/);
+    expect(loadFn?.[0] ?? '').toContain('ThemeManager.getCurrentColorMode');
+  });
+
+  it('UT-P1-06 color mode UI present with three options', () => {
+    expect(html).toContain('data-testid="settings-appearance-color-mode"');
+    expect(html).toContain('data-testid="settings-color-mode"');
+    expect(html).toContain('data-testid="settings-color-mode-light"');
+    expect(html).toContain('data-testid="settings-color-mode-dark"');
+    expect(html).toContain('data-testid="settings-color-mode-system"');
+    expect(html).toContain('颜色模式');
+    expect(html).toContain('浅色');
+    expect(html).toContain('深色');
+    expect(html).toContain('跟随系统');
+    expect(html).toContain("setAppearanceColorMode('light')");
+    expect(html).toContain("setAppearanceColorMode('dark')");
+    expect(html).toContain("setAppearanceColorMode('system')");
+  });
 });
