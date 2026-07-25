@@ -4,7 +4,6 @@
  */
 
 import type { ColorSchemeName } from '../constants/colorSchemes';
-import { ColorContext } from '../utils/ColorContext';
 import { updateRuntimeCssRule } from '../utils/runtimeStyles';
 import { StorageService } from '@/services/storageService';
 import eventBus from '../EventBus';
@@ -36,38 +35,52 @@ export interface ThemeConfig {
 export const THEME_PRESETS: Record<string, ThemeConfig> = {
   default: {
     id: 'default',
-    name: '默认主题',
-    description: '经典蓝色主题，适合商务场景',
+    name: '默认',
+    description: '经典蓝色主色，适合通用商务工作台',
     colorScheme: 'blue',
+  },
+  minimal: {
+    id: 'minimal',
+    name: '极简素色',
+    description:
+      '工业中性主色，低刺激、高对比，适合长时间运营作业；仅调整全局主色 token，不改变模块归属与页面 banner',
+    colorScheme: 'slate',
+    customVars: {
+      '--color-primary': 'var(--color-slate-700)',
+      '--color-primary-light': 'var(--color-slate-100)',
+      '--color-primary-dark': 'var(--color-slate-800)',
+      '--color-primary-darker': 'var(--color-slate-900)',
+      '--color-focus-ring': 'var(--color-slate-700)',
+    },
   },
   ocean: {
     id: 'ocean',
-    name: '海洋主题',
-    description: '清新的青色调，营造宁静氛围',
+    name: '海洋',
+    description: '青色主色，偏清爽的全局强调',
     colorScheme: 'cyan',
-  },
-  sunset: {
-    id: 'sunset',
-    name: '日落主题',
-    description: '温暖的橙色调，充满活力',
-    colorScheme: 'orange',
   },
   forest: {
     id: 'forest',
-    name: '森林主题',
-    description: '自然的绿色调，舒适护眼',
+    name: '森林',
+    description: '绿色主色，偏自然的全局强调',
     colorScheme: 'green',
+  },
+  sunset: {
+    id: 'sunset',
+    name: '日落',
+    description: '橙色主色，偏暖的全局强调',
+    colorScheme: 'orange',
   },
   purple: {
     id: 'purple',
-    name: '紫罗兰主题',
-    description: '优雅的紫色调，彰显品味',
+    name: '紫罗兰',
+    description: '紫色主色，偏沉稳的全局强调',
     colorScheme: 'purple',
   },
   rose: {
     id: 'rose',
-    name: '玫瑰主题',
-    description: '浪漫的粉色调，温柔细腻',
+    name: '玫瑰',
+    description: '玫红主色，偏醒目的全局强调',
     colorScheme: 'rose',
   },
 };
@@ -92,9 +105,6 @@ export class ThemeManager {
     const { animate = true } = options;
     const previousTheme = this.currentTheme;
     const root = document.documentElement;
-
-    // 应用颜色方案
-    ColorContext.setModuleColor(theme.colorScheme);
 
     // 更新CSS变量
     const colorVars: Record<string, string> = this.getColorVars(theme.colorScheme);

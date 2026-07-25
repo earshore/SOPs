@@ -68,7 +68,7 @@ describe('ThemeManager', () => {
 
     ThemeManager.applyTheme('ocean');
 
-    expect(ColorContext.setModuleColor).toHaveBeenCalledWith('cyan');
+    expect(ColorContext.setModuleColor).not.toHaveBeenCalled();
     expect(document.documentElement.dataset.theme).toBe('ocean');
     expect(getRuntimeCssRuleText('theme-manager-vars')).toContain(
       '--color-primary:var(--color-cyan-500)'
@@ -88,6 +88,30 @@ describe('ThemeManager', () => {
       '--theme-transition-duration'
     );
     expect(ThemeManager.getCurrentTheme()).toBe('ocean');
+  });
+
+  it('applies minimal with industrial slate customVars and does not touch ColorContext', () => {
+    ThemeManager.applyTheme('minimal');
+
+    expect(document.documentElement.dataset.theme).toBe('minimal');
+    expect(ColorContext.setModuleColor).not.toHaveBeenCalled();
+    const rule = getRuntimeCssRuleText('theme-manager-vars');
+    expect(rule).toContain('--color-primary:var(--color-slate-700)');
+    expect(rule).toContain('--color-primary-light:var(--color-slate-100)');
+    expect(rule).toContain('--color-primary-dark:var(--color-slate-800)');
+    expect(rule).toContain('--color-primary-darker:var(--color-slate-900)');
+    expect(rule).toContain('--color-focus-ring:var(--color-slate-700)');
+    expect(StorageService.set).toHaveBeenCalledWith('app-theme', 'minimal');
+    expect(ThemeManager.getCurrentTheme()).toBe('minimal');
+    expect(THEME_PRESETS.minimal.colorScheme).toBe('slate');
+  });
+
+  it('lists appearance presets with minimal second after default', () => {
+    const ids = ThemeManager.getAllThemes().map(t => t.id);
+    expect(ids.slice(0, 2)).toEqual(['default', 'minimal']);
+    expect(ids).toEqual(
+      expect.arrayContaining(['default', 'minimal', 'ocean', 'forest', 'sunset', 'purple', 'rose'])
+    );
   });
 
   it('registers custom themes, restores persisted themes, and skips invalid saved themes', () => {
