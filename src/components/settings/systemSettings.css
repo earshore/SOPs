@@ -982,42 +982,21 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 
 .settings-llm-step__header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.625rem;
   padding: 0.75rem 0.875rem;
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.4));
 }
 
-.settings-llm-step__header::after {
-  content: '\f078';
-  font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free', sans-serif;
-  font-weight: 900;
-  font-size: 0.5625rem;
-  color: #94a3b8;
+/* Real FA icon — more reliable than CSS content \f078 */
+.settings-llm-step__chevron {
   margin-left: auto;
-  margin-top: 0.25rem;
-  transition: transform 150ms ease;
-}
-
-.settings-llm-step[open] > .settings-llm-step__header::after {
-  transform: rotate(180deg);
-}
-
-.settings-llm-step__index {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.375rem;
-  height: 1.375rem;
   flex-shrink: 0;
-  margin-top: 0.0625rem;
-  border-radius: 9999px;
-  background: linear-gradient(145deg, #8b5cf6, #6366f1);
-  color: #fff;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  box-shadow: 0 1px 2px rgba(99, 102, 241, 0.28);
+  transition: transform 160ms ease;
+}
+
+.settings-llm-step[open] > summary .settings-llm-step__chevron {
+  transform: rotate(180deg);
 }
 
 .settings-llm-step__title {
@@ -1442,13 +1421,166 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 }
 
 .settings-tool-app-chevron,
-.settings-collapsible-chevron {
+.settings-collapsible-chevron,
+.settings-llm-step__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: #94a3b8;
   transition: transform 160ms ease;
 }
 
 .settings-tool-app[open] .settings-tool-app-chevron,
-.settings-collapsible-card[open] .settings-collapsible-chevron {
+.settings-collapsible-card[open] .settings-collapsible-chevron,
+.settings-llm-step[open] .settings-llm-step__chevron,
+details.settings-submodule[open] .settings-collapsible-chevron {
   transform: rotate(180deg);
+}
+
+/* Proxy connection row + actions */
+.settings-proxy-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .settings-proxy-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: start;
+  }
+}
+
+.settings-proxy-row__field {
+  min-width: 0;
+}
+
+.settings-proxy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.settings-proxy-actions__btn {
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    opacity 150ms ease;
+}
+
+.settings-proxy-actions__btn--secondary {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #334155;
+}
+
+.settings-proxy-actions__btn--secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.settings-proxy-actions__btn--secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-proxy-actions__btn--primary {
+  border: 1px solid transparent;
+  background: #334155;
+  color: #fff;
+}
+
+.settings-proxy-actions__btn--primary:hover {
+  background: #1e293b;
+}
+
+/* Tool strategy footer actions */
+.settings-actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding-top: 0.25rem;
+}
+
+.settings-actions-bar__hint {
+  margin: 0;
+  flex: 1 1 12rem;
+  max-width: 22rem;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+.settings-actions-bar__btns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.settings-actions-bar__btn {
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    opacity 150ms ease;
+}
+
+.settings-actions-bar__btn--ghost {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+}
+
+.settings-actions-bar__btn--ghost:hover {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.settings-actions-bar__btn--primary {
+  border: 1px solid transparent;
+  background: linear-gradient(90deg, #4f46e5, #2563eb);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(79, 70, 229, 0.18);
+}
+
+.settings-actions-bar__btn--primary:hover {
+  filter: brightness(0.97);
+}
+
+.settings-actions-bar__btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Collapsed data cards — shared summary rhythm */
+.settings-collapsible-card > .settings-collapsible-summary {
+  padding: 0.75rem 0.875rem;
+  min-height: 2.75rem;
+  align-items: center;
+}
+
+.settings-collapsible-card > .settings-collapsible-body {
+  border-top: 1px solid #f1f5f9;
 }
 
 .settings-stat-tile {
