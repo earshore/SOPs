@@ -1048,6 +1048,15 @@ it('scrolls settings sections without changing the URL hash', () => {
   scroller.remove();
 });
 
+it('CT-P1-00 settings css defines surface token mapping', () => {
+  const css = readFileSync(
+    resolve(process.cwd(), 'src/components/settings/systemSettings.css'),
+    'utf8'
+  );
+  expect(css).toMatch(/--settings-surface/);
+  expect(css).toMatch(/--settings-accent/);
+});
+
 it('keeps the real settings template optimized for PC category scanning', () => {
   const template = readFileSync(
     resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
