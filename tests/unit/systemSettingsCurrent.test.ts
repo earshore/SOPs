@@ -1123,3 +1123,95 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(styles).toContain('grid-template-columns: 172px minmax(0, 1fr)');
   expect(styles).toContain('flex-direction: column');
 });
+
+it('UT-P0-01 saveProviderConfig does not persist runtime strategy', async () => {
+  const runtime = await import('@/services/runtimeStrategyService');
+  const saveRuntime = vi.spyOn(runtime, 'saveRuntimeStrategySettings');
+  const panel = createPanel();
+  panel.llm.provider = 'new_api';
+  panel.llm.apiKey = 'sk-test';
+  panel.llm.endpoint = 'https://example.com/v1';
+  panel.llm.model = 'model-a';
+  vi.mocked(StorageService.set).mockClear();
+
+  await panel.saveProviderConfig();
+
+  expect(saveRuntime).not.toHaveBeenCalled();
+  expect(
+    vi.mocked(StorageService.set).mock.calls.some(([key]) => key === 'runtime_strategy_settings')
+  ).toBe(false);
+  expect(StorageService.setLLMConfig).toHaveBeenCalled();
+});
+
+it('UT-P0-02 saveToolStrategy persists tool strategy and runtime', async () => {
+  const runtime = await import('@/services/runtimeStrategyService');
+  const saveRuntime = vi.spyOn(runtime, 'saveRuntimeStrategySettings');
+  const panel = createPanel();
+  panel.llm.provider = 'new_api';
+  panel.toolStrategy.targetModels['master-analysis-ai-analysis'] = 'quality-model';
+  panel.runtimeStrategy.settings.llm.maxRetries = 4;
+  vi.mocked(StorageService.set).mockClear();
+
+  await panel.saveToolStrategy();
+
+  // setToolTargetDefaultModel → saveToolStrategySettings (same-module; assert via storage key)
+  expect(StorageService.set).toHaveBeenCalledWith(
+    'tool_strategy_settings',
+    expect.objectContaining({
+      version: 2,
+      targets: expect.objectContaining({
+        'master-analysis-ai-analysis': {
+          defaultModelsByProvider: {
+            new_api: 'quality-model',
+          },
+        },
+      }),
+    })
+  );
+  expect(saveRuntime).toHaveBeenCalled();
+  expect(StorageService.set).toHaveBeenCalledWith(
+    'runtime_strategy_settings',
+    expect.objectContaining({
+      llm: expect.objectContaining({ maxRetries: 4 }),
+    })
+  );
+});
+
+it('UT-P0-03 saveProxyConfig only updates proxy (not tool strategy or LLM keys)', async () => {
+  const panel = createPanel();
+  panel.proxy.type = 'scraperapi';
+  panel.proxy.customUrl = 'proxy-key';
+  vi.mocked(StorageService.set).mockClear();
+  vi.mocked(StorageService.setSecure).mockClear();
+  vi.mocked(StorageService.setLLMConfig).mockClear();
+
+  await panel.saveProxyConfig();
+
+  expect(StorageService.setProxyConfigWithCredential).toHaveBeenCalledWith({
+    type: 'scraperapi',
+    customUrl: 'proxy-key',
+  });
+  expect(StorageService.setProxyKeyMap).toHaveBeenCalled();
+  expect(
+    vi.mocked(StorageService.set).mock.calls.some(([key]) => key === 'tool_strategy_settings')
+  ).toBe(false);
+  expect(
+    vi.mocked(StorageService.set).mock.calls.some(([key]) => key === 'runtime_strategy_settings')
+  ).toBe(false);
+  expect(StorageService.setLLMConfig).not.toHaveBeenCalled();
+  expect(
+    vi
+      .mocked(StorageService.setSecure)
+      .mock.calls.some(([key]) => String(key).startsWith('llm_key_'))
+  ).toBe(false);
+});
+
+it('CT-P0-01 tool strategy save copy mentions runtime strategy', () => {
+  const template = readFileSync(
+    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
+    'utf8'
+  );
+  expect(template).toMatch(/运行时策略|运行策略/);
+  expect(template).toContain('settings-save-tool-strategy');
+  expect(template).toContain('将保存当前面板中的全部运行时策略');
+});
