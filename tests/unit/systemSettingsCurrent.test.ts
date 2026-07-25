@@ -302,6 +302,45 @@ it('registers Alpine settings and initializes subscriptions', async () => {
   expect(panel.isOpen).toBe(false);
 });
 
+it('does not stack EventBus or $watch subscriptions when init is called twice', async () => {
+  const panel = createPanel();
+  panel.$watch = vi.fn();
+
+  eventBus.removeAllListeners(APP_EVENTS.SETTINGS_OPEN);
+  eventBus.removeAllListeners(APP_EVENTS.SETTINGS_CLOSE);
+  const openBefore = eventBus.getStats().eventCounts[APP_EVENTS.SETTINGS_OPEN] ?? 0;
+  const closeBefore = eventBus.getStats().eventCounts[APP_EVENTS.SETTINGS_CLOSE] ?? 0;
+
+  panel.init();
+  const openAfterFirst = eventBus.getStats().eventCounts[APP_EVENTS.SETTINGS_OPEN] ?? 0;
+  const closeAfterFirst = eventBus.getStats().eventCounts[APP_EVENTS.SETTINGS_CLOSE] ?? 0;
+  panel.init();
+  const openAfterSecond = eventBus.getStats().eventCounts[APP_EVENTS.SETTINGS_OPEN] ?? 0;
+  const closeAfterSecond = eventBus.getStats().eventCounts[APP_EVENTS.SETTINGS_CLOSE] ?? 0;
+
+  expect(panel.$watch).toHaveBeenCalledTimes(2);
+  expect(panel._subscriptionsInitialized).toBe(true);
+  expect(panel._unsubscribers).toHaveLength(3);
+  expect(openAfterFirst - openBefore).toBe(1);
+  expect(closeAfterFirst - closeBefore).toBe(1);
+  expect(openAfterSecond - openAfterFirst).toBe(0);
+  expect(closeAfterSecond - closeAfterFirst).toBe(0);
+
+  panel.isOpen = false;
+  eventBus.emit(APP_EVENTS.SETTINGS_OPEN);
+  expect(panel.isOpen).toBe(true);
+
+  panel.destroy();
+  expect(panel._subscriptionsInitialized).toBe(false);
+  expect(panel._unsubscribers).toEqual([]);
+  expect(eventBus.getStats().eventCounts[APP_EVENTS.SETTINGS_OPEN] ?? 0).toBe(openBefore);
+  expect(eventBus.getStats().eventCounts[APP_EVENTS.SETTINGS_CLOSE] ?? 0).toBe(closeBefore);
+
+  panel.isOpen = false;
+  eventBus.emit(APP_EVENTS.SETTINGS_OPEN);
+  expect(panel.isOpen).toBe(false);
+});
+
 it('computes field state, display labels, and local data text', () => {
   const panel = createPanel();
   deps.env.isProduction = true;

@@ -379,7 +379,9 @@ interface SettingsPanelData {
   localDataCleanupToggleText: string;
   localDataCleanupToggleIconClass: string;
   localDataBucketItems: LocalDataBucketView[];
-  _unsubscribers?: Array<() => void>; // 新增：存储清理函数
+  _unsubscribers?: Array<() => void>; // EventBus / window 订阅清理
+  /** True after EventBus/window/$watch subscriptions are registered once. */
+  _subscriptionsInitialized?: boolean;
   _settingsBaseline: SettingsDirtySnapshot | null;
   _runtimeHealthNormalized: boolean;
   healthMessages: string[];
@@ -1169,6 +1171,7 @@ function createSettingsState(): Pick<
   | 'appearanceRespectSystemPreference'
   | 'activeRuntimePresetId'
   | '_unsubscribers'
+  | '_subscriptionsInitialized'
   | '_settingsBaseline'
   | '_runtimeHealthNormalized'
   | 'healthMessages'
@@ -1197,8 +1200,9 @@ function createSettingsState(): Pick<
     appearanceRespectSystemPreference: true,
     activeRuntimePresetId: null,
 
-    // 新增：清理函数数组
+    // EventBus / window 订阅清理
     _unsubscribers: [],
+    _subscriptionsInitialized: false,
 
     _settingsBaseline: null,
 
@@ -1732,7 +1736,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.loadProviderConfig(this.llm.provider);
     void this.refreshLocalDataUsage();
 
-    // 订阅 EventBus 事件，保存清理函数
+    // Subscriptions + $watch are once-per-instance (Alpine may re-enter init).
+    if (this._subscriptionsInitialized) {
+      return;
+    }
+
     const unsubOpen = eventBus.on(APP_EVENTS.SETTINGS_OPEN, payload => {
       void this.open(
         normalizeSettingsOpenOptions(payload as SettingsOpenOptions | null | undefined)
@@ -1748,7 +1756,6 @@ const settingsPanelBehavior: SettingsPanelPart = {
     };
     window.addEventListener('storage', onStorage);
 
-    // 保存清理函数
     this._unsubscribers = [
       unsubOpen,
       unsubClose,
@@ -1756,6 +1763,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     ];
 
     registerSettingsWatchers(this as SettingsPanelData & AlpineWatchContext);
+    this._subscriptionsInitialized = true;
   },
 
   async open(options?: SettingsOpenOptions) {
@@ -1913,9 +1921,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   destroy() {
-    // 清理 EventBus 订阅
     this._unsubscribers?.forEach(unsub => unsub());
     this._unsubscribers = [];
+    this._subscriptionsInitialized = false;
   },
 
   scrollToElementInPanel(el: HTMLElement): void {
