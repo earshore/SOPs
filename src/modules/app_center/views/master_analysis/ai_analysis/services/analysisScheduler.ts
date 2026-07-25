@@ -189,6 +189,23 @@ export function resolveAnalysisSchedule(
   };
 }
 
+/** Compact summary used in settings dropdown options / page chips. */
+export function formatSchedulePreferenceHint(
+  preference: SchedulingPreference,
+  enableCache: boolean
+): string {
+  const plan = resolveAnalysisSchedule({ schedulingPreference: preference });
+  const cacheText = enableCache ? '缓存开' : '缓存关';
+  const failureText = plan.failureStrategy === 'continue' ? '失败继续' : '失败中止';
+  return `并发${plan.maxConcurrency} · ${cacheText} · ${failureText}`;
+}
+
+export const SCHEDULE_PREFERENCE_SHORT_LABELS: Record<SchedulingPreference, string> = {
+  recommended: '推荐',
+  reliability: '稳定',
+  speed: '速度',
+};
+
 export function resolveAnalysisSchedulePlan(
   input: AnalysisScheduleInput
 ): AnalysisRuntimeSchedulePlan {

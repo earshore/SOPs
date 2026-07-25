@@ -180,7 +180,6 @@ function createPerformanceSettingsActions(): PanelMixin<{
       openSettings({
         sectionId: 'settings-section-tool-strategy',
         focus: 'master-analysis',
-        density: 'advanced',
       });
     },
 

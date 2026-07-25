@@ -1192,18 +1192,76 @@
                         </div>
                       </template>
                       <div class="mt-3 grid gap-3 sm:grid-cols-3">
-                        <label class="block">
+                        <div class="block min-w-0">
                           <span class="settings-label">调度偏好</span>
-                          <select
-                            :value="runtimeStrategy.settings.masterAnalysis.schedulingPreference"
-                            @change="setRuntimeString('masterAnalysis.schedulingPreference', $event)"
-                            class="settings-control settings-control--sm"
+                          <div
+                            class="settings-schedule-select relative"
+                            @keydown.escape.window="schedulePreferenceMenuOpen = false"
+                            @click.outside="schedulePreferenceMenuOpen = false"
                           >
-                            <option value="recommended">推荐</option>
-                            <option value="reliability">稳定</option>
-                            <option value="speed">速度</option>
-                          </select>
-                        </label>
+                            <button
+                              type="button"
+                              class="settings-control settings-control--sm settings-schedule-select__trigger"
+                              data-testid="settings-schedule-preference"
+                              :aria-expanded="schedulePreferenceMenuOpen.toString()"
+                              aria-haspopup="listbox"
+                              @click="schedulePreferenceMenuOpen = !schedulePreferenceMenuOpen"
+                            >
+                              <span
+                                class="settings-schedule-select__value min-w-0 flex-1 text-left"
+                              >
+                                <span
+                                  class="settings-schedule-select__label"
+                                  x-text="masterAnalysisScheduleSelectedLabel"
+                                ></span>
+                                <span
+                                  class="settings-schedule-select__hint"
+                                  x-text="masterAnalysisScheduleSelectedHint"
+                                ></span>
+                              </span>
+                              <i
+                                class="fas fa-chevron-down text-[9px] text-slate-400 shrink-0"
+                                aria-hidden="true"
+                              ></i>
+                            </button>
+                            <ul
+                              class="settings-schedule-select__menu"
+                              role="listbox"
+                              :hidden="!schedulePreferenceMenuOpen"
+                            >
+                              <template
+                                x-for="opt in masterAnalysisScheduleOptions"
+                                :key="opt.value"
+                              >
+                                <li role="option">
+                                  <button
+                                    type="button"
+                                    class="settings-schedule-select__option"
+                                    :class="{
+                                      'is-active':
+                                        runtimeStrategy.settings.masterAnalysis
+                                          .schedulingPreference === opt.value,
+                                    }"
+                                    :aria-selected="(
+                                      runtimeStrategy.settings.masterAnalysis
+                                        .schedulingPreference === opt.value
+                                    ).toString()"
+                                    @click="setMasterAnalysisSchedulePreference(opt.value)"
+                                  >
+                                    <span
+                                      class="settings-schedule-select__label"
+                                      x-text="opt.label"
+                                    ></span>
+                                    <span
+                                      class="settings-schedule-select__hint"
+                                      x-text="opt.hint"
+                                    ></span>
+                                  </button>
+                                </li>
+                              </template>
+                            </ul>
+                          </div>
+                        </div>
                         <label class="block">
                           <span class="settings-label">完整报告 Token</span>
                           <input

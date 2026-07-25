@@ -75,6 +75,12 @@ import {
   type RuntimeStrategySettings,
 } from '@/services/runtimeStrategyService';
 import {
+  formatSchedulePreferenceHint,
+  isSchedulingPreference,
+  SCHEDULE_PREFERENCE_SHORT_LABELS,
+  type SchedulingPreference,
+} from '@/modules/app_center/views/master_analysis/ai_analysis/services/analysisScheduler';
+import {
   getDeveloperDiagnosticSettings,
   updateDeveloperDiagnosticSetting,
   type DeveloperDiagnosticSettings,
@@ -293,6 +299,7 @@ interface SettingsPanelData {
   activeRuntimePresetId: RuntimePresetId | null;
   /** API path custom dropdown open state */
   llmApiPathMenuOpen: boolean;
+  schedulePreferenceMenuOpen: boolean;
   llm: LLMState;
   proxy: ProxyState;
   toolStrategy: ToolStrategyState;
@@ -430,6 +437,14 @@ interface SettingsPanelData {
   setRuntimeNumber(path: string, event: Event, multiplier?: number): void;
   setRuntimeBoolean(path: string, event: Event): void;
   setRuntimeString(path: string, event: Event): void;
+  setMasterAnalysisSchedulePreference(preference: SchedulingPreference): void;
+  masterAnalysisScheduleOptions: Array<{
+    value: SchedulingPreference;
+    label: string;
+    hint: string;
+  }>;
+  masterAnalysisScheduleSelectedLabel: string;
+  masterAnalysisScheduleSelectedHint: string;
   setDeveloperDiagnosticBoolean(
     key: keyof Omit<DeveloperDiagnosticSettings, 'loggerMinLevel'>,
     event: Event
@@ -1159,6 +1174,7 @@ function createSettingsState(): Pick<
   | 'developerDiagnostics'
   | 'localData'
   | 'llmApiPathMenuOpen'
+  | 'schedulePreferenceMenuOpen'
 > {
   return {
     isOpen: false,
@@ -1186,6 +1202,7 @@ function createSettingsState(): Pick<
     externalChangeConflict: false,
 
     llmApiPathMenuOpen: false,
+    schedulePreferenceMenuOpen: false,
 
     // LLM Config State
     llm: {
@@ -1540,6 +1557,34 @@ const settingsPanelBehavior: SettingsPanelPart = {
       value: budgets[field.key] ?? defaultBudgets[field.key] ?? 0,
       unit: 'tokens',
     }));
+  },
+
+  get masterAnalysisScheduleOptions(): Array<{
+    value: SchedulingPreference;
+    label: string;
+    hint: string;
+  }> {
+    const enableCache = this.runtimeStrategy.settings.masterAnalysis.enableCache;
+    return (['recommended', 'reliability', 'speed'] as const).map(value => ({
+      value,
+      label: SCHEDULE_PREFERENCE_SHORT_LABELS[value],
+      hint: formatSchedulePreferenceHint(value, enableCache),
+    }));
+  },
+
+  get masterAnalysisScheduleSelectedLabel(): string {
+    const pref = this.runtimeStrategy.settings.masterAnalysis.schedulingPreference;
+    const key = isSchedulingPreference(pref) ? pref : 'recommended';
+    return SCHEDULE_PREFERENCE_SHORT_LABELS[key];
+  },
+
+  get masterAnalysisScheduleSelectedHint(): string {
+    const pref = this.runtimeStrategy.settings.masterAnalysis.schedulingPreference;
+    const key = isSchedulingPreference(pref) ? pref : 'recommended';
+    return formatSchedulePreferenceHint(
+      key,
+      this.runtimeStrategy.settings.masterAnalysis.enableCache
+    );
   },
 
   get ppcThresholdItems(): RuntimeNumberFieldView[] {
@@ -2413,6 +2458,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
       path,
       (event.target as HTMLSelectElement).value
     );
+  },
+
+  setMasterAnalysisSchedulePreference(preference: SchedulingPreference): void {
+    if (!isSchedulingPreference(preference)) return;
+    this.runtimeStrategy.settings.masterAnalysis.schedulingPreference = preference;
+    this.schedulePreferenceMenuOpen = false;
   },
 
   setDeveloperDiagnosticBoolean(

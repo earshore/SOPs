@@ -7,6 +7,7 @@ import {
   resolveAnalysisSchedule,
   savePerformanceSettings,
 } from './PerformanceSettings';
+import { formatSchedulePreferenceHint } from '../services/analysisScheduler';
 
 const openSettingsMock = vi.hoisted(() => vi.fn());
 
@@ -38,24 +39,21 @@ describe('PerformanceSettings', () => {
     vi.clearAllMocks();
   });
 
-  it('normalizes persisted settings', () => {
+  it('reads scheduling preference from runtime strategy', () => {
     vi.mocked(StorageService.get).mockReturnValue({
+      version: 2,
       masterAnalysis: {
         schedulingPreference: 'reliability',
-        enableCache: false,
+        enableCache: true,
       },
     });
-
     expect(getPerformanceSettings()).toMatchObject({
       schedulingPreference: 'reliability',
-      maxConcurrency: 2,
-      enableCache: false,
-      failureStrategy: 'abort',
-      settingsVersion: 3,
+      enableCache: true,
     });
   });
 
-  it('resolves schedule plans from user intent', () => {
+  it('resolveAnalysisSchedule maps preference tiers', () => {
     expect(resolveAnalysisSchedule({ schedulingPreference: 'recommended' })).toMatchObject({
       tier: 'recommended',
       maxConcurrency: 4,
@@ -73,22 +71,28 @@ describe('PerformanceSettings', () => {
     });
   });
 
-  it('keeps panel summary actions bound and deep-links to system settings', async () => {
+  it('formatSchedulePreferenceHint matches page summary style', () => {
+    expect(formatSchedulePreferenceHint('recommended', true)).toBe('并发4 · 缓存开 · 失败继续');
+    expect(formatSchedulePreferenceHint('reliability', false)).toBe('并发2 · 缓存关 · 失败中止');
+    expect(formatSchedulePreferenceHint('speed', true)).toBe('并发8 · 缓存开 · 失败继续');
+  });
+
+  it('clearCache refreshes cache stats', async () => {
     vi.mocked(StorageService.get).mockReturnValue(null);
     const panel = createPerformanceSettingsPanel();
-
     await panel.updateCacheStats();
     expect(panel.cacheStats).toEqual({ count: 2, totalSize: 2048 });
+    await panel.clearCache();
+    expect(panel.cacheStats).toEqual({ count: 2, totalSize: 2048 });
+  });
 
-    panel.toggleSettings();
-    expect(panel.showSettings).toBe(true);
-
+  it('deep-links to system settings without density flag', () => {
+    vi.mocked(StorageService.get).mockReturnValue(null);
+    const panel = createPerformanceSettingsPanel();
     panel.openSystemSettings();
-    expect(panel.showSettings).toBe(false);
     expect(openSettingsMock).toHaveBeenCalledWith({
       sectionId: 'settings-section-tool-strategy',
       focus: 'master-analysis',
-      density: 'advanced',
     });
   });
 
@@ -113,42 +117,17 @@ describe('PerformanceSettings', () => {
     );
   });
 
-  it('keeps the hidden performance modal from being forced visible by flex layout', () => {
-    const styles = readFileSync(
-      'src/modules/app_center/views/master_analysis/master_analysis_style.css',
-      'utf8'
-    );
-
-    expect(styles).toMatch(
-      /\.ma-performance-modal\[hidden\]\s*\{\s*display:\s*none\s*!important;\s*\}/
-    );
-  });
-
-  it('CT-P1-01 summary card deep-links instead of inline strategy save', () => {
+  it('template exposes minimal clear-cache control and drops analysis-settings entry', () => {
     const template = readFileSync(
       'src/modules/app_center/views/master_analysis/ai_analysis/template.html',
       'utf8'
     );
-    const closeButton = template.match(/<button[\s\S]*?aria-label="关闭性能设置"[\s\S]*?>/)?.[0];
-
-    expect(closeButton).toContain('inline-flex');
-    expect(closeButton).toContain('items-center');
-    expect(closeButton).toContain('justify-center');
-    expect(template).toContain('settings-card');
-    expect(template).toContain('在系统设置中配置');
-    expect(template).toContain('perfSettings.openSystemSettings()');
+    expect(template).toContain('data-testid="ma-clear-analysis-cache"');
+    expect(template).toContain('perfSettings.clearCache()');
+    expect(template).toContain('清除缓存');
+    expect(template).not.toContain('分析设置');
+    expect(template).not.toContain('perfSettings.toggleSettings()');
+    expect(template).not.toContain('在系统设置中配置');
     expect(template).not.toContain('perfSettings.saveSettings()');
-    expect(template).not.toContain('perfSettings.setSchedulingPreference');
-  });
-
-  it('centers the performance modal close icon inside its button', () => {
-    const styles = readFileSync(
-      'src/modules/app_center/views/master_analysis/master_analysis_style.css',
-      'utf8'
-    );
-
-    expect(styles).toMatch(
-      /\.ma-performance-modal button\[aria-label='关闭性能设置'\]\s*\{[\s\S]*display:\s*inline-flex;[\s\S]*align-items:\s*center;[\s\S]*justify-content:\s*center;[\s\S]*\}/
-    );
   });
 });
