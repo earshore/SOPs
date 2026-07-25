@@ -28,10 +28,6 @@ export class SystemSettingsPage {
     await expect(this.page.locator('#settings-section-llm')).toBeVisible();
   }
 
-  async setDensity(mode: 'simple' | 'advanced'): Promise<void> {
-    await this.page.getByTestId(`settings-density-${mode}`).click();
-  }
-
   async goToSection(label: string): Promise<void> {
     // Prefer side nav only — tip icons use generic "查看说明" aria-label to avoid clashes.
     await this.page

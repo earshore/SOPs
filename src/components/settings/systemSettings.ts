@@ -1620,11 +1620,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   get isPartialLocalDataExport(): boolean {
     const selected = this.localData.selectedExportBuckets;
-    return (
-      this.settingsDensity === 'advanced' &&
-      selected.length > 0 &&
-      selected.length < ALL_LOCAL_DATA_BUCKET_IDS.length
-    );
+    return selected.length > 0 && selected.length < ALL_LOCAL_DATA_BUCKET_IDS.length;
   },
 
   get exportLocalDataButtonText(): string {
@@ -1971,15 +1967,6 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.searchHitId = match?.id ?? '';
     if (!match) {
       return;
-    }
-    // Expert focus targets live under advanced density — surface them for scroll.
-    if (
-      this.settingsDensity === 'simple' &&
-      (match.id === 'ppc-thresholds' ||
-        match.id === 'ppc-analysis-flags' ||
-        match.id === 'master-analysis')
-    ) {
-      this.setDensity('advanced');
     }
     queueMicrotask(() => {
       this.scrollToSearchHit(match.id);

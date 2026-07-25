@@ -71,22 +71,17 @@ describe('settingsSearch', () => {
   });
 
   it('UT-P1-05 index covers key sections', () => {
-    expect(SETTINGS_SEARCH_INDEX.some(e => e.sectionId === 'settings-section-llm')).toBe(
+    expect(SETTINGS_SEARCH_INDEX.some(e => e.sectionId === 'settings-section-llm')).toBe(true);
+    expect(SETTINGS_SEARCH_INDEX.some(e => e.sectionId === 'settings-section-tool-strategy')).toBe(
       true
     );
-    expect(
-      SETTINGS_SEARCH_INDEX.some(e => e.sectionId === 'settings-section-tool-strategy')
-    ).toBe(true);
   });
 });
 
 describe('density deep link helper', () => {
   it('applySettingsDeepLink calls setDensity when provided', () => {
     const setDensity = vi.fn();
-    applySettingsDeepLink(
-      { density: 'advanced' },
-      { scrollToSection: vi.fn(), setDensity }
-    );
+    applySettingsDeepLink({ density: 'advanced' }, { scrollToSection: vi.fn(), setDensity });
     expect(setDensity).toHaveBeenCalledWith('advanced');
   });
 });
@@ -101,16 +96,17 @@ describe('CT-P1-02 / CT-P1-03 template contracts', () => {
     'utf8'
   );
 
-  it('CT-P1-02 has segmented density control and search classes', () => {
-    expect(html).toContain('settings-segmented');
-    expect(html).toContain('settings-density-simple');
-    expect(html).toContain('settings-density-advanced');
+  it('CT-P1-02 has search toolbar without density mode', () => {
     expect(html).toContain('settings-search');
     expect(html).toContain('data-testid="settings-search"');
-    expect(html).toContain('data-settings-density="advanced"');
-    expect(html).toContain("settingsDensity === 'simple'");
-    expect(css).toContain('.settings-segmented');
+    expect(html).toContain('settings-toolbar--search-only');
+    expect(html).not.toContain('settings-density-simple');
+    expect(html).not.toContain('settings-density-advanced');
+    expect(html).not.toContain('data-settings-density=');
+    expect(html).not.toContain("settingsDensity === 'simple'");
     expect(css).toContain('.settings-search');
+    // segmented still used for animation speed
+    expect(css).toContain('.settings-segmented');
   });
 
   it('CT-P1-03 template includes impact scope badge copy', () => {

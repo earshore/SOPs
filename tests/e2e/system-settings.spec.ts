@@ -15,8 +15,6 @@ test.describe('system settings', () => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
 
-    // Expert runtime fields are advanced density — switch first, then dirty maxRetries
-    await settings.setDensity('advanced');
     await settings.goToSection('工具策略');
     const general = page.locator(
       '#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]'
@@ -44,7 +42,6 @@ test.describe('system settings', () => {
   test('E2E-P0-02 save clears dirty so close skips confirm', async ({ page }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
-    await settings.setDensity('advanced');
     await settings.goToSection('工具策略');
     const general = page.locator(
       '#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]'
@@ -94,20 +91,19 @@ test.describe('system settings', () => {
     await expect(page.getByRole('heading', { name: '数据与备份' })).toBeVisible();
   });
 
-  test('E2E-P1-02 density hides expert fields in simple mode', async ({ page }) => {
+  test('E2E-P1-02 general AI strategy is always listed and collapsible', async ({ page }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
-
-    await settings.setDensity('simple');
     await settings.goToSection('工具策略');
-    await expect(
-      page.locator('#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]')
-    ).toBeHidden();
 
-    await settings.setDensity('advanced');
-    await expect(
-      page.locator('#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]')
-    ).toBeVisible();
+    const general = page.locator(
+      '#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]'
+    );
+    await expect(general).toBeVisible();
+    // default closed — fields not visible until expand
+    await expect(general.locator('input[type="number"]').first()).toBeHidden();
+    await general.locator('summary').click();
+    await expect(general.locator('input[type="number"]').first()).toBeVisible();
   });
 
   test('E2E-P1-03 search locates PPC ACOS thresholds', async ({ page }) => {
@@ -127,9 +123,9 @@ test.describe('system settings', () => {
     await expect(settings.appearanceSection()).toBeVisible();
     await expect(page.getByTestId('settings-appearance-theme')).toBeVisible();
     await expect(page.getByTestId('settings-theme-select')).toBeVisible();
-    // 动画默认收起 — 先展开再断言
-    await page.locator('[data-testid="settings-appearance-animation"] summary').click();
+    // redesigned appearance: toggles always visible in grid
     await expect(page.getByTestId('settings-animations-enabled')).toBeVisible();
+    await expect(page.getByTestId('settings-respect-reduced-motion')).toBeVisible();
     await expect(
       page.locator('#settings-section-appearance [data-testid="settings-runtime-presets"]')
     ).toHaveCount(0);
@@ -138,7 +134,6 @@ test.describe('system settings', () => {
   test('E2E-P1-06 runtime presets live inside 通用 AI 执行策略', async ({ page }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
-    await settings.setDensity('advanced');
     await settings.goToSection('工具策略');
 
     const general = page.locator(
@@ -151,6 +146,22 @@ test.describe('system settings', () => {
     await expect(page.getByTestId('settings-preset-cost')).toBeVisible();
     await page.getByTestId('settings-preset-cost').click();
     await expect(presets).toBeVisible();
+  });
+
+  test('E2E-P1-07 Master Analysis lists 数据采集 before AI 智能分析', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+    await settings.goToSection('工具策略');
+    const master = page.locator(
+      '#settings-section-tool-strategy details[data-settings-focus="master-analysis"]'
+    );
+    await expect(master).toBeVisible();
+    const body = await master.innerHTML();
+    expect(body.indexOf('settings-section-network')).toBeLessThan(
+      body.indexOf('master-analysis-ai')
+    );
+    expect(body).toContain('AI 智能分析');
+    expect(body).toContain('数据采集');
   });
 
   test('E2E-P1-nav six primary sections are listed', async ({ page }) => {
