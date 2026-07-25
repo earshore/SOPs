@@ -38,14 +38,17 @@ import { fetchModelsFromApi, callLLM } from '@/services/llmService';
 import {
   API_PATH_OPTIONS,
   DEFAULT_API_PATH_ID,
+  DEFAULT_REASONING_EFFORTS,
   DEFAULT_REASONING_PREFS,
   buildFullApiUrl,
+  isReasoningEffortLevel,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
   resolveModelCapability,
   shouldShowReasoningControls,
   type ApiPathId,
   type ApiPathOption,
+  type ReasoningEffortLevel,
   type ReasoningUserPrefs,
   type ResolvedModelCapability,
 } from '@/services/modelCapability';
@@ -313,7 +316,7 @@ interface SettingsPanelData {
   activeModelInfo: ModelMetadata | null;
   activeModelCapability: import('@/services/modelCapability').ResolvedModelCapability | null;
   showReasoningControls: boolean;
-  reasoningEffortOptions: Array<'low' | 'medium' | 'high'>;
+  reasoningEffortOptions: ReasoningEffortLevel[];
   apiPathOptions: readonly ApiPathOption[];
   fullApiUrlPreview: string;
   apiPathCapabilityHint: string;
@@ -430,7 +433,7 @@ interface SettingsPanelData {
   setLlmServiceTier(event: Event): void;
   setReasoningEnabled(event: Event): void;
   setReasoningEffort(event: Event): void;
-  setReasoningEffortLevel(level: 'low' | 'medium' | 'high'): void;
+  setReasoningEffortLevel(level: ReasoningEffortLevel | string): void;
   setToolTargetModel(targetId: ToolStrategyTargetId, event: Event): void;
   getRuntimeNumber(path: string, divisor?: number): number;
   getRuntimeBoolean(path: string): boolean;
@@ -1302,12 +1305,18 @@ const settingsPanelBehavior: SettingsPanelPart = {
     return cap ? shouldShowReasoningControls(cap) : false;
   },
 
-  get reasoningEffortOptions(): Array<'low' | 'medium' | 'high'> {
+  get reasoningEffortOptions(): ReasoningEffortLevel[] {
     const cap = this.activeModelCapability;
     if (!cap || cap.reasoningEfforts.length === 0) {
-      return ['low', 'medium', 'high'];
+      return [...DEFAULT_REASONING_EFFORTS];
     }
-    return [...cap.reasoningEfforts];
+    // Prefer full 5-tier UI; keep model-reported list if it already includes extras
+    const fromCap = cap.reasoningEfforts.filter(isReasoningEffortLevel);
+    const merged = [...DEFAULT_REASONING_EFFORTS];
+    for (const level of fromCap) {
+      if (!merged.includes(level)) merged.push(level);
+    }
+    return merged;
   },
 
   get apiPathOptions(): readonly ApiPathOption[] {
@@ -1377,16 +1386,18 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   get reasoningEffortLabel(): string {
-    const effort = this.llm.reasoningPrefs?.effort;
-    if (effort === 'low') return 'Low';
-    if (effort === 'high') return 'High';
-    return 'Medium';
+    return this.reasoningEffortButtonLabel(this.llm.reasoningPrefs?.effort || 'medium');
   },
 
   reasoningEffortButtonLabel(level: string): string {
-    if (level === 'low') return 'Low';
-    if (level === 'high') return 'High';
-    return 'Medium';
+    const labels: Record<string, string> = {
+      low: 'low',
+      medium: 'medium',
+      high: 'high',
+      xhigh: 'xhigh',
+      max: 'max',
+    };
+    return labels[level] || level;
   },
 
   /**
@@ -2408,18 +2419,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   setReasoningEffort(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
-    this.setReasoningEffortLevel(
-      value === 'low' || value === 'medium' || value === 'high'
-        ? value
-        : DEFAULT_REASONING_PREFS.effort
-    );
+    this.setReasoningEffortLevel(value);
   },
 
-  setReasoningEffortLevel(level: 'low' | 'medium' | 'high'): void {
-    const effort =
-      level === 'low' || level === 'medium' || level === 'high'
-        ? level
-        : DEFAULT_REASONING_PREFS.effort;
+  setReasoningEffortLevel(level: ReasoningEffortLevel | string): void {
+    const effort = isReasoningEffortLevel(level) ? level : DEFAULT_REASONING_PREFS.effort;
     this.llm.reasoningPrefs = {
       ...normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
       effort,

@@ -37,6 +37,14 @@ describe('normalizeReasoningUserPrefs', () => {
       effort: 'medium',
     });
   });
+
+  it('accepts five-tier efforts including xhigh and max', () => {
+    expect(normalizeReasoningUserPrefs({ enabled: true, effort: 'xhigh' }).effort).toBe('xhigh');
+    expect(normalizeReasoningUserPrefs({ enabled: true, effort: 'max' }).effort).toBe('max');
+    expect(normalizeReasoningUserPrefs({ enabled: true, effort: 'ultra' as 'max' }).effort).toBe(
+      'medium'
+    );
+  });
 });
 
 describe('resolveEffectiveReasoning', () => {

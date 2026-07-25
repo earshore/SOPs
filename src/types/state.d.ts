@@ -637,7 +637,7 @@ export interface LLMProviderConfig {
    */
   reasoningPrefs?: {
     enabled: boolean;
-    effort: 'low' | 'medium' | 'high';
+    effort: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
   };
   /**
    * User-selected default API path mode (appended to endpoint base).

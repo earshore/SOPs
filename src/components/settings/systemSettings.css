@@ -1298,9 +1298,25 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   border-top: 1px solid rgba(221, 214, 254, 0.65);
 }
 
+/* 5-tier effort control — same visual language as appearance animation speed */
+.settings-segmented--effort {
+  flex: 1 1 16rem;
+  min-width: 14rem;
+  max-width: 22rem;
+}
+
+.settings-segmented--effort .settings-segmented__btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.25rem 0.35rem;
+  font-size: 0.6875rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* legacy class kept for safety if any residual markup references it */
 .settings-reasoning-effort {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.3125rem;
   padding: 0.3125rem;
   border-radius: 0.75rem;

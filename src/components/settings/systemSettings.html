@@ -582,37 +582,34 @@
                         class="settings-reasoning-card__effort"
                         :hidden="!llm.reasoningPrefs.enabled"
                       >
-                        <div class="flex items-center justify-between gap-2 mb-2">
-                          <span
-                            class="text-[10px] font-semibold uppercase tracking-wider text-slate-400"
-                            >Effort</span
-                          >
-                          <span
-                            class="font-mono text-[11px] font-semibold text-violet-600"
-                            x-text="reasoningEffortLabel"
-                          ></span>
-                        </div>
                         <div
-                          class="settings-reasoning-effort"
-                          role="radiogroup"
-                          aria-label="Reasoning effort"
+                          class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2"
                         >
-                          <template x-for="level in reasoningEffortOptions" :key="level">
-                            <button
-                              type="button"
-                              role="radio"
-                              class="settings-reasoning-effort__btn"
-                              :class="llm.reasoningPrefs.effort === level ? 'is-active' : ''"
-                              :aria-checked="llm.reasoningPrefs.effort === level"
-                              @click="setReasoningEffortLevel(level)"
-                              x-text="reasoningEffortButtonLabel(level)"
-                            ></button>
-                          </template>
+                          <div class="min-w-0">
+                            <span class="settings-label mb-0">推理等级</span>
+                            <p class="settings-field-help mt-0.5 mb-0">
+                              low → max 共 5 档；网关未透传时可能 400，可关闭后重试
+                            </p>
+                          </div>
+                          <div
+                            class="settings-segmented settings-segmented--inline settings-segmented--effort"
+                            role="radiogroup"
+                            aria-label="推理等级"
+                            data-testid="settings-reasoning-effort"
+                          >
+                            <template x-for="level in reasoningEffortOptions" :key="level">
+                              <button
+                                type="button"
+                                role="radio"
+                                class="settings-segmented__btn"
+                                :class="{ 'is-active': llm.reasoningPrefs.effort === level }"
+                                :aria-checked="(llm.reasoningPrefs.effort === level).toString()"
+                                @click="setReasoningEffortLevel(level)"
+                                x-text="reasoningEffortButtonLabel(level)"
+                              ></button>
+                            </template>
+                          </div>
                         </div>
-                        <p class="settings-field-help mt-2">
-                          使用官方字段 Low / Medium / High。Deep Chat
-                          可在会话内覆盖；网关未透传时启用可能 400，可关闭后重试。
-                        </p>
                       </div>
                     </div>
                   </div>

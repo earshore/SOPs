@@ -6,9 +6,27 @@
  */
 
 /** Product-side thinking intensity; 'off' means disabled (not listed in efforts). */
-export type ReasoningEffort = 'off' | 'low' | 'medium' | 'high';
+export type ReasoningEffort = 'off' | 'low' | 'medium' | 'high' | 'xhigh' | 'max';
 
 export type ReasoningEffortLevel = Exclude<ReasoningEffort, 'off'>;
+
+export const REASONING_EFFORT_LEVELS: readonly ReasoningEffortLevel[] = [
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+  'max',
+] as const;
+
+export function isReasoningEffortLevel(value: unknown): value is ReasoningEffortLevel {
+  return (
+    value === 'low' ||
+    value === 'medium' ||
+    value === 'high' ||
+    value === 'xhigh' ||
+    value === 'max'
+  );
+}
 
 /**
  * Transport surface / API path mode for LLM calls.
@@ -147,6 +165,12 @@ export const DEFAULT_REASONING_PREFS: ReasoningUserPrefs = {
   effort: 'medium',
 };
 
-export const DEFAULT_REASONING_EFFORTS: ReasoningEffortLevel[] = ['low', 'medium', 'high'];
+export const DEFAULT_REASONING_EFFORTS: ReasoningEffortLevel[] = [
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+  'max',
+];
 
 export const DEFAULT_API_SURFACE: ApiSurface = 'chat_completions';

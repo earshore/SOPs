@@ -47,7 +47,14 @@ export function mapAnthropicThinking(prefs: {
   if (!prefs.enabled || prefs.effort === 'off') {
     return {};
   }
-  const budget = prefs.effort === 'low' ? 1_024 : prefs.effort === 'high' ? 10_000 : 5_000;
+  const budgetByEffort: Record<Exclude<ReasoningEffort, 'off'>, number> = {
+    low: 1_024,
+    medium: 5_000,
+    high: 10_000,
+    xhigh: 16_000,
+    max: 32_000,
+  };
+  const budget = budgetByEffort[prefs.effort] ?? 5_000;
   return {
     thinking: {
       type: 'enabled',
@@ -68,7 +75,14 @@ export function mapGeminiThinking(prefs: {
   if (!prefs.enabled || prefs.effort === 'off') {
     return {};
   }
-  const budget = prefs.effort === 'low' ? 1_024 : prefs.effort === 'high' ? 8_192 : 4_096;
+  const budgetByEffort: Record<Exclude<ReasoningEffort, 'off'>, number> = {
+    low: 1_024,
+    medium: 4_096,
+    high: 8_192,
+    xhigh: 16_384,
+    max: 32_768,
+  };
+  const budget = budgetByEffort[prefs.effort] ?? 4_096;
   return {
     reasoning_effort: prefs.effort,
     extra_body: {

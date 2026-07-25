@@ -6,7 +6,7 @@ import type {
   ResolvedModelCapability,
   SessionReasoningOverride,
 } from './types';
-import { DEFAULT_REASONING_PREFS } from './types';
+import { DEFAULT_REASONING_PREFS, isReasoningEffortLevel } from './types';
 
 export function clampEffort(
   effort: ReasoningEffort | undefined,
@@ -24,10 +24,9 @@ export function normalizeReasoningUserPrefs(
 ): ReasoningUserPrefs {
   return {
     enabled: Boolean(prefs?.enabled),
-    effort:
-      prefs?.effort === 'low' || prefs?.effort === 'medium' || prefs?.effort === 'high'
-        ? prefs.effort
-        : DEFAULT_REASONING_PREFS.effort,
+    effort: isReasoningEffortLevel(prefs?.effort)
+      ? prefs.effort
+      : DEFAULT_REASONING_PREFS.effort,
   };
 }
 
