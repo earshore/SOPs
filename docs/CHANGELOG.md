@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Ownership Role → Palette / `wb-theme-*` 映射表（Phase 4 预备）：`docs/superpowers/plans/2026-07-26-ownership-role-palette-map.md`。
 - D1 token 覆盖清点：`npm run token:override-audit`（`scripts/quality/audit-token-overrides.ts`）+ 库存报告 `docs/superpowers/plans/2026-07-26-token-override-inventory.md`。
 - 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
 - 主题落地团队作战手册 + 体验验收矩阵（`docs/superpowers/plans/2026-07-26-theme-system-*`）。
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- D6 业务样例（Keyword Hunter）：主 CTA / 最小化 chrome 从 hard `blue-600` 迁到 `--color-primary*` / `--color-focus-ring`（不改 wb-theme / 模块归属色）。
 - Shared buttons：glow/筛选 active·focus 从 brand-blue 改为 `--color-primary*` / `--color-focus-ring` / `color-mix`（保留 `--button-filter-accent` 模块归属覆写）。
 - D1 治理门禁：`token:override-audit:gate`（`--fail-on-unallowlisted-atomic`）并入 `ci:quality`（css:audit → hardcode → token gate）。
 - D2 R2/R3：高流量工作台面板圆角收敛到 `var(--workbench-radius)` / panel|card 别名（`analysis-widget-card`、PromptLab/AI Analysis 覆盖、Keyword Hunter textarea、PPC import 面板）；未改 entry/overview 卡。

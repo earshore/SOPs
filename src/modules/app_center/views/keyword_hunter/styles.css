@@ -73,16 +73,20 @@
   width: 2.25rem;
   height: 2.25rem;
   flex-basis: 2.25rem;
-  border-color: var(--color-blue-600, #2563eb);
-  background: var(--color-blue-600, #2563eb);
+  border-color: var(--color-primary, #3b82f6);
+  background: var(--color-primary, #3b82f6);
   color: white;
 }
 
 .keyword-hunter-title-icon-btn--primary:hover,
 .keyword-hunter-title-icon-btn--primary:focus-visible {
-  border-color: var(--color-blue-700, #1d4ed8);
-  background: var(--color-blue-700, #1d4ed8);
+  border-color: var(--color-primary-dark, #1d4ed8);
+  background: var(--color-primary-dark, #1d4ed8);
   color: white;
+  box-shadow:
+    0 0 0 2px var(--color-white, #ffffff),
+    0 0 0 4px
+      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 35%, transparent);
 }
 
 .keyword-hunter-title-action-btn {
@@ -761,15 +765,21 @@
   border-radius: var(--rounded-card, var(--rounded-md));
   font-size: 0.875rem;
   font-weight: 600;
+  color: white;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary, #3b82f6),
+    var(--color-primary-dark, #1d4ed8)
+  );
+  border: 1px solid color-mix(in srgb, var(--color-primary, #3b82f6) 30%, transparent);
+  cursor: pointer;
   transition:
     background-color var(--duration-normal) var(--ease-in-out),
     color var(--duration-normal) var(--ease-in-out),
     opacity var(--duration-normal) var(--ease-in-out),
     box-shadow var(--duration-normal) var(--ease-in-out),
     transform var(--duration-normal) var(--ease-in-out);
-  border: none;
-  cursor: pointer;
-  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  box-shadow: 0 12px 24px -12px color-mix(in srgb, var(--color-primary, #3b82f6) 35%, transparent);
 }
 
 .keyword-hunter-minimized-btn.show {
@@ -779,7 +789,15 @@
 
 .keyword-hunter-minimized-btn:hover {
   transform: none;
-  box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+  box-shadow: 0 16px 28px -12px color-mix(in srgb, var(--color-primary, #3b82f6) 45%, transparent);
+}
+
+.keyword-hunter-minimized-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-white, #ffffff),
+    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6)),
+    0 12px 24px -12px color-mix(in srgb, var(--color-primary, #3b82f6) 35%, transparent);
 }
 
 #keyword-hunter-btn-start-analysis,
@@ -1716,13 +1734,21 @@
 .keyword-hunter-primary-action {
   padding: 0.625rem 1rem;
   color: white;
-  background: var(--color-blue-600, #2563eb);
-  border-color: var(--color-blue-600, #2563eb);
+  background: var(--color-primary, #3b82f6);
+  border-color: var(--color-primary, #3b82f6);
 }
 
 .keyword-hunter-primary-action:hover {
-  background: var(--color-blue-700, #1d4ed8);
-  border-color: var(--color-blue-700, #1d4ed8);
+  background: var(--color-primary-dark, #1d4ed8);
+  border-color: var(--color-primary-dark, #1d4ed8);
+}
+
+.keyword-hunter-primary-action:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-white, #ffffff),
+    0 0 0 4px
+      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 35%, transparent);
 }
 
 .keyword-hunter-secondary-action {

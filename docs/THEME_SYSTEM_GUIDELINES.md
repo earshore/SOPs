@@ -117,13 +117,15 @@ npm run generate:tokens
 
 ### 3.1 决策顺序
 
-1. 普通子页以 `menuConfig.ts` 中一级目录 `category.color` 为准。
+1. 普通子页以 `menuConfig.ts` 中一级目录 `category.color` 为准（映射到 Ownership Role，见 [Role 全表](./superpowers/plans/2026-07-26-ownership-role-palette-map.md)）。
 2. 模块总览页可使用模块 `themeColor`。
 3. 状态色使用语义状态 token，不跟随模块主题色。
 4. 图表和数据系列可以使用多色，但必须有文字、图例或形状辅助，不能只靠颜色表达含义。
 5. Appearance 只改变全局 primary / focus token，不改变上述模块归属决策。
 
 ### 3.2 当前主题映射
+
+**Ownership Role → Palette / `wb-theme-*` 全表（Phase 4 预备·可执行）**: […/plans/2026-07-26-ownership-role-palette-map.md](./superpowers/plans/2026-07-26-ownership-role-palette-map.md)。新页面只选 **role**，不发明色名；Appearance 不得改写该表。下表为简表（与 `menuConfig` 冲突时以代码 + Role 全表为准）。
 
 | 区域 | 当前主题来源 | 页面主视觉 |
 | --- | --- | --- |

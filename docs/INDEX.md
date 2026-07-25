@@ -84,6 +84,7 @@
 - [稳定主题系统规范](./THEME_SYSTEM_GUIDELINES.md)
 - [主题系统企业级审查与收敛路线图](./superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md) — As-Is/To-Be、D1–D12、Phase 0–5
 - [主题落地团队作战手册](./superpowers/plans/2026-07-26-theme-system-team-operating-playbook.md) — 角色/RACI/门禁/两周冲刺
+- [Ownership Role → Palette 映射表](./superpowers/plans/2026-07-26-ownership-role-palette-map.md) — Phase 4 预备：role / menu / wb-theme / 例外
 - [主题体验验收矩阵](./superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md) — 体验官场景与签字
 - [主题 XO 签字状态](./superpowers/plans/2026-07-26-theme-system-xo-signoff-status.md) — code-aware 状态 + 30 分钟人工脚本
 - [主题落地进度看板](./superpowers/plans/2026-07-26-theme-system-landing-status.md) — Phase 完成度 / 门禁 / 下一波

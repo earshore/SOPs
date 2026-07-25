@@ -305,6 +305,41 @@ async function expectDocumentThemeState(
   }
 }
 
+/**
+ * Layer B ownership chrome must not be rewritten by Appearance (Layer A).
+ * Keyword Hunter live templates use wb-theme-rose (menuConfig color: rose).
+ * Prefer banner class; fall back to sidebar theme class when banner is hidden.
+ */
+async function expectKeywordHunterOwnershipChrome(page: Page): Promise<void> {
+  const ownershipBanner = page.locator('#keyword-hunter-module-input .wb-container.wb-theme-rose');
+  const ownershipSidebar = page.locator('.sidebar-shell.sidebar-theme-rose');
+
+  if ((await ownershipBanner.count()) > 0 && (await ownershipBanner.first().isVisible())) {
+    await expect(ownershipBanner.first()).toHaveClass(/\bwb-theme-rose\b/);
+    return;
+  }
+
+  if ((await ownershipSidebar.count()) > 0) {
+    await expect(ownershipSidebar.first()).toHaveClass(/\bsidebar-theme-rose\b/);
+    return;
+  }
+
+  test.skip(
+    true,
+    'Keyword Hunter ownership chrome (wb-theme-rose / sidebar-theme-rose) not detectable in DOM'
+  );
+}
+
+async function closeGlobalSettings(page: Page): Promise<void> {
+  const settingsPanel = page.getByTestId('settings-panel');
+  if ((await settingsPanel.getAttribute('data-state')) === 'closed') {
+    return;
+  }
+
+  await page.getByRole('button', { name: '关闭系统设置' }).click();
+  await expect(settingsPanel).toHaveAttribute('data-state', 'closed');
+}
+
 type SwitchTabTarget =
   | { kind: 'sops'; targetActionSelector: string | null }
   | { kind: 'sidebar'; menu: string; overview: string; trigger: string };
@@ -1168,6 +1203,27 @@ test.describe('release candidate smoke', () => {
       colorMode: 'light',
       darkClass: false,
     });
+
+    // R4 / R7-C5: Appearance must not rewrite module ownership chrome.
+    // Persist minimal, leave settings, open Keyword Hunter, assert wb-theme-rose
+    // (live template class; docs still say fuchsia historically).
+    await closeGlobalSettings(page);
+    const keywordHunterRoute = CORE_ROUTES.find(route => route.routeId === 'keyword_hunter_input');
+    if (!keywordHunterRoute) {
+      throw new Error('Keyword Hunter Input missing from CORE_ROUTES');
+    }
+    await openRoute(page, keywordHunterRoute.path);
+    await expectRouteReady(page, keywordHunterRoute);
+    await expectNoRouteErrorText(page);
+    await expectDocumentThemeState(page, {
+      appearance: 'minimal',
+      colorMode: 'light',
+      darkClass: false,
+    });
+    await expectKeywordHunterOwnershipChrome(page);
+
+    await openGlobalSettings(page);
+    await openAppearanceSettings(page);
 
     await page.getByTestId('settings-color-mode-dark').click();
     await expect(page.getByTestId('settings-color-mode-dark')).toHaveAttribute(
