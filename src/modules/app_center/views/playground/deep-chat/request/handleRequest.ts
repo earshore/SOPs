@@ -343,6 +343,13 @@ export function ensureStreamingDeepThinkingBlock(
   }
 
   uiHooks.paintOrResumeStreamingReasoning(text, pending, full);
+  // After expand, re-measure scroll cap once layout is visible (hidden body → 0 height).
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(() => {
+      if (!body.isConnected || !pending.reasoningUiExpanded) return;
+      uiHooks.paintOrResumeStreamingReasoning(text, pending, pending.reasoningText);
+    });
+  }
 }
 
 export function isCurrentResponseTarget(

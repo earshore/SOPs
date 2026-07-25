@@ -67,6 +67,8 @@ export const sessionState = {
   pendingChromeRetryTimeouts: [] as number[],
   reasoningTypewriterTimer: null as number | null,
   reasoningTypewriterTextEl: null as HTMLElement | null,
+  /** Scopes the global typewriter timer to one pending request key. */
+  reasoningTypewriterKey: null as string | null,
   waitingStatusRotateTimer: null as number | null,
   settledDeepThinkingUi: new Map<
     string,

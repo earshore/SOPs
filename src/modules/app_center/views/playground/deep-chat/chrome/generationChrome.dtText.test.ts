@@ -1,15 +1,23 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+// vi used for typewriter rearm fake timers
 import {
   DEEP_CHAT_DT_BODY_MAX_HEIGHT_PX,
   applySettledDeepThinkingUi,
+  getOrCreateSettledUiState,
+  liveHostHasRequiredGenerationChrome,
+  mountSettledDeepThinkingChrome,
+  paintOrResumeStreamingReasoning,
+  preparePendingSettledHandoff,
   resolveDeepChatDtBodyEl,
+  stopReasoningTypewriter,
   stripSettledChromeFromHost,
   syncActivityListDom,
   syncDeepChatDtBodyScrollCap,
   syncLivePlaceholderBubble,
 } from './generationChrome';
-import { GENERATION_CHROME_CLASS } from '../session/sessionState';
+import { GENERATION_CHROME_CLASS, sessionState } from '../session/sessionState';
 import type { PendingDeepChatRequest } from '../request/lifecycle';
+import { createPendingDeepChatRequest } from '../request/lifecycle';
 
 describe('syncDeepChatDtBodyScrollCap', () => {
   afterEach(() => {
@@ -213,5 +221,149 @@ describe('settled activity list DOM', () => {
     expect(
       settled.querySelector('.deep-chat-dt-done-toggle')?.classList.contains('is-static')
     ).toBe(true);
+  });
+});
+
+describe('preparePendingSettledHandoff + mountSettledDeepThinkingChrome', () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+    sessionState.settledDeepThinkingUi.clear();
+    stopReasoningTypewriter();
+  });
+
+  it('keeps reasoning readable after settle when stream was expanded (O1)', () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+
+    const pending = createPendingDeepChatRequest('thread-handoff', []);
+    pending.reasoningText = 'visible reasoning body line';
+    pending.reasoningUiExpanded = true;
+    pending.reasoningDisplayedLength = 4; // mid-typewriter
+    pending.isSettled = true;
+
+    const uiKey = `thread-handoff:pending-settled:${pending.startedAt}`;
+    preparePendingSettledHandoff(pending, uiKey);
+
+    expect(pending.reasoningDisplayedLength).toBe(pending.reasoningText.length);
+    const state = getOrCreateSettledUiState(uiKey);
+    expect(state.doneOpen).toBe(true);
+    expect(state.activityOpen.reasoning).toBe(true);
+
+    mountSettledDeepThinkingChrome(host, pending.reasoningText, 2, uiKey);
+    const text = host.querySelector(
+      '.deep-chat-dt-activity[data-kind="reasoning"] .deep-chat-dt-text'
+    );
+    expect(text?.textContent).toBe('visible reasoning body line');
+    const donePanel = host.querySelector('.deep-chat-dt-done-panel') as HTMLElement | null;
+    expect(donePanel?.hidden).toBe(false);
+  });
+
+  it('does not force-open 已完成 when user collapsed stream (A1)', () => {
+    const pending = createPendingDeepChatRequest('thread-collapsed', []);
+    pending.reasoningText = 'hidden while collapsed';
+    pending.reasoningUiExpanded = false;
+    pending.reasoningDisplayedLength = 3;
+    pending.isSettled = true;
+
+    const uiKey = `thread-collapsed:pending-settled:${pending.startedAt}`;
+    preparePendingSettledHandoff(pending, uiKey);
+    const state = getOrCreateSettledUiState(uiKey);
+    expect(state.doneOpen).toBe(false);
+    expect(state.activityOpen.reasoning).toBeFalsy();
+    // Flush still completes full length so no truncated slice is lost.
+    expect(pending.reasoningDisplayedLength).toBe(pending.reasoningText.length);
+  });
+});
+
+describe('paintOrResumeStreamingReasoning', () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+    stopReasoningTypewriter();
+  });
+
+  it('instant-paints large one-shot reasoning dumps (O3)', () => {
+    const text = document.createElement('pre');
+    text.className = 'deep-chat-dt-text';
+    const body = document.createElement('div');
+    body.className = 'deep-chat-dt-body';
+    body.appendChild(text);
+    document.body.appendChild(body);
+
+    const pending = createPendingDeepChatRequest('thread-instant', []);
+    pending.reasoningUiExpanded = true;
+    const full = 'x'.repeat(200);
+    pending.reasoningText = full;
+    pending.reasoningDisplayedLength = 0;
+
+    paintOrResumeStreamingReasoning(text, pending, full);
+    expect(text.textContent).toBe(full);
+    expect(pending.reasoningDisplayedLength).toBe(full.length);
+  });
+
+  it('re-arms typewriter when full grows after catch-up (O3)', () => {
+    vi.useFakeTimers();
+    const text = document.createElement('pre');
+    text.className = 'deep-chat-dt-text';
+    const body = document.createElement('div');
+    body.className = 'deep-chat-dt-body';
+    body.appendChild(text);
+    document.body.appendChild(body);
+
+    const pending = createPendingDeepChatRequest('thread-rearm', []);
+    pending.reasoningUiExpanded = true;
+    pending.reasoningText = 'abc';
+    pending.reasoningDisplayedLength = 3;
+    sessionState.pendingRequests.set(pending.threadId, pending);
+    sessionState.threadStore.activeThreadId = pending.threadId;
+
+    paintOrResumeStreamingReasoning(text, pending, pending.reasoningText);
+    expect(text.textContent).toBe('abc');
+
+    pending.reasoningText = 'abcdef';
+    paintOrResumeStreamingReasoning(text, pending, pending.reasoningText);
+    // Typewriter should be scheduled; advance timers until catch-up.
+    for (let i = 0; i < 20; i++) {
+      vi.advanceTimersByTime(30);
+    }
+    expect(pending.reasoningDisplayedLength).toBe(6);
+    expect(text.textContent).toBe('abcdef');
+
+    sessionState.pendingRequests.delete(pending.threadId);
+    vi.useRealTimers();
+  });
+});
+
+describe('liveHostHasRequiredGenerationChrome (O4 remount skip)', () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+  });
+
+  it('treats streaming chrome as present when phase needs bubble chrome', () => {
+    const host = document.createElement('div');
+    const chrome = document.createElement('div');
+    chrome.className = `${GENERATION_CHROME_CLASS} is-streaming`;
+    host.appendChild(chrome);
+
+    const pending = createPendingDeepChatRequest('thread-chrome', []);
+    pending.reasoningText = 'r';
+    expect(liveHostHasRequiredGenerationChrome(host, pending)).toBe(true);
+  });
+
+  it('stripSettledChromeFromHost removes settled flash before stream mount', () => {
+    const host = document.createElement('div');
+    const chrome = document.createElement('div');
+    chrome.className = `${GENERATION_CHROME_CLASS} is-settled`;
+    const settled = document.createElement('div');
+    settled.className = 'deep-chat-dt-settled';
+    const label = document.createElement('span');
+    label.className = 'deep-chat-dt-done-label';
+    label.textContent = '已完成 0s';
+    settled.appendChild(label);
+    chrome.appendChild(settled);
+    host.appendChild(chrome);
+    document.body.appendChild(host);
+
+    stripSettledChromeFromHost(host);
+    expect(host.querySelector(`.${GENERATION_CHROME_CLASS}`)).toBeNull();
   });
 });

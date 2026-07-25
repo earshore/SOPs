@@ -18,6 +18,15 @@ import {
   buildPreReplyActivityTimeline,
   type PreReplyActivityStep,
 } from '../request/preReplyActivity';
+import {
+  flushDisplayedLength,
+  liveStreamingChromeSatisfied,
+  resolveSettledHandoffExpand,
+  shouldFlushTypewriterOnSettle,
+  shouldInstantPaintReasoning,
+  shouldRearmTypewriter,
+  typewriterStep,
+} from './reasoningDisplayState';
 
 import { refreshMessageToolbarStatuses } from '../composer/messageToolbar';
 
@@ -222,14 +231,14 @@ export function liveHostHasRequiredGenerationChrome(
   const hasActivity = Boolean(pending.preReplySteps?.length);
   // waiting / generating-without-reasoning never mount streaming chrome — requiring
   // `.is-streaming` here caused infinite MutationObserver remount (page freeze on resend).
-  if (!liveGenerationPhaseNeedsBubbleChrome(phase, hasReasoning, hasActivity)) {
-    return true;
+  const needsBubbleChrome = liveGenerationPhaseNeedsBubbleChrome(phase, hasReasoning, hasActivity);
+  if (phase === 'settled') {
+    return Boolean(liveHost.querySelector(`:scope > .${GENERATION_CHROME_CLASS}.is-settled`));
   }
-  const selector =
-    phase === 'settled'
-      ? `:scope > .${GENERATION_CHROME_CLASS}.is-settled`
-      : `:scope > .${GENERATION_CHROME_CLASS}.is-streaming`;
-  return Boolean(liveHost.querySelector(selector));
+  const hasStreamingChrome = Boolean(
+    liveHost.querySelector(`:scope > .${GENERATION_CHROME_CLASS}.is-streaming`)
+  );
+  return liveStreamingChromeSatisfied({ hasStreamingChrome, needsBubbleChrome });
 }
 
 export function hostsHaveSettledChromeWhereRequired(
@@ -325,6 +334,7 @@ export function syncAllDeepThinkingChrome(container: HTMLElement): void {
         clearWaitingStatusRotateTimer();
         const durationSec = getPendingReasoningDurationSec(pending);
         const uiKey = `${thread.id}:pending-settled:${pending.startedAt}`;
+        preparePendingSettledHandoff(pending, uiKey);
         const steps = buildPreReplyActivityTimeline({
           reasoningText: pending.reasoningText,
           steps: pending.preReplySteps,
@@ -433,12 +443,47 @@ export function prefersInstantReasoningText(): boolean {
   return prefersReducedMotion();
 }
 
-export function stopReasoningTypewriter(): void {
+export function pendingTypewriterKey(pending: PendingDeepChatRequest): string {
+  return `${pending.threadId}:${pending.startedAt}`;
+}
+
+/** Stop typewriter. When pendingKey is set, only stop if it matches the active binding. */
+export function stopReasoningTypewriter(pendingKey?: string | null): void {
+  if (
+    pendingKey != null &&
+    sessionState.reasoningTypewriterKey != null &&
+    sessionState.reasoningTypewriterKey !== pendingKey
+  ) {
+    return;
+  }
   if (sessionState.reasoningTypewriterTimer !== null) {
     window.clearTimeout(sessionState.reasoningTypewriterTimer);
     sessionState.reasoningTypewriterTimer = null;
   }
   sessionState.reasoningTypewriterTextEl = null;
+  sessionState.reasoningTypewriterKey = null;
+}
+
+/** Flush stream display cursor then apply settle expand inheritance (spec O1/O3). */
+export function preparePendingSettledHandoff(pending: PendingDeepChatRequest, uiKey: string): void {
+  const fullLen = pending.reasoningText.length;
+  const displayed = pending.reasoningDisplayedLength ?? 0;
+  if (shouldFlushTypewriterOnSettle(displayed, fullLen)) {
+    pending.reasoningDisplayedLength = flushDisplayedLength(fullLen);
+  }
+  stopReasoningTypewriter(pendingTypewriterKey(pending));
+
+  const handoff = resolveSettledHandoffExpand({
+    reasoningUiExpanded: pending.reasoningUiExpanded,
+    hasReasoningText: Boolean(pending.reasoningText.trim()),
+  });
+  const state = getOrCreateSettledUiState(uiKey);
+  if (handoff.doneOpen) {
+    state.doneOpen = true;
+    state.activityOpen = { ...state.activityOpen, reasoning: handoff.reasoningRowOpen };
+    state.deepOpen = handoff.reasoningRowOpen;
+  }
+  state.displayedLength = fullLen;
 }
 
 /** Max height (px) for 深度思考 body before scroll — keep in sync with CSS 12.5rem. */
@@ -516,16 +561,19 @@ export function scheduleReasoningTypewriter(
   getFullText: () => string,
   getDisplayed: () => number,
   setDisplayed: (n: number) => void,
-  isActive: () => boolean
+  isActive: () => boolean,
+  pendingKey?: string
 ): void {
   stopReasoningTypewriter();
   sessionState.reasoningTypewriterTextEl = textEl;
+  sessionState.reasoningTypewriterKey = pendingKey ?? null;
 
   const run = (): void => {
     if (!isActive() || sessionState.reasoningTypewriterTextEl !== textEl || !textEl.isConnected) {
       sessionState.reasoningTypewriterTimer = null;
       if (sessionState.reasoningTypewriterTextEl === textEl) {
         sessionState.reasoningTypewriterTextEl = null;
+        sessionState.reasoningTypewriterKey = null;
       }
       return;
     }
@@ -537,12 +585,11 @@ export function scheduleReasoningTypewriter(
       }
       setDisplayed(full.length);
       syncDeepChatDtBodyScrollCap(textEl);
-      // Stay armed: more reasoning may still arrive while expanded.
-      // Next uiHooks.ensureStreamingDeepThinkingBlock / resume will restart if full grows.
+      // Timer idle; paintOrResumeStreamingReasoning re-arms when full grows (shouldRearm).
       sessionState.reasoningTypewriterTimer = null;
       return;
     }
-    displayed = Math.min(full.length, displayed + REASONING_TYPEWRITER_CHARS);
+    displayed = typewriterStep(displayed, full.length, REASONING_TYPEWRITER_CHARS);
     setDisplayed(displayed);
     textEl.textContent = full.slice(0, displayed);
     syncDeepChatDtBodyScrollCap(textEl);
@@ -571,11 +618,12 @@ export function resumeStreamingReasoningTypewriter(
   if (pending.reasoningDisplayedLength === undefined) {
     pending.reasoningDisplayedLength = 0;
   }
-  // Already driving this live `<pre>`: each tick re-reads pending.reasoningText.
-  // Skip restart on every reasoning chunk (avoids jank). Remounted nodes rebind.
+  const key = pendingTypewriterKey(pending);
+  // Already driving this live `<pre>` for this pending: each tick re-reads full text.
   if (
     sessionState.reasoningTypewriterTimer !== null &&
     sessionState.reasoningTypewriterTextEl === textEl &&
+    sessionState.reasoningTypewriterKey === key &&
     textEl.isConnected &&
     isStreamingReasoningTypewriterActive(pending)
   ) {
@@ -588,7 +636,8 @@ export function resumeStreamingReasoningTypewriter(
     n => {
       pending.reasoningDisplayedLength = n;
     },
-    () => isStreamingReasoningTypewriterActive(pending)
+    () => isStreamingReasoningTypewriterActive(pending),
+    key
   );
 }
 
@@ -617,15 +666,25 @@ export function paintOrResumeStreamingReasoning(
   pending: PendingDeepChatRequest,
   full: string
 ): void {
+  const key = pendingTypewriterKey(pending);
   if (prefersInstantReasoningText()) {
     textEl.textContent = full;
     pending.reasoningDisplayedLength = full.length;
-    stopReasoningTypewriter();
+    stopReasoningTypewriter(key);
     syncDeepChatDtBodyScrollCap(textEl);
     return;
   }
 
   const displayed = pending.reasoningDisplayedLength ?? 0;
+  // Large one-shot reasoning dump: paint full immediately (spec O3 / F6).
+  if (shouldInstantPaintReasoning(full.length) && displayed === 0) {
+    textEl.textContent = full;
+    pending.reasoningDisplayedLength = full.length;
+    stopReasoningTypewriter(key);
+    syncDeepChatDtBodyScrollCap(textEl);
+    return;
+  }
+
   if (displayed >= full.length) {
     if (textEl.textContent !== full) {
       textEl.textContent = full;
@@ -635,8 +694,16 @@ export function paintOrResumeStreamingReasoning(
     return;
   }
 
-  // New chunks or re-expand with remaining text → keep typewriter running.
-  resumeStreamingReasoningTypewriter(textEl, pending);
+  if (
+    shouldRearmTypewriter({
+      displayed,
+      fullLength: full.length,
+      expanded: pending.reasoningUiExpanded === true,
+      settled: Boolean(pending.isSettled),
+    })
+  ) {
+    resumeStreamingReasoningTypewriter(textEl, pending);
+  }
 }
 
 export function hideStatusInChrome(chrome: HTMLElement): void {
