@@ -2,7 +2,7 @@
   min-height: 86px;
   padding: 12px;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 8px;
+  border-radius: var(--workbench-radius, var(--card-radius, 8px));
   background: rgba(255, 255, 255, 0.72);
   box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.42);
 }

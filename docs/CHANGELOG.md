@@ -25,9 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Shared buttons：glow/筛选 active·focus 从 brand-blue 改为 `--color-primary*` / `--color-focus-ring` / `color-mix`（保留 `--button-filter-accent` 模块归属覆写）。
 - D1 治理门禁：`token:override-audit:gate`（`--fail-on-unallowlisted-atomic`）并入 `ci:quality`（css:audit → hardcode → token gate）。
 - D2 R2/R3：高流量工作台面板圆角收敛到 `var(--workbench-radius)` / panel|card 别名（`analysis-widget-card`、PromptLab/AI Analysis 覆盖、Keyword Hunter textarea、PPC import 面板）；未改 entry/overview 卡。
 - D2 R3 续：Scraper 上传/策略面板覆盖、PPC filter/table/settings 壳、forms checkbox 工作台面 → `var(--workbench-radius, var(--panel-radius, 8px))`。
+- D2 R3 第三批：Keyword Hunter 输入/报告/对比面板、Master Analysis workflow strip、PPC panel/stat tile/report-type、App Center workbench shells → `var(--workbench-radius)` / panel|card 别名。
 - Settings 壳层 chrome：`--settings-accent` / focus / 分段 active / 主 CTA 映射 Appearance primary token（X6 partial）。
 - Settings X6 收尾：`systemSettings` 主保存 CTA、通用输入 focus、brand accent 标签/勾选改 `--settings-*` / `settings-btn-primary`（保留 section indigo 与进度桶色）。
 - D1 Phase 2 prep：从 `variables.css` 移除与 generated 值完全相同的原子重复（色板 / 字号字重 / leading / tracking / 数字 spacing），语义与 intentional 冲突尺度保留。

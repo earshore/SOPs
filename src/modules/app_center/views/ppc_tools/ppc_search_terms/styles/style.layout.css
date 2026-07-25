@@ -1,6 +1,6 @@
 .ppc-search-terms-panel {
   border: 1px solid var(--border-muted, var(--color-slate-200, #e2e8f0));
-  border-radius: var(--rounded-panel, 8px);
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: var(--surface-panel, #ffffff);
   box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
 }

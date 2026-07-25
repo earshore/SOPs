@@ -83,14 +83,16 @@
   box-shadow: none;
 }
 
-/* 发光按钮效果 */
+/* 发光按钮效果：跟 Appearance primary，不硬编 brand blue */
 .action-btn-glow {
   position: relative;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 20px
+    color-mix(in srgb, var(--color-primary, var(--color-focus-ring)) 40%, transparent);
 }
 
 .action-btn-glow:hover {
-  box-shadow: 0 6px 30px rgba(59, 130, 246, 0.6);
+  box-shadow: 0 6px 30px
+    color-mix(in srgb, var(--color-primary, var(--color-focus-ring)) 60%, transparent);
 }
 
 .action-btn-glow::before {
@@ -200,11 +202,11 @@
 .category-filter-btn[aria-pressed='true'] {
   border-color: var(
     --button-filter-active-border,
-    var(--button-filter-accent, var(--color-primary, var(--color-blue-600, #2563eb)))
+    var(--button-filter-accent, var(--color-primary))
   ) !important;
   background: var(
     --button-filter-active-bg,
-    var(--button-filter-accent, var(--color-primary, var(--color-blue-600, #2563eb)))
+    var(--button-filter-accent, var(--color-primary))
   ) !important;
   color: var(--button-filter-active-color, #ffffff) !important;
   box-shadow: var(--button-filter-active-shadow, none);
@@ -221,7 +223,7 @@
   outline: 2px solid
     var(
       --button-filter-focus-color,
-      var(--button-filter-accent, var(--color-primary, var(--color-blue-600, #2563eb)))
+      var(--button-filter-accent, var(--color-focus-ring, var(--color-primary)))
     );
   outline-offset: 2px;
   box-shadow: 0 0 0 3px
@@ -229,7 +231,7 @@
       --button-filter-focus-ring,
       color-mix(
         in srgb,
-        var(--button-filter-accent, var(--color-primary, var(--color-blue-600, #2563eb))) 16%,
+        var(--button-filter-accent, var(--color-focus-ring, var(--color-primary))) 16%,
         transparent
       )
     );
