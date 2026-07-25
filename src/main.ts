@@ -690,10 +690,6 @@ registerActionsWithLegacy({
                 | 'settings-section-performance'
                 | undefined,
               focus: typeof params.focus === 'string' ? params.focus : undefined,
-              density:
-                params.density === 'simple' || params.density === 'advanced'
-                  ? params.density
-                  : undefined,
             }
           : undefined
       )

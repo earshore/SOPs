@@ -1118,14 +1118,12 @@ it('openSettings forwards deep-link options on SETTINGS_OPEN', () => {
   openSettings({
     sectionId: 'settings-section-tool-strategy',
     focus: 'master-analysis',
-    density: 'advanced',
   });
 
   expect(open).toHaveBeenCalledWith(
     expect.objectContaining({
       sectionId: 'settings-section-tool-strategy',
       focus: 'master-analysis',
-      density: 'advanced',
     })
   );
   unsub();
@@ -1231,7 +1229,9 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template.indexOf('通用 AI 执行策略')).toBeLessThan(template.indexOf('应用中心'));
   // Content order (exclude side-nav secondary labels which may mention the same names)
   const sectionsChunk = template.slice(template.indexOf('settings-panel-sections'));
-  expect(sectionsChunk.indexOf('Master Analysis')).toBeLessThan(sectionsChunk.indexOf('Playground'));
+  expect(sectionsChunk.indexOf('Master Analysis')).toBeLessThan(
+    sectionsChunk.indexOf('Playground')
+  );
   expect(sectionsChunk.indexOf('Playground')).toBeLessThan(sectionsChunk.indexOf('Keyword Hunter'));
   expect(sectionsChunk.indexOf('Keyword Hunter')).toBeLessThan(sectionsChunk.indexOf('PPC Tools'));
   // 采集代理并入 Master Analysis → 数据采集
@@ -1395,10 +1395,7 @@ it('UT-P0-10b proxy test success clears error state without closing panel', asyn
   panel.proxy.customUrl = 'test-key';
   panel.proxy.testError = 'stale';
   panel.proxy.status = 'error';
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockResolvedValueOnce({ ok: true, status: 200 } as Response)
-  );
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({ ok: true, status: 200 } as Response));
 
   await panel.testProxyConnection();
 

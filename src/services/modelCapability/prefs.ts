@@ -24,9 +24,7 @@ export function normalizeReasoningUserPrefs(
 ): ReasoningUserPrefs {
   return {
     enabled: Boolean(prefs?.enabled),
-    effort: isReasoningEffortLevel(prefs?.effort)
-      ? prefs.effort
-      : DEFAULT_REASONING_PREFS.effort,
+    effort: isReasoningEffortLevel(prefs?.effort) ? prefs.effort : DEFAULT_REASONING_PREFS.effort,
   };
 }
 

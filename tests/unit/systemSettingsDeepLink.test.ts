@@ -90,7 +90,6 @@ describe('settingsDeepLink helpers', () => {
     ).toEqual({
       sectionId: 'settings-section-tool-strategy',
       focus: 'ppc-thresholds',
-      density: 'advanced',
     });
     expect(normalizeSettingsOpenOptions({ sectionId: 'bad' as never })).toEqual({});
   });
@@ -124,16 +123,15 @@ describe('openSettings SETTINGS_OPEN payload', () => {
     openSettings({
       sectionId: 'settings-section-tool-strategy',
       focus: 'ppc-thresholds',
-      density: 'advanced',
     });
 
     expect(handler).toHaveBeenCalledTimes(1);
     expect(handler.mock.calls[0][0]).toMatchObject({
       sectionId: 'settings-section-tool-strategy',
       focus: 'ppc-thresholds',
-      density: 'advanced',
       timestamp: expect.any(Number),
     });
+    expect(handler.mock.calls[0][0]).not.toHaveProperty('density');
 
     closeSettings();
     unsub();

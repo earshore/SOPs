@@ -1,10 +1,6 @@
 // src/components/settings/domain/settingsDeepLink.ts
 // Deep-link options for system settings open (section scroll + focus expand).
 
-import type { SettingsDensity } from '@/components/settings/domain/settingsUiPreferences';
-
-export type { SettingsDensity } from '@/components/settings/domain/settingsUiPreferences';
-
 export type SettingsSectionId =
   | 'settings-section-llm'
   | 'settings-section-tool-strategy'
@@ -17,8 +13,6 @@ export interface SettingsOpenOptions {
   sectionId?: SettingsSectionId;
   /** Expand details / highlight card, e.g. 'ppc-thresholds' | 'master-analysis' | 'ppc-analysis-flags' */
   focus?: string;
-  /** Open with advanced density when linking from module expert controls */
-  density?: SettingsDensity;
 }
 
 export const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = [
@@ -50,9 +44,6 @@ export function normalizeSettingsOpenOptions(
   if (typeof raw.focus === 'string' && raw.focus.trim()) {
     options.focus = raw.focus.trim();
   }
-  if (raw.density === 'simple' || raw.density === 'advanced') {
-    options.density = raw.density;
-  }
   return options;
 }
 
@@ -65,13 +56,9 @@ export function applySettingsDeepLink(
   options: SettingsOpenOptions | undefined,
   helpers: {
     scrollToSection: (sectionId: string) => void;
-    setDensity?: (density: SettingsDensity) => void;
   }
 ): void {
   const normalized = normalizeSettingsOpenOptions(options);
-  if (normalized.density && helpers.setDensity) {
-    helpers.setDensity(normalized.density);
-  }
   if (normalized.sectionId) {
     helpers.scrollToSection(normalized.sectionId);
   }
@@ -84,7 +71,6 @@ function escapeAttrSelector(value: string): string {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
     return CSS.escape(value);
   }
-  // Focus ids are simple tokens (e.g. master-analysis); still escape quotes defensively.
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 

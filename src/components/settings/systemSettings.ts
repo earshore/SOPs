@@ -111,11 +111,6 @@ import {
   normalizeSettingsOpenOptions,
   type SettingsOpenOptions,
 } from '@/components/settings/domain/settingsDeepLink';
-import {
-  getSettingsUiPreferences,
-  saveSettingsUiPreferences,
-  type SettingsDensity,
-} from '@/components/settings/domain/settingsUiPreferences';
 import { findFirstSettingsSearchMatch } from '@/components/settings/domain/settingsSearch';
 import {
   applyRuntimePreset,
@@ -134,7 +129,6 @@ import { animationSettingsStore, getAnimationSettings } from '@/stores/animation
 import type { AnimationSpeed } from '@/types/animation-types';
 
 export type { SettingsOpenOptions } from '@/components/settings/domain/settingsDeepLink';
-export type { SettingsDensity } from '@/components/settings/domain/settingsUiPreferences';
 export type { RuntimePresetId } from '@/components/settings/domain/settingsPresets';
 export type { SettingsRollbackPartition } from '@/components/settings/domain/settingsRollback';
 
@@ -285,8 +279,6 @@ interface RuntimeStrategyState {
 
 interface SettingsPanelData {
   isOpen: boolean;
-  /** simple | advanced — Spec §3.3; not a dirty partition */
-  settingsDensity: SettingsDensity;
   /** In-panel search query (P1-3) */
   searchQuery: string;
   /** Last search hit id (section or focus target) */
@@ -481,8 +473,6 @@ interface SettingsPanelData {
   isNavGroupOpen(groupId: string): boolean;
   toggleNavGroup(groupId: string, sectionId: string): void;
   navigateToNavTarget(targetId: string, groupId?: string): void;
-  setDensity(density: SettingsDensity): void;
-  setToolAppDetailsOpen(open: boolean): void;
   onSettingsSearch(event?: Event): void;
   scrollToSearchHit(hitId: string): void;
   loadAppearanceSettings(): void;
@@ -1182,7 +1172,6 @@ type SettingsPanelPart = Partial<SettingsPanelData> & ThisType<SettingsPanelData
 function createSettingsState(): Pick<
   SettingsPanelData,
   | 'isOpen'
-  | 'settingsDensity'
   | 'searchQuery'
   | 'searchHitId'
   | 'appearanceThemeId'
@@ -1209,7 +1198,6 @@ function createSettingsState(): Pick<
   return {
     isOpen: false,
 
-    settingsDensity: getSettingsUiPreferences().density,
     searchQuery: '',
     searchHitId: '',
     navOpenGroup: null as string | null,
@@ -1783,7 +1771,6 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   async open(options?: SettingsOpenOptions) {
     this.isOpen = true;
-    this.settingsDensity = getSettingsUiPreferences().density;
     this.searchQuery = '';
     this.searchHitId = '';
     this.activeRuntimePresetId = null;
@@ -1801,12 +1788,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.captureSettingsBaseline();
 
     const deepLink = normalizeSettingsOpenOptions(options);
-    if (deepLink.sectionId || deepLink.focus || deepLink.density) {
+    if (deepLink.sectionId || deepLink.focus) {
       // Defer until panel is painted so section nodes exist for scroll/focus.
       queueMicrotask(() => {
         applySettingsDeepLink(deepLink, {
           scrollToSection: sectionId => this.scrollToSection(sectionId),
-          setDensity: density => this.setDensity(density),
         });
       });
     }
@@ -1991,22 +1977,6 @@ const settingsPanelBehavior: SettingsPanelPart = {
     requestAnimationFrame(() => {
       this.scrollToElementInPanel(el);
     });
-  },
-
-  setDensity(density: SettingsDensity): void {
-    const next: SettingsDensity = density === 'advanced' ? 'advanced' : 'simple';
-    this.settingsDensity = next;
-    saveSettingsUiPreferences({ density: next });
-  },
-
-  setToolAppDetailsOpen(open: boolean): void {
-    document
-      .querySelectorAll<HTMLDetailsElement>(
-        '#settings-section-tool-strategy details.settings-tool-app[data-settings-tool-app]'
-      )
-      .forEach(el => {
-        el.open = open;
-      });
   },
 
   get appearanceThemeOptions(): Array<{ id: string; name: string; description?: string }> {

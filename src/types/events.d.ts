@@ -430,7 +430,7 @@ export interface LoadingStopEventPayload {
 }
 
 /**
- * 设置打开事件（深链可选 section / focus / density）
+ * 设置打开事件（深链可选 section / focus）
  * @see SettingsOpenOptions in settingsDeepLink.ts
  */
 export interface SettingsOpenEventPayload {
@@ -444,7 +444,6 @@ export interface SettingsOpenEventPayload {
   /** @deprecated use sectionId */
   section?: string;
   focus?: string;
-  density?: 'simple' | 'advanced';
   timestamp?: number;
 }
 
