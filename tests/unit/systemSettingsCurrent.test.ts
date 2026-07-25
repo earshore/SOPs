@@ -1246,3 +1246,28 @@ it('UT-P0-06c close without dirty skips confirm', async () => {
   expect(deps.confirmWithModal).not.toHaveBeenCalled();
   expect(panel.isOpen).toBe(false);
 });
+
+it('UT-P0-06d dirty then saveRuntimeStrategy then close does not confirm', async () => {
+  deps.confirmWithModal.mockClear();
+  const panel = createPanel();
+  await panel.open();
+  panel.captureSettingsBaseline();
+  panel.runtimeStrategy.settings.llm.maxRetries = 9;
+  await panel.saveRuntimeStrategy();
+  await panel.close();
+  expect(deps.confirmWithModal).not.toHaveBeenCalled();
+  expect(panel.isOpen).toBe(false);
+});
+
+it('UT-P0-06e second close after discard does not re-prompt', async () => {
+  deps.confirmWithModal.mockResolvedValueOnce(true);
+  const panel = createPanel();
+  await panel.open();
+  panel.captureSettingsBaseline();
+  panel.runtimeStrategy.settings.llm.maxRetries = 9;
+  await panel.close();
+  expect(panel.isOpen).toBe(false);
+  deps.confirmWithModal.mockClear();
+  await panel.close();
+  expect(deps.confirmWithModal).not.toHaveBeenCalled();
+});

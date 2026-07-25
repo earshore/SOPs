@@ -1485,6 +1485,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   async close(): Promise<void> {
+    if (!this.isOpen) return;
     const dirty = this.dirtyPartitions;
     if (dirty.length > 0) {
       const ok = await confirmSettingsAction(
@@ -1493,6 +1494,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
         '放弃更改'
       );
       if (!ok) return;
+      // discard: reload authoritative state so baseline matches closed panel
+      this.loadRuntimeStrategy();
+      this.loadToolStrategyDefaults();
+      void this.loadProviderConfig(this.llm.provider);
+      void this.loadProxyConfig();
+      this.captureSettingsBaseline();
     }
     this.isOpen = false;
   },
