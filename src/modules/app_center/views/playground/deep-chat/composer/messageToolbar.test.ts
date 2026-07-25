@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import type { DeepChatMessage } from '../types';
 import {
   findStoredMessageForToolbar,
+  isToolbarCopyableContent,
   resolveToolbarStatusLabel,
   shouldMountMessageToolbarShell,
+  syncToolbarContentBoundActions,
 } from './messageToolbar';
 
 describe('shouldMountMessageToolbarShell', () => {
@@ -38,6 +40,40 @@ describe('shouldMountMessageToolbarShell', () => {
         hasActivePending: false,
       })
     ).toBe(false);
+  });
+});
+
+describe('isToolbarCopyableContent + syncToolbarContentBoundActions (TB2)', () => {
+  it('treats empty and ZWSP-only as not copyable', () => {
+    expect(isToolbarCopyableContent('')).toBe(false);
+    expect(isToolbarCopyableContent('   ')).toBe(false);
+    expect(isToolbarCopyableContent('\u200b')).toBe(false);
+    expect(isToolbarCopyableContent('hello')).toBe(true);
+  });
+
+  it('disables copy/edit when content is empty and re-enables when text arrives', () => {
+    const toolbar = document.createElement('div');
+    const copy = document.createElement('button');
+    copy.dataset.toolbarAction = 'copy';
+    copy.setAttribute('aria-label', '复制消息');
+    copy.title = '复制消息';
+    const edit = document.createElement('button');
+    edit.dataset.toolbarAction = 'edit';
+    edit.setAttribute('aria-label', '编辑消息');
+    edit.title = '编辑消息';
+    toolbar.append(copy, edit);
+
+    syncToolbarContentBoundActions(toolbar, '\u200b');
+    expect(copy.disabled).toBe(true);
+    expect(copy.getAttribute('aria-disabled')).toBe('true');
+    expect(copy.title).toBe('暂无正文可复制');
+    expect(edit.disabled).toBe(true);
+
+    syncToolbarContentBoundActions(toolbar, 'final answer');
+    expect(copy.disabled).toBe(false);
+    expect(copy.getAttribute('aria-disabled')).toBe('false');
+    expect(copy.title).toBe('复制消息');
+    expect(edit.disabled).toBe(false);
   });
 });
 

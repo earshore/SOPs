@@ -54,6 +54,13 @@ export function shouldMountMessageToolbarShell(args: {
   return false;
 }
 
+/** True when bubble text is copy/edit-worthy (not empty / ZWSP-only). */
+export function isToolbarCopyableContent(content: string): boolean {
+  const trimmed = (content || '').trim();
+  if (!trimmed) return false;
+  return !isZwspOnlyText(trimmed);
+}
+
 export function setupMessageToolbars(
   chat: DeepChatElement,
   getStoredMessages: () => DeepChatMessage[],
@@ -230,6 +237,9 @@ function installOrUpdateMessageToolbar(args: {
     actions: args.actions,
   });
 
+  // Empty / ZWSP live bubbles keep the shell but disable copy / content-bound actions (TB2).
+  syncToolbarContentBoundActions(toolbar, meaningfulContent);
+
   // 「正在生成回复 · 已收到 N 字」 at toolbar end (after copy / tools), not above bubble.
   syncToolbarLiveGenerationLabel(toolbar, isLiveAi ? args.liveLabel : null);
 }
@@ -280,6 +290,40 @@ function ensureMessageToolbarElement(args: {
   );
   args.innerContainer.appendChild(toolbar);
   return toolbar;
+}
+
+/** Enable/disable copy & keyword-hunter when bubble has no real text (TB2). */
+export function syncToolbarContentBoundActions(toolbar: HTMLElement, content: string): void {
+  const copyable = isToolbarCopyableContent(content);
+  toolbar.querySelectorAll<HTMLButtonElement>('[data-toolbar-action="copy"]').forEach(btn => {
+    setToolbarButtonDisabled(btn, !copyable, '暂无正文可复制');
+  });
+  toolbar
+    .querySelectorAll<HTMLButtonElement>('[data-toolbar-action="keyword-hunter"]')
+    .forEach(btn => {
+      setToolbarButtonDisabled(btn, !copyable, '暂无正文可推送');
+    });
+  toolbar.querySelectorAll<HTMLButtonElement>('[data-toolbar-action="edit"]').forEach(btn => {
+    setToolbarButtonDisabled(btn, !copyable, '暂无正文可编辑');
+  });
+}
+
+function setToolbarButtonDisabled(
+  button: HTMLButtonElement,
+  disabled: boolean,
+  disabledTitle: string
+): void {
+  button.disabled = disabled;
+  button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+  if (disabled) {
+    button.title = disabledTitle;
+    button.classList.add('is-disabled');
+  } else {
+    // Restore original aria-label as title when re-enabled.
+    const label = button.getAttribute('aria-label') || '';
+    if (label) button.title = label;
+    button.classList.remove('is-disabled');
+  }
 }
 
 /** Append/update/remove live generation text at the end of the toolbar row. */
@@ -461,7 +505,14 @@ function createMessageToolbar(
   const skillContexts = actions.getSkillContexts?.() || [];
 
   toolbar.appendChild(
-    createToolbarButton('复制消息', getCopyIcon(), () => copyMessageContent(bubble, skillContexts))
+    createToolbarButton(
+      '复制消息',
+      getCopyIcon(),
+      () => copyMessageContent(bubble, skillContexts),
+      {
+        action: 'copy',
+      }
+    )
   );
 
   if (role === 'ai' && actions.sendToKeywordHunter && actions.canSendToKeywordHunter?.()) {
@@ -475,15 +526,18 @@ function createMessageToolbar(
             storedMessage
           );
         },
-        { emphasized: true }
+        { emphasized: true, action: 'keyword-hunter' }
       )
     );
   }
 
   if (role === 'user') {
     toolbar.appendChild(
-      createToolbarButton('编辑消息', getEditIcon(), () =>
-        editMessageContent(chat, bubble, actions)
+      createToolbarButton(
+        '编辑消息',
+        getEditIcon(),
+        () => editMessageContent(chat, bubble, actions),
+        { action: 'edit' }
       )
     );
   }
@@ -495,7 +549,7 @@ function createToolbarButton(
   label: string,
   icon: string,
   onClick: () => void,
-  options: { emphasized?: boolean } = {}
+  options: { emphasized?: boolean; action?: string } = {}
 ): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
@@ -504,10 +558,14 @@ function createToolbarButton(
     : 'deep-chat-message-tool';
   button.title = label;
   button.setAttribute('aria-label', label);
+  if (options.action) {
+    button.dataset.toolbarAction = options.action;
+  }
   setSafeHtml(button, icon);
   button.addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
+    if (button.disabled) return;
     onClick();
   });
   return button;

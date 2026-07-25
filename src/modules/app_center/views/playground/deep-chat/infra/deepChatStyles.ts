@@ -632,6 +632,21 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     outline: none;
   }
 
+  .deep-chat-message-tool:disabled,
+  .deep-chat-message-tool.is-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    color: #94a3b8;
+  }
+
+  .deep-chat-message-tool:disabled:hover,
+  .deep-chat-message-tool.is-disabled:hover,
+  .deep-chat-message-tool:disabled:focus-visible,
+  .deep-chat-message-tool.is-disabled:focus-visible {
+    background: transparent;
+    color: #94a3b8;
+  }
+
   /* Emphasize via icon color only — no fill/border so it stays aligned with sibling tools */
   .deep-chat-message-tool--emphasized {
     background: transparent;

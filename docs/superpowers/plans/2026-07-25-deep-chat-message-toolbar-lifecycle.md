@@ -160,9 +160,9 @@ for (const ms of [32, 80]) {
 
 **Files:** `messageToolbar.ts` `createMessageToolbar`
 
-- [ ] When content empty/ZWSP, disable copy button (`disabled` + aria).
-- [ ] Tests for disabled state.
-- [ ] Commit: `fix(deep-chat): disable copy on empty live toolbar bubble`
+- [x] When content empty/ZWSP, disable copy button (`disabled` + aria).
+- [x] Tests for disabled state.
+- [x] Commit: `fix(deep-chat): disable copy on empty live toolbar bubble`
 
 ---
 
