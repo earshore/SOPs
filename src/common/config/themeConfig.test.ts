@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { THEME_PRESETS, ThemeManager, type ThemeConfig } from './themeConfig';
+import {
+  THEME_PRESETS,
+  ThemeManager,
+  type AppearanceThemeColors,
+  type ThemeConfig,
+} from './themeConfig';
 import { ColorContext } from '../utils/ColorContext';
 import { getRuntimeCssRuleText } from '../utils/runtimeStyles';
 import { StorageService } from '../../services/storageService';
@@ -138,30 +143,54 @@ describe('ThemeManager', () => {
     expect(StorageService.set).not.toHaveBeenCalled();
   });
 
-  it('previews theme colors from CSS variables', () => {
+  it('previews only Appearance-controlled primary-family + focus colors', () => {
     const root = document.documentElement;
     root.style.setProperty('--color-orange-500', '#f97316');
     root.style.setProperty('--color-orange-100', '#ffedd5');
     root.style.setProperty('--color-orange-700', '#c2410c');
+    root.style.setProperty('--color-orange-900', '#7c2d12');
+    root.style.setProperty('--color-focus-ring', '#2563eb');
+    // Status / secondary tokens must not appear on the preview shape (D10)
     root.style.setProperty('--color-secondary', '#64748b');
-    root.style.setProperty('--color-accent', '#06b6d4');
     root.style.setProperty('--color-success', '#16a34a');
-    root.style.setProperty('--color-warning', '#eab308');
-    root.style.setProperty('--color-error', '#dc2626');
-    root.style.setProperty('--color-info', '#2563eb');
 
-    expect(ThemeManager.previewTheme('sunset')).toEqual({
+    const preview = ThemeManager.previewTheme('sunset');
+    expect(preview).toEqual({
       primary: '#f97316',
       primaryLight: '#ffedd5',
       primaryDark: '#c2410c',
-      secondary: '#64748b',
-      accent: '#06b6d4',
-      success: '#16a34a',
-      warning: '#eab308',
-      error: '#dc2626',
-      info: '#2563eb',
-    });
+      primaryDarker: '#7c2d12',
+      // sunset has no custom focus → current document focus-ring
+      focusRing: '#2563eb',
+    } satisfies AppearanceThemeColors);
+    expect(preview).not.toHaveProperty('secondary');
+    expect(preview).not.toHaveProperty('success');
+    expect(preview).not.toHaveProperty('accent');
+    expect(preview).not.toHaveProperty('warning');
+    expect(preview).not.toHaveProperty('error');
+    expect(preview).not.toHaveProperty('info');
     expect(ThemeManager.previewTheme('missing')).toBeNull();
+  });
+
+  it('previews default using blue scheme primary family (no focus override)', () => {
+    const root = document.documentElement;
+    root.style.setProperty('--color-blue-500', '#3b82f6');
+    root.style.setProperty('--color-blue-100', '#dbeafe');
+    root.style.setProperty('--color-blue-700', '#1d4ed8');
+    root.style.setProperty('--color-blue-900', '#1e3a8a');
+    root.style.setProperty('--color-focus-ring', '#3b82f6');
+
+    const preview = ThemeManager.previewTheme('default');
+    expect(preview).toEqual({
+      primary: '#3b82f6',
+      primaryLight: '#dbeafe',
+      primaryDark: '#1d4ed8',
+      primaryDarker: '#1e3a8a',
+      focusRing: '#3b82f6',
+    } satisfies AppearanceThemeColors);
+    expect(Object.keys(preview as AppearanceThemeColors).sort()).toEqual(
+      ['focusRing', 'primary', 'primaryDark', 'primaryDarker', 'primaryLight'].sort()
+    );
   });
 
   it('previews minimal using industrial customVars shades, not scheme-500', () => {
@@ -169,20 +198,22 @@ describe('ThemeManager', () => {
     root.style.setProperty('--color-slate-700', '#334155');
     root.style.setProperty('--color-slate-100', '#f1f5f9');
     root.style.setProperty('--color-slate-800', '#1e293b');
+    root.style.setProperty('--color-slate-900', '#0f172a');
     root.style.setProperty('--color-slate-500', '#64748b');
-    root.style.setProperty('--color-secondary', '#64748b');
-    root.style.setProperty('--color-accent', '#06b6d4');
-    root.style.setProperty('--color-success', '#16a34a');
-    root.style.setProperty('--color-warning', '#eab308');
-    root.style.setProperty('--color-error', '#dc2626');
-    root.style.setProperty('--color-info', '#2563eb');
+    root.style.setProperty('--color-focus-ring', '#2563eb');
 
     const preview = ThemeManager.previewTheme('minimal');
     expect(preview).not.toBeNull();
-    expect(preview?.primary).toBe('#334155');
-    expect(preview?.primaryLight).toBe('#f1f5f9');
-    expect(preview?.primaryDark).toBe('#1e293b');
+    expect(preview).toEqual({
+      primary: '#334155',
+      primaryLight: '#f1f5f9',
+      primaryDark: '#1e293b',
+      primaryDarker: '#0f172a',
+      focusRing: '#334155',
+    } satisfies AppearanceThemeColors);
     expect(preview?.primary).not.toBe('#64748b');
+    // customVars override focus-ring away from document default blue
+    expect(preview?.focusRing).not.toBe('#2563eb');
   });
 
   it('logs and ignores unknown themes', () => {

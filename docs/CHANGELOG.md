@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
+- 主题落地团队作战手册 + 体验验收矩阵（`docs/superpowers/plans/2026-07-26-theme-system-*`）。
+- D6 壳层 `blue-*` 硬编码基线门禁：`npm run theme:hardcode-baseline`（shell 基线 42）。
+- Appearance 预览类型收窄为 `AppearanceThemeColors`（primary 族 + focus；D10）。
 
 ### Changed
 

@@ -1,6 +1,25 @@
 /**
- * 主题配置中心
- * 管理应用的主题系统，支持运行时主题切换
+ * Appearance theme runtime (Layer A) — ThemeManager SSOT.
+ *
+ * A2 dual-layer model (see docs/THEME_SYSTEM_GUIDELINES.md §2.2):
+ *   1. Semantic status colors (success / warning / error / info) — not Appearance
+ *   2. Module ownership (menuConfig / wb-theme-* / ColorContext.infer) — not Appearance
+ *   3. Appearance primary / focus (this file) — user-selectable presets
+ *   4. Neutral surface / text / border
+ *
+ * Runtime contract:
+ * - Unique Appearance API: ThemeManager (no parallel themes.ts).
+ * - Persistence key: `app-theme` (StorageService).
+ * - applyTheme writes only global primary-family (+ optional focus) CSS vars and
+ *   `document.documentElement.dataset.theme` (= appearance id).
+ * - applyTheme MUST NOT call ColorContext.setModuleColor or rewrite module ownership.
+ *
+ * Caveat (debt D3): `data-theme` currently carries the Appearance preset id and is
+ * also used by dark-mode selectors (`[data-theme='dark']`). Appearance apply can
+ * clobber dark. Phase 1 should split `data-appearance` + `data-color-mode`.
+ *
+ * Debt D10: preview / types only promise primary-family + focus — not secondary
+ * or status colors. Those live outside Appearance control.
  */
 
 import type { ColorSchemeName } from '../constants/colorSchemes';
@@ -8,29 +27,46 @@ import { updateRuntimeCssRule } from '../utils/runtimeStyles';
 import { StorageService } from '@/services/storageService';
 import eventBus from '../EventBus';
 
-export interface ThemeColors {
+/**
+ * Colors actually controlled / previewed by Appearance (Layer A).
+ * Matches getColorVars + optional customVars (`--color-focus-ring` on some presets).
+ *
+ * Does **not** include secondary, accent, or status colors — ThemeManager never
+ * switches those (debt D10).
+ */
+export interface AppearanceThemeColors {
   primary: string;
   primaryLight: string;
   primaryDark: string;
-  secondary: string;
-  accent: string;
-  success: string;
-  warning: string;
-  error: string;
-  info: string;
+  primaryDarker: string;
+  /**
+   * Resolved focus ring. Only set by presets that include `--color-focus-ring`
+   * in customVars (e.g. minimal); otherwise the current document value (or empty).
+   */
+  focusRing: string;
 }
+
+/**
+ * @deprecated Use `AppearanceThemeColors`. Alias kept so existing imports keep
+ * compiling while callers migrate off the old over-broad name.
+ *
+ * Historical `ThemeColors` listed secondary/accent/success/warning/error/info, but
+ * Appearance never applied them. Prefer `AppearanceThemeColors` for new code.
+ */
+export type ThemeColors = AppearanceThemeColors;
 
 export interface ThemeConfig {
   id: string;
   name: string;
   description?: string;
   colorScheme: ColorSchemeName;
+  /** Optional CSS var overrides; Appearance-safe keys are primary* / focus-ring. */
   customVars?: Record<string, string>;
   darkMode?: boolean;
 }
 
 /**
- * 预设主题配置
+ * 预设主题配置（Appearance presets only — Layer A）
  */
 export const THEME_PRESETS: Record<string, ThemeConfig> = {
   default: {
@@ -86,14 +122,20 @@ export const THEME_PRESETS: Record<string, ThemeConfig> = {
 };
 
 /**
- * 主题管理器
+ * 主题管理器 — Appearance-only runtime.
+ * Does not own module colors, status colors, or color-mode (dark).
  */
 export class ThemeManager {
   private static currentTheme: string = 'default';
   private static customThemes: Map<string, ThemeConfig> = new Map();
 
   /**
-   * 应用主题
+   * Apply an Appearance preset.
+   * Writes primary-family (+ optional focus) CSS vars and data-theme = appearance id.
+   * Does **not** call ColorContext.setModuleColor (A2 / Layer B remains ownership-only).
+   * Persistence: StorageService key `app-theme`.
+   *
+   * Note (D3): overwriting data-theme can clear a concurrent dark-mode marker.
    */
   static applyTheme(themeId: string, options: { animate?: boolean } = {}): void {
     const theme = this.getTheme(themeId);
@@ -106,7 +148,7 @@ export class ThemeManager {
     const previousTheme = this.currentTheme;
     const root = document.documentElement;
 
-    // 更新CSS变量
+    // 更新CSS变量（primary 族 + customVars；不含状态色 / 模块色）
     const colorVars: Record<string, string> = this.getColorVars(theme.colorScheme);
 
     // 应用自定义变量
@@ -116,7 +158,7 @@ export class ThemeManager {
       });
     }
 
-    // 更新data属性
+    // 更新data属性（appearance id；D3: shared with dark until Phase 1 split）
     root.dataset.theme = themeId;
     const themeSelector = getThemeSelector(themeId);
     updateRuntimeCssRule('theme-manager-vars', themeSelector, {
@@ -149,7 +191,8 @@ export class ThemeManager {
   }
 
   /**
-   * 获取颜色变量
+   * Primary-family CSS vars for a color scheme (Appearance write surface).
+   * Status / secondary / accent tokens are intentionally omitted.
    */
   private static getColorVars(colorScheme: ColorSchemeName): Record<string, string> {
     return {
@@ -189,7 +232,7 @@ export class ThemeManager {
   }
 
   /**
-   * 从本地存储恢复主题
+   * 从本地存储恢复主题（key: `app-theme`）
    */
   static restoreTheme(): void {
     const savedTheme = StorageService.get<string>('app-theme', null);
@@ -199,10 +242,11 @@ export class ThemeManager {
   }
 
   /**
-   * 预览主题（不应用）
-   * 与 applyTheme 使用同一套 getColorVars + customVars 合并结果解析色值。
+   * Preview Appearance colors without applying.
+   * Uses the same getColorVars + customVars merge as applyTheme.
+   * Returns only primary-family + focus (AppearanceThemeColors) — not status colors.
    */
-  static previewTheme(themeId: string): ThemeColors | null {
+  static previewTheme(themeId: string): AppearanceThemeColors | null {
     const theme = this.getTheme(themeId);
     if (!theme) return null;
 
@@ -213,16 +257,17 @@ export class ThemeManager {
       ...(theme.customVars ?? {}),
     };
 
+    const focusDeclaration = colorVars['--color-focus-ring'];
+    const focusRing = focusDeclaration
+      ? resolveCssColorToken(style, focusDeclaration)
+      : style.getPropertyValue('--color-focus-ring').trim();
+
     return {
       primary: resolveCssColorToken(style, colorVars['--color-primary']),
       primaryLight: resolveCssColorToken(style, colorVars['--color-primary-light']),
       primaryDark: resolveCssColorToken(style, colorVars['--color-primary-dark']),
-      secondary: style.getPropertyValue('--color-secondary').trim(),
-      accent: style.getPropertyValue('--color-accent').trim(),
-      success: style.getPropertyValue('--color-success').trim(),
-      warning: style.getPropertyValue('--color-warning').trim(),
-      error: style.getPropertyValue('--color-error').trim(),
-      info: style.getPropertyValue('--color-info').trim(),
+      primaryDarker: resolveCssColorToken(style, colorVars['--color-primary-darker']),
+      focusRing,
     };
   }
 }
