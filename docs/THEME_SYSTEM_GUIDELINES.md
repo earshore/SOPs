@@ -1,8 +1,8 @@
 # 稳定主题系统规范
 
 **适用范围**: SOPs Web 端所有页面、模块样式、共享组件和视觉整改  
-**更新时间**: 2026-07-02  
-**目标**: 把项目从多套局部视觉方案收敛为稳定、可审计、适合内部运营工作台的主题系统。
+**更新时间**: 2026-07-25  
+**目标**: 把项目从多套局部视觉方案收敛为稳定、可审计、适合内部运营工作台的主题系统；支持用户 Appearance 切换全局 primary，**不**覆盖模块归属色。
 
 ---
 
@@ -15,6 +15,7 @@ SOPs 是内部亚马逊运营作业系统，不是营销官网。主题系统优
 - 状态和风险含义清楚。
 - 主题色用于归属和强调，不承担装饰主角。
 - 可访问性、暗色模式和视觉回归能被稳定验证。
+- 用户可通过 Appearance 切换全局主色（primary / focus）；模块导航与 banner 归属色不受 Appearance 覆盖。
 
 默认视觉方向：
 
@@ -57,6 +58,56 @@ SOPs 是内部亚马逊运营作业系统，不是营销官网。主题系统优
 npm run generate:tokens
 ```
 
+### 2.2 双层主题模型（A2）
+
+运行时颜色决策按以下**优先级**（高 → 低）理解，避免 Appearance 与业务归属互相踩踏：
+
+1. 语义状态色  
+2. 模块归属色  
+3. 外观主色（Appearance）  
+4. 中性 surface / text / border  
+
+| 层 | 数据源 | 可写 | 不可改 |
+| --- | --- | --- | --- |
+| A Appearance | `themeConfig.ts` / `ThemeManager` | `--color-primary*`、`--color-focus-ring` | `wb-theme-*`、menu 归属、状态色 |
+| B Module Ownership | `menuConfig` + banner/colorSchemes | 导航/banner/入口归属 | 不被 Appearance 覆盖 |
+
+**运行时 SSOT：**
+
+- 唯一主题 API：`ThemeManager`（`src/common/config/themeConfig.ts`）。
+- 持久化存储 key：`app-theme`。
+- **已删除** `src/common/config/themes.ts`；不得再引入平行主题配置文件。
+- `applyTheme` 只写全局 primary / focus 相关 CSS 变量与 `data-theme`（appearance id）；**不得**调用 `ColorContext.setModuleColor` 或改写模块归属。
+
+### 2.3 Appearance Presets
+
+用户可选的全局外观预设（id → 名称 / colorScheme）：
+
+| id | 名称 | colorScheme | 备注 |
+| --- | --- | --- | --- |
+| default | 默认 | blue | 商务默认 |
+| minimal | 极简素色 | slate | primary/focus → slate-700 工业档（`customVars`） |
+| ocean | 海洋 | cyan | |
+| forest | 森林 | green | |
+| sunset | 日落 | orange | |
+| purple | 紫罗兰 | purple | |
+| rose | 玫瑰 | rose | |
+
+`minimal` 的 `customVars`（工业档主色，覆盖默认 scheme 的 500 档映射）：
+
+| 变量 | 值 |
+| --- | --- |
+| `--color-primary` | `var(--color-slate-700)` |
+| `--color-primary-light` | `var(--color-slate-100)` |
+| `--color-primary-dark` | `var(--color-slate-800)` |
+| `--color-primary-darker` | `var(--color-slate-900)` |
+| `--color-focus-ring` | `var(--color-slate-700)` |
+
+**契约：**
+
+- Appearance **不得**调用或覆盖模块 `ColorContext` 归属（menu / 路由推断的 `wb-theme-*`、导航色）。
+- **影响面**：仅 token 化的全局壳层（使用 `--color-primary*` / focus 等语义变量的区域）；大量硬编码 `blue-*` 的 UI **可以**不随 Appearance 变色（见债务 D6），验收不要求全站硬编码色跟随。
+
 ---
 
 ## 3. 颜色归属
@@ -67,6 +118,7 @@ npm run generate:tokens
 2. 模块总览页可使用模块 `themeColor`。
 3. 状态色使用语义状态 token，不跟随模块主题色。
 4. 图表和数据系列可以使用多色，但必须有文字、图例或形状辅助，不能只靠颜色表达含义。
+5. Appearance 只改变全局 primary / focus token，不改变上述模块归属决策。
 
 ### 3.2 当前主题映射
 
@@ -80,7 +132,7 @@ npm run generate:tokens
 | SOPs 客服与体验 | `category.color: teal` | `wb-theme-service` / `wb-theme-teal` |
 | 应用中心总览 | `themeColor: purple` | purple / fuchsia，仅用于总览入口 |
 | Master Analysis | `category.color: indigo` | `wb-theme-indigo` |
-| Playground | `category.color: indigo` | indigo；Deep Chat 可隐藏 banner |
+| Playground | **配置**：`category.color` / `themeColor` = `orange` | **实现例外**：Deep Chat 可为 terracotta / `wb-theme-supply` / 隐藏 banner；**不**将 `wb-theme-orange` 写为本轮唯一 banner class。Playground 归属**不是** indigo / cyan |
 | Keyword Hunter | `category.color: fuchsia` | `wb-theme-fuchsia` |
 | PPC Tools | `category.color: emerald` | emerald / teal；自定义 hero 需受控 |
 | Amazon 智库总览 | `themeColor: orange` | orange / red，仅用于总览入口 |
@@ -276,7 +328,22 @@ npm run generate:tokens
 
 ---
 
-## 8. 验收标准
+## 8. 已知债务
+
+以下债务在主题整改中**承认现状**，不在本规范要求“本轮一次清零”；新增代码应避免扩大。
+
+| ID | 内容 |
+| --- | --- |
+| D1 | `variables.css` 重定义基础色阶 / 字号，覆盖 generated |
+| D2 | 圆角语义名与像素不一致；工作台行为写死 ≤8px |
+| D3 | `[data-theme='dark']` 与 appearance id **互斥共用** `data-theme`；`applyTheme` 会覆盖 dark；后续应拆 `data-appearance` / `data-color-mode` |
+| D4 | colorSchemes 营销向 hover 与工作台底线冲突 |
+| D5 | `--focus-ring-soft` 等可能残留蓝系硬编码 |
+| D6 | 大量 UI 硬编码 `blue-*`，Appearance 可见影响有限 |
+
+---
+
+## 9. 验收标准
 
 ### 必跑命令
 
@@ -298,6 +365,12 @@ npm run generate:tokens
 npm run test:visual
 ```
 
+涉及 Appearance / `ThemeManager` 时：
+
+```bash
+npx vitest run src/common/config/themeConfig.test.ts
+```
+
 发布前：
 
 ```bash
@@ -313,18 +386,25 @@ npm run build
 - 工作台面板圆角不超过 `8px`，hover 不移动布局。
 - 页面主视觉颜色和 `menuConfig.ts` 归属一致。
 - 文本对比度、focus、触控目标和可访问名称满足基础要求。
+- Appearance 切换后，模块 banner / `wb-theme-*` 归属**不变**。
+- 只保证 **token 化壳层**随 Appearance 变色；**不要求**硬编码 `blue-*` 全站变色（D6）。
+- **不**验收 dark 模式与 Appearance 联用（D3）。
+- `npx vitest run src/common/config/themeConfig.test.ts` 通过。
+- 仓库中**不存在** `src/common/config/themes.ts`。
+- `applyTheme` **不**调用 `ColorContext.setModuleColor`。
 
 ---
 
-## 9. 和现有文档的关系
+## 10. 和现有文档的关系
 
-- 本文是主题系统的上层规范，回答“颜色、token、组件和例外怎么决策”。
+- 本文是主题系统的上层规范（宪法），回答“颜色、token、组件、Appearance 与模块归属、例外怎么决策”。
 - `docs/VISUAL_DESIGN_GUIDELINES.md` 是页面视觉和 welcome banner 的详细执行规范。
 - `src/css/README.md` 是 CSS 目录和组件使用说明。
 - `src/css/QUICK-REFERENCE.md` 是变量和组件类速查，不作为主题决策源。
+- Appearance 运行时实现以 `src/common/config/themeConfig.ts` 为准；模块归属以 `menuConfig.ts` 与 banner `wb-theme-*` 为准。
 
 当文档冲突时，优先级为：
 
-1. 本文的主题系统分层和验收规则。
+1. 本文的主题系统分层（含 A2 双层模型）和验收规则。
 2. `VISUAL_DESIGN_GUIDELINES.md` 的页面和 banner 细则。
 3. `src/css/README.md` 与 `QUICK-REFERENCE.md` 的实现速查。
