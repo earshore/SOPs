@@ -200,6 +200,7 @@ export class ThemeManager {
 
   /**
    * 预览主题（不应用）
+   * 与 applyTheme 使用同一套 getColorVars + customVars 合并结果解析色值。
    */
   static previewTheme(themeId: string): ThemeColors | null {
     const theme = this.getTheme(themeId);
@@ -207,19 +208,39 @@ export class ThemeManager {
 
     const root = document.documentElement;
     const style = getComputedStyle(root);
+    const colorVars: Record<string, string> = {
+      ...this.getColorVars(theme.colorScheme),
+      ...(theme.customVars ?? {}),
+    };
 
     return {
-      primary: style.getPropertyValue(`--color-${theme.colorScheme}-500`),
-      primaryLight: style.getPropertyValue(`--color-${theme.colorScheme}-100`),
-      primaryDark: style.getPropertyValue(`--color-${theme.colorScheme}-700`),
-      secondary: style.getPropertyValue('--color-secondary'),
-      accent: style.getPropertyValue('--color-accent'),
-      success: style.getPropertyValue('--color-success'),
-      warning: style.getPropertyValue('--color-warning'),
-      error: style.getPropertyValue('--color-error'),
-      info: style.getPropertyValue('--color-info'),
+      primary: resolveCssColorToken(style, colorVars['--color-primary']),
+      primaryLight: resolveCssColorToken(style, colorVars['--color-primary-light']),
+      primaryDark: resolveCssColorToken(style, colorVars['--color-primary-dark']),
+      secondary: style.getPropertyValue('--color-secondary').trim(),
+      accent: style.getPropertyValue('--color-accent').trim(),
+      success: style.getPropertyValue('--color-success').trim(),
+      warning: style.getPropertyValue('--color-warning').trim(),
+      error: style.getPropertyValue('--color-error').trim(),
+      info: style.getPropertyValue('--color-info').trim(),
     };
   }
+}
+
+/**
+ * Resolve a theme color declaration to a concrete computed value.
+ * Supports `var(--token)` references used by getColorVars / customVars.
+ */
+function resolveCssColorToken(style: CSSStyleDeclaration, declaration: string | undefined): string {
+  if (!declaration) {
+    return '';
+  }
+  const trimmed = declaration.trim();
+  const varMatch = trimmed.match(/^var\(\s*(--[a-zA-Z0-9-]+)\s*(?:,[^)]*)?\)$/);
+  if (varMatch?.[1]) {
+    return style.getPropertyValue(varMatch[1]).trim();
+  }
+  return trimmed;
 }
 
 function getThemeSelector(themeId: string): string {

@@ -107,6 +107,7 @@ npm run generate:tokens
 
 - Appearance **不得**调用或覆盖模块 `ColorContext` 归属（menu / 路由推断的 `wb-theme-*`、导航色）。
 - **影响面**：仅 token 化的全局壳层（使用 `--color-primary*` / focus 等语义变量的区域）；大量硬编码 `blue-*` 的 UI **可以**不随 Appearance 变色（见债务 D6），验收不要求全站硬编码色跟随。
+- `ThemeManager.previewTheme` 与 `applyTheme` 使用同一套 `getColorVars` + `customVars` 合并结果解析色值（例如 `minimal` 预览为 slate-700 工业档，而非 scheme 默认 500）。
 
 ---
 

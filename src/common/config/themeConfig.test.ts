@@ -106,12 +106,17 @@ describe('ThemeManager', () => {
     expect(THEME_PRESETS.minimal.colorScheme).toBe('slate');
   });
 
-  it('lists appearance presets with minimal second after default', () => {
+  it('lists appearance presets in exact enterprise order', () => {
     const ids = ThemeManager.getAllThemes().map(t => t.id);
-    expect(ids.slice(0, 2)).toEqual(['default', 'minimal']);
-    expect(ids).toEqual(
-      expect.arrayContaining(['default', 'minimal', 'ocean', 'forest', 'sunset', 'purple', 'rose'])
-    );
+    expect(ids).toEqual([
+      'default',
+      'minimal',
+      'ocean',
+      'forest',
+      'sunset',
+      'purple',
+      'rose',
+    ]);
   });
 
   it('registers custom themes, restores persisted themes, and skips invalid saved themes', () => {
@@ -165,6 +170,27 @@ describe('ThemeManager', () => {
       info: '#2563eb',
     });
     expect(ThemeManager.previewTheme('missing')).toBeNull();
+  });
+
+  it('previews minimal using industrial customVars shades, not scheme-500', () => {
+    const root = document.documentElement;
+    root.style.setProperty('--color-slate-700', '#334155');
+    root.style.setProperty('--color-slate-100', '#f1f5f9');
+    root.style.setProperty('--color-slate-800', '#1e293b');
+    root.style.setProperty('--color-slate-500', '#64748b');
+    root.style.setProperty('--color-secondary', '#64748b');
+    root.style.setProperty('--color-accent', '#06b6d4');
+    root.style.setProperty('--color-success', '#16a34a');
+    root.style.setProperty('--color-warning', '#eab308');
+    root.style.setProperty('--color-error', '#dc2626');
+    root.style.setProperty('--color-info', '#2563eb');
+
+    const preview = ThemeManager.previewTheme('minimal');
+    expect(preview).not.toBeNull();
+    expect(preview?.primary).toBe('#334155');
+    expect(preview?.primaryLight).toBe('#f1f5f9');
+    expect(preview?.primaryDark).toBe('#1e293b');
+    expect(preview?.primary).not.toBe('#64748b');
   });
 
   it('logs and ignores unknown themes', () => {
