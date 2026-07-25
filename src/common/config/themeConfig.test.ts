@@ -108,15 +108,7 @@ describe('ThemeManager', () => {
 
   it('lists appearance presets in exact enterprise order', () => {
     const ids = ThemeManager.getAllThemes().map(t => t.id);
-    expect(ids).toEqual([
-      'default',
-      'minimal',
-      'ocean',
-      'forest',
-      'sunset',
-      'purple',
-      'rose',
-    ]);
+    expect(ids).toEqual(['default', 'minimal', 'ocean', 'forest', 'sunset', 'purple', 'rose']);
   });
 
   it('registers custom themes, restores persisted themes, and skips invalid saved themes', () => {
