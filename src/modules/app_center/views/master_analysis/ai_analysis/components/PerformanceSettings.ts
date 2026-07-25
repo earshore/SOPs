@@ -1,6 +1,6 @@
 /**
  * 性能设置组件
- * 允许用户调整并行分析的性能参数
+ * 模块内只读摘要 + 深链打开系统设置；策略写入唯一入口为系统设置。
  */
 
 import { getCacheStatsAsync, clearAnalysisCacheAsync } from '../services/parallelAnalysisService';
@@ -18,6 +18,8 @@ import {
   type ScheduleTier,
 } from '../services/analysisScheduler';
 import { showToast } from '@/common/ui/index';
+import { openSettings } from '@/components/settings/systemSettings';
+
 const SETTINGS_VERSION = 3;
 
 export type { AnalysisSchedulePlan, FailureStrategy, SchedulingPreference, ScheduleTier };
@@ -45,13 +47,13 @@ const SCHEDULE_TIER_CONFIG: Record<ScheduleTier, { label: string; activeClass: s
 };
 
 /**
- * 性能设置接口
+ * 性能设置接口（只读消费；写入走系统设置 Runtime）
  */
 export interface PerformanceSettings {
-  schedulingPreference: SchedulingPreference; // 用户调度偏好
-  enableCache: boolean; // 是否启用缓存
-  maxConcurrency: number; // 由调度算法派生的最大并发数
-  failureStrategy: FailureStrategy; // 由调度算法派生的失败处理策略
+  schedulingPreference: SchedulingPreference;
+  enableCache: boolean;
+  maxConcurrency: number;
+  failureStrategy: FailureStrategy;
   settingsVersion?: number;
 }
 
@@ -60,6 +62,7 @@ interface PerformanceSettingsPanelContext {
   settings: PerformanceSettings;
   cacheStats: { count: number; totalSize: number };
   updateCacheStats(): Promise<void>;
+  refreshSettingsFromRuntime(): void;
 }
 
 type PanelMixin<T extends object> = T & ThisType<PerformanceSettingsPanelContext>;
@@ -67,9 +70,6 @@ type PerformanceSettingsPanel = PerformanceSettingsPanelContext &
   ReturnType<typeof createPerformanceSettingsActions> &
   ReturnType<typeof createScheduleGetters>;
 
-/**
- * 默认设置
- */
 const DEFAULT_SETTINGS: PerformanceSettings = {
   schedulingPreference: 'recommended',
   maxConcurrency: 4,
@@ -112,9 +112,7 @@ function normalizeSettings(settings: Partial<PerformanceSettings>): PerformanceS
   };
 }
 
-/**
- * 获取性能设置
- */
+/** 只读：从 Runtime 读取当前策略 */
 export function getPerformanceSettings(): PerformanceSettings {
   try {
     return normalizeSettings(getRuntimeMasterAnalysisOptions());
@@ -124,7 +122,8 @@ export function getPerformanceSettings(): PerformanceSettings {
 }
 
 /**
- * 保存性能设置
+ * 写入 Runtime（供系统设置 / 测试使用）。
+ * 模块 UI 不再调用此函数保存策略。
  */
 export function savePerformanceSettings(settings: PerformanceSettings): void {
   try {
@@ -148,83 +147,53 @@ function createPerformanceSettingsActions(): PanelMixin<{
   init(): void;
   updateCacheStats(): Promise<void>;
   toggleSettings(): void;
-  saveSettings(): void;
-  resetSettings(): void;
-  setSchedulingPreference(event: Event): void;
-  setEnableCache(event: Event): void;
+  openSystemSettings(): void;
+  refreshSettingsFromRuntime(): void;
   clearCache(): Promise<void>;
   formatSize(bytes: number): string;
 }> {
   return {
-    // 初始化
     init() {
       this.updateCacheStats();
     },
 
-    // 更新缓存统计
     async updateCacheStats() {
       this.cacheStats = await getCacheStatsAsync();
     },
 
-    // 切换设置面板
+    /** Show read-only summary panel (no strategy editors). */
     toggleSettings() {
       this.showSettings = !this.showSettings;
       if (this.showSettings) {
+        this.refreshSettingsFromRuntime();
         void this.updateCacheStats();
       }
     },
 
-    // 保存设置
-    saveSettings() {
-      try {
-        savePerformanceSettings(normalizeSettings(this.settings));
-        this.showSettings = false;
-
-        // 显示成功提示
-        showToast('分析设置已保存', { type: 'success' });
-      } catch (error) {
-        showToast('保存失败: ' + (error as Error).message, { type: 'error' });
-      }
+    refreshSettingsFromRuntime() {
+      this.settings = getPerformanceSettings();
     },
 
-    // 重置为默认值
-    resetSettings() {
-      this.settings = { ...DEFAULT_SETTINGS };
-    },
-
-    setSchedulingPreference(event: Event) {
-      const target = event.target as HTMLInputElement;
-      const schedulingPreference = isSchedulingPreference(target.value)
-        ? target.value
-        : DEFAULT_SETTINGS.schedulingPreference;
-
-      this.settings = normalizeSettings({
-        ...this.settings,
-        schedulingPreference,
+    /** Deep-link into system settings tool strategy → Master Analysis. */
+    openSystemSettings() {
+      this.showSettings = false;
+      openSettings({
+        sectionId: 'settings-section-tool-strategy',
+        focus: 'master-analysis',
+        density: 'advanced',
       });
     },
 
-    setEnableCache(event: Event) {
-      const target = event.target as HTMLInputElement;
-      this.settings = {
-        ...this.settings,
-        enableCache: target.checked,
-      };
-    },
-
-    // 清除缓存
     async clearCache() {
       try {
         await clearAnalysisCacheAsync();
         await this.updateCacheStats();
-
         showToast('缓存已清除', { type: 'success' });
       } catch (error) {
         showToast('清除失败: ' + (error as Error).message, { type: 'error' });
       }
     },
 
-    // 格式化文件大小
     formatSize(bytes: number): string {
       if (bytes < 1024) return bytes + ' B';
       if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
@@ -310,11 +279,10 @@ function applyPanelMixin(panel: object, mixin: object): void {
 }
 
 /**
- * 创建性能设置面板
+ * 创建性能设置面板（摘要 + 深链）
  */
 export function createPerformanceSettingsPanel(): PerformanceSettingsPanel {
   const panel = {
-    // 状态
     showSettings: false,
     settings: getPerformanceSettings(),
     cacheStats: { count: 0, totalSize: 0 },

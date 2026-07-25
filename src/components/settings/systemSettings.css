@@ -187,6 +187,14 @@
   padding: 0.75rem;
 }
 
+/* Temporary highlight when opened via deep link focus */
+.settings-deep-link-highlight {
+  outline: 2px solid color-mix(in srgb, var(--settings-accent, #6366f1) 55%, transparent);
+  outline-offset: 3px;
+  border-radius: 0.75rem;
+  transition: outline-color 0.3s ease;
+}
+
 .settings-card__title {
   margin: 0;
   font-size: 0.75rem;

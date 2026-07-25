@@ -92,6 +92,13 @@ import {
   evaluateSettingsHealth,
   isRuntimeRawInvalid,
 } from '@/components/settings/domain/settingsHealth';
+import {
+  applySettingsDeepLink,
+  normalizeSettingsOpenOptions,
+  type SettingsOpenOptions,
+} from '@/components/settings/domain/settingsDeepLink';
+
+export type { SettingsOpenOptions } from '@/components/settings/domain/settingsDeepLink';
 
 let alpineRetryCount = 0;
 
@@ -328,7 +335,7 @@ interface SettingsPanelData {
   healthMessages: string[];
   dirtyPartitions: SettingsDirtyPartition[];
   init(): void;
-  open(): Promise<void>;
+  open(options?: SettingsOpenOptions): Promise<void>;
   close(): Promise<void>;
   destroy(): void; // 新增：清理方法
   captureSettingsBaseline(): void;
@@ -1478,8 +1485,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
     void this.refreshLocalDataUsage();
 
     // 订阅 EventBus 事件，保存清理函数
-    const unsubOpen = eventBus.on(APP_EVENTS.SETTINGS_OPEN, () => {
-      void this.open();
+    const unsubOpen = eventBus.on(APP_EVENTS.SETTINGS_OPEN, payload => {
+      void this.open(
+        normalizeSettingsOpenOptions(
+          payload as SettingsOpenOptions | null | undefined
+        )
+      );
     });
 
     const unsubClose = eventBus.on(APP_EVENTS.SETTINGS_CLOSE, () => {
@@ -1492,7 +1503,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     registerSettingsWatchers(this as SettingsPanelData & AlpineWatchContext);
   },
 
-  async open() {
+  async open(options?: SettingsOpenOptions) {
     this.isOpen = true;
     const rawRuntime = StorageService.get(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS);
     this._runtimeHealthNormalized = isRuntimeRawInvalid(rawRuntime);
@@ -1505,6 +1516,16 @@ const settingsPanelBehavior: SettingsPanelPart = {
       this.refreshSettingsHealth();
     });
     this.captureSettingsBaseline();
+
+    const deepLink = normalizeSettingsOpenOptions(options);
+    if (deepLink.sectionId || deepLink.focus || deepLink.density) {
+      // Defer until panel is painted so section nodes exist for scroll/focus.
+      queueMicrotask(() => {
+        applySettingsDeepLink(deepLink, {
+          scrollToSection: sectionId => this.scrollToSection(sectionId),
+        });
+      });
+    }
   },
 
   refreshSettingsHealth(): void {
@@ -2262,12 +2283,19 @@ export function initAlpineSettings(): void {
 }
 
 // Legacy Bridge for ActionRegistry
-export function openSettings(): void {
-  eventBus.emit(APP_EVENTS.SETTINGS_OPEN);
+export function openSettings(options?: SettingsOpenOptions): void {
+  const deepLink = normalizeSettingsOpenOptions(options);
+  eventBus.emit(APP_EVENTS.SETTINGS_OPEN, {
+    ...deepLink,
+    timestamp: Date.now(),
+  });
 }
 
 export function closeSettings(): void {
-  eventBus.emit(APP_EVENTS.SETTINGS_CLOSE);
+  eventBus.emit(APP_EVENTS.SETTINGS_CLOSE, {
+    saved: false,
+    timestamp: Date.now(),
+  });
 }
 
 /**

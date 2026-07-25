@@ -1015,10 +1015,49 @@ it('emits settings bridge events through EventBus', () => {
   fetchModels();
 
   expect(open).toHaveBeenCalledTimes(1);
+  expect(open.mock.calls[0][0]).toMatchObject({ timestamp: expect.any(Number) });
   expect(close).toHaveBeenCalledTimes(1);
+  expect(close.mock.calls[0][0]).toMatchObject({
+    saved: false,
+    timestamp: expect.any(Number),
+  });
 
   unsubscribeOpen();
   unsubscribeClose();
+});
+
+it('openSettings forwards deep-link options on SETTINGS_OPEN', () => {
+  const open = vi.fn();
+  const unsub = eventBus.on(APP_EVENTS.SETTINGS_OPEN, open);
+
+  openSettings({
+    sectionId: 'settings-section-tool-strategy',
+    focus: 'master-analysis',
+    density: 'advanced',
+  });
+
+  expect(open).toHaveBeenCalledWith(
+    expect.objectContaining({
+      sectionId: 'settings-section-tool-strategy',
+      focus: 'master-analysis',
+      density: 'advanced',
+    })
+  );
+  unsub();
+});
+
+it('panel open with options scrolls to sectionId', async () => {
+  const panel = createPanel();
+  const scroll = vi.spyOn(panel, 'scrollToSection');
+
+  await panel.open({
+    sectionId: 'settings-section-performance',
+    focus: 'unused-focus-id',
+  });
+  await Promise.resolve();
+
+  expect(panel.isOpen).toBe(true);
+  expect(scroll).toHaveBeenCalledWith('settings-section-performance');
 });
 
 it('scrolls settings sections without changing the URL hash', () => {

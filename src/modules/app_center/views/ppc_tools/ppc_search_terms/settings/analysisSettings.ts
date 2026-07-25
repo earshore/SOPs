@@ -1,4 +1,4 @@
-import { StorageService } from '@/services/storageService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
   getRuntimePpcSearchTermsOptions,
   getRuntimeStrategySettings,
@@ -14,7 +14,8 @@ export interface AnalysisSettings {
   context: PpcSearchTermsAnalysisContext;
 }
 
-const ANALYSIS_SETTINGS_STORAGE_KEY = 'ppc_search_terms_analysis_settings_v1';
+/** @deprecated Legacy dual-write key for strategy flags — migrate once, never write strategy here. */
+const LEGACY_ANALYSIS_SETTINGS_STORAGE_KEY = 'ppc_search_terms_analysis_settings_v1';
 
 export { getAnalysisSettingInputs };
 
@@ -35,18 +36,18 @@ export function readAnalysisSettings(container: HTMLElement): AnalysisSettings {
 }
 
 export function restoreAnalysisSettings(container: HTMLElement): void {
+  migrateLegacyAnalysisStrategyIfNeeded();
   const saved = getRuntimePpcSearchTermsOptions();
   setChecked(container, 'ppc-search-terms-use-agent', saved.useAgent);
   setChecked(container, 'ppc-search-terms-allow-local-fallback', saved.allowLocalFallback);
   setChecked(container, 'ppc-search-terms-use-context', saved.useContext);
 }
 
+/**
+ * Strategy flags (useAgent / allowLocalFallback / useContext) write Runtime only.
+ * Session context (asin / listing text) stays module-local and is not persisted here.
+ */
 export function saveAnalysisSettings(settings: AnalysisSettings): void {
-  StorageService.set(ANALYSIS_SETTINGS_STORAGE_KEY, {
-    useAgent: settings.useAgent,
-    allowLocalFallback: settings.allowLocalFallback,
-    useContext: settings.useContext,
-  });
   const runtimeSettings = getRuntimeStrategySettings();
   saveRuntimeStrategySettings({
     ...runtimeSettings,
@@ -57,4 +58,48 @@ export function saveAnalysisSettings(settings: AnalysisSettings): void {
       useContext: settings.useContext,
     },
   });
+}
+
+function migrateLegacyAnalysisStrategyIfNeeded(): void {
+  const legacy = StorageService.get<{
+    useAgent?: boolean;
+    allowLocalFallback?: boolean;
+    useContext?: boolean;
+  }>(LEGACY_ANALYSIS_SETTINGS_STORAGE_KEY, null);
+  if (!legacy || typeof legacy !== 'object') {
+    return;
+  }
+
+  const rawRuntime = StorageService.get(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS);
+  const hasRuntimePpc =
+    rawRuntime !== null &&
+    typeof rawRuntime === 'object' &&
+    !Array.isArray(rawRuntime) &&
+    'ppcSearchTerms' in (rawRuntime as Record<string, unknown>) &&
+    typeof (rawRuntime as Record<string, unknown>).ppcSearchTerms === 'object' &&
+    (rawRuntime as Record<string, unknown>).ppcSearchTerms !== null;
+
+  if (!hasRuntimePpc) {
+    const runtimeSettings = getRuntimeStrategySettings();
+    saveRuntimeStrategySettings({
+      ...runtimeSettings,
+      ppcSearchTerms: {
+        ...runtimeSettings.ppcSearchTerms,
+        useAgent:
+          typeof legacy.useAgent === 'boolean'
+            ? legacy.useAgent
+            : runtimeSettings.ppcSearchTerms.useAgent,
+        allowLocalFallback:
+          typeof legacy.allowLocalFallback === 'boolean'
+            ? legacy.allowLocalFallback
+            : runtimeSettings.ppcSearchTerms.allowLocalFallback,
+        useContext:
+          typeof legacy.useContext === 'boolean'
+            ? legacy.useContext
+            : runtimeSettings.ppcSearchTerms.useContext,
+      },
+    });
+  }
+
+  StorageService.remove(LEGACY_ANALYSIS_SETTINGS_STORAGE_KEY);
 }

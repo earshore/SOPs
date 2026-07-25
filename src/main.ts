@@ -675,8 +675,29 @@ registerActionsWithLegacy({
     }
   },
 
-  // === Settings 设置（懒加载 settings 模块） ===
-  openSettings: async () => withSystemSettings(s => s.openSettings()),
+  // === Settings 设置（懒加载 settings 模块；支持深链 options） ===
+  openSettings: async (params?: Record<string, unknown>) =>
+    withSystemSettings(s =>
+      s.openSettings(
+        params && typeof params === 'object'
+          ? {
+              sectionId: params.sectionId as
+                | 'settings-section-llm'
+                | 'settings-section-tool-strategy'
+                | 'settings-section-network'
+                | 'settings-section-data'
+                | 'settings-section-appearance'
+                | 'settings-section-performance'
+                | undefined,
+              focus: typeof params.focus === 'string' ? params.focus : undefined,
+              density:
+                params.density === 'simple' || params.density === 'advanced'
+                  ? params.density
+                  : undefined,
+            }
+          : undefined
+      )
+    ),
   closeSettings: async () => withSystemSettings(s => s.closeSettings()),
   downloadAmazonInsightPlugin: () => {
     closeMegaMenus({ blurActive: true });

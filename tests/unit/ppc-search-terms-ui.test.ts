@@ -435,14 +435,25 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
       targetAcos.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    expect(mocks.storageSet).toHaveBeenCalledWith('ppc_search_terms_thresholds_v1', {
-      targetAcos: 40,
-      highAcos: 63,
-      minClicksNoOrder: 18,
-      minSpendNoOrder: 24,
-      minOrdersHarvest: 4,
-      minCtr: 0.5,
-    });
+    expect(mocks.storageSet).not.toHaveBeenCalledWith(
+      'ppc_search_terms_thresholds_v1',
+      expect.anything()
+    );
+    expect(mocks.storageSet).toHaveBeenCalledWith(
+      'runtime_strategy_settings',
+      expect.objectContaining({
+        ppcSearchTerms: expect.objectContaining({
+          thresholds: expect.objectContaining({
+            targetAcos: 40,
+            highAcos: 63,
+            minClicksNoOrder: 18,
+            minSpendNoOrder: 24,
+            minOrdersHarvest: 4,
+            minCtr: 0.5,
+          }),
+        }),
+      })
+    );
   });
 
   it('migrates legacy PPC Search Terms settings storage keys', async () => {

@@ -969,7 +969,7 @@
       </div>
     </div>
 
-    <!-- 性能设置模态框 -->
+    <!-- 性能设置摘要（策略编辑唯一入口：系统设置深链） -->
     <template x-teleport="#modal-container">
       <div
         :hidden="!perfSettings.showSettings"
@@ -978,22 +978,23 @@
         @click.self="perfSettings.toggleSettings()"
       >
         <div
-          class="ma-performance-modal-panel flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl sm:max-h-[88vh]"
+          class="ma-performance-modal-panel flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl sm:max-h-[88vh]"
           role="dialog"
           aria-modal="true"
           aria-labelledby="performance-settings-title"
           @click.stop
         >
-          <!-- Header -->
           <div class="shrink-0 px-5 py-4 border-b border-slate-200">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <i class="fa-solid fa-sliders text-slate-500"></i>
                 <div>
                   <h2 id="performance-settings-title" class="text-lg font-semibold text-slate-900">
-                    性能设置
+                    分析策略摘要
                   </h2>
-                  <p class="mt-0.5 text-sm text-slate-500">选择调度偏好和缓存。</p>
+                  <p class="mt-0.5 text-sm text-slate-500">
+                    调度与缓存策略在系统设置中统一配置。
+                  </p>
                 </div>
               </div>
               <button
@@ -1007,20 +1008,15 @@
             </div>
           </div>
 
-          <!-- Content -->
           <div class="min-h-0 overflow-y-auto px-5 py-4 space-y-4">
-            <!-- 调度偏好 -->
-            <section class="space-y-3">
-              <div class="flex items-center justify-between gap-3">
+            <div class="settings-card space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+              <div class="flex items-start justify-between gap-3">
                 <div>
-                  <div
-                    id="ai-analysis-scheduling-title"
-                    class="text-sm font-semibold text-slate-900"
-                  >
-                    调度偏好
-                  </div>
-                  <p id="ai-analysis-scheduling-helper" class="mt-0.5 text-xs text-slate-500">
-                    系统会自动控制并发与失败处理。
+                  <h3 class="settings-card__title text-sm font-bold text-slate-800">
+                    Master Analysis
+                  </h3>
+                  <p class="settings-card__desc mt-1 text-xs text-slate-500">
+                    当前只读摘要；修改请打开系统设置。
                   </p>
                 </div>
                 <span
@@ -1031,123 +1027,48 @@
                   <span x-text="perfSettings.scheduleTierLabel"></span>
                 </span>
               </div>
-
-              <div
-                class="grid gap-2 md:grid-cols-3"
-                role="radiogroup"
-                aria-labelledby="ai-analysis-scheduling-title"
-                aria-describedby="ai-analysis-scheduling-helper"
-              >
-                <label
-                  class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
-                  :class="perfSettings.getSchedulePreferenceClass('recommended')"
-                >
-                  <input
-                    type="radio"
-                    name="schedulingPreference"
-                    value="recommended"
-                    :checked="perfSettings.settings.schedulingPreference === 'recommended'"
-                    @change="perfSettings.setSchedulingPreference($event)"
-                    class="sr-only"
-                  />
-                  <div class="flex items-center gap-2 text-sm font-semibold">
-                    <i class="fa-solid fa-gauge-high"></i>
-                    推荐档
-                  </div>
-                  <p class="mt-1.5 text-xs leading-snug opacity-75">平衡速度和稳定性</p>
-                </label>
-                <label
-                  class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
-                  :class="perfSettings.getSchedulePreferenceClass('reliability')"
-                >
-                  <input
-                    type="radio"
-                    name="schedulingPreference"
-                    value="reliability"
-                    :checked="perfSettings.settings.schedulingPreference === 'reliability'"
-                    @change="perfSettings.setSchedulingPreference($event)"
-                    class="sr-only"
-                  />
-                  <div class="flex items-center gap-2 text-sm font-semibold">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    可靠性优先
-                  </div>
-                  <p class="mt-1.5 text-xs leading-snug opacity-75">优先完整结果</p>
-                </label>
-                <label
-                  class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
-                  :class="perfSettings.getSchedulePreferenceClass('speed')"
-                >
-                  <input
-                    type="radio"
-                    name="schedulingPreference"
-                    value="speed"
-                    :checked="perfSettings.settings.schedulingPreference === 'speed'"
-                    @change="perfSettings.setSchedulingPreference($event)"
-                    class="sr-only"
-                  />
-                  <div class="flex items-center gap-2 text-sm font-semibold">
-                    <i class="fa-solid fa-bolt"></i>
-                    速度优先
-                  </div>
-                  <p class="mt-1.5 text-xs leading-snug opacity-75">优先快速完成</p>
-                </label>
-              </div>
-
-              <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
-                <div class="grid grid-cols-3 gap-3">
-                  <div>
-                    <div class="text-[11px] font-medium text-slate-500">当前策略</div>
-                    <div
-                      class="mt-0.5 text-sm font-semibold text-slate-900"
-                      x-text="perfSettings.schedulePreferenceLabel"
-                    ></div>
-                  </div>
-                  <div>
-                    <div class="text-[11px] font-medium text-slate-500">调度方式</div>
-                    <div
-                      class="mt-0.5 text-sm font-semibold text-slate-900"
-                      x-text="perfSettings.scheduleRuntimeText"
-                    ></div>
-                  </div>
-                  <div>
-                    <div class="text-[11px] font-medium text-slate-500">失败处理</div>
-                    <div
-                      class="mt-0.5 text-sm font-semibold text-slate-900"
-                      x-text="perfSettings.scheduleFailureHandlingText"
-                    ></div>
-                  </div>
+              <div class="grid grid-cols-3 gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3">
+                <div>
+                  <div class="text-[11px] font-medium text-slate-500">当前策略</div>
+                  <div
+                    class="mt-0.5 text-sm font-semibold text-slate-900"
+                    x-text="perfSettings.schedulePreferenceLabel"
+                  ></div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-medium text-slate-500">调度方式</div>
+                  <div
+                    class="mt-0.5 text-sm font-semibold text-slate-900"
+                    x-text="perfSettings.scheduleRuntimeText"
+                  ></div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-medium text-slate-500">失败处理</div>
+                  <div
+                    class="mt-0.5 text-sm font-semibold text-slate-900"
+                    x-text="perfSettings.scheduleFailureHandlingText"
+                  ></div>
                 </div>
               </div>
-            </section>
-
-            <!-- 缓存设置 -->
-            <section class="rounded-lg border border-slate-200 bg-white p-3">
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <label class="flex min-h-11 cursor-pointer items-start gap-3">
-                  <input
-                    type="checkbox"
-                    :checked="perfSettings.settings.enableCache"
-                    @change="perfSettings.setEnableCache($event)"
-                    aria-describedby="ai-analysis-cache-helper"
-                    class="mt-1 w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                  />
-                  <div>
-                    <div class="text-sm font-semibold text-slate-900">智能缓存</div>
-                    <div id="ai-analysis-cache-helper" class="mt-1 text-xs text-slate-500">
-                      已缓存
-                      <span
-                        class="font-semibold text-slate-900"
-                        x-text="perfSettings.cacheStats.count"
-                      ></span>
-                      项 ·
-                      <span
-                        class="font-semibold text-slate-900"
-                        x-text="perfSettings.formatSize(perfSettings.cacheStats.totalSize)"
-                      ></span>
-                    </div>
-                  </div>
-                </label>
+              <p class="text-xs text-slate-500">
+                缓存：
+                <span class="font-semibold text-slate-800" x-text="perfSettings.settings.enableCache ? '已启用' : '已关闭'"></span>
+                · 已缓存
+                <span class="font-semibold text-slate-800" x-text="perfSettings.cacheStats.count"></span>
+                项 ·
+                <span
+                  class="font-semibold text-slate-800"
+                  x-text="perfSettings.formatSize(perfSettings.cacheStats.totalSize)"
+                ></span>
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  @click="perfSettings.openSystemSettings()"
+                  class="min-h-10 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-indigo-700 hover:bg-indigo-50 transition-colors"
+                >
+                  在系统设置中配置
+                </button>
                 <button
                   type="button"
                   @click="perfSettings.clearCache()"
@@ -1157,38 +1078,19 @@
                   清除缓存
                 </button>
               </div>
-            </section>
+            </div>
           </div>
 
-          <!-- Footer -->
           <div
-            class="shrink-0 bg-slate-50 px-5 py-3 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-200"
+            class="shrink-0 bg-slate-50 px-5 py-3 flex justify-end gap-3 border-t border-slate-200"
           >
             <button
               type="button"
-              @click="perfSettings.resetSettings()"
-              class="min-h-11 px-3 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors"
+              @click="perfSettings.toggleSettings()"
+              class="min-h-11 px-5 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 font-medium transition-colors"
             >
-              <i class="fa-solid fa-rotate-left mr-2"></i>
-              恢复默认
+              关闭
             </button>
-            <div class="flex gap-3 justify-end">
-              <button
-                type="button"
-                @click="perfSettings.toggleSettings()"
-                class="min-h-11 px-5 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 font-medium transition-colors"
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                @click="perfSettings.saveSettings()"
-                class="min-h-11 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-              >
-                <i class="fa-solid fa-check mr-2"></i>
-                保存设置
-              </button>
-            </div>
           </div>
         </div>
       </div>

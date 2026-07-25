@@ -56,7 +56,11 @@ declare global {
     clearSidebarSearch?: () => void;
 
     // 设置相关
-    openSettings?: () => void;
+    openSettings?: (options?: {
+      sectionId?: string;
+      focus?: string;
+      density?: 'simple' | 'advanced';
+    }) => void;
     closeSettings?: () => void;
     saveProviderConfig?: () => void;
     loadProviderConfig?: () => void;
