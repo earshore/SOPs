@@ -26,14 +26,21 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本           | 说明                                               |
 | ---------------------------- | -------------- | -------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.0.10`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.11-rc.8` | 系统设置企业级硬化（保存契约 / 二级导航 / 推理 5 档）；**勿**默认当生产 |
-| package.json                 | `3.0.11-rc.8`  | 与 RC tag / Release 一致（GA 前）                  |
+| **当前 Pre-release 候选**    | `v3.0.11-rc.9` | 主题架构收口 + 可行动 LLM 失败体验 + 文档权威；**勿**默认当生产 |
+| package.json                 | `3.0.11-rc.9`  | 与 RC tag / Release 一致（GA 前）                  |
 | 上一 GA                      | `v3.0.10`      | 回滚参考                                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.8` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.9` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.8`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.9`。
+
+`v3.0.11-rc.9`（2026-07-26，Pre-release）收口 rc.8 之后的主题、失败体验与文档权威：
+
+- **主题**：极简素色 Appearance、`themes.ts` 删除、A2 模块归属独立；THEME/VISUAL 与 INDEX 文档权威。
+- **LLM UX**：可行动失败 Toast / 打开设置深链；推理 effort 按模型上限 clamp。
+- **稳定性**：Keyword Hunter BaseModule 生命周期、设置订阅 init-once、共享下载/LLM bridge 收敛。
+- GitHub Latest **仍指向** `v3.0.10`；回滚基线为 `v3.0.10`。
 
 `v3.0.11-rc.8`（2026-07-25，Pre-release）收口 rc.7 之后的系统设置硬化：
 

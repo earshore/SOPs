@@ -9,22 +9,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [3.0.11-rc.9] - 2026-07-26
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.8` 之后的**主题架构企业级收口**、**可行动 LLM 失败体验**、Keyword Hunter 生命周期与文档权威整理。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- 外观主题 **极简素色（`minimal`）**：工业 slate-700 primary/focus；设置面板自动出现；A2 分层（Appearance 不覆盖模块归属色）。
 - 共享 LLM 失败体验：`formatLlmFailureUx` / `showLlmFailureToast`（配置/401/429/超时/存储满等可行动 Toast，支持「打开设置」深链）。
 - Toast 可选 `action` 按钮（`notifications` + `.toast-action` 样式）。
 - 运维文档：`docs/troubleshooting/DEGRADATION_MATRIX.md`（LLM / 存储 / chunk 降级与代码路径对照）。
 - 工具 LLM 错误码速查：`docs/troubleshooting/LLM_ERROR_CODES.md`（`ERR_LLM_*` 与历史码映射）。
+- 主题架构 Spec / Plan：`docs/superpowers/specs|plans/2026-07-25-theme-architecture-enterprise*.md`；`THEME_SYSTEM` / `VISUAL` 双层契约与 D1–D6 债务登记。
+- 文档权威：`.kiro/README.md`（historical）、`docs/superpowers/README.md`、刷新 `docs/INDEX.md` 现行 vs 归档分区。
 
 ### Changed
 
+- 删除无引用的 `src/common/config/themes.ts` 双轨主题运行时；Appearance 仅 `ThemeManager`（`app-theme`）。
+- `ThemeManager.applyTheme` 不再调用 `ColorContext.setModuleColor`；`previewTheme` 与 customVars 对齐。
 - 收敛下载 / CSV / 剪贴板 / 一次性 handoff / `llmToolBridge` / `llmRequestCache` / Alpine panel 工厂，业务模块改复用共享实现。
 - Keyword Hunter：DOM/定时器经 BaseModule disposable；离开时拆除 body 浮动 chrome。
 - 系统设置：EventBus / storage / `$watch` 订阅 init-once，避免重复打开堆监听。
+- 根目录 one-off Deep Chat 审查笔记迁入 `docs/archive/ui-audit/`（结构清理 batch B）。
 
 ### Fixed
 
 - 设置 E2E smoke：展开 LLM 折叠步骤后再操作凭证与模型列表。
 - `GlobalErrorHandler` 通知用户时按 `showToast(title, { type })` 调用，并走 LLM actionable UX。
 - AI Analysis / Keyword Hunter 分析失败提示统一为可行动 LLM 失败 Toast。
+- 模型列表拉取错误映射 complexity（ESLint warning gate）。
+- 推理档位按模型上限 clamp（如 Grok `max` → `high`），避免非法 effort 写入网关。
+- `themeConfig` 单测 / type-check:tests / Prettier 门禁与完整 `npm run build` 通过（rc.8 后主题批次）。
 
 ## [3.0.11-rc.8] - 2026-07-25
 
