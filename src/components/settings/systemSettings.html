@@ -1131,11 +1131,22 @@
                     </div>
                   </details>
 
-                  <div class="settings-submodule" data-settings-focus="master-analysis-ai">
-                    <div class="settings-submodule__head">
-                      <h5 class="settings-submodule__title">AI 智能分析</h5>
-                      <p class="settings-submodule__desc">默认模型、调度与 Token 限额</p>
-                    </div>
+                  <details
+                    class="settings-submodule settings-collapsible-card"
+                    data-settings-focus="master-analysis-ai"
+                  >
+                    <summary
+                      class="settings-submodule__head settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
+                    >
+                      <div class="min-w-0">
+                        <h5 class="settings-submodule__title">AI 智能分析</h5>
+                        <p class="settings-submodule__desc">默认模型、调度与 Token 限额</p>
+                      </div>
+                      <i
+                        class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
+                        aria-hidden="true"
+                      ></i>
+                    </summary>
                     <div class="settings-submodule__body space-y-3">
                       <template
                         x-for="item in toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])"
@@ -1315,7 +1326,7 @@
                         </template>
                       </div>
                     </div>
-                  </div>
+                  </details>
                 </div>
               </details>
 
@@ -2390,8 +2401,8 @@
 
                 <div class="settings-appearance-divider" role="separator"></div>
 
-                <!-- Speed -->
-                <div class="settings-appearance-row settings-appearance-row--stack">
+                <!-- Speed: meta + segmented side by side -->
+                <div class="settings-appearance-row">
                   <div class="settings-appearance-row__meta">
                     <span class="settings-appearance-row__icon" aria-hidden="true">
                       <i class="fas fa-gauge-high"></i>
@@ -2402,7 +2413,7 @@
                     </div>
                   </div>
                   <div
-                    class="settings-segmented settings-segmented--grow"
+                    class="settings-segmented settings-segmented--inline"
                     role="group"
                     aria-label="动画速度"
                   >

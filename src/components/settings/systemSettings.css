@@ -689,20 +689,16 @@ select.settings-control {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem 1rem;
-  padding: 0.875rem 1rem;
-}
-
-.settings-appearance-row--stack {
-  flex-direction: column;
-  align-items: stretch;
+  padding: 0.75rem 1rem;
+  min-height: 3.25rem;
 }
 
 .settings-appearance-row__meta {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.625rem;
   min-width: 0;
-  flex: 1 1 12rem;
+  flex: 1 1 10rem;
 }
 
 .settings-appearance-row__icon {
@@ -716,6 +712,7 @@ select.settings-control {
   background: #f1f5f9;
   color: #64748b;
   font-size: 0.6875rem;
+  align-self: center;
 }
 
 .settings-appearance-row__title {
@@ -797,14 +794,19 @@ select.settings-control {
   box-shadow: var(--settings-focus-ring);
 }
 
-.settings-segmented--grow {
-  width: 100%;
-  max-width: 20rem;
-  margin-left: auto;
+/* Side-by-side with appearance row meta (animation speed) */
+.settings-segmented--inline {
+  flex: 0 1 14rem;
+  min-width: 11rem;
+  max-width: 16rem;
+  width: auto;
+  margin-left: 0;
 }
 
-.settings-segmented--grow .settings-segmented__btn {
+.settings-segmented--inline .settings-segmented__btn {
   flex: 1 1 0;
+  min-height: 1.875rem;
+  padding: 0.25rem 0.5rem;
 }
 
 /* App group + submodule under tool strategy */
@@ -816,13 +818,28 @@ select.settings-control {
   border: 1px solid #e2e8f0;
   border-radius: 0.75rem;
   background: rgba(255, 255, 255, 0.9);
-  padding: 0.75rem;
+  padding: 0;
+  overflow: visible;
 }
 
-.settings-submodule__head {
-  margin-bottom: 0.625rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
+details.settings-submodule > summary.settings-submodule__head {
+  list-style: none;
+  cursor: pointer;
+  margin: 0;
+  padding: 0.75rem;
+  border-bottom: 1px solid transparent;
+}
+
+details.settings-submodule > summary.settings-submodule__head::-webkit-details-marker {
+  display: none;
+}
+
+details.settings-submodule[open] > summary.settings-submodule__head {
+  border-bottom-color: #f1f5f9;
+}
+
+.settings-submodule__body {
+  padding: 0 0.75rem 0.75rem;
 }
 
 .settings-submodule__title {

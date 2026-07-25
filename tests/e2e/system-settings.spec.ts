@@ -148,7 +148,9 @@ test.describe('system settings', () => {
     await expect(presets).toBeVisible();
   });
 
-  test('E2E-P1-07 Master Analysis lists 数据采集 before AI 智能分析', async ({ page }) => {
+  test('E2E-P1-07 Master Analysis lists 数据采集 before AI 智能分析 and AI is collapsible', async ({
+    page,
+  }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
     await settings.goToSection('工具策略');
@@ -162,6 +164,13 @@ test.describe('system settings', () => {
     );
     expect(body).toContain('AI 智能分析');
     expect(body).toContain('数据采集');
+
+    const aiBlock = master.locator('details[data-settings-focus="master-analysis-ai"]');
+    await expect(aiBlock).toBeVisible();
+    // default collapsed
+    await expect(aiBlock.locator('.settings-submodule__body')).toBeHidden();
+    await aiBlock.locator('summary').click();
+    await expect(aiBlock.locator('.settings-submodule__body')).toBeVisible();
   });
 
   test('E2E-P1-nav six primary sections are listed', async ({ page }) => {
