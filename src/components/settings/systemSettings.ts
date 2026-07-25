@@ -87,6 +87,10 @@ import {
   type SettingsDirtyPartition,
   type SettingsDirtySnapshot,
 } from '@/components/settings/domain/settingsDirty';
+import {
+  evaluateSettingsHealth,
+  isRuntimeRawInvalid,
+} from '@/components/settings/domain/settingsHealth';
 
 let alpineRetryCount = 0;
 
@@ -308,12 +312,15 @@ interface SettingsPanelData {
   localDataBucketItems: LocalDataBucketView[];
   _unsubscribers?: Array<() => void>; // 新增：存储清理函数
   _settingsBaseline: SettingsDirtySnapshot | null;
+  _runtimeHealthNormalized: boolean;
+  healthMessages: string[];
   dirtyPartitions: SettingsDirtyPartition[];
   init(): void;
   open(): Promise<void>;
   close(): Promise<void>;
   destroy(): void; // 新增：清理方法
   captureSettingsBaseline(): void;
+  refreshSettingsHealth(): void;
   openPerformanceMonitor(): Promise<void>;
   loadProviderConfig(provider: string): Promise<void>;
   fetchModels(): Promise<void>;
@@ -969,6 +976,8 @@ function createSettingsState(): Pick<
   | 'isOpen'
   | '_unsubscribers'
   | '_settingsBaseline'
+  | '_runtimeHealthNormalized'
+  | 'healthMessages'
   | 'llm'
   | 'proxy'
   | 'toolStrategy'
@@ -984,6 +993,10 @@ function createSettingsState(): Pick<
     _unsubscribers: [],
 
     _settingsBaseline: null,
+
+    _runtimeHealthNormalized: false,
+
+    healthMessages: [] as string[],
 
     llmApiPathMenuOpen: false,
 
@@ -1464,12 +1477,33 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   async open() {
     this.isOpen = true;
+    const rawRuntime = StorageService.get(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS);
+    this._runtimeHealthNormalized = isRuntimeRawInvalid(rawRuntime);
     this.loadRuntimeStrategy();
     this.developerDiagnostics = getDeveloperDiagnosticSettings();
     await this.loadProviderConfig(this.llm.provider);
     await this.loadProxyConfig();
-    void this.refreshLocalDataUsage();
+    this.refreshSettingsHealth();
+    void this.refreshLocalDataUsage().then(() => {
+      this.refreshSettingsHealth();
+    });
     this.captureSettingsBaseline();
+  },
+
+  refreshSettingsHealth(): void {
+    const hasLlmEndpoint = Boolean((this.llm.endpoint || '').trim());
+    const hasLlmKey = Boolean((this.llm.apiKey || '').trim());
+    let storageUsageRatio: number | undefined;
+    if (this.localData.usage) {
+      const limit = 5 * 1024 * 1024;
+      storageUsageRatio = this.localData.usage.localStorage.used / limit;
+    }
+    this.healthMessages = evaluateSettingsHealth({
+      runtimeNormalized: this._runtimeHealthNormalized,
+      hasLlmEndpoint,
+      hasLlmKey,
+      storageUsageRatio,
+    }).messages;
   },
 
   captureSettingsBaseline(): void {

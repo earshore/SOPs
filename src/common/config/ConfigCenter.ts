@@ -197,6 +197,11 @@ export class ConfigCenter implements IConfigService {
         enableDebugMode: env === 'development',
       },
       routes: {} as MenuConfig, // 将在后续加载
+      /**
+       * FALLBACK-ONLY for runtime-overlapping numerics.
+       * User-facing runtime values: runtimeStrategyService (SSOT).
+       * Do not re-read these to override user runtime after load.
+       */
       scraper: {
         requestTimeout: 15000,
         maxConcurrent: 2,
@@ -206,6 +211,11 @@ export class ConfigCenter implements IConfigService {
         batchDelay: 1500,
         cacheDuration: 24 * 60 * 60 * 1000, // 24小时
       },
+      /**
+       * FALLBACK-ONLY for runtime-overlapping numerics.
+       * User-facing runtime values: runtimeStrategyService (SSOT).
+       * Do not re-read these to override user runtime after load.
+       */
       llm: {
         defaultTimeout: 30000,
         analysisTimeout: 120000,
@@ -224,6 +234,11 @@ export class ConfigCenter implements IConfigService {
         batchSize: 10,
         batchTimeout: 5000,
       },
+      /**
+       * FALLBACK-ONLY for runtime-overlapping numerics.
+       * User-facing runtime values: runtimeStrategyService (SSOT).
+       * Do not re-read these to override user runtime after load.
+       */
       storage: {
         lruMaxSize: 4 * 1024 * 1024, // 4MB
         lruWarningThreshold: 0.8,

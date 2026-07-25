@@ -1216,6 +1216,16 @@ it('CT-P0-01 tool strategy save copy mentions runtime strategy', () => {
   expect(template).toContain('将保存当前面板中的全部运行时策略');
 });
 
+it('UT-P0-09 open with invalid runtime normalizes and sets healthMessages', async () => {
+  deps.values.set(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS, 'not-an-object');
+  const panel = createPanel();
+  await expect(panel.open()).resolves.toBeUndefined();
+  expect(panel.runtimeStrategy.settings.llm).toBeDefined();
+  expect(panel.runtimeStrategy.settings.scraper.maxConcurrent).toBeTypeOf('number');
+  expect(panel.healthMessages.length).toBeGreaterThan(0);
+  expect(panel.healthMessages.some((m: string) => m.includes('安全默认'))).toBe(true);
+});
+
 it('UT-P0-06 close confirms when runtime dirty and stays open on cancel', async () => {
   deps.confirmWithModal.mockResolvedValueOnce(false);
   const panel = createPanel();

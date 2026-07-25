@@ -129,6 +129,15 @@
                 <div class="min-w-0">
                   <p class="settings-coach__title">配置提示</p>
                   <p class="settings-coach__text" x-text="llmSetupReadinessText"></p>
+                  <ul
+                    class="settings-coach__health mt-1.5 space-y-0.5"
+                    x-show="healthMessages.length > 0"
+                    role="list"
+                  >
+                    <template x-for="msg in healthMessages" :key="msg">
+                      <li class="settings-coach__text text-amber-700" x-text="msg"></li>
+                    </template>
+                  </ul>
                 </div>
               </div>
 
