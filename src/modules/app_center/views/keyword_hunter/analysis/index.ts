@@ -35,12 +35,6 @@ marked.use({
 // Module State
 // ==========================================
 
-interface EventListenerRecord {
-  element: HTMLElement | Document;
-  event: string;
-  handler: EventListenerOrEventListenerObject;
-}
-
 interface ActiveAnalysisRun {
   processedCopy: string;
   promise: Promise<string>;
@@ -54,8 +48,9 @@ interface ActiveAnalysisRun {
 /** 存放当次分析的原始 Markdown 文本（未渲染 HTML） */
 let rawMarkdownCache = '';
 
-let eventListeners: EventListenerRecord[] = [];
-let timeouts: number[] = [];
+/** Singleton set in module constructor; routes DOM/timer registration through BaseModule. */
+let analysisLifecycle: KeywordHunterAnalysisModule | null = null;
+
 let activeAnalysisRun: ActiveAnalysisRun | null = null;
 let analysisViewVersion = 0;
 
@@ -64,28 +59,15 @@ let analysisViewVersion = 0;
 // ==========================================
 
 function addEventListener(
-  element: HTMLElement | Document,
+  element: HTMLElement | Document | Window,
   event: string,
   handler: EventListenerOrEventListenerObject
 ): void {
-  element.addEventListener(event, handler);
-  eventListeners.push({ element, event, handler });
+  analysisLifecycle?.trackDomEvent(element, event, handler);
 }
 
 function addTimeout(callback: () => void, delay: number): number {
-  const id = window.setTimeout(callback, delay);
-  timeouts.push(id);
-  return id;
-}
-
-function cleanup(): void {
-  eventListeners.forEach(({ element, event, handler }) => {
-    element.removeEventListener(event, handler);
-  });
-  eventListeners = [];
-
-  timeouts.forEach(id => clearTimeout(id));
-  timeouts = [];
+  return analysisLifecycle?.trackTimeout(callback, delay) ?? 0;
 }
 
 function escapeHtml(text: string): string {
@@ -1089,6 +1071,29 @@ function handleAnalysisMountError(error: unknown): never {
 class KeywordHunterAnalysisModule extends BaseModule {
   constructor() {
     super('keyword_hunter_analysis');
+    analysisLifecycle = this;
+  }
+
+  trackDomEvent(
+    target: HTMLElement | Document | Window | null,
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void {
+    (
+      this as unknown as {
+        addEventListener: (
+          target: EventTarget | null,
+          type: string,
+          listener: EventListenerOrEventListenerObject,
+          options?: boolean | AddEventListenerOptions
+        ) => void;
+      }
+    ).addEventListener(target, type, listener, options);
+  }
+
+  trackTimeout(callback: () => void, delay: number): number {
+    return this.setTimeout(callback, delay);
   }
 
   protected async render(): Promise<void> {
@@ -1141,7 +1146,7 @@ class KeywordHunterAnalysisModule extends BaseModule {
     try {
       analysisViewVersion += 1;
       saveAnalysisStateToState();
-      cleanup();
+      // Listeners/timers already disposed by BaseModule.unmount
     } catch (error) {
       ErrorService.handle(error as Error, {
         action: 'unmountAnalysisModule',

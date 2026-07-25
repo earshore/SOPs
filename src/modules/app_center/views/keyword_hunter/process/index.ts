@@ -36,17 +36,14 @@ import '../styles.css';
 // Module State
 // ==========================================
 
-interface EventListenerRecord {
-  element: HTMLElement | Document;
-  event: string;
-  handler: EventListenerOrEventListenerObject;
-}
-
 interface FloatWinState {
   isDragging: boolean;
   offsetX: number;
   offsetY: number;
 }
+
+/** Singleton set in module constructor; routes DOM/timer registration through BaseModule. */
+let processLifecycle: KeywordHunterProcessModule | null = null;
 
 interface KeywordItem {
   keyword: string;
@@ -97,8 +94,6 @@ type MatchedKeywordEntry = KeywordHunterStoreState['matchedKeywords'][number] | 
 type TranslationModelOption = NonNullable<LLMProviderConfig['models']>[number];
 const SEO_PROCESS_TARGET_ID = 'keyword-hunter-seo-process';
 
-let eventListeners: EventListenerRecord[] = []; // 用于清理事件监听器
-let timeouts: number[] = []; // 用于清理定时器
 let floatWinState: FloatWinState = {
   isDragging: false,
   offsetX: 0,
@@ -113,24 +108,21 @@ let isRefreshingTranslationModels = false;
 // ==========================================
 
 /**
- * 添加事件监听器（带自动清理）
+ * 添加事件监听器（经 BaseModule disposables，unmount 自动清理）
  */
 function addEventListener(
-  element: HTMLElement | Document,
+  element: HTMLElement | Document | Window,
   event: string,
   handler: EventListenerOrEventListenerObject
 ): void {
-  element.addEventListener(event, handler);
-  eventListeners.push({ element, event, handler });
+  processLifecycle?.trackDomEvent(element, event, handler);
 }
 
 /**
- * 添加定时器（带自动清理）
+ * 添加定时器（经 BaseModule disposables，unmount 自动清理）
  */
 function addTimeout(callback: () => void, delay: number): number {
-  const id = window.setTimeout(callback, delay);
-  timeouts.push(id);
-  return id;
+  return processLifecycle?.trackTimeout(callback, delay) ?? 0;
 }
 
 const KEYWORD_HUNTER_FLOATING_WINDOW_ID = 'keyword-hunter-keywords-floating';
@@ -145,23 +137,12 @@ function removeKeywordHunterFloatingChrome(): void {
 }
 
 /**
- * 清理所有事件监听器、定时器，以及挂到 body 的浮动窗
+ * Domain teardown after BaseModule has disposed tracked listeners/timers.
+ * Removes body-level floating chrome left by process mount.
  */
-function cleanup(): void {
-  // 清理事件监听器
-  eventListeners.forEach(({ element, event, handler }) => {
-    element.removeEventListener(event, handler);
-  });
-  eventListeners = [];
-
-  // 清理定时器
-  timeouts.forEach(id => clearTimeout(id));
-  timeouts = [];
-
-  // 浮动窗在 mount 时可能被 append 到 body，必须与监听器一并拆除
+function cleanupProcessSurface(): void {
   removeKeywordHunterFloatingChrome();
 
-  // 重置浮动窗口状态
   floatWinState = {
     isDragging: false,
     offsetX: 0,
@@ -1973,6 +1954,30 @@ function handleProcessMountError(error: unknown): never {
 class KeywordHunterProcessModule extends BaseModule {
   constructor() {
     super('keyword_hunter_process');
+    processLifecycle = this;
+  }
+
+  /** Public bridge so module helpers can register auto-disposed listeners. */
+  trackDomEvent(
+    target: HTMLElement | Document | Window | null,
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void {
+    (
+      this as unknown as {
+        addEventListener: (
+          target: EventTarget | null,
+          type: string,
+          listener: EventListenerOrEventListenerObject,
+          options?: boolean | AddEventListenerOptions
+        ) => void;
+      }
+    ).addEventListener(target, type, listener, options);
+  }
+
+  trackTimeout(callback: () => void, delay: number): number {
+    return this.setTimeout(callback, delay);
   }
 
   protected async render(): Promise<void> {
@@ -2050,8 +2055,8 @@ class KeywordHunterProcessModule extends BaseModule {
       // 1. 保存状态到 state
       saveProcessStateToState();
 
-      // 2. 清理监听器/定时器，并幂等拆除 body 级浮动窗与定位样式
-      cleanup();
+      // Listeners/timers already disposed by BaseModule.unmount; tear down body chrome.
+      cleanupProcessSurface();
     } catch (error) {
       // Best-effort surface teardown even if state save failed mid-unmount.
       try {

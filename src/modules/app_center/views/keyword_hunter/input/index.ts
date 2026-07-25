@@ -30,14 +30,9 @@ const nativeLoggerConsole = globalThis.console;
 // Module State
 // ==========================================
 
-interface EventListenerRecord {
-  element: HTMLElement | Document;
-  event: string;
-  handler: EventListenerOrEventListenerObject;
-}
+/** Singleton set in module constructor; routes DOM/timer registration through BaseModule. */
+let inputLifecycle: KeywordHunterInputModule | null = null;
 
-let eventListeners: EventListenerRecord[] = []; // 用于清理事件监听器
-let timeouts: number[] = []; // 用于清理定时器
 let debouncedInputHandler: ((...args: unknown[]) => void) | null = null; // Debounced function reference
 let registeredActions: string[] = []; // 用于清理已注册的动作
 let lastKeywordInputSnapshot: string | null = null; // 用于撤回关键词清理操作
@@ -62,41 +57,27 @@ interface SnapshotStatusView {
 // ==========================================
 
 /**
- * 添加事件监听器（带自动清理）
+ * 添加事件监听器（经 BaseModule disposables，unmount 自动清理）
  */
 function addEventListener(
-  element: HTMLElement | Document,
+  element: HTMLElement | Document | Window,
   event: string,
   handler: EventListenerOrEventListenerObject
 ): void {
-  element.addEventListener(event, handler);
-  eventListeners.push({ element, event, handler });
+  inputLifecycle?.trackDomEvent(element, event, handler);
 }
 
 /**
- * 添加定时器（带自动清理）
+ * 添加定时器（经 BaseModule disposables，unmount 自动清理）
  */
 function addTimeout(callback: () => void, delay: number): number {
-  const id = window.setTimeout(callback, delay);
-  timeouts.push(id);
-  return id;
+  return inputLifecycle?.trackTimeout(callback, delay) ?? 0;
 }
 
 /**
- * 清理所有事件监听器和定时器
+ * Domain teardown after BaseModule disposed tracked listeners/timers.
  */
-function cleanup(): void {
-  // 清理事件监听器
-  eventListeners.forEach(({ element, event, handler }) => {
-    element.removeEventListener(event, handler);
-  });
-  eventListeners = [];
-
-  // 清理定时器
-  timeouts.forEach(id => clearTimeout(id));
-  timeouts = [];
-
-  // 清理 debounced handler
+function cleanupInputSurface(): void {
   debouncedInputHandler = null;
   lastKeywordInputSnapshot = null;
   inputSnapshots = [];
@@ -104,7 +85,6 @@ function cleanup(): void {
   inputSnapshotLoadSeq += 1;
   snapshotSaveInProgress = false;
 
-  // 清理已注册的动作
   if (registeredActions.length > 0) {
     unregisterActions(registeredActions);
     registeredActions = [];
@@ -974,6 +954,29 @@ function setupEventListeners(container: HTMLElement): void {
 class KeywordHunterInputModule extends BaseModule {
   constructor() {
     super('keyword_hunter_input');
+    inputLifecycle = this;
+  }
+
+  trackDomEvent(
+    target: HTMLElement | Document | Window | null,
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void {
+    (
+      this as unknown as {
+        addEventListener: (
+          target: EventTarget | null,
+          type: string,
+          listener: EventListenerOrEventListenerObject,
+          options?: boolean | AddEventListenerOptions
+        ) => void;
+      }
+    ).addEventListener(target, type, listener, options);
+  }
+
+  trackTimeout(callback: () => void, delay: number): number {
+    return this.setTimeout(callback, delay);
   }
 
   protected async render(): Promise<void> {
@@ -1046,8 +1049,8 @@ class KeywordHunterInputModule extends BaseModule {
       // 1. 保存状态到 state
       saveInputsToState();
 
-      // 2. 清理事件监听器和定时器
-      cleanup();
+      // 2. Domain surface only; listeners/timers already disposed by BaseModule
+      cleanupInputSurface();
     } catch (error) {
       console.error('[Input] ❌ 子模块卸载失败:', error);
     }
