@@ -188,15 +188,6 @@
           <button
             type="button"
             class="settings-panel-nav-link"
-            aria-controls="settings-section-network"
-            @click="scrollToSection('settings-section-network')"
-          >
-            <i class="fas fa-network-wired" aria-hidden="true"></i>
-            <span>采集代理与网络</span>
-          </button>
-          <button
-            type="button"
-            class="settings-panel-nav-link"
             aria-controls="settings-section-data"
             @click="scrollToSection('settings-section-data')"
           >
@@ -242,11 +233,7 @@
                     class="settings-section-tip"
                     :class="{ 'is-warn': healthMessages.length > 0 }"
                   >
-                    <button
-                      type="button"
-                      class="settings-section-tip__btn"
-                      aria-label="查看说明"
-                    >
+                    <button type="button" class="settings-section-tip__btn" aria-label="查看说明">
                       <i class="fas fa-circle-info" aria-hidden="true"></i>
                     </button>
                     <div class="settings-section-tip__popover" role="tooltip">
@@ -300,14 +287,14 @@
 
               <div class="settings-llm-steps space-y-3">
                 <!-- Step 1: 基本信息 -->
-                <section class="settings-llm-step" aria-labelledby="llm-step-1-title">
-                  <header class="settings-llm-step__header">
+                <details class="settings-llm-step" aria-labelledby="llm-step-1-title">
+                  <summary class="settings-llm-step__header">
                     <span class="settings-llm-step__index" aria-hidden="true">1</span>
                     <div class="min-w-0">
                       <h4 id="llm-step-1-title" class="settings-llm-step__title">基本信息</h4>
                       <p class="settings-llm-step__desc">厂商配置档、Endpoint 与协议路径</p>
                     </div>
-                  </header>
+                  </summary>
                   <div class="settings-llm-step__body space-y-3.5">
                     <div class="group">
                       <label
@@ -442,17 +429,17 @@
                       ></p>
                     </div>
                   </div>
-                </section>
+                </details>
 
                 <!-- Step 2: 凭证 -->
-                <section class="settings-llm-step" aria-labelledby="llm-step-2-title">
-                  <header class="settings-llm-step__header">
+                <details class="settings-llm-step" aria-labelledby="llm-step-2-title">
+                  <summary class="settings-llm-step__header">
                     <span class="settings-llm-step__index" aria-hidden="true">2</span>
                     <div class="min-w-0">
                       <h4 id="llm-step-2-title" class="settings-llm-step__title">凭证</h4>
                       <p class="settings-llm-step__desc">API Key 仅保存在本机浏览器</p>
                     </div>
-                  </header>
+                  </summary>
                   <div class="settings-llm-step__body">
                     <div class="group">
                       <label
@@ -491,17 +478,17 @@
                       <p class="settings-field-help" x-text="localSecretBoundaryText"></p>
                     </div>
                   </div>
-                </section>
+                </details>
 
                 <!-- Step 3: 模型与能力 -->
-                <section class="settings-llm-step" aria-labelledby="llm-step-3-title">
-                  <header class="settings-llm-step__header">
+                <details class="settings-llm-step" aria-labelledby="llm-step-3-title">
+                  <summary class="settings-llm-step__header">
                     <span class="settings-llm-step__index" aria-hidden="true">3</span>
                     <div class="min-w-0">
                       <h4 id="llm-step-3-title" class="settings-llm-step__title">模型与能力</h4>
                       <p class="settings-llm-step__desc">默认模型、路径能力与推理偏好</p>
                     </div>
-                  </header>
+                  </summary>
                   <div class="settings-llm-step__body space-y-3.5">
                     <div class="group">
                       <label
@@ -651,17 +638,17 @@
                       </div>
                     </div>
                   </div>
-                </section>
+                </details>
 
                 <!-- Step 4: 高级选项 -->
-                <section class="settings-llm-step" aria-labelledby="llm-step-4-title">
-                  <header class="settings-llm-step__header">
+                <details class="settings-llm-step" aria-labelledby="llm-step-4-title">
+                  <summary class="settings-llm-step__header">
                     <span class="settings-llm-step__index" aria-hidden="true">4</span>
                     <div class="min-w-0">
                       <h4 id="llm-step-4-title" class="settings-llm-step__title">高级选项</h4>
                       <p class="settings-llm-step__desc">服务层级等可选上游参数</p>
                     </div>
-                  </header>
+                  </summary>
                   <div class="settings-llm-step__body">
                     <div class="group">
                       <label
@@ -695,7 +682,7 @@
                       </p>
                     </div>
                   </div>
-                </section>
+                </details>
 
                 <div class="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:gap-2.5">
                   <button
@@ -751,11 +738,7 @@
                   <span class="settings-badge settings-badge--global">需保存</span>
                   <span class="settings-badge settings-badge--ai-cost">影响 AI 成本</span>
                   <div class="settings-section-tip">
-                    <button
-                      type="button"
-                      class="settings-section-tip__btn"
-                      aria-label="查看说明"
-                    >
+                    <button type="button" class="settings-section-tip__btn" aria-label="查看说明">
                       <i class="fas fa-circle-info" aria-hidden="true"></i>
                     </button>
                     <div class="settings-section-tip__popover" role="tooltip">
@@ -776,78 +759,6 @@
 
             <div class="settings-section-frame settings-section-frame--strategy space-y-4">
               <!-- Runtime presets (moved from 外观与体验) -->
-              <div
-                class="settings-card"
-                id="settings-runtime-presets"
-                data-settings-focus="settings-runtime-presets"
-                data-testid="settings-runtime-presets"
-              >
-                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h4 class="settings-card__title">运行策略一键预设</h4>
-                    <p class="settings-card__desc">
-                      稳定 / 速度 / 成本；不改 Key、代理与工具模型。应用后需保存。
-                    </p>
-                  </div>
-                  <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="settings-badge settings-badge--global">需保存</span>
-                  </div>
-                </div>
-                <div class="settings-preset-group mt-3" role="group" aria-label="运行策略预设">
-                  <button
-                    type="button"
-                    class="settings-preset-group__btn"
-                    data-testid="settings-preset-reliability"
-                    :class="{ 'is-active': activeRuntimePresetId === 'reliability' }"
-                    :aria-pressed="(activeRuntimePresetId === 'reliability').toString()"
-                    @click="applyRuntimePresetById('reliability')"
-                  >
-                    <i class="fas fa-shield-halved" aria-hidden="true"></i>
-                    稳定优先
-                  </button>
-                  <button
-                    type="button"
-                    class="settings-preset-group__btn"
-                    data-testid="settings-preset-speed"
-                    :class="{ 'is-active': activeRuntimePresetId === 'speed' }"
-                    :aria-pressed="(activeRuntimePresetId === 'speed').toString()"
-                    @click="applyRuntimePresetById('speed')"
-                  >
-                    <i class="fas fa-bolt" aria-hidden="true"></i>
-                    速度优先
-                  </button>
-                  <button
-                    type="button"
-                    class="settings-preset-group__btn"
-                    data-testid="settings-preset-cost"
-                    :class="{ 'is-active': activeRuntimePresetId === 'cost' }"
-                    :aria-pressed="(activeRuntimePresetId === 'cost').toString()"
-                    @click="applyRuntimePresetById('cost')"
-                  >
-                    <i class="fas fa-coins" aria-hidden="true"></i>
-                    成本优先
-                  </button>
-                </div>
-              </div>
-
-              <div class="settings-expand-bar">
-                <button
-                  type="button"
-                  class="settings-expand-bar__btn"
-                  data-testid="settings-tool-apps-expand"
-                  @click="setToolAppDetailsOpen(true)"
-                >
-                  全部展开
-                </button>
-                <button
-                  type="button"
-                  class="settings-expand-bar__btn"
-                  data-testid="settings-tool-apps-collapse"
-                  @click="setToolAppDetailsOpen(false)"
-                >
-                  全部收起
-                </button>
-              </div>
 
               <div
                 class="settings-card"
@@ -855,12 +766,140 @@
                 :hidden="settingsDensity === 'simple'"
               >
                 <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h4 class="settings-card__title">通用 AI 执行策略</h4>
-                    <p class="settings-card__desc">
-                      控制所有 AI 工具共用的请求超时、重试和连接测试策略。
-                    </p>
-                  </div>
+                  <details
+                    class="settings-card settings-collapsible-card"
+                    data-settings-density="advanced"
+                    :hidden="settingsDensity === 'simple'"
+                    data-settings-focus="general-ai-runtime"
+                  >
+                    <summary
+                      class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
+                    >
+                      <div>
+                        <h4 class="settings-card__title">通用 AI 执行策略</h4>
+                        <p class="settings-card__desc">超时、重试与一键预设</p>
+                      </div>
+                      <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="settings-badge settings-badge--global">全局生效</span>
+                        <span class="settings-badge settings-badge--ai-cost">影响 AI 成本</span>
+                      </div>
+                      <i
+                        class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
+                        aria-hidden="true"
+                      ></i>
+                    </summary>
+                    <div class="settings-collapsible-body px-0 pb-0 pt-2">
+                      <div class="mt-1 grid gap-3 sm:grid-cols-4">
+                        <label class="block">
+                          <span class="settings-label">AI / 工具请求超时（秒）</span>
+                          <input
+                            type="number"
+                            min="30"
+                            max="300"
+                            step="5"
+                            :value="runtimeAnalysisTimeoutSeconds"
+                            @input="setRuntimeNumber('llm.analysisTimeoutMs', $event, 1000)"
+                            class="settings-control settings-control--sm"
+                          />
+                        </label>
+                        <label class="block">
+                          <span class="settings-label">模型重试次数</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="5"
+                            step="1"
+                            :value="runtimeStrategy.settings.llm.maxRetries"
+                            @input="setRuntimeNumber('llm.maxRetries', $event)"
+                            class="settings-control settings-control--sm"
+                          />
+                        </label>
+                        <label class="block">
+                          <span class="settings-label">重试间隔（秒）</span>
+                          <input
+                            type="number"
+                            min="0.25"
+                            max="30"
+                            step="0.25"
+                            :value="getRuntimeNumber('llm.retryDelayMs', 1000)"
+                            @input="setRuntimeNumber('llm.retryDelayMs', $event, 1000)"
+                            class="settings-control settings-control--sm"
+                          />
+                        </label>
+                        <label class="block">
+                          <span class="settings-label">连接测试超时（秒）</span>
+                          <input
+                            type="number"
+                            min="5"
+                            max="60"
+                            step="5"
+                            :value="runtimeTestConnectionTimeoutSeconds"
+                            @input="setRuntimeNumber('llm.testConnectionTimeoutMs', $event, 1000)"
+                            class="settings-control settings-control--sm"
+                          />
+                        </label>
+                      </div>
+
+                      <div
+                        class="mt-4 border-t border-slate-100 pt-3"
+                        id="settings-runtime-presets"
+                        data-settings-focus="settings-runtime-presets"
+                        data-testid="settings-runtime-presets"
+                      >
+                        <div
+                          class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div>
+                            <h5 class="settings-card__title">运行策略一键预设</h5>
+                            <p class="settings-card__desc">
+                              稳定 / 速度 / 成本；不改 Key、代理与工具模型。应用后需保存。
+                            </p>
+                          </div>
+                          <span class="settings-badge settings-badge--global">需保存</span>
+                        </div>
+                        <div
+                          class="settings-preset-group mt-3"
+                          role="group"
+                          aria-label="运行策略预设"
+                        >
+                          <button
+                            type="button"
+                            class="settings-preset-group__btn"
+                            data-testid="settings-preset-reliability"
+                            :class="{ 'is-active': activeRuntimePresetId === 'reliability' }"
+                            :aria-pressed="(activeRuntimePresetId === 'reliability').toString()"
+                            @click="applyRuntimePresetById('reliability')"
+                          >
+                            <i class="fas fa-shield-halved" aria-hidden="true"></i>
+                            稳定优先
+                          </button>
+                          <button
+                            type="button"
+                            class="settings-preset-group__btn"
+                            data-testid="settings-preset-speed"
+                            :class="{ 'is-active': activeRuntimePresetId === 'speed' }"
+                            :aria-pressed="(activeRuntimePresetId === 'speed').toString()"
+                            @click="applyRuntimePresetById('speed')"
+                          >
+                            <i class="fas fa-bolt" aria-hidden="true"></i>
+                            速度优先
+                          </button>
+                          <button
+                            type="button"
+                            class="settings-preset-group__btn"
+                            data-testid="settings-preset-cost"
+                            :class="{ 'is-active': activeRuntimePresetId === 'cost' }"
+                            :aria-pressed="(activeRuntimePresetId === 'cost').toString()"
+                            @click="applyRuntimePresetById('cost')"
+                          >
+                            <i class="fas fa-coins" aria-hidden="true"></i>
+                            成本优先
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </details>
+
                   <div class="flex flex-wrap items-center gap-1.5">
                     <span class="settings-badge settings-badge--global">全局生效</span>
                     <span class="settings-badge settings-badge--ai-cost">影响 AI 成本</span>
@@ -1073,6 +1112,257 @@
                     </template>
                   </div>
                 </div>
+
+                <details
+                  class="settings-collapsible-card mt-3"
+                  id="settings-section-network"
+                  data-settings-focus="master-analysis-scrape"
+                >
+                  <summary
+                    class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
+                  >
+                    <div>
+                      <h4 class="settings-card__title">数据采集</h4>
+                      <p class="settings-card__desc">代理连接与采集运行策略</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <span class="settings-badge settings-badge--scrape">影响采集</span>
+                      <span class="settings-badge settings-badge--local">仅本浏览器</span>
+                    </div>
+                    <i
+                      class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      aria-hidden="true"
+                    ></i>
+                  </summary>
+                  <div class="settings-collapsible-body px-3 pb-3 space-y-3 mt-2">
+                    <!-- Connection Type -->
+                    <div class="group">
+                      <label for="proxy-type" class="settings-label">连接方式</label>
+                      <div class="relative">
+                        <select
+                          id="proxy-type"
+                          name="proxy-type"
+                          :value="proxy.type"
+                          @change="setProxyType($event)"
+                          class="settings-control"
+                        >
+                          <optgroup label="商业 API (高成功率)">
+                            <template x-for="option in commercialProxyOptions" :key="option.type">
+                              <option :value="option.type" x-text="option.displayName"></option>
+                            </template>
+                          </optgroup>
+                          <optgroup label="直连">
+                            <template x-for="option in directProxyOptions" :key="option.type">
+                              <option :value="option.type" x-text="option.displayName"></option>
+                            </template>
+                          </optgroup>
+                        </select>
+                        <div
+                          class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                        >
+                          <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Conditional Input -->
+                    <div :hidden="!proxyNeedsInput" class="space-y-3">
+                      <label
+                        for="proxy-custom-url"
+                        class="block text-xs font-semibold text-slate-600"
+                        x-text="proxyInputLabel"
+                      ></label>
+                      <div class="flex gap-2">
+                        <div class="relative min-w-0 flex-1">
+                          <div
+                            class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-cyan-100 flex items-center justify-center"
+                          >
+                            <i class="fas fa-globe text-cyan-500 text-[9px]"></i>
+                          </div>
+                          <input
+                            :type="proxyInputType"
+                            id="proxy-custom-url"
+                            name="proxy-custom-url"
+                            :value="proxy.customUrl"
+                            @input="setProxyCustomUrl($event)"
+                            class="settings-proxy-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                            :placeholder="proxyInputPlaceholder"
+                          />
+                          <button
+                            type="button"
+                            @click="toggleProxyKeyVisibility()"
+                            :aria-label="proxyKeyVisibilityLabel"
+                            :title="proxyKeyVisibilityLabel"
+                            class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                          >
+                            <i class="fas text-xs" :class="proxyKeyIconClass"></i>
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          @click="saveProxyConfig()"
+                          class="px-5 py-2.5 bg-slate-700 hover:bg-slate-800 text-white rounded-xl transition duration-200 text-sm font-semibold shadow-sm whitespace-nowrap active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
+                        >
+                          更新配置
+                        </button>
+                      </div>
+                      <p class="settings-field-help" x-text="proxyHintText"></p>
+                    </div>
+
+                    <!-- Proxy connectivity test — always reachable in network section (E2E-P0-03) -->
+                    <div class="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        data-testid="settings-test-proxy"
+                        @click="testProxyConnection()"
+                        :disabled="proxy.isTesting"
+                        class="min-h-[40px] px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 rounded-xl transition duration-200 text-sm font-semibold whitespace-nowrap active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                      >
+                        <span x-text="proxy.isTesting ? '测试中...' : '测试连接'"></span>
+                      </button>
+                      <p
+                        class="text-xs"
+                        :class="proxy.status === 'ok' ? 'text-emerald-600' : 'text-rose-600'"
+                        x-show="proxy.testMessage"
+                        x-text="proxy.testMessage"
+                        data-testid="settings-proxy-test-message"
+                      ></p>
+                    </div>
+
+                    <!-- Tip Card -->
+                    <div
+                      class="p-3.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/50 border border-blue-100/60 rounded-2xl flex gap-3"
+                    >
+                      <div
+                        class="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                      >
+                        <i class="fas fa-lightbulb text-blue-500 text-[10px]"></i>
+                      </div>
+                      <p class="text-[11px] text-slate-500 leading-[1.7]">
+                        商业 API 通常提供更稳定的 IP 池和验证码自动绕过功能，建议在大量采集时使用。
+                      </p>
+                    </div>
+
+                    <details
+                      class="settings-collapsible-card"
+                      data-settings-density="advanced"
+                      :hidden="settingsDensity === 'simple'"
+                    >
+                      <summary
+                        class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
+                      >
+                        <div>
+                          <h4 class="settings-card__title">采集运行策略</h4>
+                          <p class="settings-card__desc">
+                            管理请求超时、并发、重试、批次和缓存策略。
+                          </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                          <span class="settings-badge settings-badge--scrape">影响采集</span>
+                          <span class="settings-card__badge">7 项设置</span>
+                        </div>
+                        <i
+                          class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
+                          aria-hidden="true"
+                        ></i>
+                      </summary>
+                      <div class="settings-collapsible-body px-3 pb-3">
+                        <div class="mt-3 grid gap-3 sm:grid-cols-4">
+                          <label class="block"
+                            ><span class="settings-label">请求超时（秒）</span
+                            ><input
+                              type="number"
+                              min="5"
+                              max="120"
+                              step="5"
+                              :value="getRuntimeNumber('scraper.requestTimeoutMs', 1000)"
+                              @input="setRuntimeNumber('scraper.requestTimeoutMs', $event, 1000)"
+                              class="settings-control settings-control--sm"
+                          /></label>
+                          <label class="block"
+                            ><span class="settings-label">最大并发</span
+                            ><input
+                              type="number"
+                              min="1"
+                              max="10"
+                              step="1"
+                              :value="runtimeStrategy.settings.scraper.maxConcurrent"
+                              @input="setRuntimeNumber('scraper.maxConcurrent', $event)"
+                              class="settings-control settings-control--sm"
+                          /></label>
+                          <label class="block"
+                            ><span class="settings-label">最大重试</span
+                            ><input
+                              type="number"
+                              min="0"
+                              max="10"
+                              step="1"
+                              :value="runtimeStrategy.settings.scraper.maxRetries"
+                              @input="setRuntimeNumber('scraper.maxRetries', $event)"
+                              class="settings-control settings-control--sm"
+                          /></label>
+                          <label class="block"
+                            ><span class="settings-label">重试间隔（秒）</span
+                            ><input
+                              type="number"
+                              min="0.1"
+                              max="30"
+                              step="0.1"
+                              :value="getRuntimeNumber('scraper.retryDelayMs', 1000)"
+                              @input="setRuntimeNumber('scraper.retryDelayMs', $event, 1000)"
+                              class="settings-control settings-control--sm"
+                          /></label>
+                          <label class="block"
+                            ><span class="settings-label">批次大小</span
+                            ><input
+                              type="number"
+                              min="1"
+                              max="50"
+                              step="1"
+                              :value="runtimeStrategy.settings.scraper.batchSize"
+                              @input="setRuntimeNumber('scraper.batchSize', $event)"
+                              class="settings-control settings-control--sm"
+                          /></label>
+                          <label class="block"
+                            ><span class="settings-label">批次间隔（秒）</span
+                            ><input
+                              type="number"
+                              min="0"
+                              max="60"
+                              step="0.5"
+                              :value="getRuntimeNumber('scraper.batchDelayMs', 1000)"
+                              @input="setRuntimeNumber('scraper.batchDelayMs', $event, 1000)"
+                              class="settings-control settings-control--sm"
+                          /></label>
+                          <label class="block"
+                            ><span class="settings-label">缓存时长（小时）</span
+                            ><input
+                              type="number"
+                              min="1"
+                              max="720"
+                              step="1"
+                              :value="getRuntimeNumber('scraper.cacheDurationMs', 3600000)"
+                              @input="setRuntimeNumber('scraper.cacheDurationMs', $event, 3600000)"
+                              class="settings-control settings-control--sm"
+                          /></label>
+                        </div>
+                        <p class="mt-3 text-[11px] leading-relaxed text-slate-500">
+                          将保存当前面板中的全部运行时策略（含工具策略区未点保存的已编辑字段）。
+                        </p>
+                        <div class="mt-3 flex justify-end">
+                          <button
+                            type="button"
+                            @click="saveRuntimeStrategy()"
+                            :disabled="runtimeStrategy.isSaving"
+                            class="min-h-[36px] rounded-xl bg-cyan-600 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-500/15 transition duration-200 hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2"
+                          >
+                            保存采集策略
+                          </button>
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                </details>
               </details>
 
               <details class="settings-tool-app" data-settings-tool-app open>
@@ -1743,263 +2033,6 @@
           </div>
 
           <!-- Section 3: Proxy Config -->
-          <section id="settings-section-network" class="settings-panel-section space-y-4">
-            <div class="settings-section-head">
-              <div
-                class="settings-section-head__icon settings-section-head__icon--cyan"
-                aria-hidden="true"
-              >
-                <i class="fas fa-network-wired"></i>
-              </div>
-              <div class="settings-section-head__main">
-                <div class="settings-section-head__title-row">
-                  <h3 class="settings-section-head__title">采集代理与网络</h3>
-                  <span class="settings-badge settings-badge--scrape">影响采集</span>
-                  <span class="settings-badge settings-badge--local">仅本浏览器</span>
-                  <div class="settings-section-tip">
-                    <button
-                      type="button"
-                      class="settings-section-tip__btn"
-                      aria-label="查看说明"
-                    >
-                      <i class="fas fa-circle-info" aria-hidden="true"></i>
-                    </button>
-                    <div class="settings-section-tip__popover" role="tooltip">
-                      <p>商业 API 适合大批量采集；与 AI 连接相互独立。</p>
-                    </div>
-                  </div>
-                </div>
-                <p class="settings-section-head__desc">代理与采集超时/并发</p>
-              </div>
-            </div>
-
-            <div class="settings-section-frame settings-section-frame--network space-y-4">
-              <!-- Connection Type -->
-              <div class="group">
-                <label for="proxy-type" class="settings-label">连接方式</label>
-                <div class="relative">
-                  <select
-                    id="proxy-type"
-                    name="proxy-type"
-                    :value="proxy.type"
-                    @change="setProxyType($event)"
-                    class="settings-control"
-                  >
-                    <optgroup label="商业 API (高成功率)">
-                      <template x-for="option in commercialProxyOptions" :key="option.type">
-                        <option :value="option.type" x-text="option.displayName"></option>
-                      </template>
-                    </optgroup>
-                    <optgroup label="直连">
-                      <template x-for="option in directProxyOptions" :key="option.type">
-                        <option :value="option.type" x-text="option.displayName"></option>
-                      </template>
-                    </optgroup>
-                  </select>
-                  <div
-                    class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
-                  >
-                    <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Conditional Input -->
-              <div :hidden="!proxyNeedsInput" class="space-y-3">
-                <label
-                  for="proxy-custom-url"
-                  class="block text-xs font-semibold text-slate-600"
-                  x-text="proxyInputLabel"
-                ></label>
-                <div class="flex gap-2">
-                  <div class="relative min-w-0 flex-1">
-                    <div
-                      class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-cyan-100 flex items-center justify-center"
-                    >
-                      <i class="fas fa-globe text-cyan-500 text-[9px]"></i>
-                    </div>
-                    <input
-                      :type="proxyInputType"
-                      id="proxy-custom-url"
-                      name="proxy-custom-url"
-                      :value="proxy.customUrl"
-                      @input="setProxyCustomUrl($event)"
-                      class="settings-proxy-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
-                      :placeholder="proxyInputPlaceholder"
-                    />
-                    <button
-                      type="button"
-                      @click="toggleProxyKeyVisibility()"
-                      :aria-label="proxyKeyVisibilityLabel"
-                      :title="proxyKeyVisibilityLabel"
-                      class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                    >
-                      <i class="fas text-xs" :class="proxyKeyIconClass"></i>
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    @click="saveProxyConfig()"
-                    class="px-5 py-2.5 bg-slate-700 hover:bg-slate-800 text-white rounded-xl transition duration-200 text-sm font-semibold shadow-sm whitespace-nowrap active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
-                  >
-                    更新配置
-                  </button>
-                </div>
-                <p class="settings-field-help" x-text="proxyHintText"></p>
-              </div>
-
-              <!-- Proxy connectivity test — always reachable in network section (E2E-P0-03) -->
-              <div class="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  data-testid="settings-test-proxy"
-                  @click="testProxyConnection()"
-                  :disabled="proxy.isTesting"
-                  class="min-h-[40px] px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 rounded-xl transition duration-200 text-sm font-semibold whitespace-nowrap active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50"
-                >
-                  <span x-text="proxy.isTesting ? '测试中...' : '测试连接'"></span>
-                </button>
-                <p
-                  class="text-xs"
-                  :class="proxy.status === 'ok' ? 'text-emerald-600' : 'text-rose-600'"
-                  x-show="proxy.testMessage"
-                  x-text="proxy.testMessage"
-                  data-testid="settings-proxy-test-message"
-                ></p>
-              </div>
-
-              <!-- Tip Card -->
-              <div
-                class="p-3.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/50 border border-blue-100/60 rounded-2xl flex gap-3"
-              >
-                <div
-                  class="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5"
-                >
-                  <i class="fas fa-lightbulb text-blue-500 text-[10px]"></i>
-                </div>
-                <p class="text-[11px] text-slate-500 leading-[1.7]">
-                  商业 API 通常提供更稳定的 IP 池和验证码自动绕过功能，建议在大量采集时使用。
-                </p>
-              </div>
-
-              <details
-                class="settings-collapsible-card"
-                data-settings-density="advanced"
-                :hidden="settingsDensity === 'simple'"
-              >
-                <summary
-                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
-                >
-                  <div>
-                    <h4 class="settings-card__title">采集运行策略</h4>
-                    <p class="settings-card__desc">管理请求超时、并发、重试、批次和缓存策略。</p>
-                  </div>
-                  <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="settings-badge settings-badge--scrape">影响采集</span>
-                    <span class="settings-card__badge">7 项设置</span>
-                  </div>
-                  <i
-                    class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
-                    aria-hidden="true"
-                  ></i>
-                </summary>
-                <div class="settings-collapsible-body px-3 pb-3">
-                  <div class="mt-3 grid gap-3 sm:grid-cols-4">
-                    <label class="block"
-                      ><span class="settings-label">请求超时（秒）</span
-                      ><input
-                        type="number"
-                        min="5"
-                        max="120"
-                        step="5"
-                        :value="getRuntimeNumber('scraper.requestTimeoutMs', 1000)"
-                        @input="setRuntimeNumber('scraper.requestTimeoutMs', $event, 1000)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">最大并发</span
-                      ><input
-                        type="number"
-                        min="1"
-                        max="10"
-                        step="1"
-                        :value="runtimeStrategy.settings.scraper.maxConcurrent"
-                        @input="setRuntimeNumber('scraper.maxConcurrent', $event)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">最大重试</span
-                      ><input
-                        type="number"
-                        min="0"
-                        max="10"
-                        step="1"
-                        :value="runtimeStrategy.settings.scraper.maxRetries"
-                        @input="setRuntimeNumber('scraper.maxRetries', $event)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">重试间隔（秒）</span
-                      ><input
-                        type="number"
-                        min="0.1"
-                        max="30"
-                        step="0.1"
-                        :value="getRuntimeNumber('scraper.retryDelayMs', 1000)"
-                        @input="setRuntimeNumber('scraper.retryDelayMs', $event, 1000)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">批次大小</span
-                      ><input
-                        type="number"
-                        min="1"
-                        max="50"
-                        step="1"
-                        :value="runtimeStrategy.settings.scraper.batchSize"
-                        @input="setRuntimeNumber('scraper.batchSize', $event)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">批次间隔（秒）</span
-                      ><input
-                        type="number"
-                        min="0"
-                        max="60"
-                        step="0.5"
-                        :value="getRuntimeNumber('scraper.batchDelayMs', 1000)"
-                        @input="setRuntimeNumber('scraper.batchDelayMs', $event, 1000)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">缓存时长（小时）</span
-                      ><input
-                        type="number"
-                        min="1"
-                        max="720"
-                        step="1"
-                        :value="getRuntimeNumber('scraper.cacheDurationMs', 3600000)"
-                        @input="setRuntimeNumber('scraper.cacheDurationMs', $event, 3600000)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                  </div>
-                  <p class="mt-3 text-[11px] leading-relaxed text-slate-500">
-                    将保存当前面板中的全部运行时策略（含工具策略区未点保存的已编辑字段）。
-                  </p>
-                  <div class="mt-3 flex justify-end">
-                    <button
-                      type="button"
-                      @click="saveRuntimeStrategy()"
-                      :disabled="runtimeStrategy.isSaving"
-                      class="min-h-[36px] rounded-xl bg-cyan-600 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-500/15 transition duration-200 hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2"
-                    >
-                      保存采集策略
-                    </button>
-                  </div>
-                </div>
-              </details>
-            </div>
-          </section>
 
           <!-- Decorative Divider -->
           <div class="flex items-center gap-3 py-1">
@@ -2027,11 +2060,7 @@
                   <span class="settings-badge settings-badge--local">仅本浏览器</span>
                   <span class="settings-badge settings-badge--destructive">破坏性</span>
                   <div class="settings-section-tip">
-                    <button
-                      type="button"
-                      class="settings-section-tip__btn"
-                      aria-label="查看说明"
-                    >
+                    <button type="button" class="settings-section-tip__btn" aria-label="查看说明">
                       <i class="fas fa-circle-info" aria-hidden="true"></i>
                     </button>
                     <div class="settings-section-tip__popover" role="tooltip">
@@ -2077,56 +2106,44 @@
                 </button>
               </div>
 
-              <div
+              <details
                 class="settings-collapsible-card space-y-2.5 p-3"
                 data-settings-density="advanced"
                 data-testid="settings-export-buckets"
                 :hidden="settingsDensity === 'simple'"
               >
-                <div class="flex flex-wrap items-start justify-between gap-2">
+                <summary
+                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
+                >
                   <div class="min-w-0">
                     <h4 class="settings-card__title">分桶导出</h4>
-                    <p class="settings-card__desc">
-                      勾选后仅导出所选分类；不勾选则导出全部。高级可选。
-                    </p>
+                    <p class="settings-card__desc">按分类选择导出内容</p>
                   </div>
-                  <div class="flex flex-wrap gap-1.5">
-                    <button
-                      type="button"
-                      @click="selectAllExportBuckets()"
-                      :disabled="localData.isBusy"
-                      class="min-h-[32px] rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    >
-                      全选
-                    </button>
-                    <button
-                      type="button"
-                      @click="clearExportBucketSelection()"
-                      :disabled="localData.isBusy"
-                      class="min-h-[32px] rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    >
-                      清空（全部）
-                    </button>
+                  <i
+                    class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
+                    aria-hidden="true"
+                  ></i>
+                </summary>
+                <div class="settings-collapsible-body pt-2">
+                  <div class="grid gap-1.5 sm:grid-cols-2">
+                    <template x-for="bucket in localDataBucketItems" :key="'export-' + bucket.id">
+                      <label
+                        class="flex min-h-[36px] cursor-pointer items-center gap-2 rounded-lg border border-slate-200/80 bg-white/90 px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50"
+                      >
+                        <input
+                          type="checkbox"
+                          class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          :checked="isExportBucketSelected(bucket.id)"
+                          @change="toggleExportBucket(bucket.id)"
+                          :disabled="localData.isBusy"
+                          :data-export-bucket="bucket.id"
+                        />
+                        <span class="min-w-0 truncate font-medium" x-text="bucket.label"></span>
+                      </label>
+                    </template>
                   </div>
                 </div>
-                <div class="grid gap-1.5 sm:grid-cols-2">
-                  <template x-for="bucket in localDataBucketItems" :key="'export-' + bucket.id">
-                    <label
-                      class="flex min-h-[36px] cursor-pointer items-center gap-2 rounded-lg border border-slate-200/80 bg-white/90 px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50"
-                    >
-                      <input
-                        type="checkbox"
-                        class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                        :checked="isExportBucketSelected(bucket.id)"
-                        @change="toggleExportBucket(bucket.id)"
-                        :disabled="localData.isBusy"
-                        :data-export-bucket="bucket.id"
-                      />
-                      <span class="min-w-0 truncate font-medium" x-text="bucket.label"></span>
-                    </label>
-                  </template>
-                </div>
-              </div>
+              </details>
 
               <details
                 class="settings-collapsible-card"
@@ -2373,39 +2390,48 @@
 
             <div class="settings-section-frame settings-section-frame--appearance space-y-4">
               <div class="settings-card" data-testid="settings-appearance-theme">
-                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
+                <div class="settings-theme-row">
+                  <div class="min-w-0">
                     <h4 class="settings-card__title">主题</h4>
                     <p class="settings-card__desc">全站配色，立即生效</p>
                   </div>
+                  <label class="settings-theme-row__control">
+                    <span class="sr-only">当前主题</span>
+                    <select
+                      class="settings-control settings-control--sm"
+                      data-testid="settings-theme-select"
+                      :value="appearanceThemeId"
+                      @change="setAppearanceThemeFromEvent($event)"
+                    >
+                      <template x-for="theme in appearanceThemeOptions" :key="theme.id">
+                        <option
+                          :value="theme.id"
+                          :selected="theme.id === appearanceThemeId"
+                          x-text="theme.name"
+                        ></option>
+                      </template>
+                    </select>
+                  </label>
                 </div>
-                <label class="mt-3 block">
-                  <span class="settings-label">当前主题</span>
-                  <select
-                    class="settings-control settings-control--sm"
-                    data-testid="settings-theme-select"
-                    :value="appearanceThemeId"
-                    @change="setAppearanceThemeFromEvent($event)"
-                  >
-                    <template x-for="theme in appearanceThemeOptions" :key="theme.id">
-                      <option
-                        :value="theme.id"
-                        :selected="theme.id === appearanceThemeId"
-                        x-text="theme.name"
-                      ></option>
-                    </template>
-                  </select>
-                </label>
               </div>
 
-              <div class="settings-card" data-testid="settings-appearance-animation">
-                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <details
+                class="settings-card settings-collapsible-card"
+                data-testid="settings-appearance-animation"
+              >
+                <summary
+                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
+                >
                   <div>
                     <h4 class="settings-card__title">动画与动效</h4>
                     <p class="settings-card__desc">开关、速度与系统减少动效</p>
                   </div>
-                </div>
-                <div class="mt-3 space-y-3">
+                  <i
+                    class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
+                    aria-hidden="true"
+                  ></i>
+                </summary>
+                <div class="settings-collapsible-body pt-2 space-y-3">
                   <label
                     class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                   >
@@ -2479,7 +2505,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </details>
             </div>
           </section>
 
@@ -2551,187 +2577,194 @@
                 </div>
               </button>
 
-              <div class="settings-card">
-                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <details class="settings-card settings-collapsible-card">
+                <summary
+                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
+                >
                   <div>
                     <h4 class="settings-card__title">调试配置</h4>
-                    <p class="settings-card__desc">修改后立即影响当前运行时。</p>
+                    <p class="settings-card__desc">修改后立即影响当前运行时</p>
                   </div>
                   <span class="settings-badge settings-badge--instant">即时生效</span>
-                </div>
-
-                <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                  <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="developerDiagnostics.performanceEnableMonitoring"
-                      @change="setDeveloperDiagnosticBoolean('performanceEnableMonitoring', $event)"
-                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>
-                      <span class="block">性能监控</span>
-                      <span
-                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
-                      >
-                        Web Vitals、加载耗时与运行指标采集
-                      </span>
-                    </span>
-                  </label>
-
-                  <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="developerDiagnostics.eventDebugEnabled"
-                      @change="setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)"
-                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>
-                      <span class="block">事件调试</span>
-                      <span
-                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
-                      >
-                        记录 app:* 自定义事件流
-                      </span>
-                    </span>
-                  </label>
-
-                  <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="developerDiagnostics.errorTrackerEnabled"
-                      @change="setDeveloperDiagnosticBoolean('errorTrackerEnabled', $event)"
-                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>
-                      <span class="block">错误追踪</span>
-                      <span
-                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
-                      >
-                        捕获运行异常与错误上下文
-                      </span>
-                    </span>
-                  </label>
-
-                  <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="developerDiagnostics.analyticsEnabled"
-                      @change="setDeveloperDiagnosticBoolean('analyticsEnabled', $event)"
-                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>
-                      <span class="block">行为分析</span>
-                      <span
-                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
-                      >
-                        记录用户行为分析事件
-                      </span>
-                    </span>
-                  </label>
-
-                  <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="developerDiagnostics.enableExperimentalFeatures"
-                      @change="setDeveloperDiagnosticBoolean('enableExperimentalFeatures', $event)"
-                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>
-                      <span class="block">实验功能</span>
-                      <span
-                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
-                      >
-                        启用 experimental feature flags
-                      </span>
-                    </span>
-                  </label>
-
-                  <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="developerDiagnostics.enableBetaFeatures"
-                      @change="setDeveloperDiagnosticBoolean('enableBetaFeatures', $event)"
-                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>
-                      <span class="block">Beta 功能</span>
-                      <span
-                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
-                      >
-                        启用 beta feature flags
-                      </span>
-                    </span>
-                  </label>
-
-                  <label
-                    class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="developerDiagnostics.enableDebugMode"
-                      @change="setDeveloperDiagnosticBoolean('enableDebugMode', $event)"
-                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>
-                      <span class="block">Debug 模式</span>
-                      <span
-                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
-                      >
-                        启用调试模式相关运行分支
-                      </span>
-                    </span>
-                  </label>
-
-                  <label class="block rounded-lg border border-slate-100 bg-slate-50/70 p-3">
-                    <span class="settings-label"> 日志级别 </span>
-                    <select
-                      :value="developerDiagnostics.loggerMinLevel"
-                      @change="setDeveloperDiagnosticLogLevel($event)"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
+                  <i
+                    class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
+                    aria-hidden="true"
+                  ></i>
+                </summary>
+                <div class="settings-collapsible-body pt-2">
+                  <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label
+                      class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
                     >
-                      <option value="debug">debug</option>
-                      <option value="info">info</option>
-                      <option value="warn">warn</option>
-                      <option value="error">error</option>
-                      <option value="fatal">fatal</option>
-                    </select>
-                  </label>
-                </div>
-
-                <div class="mt-3 rounded-lg border border-amber-100 bg-amber-50/60 p-3">
-                  <div class="flex items-start gap-2.5">
-                    <span
-                      class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700 ring-1 ring-amber-200"
-                    >
-                      <i class="fas fa-shield-halved text-[11px]"></i>
-                    </span>
-                    <span class="min-w-0 flex-1">
-                      <span class="flex flex-wrap items-center justify-between gap-2">
-                        <span class="settings-card__title">端点安全策略</span>
+                      <input
+                        type="checkbox"
+                        :checked="developerDiagnostics.performanceEnableMonitoring"
+                        @change="setDeveloperDiagnosticBoolean('performanceEnableMonitoring', $event)"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <span>
+                        <span class="block">性能监控</span>
                         <span
-                          class="shrink-0 rounded-md bg-white/80 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700"
-                          x-text="developerDangerousEndpointText"
-                        ></span>
+                          class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                        >
+                          Web Vitals、加载耗时与运行指标采集
+                        </span>
                       </span>
-                      <span class="mt-1 block text-[10px] leading-relaxed text-slate-500">
-                        这是当前环境的只读安全提示，不属于调试开关。
+                    </label>
+
+                    <label
+                      class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="developerDiagnostics.eventDebugEnabled"
+                        @change="setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <span>
+                        <span class="block">事件调试</span>
+                        <span
+                          class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                        >
+                          记录 app:* 自定义事件流
+                        </span>
                       </span>
-                    </span>
+                    </label>
+
+                    <label
+                      class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="developerDiagnostics.errorTrackerEnabled"
+                        @change="setDeveloperDiagnosticBoolean('errorTrackerEnabled', $event)"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <span>
+                        <span class="block">错误追踪</span>
+                        <span
+                          class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                        >
+                          捕获运行异常与错误上下文
+                        </span>
+                      </span>
+                    </label>
+
+                    <label
+                      class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="developerDiagnostics.analyticsEnabled"
+                        @change="setDeveloperDiagnosticBoolean('analyticsEnabled', $event)"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <span>
+                        <span class="block">行为分析</span>
+                        <span
+                          class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                        >
+                          记录用户行为分析事件
+                        </span>
+                      </span>
+                    </label>
+
+                    <label
+                      class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="developerDiagnostics.enableExperimentalFeatures"
+                        @change="setDeveloperDiagnosticBoolean('enableExperimentalFeatures', $event)"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <span>
+                        <span class="block">实验功能</span>
+                        <span
+                          class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                        >
+                          启用 experimental feature flags
+                        </span>
+                      </span>
+                    </label>
+
+                    <label
+                      class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="developerDiagnostics.enableBetaFeatures"
+                        @change="setDeveloperDiagnosticBoolean('enableBetaFeatures', $event)"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <span>
+                        <span class="block">Beta 功能</span>
+                        <span
+                          class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                        >
+                          启用 beta feature flags
+                        </span>
+                      </span>
+                    </label>
+
+                    <label
+                      class="flex min-h-[44px] items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-700 shadow-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="developerDiagnostics.enableDebugMode"
+                        @change="setDeveloperDiagnosticBoolean('enableDebugMode', $event)"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <span>
+                        <span class="block">Debug 模式</span>
+                        <span
+                          class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                        >
+                          启用调试模式相关运行分支
+                        </span>
+                      </span>
+                    </label>
+
+                    <label class="block rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+                      <span class="settings-label"> 日志级别 </span>
+                      <select
+                        :value="developerDiagnostics.loggerMinLevel"
+                        @change="setDeveloperDiagnosticLogLevel($event)"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
+                      >
+                        <option value="debug">debug</option>
+                        <option value="info">info</option>
+                        <option value="warn">warn</option>
+                        <option value="error">error</option>
+                        <option value="fatal">fatal</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div class="mt-3 rounded-lg border border-amber-100 bg-amber-50/60 p-3">
+                    <div class="flex items-start gap-2.5">
+                      <span
+                        class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700 ring-1 ring-amber-200"
+                      >
+                        <i class="fas fa-shield-halved text-[11px]"></i>
+                      </span>
+                      <span class="min-w-0 flex-1">
+                        <span class="flex flex-wrap items-center justify-between gap-2">
+                          <span class="settings-card__title">端点安全策略</span>
+                          <span
+                            class="shrink-0 rounded-md bg-white/80 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700"
+                            x-text="developerDangerousEndpointText"
+                          ></span>
+                        </span>
+                        <span class="mt-1 block text-[10px] leading-relaxed text-slate-500">
+                          这是当前环境的只读安全提示，不属于调试开关。
+                        </span>
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </details>
 
               <!-- Info Card -->
               <div

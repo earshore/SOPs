@@ -361,25 +361,28 @@
   color: #3730a3;
 }
 
-/* Runtime strategy preset buttons (P1-6) */
+/* Runtime strategy preset buttons (P1-6) — full width equal columns */
 .settings-preset-group {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
+  width: 100%;
 }
 
 .settings-preset-group__btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.375rem;
+  width: 100%;
   min-height: 2.25rem;
-  padding: 0.375rem 0.875rem;
+  padding: 0.375rem 0.5rem;
   border: 1px solid var(--settings-border, #e2e8f0);
   border-radius: var(--settings-radius-control, 0.75rem);
   background: var(--settings-surface, #fff);
   color: var(--settings-text, #334155);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition:
     background 150ms ease,
@@ -669,7 +672,23 @@ select.settings-control {
   color: #b45309;
 }
 
-/* ---- LLM setup: numbered steps 1–4 ---- */
+/* Theme title + select side by side */
+.settings-theme-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.settings-theme-row__control {
+  flex: 1 1 12rem;
+  min-width: 10rem;
+  max-width: 18rem;
+  margin: 0;
+}
+
+/* ---- LLM setup: numbered steps 1–4 (collapsible, default closed) ---- */
 .settings-llm-step {
   border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 0.875rem;
@@ -679,14 +698,43 @@ select.settings-control {
   overflow: visible;
 }
 
+.settings-llm-step > summary.settings-llm-step__header {
+  list-style: none;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  border-radius: 0.875rem;
+}
+
+.settings-llm-step > summary.settings-llm-step__header::-webkit-details-marker {
+  display: none;
+}
+
+.settings-llm-step[open] > summary.settings-llm-step__header {
+  border-bottom-color: rgba(241, 245, 249, 0.95);
+  border-radius: 0.875rem 0.875rem 0 0;
+}
+
 .settings-llm-step__header {
   display: flex;
   align-items: flex-start;
   gap: 0.625rem;
-  padding: 0.75rem 0.875rem 0.5rem;
-  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
-  border-radius: 0.875rem 0.875rem 0 0;
+  padding: 0.75rem 0.875rem;
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.4));
+}
+
+.settings-llm-step__header::after {
+  content: '\f078';
+  font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free', sans-serif;
+  font-weight: 900;
+  font-size: 0.5625rem;
+  color: #94a3b8;
+  margin-left: auto;
+  margin-top: 0.25rem;
+  transition: transform 150ms ease;
+}
+
+.settings-llm-step[open] > .settings-llm-step__header::after {
+  transform: rotate(180deg);
 }
 
 .settings-llm-step__index {
@@ -708,7 +756,7 @@ select.settings-control {
 
 .settings-llm-step__title {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #334155;
   line-height: 1.25;
 }

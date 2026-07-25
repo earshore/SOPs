@@ -59,8 +59,17 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   },
   {
     id: 'settings-section-network',
-    sectionId: 'settings-section-network',
-    labels: ['采集代理与网络', '代理', '连接方式', 'ScraperAPI', '采集运行策略', '最大并发'],
+    sectionId: 'settings-section-tool-strategy',
+    labels: [
+      '数据采集',
+      '采集代理',
+      '代理',
+      '连接方式',
+      'ScraperAPI',
+      '采集运行策略',
+      '最大并发',
+      'Master Analysis 采集',
+    ],
   },
   {
     id: 'settings-section-data',

@@ -18,8 +18,12 @@ test.describe('system settings', () => {
     // Expert runtime fields are advanced density — switch first, then dirty maxRetries
     await settings.setDensity('advanced');
     await settings.goToSection('工具策略');
-    const maxRetries = page
-      .locator('#settings-section-tool-strategy label')
+    const general = page.locator(
+      '#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]'
+    );
+    await general.locator('summary').click();
+    const maxRetries = general
+      .locator('label')
       .filter({ hasText: '模型重试次数' })
       .locator('input[type="number"]');
     await maxRetries.waitFor({ state: 'visible' });
@@ -42,9 +46,13 @@ test.describe('system settings', () => {
     await settings.openFromNav();
     await settings.setDensity('advanced');
     await settings.goToSection('工具策略');
+    const general = page.locator(
+      '#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]'
+    );
+    await general.locator('summary').click();
 
-    const maxRetries = page
-      .locator('#settings-section-tool-strategy label')
+    const maxRetries = general
+      .locator('label')
       .filter({ hasText: '模型重试次数' })
       .locator('input[type="number"]');
     await maxRetries.waitFor({ state: 'visible' });
@@ -65,12 +73,15 @@ test.describe('system settings', () => {
     });
   });
 
-  test('E2E-P0-03 proxy test entry is visible in network section', async ({ page }) => {
+  test('E2E-P0-03 proxy test entry is under Master Analysis 数据采集', async ({ page }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
-    await settings.goToSection('采集代理与网络');
+    await settings.goToSection('工具策略');
 
-    await expect(page.locator('#settings-section-network')).toBeVisible();
+    // Nested under Master Analysis — expand scrape details if needed
+    const scrape = page.locator('#settings-section-network');
+    await scrape.scrollIntoViewIfNeeded();
+    await scrape.locator(':scope > summary').click();
     await expect(settings.proxyTestButton()).toBeVisible();
     await expect(settings.proxyTestButton()).toContainText(/测试连接/);
   });
@@ -89,10 +100,14 @@ test.describe('system settings', () => {
 
     await settings.setDensity('simple');
     await settings.goToSection('工具策略');
-    await expect(page.getByText('通用 AI 执行策略')).toBeHidden();
+    await expect(
+      page.locator('#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]')
+    ).toBeHidden();
 
     await settings.setDensity('advanced');
-    await expect(page.getByText('通用 AI 执行策略')).toBeVisible();
+    await expect(
+      page.locator('#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]')
+    ).toBeVisible();
   });
 
   test('E2E-P1-03 search locates PPC ACOS thresholds', async ({ page }) => {
@@ -112,38 +127,28 @@ test.describe('system settings', () => {
     await expect(settings.appearanceSection()).toBeVisible();
     await expect(page.getByTestId('settings-appearance-theme')).toBeVisible();
     await expect(page.getByTestId('settings-theme-select')).toBeVisible();
+    // 动画默认收起 — 先展开再断言
+    await page.locator('[data-testid="settings-appearance-animation"] summary').click();
     await expect(page.getByTestId('settings-animations-enabled')).toBeVisible();
-    // Presets moved to 工具策略
     await expect(
       page.locator('#settings-section-appearance [data-testid="settings-runtime-presets"]')
     ).toHaveCount(0);
   });
 
-  test('E2E-P1-06 runtime presets live under tool strategy and tool apps start open', async ({
-    page,
-  }) => {
+  test('E2E-P1-06 runtime presets live inside 通用 AI 执行策略', async ({ page }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
+    await settings.setDensity('advanced');
     await settings.goToSection('工具策略');
 
-    const presets = page.locator(
-      '#settings-section-tool-strategy [data-testid="settings-runtime-presets"]'
+    const general = page.locator(
+      '#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]'
     );
+    await general.locator('summary').click();
+    const presets = page.getByTestId('settings-runtime-presets');
     await expect(presets).toBeVisible();
     await expect(page.getByTestId('settings-preset-reliability')).toBeVisible();
     await expect(page.getByTestId('settings-preset-cost')).toBeVisible();
-
-    // Tool app groups default open so users see model selects without hunting
-    const master = page.locator(
-      '#settings-section-tool-strategy details.settings-tool-app[data-settings-focus="master-analysis"]'
-    );
-    await expect(master).toHaveAttribute('open', '');
-
-    await page.getByTestId('settings-tool-apps-collapse').click();
-    await expect(master).not.toHaveAttribute('open', '');
-    await page.getByTestId('settings-tool-apps-expand').click();
-    await expect(master).toHaveAttribute('open', '');
-
     await page.getByTestId('settings-preset-cost').click();
     await expect(presets).toBeVisible();
   });
@@ -153,14 +158,10 @@ test.describe('system settings', () => {
     await settings.openFromNav();
 
     const nav = page.locator('nav.settings-panel-nav');
-    for (const label of [
-      'AI 模型与连接',
-      '工具策略',
-      '采集代理与网络',
-      '数据与备份',
-      '外观与体验',
-    ]) {
+    for (const label of ['AI 模型与连接', '工具策略', '数据与备份', '外观与体验']) {
       await expect(nav.getByRole('button', { name: label, exact: true })).toBeVisible();
     }
+    // 采集代理已并入工具策略 → Master Analysis → 数据采集
+    await expect(nav.getByRole('button', { name: '采集代理与网络', exact: true })).toHaveCount(0);
   });
 });

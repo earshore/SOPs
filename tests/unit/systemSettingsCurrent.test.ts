@@ -1194,14 +1194,15 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).not.toContain('href="#settings-section-');
   expect(template).toContain('@click="scrollToSection(\'settings-section-llm\')"');
   expect(template).toContain('@click="scrollToSection(\'settings-section-tool-strategy\')"');
-  expect(template).toContain('@click="scrollToSection(\'settings-section-network\')"');
   expect(template).toContain('@click="scrollToSection(\'settings-section-data\')"');
   expect(template).toContain('@click="scrollToSection(\'settings-section-performance\')"');
   expect(template).toContain('id="settings-section-llm"');
   expect(template).toContain('id="settings-section-tool-strategy"');
+  // network id kept for deep-link, nested under Master Analysis 数据采集
   expect(template).toContain('id="settings-section-network"');
   expect(template).toContain('id="settings-section-data"');
   expect(template).toContain('id="settings-section-performance"');
+  expect(template).not.toContain('aria-controls="settings-section-network"');
   expect(template).toContain('AI 模型与连接');
   expect(template).toContain('工具策略');
   expect(template).toContain('通用 AI 执行策略');
@@ -1226,12 +1227,16 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template.indexOf('Master Analysis')).toBeLessThan(template.indexOf('Playground'));
   expect(template.indexOf('Playground')).toBeLessThan(template.indexOf('Keyword Hunter'));
   expect(template.indexOf('Keyword Hunter')).toBeLessThan(template.indexOf('PPC Tools'));
-  expect(template).toContain('采集代理与网络');
+  // 采集代理并入 Master Analysis → 数据采集
+  expect(template).toContain('数据采集');
   expect(template).toContain('采集运行策略');
-  expect(template.match(/<details\s+[^>]*class="settings-collapsible-card/g) || []).toHaveLength(2);
+  expect(template).toContain('id="settings-section-network"');
   expect(template).toContain('settings-collapsible-summary');
   expect(template).toContain('settings-collapsible-chevron');
-  expect(template).not.toMatch(/<details[^>]*settings-collapsible-card[^>]*\sopen(\s|=|>)/);
+  expect(template).toContain('settings-llm-step');
+  expect(template).toContain('<details class="settings-llm-step"');
+  expect(template).not.toContain('settings-expand-bar');
+  expect(template).toContain('data-settings-focus="general-ai-runtime"');
   expect(template).toContain('数据与备份');
   expect(template).toContain('数据保留策略');
   expect(template).toContain('开发者诊断');
