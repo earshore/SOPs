@@ -7,7 +7,7 @@
 
 import { callLLM } from '@/services/llmService';
 import { withStructuredAnalysisOptions } from '@/services/modelCapability';
-import { configCenter } from '@/common/config/ConfigCenter';
+import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
 import { ApiError, ValidationError } from '@/common/errors/AppError';
 import { TRANSLATE_PROMPT_TEMPLATE } from '../constants/prompts';
 import { sanitizePromptInput } from '../ai_analysis/prompts/promptSanitizer';
@@ -89,7 +89,7 @@ async function callAnalysisLLM(prompt: string, llmConfig: LLMConfig): Promise<st
         maxTokens: getMasterAnalysisFullReportMaxTokens(),
         ...(llmConfig.serviceTier && { serviceTier: llmConfig.serviceTier }),
         stream: true,
-        timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
+        timeout: getRuntimeLlmAnalysisOptions().timeout,
       },
       {
         provider: llmConfig.provider,
@@ -207,7 +207,7 @@ export const AnalysisService = {
           maxTokens: getMasterAnalysisTranslationMaxTokens(),
           ...(llmConfig.serviceTier && { serviceTier: llmConfig.serviceTier }),
           stream: true,
-          timeout: configCenter.get<number>('llm.defaultTimeout') || 60000,
+          timeout: getRuntimeLlmAnalysisOptions().timeout,
         },
         {
           provider: llmConfig.provider,

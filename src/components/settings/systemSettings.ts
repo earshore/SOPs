@@ -21,6 +21,7 @@ import {
   DEFAULT_SCRAPER_PROXY_TYPE,
   SCRAPER_COMMERCIAL_PROXY_OPTIONS,
   SCRAPER_DIRECT_PROXY_OPTIONS,
+  buildScraperProxyUrl,
   getScraperProxyDisplayName,
   getScraperProxyHintText,
   getScraperProxyInputLabel,
@@ -214,7 +215,18 @@ interface ProxyState {
   customUrl: string;
   showKey: boolean;
   savedKeyMap: Record<string, string>;
+  /** UI-only: proxy connectivity probe in progress */
+  isTesting: boolean;
+  /** UI-only: last probe error (empty when clear/ok) */
+  testError: string;
+  /** UI-only: last probe message (success or failure) */
+  testMessage: string;
+  /** UI-only: '', 'ok', 'error', 'testing' */
+  status: string;
 }
+
+/** Lightweight public URL used only to exercise the configured proxy path. */
+const PROXY_PROBE_TARGET_URL = 'https://www.example.com/';
 
 interface ToolStrategyState {
   targetModels: Record<ToolStrategyTargetId, string>;
@@ -333,6 +345,7 @@ interface SettingsPanelData {
   resetRuntimeStrategy(): void;
   loadProxyConfig(): Promise<void>;
   saveProxyConfig(): Promise<void>;
+  testProxyConnection(): Promise<void>;
   setLlmProvider(event: Event): void;
   setLlmEndpoint(event: Event): void;
   setLlmApiPath(event: Event): void;
@@ -1021,6 +1034,10 @@ function createSettingsState(): Pick<
       customUrl: '',
       showKey: false,
       savedKeyMap: {},
+      isTesting: false,
+      testError: '',
+      testMessage: '',
+      status: '',
     },
 
     toolStrategy: {
@@ -1812,6 +1829,72 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
     this.captureSettingsBaseline();
     showToast('网络配置已更新', { type: 'success' });
+  },
+
+  async testProxyConnection(): Promise<void> {
+    // Clear previous probe result; never close the panel on failure (UT-P0-10).
+    this.proxy.testError = '';
+    this.proxy.testMessage = '';
+    this.proxy.status = '';
+
+    if (scraperProxyNeedsInput(this.proxy.type) && !this.proxy.customUrl.trim()) {
+      const message = '请先填写 API Key 或代理地址';
+      this.proxy.testError = message;
+      this.proxy.testMessage = message;
+      this.proxy.status = 'error';
+      showToast(message, { type: 'warning' });
+      return;
+    }
+
+    const fetchUrl = buildScraperProxyUrl(
+      this.proxy.type,
+      PROXY_PROBE_TARGET_URL,
+      this.proxy.customUrl
+    );
+    if (!fetchUrl) {
+      const message = '不支持的代理类型';
+      this.proxy.testError = message;
+      this.proxy.testMessage = message;
+      this.proxy.status = 'error';
+      showToast(message, { type: 'error' });
+      return;
+    }
+
+    this.proxy.isTesting = true;
+    this.proxy.status = 'testing';
+
+    const timeoutMs = this.runtimeStrategy.settings.scraper.requestTimeoutMs;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      showToast('正在测试代理连接...', { type: 'info' });
+      const response = await fetch(fetchUrl, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        throw new Error(`代理响应异常 (HTTP ${response.status})`);
+      }
+      this.proxy.status = 'ok';
+      this.proxy.testError = '';
+      this.proxy.testMessage = '代理连接成功';
+      showToast('代理连接成功', { type: 'success' });
+    } catch (error) {
+      const raw = error instanceof Error ? error.message : '代理连接失败';
+      const message =
+        error instanceof Error &&
+        (error.name === 'AbortError' || /timeout|aborted/i.test(raw))
+          ? '代理连接超时'
+          : raw || '代理连接失败';
+      this.proxy.testError = message;
+      this.proxy.testMessage = message;
+      this.proxy.status = 'error';
+      showToast(message, { type: 'error' });
+    } finally {
+      clearTimeout(timeoutId);
+      this.proxy.isTesting = false;
+    }
   },
 
   setLlmProvider(event: Event): void {

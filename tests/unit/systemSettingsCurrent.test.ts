@@ -1206,6 +1206,51 @@ it('UT-P0-03 saveProxyConfig only updates proxy (not tool strategy or LLM keys)'
   ).toBe(false);
 });
 
+it('UT-P0-10 proxy test failure sets error without closing panel', async () => {
+  const panel = createPanel();
+  panel.isOpen = true;
+  panel.proxy.type = 'scraperapi';
+  panel.proxy.customUrl = 'test-key';
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValueOnce(new Error('proxy offline')));
+
+  await panel.testProxyConnection();
+
+  expect(panel.isOpen).toBe(true);
+  expect(panel.proxy.testError || panel.proxy.status).toBeTruthy();
+  expect(panel.proxy.testError).toBe('proxy offline');
+  expect(panel.proxy.status).toBe('error');
+  expect(panel.proxy.isTesting).toBe(false);
+});
+
+it('UT-P0-10b proxy test success clears error state without closing panel', async () => {
+  const panel = createPanel();
+  panel.isOpen = true;
+  panel.proxy.type = 'scraperapi';
+  panel.proxy.customUrl = 'test-key';
+  panel.proxy.testError = 'stale';
+  panel.proxy.status = 'error';
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValueOnce({ ok: true, status: 200 } as Response)
+  );
+
+  await panel.testProxyConnection();
+
+  expect(panel.isOpen).toBe(true);
+  expect(panel.proxy.testError).toBe('');
+  expect(panel.proxy.status).toBe('ok');
+  expect(panel.proxy.testMessage).toContain('成功');
+});
+
+it('CT-P0-05 network section exposes proxy test entry', () => {
+  const template = readFileSync(
+    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
+    'utf8'
+  );
+  expect(template).toContain('data-testid="settings-test-proxy"');
+  expect(template).toContain('testProxyConnection()');
+});
+
 it('CT-P0-01 tool strategy save copy mentions runtime strategy', () => {
   const template = readFileSync(
     resolve(process.cwd(), 'src/components/settings/systemSettings.html'),

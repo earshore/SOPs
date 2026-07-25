@@ -1566,6 +1566,15 @@
                   </div>
                   <button
                     type="button"
+                    data-testid="settings-test-proxy"
+                    @click="testProxyConnection()"
+                    :disabled="proxy.isTesting"
+                    class="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 rounded-xl transition duration-200 text-sm font-semibold whitespace-nowrap active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                  >
+                    <span x-text="proxy.isTesting ? '测试中...' : '测试连接'"></span>
+                  </button>
+                  <button
+                    type="button"
                     @click="saveProxyConfig()"
                     class="px-5 py-2.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white rounded-xl transition duration-200 text-sm font-semibold shadow-lg shadow-slate-500/15 whitespace-nowrap active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
                   >
@@ -1573,6 +1582,13 @@
                   </button>
                 </div>
                 <p class="settings-field-help" x-text="proxyHintText"></p>
+                <p
+                  class="text-xs"
+                  :class="proxy.status === 'ok' ? 'text-emerald-600' : 'text-rose-600'"
+                  x-show="proxy.testMessage"
+                  x-text="proxy.testMessage"
+                  data-testid="settings-proxy-test-message"
+                ></p>
               </div>
 
               <!-- Tip Card -->
