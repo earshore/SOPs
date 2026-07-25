@@ -53,16 +53,19 @@ vi.mock('@/services/errorService', () => ({
   ErrorService: { handle: vi.fn() },
 }));
 
-vi.mock('@/services/localDataStore', () => ({
-  LocalDataStore: {
-    getUsage: vi.fn(),
-    exportAll: vi.fn(),
-    importAll: vi.fn(),
-    clearBucket: vi.fn(),
-    clearAll: vi.fn(),
-  },
-  summarizeLocalDataExport: vi.fn(),
-}));
+vi.mock('@/services/localDataStore', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/services/localDataStore')>();
+  return {
+    ...actual,
+    LocalDataStore: {
+      getUsage: vi.fn(),
+      exportAll: vi.fn(),
+      importAll: vi.fn(),
+      clearBucket: vi.fn(),
+      clearAll: vi.fn(),
+    },
+  };
+});
 
 vi.mock('@/stores/useAppStore', () => ({
   appStore: { getState: () => ({}) },

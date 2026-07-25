@@ -28,6 +28,10 @@ export interface LocalDataRecord<T = unknown> {
 
 export interface LocalDataExport {
   version: 1;
+  /** Explicit export schema version (mirrors `version` for new payloads). */
+  schemaVersion: 1;
+  /** Present only for partial (bucketed) exports. */
+  buckets?: LocalDataBucketId[];
   exportedAt: string;
   localStorage: Record<string, string>;
   indexedDB: Array<LocalDataRecord>;
@@ -35,6 +39,11 @@ export interface LocalDataExport {
     app: 'sops';
     storageVersion: string;
   };
+}
+
+export interface LocalDataExportOptions {
+  /** When set and non-empty, export only these buckets and record them on the payload. */
+  buckets?: LocalDataBucketId[];
 }
 
 export interface LocalDataImportOptions {
@@ -267,12 +276,50 @@ interface PreparedLocalDataImport {
   indexedRecords: Array<LocalDataRecord>;
 }
 
-function assertSupportedLocalDataExport(data: LocalDataExport): void {
+/**
+ * Resolve schema version from new (`schemaVersion`) or legacy (`version`) fields.
+ * Returns null when neither field is a number (missing / invalid).
+ */
+export function resolveLocalDataExportSchemaVersion(data: unknown): number | null {
+  if (!isRecord(data)) return null;
+  if (typeof data.schemaVersion === 'number') return data.schemaVersion;
+  if (typeof data.version === 'number') return data.version;
+  return null;
+}
+
+function normalizeExportBucketFilter(
+  buckets: LocalDataBucketId[] | undefined
+): LocalDataBucketId[] | null {
+  if (!buckets || buckets.length === 0) {
+    return null;
+  }
+  const unique = Array.from(new Set(buckets));
+  for (const id of unique) {
+    if (!LOCAL_DATA_BUCKET_IDS.includes(id)) {
+      throw new ValidationError('不支持的本地数据分类', 'LOCAL_DATA_003', 'buckets', id, {
+        module: 'LocalDataStore',
+        action: 'normalizeExportBucketFilter',
+      });
+    }
+  }
+  return unique;
+}
+
+function assertSupportedLocalDataExport(data: unknown): asserts data is LocalDataExport {
+  if (!isRecord(data)) {
+    throw new ValidationError('不支持的本地数据备份格式', 'LOCAL_DATA_001', 'export', data, {
+      module: 'LocalDataStore',
+      action: 'assertSupportedLocalDataExport',
+    });
+  }
+
+  const schemaVersion = resolveLocalDataExportSchemaVersion(data);
+  const metadata = isRecord(data.metadata) ? data.metadata : null;
+
   if (
-    !data ||
-    data.version !== 1 ||
-    data.metadata?.app !== 'sops' ||
-    data.metadata?.storageVersion !== STORAGE_VERSION ||
+    schemaVersion !== 1 ||
+    metadata?.app !== 'sops' ||
+    metadata?.storageVersion !== STORAGE_VERSION ||
     !isRecord(data.localStorage) ||
     !Array.isArray(data.indexedDB)
   ) {
@@ -307,26 +354,66 @@ function exportIncludesSecrets(data: LocalDataExport): boolean {
  * Validate a backup payload and return a human-readable import summary.
  */
 export function summarizeLocalDataExport(data: unknown): LocalDataExportSummary {
-  assertSupportedLocalDataExport(data as LocalDataExport);
-  const exportData = data as LocalDataExport;
-  const localStorageKeys = Object.keys(exportData.localStorage).length;
-  const indexedDbRecords = exportData.indexedDB.length;
+  assertSupportedLocalDataExport(data);
+  const localStorageKeys = Object.keys(data.localStorage).length;
+  const indexedDbRecords = data.indexedDB.length;
   let estimatedBytes = 0;
 
   try {
-    estimatedBytes = JSON.stringify(exportData).length * 2;
+    estimatedBytes = JSON.stringify(data).length * 2;
   } catch {
     estimatedBytes = localStorageKeys * 32 + indexedDbRecords * 64;
   }
 
   return {
-    exportedAt: exportData.exportedAt || '未知时间',
-    storageVersion: exportData.metadata.storageVersion,
+    exportedAt: typeof data.exportedAt === 'string' ? data.exportedAt : '未知时间',
+    storageVersion: data.metadata.storageVersion,
     localStorageKeys,
     indexedDbRecords,
     estimatedBytes,
-    includesSecrets: exportIncludesSecrets(exportData),
+    includesSecrets: exportIncludesSecrets(data),
   };
+}
+
+/**
+ * Parse raw backup text and validate before importAll.
+ * Rejects non-JSON and missing/unsupported schema version.
+ */
+export function precheckLocalDataImportText(text: string): {
+  data: LocalDataExport;
+  summary: LocalDataExportSummary;
+} {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new ValidationError(
+      '备份文件不是有效的 JSON，无法导入',
+      'LOCAL_DATA_005',
+      'text',
+      text.slice(0, 120),
+      {
+        module: 'LocalDataStore',
+        action: 'precheckLocalDataImportText',
+      }
+    );
+  }
+
+  if (resolveLocalDataExportSchemaVersion(parsed) === null) {
+    throw new ValidationError(
+      '备份文件缺少 schemaVersion / version，无法导入',
+      'LOCAL_DATA_006',
+      'schemaVersion',
+      parsed,
+      {
+        module: 'LocalDataStore',
+        action: 'precheckLocalDataImportText',
+      }
+    );
+  }
+
+  const summary = summarizeLocalDataExport(parsed);
+  return { data: parsed as LocalDataExport, summary };
 }
 
 function collectImportLocalStorageEntries(
@@ -505,11 +592,17 @@ class LocalDataStoreClass {
     this.clearAppLocalStorageKeys();
   }
 
-  async exportAll(): Promise<LocalDataExport> {
+  async exportAll(options: LocalDataExportOptions = {}): Promise<LocalDataExport> {
+    const bucketFilter = normalizeExportBucketFilter(options.buckets);
+    const bucketSet = bucketFilter ? new Set(bucketFilter) : null;
     const localStorageData: Record<string, string> = {};
     const storage = getBrowserLocalStorage();
     for (const key of this.getLocalStorageKeys()) {
-      if (classifyLocalStorageKey(key) === null) {
+      const bucketId = classifyLocalStorageKey(key);
+      if (bucketId === null) {
+        continue;
+      }
+      if (bucketSet && !bucketSet.has(bucketId)) {
         continue;
       }
       const value = storage.getItem(key);
@@ -518,16 +611,30 @@ class LocalDataStoreClass {
       }
     }
 
-    return {
+    const indexedRecords = await this.getAllRecords();
+    const indexedDB = bucketSet
+      ? indexedRecords.filter(record =>
+          bucketSet.has(classifyKey(record.key, record.storageClass))
+        )
+      : indexedRecords;
+
+    const payload: LocalDataExport = {
       version: 1,
+      schemaVersion: 1,
       exportedAt: new Date().toISOString(),
       localStorage: localStorageData,
-      indexedDB: await this.getAllRecords(),
+      indexedDB,
       metadata: {
         app: 'sops',
         storageVersion: STORAGE_VERSION,
       },
     };
+
+    if (bucketFilter) {
+      payload.buckets = bucketFilter;
+    }
+
+    return payload;
   }
 
   async importAll(data: LocalDataExport, options: LocalDataImportOptions = {}): Promise<void> {

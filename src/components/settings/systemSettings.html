@@ -1890,7 +1890,8 @@
                   :disabled="localData.isBusy"
                   class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                 >
-                  <i class="fas fa-file-export text-blue-500"></i> 导出全部备份
+                  <i class="fas fa-file-export text-blue-500"></i>
+                  <span x-text="exportLocalDataButtonText"></span>
                 </button>
                 <button
                   type="button"
@@ -1900,6 +1901,57 @@
                 >
                   <i class="fas fa-file-import text-emerald-500"></i> 导入备份
                 </button>
+              </div>
+
+              <div
+                class="settings-collapsible-card space-y-2.5 p-3"
+                data-settings-density="advanced"
+                data-testid="settings-export-buckets"
+                :hidden="settingsDensity === 'simple'"
+              >
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <h4 class="settings-card__title">分桶导出</h4>
+                    <p class="settings-card__desc">
+                      勾选后仅导出所选分类；不勾选则导出全部。高级可选。
+                    </p>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      @click="selectAllExportBuckets()"
+                      :disabled="localData.isBusy"
+                      class="min-h-[32px] rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    >
+                      全选
+                    </button>
+                    <button
+                      type="button"
+                      @click="clearExportBucketSelection()"
+                      :disabled="localData.isBusy"
+                      class="min-h-[32px] rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    >
+                      清空（全部）
+                    </button>
+                  </div>
+                </div>
+                <div class="grid gap-1.5 sm:grid-cols-2">
+                  <template x-for="bucket in localDataBucketItems" :key="'export-' + bucket.id">
+                    <label
+                      class="flex min-h-[36px] cursor-pointer items-center gap-2 rounded-lg border border-slate-200/80 bg-white/90 px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50"
+                    >
+                      <input
+                        type="checkbox"
+                        class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        :checked="isExportBucketSelected(bucket.id)"
+                        @change="toggleExportBucket(bucket.id)"
+                        :disabled="localData.isBusy"
+                        :data-export-bucket="bucket.id"
+                      />
+                      <span class="min-w-0 truncate font-medium" x-text="bucket.label"></span>
+                    </label>
+                  </template>
+                </div>
               </div>
 
               <details

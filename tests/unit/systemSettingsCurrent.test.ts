@@ -982,6 +982,89 @@ it('does not import when the user cancels the import choice dialog', async () =>
   expect(panel.localData.isBusy).toBe(false);
 });
 
+async function runImportRawFilePicker(panel: TestPanel, text: string): Promise<void> {
+  const file = { text: vi.fn(async () => text) };
+  const input = document.createElement('input');
+  const createElement = document.createElement.bind(document);
+  let changeHandler: ((event: Event) => void | Promise<void>) | null = null;
+  Object.defineProperty(input, 'files', { value: [file], configurable: true });
+  vi.spyOn(input, 'click').mockImplementation(() => undefined);
+  vi.spyOn(input, 'addEventListener').mockImplementation(
+    (type: string, listener: EventListenerOrEventListenerObject) => {
+      if (type === 'change' && typeof listener === 'function') {
+        changeHandler = listener as (event: Event) => void | Promise<void>;
+      }
+    }
+  );
+  vi.spyOn(document, 'createElement').mockImplementation((tagName: string) =>
+    tagName === 'input' ? input : createElement(tagName)
+  );
+
+  await panel.importLocalData();
+  expect(changeHandler).toBeTypeOf('function');
+  await changeHandler?.(new Event('change'));
+  await Promise.resolve();
+}
+
+it('UT-P2-02 does not call importAll for invalid JSON or missing version', async () => {
+  const panel = createPanel();
+
+  await runImportRawFilePicker(panel, '{not-valid-json');
+  expect(LocalDataStore.importAll).not.toHaveBeenCalled();
+  expect(deps.errorHandle).toHaveBeenCalled();
+  expect(deps.chooseWithModal).not.toHaveBeenCalled();
+
+  deps.errorHandle.mockClear();
+  deps.chooseWithModal.mockClear();
+  deps.localData.importAll.mockClear();
+
+  await runImportRawFilePicker(
+    panel,
+    JSON.stringify({
+      exportedAt: '2026-07-20T00:00:00.000Z',
+      localStorage: {},
+      indexedDB: [],
+      metadata: { app: 'sops', storageVersion: 'local-data-v1' },
+    })
+  );
+  expect(LocalDataStore.importAll).not.toHaveBeenCalled();
+  expect(deps.errorHandle).toHaveBeenCalled();
+  expect(deps.chooseWithModal).not.toHaveBeenCalled();
+  expect(panel.localData.isBusy).toBe(false);
+});
+
+it('UT-P2-01 panel partial export passes selected buckets to exportAll', async () => {
+  const panel = createPanel();
+  panel.settingsDensity = 'advanced';
+  panel.localData.selectedExportBuckets = ['cache'];
+  deps.confirmWithModal.mockResolvedValueOnce(true);
+  deps.localData.exportAll.mockResolvedValueOnce({
+    version: 1,
+    schemaVersion: 1,
+    buckets: ['cache'],
+    exportedAt: '2026-07-20T00:00:00.000Z',
+    localStorage: {},
+    indexedDB: [],
+    metadata: { app: 'sops', storageVersion: 'local-data-v1' },
+  });
+
+  const createElement = document.createElement.bind(document);
+  const link = document.createElement('a');
+  vi.spyOn(link, 'click').mockImplementation(() => undefined);
+  vi.spyOn(document, 'createElement').mockImplementation((tagName: string) =>
+    tagName === 'a' ? link : createElement(tagName)
+  );
+  const createObjectURL = vi.fn(() => 'blob:export');
+  const revokeObjectURL = vi.fn();
+  vi.stubGlobal('URL', { createObjectURL, revokeObjectURL });
+
+  await panel.exportLocalData();
+
+  expect(LocalDataStore.exportAll).toHaveBeenCalledWith({ buckets: ['cache'] });
+  expect(panel.exportLocalDataButtonText).toBe('导出选中分类');
+  expect(panel.isPartialLocalDataExport).toBe(true);
+});
+
 it('updates model status safely for configured, pending, and missing DOM states', async () => {
   document.body.innerHTML = '<div id="model-status"></div>';
   deps.values.set(STORAGE_KEYS.LLM_ACTIVE_PROVIDER, 'new_api');

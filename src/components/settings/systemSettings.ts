@@ -52,7 +52,7 @@ import {
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
   LocalDataStore,
-  summarizeLocalDataExport,
+  precheckLocalDataImportText,
   type LocalDataBucketId,
   type LocalDataExportSummary,
   type LocalDataUsage,
@@ -320,6 +320,8 @@ interface SettingsPanelData {
     isBusy: boolean;
     clearingBucketId: LocalDataBucketId | null;
     cleanupItemsExpanded: boolean;
+    /** Selected bucket ids for partial export (advanced). Empty means full export. */
+    selectedExportBuckets: LocalDataBucketId[];
   };
   showDangerousEndpointWarning: boolean;
   proxyNeedsInput: boolean;
@@ -416,9 +418,15 @@ interface SettingsPanelData {
   getModelValue(model: ModelOption): string;
   getModelLabel(model: ModelOption): string;
   refreshLocalDataUsage(): Promise<void>;
+  isPartialLocalDataExport: boolean;
+  exportLocalDataButtonText: string;
   exportLocalData(): Promise<void>;
   importLocalData(): Promise<void>;
   toggleLocalDataCleanupItems(): void;
+  isExportBucketSelected(bucketId: LocalDataBucketId): boolean;
+  toggleExportBucket(bucketId: LocalDataBucketId): void;
+  selectAllExportBuckets(): void;
+  clearExportBucketSelection(): void;
   clearLocalCache(): Promise<void>;
   clearLocalDataBucket(bucketId: LocalDataBucketId): Promise<void>;
   clearAllLocalData(): Promise<void>;
@@ -532,6 +540,17 @@ const MODEL_FEATURE_ICONS: Record<ModelFeature, string> = {
 };
 
 const LLM_TEST_CONNECTION_MAX_TOKENS = 32;
+
+const ALL_LOCAL_DATA_BUCKET_IDS: LocalDataBucketId[] = [
+  'config',
+  'secrets',
+  'workspace-state',
+  'scrape-history',
+  'chat-history',
+  'keyword-history',
+  'cache',
+  'other',
+];
 
 const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
   config: {
@@ -1128,6 +1147,8 @@ function createSettingsState(): Pick<
       isBusy: false,
       clearingBucketId: null,
       cleanupItemsExpanded: false,
+      // Empty selection = full export; advanced UI can opt into partial buckets.
+      selectedExportBuckets: [],
     },
   };
 }
@@ -1511,6 +1532,19 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   get localDataCleanupToggleIconClass(): string {
     return this.localData.cleanupItemsExpanded ? 'fa-chevron-up' : 'fa-chevron-down';
+  },
+
+  get isPartialLocalDataExport(): boolean {
+    const selected = this.localData.selectedExportBuckets;
+    return (
+      this.settingsDensity === 'advanced' &&
+      selected.length > 0 &&
+      selected.length < ALL_LOCAL_DATA_BUCKET_IDS.length
+    );
+  },
+
+  get exportLocalDataButtonText(): string {
+    return this.isPartialLocalDataExport ? '导出选中分类' : '导出全部备份';
   },
 
   get localDataBucketItems(): LocalDataBucketView[] {
@@ -2268,16 +2302,23 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   async exportLocalData(): Promise<void> {
+    const selectedBuckets = this.isPartialLocalDataExport
+      ? [...this.localData.selectedExportBuckets]
+      : undefined;
     const confirmed = await confirmSettingsAction(
-      '导出本地数据',
-      `导出的备份文件可能包含本地加密的 API Key、代理凭据、配置和历史记录等敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`,
+      selectedBuckets ? '导出分桶本地数据' : '导出本地数据',
+      selectedBuckets
+        ? `将仅导出已选分类（${selectedBuckets.join('、')}）。备份可能仍含敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`
+        : `导出的备份文件可能包含本地加密的 API Key、代理凭据、配置和历史记录等敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`,
       '继续导出'
     );
     if (!confirmed) return;
 
     try {
       this.localData.isBusy = true;
-      const data = await LocalDataStore.exportAll();
+      const data = await LocalDataStore.exportAll(
+        selectedBuckets ? { buckets: selectedBuckets } : {}
+      );
       const payload = JSON.stringify(data, null, 2);
       const estimatedBytes = payload.length * 2;
       if (estimatedBytes >= LOCAL_DATA_EXPORT_SIZE_WARN_BYTES) {
@@ -2293,12 +2334,13 @@ const settingsPanelBehavior: SettingsPanelPart = {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `sops-local-data-${new Date().toISOString().slice(0, 10)}.json`;
+      const suffix = selectedBuckets ? `-partial-${selectedBuckets.join('-')}` : '';
+      link.download = `sops-local-data${suffix}-${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      showToast('本地数据已导出', { type: 'success' });
+      showToast(selectedBuckets ? '分桶本地数据已导出' : '本地数据已导出', { type: 'success' });
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'exportLocalData', module: 'settings' });
     } finally {
@@ -2317,17 +2359,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
       try {
         this.localData.isBusy = true;
         const text = await file.text();
-        let parsed: unknown;
+        let prechecked: { data: Parameters<typeof LocalDataStore.importAll>[0]; summary: LocalDataExportSummary };
         try {
-          parsed = JSON.parse(text);
-        } catch {
-          showToast('备份文件不是有效的 JSON，无法导入', { type: 'error' });
-          return;
-        }
-
-        let summary: LocalDataExportSummary;
-        try {
-          summary = summarizeLocalDataExport(parsed);
+          prechecked = precheckLocalDataImportText(text);
         } catch (error) {
           ErrorService.handle(error as Error, { action: 'importLocalData', module: 'settings' });
           return;
@@ -2335,7 +2369,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
         const choice = await chooseWithModal({
           title: '导入本地数据',
-          content: buildLocalDataImportChoiceContent(summary),
+          content: buildLocalDataImportChoiceContent(prechecked.summary),
           primaryLabel: '完整恢复',
           secondaryLabel: '合并导入',
           cancelLabel: '取消',
@@ -2347,9 +2381,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
         }
 
         const mode = choice === 'primary' ? 'replace' : 'merge';
-        await LocalDataStore.importAll(parsed as Parameters<typeof LocalDataStore.importAll>[0], {
-          mode,
-        });
+        await LocalDataStore.importAll(prechecked.data, { mode });
         await this.refreshLocalDataUsage();
         showToast('本地数据已导入，页面即将刷新以应用恢复结果', { type: 'success' });
         reloadAfterLocalDataChange();
@@ -2364,6 +2396,27 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   toggleLocalDataCleanupItems(): void {
     this.localData.cleanupItemsExpanded = !this.localData.cleanupItemsExpanded;
+  },
+
+  isExportBucketSelected(bucketId: LocalDataBucketId): boolean {
+    return this.localData.selectedExportBuckets.includes(bucketId);
+  },
+
+  toggleExportBucket(bucketId: LocalDataBucketId): void {
+    const selected = this.localData.selectedExportBuckets;
+    if (selected.includes(bucketId)) {
+      this.localData.selectedExportBuckets = selected.filter(id => id !== bucketId);
+      return;
+    }
+    this.localData.selectedExportBuckets = [...selected, bucketId];
+  },
+
+  selectAllExportBuckets(): void {
+    this.localData.selectedExportBuckets = [...ALL_LOCAL_DATA_BUCKET_IDS];
+  },
+
+  clearExportBucketSelection(): void {
+    this.localData.selectedExportBuckets = [];
   },
 
   async clearLocalCache(): Promise<void> {

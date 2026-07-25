@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { LocalDataStore, summarizeLocalDataExport } from '@/services/localDataStore';
+import {
+  LocalDataStore,
+  precheckLocalDataImportText,
+  summarizeLocalDataExport,
+} from '@/services/localDataStore';
 
 beforeEach(async () => {
   vi.restoreAllMocks();
@@ -220,9 +224,10 @@ it('removes LRU metadata when clearing cache keys', async () => {
   expect(localStorage.getItem('_lru_access_cache:view:item')).toBeNull();
 });
 
-it('summarizes backup metadata including secret detection', () => {
+it('UT-P2-03 summarizes backup metadata including keys and secret detection', () => {
   const summary = summarizeLocalDataExport({
     version: 1,
+    schemaVersion: 1,
     exportedAt: '2026-07-20T12:00:00.000Z',
     localStorage: {
       app_theme: JSON.stringify('dark'),
@@ -252,6 +257,36 @@ it('summarizes backup metadata including secret detection', () => {
   expect(summary.estimatedBytes).toBeGreaterThan(0);
 });
 
+it('UT-P2-01 exports only selected buckets and includes schemaVersion', async () => {
+  localStorage.setItem('cache:view:item', 'cached-view');
+  localStorage.setItem('llm_active_provider', JSON.stringify('new_api'));
+  localStorage.setItem('secure_llm_key_new_api', JSON.stringify({ encrypted: true }));
+  await LocalDataStore.set('cache:ai-analysis:item', { cached: true }, 'cache');
+  await LocalDataStore.set('user:scrape_history', [{ id: 1 }], 'user-data');
+
+  const exported = await LocalDataStore.exportAll({ buckets: ['cache'] });
+
+  expect(exported.schemaVersion).toBe(1);
+  expect(exported.version).toBe(1);
+  expect(exported.buckets).toEqual(['cache']);
+  expect(exported.localStorage).toEqual({ 'cache:view:item': 'cached-view' });
+  expect(exported.indexedDB.map(record => record.key)).toEqual(['cache:ai-analysis:item']);
+  expect(exported.metadata).toEqual({
+    app: 'sops',
+    storageVersion: 'local-data-v1',
+  });
+});
+
+it('full export always includes schemaVersion and omits buckets', async () => {
+  localStorage.setItem('app_theme', JSON.stringify('dark'));
+
+  const exported = await LocalDataStore.exportAll();
+
+  expect(exported.schemaVersion).toBe(1);
+  expect(exported.buckets).toBeUndefined();
+  expect(exported.localStorage).toHaveProperty('app_theme');
+});
+
 it('rejects unsupported backup payloads when summarizing', () => {
   expect(() =>
     summarizeLocalDataExport({
@@ -262,6 +297,20 @@ it('rejects unsupported backup payloads when summarizing', () => {
       metadata: { app: 'other', storageVersion: 'local-data-v1' },
     })
   ).toThrow('不支持的本地数据备份格式');
+});
+
+it('precheck rejects invalid JSON and missing version before import use', () => {
+  expect(() => precheckLocalDataImportText('{not-json')).toThrow('不是有效的 JSON');
+  expect(() =>
+    precheckLocalDataImportText(
+      JSON.stringify({
+        exportedAt: new Date().toISOString(),
+        localStorage: {},
+        indexedDB: [],
+        metadata: { app: 'sops', storageVersion: 'local-data-v1' },
+      })
+    )
+  ).toThrow('缺少 schemaVersion / version');
 });
 
 it('exports and imports localStorage and IndexedDB-layer data', async () => {
