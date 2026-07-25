@@ -43,8 +43,19 @@ This review keeps the application layout intact and only documents the current s
 - Kept active references in the root and `docs/` top level: README, changelog, deployment, current quality/security reports, product roadmap, and active design/architecture guidelines.
 - Kept local AI tool state, generated quality reports, exported sample data, and local plugin bundles out of Git through `.gitignore`.
 
+## Document authority (2026-07-26 batch C)
+
+| Corpus | Role |
+| --- | --- |
+| `docs/superpowers/` | **Active** implementation plans and design specs |
+| `docs/*_GUIDELINES.md`, `docs/SHARED_CAPABILITIES_GUIDE.md`, `docs/TECH_DEBT_AUDIT.md` | **Active** product/engineering constitutions and live debt signals |
+| `docs/INDEX.md` | Navigation: active vs archive vs historical |
+| `.kiro/` | **Historical only** (see `.kiro/README.md`); not current debt/plan SSOT |
+| `docs/archive/` | Completed one-off audits and retired notes |
+
 ## Remaining Review Items
 
 - Keep generated reports out of Git unless they are explicitly promoted into a maintained document such as `TECH_DEBT_AUDIT.md` or `XSS_SCAN_REPORT.md`.
-- Treat `.kiro/` project planning documents as historical references; avoid adding local `.kiro/hooks/` or `.kiro/settings/` state back to version control.
+- Treat `.kiro/` project planning documents as historical references; avoid adding local `.kiro/hooks/` or `.kiro/settings/` state back to version control. Optional later: mass-move `.kiro/` under `docs/archive/kiro-2026-h1/` only after confirming no required path dependencies.
 - Continue pruning root-level one-off reports after each audit cycle so the root remains limited to application entry points and repository-level documentation.
+- Structure cleanup batches D–F (dead `StandardModule`, orphan scripts, vite config ownership) remain out of batch C.
