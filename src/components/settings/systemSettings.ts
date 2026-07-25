@@ -1350,22 +1350,16 @@ const settingsPanelBehavior: SettingsPanelPart = {
     return buildApiPathCapabilityHint(pathId, registryCap);
   },
 
-  /** Soft readiness line under the section intro (human, non-blocking). */
+  /** Soft readiness line under the section intro (status only). */
   get llmSetupReadinessText(): string {
     const hasEndpoint = Boolean((this.llm.endpoint || '').trim());
     const needsKey = isLLMApiKeyRequired(this.llm);
     const hasKey = Boolean((this.llm.apiKey || '').trim());
     const hasModel = Boolean((this.llm.model || '').trim());
-    if (!hasEndpoint) {
-      return '先填写 API Endpoint（官方 API 或兼容中转均可），密钥仅保存在本机浏览器。';
-    }
-    if (needsKey && !hasKey) {
-      return 'Endpoint 已就绪。填入 API Key 后即可「获取模型列表」与「测试连接」。';
-    }
-    if (!hasModel) {
-      return '连接信息已备齐。点「获取模型列表」，再选默认模型并保存。';
-    }
-    return '配置看起来可用。建议先「测试连接」，确认后再保存。';
+    if (!hasEndpoint) return '缺 Endpoint';
+    if (needsKey && !hasKey) return '缺 API Key';
+    if (!hasModel) return '未选模型';
+    return '可测试连接';
   },
 
   get selectedApiPathDescription(): string {

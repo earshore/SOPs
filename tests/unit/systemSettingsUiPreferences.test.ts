@@ -110,10 +110,11 @@ describe('CT-P1-02 / CT-P1-03 template contracts', () => {
   });
 
   it('CT-P1-03 template includes impact scope badge copy', () => {
-    expect(html).toContain('仅本浏览器');
+    // Converged: one primary badge per zone (no redundant 仅本浏览器 stack)
     expect(html).toContain('影响 AI 成本');
     expect(html).toContain('影响采集');
     expect(html).toContain('破坏性');
+    expect(html).toContain('即时生效');
     expect(html).toContain('settings-badge');
     expect(css).toContain('.settings-badge--ai-cost');
   });

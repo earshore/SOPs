@@ -520,7 +520,8 @@ it('exposes deepChat business tools toggle binding in settings template', () => 
   expect(template).toContain("setRuntimeBoolean('deepChat.enableBusinessTools'");
   expect(template).toContain('runtimeStrategy.settings.deepChat.enableBusinessTools');
   expect(template).toContain('启用业务工具');
-  expect(template).toContain('保存工具与运行策略');
+  expect(template).toContain('settings-save-tool-strategy');
+  expect(template).toContain('修改后需保存');
 });
 
 it('fetches models and handles validation or API failures', async () => {
@@ -1396,9 +1397,9 @@ it('CT-P0-01 tool strategy save copy mentions runtime strategy', () => {
     resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
     'utf8'
   );
-  expect(template).toMatch(/运行时策略|运行策略/);
+  expect(template).toMatch(/运行时策略|运行策略|本页全部策略/);
   expect(template).toContain('settings-save-tool-strategy');
-  expect(template).toContain('将保存当前面板中的全部运行时策略');
+  expect(template).toContain('保存：本页全部策略');
 });
 
 it('UT-P0-09 open with invalid runtime normalizes and sets healthMessages', async () => {
