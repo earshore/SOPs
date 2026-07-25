@@ -247,6 +247,30 @@ async function openGlobalSettings(page: Page): Promise<void> {
   ).toBeVisible();
 }
 
+/**
+ * LLM setup uses collapsed <details> steps (凭证 / 模型与能力).
+ * Expand them so endpoint, API key, and model sync controls are interactable.
+ */
+async function prepareLlmConnectionControls(page: Page): Promise<void> {
+  const llmSection = page.locator('#settings-section-llm');
+  await page
+    .locator('nav.settings-panel-nav')
+    .getByRole('button', { name: 'AI 模型与连接', exact: true })
+    .click();
+
+  await llmSection.locator('details.settings-llm-step').evaluateAll(nodes => {
+    for (const node of nodes) {
+      if (node instanceof HTMLDetailsElement) {
+        node.open = true;
+      }
+    }
+  });
+
+  await expect(llmSection.locator('#llm-endpoint')).toBeVisible();
+  await expect(llmSection.locator('#llm-api-key')).toBeVisible();
+  await expect(llmSection.getByRole('button', { name: '获取模型列表' })).toBeVisible();
+}
+
 type SwitchTabTarget =
   | { kind: 'sops'; targetActionSelector: string | null }
   | { kind: 'sidebar'; menu: string; overview: string; trigger: string };
@@ -991,6 +1015,7 @@ test.describe('release candidate smoke', () => {
     });
 
     await openGlobalSettings(page);
+    await prepareLlmConnectionControls(page);
 
     const llmSection = page.locator('#settings-section-llm');
     await expect(llmSection.locator('#llm-endpoint')).toHaveValue(DEFAULT_LLM_ENDPOINT);
@@ -1064,6 +1089,7 @@ test.describe('release candidate smoke', () => {
     });
 
     await openGlobalSettings(page);
+    await prepareLlmConnectionControls(page);
 
     const llmSection = page.locator('#settings-section-llm');
     const errorToast = page
