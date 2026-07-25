@@ -60,8 +60,11 @@ import {
 import { ErrorService } from '@/services/errorService';
 import {
   TOOL_STRATEGY_TARGETS,
+  getToolStrategySettings,
   getToolTargetDefaultModel,
+  saveToolStrategySettings,
   setToolTargetDefaultModel,
+  type ToolStrategySettings,
   type ToolStrategyTargetId,
 } from '@/services/toolStrategyService';
 import {
@@ -91,6 +94,7 @@ import {
 import {
   evaluateSettingsHealth,
   isRuntimeRawInvalid,
+  isStorageQuotaWarning,
 } from '@/components/settings/domain/settingsHealth';
 import {
   applySettingsDeepLink,
@@ -108,6 +112,13 @@ import {
   isRuntimePresetId,
   type RuntimePresetId,
 } from '@/components/settings/domain/settingsPresets';
+import {
+  evaluateExternalStorageChange,
+  getSettingsRollbackCount,
+  pushSettingsRollbackSnapshot,
+  undoLastSettingsSave as popLastSettingsSave,
+  type SettingsRollbackPartition,
+} from '@/components/settings/domain/settingsRollback';
 import { ThemeManager, THEME_PRESETS } from '@/common/config/themeConfig';
 import {
   animationSettingsStore,
@@ -118,6 +129,7 @@ import type { AnimationSpeed } from '@/types/animation-types';
 export type { SettingsOpenOptions } from '@/components/settings/domain/settingsDeepLink';
 export type { SettingsDensity } from '@/components/settings/domain/settingsUiPreferences';
 export type { RuntimePresetId } from '@/components/settings/domain/settingsPresets';
+export type { SettingsRollbackPartition } from '@/components/settings/domain/settingsRollback';
 
 let alpineRetryCount = 0;
 
@@ -371,12 +383,27 @@ interface SettingsPanelData {
   _runtimeHealthNormalized: boolean;
   healthMessages: string[];
   dirtyPartitions: SettingsDirtyPartition[];
+  /** P2-4: another tab changed settings keys */
+  externalChangeNotice: boolean;
+  /** P2-4: dirty when external change arrived (conflict; no auto-reload) */
+  externalChangeConflict: boolean;
+  /** P2-5: localStorage usage / assumed 5MB limit */
+  storageUsageRatio: number | undefined;
+  /** P2-5: quota status bar visibility */
+  quotaWarningVisible: boolean;
+  /** P2-3: undo available for runtime partition */
+  canUndoRuntimeSave: boolean;
   init(): void;
   open(options?: SettingsOpenOptions): Promise<void>;
   close(): Promise<void>;
   destroy(): void; // 新增：清理方法
   captureSettingsBaseline(): void;
   refreshSettingsHealth(): void;
+  refreshRollbackUi(): void;
+  handleStorageEvent(event: StorageEvent): void;
+  dismissExternalChangeNotice(): void;
+  reloadFromExternalChange(): Promise<void>;
+  undoLastSettingsSave(partition: SettingsRollbackPartition): Promise<void>;
   openPerformanceMonitor(): Promise<void>;
   loadProviderConfig(provider: string): Promise<void>;
   fetchModels(): Promise<void>;
@@ -1071,6 +1098,8 @@ function createSettingsState(): Pick<
   | '_settingsBaseline'
   | '_runtimeHealthNormalized'
   | 'healthMessages'
+  | 'externalChangeNotice'
+  | 'externalChangeConflict'
   | 'llm'
   | 'proxy'
   | 'toolStrategy'
@@ -1100,6 +1129,9 @@ function createSettingsState(): Pick<
     _runtimeHealthNormalized: false,
 
     healthMessages: [] as string[],
+
+    externalChangeNotice: false,
+    externalChangeConflict: false,
 
     llmApiPathMenuOpen: false,
 
@@ -1574,6 +1606,20 @@ const settingsPanelBehavior: SettingsPanelPart = {
     });
   },
 
+  get storageUsageRatio(): number | undefined {
+    if (!this.localData.usage) return undefined;
+    const limit = 5 * 1024 * 1024;
+    return this.localData.usage.localStorage.used / limit;
+  },
+
+  get quotaWarningVisible(): boolean {
+    return isStorageQuotaWarning(this.storageUsageRatio);
+  },
+
+  get canUndoRuntimeSave(): boolean {
+    return getSettingsRollbackCount('runtime') > 0;
+  },
+
   // Lifecycle
   init() {
     this.loadRuntimeStrategy();
@@ -1596,8 +1642,17 @@ const settingsPanelBehavior: SettingsPanelPart = {
       void this.close();
     });
 
+    const onStorage = (event: StorageEvent) => {
+      this.handleStorageEvent(event);
+    };
+    window.addEventListener('storage', onStorage);
+
     // 保存清理函数
-    this._unsubscribers = [unsubOpen, unsubClose];
+    this._unsubscribers = [
+      unsubOpen,
+      unsubClose,
+      () => window.removeEventListener('storage', onStorage),
+    ];
 
     registerSettingsWatchers(this as SettingsPanelData & AlpineWatchContext);
   },
@@ -1636,17 +1691,81 @@ const settingsPanelBehavior: SettingsPanelPart = {
   refreshSettingsHealth(): void {
     const hasLlmEndpoint = Boolean((this.llm.endpoint || '').trim());
     const hasLlmKey = Boolean((this.llm.apiKey || '').trim());
-    let storageUsageRatio: number | undefined;
-    if (this.localData.usage) {
-      const limit = 5 * 1024 * 1024;
-      storageUsageRatio = this.localData.usage.localStorage.used / limit;
-    }
     this.healthMessages = evaluateSettingsHealth({
       runtimeNormalized: this._runtimeHealthNormalized,
       hasLlmEndpoint,
       hasLlmKey,
-      storageUsageRatio,
+      storageUsageRatio: this.storageUsageRatio,
     }).messages;
+  },
+
+  refreshRollbackUi(): void {
+    // Alpine getters re-read sessionStorage; no-op hook for tests / future ticks.
+  },
+
+  handleStorageEvent(event: StorageEvent): void {
+    const result = evaluateExternalStorageChange({
+      key: event.key,
+      isDirty: this.dirtyPartitions.length > 0,
+    });
+    if (!result) return;
+    // P2-4: never auto-reload — only surface notice (conflict when dirty).
+    this.externalChangeNotice = true;
+    this.externalChangeConflict = result.conflict;
+  },
+
+  dismissExternalChangeNotice(): void {
+    this.externalChangeNotice = false;
+    this.externalChangeConflict = false;
+  },
+
+  async reloadFromExternalChange(): Promise<void> {
+    this.dismissExternalChangeNotice();
+    this.loadRuntimeStrategy();
+    this.loadToolStrategyDefaults();
+    await this.loadProviderConfig(this.llm.provider);
+    await this.loadProxyConfig();
+    this.captureSettingsBaseline();
+    this.refreshSettingsHealth();
+    void this.refreshLocalDataUsage().then(() => this.refreshSettingsHealth());
+    showToast('已从其他标签页重新加载设置', { type: 'success' });
+  },
+
+  async undoLastSettingsSave(partition: SettingsRollbackPartition): Promise<void> {
+    const payload = popLastSettingsSave(partition);
+    if (payload == null) {
+      showToast('没有可撤销的保存', { type: 'warning' });
+      return;
+    }
+
+    try {
+      if (partition === 'runtime') {
+        saveRuntimeStrategySettings(payload as RuntimeStrategySettings);
+        this.loadRuntimeStrategy();
+      } else if (partition === 'toolStrategy') {
+        saveToolStrategySettings(payload as ToolStrategySettings);
+        this.loadToolStrategyDefaults();
+      } else if (partition === 'llm') {
+        const snap = payload as {
+          provider?: string;
+          config?: LLMProviderConfig;
+        };
+        if (snap?.provider && snap.config) {
+          StorageService.setLLMConfig(snap.provider, snap.config);
+          this.llm.provider = snap.provider;
+          await this.loadProviderConfig(snap.provider);
+          updateModelStatus();
+        }
+      }
+      this.captureSettingsBaseline();
+      this.refreshRollbackUi();
+      showToast('已撤销上次保存', { type: 'success' });
+    } catch (error) {
+      ErrorService.handle(error as Error, {
+        action: 'undoLastSettingsSave',
+        module: 'settings',
+      });
+    }
   },
 
   captureSettingsBaseline(): void {
@@ -1978,6 +2097,15 @@ const settingsPanelBehavior: SettingsPanelPart = {
         apiKey: '', // 占位符,实际存储在安全存储中
       };
 
+      // P2-3: snapshot pre-save LLM config (no secrets)
+      const previous = StorageService.getLLMConfig(this.llm.provider);
+      pushSettingsRollbackSnapshot('llm', {
+        provider: this.llm.provider,
+        config: previous
+          ? { ...previous, apiKey: '' }
+          : { ...newConfig, apiKey: '' },
+      });
+
       if (this.llm.apiKey) {
         // API Key 单独加密存储
         await StorageService.setSecure(`llm_key_${this.llm.provider}`, this.llm.apiKey);
@@ -2012,6 +2140,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
   async saveToolStrategy(): Promise<void> {
     try {
       this.toolStrategy.isSaving = true;
+      // P2-3: pre-save snapshots for tool + runtime (both written by this action)
+      pushSettingsRollbackSnapshot('toolStrategy', getToolStrategySettings());
+      pushSettingsRollbackSnapshot('runtime', getRuntimeStrategySettings());
       TOOL_STRATEGY_TARGETS.forEach(target => {
         setToolTargetDefaultModel(
           target.id,
@@ -2022,6 +2153,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
       saveRuntimeStrategySettings(this.runtimeStrategy.settings);
       this.loadRuntimeStrategy();
       this.captureSettingsBaseline();
+      this.refreshRollbackUi();
       showToast('工具与运行策略已保存', { type: 'success' });
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'saveToolStrategy', module: 'settings' });
@@ -2037,9 +2169,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
   async saveRuntimeStrategy(): Promise<void> {
     try {
       this.runtimeStrategy.isSaving = true;
+      // P2-3: pre-save snapshot of persisted runtime
+      pushSettingsRollbackSnapshot('runtime', getRuntimeStrategySettings());
       saveRuntimeStrategySettings(this.runtimeStrategy.settings);
       this.loadRuntimeStrategy();
       this.captureSettingsBaseline();
+      this.refreshRollbackUi();
       showToast('策略已保存', { type: 'success' });
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'saveRuntimeStrategy', module: 'settings' });

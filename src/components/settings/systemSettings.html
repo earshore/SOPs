@@ -97,6 +97,75 @@
       </p>
     </div>
 
+    <!-- P2-4 multi-tab external change notice -->
+    <div
+      class="settings-status-bar settings-status-bar--info"
+      data-testid="settings-external-change-notice"
+      x-show="externalChangeNotice"
+      x-cloak
+      role="status"
+    >
+      <span class="settings-status-bar__icon" aria-hidden="true">
+        <i class="fas fa-window-restore"></i>
+      </span>
+      <div class="settings-status-bar__body">
+        <p class="settings-status-bar__title">其他标签页已修改设置</p>
+        <p
+          class="settings-status-bar__text"
+          x-text="
+            externalChangeConflict
+              ? '当前有未保存修改，重新加载将覆盖本地编辑。'
+              : '可重新加载以同步其他标签页的更改。'
+          "
+        ></p>
+      </div>
+      <div class="settings-status-bar__actions">
+        <button
+          type="button"
+          class="settings-status-bar__btn settings-status-bar__btn--primary"
+          data-testid="settings-reload-external"
+          @click="reloadFromExternalChange()"
+        >
+          重新加载
+        </button>
+        <button
+          type="button"
+          class="settings-status-bar__btn"
+          data-testid="settings-dismiss-external"
+          @click="dismissExternalChangeNotice()"
+        >
+          忽略
+        </button>
+      </div>
+    </div>
+
+    <!-- P2-5 quota warning -->
+    <div
+      class="settings-status-bar settings-status-bar--warning"
+      data-testid="settings-quota-warning"
+      x-show="quotaWarningVisible"
+      x-cloak
+      role="status"
+    >
+      <span class="settings-status-bar__icon" aria-hidden="true">
+        <i class="fas fa-hdd"></i>
+      </span>
+      <div class="settings-status-bar__body">
+        <p class="settings-status-bar__title">本机存储占用较高</p>
+        <p class="settings-status-bar__text">建议清理缓存或导出备份后再继续保存。</p>
+      </div>
+      <div class="settings-status-bar__actions">
+        <button
+          type="button"
+          class="settings-status-bar__btn settings-status-bar__btn--primary"
+          data-testid="settings-quota-cta"
+          @click="scrollToSection('settings-section-data')"
+        >
+          清理/导出
+        </button>
+      </div>
+    </div>
+
     <!-- Scrollable Content -->
     <div class="settings-panel-scroll flex-1 overflow-y-auto px-5 py-6">
       <div class="settings-panel-body">
@@ -1564,6 +1633,15 @@
                   class="min-h-[40px] rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
                 >
                   恢复默认策略
+                </button>
+                <button
+                  type="button"
+                  data-testid="settings-undo-runtime-save"
+                  :hidden="!canUndoRuntimeSave"
+                  @click="undoLastSettingsSave('runtime')"
+                  class="min-h-[40px] rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                >
+                  撤销上次保存
                 </button>
                 <button
                   type="button"

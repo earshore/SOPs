@@ -5,7 +5,17 @@ export interface SettingsHealthResult {
   messages: string[];
 }
 
-const STORAGE_USAGE_WARN_RATIO = 0.8;
+/** Shared with quota status bar (P2-5). */
+export const STORAGE_USAGE_WARN_RATIO = 0.8;
+
+/** True when localStorage usage ratio should show the quota warning bar. */
+export function isStorageQuotaWarning(ratio: number | undefined | null): boolean {
+  return (
+    typeof ratio === 'number' &&
+    Number.isFinite(ratio) &&
+    ratio >= STORAGE_USAGE_WARN_RATIO
+  );
+}
 
 /**
  * Pure open-time health evaluation for system settings.
@@ -29,11 +39,7 @@ export function evaluateSettingsHealth(input: {
     messages.push('尚未配置 LLM API Key。');
   }
 
-  if (
-    typeof input.storageUsageRatio === 'number' &&
-    Number.isFinite(input.storageUsageRatio) &&
-    input.storageUsageRatio >= STORAGE_USAGE_WARN_RATIO
-  ) {
+  if (isStorageQuotaWarning(input.storageUsageRatio)) {
     messages.push('本机存储占用较高，建议清理缓存或导出备份。');
   }
 
