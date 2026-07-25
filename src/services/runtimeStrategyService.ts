@@ -42,7 +42,10 @@ export interface RuntimeStrategySettings {
     maxThreadMessageCount: number;
     maxThreadCount: number;
     maxPromptDraftCount: number;
-    /** Opt-in: inject read-only business tools on Responses path (fail-closed default). */
+    /**
+     * Inject Deep Chat business tools (web_search / search_x / session read-only).
+     * Default **true**. User toggle: 系统设置 → 工具策略 → Playground · Deep Chat.
+     */
     enableBusinessTools: boolean;
   };
   ppcSearchTerms: {

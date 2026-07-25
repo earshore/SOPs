@@ -2,9 +2,10 @@
  * Safe business tools for Deep Chat on chat_completions + responses paths.
  * Includes read-only session tools and client-side web / X search.
  *
- * Product rule: injection is **opt-in via runtime** (deepChat.enableBusinessTools).
- * Default is enabled so search-style questions can complete a tool loop instead of
- * dumping raw tool syntax as assistant text.
+ * Product rule: controlled by runtime strategy `deepChat.enableBusinessTools`
+ * (default **true**, toggle in 系统设置 → 工具策略 → Playground · Deep Chat).
+ * When enabled, search-style questions can complete a tool loop instead of dumping
+ * raw tool syntax as assistant text.
  */
 
 import type { ResponsesToolExecutor } from '@/services/modelCapability';

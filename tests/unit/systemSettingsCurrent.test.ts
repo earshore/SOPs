@@ -457,7 +457,7 @@ it('saves and reloads tool strategy target default models', async () => {
       }),
     })
   );
-  expect(showToast).toHaveBeenCalledWith('工具策略已保存', { type: 'success' });
+  expect(showToast).toHaveBeenCalledWith('工具与运行策略已保存', { type: 'success' });
 
   panel.toolStrategy.targetModels['master-analysis-ai-analysis'] = '';
   panel.loadToolStrategyDefaults();
@@ -471,6 +471,9 @@ it('saves editable runtime strategy settings', async () => {
   panel.setRuntimeNumber('llm.maxRetries', { target: { value: '4' } } as any);
   panel.setRuntimeNumber('llm.testConnectionTimeoutMs', { target: { value: '20' } } as any, 1000);
   panel.setRuntimeNumber('deepChat.requestTimeoutMs', { target: { value: '75' } } as any, 1000);
+  panel.setRuntimeBoolean('deepChat.enableBusinessTools', {
+    target: { checked: false },
+  } as any);
   panel.setRuntimeNumber('ppcSearchTerms.batchSize', { target: { value: '120' } } as any);
   panel.setRuntimeNumber('ppcSearchTerms.maxConcurrentBatches', { target: { value: '3' } } as any);
   panel.setRuntimeBoolean('keywordHunterSeoProcess.enableLlmCache', {
@@ -492,6 +495,7 @@ it('saves editable runtime strategy settings', async () => {
       }),
       deepChat: expect.objectContaining({
         requestTimeoutMs: 75000,
+        enableBusinessTools: false,
       }),
       ppcSearchTerms: expect.objectContaining({
         batchSize: 120,
@@ -506,6 +510,17 @@ it('saves editable runtime strategy settings', async () => {
     })
   );
   expect(showToast).toHaveBeenCalledWith('策略已保存', { type: 'success' });
+});
+
+it('exposes deepChat business tools toggle binding in settings template', () => {
+  const template = readFileSync(
+    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
+    'utf8'
+  );
+  expect(template).toContain("setRuntimeBoolean('deepChat.enableBusinessTools'");
+  expect(template).toContain('runtimeStrategy.settings.deepChat.enableBusinessTools');
+  expect(template).toContain('启用业务工具');
+  expect(template).toContain('保存工具与运行策略');
 });
 
 it('fetches models and handles validation or API failures', async () => {

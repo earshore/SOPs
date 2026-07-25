@@ -1252,7 +1252,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   get toolStrategySaveText(): string {
-    return this.toolStrategy.isSaving ? '保存中' : '保存工具策略';
+    return this.toolStrategy.isSaving ? '保存中' : '保存工具与运行策略';
   },
 
   get toolStrategySaveIconClass(): string {
@@ -1637,7 +1637,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
       });
       saveRuntimeStrategySettings(this.runtimeStrategy.settings);
       this.loadRuntimeStrategy();
-      showToast('工具策略已保存', { type: 'success' });
+      showToast('工具与运行策略已保存', { type: 'success' });
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'saveToolStrategy', module: 'settings' });
     } finally {
