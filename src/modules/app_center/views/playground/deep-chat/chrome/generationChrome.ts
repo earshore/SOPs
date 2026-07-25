@@ -566,15 +566,17 @@ export function syncDeepChatDtTextScrollCap(
  * Streaming-only typewriter. Reads full text live each tick so collapse→expand
  * and late reasoning chunks keep advancing (no stale snapshot freeze).
  */
+export type ReasoningTypewriterOptions = {
+  textEl: HTMLElement;
+  getFullText: () => string;
+  getDisplayed: () => number;
+  setDisplayed: (n: number) => void;
+  isActive: () => boolean;
+  pendingKey?: string;
+};
 
-export function scheduleReasoningTypewriter(
-  textEl: HTMLElement,
-  getFullText: () => string,
-  getDisplayed: () => number,
-  setDisplayed: (n: number) => void,
-  isActive: () => boolean,
-  pendingKey?: string
-): void {
+export function scheduleReasoningTypewriter(options: ReasoningTypewriterOptions): void {
+  const { textEl, getFullText, getDisplayed, setDisplayed, isActive, pendingKey } = options;
   stopReasoningTypewriter();
   sessionState.reasoningTypewriterTextEl = textEl;
   sessionState.reasoningTypewriterKey = pendingKey ?? null;
@@ -640,16 +642,16 @@ export function resumeStreamingReasoningTypewriter(
   ) {
     return;
   }
-  scheduleReasoningTypewriter(
+  scheduleReasoningTypewriter({
     textEl,
-    () => pending.reasoningText,
-    () => pending.reasoningDisplayedLength ?? 0,
-    n => {
+    getFullText: () => pending.reasoningText,
+    getDisplayed: () => pending.reasoningDisplayedLength ?? 0,
+    setDisplayed: n => {
       pending.reasoningDisplayedLength = n;
     },
-    () => isStreamingReasoningTypewriterActive(pending),
-    key
-  );
+    isActive: () => isStreamingReasoningTypewriterActive(pending),
+    pendingKey: key,
+  });
 }
 
 export function getChromeOnHost(host: HTMLElement): HTMLElement | null {
