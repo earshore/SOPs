@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { copyTextToClipboard } from '@/common/utils/clipboard';
+import { copyTextToClipboard, readTextFromClipboard } from '@/common/utils/clipboard';
 
 describe('copyTextToClipboard', () => {
   const originalClipboard = navigator.clipboard;
@@ -49,5 +49,39 @@ describe('copyTextToClipboard', () => {
     document.execCommand = vi.fn().mockReturnValue(false);
 
     await expect(copyTextToClipboard('x')).resolves.toBe(false);
+  });
+});
+
+describe('readTextFromClipboard', () => {
+  const originalClipboard = navigator.clipboard;
+
+  afterEach(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: originalClipboard,
+    });
+  });
+
+  it('reads text when Clipboard API is available', async () => {
+    const readText = vi.fn().mockResolvedValue('pasted');
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { readText },
+    });
+    await expect(readTextFromClipboard()).resolves.toBe('pasted');
+  });
+
+  it('returns null when clipboard is unavailable or rejects', async () => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: undefined,
+    });
+    await expect(readTextFromClipboard()).resolves.toBeNull();
+
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { readText: vi.fn().mockRejectedValue(new Error('denied')) },
+    });
+    await expect(readTextFromClipboard()).resolves.toBeNull();
   });
 });

@@ -118,7 +118,8 @@ function inspectPage(file: string): PageArchitectureRecord {
     usesSharedTemplateShell:
       /\bcreateSopTemplateModule\b/.test(content) ||
       /\bcreateStaticTemplateModule\b/.test(content) ||
-      /\bcreateBusinessScenarioModule\b/.test(content),
+      /\bcreateBusinessScenarioModule\b/.test(content) ||
+      /\bcreateAlpinePanelModule\b/.test(content),
     exportsNakedMount: /\bexport\s+(?:async\s+)?function\s+mount\b/.test(content),
     usesViewLoader: /\bviewLoader\b|common\/utils\/viewLoader/.test(content),
     usesSafeTemplateLoader: /\bSafeTemplateLoader\b|\bsafeTemplateLoader\b/.test(content),
@@ -201,7 +202,7 @@ function collectHardIssues(records: PageArchitectureRecord[]): PageArchitectureI
       check: 'base-module',
       file: record.file,
       message:
-        'Page entry implementation must extend BaseModule or use a shared template shell (createSopTemplateModule / createStaticTemplateModule / createBusinessScenarioModule).',
+        'Page entry implementation must extend BaseModule or use a shared template shell (createSopTemplateModule / createStaticTemplateModule / createBusinessScenarioModule / createAlpinePanelModule).',
     }));
 
   return [

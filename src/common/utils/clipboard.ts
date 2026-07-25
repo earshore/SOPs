@@ -51,3 +51,14 @@ function copyTextWithSelectionFallback(text: string): boolean {
 
   return copied;
 }
+
+export async function readTextFromClipboard(): Promise<string | null> {
+  try {
+    if (typeof navigator === 'undefined' || !navigator.clipboard?.readText) {
+      return null;
+    }
+    return await navigator.clipboard.readText();
+  } catch {
+    return null;
+  }
+}

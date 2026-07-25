@@ -5,14 +5,19 @@
 // ================================================================
 
 import { callLLM, type LLMStreamMetrics } from '@/services/llmService';
-import { LocalDataStore } from '@/services/localDataStore';
 import { ValidationError } from '@/common/errors/AppError';
 import {
   ANALYSIS_PROMPT_TEMPLATE,
   TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2,
 } from '../constants/prompts';
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
-import { applyToolTargetModel, type ToolStrategyTargetId } from '@/services/toolStrategyService';
+import { resolveToolLlmConfig, resolveToolLlmPublicConfig } from '@/services/llmToolBridge';
+import {
+  buildLlmRequestCacheKey,
+  getTimedLocalCacheValue,
+  runWithInFlightDedup,
+  setTimedLocalCacheValue,
+} from '@/services/llmRequestCache';
+import { type ToolStrategyTargetId } from '@/services/toolStrategyService';
 import {
   getRuntimeKeywordHunterListingReviewOptions,
   getRuntimeKeywordHunterSeoOptions,
@@ -31,11 +36,6 @@ const nativeLoggerConsole = globalThis.console;
 const KEYWORD_HUNTER_LLM_CACHE_VERSION = 'v1';
 const KEYWORD_HUNTER_LLM_CACHE_PREFIX = 'cache:keyword-hunter-llm:';
 const keywordHunterInFlightLlmRequests = new Map<string, Promise<string>>();
-
-interface CachedKeywordHunterLlmEntry {
-  response: string;
-  timestamp: number;
-}
 
 interface KeywordHunterLlmOptions {
   temperature?: number;
@@ -66,13 +66,6 @@ interface KeywordHunterLlmCall {
   options: ResolvedKeywordHunterLlmOptions;
   cacheKey: string;
   onStatus?: (status: KeywordHunterLlmStatus) => void;
-}
-
-interface KeywordHunterLlmCacheConfig {
-  provider: string;
-  endpoint: string;
-  model: string;
-  serviceTier?: LLMProviderConfig['serviceTier'];
 }
 
 // ==========================================
@@ -402,46 +395,16 @@ function getTranslationMaxTokens(copyText: string): number {
 // 3. LLM 服务封装
 // ==========================================
 
-function createLlmConfigValidationError(
-  message: string,
-  code: string,
-  provider: string
-): ValidationError {
-  return new ValidationError(message, code, undefined, undefined, {
-    module: 'KeywordHunterService',
-    action: 'bridgeCallLLM',
-    provider,
-  });
-}
-
 async function bridgeCallLLM(
   systemPrompt: string,
   userPrompt: string,
   options: KeywordHunterLlmOptions = {}
 ): Promise<string> {
   const { onStatus, ...requestOptions } = options;
-  // 使用 StorageService 获取 LLM 配置
-  const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
   const strategyTargetId = requestOptions.strategyTargetId || 'keyword-hunter-seo-process';
-
-  if (!activeProvider || typeof activeProvider !== 'string') {
-    throw new ValidationError(
-      '请先在全局设置中选择 LLM 提供商',
-      'ERR_LLM_PROVIDER_NOT_SELECTED',
-      undefined,
-      undefined,
-      { module: 'KeywordHunterService', action: 'bridgeCallLLM' }
-    );
-  }
-
-  const cacheConfig = getKeywordHunterLlmCacheConfig(activeProvider, strategyTargetId);
-  if (!cacheConfig.model) {
-    throw createLlmConfigValidationError(
-      '未选择模型，请在设置中同步或选择模型',
-      'ERR_LLM_MODEL_NOT_SELECTED',
-      activeProvider
-    );
-  }
+  const publicConfig = resolveToolLlmPublicConfig(strategyTargetId, {
+    module: 'KeywordHunterService',
+  });
 
   const messages = [
     { role: 'system' as const, content: systemPrompt },
@@ -452,21 +415,27 @@ async function bridgeCallLLM(
     temperature: 0.3,
     jsonMode: false,
     ...requestOptions,
-    ...(cacheConfig.serviceTier && { serviceTier: cacheConfig.serviceTier }),
+    ...(publicConfig.serviceTier && { serviceTier: publicConfig.serviceTier }),
   };
 
-  const cacheKey = generateKeywordHunterLlmCacheKey(
-    activeProvider,
-    cacheConfig.endpoint,
-    cacheConfig.model,
+  const cacheKey = buildLlmRequestCacheKey({
+    prefix: KEYWORD_HUNTER_LLM_CACHE_PREFIX,
+    version: KEYWORD_HUNTER_LLM_CACHE_VERSION,
+    provider: publicConfig.provider,
+    endpoint: publicConfig.endpoint,
+    model: publicConfig.model,
     messages,
-    finalOptions
-  );
+    options: finalOptions,
+  });
   const runtimeOptions = getKeywordHunterRuntimeOptions(strategyTargetId);
   if (runtimeOptions.enableLlmCache) {
-    const cachedResponse = await getCachedKeywordHunterLlmResponse(
+    const cachedResponse = await getTimedLocalCacheValue(
       cacheKey,
-      runtimeOptions.cacheTtlMs
+      runtimeOptions.cacheTtlMs,
+      raw => {
+        const response = (raw as { response?: unknown }).response;
+        return typeof response === 'string' ? response : null;
+      }
     );
     if (cachedResponse !== null) {
       onStatus?.({ stage: 'cache-hit' });
@@ -474,63 +443,33 @@ async function bridgeCallLLM(
     }
   }
 
-  const inFlightRequest = keywordHunterInFlightLlmRequests.get(cacheKey);
-  if (inFlightRequest) {
-    onStatus?.({ stage: 'in-flight' });
-    return await inFlightRequest;
-  }
-
-  const request = getKeywordHunterLlmApiKey(activeProvider).then(apiKey =>
-    callAndCacheKeywordHunterLlm({
-      messages,
-      provider: activeProvider,
-      endpoint: cacheConfig.endpoint,
-      apiKey,
-      model: cacheConfig.model,
-      options: finalOptions,
-      cacheKey,
-      enableCache: runtimeOptions.enableLlmCache,
-      onStatus,
-    })
+  const { value, fromInFlight } = await runWithInFlightDedup(
+    keywordHunterInFlightLlmRequests,
+    cacheKey,
+    () =>
+      resolveToolLlmConfig(strategyTargetId, {
+        module: 'KeywordHunterService',
+      }).then(config =>
+        callAndCacheKeywordHunterLlm({
+          messages,
+          provider: config.provider,
+          endpoint: config.endpoint,
+          apiKey: config.apiKey,
+          model: config.model,
+          options: {
+            ...finalOptions,
+            ...(config.serviceTier && { serviceTier: config.serviceTier }),
+          },
+          cacheKey,
+          enableCache: runtimeOptions.enableLlmCache,
+          onStatus,
+        })
+      )
   );
-  keywordHunterInFlightLlmRequests.set(cacheKey, request);
-  try {
-    return await request;
-  } finally {
-    keywordHunterInFlightLlmRequests.delete(cacheKey);
+  if (fromInFlight) {
+    onStatus?.({ stage: 'in-flight' });
   }
-}
-
-async function getKeywordHunterLlmApiKey(provider: string): Promise<string> {
-  const config = await StorageService.getLLMConfigWithKey(provider);
-  if (!config || !config.apiKey) {
-    throw createLlmConfigValidationError(
-      '所选提供商未配置 API Key',
-      'ERR_LLM_API_KEY_MISSING',
-      provider
-    );
-  }
-  return config.apiKey;
-}
-
-function getKeywordHunterLlmCacheConfig(
-  provider: string,
-  strategyTargetId: ToolStrategyTargetId
-): KeywordHunterLlmCacheConfig {
-  const config = StorageService.getLLMConfig(provider);
-  const strategyConfig = config
-    ? applyToolTargetModel(strategyTargetId, {
-        ...config,
-        provider,
-      })
-    : null;
-
-  return {
-    provider,
-    endpoint: strategyConfig?.endpoint || '',
-    model: strategyConfig?.model || '',
-    serviceTier: strategyConfig?.serviceTier,
-  };
+  return value;
 }
 
 function getKeywordHunterRuntimeOptions(strategyTargetId: ToolStrategyTargetId): {
@@ -561,79 +500,9 @@ async function callAndCacheKeywordHunterLlm({
     onFirstResponse: metrics => onStatus?.({ stage: 'first-response', metrics }),
   });
   if (enableCache && response.trim()) {
-    await setCachedKeywordHunterLlmResponse(cacheKey, response);
+    await setTimedLocalCacheValue(cacheKey, { response });
   }
   return response;
-}
-
-function generateKeywordHunterLlmCacheKey(
-  provider: string,
-  endpoint: string,
-  model: string,
-  messages: unknown,
-  options: unknown
-): string {
-  return [
-    KEYWORD_HUNTER_LLM_CACHE_PREFIX,
-    KEYWORD_HUNTER_LLM_CACHE_VERSION,
-    hashString(
-      [provider, endpoint, model, JSON.stringify(options), JSON.stringify(messages)].join('\n')
-    ),
-  ].join(':');
-}
-
-function isCachedKeywordHunterLlmEntry(value: unknown): value is CachedKeywordHunterLlmEntry {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as { response?: unknown }).response === 'string' &&
-    typeof (value as { timestamp?: unknown }).timestamp === 'number'
-  );
-}
-
-async function getCachedKeywordHunterLlmResponse(
-  cacheKey: string,
-  cacheTtlMs: number
-): Promise<string | null> {
-  try {
-    const cached = await LocalDataStore.get<CachedKeywordHunterLlmEntry>(cacheKey, null);
-    if (!isCachedKeywordHunterLlmEntry(cached)) {
-      return null;
-    }
-    if (Date.now() - cached.timestamp >= cacheTtlMs) {
-      await LocalDataStore.remove(cacheKey);
-      return null;
-    }
-    return cached.response;
-  } catch {
-    return null;
-  }
-}
-
-async function setCachedKeywordHunterLlmResponse(
-  cacheKey: string,
-  response: string
-): Promise<void> {
-  try {
-    await LocalDataStore.set<CachedKeywordHunterLlmEntry>(
-      cacheKey,
-      {
-        response,
-        timestamp: Date.now(),
-      },
-      'cache'
-    );
-  } catch {
-    // Cache failures should not block analysis or translation.
-  }
-}
-
-function hashString(value: string): string {
-  let hash = 0;
-  for (let index = 0; index < value.length; index += 1) {
-    hash = ((hash << 5) - hash + value.charCodeAt(index)) | 0;
-  }
-  return Math.abs(hash).toString(36);
 }
 
 /**

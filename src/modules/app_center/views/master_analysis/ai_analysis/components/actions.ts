@@ -1,4 +1,5 @@
 import { copyTextToClipboard } from '@/common/utils/clipboard';
+import { downloadJson as downloadJsonFile } from '@/common/utils/download';
 
 /**
  * Alpine 组件用户动作
@@ -240,16 +241,10 @@ export function downloadJson(context: AlpineContext, dataSourceMarketplace: stri
   }
 
   const reportData = createJsonReportData(context, dataSourceMarketplace);
-  const json = JSON.stringify(reportData, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `analysis-report-${context.selectedAsins.join('-')}-${Date.now()}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  downloadJsonFile(
+    `analysis-report-${context.selectedAsins.join('-')}-${Date.now()}.json`,
+    reportData
+  );
 
   showToast('JSON 报告已下载', { type: 'success' });
 }

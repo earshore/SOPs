@@ -8,17 +8,13 @@
  * 4. 失败隔离（单个失败不影响整体）
  */
 
-import {
-  callLLM,
-  type ChatMessage,
-  type LLMOptions,
-  type LLMStreamMetrics,
-} from '@/services/llmService';
+import { callLLM, type ChatMessage, type LLMStreamMetrics } from '@/services/llmService';
 import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import { LocalDataStore } from '@/services/localDataStore';
 import { StorageService, STORAGE_KEYS, CACHE_PREFIXES } from '@/services/storageService';
-import { applyToolTargetModel, resolveToolTargetModel } from '@/services/toolStrategyService';
-import { ValidationError, BusinessError } from '@/common/errors/AppError';
+import { resolveToolTargetModel } from '@/services/toolStrategyService';
+import { resolveToolLlmConfig, type ResolvedToolLlmConfig } from '@/services/llmToolBridge';
+import { BusinessError } from '@/common/errors/AppError';
 import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
@@ -46,13 +42,7 @@ const DEFAULT_CACHE_IDENTITY: AnalysisCacheIdentity = {
 /**
  * LLM 配置接口
  */
-interface LLMConfig {
-  provider: string;
-  endpoint: string;
-  apiKey: string;
-  model: string;
-  serviceTier?: LLMOptions['serviceTier'];
-}
+type LLMConfig = ResolvedToolLlmConfig;
 
 export interface AnalysisCacheIdentity {
   provider: string;
@@ -503,53 +493,9 @@ export async function setCachedResult(cacheKey: string, result: unknown): Promis
  * 获取 LLM 配置
  */
 async function getLLMConfig(): Promise<LLMConfig> {
-  const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
-
-  if (!activeProvider || typeof activeProvider !== 'string') {
-    throw new ValidationError(
-      '请先在系统设置中选择 LLM 提供商',
-      'ERR_LLM_PROVIDER_NOT_SELECTED',
-      undefined,
-      undefined,
-      { module: 'ParallelAnalysisService', action: 'getLLMConfig' }
-    );
-  }
-
-  const config = await StorageService.getLLMConfigWithKey(activeProvider);
-
-  if (!config || !config.apiKey) {
-    throw new ValidationError(
-      '所选提供商未配置 API Key',
-      'ERR_LLM_API_KEY_MISSING',
-      undefined,
-      undefined,
-      { module: 'ParallelAnalysisService', action: 'getLLMConfig', provider: activeProvider }
-    );
-  }
-
-  const strategyConfig = applyToolTargetModel('master-analysis-ai-analysis', {
-    ...config,
-    provider: activeProvider,
+  return resolveToolLlmConfig('master-analysis-ai-analysis', {
+    module: 'ParallelAnalysisService',
   });
-  const model = strategyConfig?.model;
-
-  if (!model) {
-    throw new ValidationError(
-      '未选择模型，请在设置中同步或选择模型',
-      'ERR_LLM_MODEL_NOT_SELECTED',
-      undefined,
-      undefined,
-      { module: 'ParallelAnalysisService', action: 'getLLMConfig', provider: activeProvider }
-    );
-  }
-
-  return {
-    provider: activeProvider,
-    endpoint: strategyConfig.endpoint,
-    apiKey: strategyConfig.apiKey,
-    model,
-    serviceTier: strategyConfig.serviceTier,
-  };
 }
 
 /**

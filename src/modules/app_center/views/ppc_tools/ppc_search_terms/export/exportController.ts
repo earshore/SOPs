@@ -1,4 +1,5 @@
 import { copyTextToClipboard } from '@/common/utils/clipboard';
+import { downloadCsv } from '@/common/utils/download';
 import { showToast } from '@/common/ui/notifications';
 import { registerPpcActionListArtifact } from '@/modules/app_center/artifactEnvelopeService';
 import { getWorkspaceContext } from '@/modules/app_center/workspaceContext';
@@ -37,7 +38,7 @@ export async function exportActionRows(
   const csv = buildActionCsv(rows, owner);
   const createdAt = new Date().toISOString();
   const id = createPpcActionListId(reportType, filter, createdAt);
-  downloadText(`ppc-${reportType}-actions-${filter}-${today()}.csv`, csv);
+  downloadCsv(`ppc-${reportType}-actions-${filter}-${today()}.csv`, csv);
   const snapshot = await savePpcActionListSnapshot({
     id,
     reportType,
@@ -89,18 +90,6 @@ export async function copyActionSummary(
     return;
   }
   showToast('复盘模板已复制', { type: 'success' });
-}
-
-function downloadText(filename: string, content: string): void {
-  const blob = new Blob([`\uFEFF${content}`], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
 }
 
 function createPpcActionListId(

@@ -31,6 +31,7 @@
 | SOP 模板页（负责人字段 + 复制模板 + actions） | `createSopTemplateModule` | `src/modules/sops/utils/sopTemplateModule.ts` |
 | 纯静态 HTML 页 | `createStaticTemplateModule` | `src/common/utils/createStaticTemplateModule.ts` |
 | More 业务场景案例页 | `createBusinessScenarioModule` | `src/modules/more/views/business_scenarios/createBusinessScenarioModule.ts` |
+| Alpine 作业面板页（AI Analysis / PromptLab / Scraper） | `createAlpinePanelModule` | `src/modules/app_center/views/master_analysis/utils/createAlpinePanelModule.ts` |
 | 复杂交互页 | `extends BaseModule` | `src/common/BaseModule.ts` |
 
 ### 2.1 静态模板页
@@ -155,7 +156,10 @@ export const unmount = () => instance.unmount();
 ## 3. 剪贴板
 
 **唯一实现**：`src/common/utils/clipboard.ts`  
-**API**：`copyTextToClipboard(text: string): Promise<boolean>`
+**API**：
+
+- `copyTextToClipboard(text: string): Promise<boolean>`
+- `readTextFromClipboard(): Promise<string | null>`
 
 ```ts
 import { copyTextToClipboard } from '@/common/utils/clipboard';
@@ -179,9 +183,55 @@ async function copyReport(text: string): Promise<void> {
 - 已内置 Clipboard API 失败时的 selection fallback（尽量保留用户选区）。
 - SOP 侧兼容 re-export：`src/modules/sops/utils/clipboard.ts` → 新代码仍建议直接 import common。
 
-禁止：在 feature 目录再实现 `writeTextToClipboard` / `writeClipboardText`。
+禁止：在 feature 目录再实现 `writeTextToClipboard` / `writeClipboardText` / 直接 `navigator.clipboard.readText`。
 
 相关测试：`tests/unit/clipboard.test.ts`
+
+---
+
+## 3.1 文件下载 / CSV
+
+**唯一实现**：
+
+- `src/common/utils/download.ts` — `downloadBlob` / `downloadText` / `downloadJson` / `downloadCsv`
+- `src/common/utils/csv.ts` — `sanitizeCsvCell` / `escapeCsvCell` / `formatCsvRows`
+
+规则：
+
+- 业务侧不要再写 `URL.createObjectURL` + `<a download>` 样板。
+- 默认 CSV 需公式注入防护；**故意导出 Excel 公式**（如 NPI）时用 `{ allowFormula: true }`。
+- 日志等无需 BOM 的导出：`downloadCsv(name, content, { bom: false })`。
+
+相关测试：`tests/unit/csv.test.ts`、`tests/unit/download.test.ts`
+
+---
+
+## 3.2 工具 LLM 配置解析
+
+**唯一实现**：`src/services/llmToolBridge.ts`
+
+- `resolveToolLlmConfig(targetId)` — 含 API Key，用于真实调用
+- `resolveToolLlmPublicConfig(targetId)` — 无 Key，用于缓存键/展示
+
+业务侧保留 prompt / schema；不要再复制「读 active provider → getLLMConfigWithKey → applyToolTargetModel → 校验」样板。
+
+### 3.2.1 LLM 请求缓存 / in-flight
+
+**唯一实现**：`src/services/llmRequestCache.ts`
+
+- `buildLlmRequestCacheKey`
+- `getTimedLocalCacheValue` / `setTimedLocalCacheValue`
+- `runWithInFlightDedup`
+
+业务侧只决定：namespace/version、是否启用缓存、TTL、payload 字段（如 `response` 或 `decisions`）。
+
+---
+
+## 3.3 一次性 Handoff 队列
+
+**唯一实现**：`src/common/utils/oneShotHandoff.ts` 的 `createOneShotHandoffQueue`
+
+已用：`skillDeepChatHandoff`、`listingWorkflowHandoff`。新交接只保留 payload 构造 + 队列 API。
 
 ---
 
@@ -311,8 +361,9 @@ export function getSiteDomain(site: string): string {
 1. **选壳**：静态 / 场景 / SOP / BaseModule（第 2 节）
 2. **manifest + loaders**：`module.manifest.ts`；loaders 保持 `import.meta.glob('./views/**/index.ts')`
 3. **安全**：`SafeTemplateLoader` + `setSafeHtml`；无直接 `innerHTML =`
-4. **复制**：只用 `copyTextToClipboard`
-5. **AI**：解析用 `parseLlmJson*`；输入用 `sanitizePromptInput*`
+4. **复制 / 粘贴**：只用 `copyTextToClipboard` / `readTextFromClipboard`
+5. **AI**：配置用 `resolveToolLlmConfig`；解析用 `parseLlmJson*`；输入用 `sanitizePromptInput*`
+5b. **导出**：只用 `download*` + `formatCsvRows`
 6. **站点**：只用 `SITE_*` / scraper formatters
 7. **Overview**：只用 `overviewInteractions`
 8. **验证**：

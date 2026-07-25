@@ -14,6 +14,8 @@ import type {
 } from '@/types/services';
 import type { LoggerConfig } from '@/common/config/ConfigCenter';
 import { ValidationError } from '@/common/errors/AppError';
+import { formatCsvRows } from '@/common/utils/csv';
+import { downloadCsv, downloadJson } from '@/common/utils/download';
 
 const nativeLoggerConsole = globalThis.console;
 /**
@@ -482,15 +484,7 @@ export class LoggerService implements ILoggerService {
         log.url || '',
       ]);
 
-      // CSV转义：将双引号转义为两个双引号
-      const escapeCSV = (cell: string): string => {
-        if (cell.includes('"') || cell.includes(',') || cell.includes('\n')) {
-          return `"${cell.replace(/"/g, '""')}"`;
-        }
-        return cell;
-      };
-
-      return [headers.join(','), ...rows.map(row => row.map(escapeCSV).join(','))].join('\n');
+      return formatCsvRows([headers, ...rows]);
     }
 
     throw new ValidationError(`不支持的导出格式: ${format}`, 'LOGGER_001', 'format', format, {
@@ -504,15 +498,12 @@ export class LoggerService implements ILoggerService {
    */
   download(format: 'json' | 'csv' = 'json'): void {
     const content = this.export(format);
-    const blob = new Blob([content], {
-      type: format === 'json' ? 'application/json' : 'text/csv',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `logs_${Date.now()}.${format}`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const filename = `logs_${Date.now()}.${format}`;
+    if (format === 'json') {
+      downloadJson(filename, content);
+      return;
+    }
+    downloadCsv(filename, content, { bom: false });
   }
 }
 

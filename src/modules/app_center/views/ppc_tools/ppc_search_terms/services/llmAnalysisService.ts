@@ -1,9 +1,17 @@
-import { ValidationError } from '@/common/errors/AppError';
 import { callLLM, type LLMOptions, type LLMStreamMetrics } from '@/services/llmService';
 import { withStructuredAnalysisOptions } from '@/services/modelCapability';
-import { LocalDataStore } from '@/services/localDataStore';
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
-import { applyToolTargetModel } from '@/services/toolStrategyService';
+import {
+  resolveToolLlmConfig,
+  resolveToolLlmPublicConfig,
+  type ResolvedToolLlmConfig,
+  type ToolLlmPublicConfig,
+} from '@/services/llmToolBridge';
+import {
+  buildLlmRequestCacheKey,
+  getTimedLocalCacheValue,
+  runWithInFlightDedup,
+  setTimedLocalCacheValue,
+} from '@/services/llmRequestCache';
 import {
   getRuntimeLlmAnalysisOptions,
   getRuntimePpcSearchTermsOptions,
@@ -34,25 +42,13 @@ export type {
 } from '../agents/agentTypes';
 export { selectPpcSearchTermsAgentModelRows } from '../agents/agentSelection';
 
-interface LLMConfig {
-  provider: string;
-  endpoint: string;
-  apiKey: string;
-  model: string;
-  serviceTier?: LLMOptions['serviceTier'];
-}
-
-type LLMCacheConfig = Omit<LLMConfig, 'apiKey'>;
+type LLMConfig = ResolvedToolLlmConfig;
+type LLMCacheConfig = ToolLlmPublicConfig;
 type GetLLMRequestConfig = () => Promise<LLMConfig>;
 
 const PPC_SEARCH_TERMS_LLM_CACHE_VERSION = 'v1';
 const PPC_SEARCH_TERMS_LLM_CACHE_PREFIX = 'cache:ppc-search-terms-llm:';
 type PpcSearchTermsRuntimeOptions = RuntimeStrategySettings['ppcSearchTerms'];
-
-interface CachedPpcSearchTermsLlmEntry {
-  decisions: PpcSearchTermsLlmDecision[];
-  timestamp: number;
-}
 
 interface PpcSearchTermsBatchAnalysisResult {
   decisions: PpcSearchTermsLlmDecision[];
@@ -289,11 +285,23 @@ async function analyzePpcSearchTermsBatch({
     ...(structured.apiPath ? { apiPath: structured.apiPath } : {}),
     ...(structured.jsonSchema ? { jsonSchema: structured.jsonSchema } : {}),
   };
-  const cacheKey = generatePpcSearchTermsBatchCacheKey(config, messages, cacheOptions);
+  const cacheKey = buildLlmRequestCacheKey({
+    prefix: PPC_SEARCH_TERMS_LLM_CACHE_PREFIX,
+    version: PPC_SEARCH_TERMS_LLM_CACHE_VERSION,
+    provider: config.provider,
+    endpoint: config.endpoint,
+    model: config.model,
+    messages,
+    options: cacheOptions,
+  });
   if (runtimeOptions.enableLlmCache) {
-    const cachedDecisions = await getCachedPpcSearchTermsBatchDecisions(
+    const cachedDecisions = await getTimedLocalCacheValue(
       cacheKey,
-      runtimeOptions.cacheTtlMs
+      runtimeOptions.cacheTtlMs,
+      raw => {
+        const decisions = (raw as { decisions?: unknown }).decisions;
+        return Array.isArray(decisions) ? (decisions as PpcSearchTermsLlmDecision[]) : null;
+      }
     );
     if (cachedDecisions) {
       return { decisions: cachedDecisions, fromCache: true };
@@ -301,27 +309,22 @@ async function analyzePpcSearchTermsBatch({
   }
 
   if (!input.signal) {
-    const inFlightRequest = ppcSearchTermsInFlightBatchRequests.get(cacheKey);
-    if (inFlightRequest) {
-      return await inFlightRequest;
-    }
-
-    const request = executePpcSearchTermsBatchRequest({
-      input,
-      rows,
-      messages,
-      cacheOptions,
+    const { value } = await runWithInFlightDedup(
+      ppcSearchTermsInFlightBatchRequests,
       cacheKey,
-      enableCache: runtimeOptions.enableLlmCache,
-      onFirstResponse,
-      getRequestConfig,
-    });
-    ppcSearchTermsInFlightBatchRequests.set(cacheKey, request);
-    try {
-      return await request;
-    } finally {
-      ppcSearchTermsInFlightBatchRequests.delete(cacheKey);
-    }
+      () =>
+        executePpcSearchTermsBatchRequest({
+          input,
+          rows,
+          messages,
+          cacheOptions,
+          cacheKey,
+          enableCache: runtimeOptions.enableLlmCache,
+          onFirstResponse,
+          getRequestConfig,
+        })
+    );
+    return value;
   }
 
   return executePpcSearchTermsBatchRequest({
@@ -365,7 +368,7 @@ async function executePpcSearchTermsBatchRequest({
   const decisions = parsePpcSearchTermsLlmDecisions(response);
   ensureCompleteDecisions(rows, decisions);
   if (enableCache) {
-    await setCachedPpcSearchTermsBatchDecisions(cacheKey, decisions);
+    await setTimedLocalCacheValue(cacheKey, { decisions });
   }
   return { decisions, fromCache: false };
 }
@@ -389,148 +392,16 @@ function getPpcSearchTermsLlmMaxTokens(
   );
 }
 
-function generatePpcSearchTermsBatchCacheKey(
-  config: LLMCacheConfig,
-  messages: unknown,
-  options: unknown
-): string {
-  return [
-    PPC_SEARCH_TERMS_LLM_CACHE_PREFIX,
-    PPC_SEARCH_TERMS_LLM_CACHE_VERSION,
-    hashString(
-      [
-        config.provider,
-        config.endpoint,
-        config.model,
-        JSON.stringify(options),
-        JSON.stringify(messages),
-      ].join('\n')
-    ),
-  ].join(':');
-}
-
-function isCachedPpcSearchTermsLlmEntry(value: unknown): value is CachedPpcSearchTermsLlmEntry {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    Array.isArray((value as { decisions?: unknown }).decisions) &&
-    typeof (value as { timestamp?: unknown }).timestamp === 'number'
-  );
-}
-
-async function getCachedPpcSearchTermsBatchDecisions(
-  cacheKey: string,
-  cacheTtlMs: number
-): Promise<PpcSearchTermsLlmDecision[] | null> {
-  try {
-    const cached = await LocalDataStore.get<CachedPpcSearchTermsLlmEntry>(cacheKey, null);
-    if (!isCachedPpcSearchTermsLlmEntry(cached)) {
-      return null;
-    }
-    if (Date.now() - cached.timestamp >= cacheTtlMs) {
-      await LocalDataStore.remove(cacheKey);
-      return null;
-    }
-    return cached.decisions;
-  } catch {
-    return null;
-  }
-}
-
-async function setCachedPpcSearchTermsBatchDecisions(
-  cacheKey: string,
-  decisions: PpcSearchTermsLlmDecision[]
-): Promise<void> {
-  try {
-    await LocalDataStore.set<CachedPpcSearchTermsLlmEntry>(
-      cacheKey,
-      {
-        decisions,
-        timestamp: Date.now(),
-      },
-      'cache'
-    );
-  } catch {
-    // Cache failures should not block analysis results.
-  }
-}
-
-function hashString(value: string): string {
-  let hash = 0;
-  for (let index = 0; index < value.length; index += 1) {
-    hash = ((hash << 5) - hash + value.charCodeAt(index)) | 0;
-  }
-  return Math.abs(hash).toString(36);
-}
-
 function getLLMCacheConfig(): LLMCacheConfig {
-  const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
-
-  if (!activeProvider || typeof activeProvider !== 'string') {
-    throw new ValidationError(
-      '请先在系统设置中选择 LLM 提供商',
-      'ERR_LLM_PROVIDER_NOT_SELECTED',
-      undefined,
-      undefined,
-      { module: 'PpcSearchTermsLlmService', action: 'getLLMConfig' }
-    );
-  }
-
-  const config = StorageService.getLLMConfig(activeProvider);
-  if (!config) {
-    throw new ValidationError(
-      '未选择模型，请在设置中同步或选择模型',
-      'ERR_LLM_MODEL_NOT_SELECTED',
-      undefined,
-      undefined,
-      { module: 'PpcSearchTermsLlmService', action: 'getLLMConfig', provider: activeProvider }
-    );
-  }
-
-  const strategyConfig = applyToolTargetModel('ppc-tools-ppc-search-terms', {
-    ...config,
-    provider: activeProvider,
+  return resolveToolLlmPublicConfig('ppc-tools-ppc-search-terms', {
+    module: 'PpcSearchTermsLlmService',
   });
-  const model = strategyConfig?.model;
-  if (!model) {
-    throw new ValidationError(
-      '未选择模型，请在设置中同步或选择模型',
-      'ERR_LLM_MODEL_NOT_SELECTED',
-      undefined,
-      undefined,
-      { module: 'PpcSearchTermsLlmService', action: 'getLLMConfig', provider: activeProvider }
-    );
-  }
-
-  return {
-    provider: activeProvider,
-    endpoint: strategyConfig.endpoint || '',
-    model,
-    serviceTier: strategyConfig.serviceTier,
-  };
 }
 
-async function getLLMConfig(cacheConfig: LLMCacheConfig): Promise<LLMConfig> {
-  const config = await StorageService.getLLMConfigWithKey(cacheConfig.provider);
-
-  if (!config || !config.apiKey) {
-    throw new ValidationError(
-      '所选提供商未配置 API Key',
-      'ERR_LLM_API_KEY_MISSING',
-      undefined,
-      undefined,
-      {
-        module: 'PpcSearchTermsLlmService',
-        action: 'getLLMConfig',
-        provider: cacheConfig.provider,
-      }
-    );
-  }
-
-  return {
-    ...cacheConfig,
-    apiKey: config.apiKey,
-  };
+async function getLLMConfig(_cacheConfig?: LLMCacheConfig): Promise<LLMConfig> {
+  return resolveToolLlmConfig('ppc-tools-ppc-search-terms', {
+    module: 'PpcSearchTermsLlmService',
+  });
 }
 
 function rowsToDecisions(rows: AnalyzedRow[]): PpcSearchTermsLlmDecision[] {

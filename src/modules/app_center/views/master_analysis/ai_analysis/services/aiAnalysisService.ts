@@ -2,17 +2,16 @@
  * AI 分析服务 - 调用大模型进行真实数据分析
  */
 
-import { callLLM, type ChatMessage, type LLMOptions } from '@/services/llmService';
+import { callLLM, type ChatMessage } from '@/services/llmService';
 import { withStructuredAnalysisOptions } from '@/services/modelCapability';
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
-import { applyToolTargetModel } from '@/services/toolStrategyService';
+import { resolveToolLlmConfig, type ResolvedToolLlmConfig } from '@/services/llmToolBridge';
 import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt, getReviewSamplingMetadata } from '../prompts/analysisPrompts';
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse, validateAnalysisResult } from './analysisResultParser';
-import { ValidationError, AppError, ErrorLevel, ErrorCategory } from '@/common/errors/AppError';
+import { AppError, ErrorLevel, ErrorCategory } from '@/common/errors/AppError';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
 
 const nativeLoggerConsole = globalThis.console;
@@ -53,66 +52,15 @@ const TARGET_TO_FIELD: Record<string, keyof FullAnalysisReport> = {
   'promise-reality': 'promise-reality',
 };
 
-/**
- * LLM 配置接口
- */
-interface LLMConfig {
-  provider: string;
-  endpoint: string;
-  apiKey: string;
-  model: string;
-  serviceTier?: LLMOptions['serviceTier'];
-}
+type LLMConfig = ResolvedToolLlmConfig;
 
 /**
  * 获取 LLM 配置
  */
 async function getLLMConfig(): Promise<LLMConfig> {
-  const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
-
-  if (!activeProvider || typeof activeProvider !== 'string') {
-    throw new ValidationError(
-      '请先在系统设置中选择 LLM 提供商',
-      'AI_ANALYSIS_001',
-      'activeProvider',
-      activeProvider,
-      { module: 'AIAnalysisService', action: 'getLLMConfig' }
-    );
-  }
-
-  const config = await StorageService.getLLMConfigWithKey(activeProvider);
-
-  if (!config || !config.apiKey) {
-    throw new ValidationError('所选提供商未配置 API Key', 'AI_ANALYSIS_002', 'config', config, {
-      module: 'AIAnalysisService',
-      action: 'getLLMConfig',
-      provider: activeProvider,
-    });
-  }
-
-  const strategyConfig = applyToolTargetModel('master-analysis-ai-analysis', {
-    ...config,
-    provider: activeProvider,
+  return resolveToolLlmConfig('master-analysis-ai-analysis', {
+    module: 'AIAnalysisService',
   });
-  const model = strategyConfig?.model;
-
-  if (!model) {
-    throw new ValidationError(
-      '未选择模型，请在设置中同步或选择模型',
-      'AI_ANALYSIS_003',
-      'model',
-      model,
-      { module: 'AIAnalysisService', action: 'getLLMConfig', provider: activeProvider }
-    );
-  }
-
-  return {
-    provider: activeProvider,
-    endpoint: strategyConfig.endpoint,
-    apiKey: strategyConfig.apiKey,
-    model,
-    serviceTier: strategyConfig.serviceTier,
-  };
 }
 
 function unwrapAnalysisResult(

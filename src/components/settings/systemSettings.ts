@@ -32,6 +32,7 @@ import {
 import { showToast } from '@/common/ui';
 import { chooseWithModal, confirmWithModal } from '@/components/modal/confirmModal';
 import { initEventLogger } from '@/common/utils/eventLogger';
+import { downloadJson } from '@/common/utils/download';
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorageBoundary';
 import { fetchModelsFromApi, callLLM } from '@/services/llmService';
@@ -934,18 +935,6 @@ function buildLocalDataExportConfirm(selectedBuckets: string[] | undefined): {
     title: '导出本地数据',
     content: `导出的备份文件可能包含本地加密的 API Key、代理凭据、配置和历史记录等敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`,
   };
-}
-
-function downloadJsonBackup(payload: string, filename: string): void {
-  const blob = new Blob([payload], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
 }
 
 function buildLocalDataImportChoiceContent(summary: LocalDataExportSummary): string {
@@ -2610,9 +2599,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
       }
 
       const suffix = selectedBuckets ? `-partial-${selectedBuckets.join('-')}` : '';
-      downloadJsonBackup(
-        payload,
-        `sops-local-data${suffix}-${new Date().toISOString().slice(0, 10)}.json`
+      downloadJson(
+        `sops-local-data${suffix}-${new Date().toISOString().slice(0, 10)}.json`,
+        payload
       );
       showToast(selectedBuckets ? '分桶本地数据已导出' : '本地数据已导出', { type: 'success' });
     } catch (error) {

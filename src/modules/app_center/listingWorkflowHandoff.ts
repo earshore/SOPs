@@ -1,4 +1,5 @@
 import type { GeneratedPromptProfileSnapshot } from '@/types/modules-business';
+import { createOneShotHandoffQueue } from '@/common/utils/oneShotHandoff';
 
 export interface ListingPromptSource {
   id: string;
@@ -18,9 +19,6 @@ export interface ListingPromptWorkflowContext {
   marketplace: string;
   asinOrSku: string;
 }
-
-let pendingPromptContext: ListingPromptWorkflowContext | null = null;
-let pendingDeepChatThreadId: string | null = null;
 
 function parseSeoKeywords(profile: GeneratedPromptProfileSnapshot | undefined): string[] {
   const seen = new Set<string>();
@@ -44,6 +42,11 @@ function cloneContext(context: ListingPromptWorkflowContext): ListingPromptWorkf
   };
 }
 
+const promptHandoff = createOneShotHandoffQueue<ListingPromptWorkflowContext>({
+  clone: cloneContext,
+});
+const threadResumeHandoff = createOneShotHandoffQueue<string>();
+
 export function createListingPromptWorkflowContext(
   prompt: ListingPromptSource
 ): ListingPromptWorkflowContext {
@@ -63,27 +66,27 @@ export function createListingPromptWorkflowContext(
 }
 
 export function queueListingPromptForDeepChat(context: ListingPromptWorkflowContext): void {
-  pendingPromptContext = cloneContext(context);
+  promptHandoff.queue(context);
 }
 
 export function consumeListingPromptForDeepChat(): ListingPromptWorkflowContext | null {
-  if (!pendingPromptContext) return null;
-  const context = cloneContext(pendingPromptContext);
-  pendingPromptContext = null;
-  return context;
+  return promptHandoff.consume();
 }
 
 export function queueDeepChatThreadResume(threadId: string): void {
-  pendingDeepChatThreadId = threadId.trim() || null;
+  const normalized = threadId.trim();
+  if (!normalized) {
+    threadResumeHandoff.clear();
+    return;
+  }
+  threadResumeHandoff.queue(normalized);
 }
 
 export function consumeDeepChatThreadResume(): string | null {
-  const threadId = pendingDeepChatThreadId;
-  pendingDeepChatThreadId = null;
-  return threadId;
+  return threadResumeHandoff.consume();
 }
 
 export function clearListingPromptHandoff(): void {
-  pendingPromptContext = null;
-  pendingDeepChatThreadId = null;
+  promptHandoff.clear();
+  threadResumeHandoff.clear();
 }

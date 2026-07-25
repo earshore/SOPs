@@ -12,6 +12,7 @@ import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import BaseModule from '@/common/BaseModule';
 import { showToast, showProgress } from '@/common/ui';
+import { readTextFromClipboard } from '@/common/utils/clipboard';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
@@ -704,7 +705,11 @@ function undoKeywordClean(): void {
  */
 async function pasteFromClipboard(): Promise<void> {
   try {
-    const text = await navigator.clipboard.readText();
+    const text = await readTextFromClipboard();
+    if (text === null) {
+      showToast('无法访问剪贴板', { type: 'error' });
+      return;
+    }
     const copyInput = document.getElementById(
       'keyword-hunter-copy-input'
     ) as HTMLTextAreaElement | null;
@@ -714,7 +719,7 @@ async function pasteFromClipboard(): Promise<void> {
       saveInputsToState();
     }
     showToast('已粘贴');
-  } catch (e) {
+  } catch {
     showToast('无法访问剪贴板', { type: 'error' });
   }
 }

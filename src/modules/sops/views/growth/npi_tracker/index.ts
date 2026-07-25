@@ -15,6 +15,8 @@ import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui/notifications';
 import '@/components/modal/AppModal';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
+import { formatCsvRows } from '@/common/utils/csv';
+import { downloadCsv } from '@/common/utils/download';
 import { escapeHtml } from '@/common/utils/security';
 import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
@@ -707,38 +709,18 @@ function buildExportRow(row: NPIProductRecord, idx: number): ExportRow {
   };
 }
 
-function escapeCsvValue(value: ExportRow[keyof ExportRow]): string | number {
-  if (
-    typeof value === 'string' &&
-    (value.includes(',') || value.includes('"') || value.includes('='))
-  ) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
-
 function buildCsvContent(exportData: ExportRow[]): string | null {
   const firstRow = exportData[0];
   if (!firstRow) return null;
 
   const headers = Object.keys(firstRow) as Array<keyof ExportRow>;
-  return [
-    headers.join(','),
-    ...exportData.map(row => headers.map(header => escapeCsvValue(row[header])).join(',')),
-  ].join('\n');
-}
-
-function downloadCsv(csvContent: string): void {
-  const BOM = '\uFEFF';
-  const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `NPI_Tracker_${new Date().toISOString().split('T')[0]}.csv`;
-  link.click();
-
-  URL.revokeObjectURL(url);
+  return formatCsvRows(
+    [
+      headers as string[],
+      ...exportData.map(row => headers.map(header => row[header] as string | number)),
+    ],
+    { allowFormula: true }
+  );
 }
 
 // Export to Excel with formulas
@@ -755,7 +737,7 @@ function exportToExcel(): void {
     return;
   }
 
-  downloadCsv(csvContent);
+  downloadCsv(`NPI_Tracker_${new Date().toISOString().split('T')[0]}.csv`, csvContent);
 
   showToast('导出成功！CSV文件包含Excel兼容公式，使用Excel打开后公式会自动计算。', {
     type: 'success',

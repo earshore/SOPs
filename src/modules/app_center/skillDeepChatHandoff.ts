@@ -4,14 +4,14 @@
  * 产品规则：技能为单次执行——用户发送后消费挂载（卸系统提示与 skillContexts）。
  */
 
+import { createOneShotHandoffQueue } from '@/common/utils/oneShotHandoff';
+
 export interface SkillDeepChatContext {
   skillId: string;
   skillTitle: string;
   skillRaw: string;
   userDraft: string;
 }
-
-let pendingSkillContext: SkillDeepChatContext | null = null;
 
 function cloneContext(context: SkillDeepChatContext): SkillDeepChatContext {
   return {
@@ -22,21 +22,21 @@ function cloneContext(context: SkillDeepChatContext): SkillDeepChatContext {
   };
 }
 
+const skillHandoff = createOneShotHandoffQueue<SkillDeepChatContext>({
+  clone: cloneContext,
+});
+
 export function queueSkillForDeepChat(context: SkillDeepChatContext): void {
-  pendingSkillContext = cloneContext(context);
+  skillHandoff.queue(context);
 }
 
 /** 非破坏性查看 pending，不消费 */
 export function peekSkillForDeepChat(): SkillDeepChatContext | null {
-  if (!pendingSkillContext) return null;
-  return cloneContext(pendingSkillContext);
+  return skillHandoff.peek();
 }
 
 export function consumeSkillForDeepChat(): SkillDeepChatContext | null {
-  if (!pendingSkillContext) return null;
-  const context = cloneContext(pendingSkillContext);
-  pendingSkillContext = null;
-  return context;
+  return skillHandoff.consume();
 }
 
 /** 展示用：去掉技能标题首尾装饰性 emoji，Chip / 列表更干净 */

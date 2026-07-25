@@ -198,6 +198,12 @@ it('uses selected provider settings and falls back to the first model entry', as
     endpoint: 'https://api.example.test',
     models: [{ id: 'model-from-list' }],
   } as never);
+  // Full config path (with key) must also expose models for first-model fallback.
+  mockedStorage.getLLMConfigWithKey.mockResolvedValueOnce({
+    endpoint: 'https://api.example.test',
+    apiKey: 'test-key',
+    models: [{ id: 'model-from-list' }],
+  } as never);
   mockedCallLLM.mockResolvedValueOnce('analysis result');
 
   await expect(

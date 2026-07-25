@@ -9,69 +9,28 @@
  * - 使用 AlpineRegistry 统一管理组件注册
  */
 
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
-import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 import { showToast } from '@/common/ui/notifications';
 import { openFilePicker } from '@/common/utils/filePicker';
 import { createScraperPanel } from './components/ScraperPanel';
-import { destroyAlpineComponent, getAlpineData } from '../utils/alpineLifecycle';
+import { createAlpinePanelModule } from '../utils/createAlpinePanelModule';
+import { getAlpineData } from '../utils/alpineLifecycle';
 import '../master_analysis_style.css';
 import './scraper_style.css';
 
-function cleanupScraperPanel(): void {
-  destroyAlpineComponent('[x-data="scraperPanel"]');
-
-  // 使用 AlpineRegistry 卸载组件
-  const registry = AlpineRegistry.getInstance();
-  registry.unregister('scraperPanel');
-}
-
-// ==========================================
-// Module Exports (统一架构接口)
-// ==========================================
-
-class ScraperModule extends BaseModule {
-  constructor() {
-    super('scraper');
-  }
-
-  protected async render(): Promise<void> {
-    const container = this.container;
-    if (!container) return;
-    const mountSignal = this.getAbortSignal();
-
-    const registry = AlpineRegistry.getInstance();
-    registry.register('scraperPanel', createScraperPanel);
-
-    // 1. 使用 SafeTemplateLoader 加载模板
-    const loader = SafeTemplateLoader.getInstance();
-    const renderer = SafeRenderer.getInstance();
-
-    const html = await loader.loadTemplate(
-      'src/modules/app_center/views/master_analysis/scraper/template.html',
-      {
-        onError: error => {
-          console.error('[Scraper] 模板加载失败:', error);
-        },
-      }
-    );
-    if (!this.isCurrentMount(mountSignal)) return;
-
-    // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
-    // 添加淡入动画（在渲染前添加）
-    container.classList.add('fade-in');
-    renderer.renderTemplate(container, html);
-  }
-
-  protected async init(): Promise<void> {
-    const container = this.container;
-    if (!container) return;
-
+const scraperModule = createAlpinePanelModule({
+  moduleId: 'scraper',
+  panelName: 'scraperPanel',
+  factory: createScraperPanel,
+  templatePath: 'src/modules/app_center/views/master_analysis/scraper/template.html',
+  templateOptions: {
+    onError: error => {
+      console.error('[Scraper] 模板加载失败:', error);
+    },
+  },
+  onInit: (container, module) => {
     const input = container.querySelector<HTMLInputElement>('#import-file-input');
     container.querySelectorAll<HTMLElement>('[data-scraper-import-trigger]').forEach(trigger => {
-      this.addEventListener(trigger, 'click', () => {
+      module.bindEventListener(trigger, 'click', () => {
         if (!openFilePicker(input)) {
           showToast('无法打开文件选择器', {
             type: 'error',
@@ -80,18 +39,9 @@ class ScraperModule extends BaseModule {
         }
       });
     });
-  }
-
-  protected onUnmount(): void {
-    try {
-      cleanupScraperPanel();
-    } catch (error) {
-      console.error('[Scraper] ❌ 子模块卸载失败:', error);
-    }
-  }
-}
-
-const scraperModule = new ScraperModule();
+  },
+  logPrefix: 'Scraper',
+});
 
 export const mount = (container: HTMLElement): Promise<void> => scraperModule.mount(container);
 export const unmount = (): void => {
@@ -101,7 +51,7 @@ export const unmount = (): void => {
   }
 
   try {
-    cleanupScraperPanel();
+    scraperModule.cleanupPanel();
   } catch (error) {
     console.error('[Scraper] ❌ 子模块卸载失败:', error);
   }

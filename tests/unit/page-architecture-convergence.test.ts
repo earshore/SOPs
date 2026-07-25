@@ -97,7 +97,8 @@ describe('page architecture convergence', () => {
           !/\bextends\s+BaseModule\b/.test(content) &&
           !/\bcreateSopTemplateModule\b/.test(content) &&
           !/\bcreateStaticTemplateModule\b/.test(content) &&
-          !/\bcreateBusinessScenarioModule\b/.test(content)
+          !/\bcreateBusinessScenarioModule\b/.test(content) &&
+          !/\bcreateAlpinePanelModule\b/.test(content)
         );
       })
       .map(file => normalizePath(relative(cwd(), file)));
