@@ -67,7 +67,7 @@
     "test:e2e:smoke": "playwright test tests/e2e/release-smoke.spec.ts --project=chromium",
     "test:e2e:smoke:release": "playwright test --config=config/playwright.release.config.ts",
     "test:e2e:smoke:compat": "playwright test tests/e2e/release-smoke.spec.ts --project=firefox --project=webkit",
-    "test:unit:settings": "vitest run tests/unit/systemSettingsCurrent.test.ts tests/unit/systemSettingsModelMetadata.test.ts tests/unit/systemSettingsDirty.test.ts tests/unit/systemSettingsHealth.test.ts tests/unit/systemSettingsDeepLink.test.ts tests/unit/systemSettingsUiPreferences.test.ts tests/unit/systemSettingsPresets.test.ts tests/unit/systemSettingsRollback.test.ts tests/unit/ppcSearchTermsSettingsLegacy.test.ts tests/unit/LocalDataStore.test.ts",
+    "test:unit:settings": "vitest run tests/unit/systemSettings tests/unit/ppcSearchTermsSettingsLegacy.test.ts tests/unit/LocalDataStore.test.ts",
     "test:e2e:settings": "playwright test tests/e2e/system-settings.spec.ts --project=chromium",
     "test:settings": "npm run type-check && npm run test:unit:settings && npm run test:e2e:smoke && npm run test:e2e:settings",
     "test:e2e:parallel": "node tests/run-parallel.js",
