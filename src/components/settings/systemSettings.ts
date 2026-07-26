@@ -1903,6 +1903,13 @@ const settingsPanelBehavior: SettingsPanelPart = {
         });
       });
     }
+
+    // Side-nav scroll-spy needs the painted panel; bind after open paint.
+    queueMicrotask(() => {
+      if (this.isOpen) {
+        this.bindSettingsNavScrollSpy();
+      }
+    });
   },
 
   refreshSettingsHealth(): void {
@@ -2027,10 +2034,13 @@ const settingsPanelBehavior: SettingsPanelPart = {
       await this.loadProxyConfig();
       this.captureSettingsBaseline();
     }
+    this.unbindSettingsNavScrollSpy();
+    this.activeNavTargetId = null;
     this.isOpen = false;
   },
 
   destroy() {
+    this.unbindSettingsNavScrollSpy();
     this._unsubscribers?.forEach(unsub => unsub());
     this._unsubscribers = [];
     this._subscriptionsInitialized = false;
@@ -2065,6 +2075,58 @@ const settingsPanelBehavior: SettingsPanelPart = {
     return this.navOpenGroup === groupId;
   },
 
+  isNavTargetCurrent(targetId: string): boolean {
+    return this.activeNavTargetId === targetId;
+  },
+
+  unbindSettingsNavScrollSpy(): void {
+    this._navScrollUnbind?.();
+    this._navScrollUnbind = null;
+  },
+
+  updateActiveNavFromScroll(): void {
+    if (Date.now() < this._navScrollPauseUntil) {
+      return;
+    }
+    const root = document.querySelector('.settings-panel-root');
+    const scroller = root?.querySelector('.settings-panel-scroll');
+    if (!(scroller instanceof HTMLElement)) {
+      return;
+    }
+    const items = measureSettingsNavMarkers(
+      scroller,
+      scroller.querySelectorAll('[data-settings-nav-id]')
+    );
+    if (!items.length) {
+      return;
+    }
+    const activeId = pickActiveSettingsNavId(items, scroller.scrollTop, 48);
+    this.activeNavTargetId = activeId;
+    const groupId = pickActiveSettingsNavGroup(items, activeId);
+    if (groupId) {
+      this.navOpenGroup = groupId;
+    }
+  },
+
+  bindSettingsNavScrollSpy(): void {
+    this.unbindSettingsNavScrollSpy();
+    const root = document.querySelector('.settings-panel-root');
+    const scroller = root?.querySelector('.settings-panel-scroll');
+    if (!(scroller instanceof HTMLElement)) {
+      return;
+    }
+    const onScroll = () => {
+      this.updateActiveNavFromScroll();
+    };
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    this._navScrollUnbind = () => {
+      scroller.removeEventListener('scroll', onScroll);
+    };
+    requestAnimationFrame(() => {
+      this.updateActiveNavFromScroll();
+    });
+  },
+
   toggleNavGroup(groupId: string, sectionId: string): void {
     this.navOpenGroup = this.navOpenGroup === groupId ? null : groupId;
     this.scrollToSection(sectionId);
@@ -2074,6 +2136,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
     if (groupId) {
       this.navOpenGroup = groupId;
     }
+    this.activeNavTargetId = targetId;
+    // Pause spy briefly so click highlight is not overwritten mid-smooth-scroll.
+    this._navScrollPauseUntil = Date.now() + 800;
     // Open collapsed details first so layout height is correct before scroll.
     const el = expandSettingsFocusTarget(targetId);
     if (!el) {

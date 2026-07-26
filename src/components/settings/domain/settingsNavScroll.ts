@@ -17,8 +17,10 @@ export function pickActiveSettingsNavId(
 ): string | null {
   if (!items.length) return null;
   const sorted = [...items].sort((a, b) => a.offsetTop - b.offsetTop);
+  const first = sorted[0];
+  if (!first) return null;
   const line = scrollTop + stickyOffset;
-  let active = sorted[0].id;
+  let active = first.id;
   for (const item of sorted) {
     if (item.offsetTop <= line) {
       active = item.id;
@@ -34,15 +36,15 @@ export function pickActiveSettingsNavGroup(
   activeId: string | null
 ): string | null {
   if (!activeId) return null;
-  return items.find((item) => item.id === activeId)?.groupId ?? null;
+  return items.find(item => item.id === activeId)?.groupId ?? null;
 }
 
 export function buildSettingsNavScrollItems(
   nodes: ReadonlyArray<{ id: string; groupId: string; offsetTop: number }>
 ): SettingsNavScrollItem[] {
   return nodes
-    .filter((n) => n.id && Number.isFinite(n.offsetTop))
-    .map((n) => ({ id: n.id, groupId: n.groupId, offsetTop: n.offsetTop }));
+    .filter(n => n.id && Number.isFinite(n.offsetTop))
+    .map(n => ({ id: n.id, groupId: n.groupId, offsetTop: n.offsetTop }));
 }
 
 /** Measure markers with data-settings-nav-id inside a scroller. */
