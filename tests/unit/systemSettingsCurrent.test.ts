@@ -598,10 +598,13 @@ it('fetches models and handles validation or API failures', async () => {
     expect.stringContaining('获取模型失败: 未能获取到有效模型列表'),
     { type: 'error' }
   );
-  expect(ErrorService.handle).toHaveBeenCalledWith(expect.any(Error), {
-    action: 'fetchModels',
-    module: 'settings',
-  });
+  expect(ErrorService.handle).toHaveBeenCalledWith(
+    expect.any(Error),
+    expect.objectContaining({
+      action: 'fetchModels',
+      module: 'settings',
+    })
+  );
   expect(panel.llm.isFetching).toBe(false);
 });
 
@@ -1326,6 +1329,81 @@ it('saveProviderConfig persists five-tier reasoningPrefs', async () => {
     expect.objectContaining({
       reasoningPrefs: { enabled: true, effort: 'xhigh' },
     })
+  );
+});
+
+it('AC3: fetchModels auto-switch clamps effort to new model allowlist', async () => {
+  const panel = createPanel();
+  panel.llm.provider = 'new_api';
+  panel.llm.endpoint = 'https://gateway.example/v1';
+  panel.llm.apiKey = 'key';
+  panel.llm.model = 'missing-model';
+  panel.llm.reasoningPrefs = { enabled: true, effort: 'max' };
+  vi.mocked(StorageService.setLLMConfig).mockClear();
+  deps.showToast.mockClear();
+
+  deps.fetchModelsFromApi.mockResolvedValueOnce([
+    { id: 'grok-4.5', context: 256000, features: ['reasoning'] },
+  ]);
+  await panel.fetchModels();
+  // silent autoSave is fire-and-forget; flush microtasks
+  await Promise.resolve();
+  await Promise.resolve();
+
+  expect(panel.llm.model).toBe('grok-4.5');
+  expect(panel.llm.reasoningPrefs.effort).toBe('high');
+  expect(panel.reasoningEffortOptions).toEqual(['low', 'medium', 'high']);
+  expect(showToast).toHaveBeenCalledWith(
+    expect.stringMatching(/推理等级已从 max 调整为 high/),
+    { type: 'info' }
+  );
+  // Demotion persisted so orphan max is not left for a later save
+  expect(StorageService.setLLMConfig).toHaveBeenCalledWith(
+    'new_api',
+    expect.objectContaining({
+      model: 'grok-4.5',
+      reasoningPrefs: expect.objectContaining({ effort: 'high' }),
+    })
+  );
+});
+
+it('AC3: loadProviderConfig demotion toasts once and persists high', async () => {
+  deps.llmConfigs.set('new_api', {
+    endpoint: 'https://gateway.example/v1',
+    model: 'grok-4.5',
+    models: ['grok-4.5'],
+    reasoningPrefs: { enabled: true, effort: 'max' },
+  });
+  deps.secureValues.set('llm_key_new_api', 'key');
+
+  const panel = createPanel();
+  vi.mocked(StorageService.setLLMConfig).mockClear();
+  deps.showToast.mockClear();
+  await panel.loadProviderConfig('new_api');
+  await Promise.resolve();
+  await Promise.resolve();
+
+  expect(panel.llm.model).toBe('grok-4.5');
+  expect(panel.llm.reasoningPrefs.effort).toBe('high');
+  expect(showToast).toHaveBeenCalledWith(
+    expect.stringMatching(/推理等级已从 max 调整为 high/),
+    { type: 'info' }
+  );
+  expect(StorageService.setLLMConfig).toHaveBeenCalledWith(
+    'new_api',
+    expect.objectContaining({
+      model: 'grok-4.5',
+      reasoningPrefs: expect.objectContaining({ effort: 'high' }),
+    })
+  );
+
+  // Second load: storage already high → no demotion toast again
+  deps.showToast.mockClear();
+  await panel.loadProviderConfig('new_api');
+  expect(panel.llm.reasoningPrefs.effort).toBe('high');
+  expect(showToast).not.toHaveBeenCalledWith(
+    expect.stringMatching(/推理等级已从/),
+    expect.anything()
   );
 });
 

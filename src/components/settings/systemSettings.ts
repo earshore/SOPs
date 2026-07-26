@@ -315,7 +315,11 @@ interface SettingsPanelData {
   activeModelCapability: import('@/services/modelCapability').ResolvedModelCapability | null;
   showReasoningControls: boolean;
   reasoningEffortOptions: ReasoningEffortLevel[];
-  clampReasoningPrefsToActiveModel(options?: { announce?: boolean }): void;
+  clampReasoningPrefsToActiveModel(options?: {
+    announce?: boolean;
+    /** Persist demoted effort so storage does not re-toast every open. */
+    persist?: boolean;
+  }): boolean;
   apiPathOptions: readonly ApiPathOption[];
   fullApiUrlPreview: string;
   apiPathCapabilityHint: string;
@@ -417,7 +421,7 @@ interface SettingsPanelData {
   fetchModels(): Promise<void>;
   testConnection(): Promise<void>;
   saveProviderConfig(): Promise<void>;
-  autoSaveProviderConfig(successToast: string): Promise<void>;
+  autoSaveProviderConfig(successToast: string, options?: { silent?: boolean }): Promise<void>;
   loadToolStrategyDefaults(): void;
   saveToolStrategy(): Promise<void>;
   loadRuntimeStrategy(): void;
@@ -1134,7 +1138,14 @@ function assertFetchedModels(models: ModelOption[], provider: string): void {
   });
 }
 
-function applyFetchedModels(panel: SettingsPanelData, models: ModelOption[]): void {
+type PanelWithReasoningClamp = SettingsPanelData & {
+  clampReasoningPrefsToActiveModel?: (options?: {
+    announce?: boolean;
+    persist?: boolean;
+  }) => boolean;
+};
+
+function applyFetchedModels(panel: PanelWithReasoningClamp, models: ModelOption[]): void {
   panel.llm.models = dedupeModels(models);
 
   const currentModelExists = panel.llm.models.some(model => getModelId(model) === panel.llm.model);
@@ -1143,6 +1154,8 @@ function applyFetchedModels(panel: SettingsPanelData, models: ModelOption[]): vo
   const firstModel = panel.llm.models[0];
   if (firstModel) {
     panel.llm.model = getModelId(firstModel);
+    // Model id changed — re-clamp effort to the new allowlist (AC3 closed loop).
+    panel.clampReasoningPrefsToActiveModel?.({ announce: true, persist: true });
   }
 }
 
@@ -1382,14 +1395,19 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   /**
    * When model changes or prefs load, keep effort inside active model allowlist
-   * via nearest-tier clamp (e.g. stored max → high on grok-4.5). Announces demotion once.
+   * via nearest-tier clamp (e.g. stored max → high on grok-4.5).
+   * Returns true when demoted. With persist:true, writes clamped prefs so demotion
+   * toast is once-only across reloads (AC3).
    */
-  clampReasoningPrefsToActiveModel(options?: { announce?: boolean }): void {
+  clampReasoningPrefsToActiveModel(options?: {
+    announce?: boolean;
+    persist?: boolean;
+  }): boolean {
     const prefs = normalizeReasoningUserPrefs(this.llm.reasoningPrefs);
     const allowed = this.reasoningEffortOptions;
-    if (allowed.length === 0) return;
+    if (allowed.length === 0) return false;
     const effort = clampEffort(prefs.effort, allowed);
-    if (effort === prefs.effort) return;
+    if (effort === prefs.effort) return false;
     this.llm.reasoningPrefs = { ...prefs, effort };
     if (options?.announce !== false) {
       const model = (this.llm.model || '').trim() || '当前模型';
@@ -1398,6 +1416,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
         { type: 'info' }
       );
     }
+    if (options?.persist) {
+      // Silent persist — demotion toast is the only UX; avoid success toast spam.
+      void this.autoSaveProviderConfig('推理等级已按模型能力调整', { silent: true });
+    }
+    return true;
   },
 
   get apiPathOptions(): readonly ApiPathOption[] {
@@ -2208,8 +2231,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.llm.serviceTier = savedConfig?.serviceTier;
     this.llm.reasoningPrefs = normalizeReasoningUserPrefs(savedConfig?.reasoningPrefs);
     this.llm.apiPath = normalizeApiPathId(savedConfig?.apiPath);
-    // Match stored effort to the selected model's allowlist (do not keep orphan max/xhigh).
-    this.clampReasoningPrefsToActiveModel();
+    // Clamp + persist demotion so next open does not re-toast (AC3 once-only).
+    this.clampReasoningPrefsToActiveModel({ announce: true, persist: true });
     this.loadToolStrategyDefaults();
   },
 
@@ -2510,7 +2533,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   setLlmModel(event: Event): void {
     this.llm.model = (event.target as HTMLSelectElement).value;
-    this.clampReasoningPrefsToActiveModel();
+    this.clampReasoningPrefsToActiveModel({ announce: true, persist: true });
   },
 
   setLlmServiceTier(event: Event): void {
@@ -2552,13 +2575,19 @@ const settingsPanelBehavior: SettingsPanelPart = {
   /**
    * Instant-save LLM config for button/switch controls (no panel close).
    * Requires endpoint+model (from form or last saved config).
+   * `silent: true` skips success toast (used when demotion toast already shown).
    */
-  async autoSaveProviderConfig(successToast: string): Promise<void> {
+  async autoSaveProviderConfig(
+    successToast: string,
+    options?: { silent?: boolean }
+  ): Promise<void> {
     try {
       const previous = StorageService.getLLMConfig(this.llm.provider);
       const newConfig = buildAutoSaveLlmConfig(this.llm, previous);
       if (!newConfig.endpoint || !newConfig.model) {
-        showToast('请先配置 Endpoint 与模型后再保存推理设置', { type: 'warning' });
+        if (!options?.silent) {
+          showToast('请先配置 Endpoint 与模型后再保存推理设置', { type: 'warning' });
+        }
         return;
       }
       pushSettingsRollbackSnapshot('llm', {
@@ -2568,7 +2597,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
       StorageService.setLLMConfig(this.llm.provider, newConfig);
       updateModelStatus();
       this.captureSettingsBaseline();
-      showToast(successToast, { type: 'success' });
+      if (!options?.silent) {
+        showToast(successToast, { type: 'success' });
+      }
     } catch (error) {
       ErrorService.handle(error as Error, {
         action: 'autoSaveProviderConfig',
