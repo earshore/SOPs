@@ -48,7 +48,7 @@
 
 [contenteditable='true']:hover {
   background: rgba(241, 245, 249, 0.8);
-  border-bottom-color: var(--color-slate-400);
+  border-bottom-color: var(--color-text-tertiary, var(--color-slate-400));
 }
 
 /* 聚焦时的呼吸光环 */
@@ -74,7 +74,7 @@
 .amz_nav-btn {
   padding: 8px 20px;
   border-radius: 99px;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   font-weight: 600;
   font-size: 0.875rem;
   transition:
@@ -108,7 +108,7 @@
 
 /* 传统的底部线条式 Tab 的增强版 */
 .amz_tab-underline-active {
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
   position: relative;
 }
 
@@ -167,7 +167,7 @@
    ---------------------------------------- */
 .amz-hub-overview {
   position: relative;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
 }
 
 .amz-hub-overview .amz-hub-hero {
@@ -238,12 +238,12 @@
 }
 
 .amz-hub-overview .amz-hub-hero .wb-description {
-  color: var(--color-slate-500) !important;
+  color: var(--color-text-secondary, var(--color-slate-500)) !important;
   line-height: var(--wb-description-line-height, 1.5);
 }
 
 .amz-hub-overview .hub-module-section p {
-  color: var(--color-slate-500) !important;
+  color: var(--color-text-secondary, var(--color-slate-500)) !important;
   line-height: 1.6;
 }
 
