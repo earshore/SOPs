@@ -77,13 +77,13 @@
       <div class="text-xs text-slate-600 mt-1">固定巡检日</div>
     </div>
   </div>
-  <section class="bg-white rounded-xl border border-blue-200 p-6 mb-6 shadow-sm">
+  <section class="ui-card p-6 mb-6">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
       <div>
-        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <h2 class="ui-card__title text-lg font-bold flex items-center gap-2">
           <i class="fas fa-file-signature text-blue-500"></i>QA 维护归档输出
         </h2>
-        <p class="text-sm text-slate-500 mt-1">
+        <p class="ui-card__muted text-sm mt-1">
           每次巡检结束后，沉淀未回复问题、标准答案、人工确认点和 Listing 反哺项。
         </p>
       </div>
@@ -444,8 +444,8 @@
     <!-- Column 3: 回答模板 + 技巧 -->
     <div class="lg:col-span-1 space-y-5">
       <!-- 回答撰写公式 -->
-      <div class="bg-white rounded-xl border-2 border-emerald-200 p-5">
-        <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+      <div class="ui-card p-5">
+        <h2 class="ui-card__title text-base font-bold mb-3 flex items-center gap-2">
           <i class="fas fa-magic text-emerald-500"></i>万能回答公式
         </h2>
         <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
@@ -507,14 +507,14 @@
         </div>
       </div>
       <!-- SEO 关键词植入技巧 -->
-      <div class="bg-white rounded-xl border-2 border-blue-200 p-5">
-        <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+      <div class="ui-card p-5">
+        <h2 class="ui-card__title text-base font-bold mb-3 flex items-center gap-2">
           <i class="fas fa-search text-blue-500"></i>SEO 关键词植入技巧
         </h2>
         <div class="space-y-3 text-xs">
           <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
             <h4 class="font-bold text-blue-800 mb-1">✅ 正确示范（自然植入）</h4>
-            <div class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
+            <div class="ui-card p-2 font-mono leading-relaxed">
               Q: "Is this suitable for camping?"<br /><br />
               A: "Great question! Yes, our <strong>portable LED camping lantern</strong> is
               specifically designed for <strong>outdoor camping and hiking</strong>. It features an
@@ -529,7 +529,7 @@
           </div>
           <div class="bg-red-50 rounded-lg p-3 border border-red-200">
             <h4 class="font-bold text-red-800 mb-1">❌ 错误示范（堆砌关键词）</h4>
-            <div class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
+            <div class="ui-card p-2 font-mono leading-relaxed">
               A: "Yes, this camping lantern LED rechargeable waterproof portable outdoor camping
               light tent lamp is suitable for camping."
             </div>
@@ -548,14 +548,14 @@
         </div>
       </div>
       <!-- 负面问题化解 -->
-      <div class="bg-white rounded-xl border-2 border-amber-200 p-5">
-        <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+      <div class="ui-card p-5">
+        <h2 class="ui-card__title text-base font-bold mb-3 flex items-center gap-2">
           <i class="fas fa-shield-alt text-amber-500"></i>负面问题化解模板
         </h2>
         <div class="space-y-3 text-xs">
           <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
             <p class="font-bold text-amber-800 mb-1">Q: "Is this product cheap quality?"</p>
-            <div class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
+            <div class="ui-card p-2 font-mono leading-relaxed">
               Thank you for your concern about quality — it's something we take very seriously. Our
               [Product Name] is manufactured using [specific material, e.g., "premium 304 stainless
               steel"] and has passed rigorous [CE/GS/TÜV] safety certification for the European
@@ -571,7 +571,7 @@
             <p class="font-bold text-red-800 mb-1">
               Q: "I've seen reviews saying this breaks easily?"
             </p>
-            <div class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
+            <div class="ui-card p-2 font-mono leading-relaxed">
               We appreciate you raising this. We continuously monitor customer feedback and have
               made improvements to [specific component, e.g., "the hinge mechanism"] based on
               earlier feedback. The current version features [improvement detail]. We stand behind
@@ -817,11 +817,11 @@
       <i class="fas fa-globe-europe text-blue-500"></i>欧洲多站点 QA 回复注意事项
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+      <div class="ui-card p-4">
+        <h4 class="ui-card__title font-bold text-sm mb-2 flex items-center gap-1">
           <span class="text-lg">🇩🇪</span> 德国站 (DE)
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• <strong>QA 数量最多</strong>，德国买家爱研究产品</li>
           <li>• 必须用德语回复，Siezen（尊称 Sie）</li>
           <li>• 提及认证（CE/GS/TÜV）德国人非常看重</li>
@@ -830,11 +830,11 @@
           <li class="text-blue-700 font-semibold">→ 最需要投入精力的站点</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+      <div class="ui-card p-4">
+        <h4 class="ui-card__title font-bold text-sm mb-2 flex items-center gap-1">
           <span class="text-lg">🇬🇧</span> 英国站 (GB)
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• QA 活跃度高，英语回复即可</li>
           <li>• 英式拼写（colour, centre, metre）</li>
           <li>• 脱欧后 GB 和 EU 的 QA 不再共享</li>
@@ -843,11 +843,11 @@
           <li class="text-blue-700 font-semibold">→ 注意用词与美式英语的区别</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+      <div class="ui-card p-4">
+        <h4 class="ui-card__title font-bold text-sm mb-2 flex items-center gap-1">
           <span class="text-lg">🇫🇷</span> 法国站 (FR)
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• 法国买家提问风格偏详细</li>
           <li>• 必须用法语，Vouvoiement（用 Vous）</li>
           <li>• 法国人对产品原产地/品牌故事感兴趣</li>
@@ -856,11 +856,11 @@
           <li class="text-blue-700 font-semibold">→ 回答长度可以比德国站略长</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+      <div class="ui-card p-4">
+        <h4 class="ui-card__title font-bold text-sm mb-2 flex items-center gap-1">
           <span class="text-lg">🇮🇹</span> 意大利站 (IT)
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• QA 数量相对较少</li>
           <li>• 用意大利语回复效果更好</li>
           <li>• 意大利买家重视设计/美观</li>
@@ -869,11 +869,11 @@
           <li class="text-blue-700 font-semibold">→ QA 少但每条影响力大</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+      <div class="ui-card p-4">
+        <h4 class="ui-card__title font-bold text-sm mb-2 flex items-center gap-1">
           <span class="text-lg">🇪🇸</span> 西班牙站 (ES)
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• QA 活跃度中等</li>
           <li>• 用西班牙语（Castellano）</li>
           <li>• 西班牙买家较直接，喜欢简洁明了</li>
@@ -882,11 +882,11 @@
           <li class="text-blue-700 font-semibold">→ 简洁清晰最重要</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-blue-200 border-2">
+      <div class="ui-card p-4 border-2 border-blue-200">
         <h4 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-1">
           <i class="fas fa-sync-alt text-blue-500"></i> 跨站 QA 同步
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• 欧洲站（DE/FR/IT/ES/NL）的 QA 会<strong>自动翻译展示</strong></li>
           <li>• DE站的 QA 可能出现在 FR/IT/ES/NL 页面</li>
           <li>• <strong>但你的官方回复只在原站显示</strong></li>
@@ -1235,9 +1235,9 @@
       <i class="fas fa-user-clock text-slate-600"></i>运营 QA 时间投入规划
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-blue-700 text-sm mb-2">📅 每周二（25-30 分钟）</h4>
-        <ul class="text-xs text-slate-600 space-y-1.5">
+        <ul class="ui-card__muted text-xs space-y-1.5">
           <li>• 扫描所有核心 ASIN 的 QA（5 分钟）</li>
           <li>• 分类 + 排优先级（3 分钟）</li>
           <li>• 撰写 + 发布回答（10-15 分钟）</li>
@@ -1245,17 +1245,17 @@
           <li>• 更新管理表（2 分钟）</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-amber-700 text-sm mb-2">📅 每月初（30 分钟）</h4>
-        <ul class="text-xs text-slate-600 space-y-1.5">
+        <ul class="ui-card__muted text-xs space-y-1.5">
           <li>• 月度 QA 分析（10 分钟）</li>
           <li>• 竞品 QA 挖掘（15 分钟）</li>
           <li>• 更新关键词列表（5 分钟）</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-purple-700 text-sm mb-2">📅 每季度（30 分钟）</h4>
-        <ul class="text-xs text-slate-600 space-y-1.5">
+        <ul class="ui-card__muted text-xs space-y-1.5">
           <li>• 全面审计所有 ASIN 的 QA 健康度</li>
           <li>• 更新/删除过期回答</li>
           <li>• 对比竞品 QA 差距</li>
@@ -1263,7 +1263,7 @@
         </ul>
       </div>
     </div>
-    <div class="mt-4 p-3 bg-white rounded-lg border border-slate-200 text-xs text-slate-700">
+    <div class="ui-card mt-4 p-3 text-xs">
       <i class="fas fa-lightbulb text-amber-500 mr-1"></i>
       <strong>效率心法：</strong>
       QA 维护是"做一次受益长久"的工作。一条好的 QA 回答可能在未来 1-2 年里持续帮助转化。 每周 25

@@ -259,16 +259,16 @@
       提前主动解决的成本（一个退款）远低于AZ输掉的成本（ODR+账号健康度扣分）。
     </div>
   </div>
-  <section class="bg-white rounded-xl border border-blue-200 p-6 mb-6 shadow-sm">
+  <section class="ui-card p-6 mb-6">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
       <div>
-        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <h2 class="ui-card__title text-lg font-bold flex items-center gap-2">
           <i
             class="fas fa-file-lines text-[var(--module-accent,var(--color-focus-ring,#3b82f6))]"
           ></i
           >客服邮件处理归档输出
         </h2>
-        <p class="text-sm text-slate-500 mt-1">
+        <p class="ui-card__muted text-sm mt-1">
           把消息分级、回复草稿、处理动作和人工确认点沉淀成可追溯记录。
         </p>
       </div>
@@ -282,7 +282,7 @@
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <label class="block">
-        <span class="text-xs font-semibold text-slate-600">作业负责人</span>
+        <span class="ui-card__title text-xs font-semibold">作业负责人</span>
         <input
           id="email-templates-owner"
           class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring,#3b82f6)] focus:border-[var(--color-focus-ring,#3b82f6)]"
@@ -1112,8 +1112,8 @@
             </div>
           </div>
           <!-- AZ决策树 -->
-          <div class="bg-white rounded-lg p-4 border border-slate-200">
-            <h4 class="font-bold text-slate-800 text-sm mb-3">
+          <div class="ui-card p-4">
+            <h4 class="ui-card__title font-bold text-sm mb-3">
               <i class="fas fa-sitemap text-red-500 mr-1"></i>A-to-Z 处理决策树
             </h4>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1282,14 +1282,14 @@
     </div>
   </div>
   <!-- ========== 多语言速查表 ========== -->
-  <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+  <div class="ui-card p-6 mb-6">
     <h2
       id="email-phrase-table-title"
-      class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"
+      class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2"
     >
       <i class="fas fa-language text-indigo-500"></i>五语高频短语速查表 — 复制即用
     </h2>
-    <p id="email-phrase-table-description" class="text-xs text-slate-500 mb-4">
+    <p id="email-phrase-table-description" class="ui-card__muted text-xs mb-4">
       日常邮件中最常用的开头/结尾/关键短语。不需要学语法，直接复制替换即可。
     </p>
     <div
@@ -1454,8 +1454,8 @@
     </div>
   </div>
   <!-- ========== 特殊场景处理 ========== -->
-  <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
       <i class="fas fa-fire-extinguisher text-red-500"></i>特殊 / 棘手场景应对指南
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1561,9 +1561,9 @@
       <i class="fas fa-user-clock text-slate-600"></i>每日客服工作流
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-blue-700 text-sm mb-2">☀️ 上午时段（9:00-9:30）</h4>
-        <ul class="text-xs text-slate-600 space-y-1.5">
+        <ul class="ui-card__muted text-xs space-y-1.5">
           <li class="flex items-start gap-1.5">
             <i class="fas fa-square text-blue-300 mt-0.5 text-[8px]"></i>
             <span>打开 Seller Central → Buyer Messages</span>
@@ -1586,9 +1586,9 @@
           </li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-amber-700 text-sm mb-2">🌆 下午时段（17:00-17:15）</h4>
-        <ul class="text-xs text-slate-600 space-y-1.5">
+        <ul class="ui-card__muted text-xs space-y-1.5">
           <li class="flex items-start gap-1.5">
             <i class="fas fa-square text-amber-300 mt-0.5 text-[8px]"></i>
             <span>快速检查新增消息（英国买家下午活跃）</span>
@@ -1607,9 +1607,9 @@
           </li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-purple-700 text-sm mb-2">📊 每周五（10分钟复盘）</h4>
-        <ul class="text-xs text-slate-600 space-y-1.5">
+        <ul class="ui-card__muted text-xs space-y-1.5">
           <li class="flex items-start gap-1.5">
             <i class="fas fa-square text-purple-300 mt-0.5 text-[8px]"></i>
             <span>检查 Account Health → Message Response Time</span>
@@ -1629,7 +1629,7 @@
         </ul>
       </div>
     </div>
-    <div class="mt-4 p-3 bg-white rounded-lg border border-slate-200 text-xs text-slate-700">
+    <div class="ui-card mt-4 p-3 text-xs">
       <i class="fas fa-lightbulb text-amber-500 mr-1"></i>
       <strong>效率心法：</strong>
       周末和节假日（欧洲公共假期多！）邮件量会骤降。但 <strong>24h SLA 不因周末暂停</strong>——
@@ -1648,11 +1648,11 @@
       了解文化差异 = 用对语气 = 更高的问题一次解决率。这些是真实经验总结。
     </p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+      <div class="ui-card p-4">
+        <h4 class="ui-card__title font-bold text-sm mb-2 flex items-center gap-1">
           <span class="text-lg">🇩🇪</span> 德国买家
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• <strong>风格：</strong>直接、注重事实、重视条理</li>
           <li>• <strong>期望：</strong>精确的信息、明确的解决时间表</li>
           <li>• <strong>禁忌：</strong>模糊承诺（"soon" → 改为 "within 3 business days"）</li>
@@ -1661,11 +1661,11 @@
           <li class="text-blue-700">→ 用精确、结构化的语言回复</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+      <div class="ui-card p-4">
+        <h4 class="ui-card__title font-bold text-sm mb-2 flex items-center gap-1">
           <span class="text-lg">🇬🇧</span> 英国买家
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• <strong>风格：</strong>礼貌含蓄、间接表达不满</li>
           <li>• <strong>期望：</strong>得体的语气、快速解决</li>
           <li>• <strong>注意：</strong>"I'm a bit disappointed" = 非常不满</li>
@@ -1674,11 +1674,11 @@
           <li class="text-blue-700">→ 语气温暖有礼，超预期服务效果最好</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+      <div class="ui-card p-4">
+        <h4 class="ui-card__title font-bold text-sm mb-2 flex items-center gap-1">
           <span class="text-lg">🇫🇷</span> 法国买家
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• <strong>风格：</strong>情绪化、表达丰富、会写长邮件</li>
           <li>• <strong>期望：</strong>被认真倾听、被尊重</li>
           <li>• <strong>禁忌：</strong>太简短的回复（会觉得你敷衍）</li>
@@ -1687,11 +1687,11 @@
           <li class="text-blue-700">→ 回复稍微长一些，表达共情</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+      <div class="ui-card p-4">
+        <h4 class="ui-card__title font-bold text-sm mb-2 flex items-center gap-1">
           <span class="text-lg">🇮🇹</span> 意大利买家
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• <strong>风格：</strong>热情但也容易激动</li>
           <li>• <strong>期望：</strong>友好亲切的沟通氛围</li>
           <li>• <strong>优势：</strong>问题解决后忠诚度很高</li>
@@ -1700,11 +1700,11 @@
           <li class="text-blue-700">→ 亲和力和诚意是关键</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+      <div class="ui-card p-4">
+        <h4 class="ui-card__title font-bold text-sm mb-2 flex items-center gap-1">
           <span class="text-lg">🇪🇸</span> 西班牙买家
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• <strong>风格：</strong>较为随和，但不满时直接</li>
           <li>• <strong>期望：</strong>快速响应、灵活处理</li>
           <li>• <strong>特点：</strong>退货率相对较低</li>
@@ -1713,11 +1713,11 @@
           <li class="text-blue-700">→ 简洁直接 + 提供明确方案</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-blue-200 border-2">
+      <div class="ui-card p-4 border-2 border-blue-200">
         <h4 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-1">
           <i class="fas fa-plus-circle text-blue-500"></i> NL / SE / PL / BE
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="ui-card__muted text-xs space-y-1">
           <li>• 🇳🇱 <strong>荷兰：</strong>直接坦率（像德国），英语流利，可用英语</li>
           <li>• 🇸🇪 <strong>瑞典：</strong>非常理性有耐心，英语流利，问题简单</li>
           <li>• 🇵🇱 <strong>波兰：</strong>价格敏感，退货偏少，可用英语</li>
@@ -1728,8 +1728,8 @@
     </div>
   </div>
   <!-- ========== Buyer-Seller Message 政策细节 ========== -->
-  <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
       <i class="fas fa-shield-alt text-emerald-500"></i>Buyer-Seller Message 合规细节
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1804,14 +1804,14 @@
     </div>
   </div>
   <!-- ========== 退款决策矩阵 ========== -->
-  <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+  <div class="ui-card p-6 mb-6">
     <h2
       id="email-refund-matrix-title"
-      class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"
+      class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2"
     >
       <i class="fas fa-calculator text-teal-500"></i>退款决策速查矩阵 — 秒级判断
     </h2>
-    <p id="email-refund-matrix-description" class="text-xs text-slate-500 mb-4">
+    <p id="email-refund-matrix-description" class="ui-card__muted text-xs mb-4">
       不需要每次都纠结"要不要退""退多少"。按此矩阵直接决策，省时间也保护利润。
     </p>
     <div
@@ -1931,8 +1931,8 @@
     </div>
   </div>
   <!-- ========== 工具和资源 ========== -->
-  <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
       <i class="fas fa-toolbox text-amber-500"></i>工具 &amp; 资源清单
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
