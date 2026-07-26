@@ -51,13 +51,13 @@
     </dl>
   </section>
   <!-- 新人执行清单 -->
-  <section class="bg-white rounded-xl border border-red-200 p-6 mb-6">
+  <section class="ui-card p-6 mb-6">
     <div class="flex flex-col lg:flex-row gap-6">
       <div class="lg:w-1/2">
-        <h2 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+        <h2 class="ui-card__title text-lg font-bold mb-3 flex items-center gap-2">
           <i class="fas fa-list-check text-red-500"></i>发布前必查清单
         </h2>
-        <div class="space-y-2 text-sm text-slate-600">
+        <div class="ui-card__muted space-y-2 text-sm">
           <label class="flex items-start gap-2">
             <input type="checkbox" class="mt-1 accent-red-600" />
             <span>把 Title、Bullets、Description、A+、Search Terms 合并成一份待查文本。</span>
@@ -92,13 +92,13 @@
       </div>
     </div>
   </section>
-  <section class="bg-white rounded-xl border border-red-200 p-6 mb-6 shadow-sm">
+  <section class="ui-card p-6 mb-6">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
       <div>
-        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <h2 class="ui-card__title text-lg font-bold flex items-center gap-2">
           <i class="fas fa-file-shield text-red-600"></i>高危词检查归档输出
         </h2>
-        <p class="text-sm text-slate-500 mt-1">
+        <p class="ui-card__muted text-sm mt-1">
           把命中词、风险等级、替换动作和复查结果沉淀成可复用记录。
         </p>
       </div>
@@ -491,8 +491,8 @@
     </div>
   </div>
   <!-- ========== 高频雷区 TOP 20 ========== -->
-  <div class="bg-white rounded-xl border-2 border-red-200 p-6 mb-6">
-    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
       <i class="fas fa-bomb text-red-500"></i>最常踩雷 TOP 20 — 中国卖家欧洲站被处罚频率最高的词
     </h2>
     <p class="ui-card__muted text-xs mb-4">
@@ -1331,7 +1331,7 @@
       如果你的 Listing 已经上架了一段时间但从未做过合规检查——现在就做。不要等到被亚马逊抑制才补救。
     </p>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="bg-white rounded-lg p-4 border border-amber-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-amber-800 text-sm mb-2">🔍 紧急排查步骤</h4>
         <ul class="text-xs text-slate-700 space-y-1.5">
           <li><strong>1.</strong> 导出所有 ASIN 的标题+Bullets+描述（后台 Inventory → 下载）</li>
@@ -1342,7 +1342,7 @@
           <li><strong>6.</strong> 修改后检查 Listing 状态是否正常（24h内）</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-amber-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-amber-800 text-sm mb-2">🚨 Listing 已被抑制怎么办</h4>
         <ul class="text-xs text-slate-700 space-y-1.5">
           <li><strong>1.</strong> 后台 Inventory → Listing Quality → 查看抑制原因</li>
@@ -1359,8 +1359,8 @@
     </div>
   </div>
   <!-- ========== GPSR 2024 专项 ========== -->
-  <div class="bg-white rounded-xl border-2 border-red-200 p-6 mb-6">
-    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
       <span class="px-2 py-0.5 bg-red-600 text-white rounded text-xs font-bold">2024 新规</span>
       <i class="fas fa-exclamation-circle text-red-500"></i>GPSR 通用产品安全法规 — 对 Listing
       的影响
@@ -1397,7 +1397,7 @@
       <i class="fas fa-user-clock text-slate-600"></i>一人公司合规检查时间规划
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-blue-700 text-sm mb-2">📅 每次上新品（10 分钟）</h4>
         <ul class="text-xs text-slate-600 space-y-1">
           <li>• 对照高危词库检查 Listing 文案</li>
@@ -1406,7 +1406,7 @@
           <li>• 上架后 24h 检查 Listing 状态</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-amber-700 text-sm mb-2">📅 每季度（30 分钟）</h4>
         <ul class="text-xs text-slate-600 space-y-1">
           <li>• 全量扫描所有在售 ASIN 的 Listing</li>
@@ -1415,7 +1415,7 @@
           <li>• 更新本地高危词库（如有新发现）</li>
         </ul>
       </div>
-      <div class="bg-white rounded-lg p-4 border border-slate-200">
+      <div class="ui-card p-4">
         <h4 class="font-bold text-purple-700 text-sm mb-2">📅 收到合规通知时（立即）</h4>
         <ul class="text-xs text-slate-600 space-y-1">
           <li>• 亚马逊发来合规审查通知 → <strong>最高优先级</strong></li>
@@ -1540,15 +1540,15 @@
 <app-modal id="rw-detail-modal" class="hidden" title="高危词详情" size="2xl" no-header>
   <div
     slot="body"
-    class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col transform scale-95 transition-transform duration-200"
+    class="bg-[var(--surface-panel,#ffffff)] rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col transform scale-95 transition-transform duration-200"
   >
     <div
-      class="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0"
+      class="px-6 py-4 border-b border-[color:var(--border-subtle,rgba(148,163,184,0.24))] flex items-center justify-between shrink-0"
       id="rw-modal-header"
     ></div>
     <div class="px-6 py-6 overflow-y-auto custom-scrollbar" id="rw-detail-content"></div>
     <div
-      class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end shrink-0 rounded-b-xl"
+      class="px-6 py-4 bg-[var(--color-bg-secondary,#f8fafc)] border-t border-[color:var(--border-subtle,rgba(148,163,184,0.24))] flex justify-end shrink-0 rounded-b-xl"
     >
       <button
         type="button"
