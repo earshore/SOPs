@@ -78,3 +78,23 @@
 .will-change-transform {
   will-change: transform;
 }
+
+/* ========================================
+   主题（浅色/深色）切换 — 整屋调光
+   applyColorMode 在切换瞬间挂上 .color-mode-switching,
+   ~260ms 后移除；首屏 (无该类) 与 reduced-motion 均不生效。
+   ======================================== */
+@media (prefers-reduced-motion: no-preference) {
+  html.color-mode-switching,
+  html.color-mode-switching *,
+  html.color-mode-switching *::before,
+  html.color-mode-switching *::after {
+    transition:
+      background-color 220ms var(--ease-smooth, ease),
+      border-color 220ms var(--ease-smooth, ease),
+      color 220ms var(--ease-smooth, ease),
+      fill 220ms var(--ease-smooth, ease),
+      stroke 220ms var(--ease-smooth, ease),
+      box-shadow 220ms var(--ease-smooth, ease) !important;
+  }
+}

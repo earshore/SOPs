@@ -13,7 +13,7 @@
   function readMode() {
     try {
       var raw = localStorage.getItem(KEY);
-      if (raw == null || raw === '') return 'light';
+      if (raw == null || raw === '') return 'system';
       try {
         var parsed = JSON.parse(raw);
         if (parsed === 'light' || parsed === 'dark' || parsed === 'system') return parsed;
@@ -28,7 +28,7 @@
     } catch (_) {
       /* private mode / blocked storage */
     }
-    return 'light';
+    return 'system';
   }
 
   function resolve(mode) {
