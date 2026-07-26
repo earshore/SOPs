@@ -194,6 +194,13 @@
   background: rgba(15, 23, 42, 0.9);
 }
 
+.dark .route-loading-skeleton__table,
+[data-color-mode-resolved='dark'] .route-loading-skeleton__table,
+[data-theme='dark'] .route-loading-skeleton__table {
+  border-color: rgba(148, 163, 184, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+}
+
 /* ========================================
    内联加载状态
    ======================================== */
