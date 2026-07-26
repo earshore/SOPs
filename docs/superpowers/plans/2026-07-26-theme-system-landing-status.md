@@ -27,7 +27,7 @@
 | **Visual / XO**    | **Yellow** | **Agent-contract XO**：**PASS with debt**（0 FAIL；主债 **X6**）；**用户本机复跑一致**；证据 `xo-agent-run/`；**人类肉眼 / 签字仍缺**；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 **code + agent-contract**；**不可**仅凭脚本关体验 RC |
 
-**一句话**: code FREEZE + agent-contract **本机可复现 PASS with debt**；下一步只剩 **人类 10–30 min 签字**（或点名债务）。smoke：`npm run test:e2e:smoke`（4173）。
+**一句话**: **Theme-first enterprise push 已启动**—T0 Done、T1 核心（primary stomp / FOUC / prefers 孤岛 / CONFIG_KEYS）Done、T2 shell **Partial**（settings/header/sidebar/home/modal）；旧 Appearance 样本波仍 FREEZE，XO 体验门仍 open。smoke：`npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar + welcome banner = **Layer B**；Appearance **不得**洗成单 primary。治理目标：主题系统管 **palette recipe + 中性面**，业务只绑 role/menu。深审查与 O0–O4 路线：[theme-ownership-surfaces-deep-review](./2026-07-26-theme-ownership-surfaces-deep-review.md)。宪法 [§2.2](../../THEME_SYSTEM_GUIDELINES.md)。megaMenu hardcode **13** = 有意 Ownership 基线。
 

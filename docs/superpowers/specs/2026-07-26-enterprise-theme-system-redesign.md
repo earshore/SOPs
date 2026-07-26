@@ -1,7 +1,7 @@
 # 企业级主题系统重构蓝图：主题 = 浅色/深色/系统
 
 **日期**: 2026-07-26  
-**状态**: 架构裁决 + 全仓审查结论 · **非**本轮全量 CSS 重写  
+**状态**: T0 **Done** · T1 核心项 **Done**（primary stomp / FOUC / prefers 孤岛 / CONFIG_KEYS） · T2 **Partial**（settings / header / sidebar / home / modal） · **非**全量业务 CSS 重写  
 **触发**: 产品纠正——当前将 Appearance 预设误称为「主题」，颜色模式（浅/深/系统）未达企业级一体化  
 **范围**: 运行时 · Token · 壳层 · 共享组件 · 业务模块 · 设置 IA · 命名  
 **关联**: `THEME_SYSTEM_GUIDELINES` · Ownership 深绑定审查 · D11/D3 债务  
@@ -194,21 +194,23 @@ Header / mega 面板 / settings / home dock / modal **只许**用 shell/surface�
 ### Phase T0 — 认知与契约钉死（本周 · 低风险）
 
 - [x] 本蓝图  
-- [ ] 宪法顶部 **产品用语表**（主题=Mode，色调=Accent）  
-- [ ] 设置文案与顺序：主题在前、色调在后（**仅 copy/IA，不改存储 key**）  
-- [ ] 色调 description 去掉「主题」歧义  
+- [x] 宪法顶部 **产品用语表**（主题=Mode，色调=Accent）  
+- [x] 设置文案与顺序：主题在前、色调在后（**仅 copy/IA，不改存储 key**）  
+- [x] 色调 description 去掉「主题」歧义  
 
+**状态:** **Done**（`a87895b7` redefine theme/accent）  
 **验收:** 用户打开设置，第一眼选浅/深/系统叫「主题」。
 
 ### Phase T1 — Theme 轴诚实（P0 技术 · 高收益）
 
-1. **删除暗色块对 primary/focus 的 indigo 覆写**  
-2. **Head 同步主题脚本 + critical 语义化**（灭 FOUC）  
-3. `prefers-color-scheme` 孤岛 → `data-color-mode-resolved`  
-4. `app-color-mode` 进入 export/CONFIG_KEYS  
-5. 默认新用户 → `system`（可配置）  
-6. 模式切换：`color-scheme` + 可选短过渡  
+1. [x] **删除暗色块对 primary/focus 的 indigo 覆写**（primary stomp） — `c19cc6c6`  
+2. [x] **Head 同步主题脚本 + critical 语义化**（灭 FOUC） — `9db508ba`  
+3. [x] `prefers-color-scheme` 孤岛 → `data-color-mode-resolved` — `ee599bb5`  
+4. [x] `app-color-mode` 进入 export/CONFIG_KEYS — `f1a1dd00`  
+5. [ ] 默认新用户 → `system`（可配置）  
+6. [ ] 模式切换：`color-scheme` + 可选短过渡  
 
+**状态:** **核心项 Done**（1–4）；5–6 仍 open  
 **验收:**  
 - 冷启动 dark/system→dark **零浅色闪**  
 - `minimal + dark` primary 仍是 slate 系，**不是 indigo**  
@@ -218,9 +220,14 @@ Header / mega 面板 / settings / home dock / modal **只许**用 shell/surface�
 
 优先级：Settings 抽屉 → Header/mega 中性面 → Sidebar 中性壳 → Home 浮动 → Modal  
 
-- 全部改 shell/surface token  
-- Ownership soft 双明度（侧栏 active 不再浅色粉岛）  
+- [x] Settings 抽屉（`b9f40bff`）  
+- [x] Header/mega 中性面（`4e768321`）  
+- [x] Sidebar 中性壳（`808b4f08`）  
+- [x] Home 浮动 + Modal（`bee360ba`）  
+- [ ] Ownership soft 双明度（侧栏 active 不再浅色粉岛）  
+- [ ] 全壳层 elevation / border 统一收口 + 体验签收  
 
+**状态:** **Partial** — settings / header / sidebar / home / modal 已走 dual-theme surface；Ownership soft 双明度与统一签收仍 open  
 **验收:** 设置/侧栏/顶栏在深色下像同一产品，不是白岛+补丁。
 
 ### Phase T3 — 共享组件「一个设计系统」
