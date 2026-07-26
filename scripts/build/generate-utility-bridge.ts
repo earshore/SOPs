@@ -576,9 +576,11 @@ function generate(): { css: string; ruleCount: number; usedCount: number } {
   return { css: lines.join('\n'), ruleCount, usedCount: used.size };
 }
 
-// 生成并写入文件
+// 生成并写入文件（UTILITY_BRIDGE_OUT 供漂移门禁写临时对照文件）
 const { css, ruleCount, usedCount } = generate();
-const outputPath = resolve(__dirname, '../../src/css/foundation/utility-bridge.generated.css');
+const outputPath =
+  process.env.UTILITY_BRIDGE_OUT ??
+  resolve(__dirname, '../../src/css/foundation/utility-bridge.generated.css');
 
 try {
   writeFileSync(outputPath, css, 'utf-8');
