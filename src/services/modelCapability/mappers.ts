@@ -36,9 +36,30 @@ export function mapResponsesReasoning(prefs: {
 }
 
 /**
- * Anthropic extended thinking via OpenAI-compatible chat/completions.
- * Maps product effort → thinking.budget_tokens (common new-api / Claude channel shape).
+ * Anthropic Messages API — official adaptive-era control:
+ * `output_config.effort` ∈ low|medium|high|xhigh|max
+ * (docs: platform.claude.com effort / Messages output_config).
+ * Prefer this for Claude 4.5+ models that list effort support; do NOT invent "extra".
+ */
+export function mapAnthropicOutputEffort(prefs: {
+  enabled: boolean;
+  effort: ReasoningEffort;
+}): Record<string, unknown> {
+  if (!prefs.enabled || prefs.effort === 'off') {
+    return {};
+  }
+  return {
+    output_config: {
+      effort: prefs.effort,
+    },
+  };
+}
+
+/**
+ * Anthropic extended thinking (legacy / pre-adaptive models).
+ * Maps product effort → thinking.budget_tokens.
  * Callers must ensure max_tokens > budget_tokens (see applyToRequest).
+ * Still used on Claude 4.5-and-earlier thinking-only models and some gateways.
  */
 export function mapAnthropicThinking(prefs: {
   enabled: boolean;
@@ -63,6 +84,18 @@ export function mapAnthropicThinking(prefs: {
   };
 }
 
+/** Shared Gemini thinking budget ladder (product L1 → official thinkingBudget). */
+export const GEMINI_THINKING_BUDGET_BY_EFFORT: Record<
+  Exclude<ReasoningEffort, 'off'>,
+  number
+> = {
+  low: 1_024,
+  medium: 4_096,
+  high: 8_192,
+  xhigh: 16_384,
+  max: 32_768,
+};
+
 /**
  * Gemini thinking via OpenAI-compatible chat/completions.
  * Uses reasoning_effort when gateways map it; also sets google thinking_config
@@ -75,14 +108,7 @@ export function mapGeminiThinking(prefs: {
   if (!prefs.enabled || prefs.effort === 'off') {
     return {};
   }
-  const budgetByEffort: Record<Exclude<ReasoningEffort, 'off'>, number> = {
-    low: 1_024,
-    medium: 4_096,
-    high: 8_192,
-    xhigh: 16_384,
-    max: 32_768,
-  };
-  const budget = budgetByEffort[prefs.effort] ?? 4_096;
+  const budget = GEMINI_THINKING_BUDGET_BY_EFFORT[prefs.effort] ?? 4_096;
   return {
     reasoning_effort: prefs.effort,
     extra_body: {

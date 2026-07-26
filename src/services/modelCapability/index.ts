@@ -1,6 +1,7 @@
 export type {
   ApiSurface,
   EffectiveReasoningPrefs,
+  EffortControlKind,
   ModelCapabilityRule,
   ModelsListEntry,
   ReasoningEffort,
@@ -23,13 +24,10 @@ export {
 } from './types';
 export {
   getModelCapabilityRules,
-  mapAnthropicThinking,
-  mapGeminiThinking,
-  mapOpenAiReasoningEffort,
-  mapResponsesReasoning,
   MODEL_CAPABILITY_CATALOG_META,
   MODEL_CAPABILITY_RULES,
 } from './registry';
+// Mappers also re-exported from ./registry for diagnostics; public path is ./mappers below.
 export { matchModelPattern, resolveModelCapability, shouldShowReasoningControls } from './resolve';
 export { normalizeModelIdForCapability, stripVendorPrefix } from './normalizeModelId';
 export {
@@ -135,7 +133,15 @@ export {
   withStructuredAnalysisOptions,
   type StructuredAnalysisContext,
 } from './structuredAnalysisOptions';
-export { readThinkingBudgetTokens } from './mappers';
+export {
+  GEMINI_THINKING_BUDGET_BY_EFFORT,
+  mapAnthropicOutputEffort,
+  mapAnthropicThinking,
+  mapGeminiThinking,
+  mapOpenAiReasoningEffort,
+  mapResponsesReasoning,
+  readThinkingBudgetTokens,
+} from './mappers';
 export type { ApiPathId, ApiPathOption } from './apiPaths';
 export {
   API_PATH_OPTIONS,

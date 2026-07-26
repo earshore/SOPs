@@ -37,15 +37,21 @@
 |------|------|
 | `reasoningEfforts` | 该模型在该 surface 可发送的档（有序） |
 | `defaultEffort` | 未指定意图时的默认 |
+| `effortControlKind` | 官方控制通道（见 vendor-effort-api-alignment） |
 | `mapRequest` | 意图 → 请求体片段；无 mapRequest = fail-closed |
+
+厂商字段级对齐（Claude `output_config.effort` vs legacy budget 等）：  
+→ **`2026-07-26-vendor-effort-api-alignment-design.md`**
 
 **代表矩阵（验收基线）：**
 
-| 家族 | 代表 id | allowlist | default |
-|------|---------|-----------|---------|
-| xAI Grok-4.5 | `grok-4.5` | `low\|medium\|high` | `high` |
-| OpenAI GPT-5 / o-series | `gpt-5.6`, `o3-mini` 等 | `low\|medium\|high\|xhigh\|max` | `medium` |
-| Gemini / Claude | budget mapper 家族 | 产品五档 → budget | `medium` |
+| 家族 | 代表 id | allowlist | default / control |
+|------|---------|-----------|-------------------|
+| xAI Grok-4.5 | `grok-4.5` | `low\|medium\|high` | high / openai effort |
+| OpenAI GPT-5 / o | `gpt-5.6` 等 | low…max | medium / openai * |
+| Claude effort 代 | `claude-opus-4.5` | low…max | high / **output_config.effort** |
+| Claude legacy | `claude-sonnet-4.5` | low…max → budget | medium / budget_tokens |
+| Gemini | gemini-* | low…max → budget | medium / thinkingBudget |
 
 依据：
 

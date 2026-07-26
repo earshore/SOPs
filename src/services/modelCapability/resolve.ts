@@ -158,6 +158,7 @@ function buildResolvedCapability(args: {
     temperatureIgnored: Boolean(capability?.temperatureIgnored),
     features: mergeFeatureLists(args.rule?.features, modelsFeatures),
     mapRequest: capability?.mapRequest ?? null,
+    effortControlKind: capability?.effortControlKind ?? 'none',
     supportsStructuredOutput: Boolean(capability?.supportsStructuredOutput),
     supportsTools: Boolean(capability?.supportsTools),
     supportsVision: Boolean(capability?.supportsVision),

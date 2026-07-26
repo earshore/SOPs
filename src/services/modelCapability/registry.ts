@@ -10,6 +10,7 @@
  */
 
 import {
+  mapAnthropicOutputEffort,
   mapAnthropicThinking,
   mapGeminiThinking,
   mapOpenAiReasoningEffort,
@@ -17,6 +18,7 @@ import {
 } from './mappers';
 import type {
   ApiSurface,
+  EffortControlKind,
   ModelCapabilityRule,
   ReasoningEffortLevel,
   SurfaceCapability,
@@ -75,6 +77,7 @@ function surfaceOpenAiEffort(opts?: EffortProfile): SurfaceCapability {
     reasoningEfforts,
     defaultEffort,
     temperatureIgnored: opts?.temperatureIgnored ?? true,
+    effortControlKind: 'openai_reasoning_effort' satisfies EffortControlKind,
     mapRequest: mapOpenAiReasoningEffort,
     // Official Chat Completions Create parity: structured + tools + vision
     supportsStructuredOutput: true,
@@ -90,6 +93,7 @@ function surfaceResponses(opts?: EffortProfile): SurfaceCapability {
     reasoningEfforts,
     defaultEffort,
     temperatureIgnored: opts?.temperatureIgnored ?? true,
+    effortControlKind: 'openai_responses_reasoning' satisfies EffortControlKind,
     mapRequest: mapResponsesReasoning,
     // OpenAI Responses capability matrix (text-first SOPs subset + declared parity flags)
     supportsStructuredOutput: true,
@@ -104,8 +108,32 @@ function surfaceResponses(opts?: EffortProfile): SurfaceCapability {
   };
 }
 
-function surfaceAnthropic(opts?: EffortProfile): SurfaceCapability {
-  // Budget mapper supports full product scale (low…max).
+/**
+ * Claude official effort string API (adaptive thinking era).
+ * Wire: output_config.effort = low|medium|high|xhigh|max (NOT "extra").
+ * Default high matches Anthropic docs.
+ */
+function surfaceAnthropicOutputEffort(opts?: EffortProfile): SurfaceCapability {
+  const { reasoningEfforts, defaultEffort } = resolveEffortFields({
+    reasoningEfforts: DEFAULT_REASONING_EFFORTS,
+    defaultEffort: 'high',
+    ...opts,
+  });
+  return {
+    supportsReasoning: true,
+    reasoningEfforts,
+    defaultEffort,
+    temperatureIgnored: true,
+    effortControlKind: 'anthropic_output_effort',
+    mapRequest: mapAnthropicOutputEffort,
+    supportsStructuredOutput: true,
+    supportsTools: true,
+    supportsVision: true,
+  };
+}
+
+/** Claude legacy extended thinking: thinking.budget_tokens ladder. */
+function surfaceAnthropicBudget(opts?: EffortProfile): SurfaceCapability {
   const { reasoningEfforts, defaultEffort } = resolveEffortFields({
     reasoningEfforts: DEFAULT_REASONING_EFFORTS,
     defaultEffort: 'medium',
@@ -116,6 +144,7 @@ function surfaceAnthropic(opts?: EffortProfile): SurfaceCapability {
     reasoningEfforts,
     defaultEffort,
     temperatureIgnored: true,
+    effortControlKind: 'anthropic_budget_tokens',
     mapRequest: mapAnthropicThinking,
     supportsStructuredOutput: true,
     supportsTools: true,
@@ -135,6 +164,7 @@ function surfaceGemini(opts?: EffortProfile): SurfaceCapability {
     reasoningEfforts,
     defaultEffort,
     temperatureIgnored: false,
+    effortControlKind: 'gemini_thinking_budget',
     mapRequest: mapGeminiThinking,
     supportsStructuredOutput: true,
     supportsTools: true,
@@ -195,17 +225,36 @@ function chatEffort(
   });
 }
 
-function claudeThinking(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+/** Claude with official output_config.effort (4.5+/4.6+ effort-capable models). */
+function claudeOutputEffort(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+  const surface = surfaceAnthropicOutputEffort();
   return entry(
     modelPattern,
     contextWindow,
     'anthropic_messages',
     {
-      anthropic_messages: surfaceAnthropic(),
-      chat_completions: surfaceAnthropic(),
+      anthropic_messages: surface,
+      // OpenAI-compatible gateways: still send output_config when channel is Claude.
+      chat_completions: surface,
       responses: surfaceResponses({ temperatureIgnored: true }),
     },
-    ['reasoning', 'claude']
+    ['reasoning', 'claude', 'anthropic_output_effort']
+  );
+}
+
+/** Claude legacy thinking.budget_tokens (3.x / thinking-only 4.x). */
+function claudeBudgetThinking(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+  const surface = surfaceAnthropicBudget();
+  return entry(
+    modelPattern,
+    contextWindow,
+    'anthropic_messages',
+    {
+      anthropic_messages: surface,
+      chat_completions: surface,
+      responses: surfaceResponses({ temperatureIgnored: true }),
+    },
+    ['reasoning', 'claude', 'anthropic_budget_tokens']
   );
 }
 
@@ -318,22 +367,38 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   chatEffort('hy3-preview', 128_000),
   chatEffort('hy3-*', 128_000),
 
-  // Anthropic Claude — real thinking mapper (not label-only)
-  claudeThinking('claude-opus-4', 200_000),
-  claudeThinking('claude-opus-4-*', 200_000),
-  claudeThinking('claude-opus-4.5', 200_000),
-  claudeThinking('claude-opus-4.5-*', 200_000),
-  claudeThinking('claude-sonnet-4', 200_000),
-  claudeThinking('claude-sonnet-4-*', 200_000),
-  claudeThinking('claude-sonnet-4.5', 200_000),
-  claudeThinking('claude-sonnet-4.5-*', 200_000),
-  claudeThinking('claude-sonnet-4-5-*', 200_000),
-  claudeThinking('claude-haiku-4', 200_000),
-  claudeThinking('claude-haiku-4-*', 200_000),
-  claudeThinking('claude-4-opus*', 200_000),
-  claudeThinking('claude-4-sonnet*', 200_000),
-  claudeThinking('claude-3-7-sonnet*', 200_000),
-  claudeThinking('claude-3-5-sonnet*', 200_000),
+  // Anthropic Claude — order: more specific + newer effort API first, then legacy budget.
+  // Official effort string: low|medium|high|xhigh|max (no "extra"). See Effort docs.
+  claudeOutputEffort('claude-opus-4.8', 200_000),
+  claudeOutputEffort('claude-opus-4.8-*', 200_000),
+  claudeOutputEffort('claude-opus-4.7', 200_000),
+  claudeOutputEffort('claude-opus-4.7-*', 200_000),
+  claudeOutputEffort('claude-opus-4.6', 200_000),
+  claudeOutputEffort('claude-opus-4.6-*', 200_000),
+  claudeOutputEffort('claude-opus-4.5', 200_000),
+  claudeOutputEffort('claude-opus-4.5-*', 200_000),
+  claudeOutputEffort('claude-opus-4-5-*', 200_000),
+  claudeOutputEffort('claude-opus-5', 200_000),
+  claudeOutputEffort('claude-opus-5-*', 200_000),
+  claudeOutputEffort('claude-sonnet-5', 200_000),
+  claudeOutputEffort('claude-sonnet-5-*', 200_000),
+  claudeOutputEffort('claude-sonnet-4.6', 200_000),
+  claudeOutputEffort('claude-sonnet-4.6-*', 200_000),
+  claudeOutputEffort('claude-sonnet-4-6-*', 200_000),
+  // Legacy budget_tokens (thinking-only / pre-effort generations)
+  claudeBudgetThinking('claude-sonnet-4.5', 200_000),
+  claudeBudgetThinking('claude-sonnet-4.5-*', 200_000),
+  claudeBudgetThinking('claude-sonnet-4-5-*', 200_000),
+  claudeBudgetThinking('claude-sonnet-4', 200_000),
+  claudeBudgetThinking('claude-sonnet-4-*', 200_000),
+  claudeBudgetThinking('claude-opus-4', 200_000),
+  claudeBudgetThinking('claude-opus-4-*', 200_000),
+  claudeBudgetThinking('claude-haiku-4', 200_000),
+  claudeBudgetThinking('claude-haiku-4-*', 200_000),
+  claudeBudgetThinking('claude-4-opus*', 200_000),
+  claudeBudgetThinking('claude-4-sonnet*', 200_000),
+  claudeBudgetThinking('claude-3-7-sonnet*', 200_000),
+  claudeBudgetThinking('claude-3-5-sonnet*', 200_000),
 
   // Google Gemini — real thinking mapper
   geminiThinking('gemini-3.6-flash', 1_000_000),
@@ -379,6 +444,7 @@ export const MODEL_CAPABILITY_CATALOG_META = {
 
 // Re-export mappers for tests / diagnostics
 export {
+  mapAnthropicOutputEffort,
   mapAnthropicThinking,
   mapGeminiThinking,
   mapOpenAiReasoningEffort,

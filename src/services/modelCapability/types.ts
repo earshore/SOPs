@@ -62,11 +62,37 @@ export interface SurfaceCapabilityFlags {
   supportsReasoningSummary?: boolean;
 }
 
+/**
+ * How product effort maps onto the wire for this surface/model generation.
+ * Registry must set this explicitly so vendor API upgrades are data changes,
+ * not scattered if/else in UI or llmService.
+ *
+ * Evolution: add a new kind + mapper; assign by modelPattern; never invent
+ * fields for an unknown kind (fail-closed via missing mapRequest).
+ */
+export type EffortControlKind =
+  /** OpenAI Chat Completions: top-level reasoning_effort */
+  | 'openai_reasoning_effort'
+  /** OpenAI Responses: reasoning.effort (+ optional summary) */
+  | 'openai_responses_reasoning'
+  /** Anthropic Messages: output_config.effort (adaptive thinking era) */
+  | 'anthropic_output_effort'
+  /** Anthropic legacy: thinking.type=enabled + budget_tokens */
+  | 'anthropic_budget_tokens'
+  /** Gemini generateContent / gateway: thinking budget (+ optional effort string) */
+  | 'gemini_thinking_budget'
+  | 'none';
+
 export interface SurfaceCapability extends SurfaceCapabilityFlags {
   supportsReasoning: boolean;
   reasoningEfforts?: ReasoningEffortLevel[];
   defaultEffort?: ReasoningEffortLevel;
   temperatureIgnored?: boolean;
+  /**
+   * Official control channel for this surface generation.
+   * Used for diagnostics, docs, and future dual-path gateways.
+   */
+  effortControlKind?: EffortControlKind;
   /**
    * Map product prefs → request body fragment for THIS surface only.
    * enabled=false / effort=off → {} (omit fields).
@@ -113,6 +139,8 @@ export interface ResolvedModelCapability {
   features: string[];
   /** null when this surface has no mapRequest — never write reasoning fields */
   mapRequest: SurfaceCapability['mapRequest'] | null;
+  /** Wire control kind from registry (SSOT for vendor API alignment). */
+  effortControlKind: EffortControlKind;
   /** Extended flags for the resolved surface (fail-closed). */
   supportsStructuredOutput: boolean;
   supportsTools: boolean;

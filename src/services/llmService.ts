@@ -1212,6 +1212,11 @@ function extractOutboundReasoningMarker(body: Record<string, unknown>): string |
   if (reasoning?.effort !== undefined) {
     return String(reasoning.effort);
   }
+  // Anthropic Messages official: output_config.effort
+  const outputConfig = body.output_config as { effort?: unknown } | undefined;
+  if (outputConfig?.effort !== undefined) {
+    return String(outputConfig.effort);
+  }
   const thinking = body.thinking as { budget_tokens?: unknown } | undefined;
   if (thinking?.budget_tokens !== undefined) {
     return `budget:${String(thinking.budget_tokens)}`;

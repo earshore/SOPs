@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  mapAnthropicOutputEffort,
   mapAnthropicThinking,
   mapGeminiThinking,
   mapOpenAiReasoningEffort,
@@ -22,7 +23,17 @@ describe('multi-protocol mappers', () => {
     expect(mapResponsesReasoning({ enabled: false, effort: 'high' })).toEqual({});
   });
 
-  it('anthropic thinking budgets by effort', () => {
+  it('anthropic official output_config.effort (not extra)', () => {
+    expect(mapAnthropicOutputEffort({ enabled: true, effort: 'xhigh' })).toEqual({
+      output_config: { effort: 'xhigh' },
+    });
+    expect(mapAnthropicOutputEffort({ enabled: true, effort: 'max' })).toEqual({
+      output_config: { effort: 'max' },
+    });
+    expect(mapAnthropicOutputEffort({ enabled: false, effort: 'high' })).toEqual({});
+  });
+
+  it('anthropic thinking budgets by effort (legacy)', () => {
     expect(mapAnthropicThinking({ enabled: true, effort: 'low' })).toEqual({
       thinking: { type: 'enabled', budget_tokens: 1_024 },
     });

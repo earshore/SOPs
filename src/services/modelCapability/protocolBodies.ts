@@ -11,6 +11,7 @@ import {
 import type { ApiPathId } from './apiPaths';
 import { normalizeToolsForChat } from './chatTools';
 import { normalizeToolsForResponses } from './responsesTools';
+import { GEMINI_THINKING_BUDGET_BY_EFFORT } from './mappers';
 
 export type ChatMessageLike = { role: string; content: string };
 
@@ -159,8 +160,7 @@ function applyGeminiThinkingConfig(
   reasoning: EffectiveReasoningPrefs
 ): void {
   if (!capability.mapRequest || !reasoning.enabled || reasoning.effort === 'off') return;
-  const effort = reasoning.effort;
-  const budget = effort === 'low' ? 1024 : effort === 'high' ? 8192 : 4096;
+  const budget = GEMINI_THINKING_BUDGET_BY_EFFORT[reasoning.effort] ?? 4_096;
   body.thinkingConfig = { thinkingBudget: budget, includeThoughts: true };
 }
 

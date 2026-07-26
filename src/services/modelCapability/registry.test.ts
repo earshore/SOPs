@@ -85,12 +85,25 @@ describe('multi-protocol flagship catalog', () => {
     );
     expect(multi.reasoningEfforts).toEqual(['low', 'medium', 'high', 'xhigh']);
 
-    const claude = resolveModelCapability(
+    const claudeLegacy = resolveModelCapability(
       { provider: 'new_api', modelId: 'claude-sonnet-4.5' },
       getModelCapabilityRules()
     );
-    // Budget mappers expose full product scale
-    expect(claude.reasoningEfforts).toEqual(['low', 'medium', 'high', 'xhigh', 'max']);
+    expect(claudeLegacy.reasoningEfforts).toEqual(['low', 'medium', 'high', 'xhigh', 'max']);
+    expect(claudeLegacy.effortControlKind).toBe('anthropic_budget_tokens');
+    expect(claudeLegacy.mapRequest?.({ enabled: true, effort: 'max' })).toEqual({
+      thinking: { type: 'enabled', budget_tokens: 32_000 },
+    });
+
+    const claudeEffort = resolveModelCapability(
+      { provider: 'new_api', modelId: 'claude-opus-4.5' },
+      getModelCapabilityRules()
+    );
+    expect(claudeEffort.effortControlKind).toBe('anthropic_output_effort');
+    expect(claudeEffort.defaultEffort).toBe('high');
+    expect(claudeEffort.mapRequest?.({ enabled: true, effort: 'xhigh' })).toEqual({
+      output_config: { effort: 'xhigh' },
+    });
 
     expect(MODEL_CAPABILITY_CATALOG_META.productReasoningEfforts).toEqual([
       'low',
@@ -134,15 +147,28 @@ describe('multi-protocol flagship catalog', () => {
     expect(cap.supportsVision).toBe(true);
   });
 
-  it('uses anthropic thinking mapper for Claude on anthropic_messages', () => {
+  it('uses anthropic budget mapper for Claude 4.5 sonnet on anthropic_messages', () => {
     const cap = resolveModelCapability(
       { provider: 'new_api', modelId: 'claude-sonnet-4-5-20250929' },
       getModelCapabilityRules()
     );
     expect(cap.apiSurface).toBe('anthropic_messages');
+    expect(cap.effortControlKind).toBe('anthropic_budget_tokens');
     expect(cap.mapRequest?.({ enabled: true, effort: 'high' })).toEqual(
       mapAnthropicThinking({ enabled: true, effort: 'high' })
     );
+  });
+
+  it('uses anthropic output_config.effort for Claude Opus 4.5', () => {
+    const cap = resolveModelCapability(
+      { provider: 'new_api', modelId: 'claude-opus-4.5' },
+      getModelCapabilityRules()
+    );
+    expect(cap.apiSurface).toBe('anthropic_messages');
+    expect(cap.effortControlKind).toBe('anthropic_output_effort');
+    expect(cap.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
+      output_config: { effort: 'high' },
+    });
   });
 
   it('keeps plain chat models fail-closed', () => {

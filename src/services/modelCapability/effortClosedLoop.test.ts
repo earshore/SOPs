@@ -63,12 +63,27 @@ const CASES: Case[] = [
     expectBodyEffort: 'max',
   },
   {
-    name: 'claude full scale max maps to thinking budget',
+    name: 'claude sonnet-4.5 legacy max maps to thinking budget',
     modelId: 'claude-sonnet-4.5',
     requested: 'max',
     expectEffective: 'max',
     expectAllowlistIncludes: ['xhigh', 'max'],
     expectThinkingBudget: true,
+  },
+  {
+    name: 'claude opus-4.5 official output_config.effort max',
+    modelId: 'claude-opus-4.5',
+    requested: 'max',
+    expectEffective: 'max',
+    expectAllowlistIncludes: ['low', 'medium', 'high', 'xhigh', 'max'],
+    expectBodyEffort: 'max',
+  },
+  {
+    name: 'claude opus-4.5 xhigh is not demoted (no extra alias)',
+    modelId: 'claude-opus-4.5',
+    requested: 'xhigh',
+    expectEffective: 'xhigh',
+    expectBodyEffort: 'xhigh',
   },
   {
     name: 'gemini max maps to thinking_config',
@@ -116,13 +131,18 @@ describe('reasoning effort closed loop (registry → resolve → mapRequest)', (
       });
 
       if (c.expectBodyEffort !== undefined) {
-        // OpenAI-style: top-level reasoning_effort or responses.reasoning.effort
+        // OpenAI: reasoning_effort | reasoning.effort; Anthropic: output_config.effort
         const top = fragment.reasoning_effort;
         const nested =
           fragment.reasoning &&
           typeof fragment.reasoning === 'object' &&
           (fragment.reasoning as { effort?: string }).effort;
-        const sent = typeof top === 'string' ? top : nested;
+        const anthropic =
+          fragment.output_config &&
+          typeof fragment.output_config === 'object' &&
+          (fragment.output_config as { effort?: string }).effort;
+        const sent =
+          typeof top === 'string' ? top : typeof nested === 'string' ? nested : anthropic;
         expect(sent, `${c.modelId} body effort`).toBe(c.expectBodyEffort);
       }
 
