@@ -36,8 +36,7 @@
 | **TD-OPS-01** | 运维 | 缺一页事故 Runbook（白屏/LLM 全挂/Pages 回滚） | 值班靠人 | 写 `docs/OPS_RUNBOOK.md` | P1 |
 | **TD-OPS-02** | 可观测 | Sentry 默认关 | 线上无聚合错误 | 保持产品决策；补「最低信号包」到 Runbook | P2 |
 | **TD-DOC-01** | 文档 | `CI-QUALITY-GATES` / 部分 best-practices 日期旧 | 误导 | 刷新与 scripts 对齐 | P2 |
-| **TD-DOC-02** | 文档 | Content Design / a11y 全文规范仍薄 | 体验债 | P1 已立 PRODUCT；补 CONTENT/a11y 专文 | P1 |
-| **TD-REL-01** | 发布 | main 提交粒度过碎时 review 成本高 | 审计成本 | RC 前按主题整理 notes（已有 CHANGELOG） | P3 |
+| **TD-REL-01** | 发布 | main 提交粒过度碎时 review 成本高 | 审计成本 | RC 前按主题整理 notes（已有 CHANGELOG） | P3 |
 
 ---
 
@@ -45,6 +44,8 @@
 
 | ID | 关闭日期 | 说明 |
 | --- | --- | --- |
+| TD-DOC-02 | 2026-07-26 | 落地 CONTENT_DESIGN / ACCESSIBILITY / OPS_RUNBOOK |
+| TD-OPS-01 | 2026-07-26 | 初版 OPS_RUNBOOK（白屏/LLM/设置/回滚）；后续可增厚 |
 | TD-SET-DENSITY | 2026-07-26 | 移除 density 模式死代码（`settingsUiPreferences`、deepLink.density） |
 | TD-SET-LINT-AUTO | 2026-07-26 | `autoSaveProviderConfig` complexity 降到 warning-gate 内 |
 | TD-SET-REASONING-ZOD | 2026-07-25 | Zod 支持 xhigh/max，修复推理无法持久化 |

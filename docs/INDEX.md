@@ -12,14 +12,17 @@
 | 你要做的事 | 先读 |
 | --- | --- |
 | 判断产品该不该做 / 体验底线 | **[PRODUCT_PRINCIPLES.md](./PRODUCT_PRINCIPLES.md)** |
+| 改用户可见文案 / Toast / 空状态措辞 | **[CONTENT_DESIGN.md](./CONTENT_DESIGN.md)** |
 | 改颜色、Appearance、暗色、归属色 | **[THEME_SYSTEM_GUIDELINES.md](./THEME_SYSTEM_GUIDELINES.md)** |
 | 改页面布局、Banner、视觉风格 | **[VISUAL_DESIGN_GUIDELINES.md](./VISUAL_DESIGN_GUIDELINES.md)** |
 | 改按钮/表单/Toast/空状态/卡片 | **[COMPONENT_GUIDELINES.md](./COMPONENT_GUIDELINES.md)** |
 | 改弹窗/确认/抽屉 | **[MODAL_DEVELOPMENT_GUIDELINES.md](./MODAL_DEVELOPMENT_GUIDELINES.md)** |
+| 键盘焦点 / a11y 底线 | **[ACCESSIBILITY.md](./ACCESSIBILITY.md)** |
 | 改 CSS 变量 / token / Tailwind 色 | **[guides/css/CSS-ARCHITECTURE-README.md](./guides/css/CSS-ARCHITECTURE-README.md)** + 主题宪法 |
 | 写/改测试、问测什么 | **[TESTING_STRATEGY.md](./TESTING_STRATEGY.md)** |
 | 发版 / tag / RC / GA | **[RELEASE_POLICY.md](./RELEASE_POLICY.md)** |
 | 部署 Cloudflare / CSP | **[DEPLOYMENT.md](./DEPLOYMENT.md)** |
+| 线上故障 / 回滚 / 白屏 / LLM 挂 | **[OPS_RUNBOOK.md](./OPS_RUNBOOK.md)** |
 | 安全报告 / 密钥边界 | **[SECURITY.md](../SECURITY.md)** |
 | 查当前技术债 | **[TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)**（活） |
 | 做新功能设计 | `docs/superpowers/specs/` + 触及的上述宪法 |
@@ -35,6 +38,8 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / TESTI
 ### 产品与体验
 
 - [产品原则](./PRODUCT_PRINCIPLES.md) — 定位、非目标、DoD、规范变更流程。
+- [内容设计规范](./CONTENT_DESIGN.md) — 去 AI 味、按钮/错误/空状态文案。
+- [无障碍规范](./ACCESSIBILITY.md) — 底线 + 发版抽检清单。
 - [稳定主题系统规范](./THEME_SYSTEM_GUIDELINES.md) — Appearance / 模块归属 / token 契约。
 - [视觉设计规范指南](./VISUAL_DESIGN_GUIDELINES.md) — 页面与组件视觉执行细则。
 - [组件开发规范](./COMPONENT_GUIDELINES.md) — 按钮/表单/反馈/卡片/清单。
@@ -66,6 +71,7 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / TESTI
 - [文档速查](./QUICK_REFERENCE.md)
 - [运营作业系统落地计划](./OPERATING_SYSTEM_ROADMAP.md) — 产品路线（非组件 SSOT）
 - [部署指南](./DEPLOYMENT.md)
+- [运维 Runbook](./OPS_RUNBOOK.md) — 白屏 / LLM / 设置 / 回滚最低信号包。
 - [变更日志](./CHANGELOG.md)
 - [发布策略](./RELEASE_POLICY.md)
 - [Release Notes 模板](./templates/RELEASE_NOTES_TEMPLATE.md)

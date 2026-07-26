@@ -90,7 +90,7 @@
 | 规则 | 说明 |
 | --- | --- |
 | 可见 label | 禁止仅 placeholder 当 label（搜索框等明确模式除外） |
-| 帮助文案 | 短、可操作；禁止正确的废话（见文案原则） |
+| 帮助文案 | 短、可操作；禁止正确的废话（见 [CONTENT_DESIGN](./CONTENT_DESIGN.md)） |
 | 错误 | 贴近字段；勿只在页顶一句 |
 | 开关 / 分段 | 偏好类可**即时保存**；长表单仍可显式保存 |
 | 密钥 | 可显示/隐藏；边界文案指向本机存储诚实原则 |
@@ -165,7 +165,7 @@
 | 动效 | 尊重 `prefers-reduced-motion` |
 | 对话框 | `role="dialog"` / `aria-modal` 由共享 modal 提供，勿自废 |
 
-完整产品目标见后续 [ACCESSIBILITY](./ACCESSIBILITY.md)（若尚未落地，以本表为组件底线）。
+完整产品目标见 [ACCESSIBILITY.md](./ACCESSIBILITY.md)；组件层以本表为强制底线。
 
 ---
 

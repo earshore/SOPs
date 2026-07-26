@@ -84,6 +84,8 @@ curl.exe https://new.hongecb.store/v1/models `
 
 ## 故障排查
 
+线上事故分级、白屏回滚、设置/存储问题与**最低信号包**见 **[OPS_RUNBOOK.md](./OPS_RUNBOOK.md)**。以下为部署相关摘要。
+
 ### 模型请求 401 或 403
 
 在 new-api 后台检查 API key 是否有效、是否在模型白名单内、额度是否耗尽、是否过期。也确认浏览器设置页保存的是当前用户可用 key。

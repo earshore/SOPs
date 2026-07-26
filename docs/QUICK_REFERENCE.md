@@ -4,6 +4,7 @@
 
 **规范导航：** [INDEX.md](./INDEX.md)（含 30 秒决策树）  
 **产品原则：** [PRODUCT_PRINCIPLES.md](./PRODUCT_PRINCIPLES.md)  
+**文案 / a11y / 运维：** [CONTENT_DESIGN](./CONTENT_DESIGN.md) · [ACCESSIBILITY](./ACCESSIBILITY.md) · [OPS_RUNBOOK](./OPS_RUNBOOK.md)  
 **测试策略：** [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)  
 **活债务：** [TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)
 

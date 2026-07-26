@@ -103,5 +103,8 @@
 | [COMPONENT_GUIDELINES.md](./COMPONENT_GUIDELINES.md) | 组件契约 |
 | [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) | 测试策略 SSOT |
 | [TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md) | 活债务看板 |
+| [CONTENT_DESIGN.md](./CONTENT_DESIGN.md) | 文案与语气 |
+| [ACCESSIBILITY.md](./ACCESSIBILITY.md) | 无障碍底线与抽检 |
+| [OPS_RUNBOOK.md](./OPS_RUNBOOK.md) | 运维最低信号包与回滚 |
 | [SECURITY.md](../SECURITY.md) | 安全策略 |
 | [OPERATING_SYSTEM_ROADMAP.md](./OPERATING_SYSTEM_ROADMAP.md) | 产品作业系统路线（规划，非组件 SSOT） |
