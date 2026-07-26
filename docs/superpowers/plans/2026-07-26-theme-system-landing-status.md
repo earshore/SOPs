@@ -1,7 +1,7 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ HEAD `9bdaa053` · D1 re-audit 0 closable `9bdaa053` · XO #24–26 Console open tips `3e600716` · D6 #27 legacy-compat `1731ed47` · D12 first-8 readiness `8f13db32` · D8 soft sop/hub `adbe0afb` · style(theme) AppModal format `f464b373` · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict `77fd0cdc` · D6 #25 AppModal `fb5384d6` · D2 #6 deferred `21bec249` · D5 inventory `5bde2abb` · XO checklist `a72046bb` · adjacent settings TD-SET `aba5a951`→`9bdc7ae9`→`f62283f3`→`9fab3a58` · Visual Yellow · Human XO first）  
-**范围**: `main` ahead of `sops/main`； residual 主题波 + D6 #24 confirmModal + **#25 AppModal** + **#26 import-conflict** + **#27 legacy-compat** + AppModal format + D12 first-8 readiness + D8 soft sop/hub + XO #24–26 Console open tips + **D1 re-audit 0 closable** + **D2 #6 docs deferral** + D5 residual inventory + XO checklist tighten；adjacent settings TD-SET scaffold/e2e + **TD-SET-04 scroll-spy complete** **已在** tip  
+**日期**: 2026-07-26（refresh @ HEAD `903dbf3e` · **sample wave FREEZE** · phase review + build/smoke 29 re-green · style format `903dbf3e` · llm effort `a5f69eb7` non-theme · D1 0 closable `9bdaa053` · D6 #18–**27** · D12×24 + first-8 readiness · D2 #6 deferred · Visual Yellow · Human XO first）  
+**范围**: `main` **=** `sops/main` @ `903dbf3e`；主题样本波 **冻结**（不再主动堆 D6）；体验关闸只靠 **人工 XO**；code 侧仅修 XO 点名回归 / 门禁红  
 **角色**: Tech Lead / Release docs  
 **诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称 visual Pass。
 
@@ -21,11 +21,11 @@
 
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Code / 契约**    | **Green**  | tip `9bdaa053`: D6 #18–**27**（**#25 AppModal** @ `fb5384d6` · **#26 import-conflict** @ `77fd0cdc` · **#27 legacy-compat** @ `1731ed47` · AppModal format @ `f464b373`）· D12×**24** + first-8 readiness @ `8f13db32` · D1 re-audit **0 closable** @ `9bdaa053` · D2 #2–#5 + **#6 deferred** @ `21bec249` · D5 residual inventory @ `5bde2abb` · XO checklist @ `a72046bb` · XO #24–26 open tips @ `3e600716` · D8 soft (+ sop/hub @ `adbe0afb`) · settings scroll-spy complete @ `9fab3a58` · shell nav/settings focus · **build+smoke 29 green** |
+| **Code / 契约**    | **Green**  | tip `903dbf3e`: D6 #18–**27** 样本波 **FREEZE** · phase review re-green（hardcode 13 · token 20/0 · css 100% · theme unit · type-check:tests · **full build** · **smoke 29/29** @ 4173）· D12×**24** · D1 **0 closable** · D2 #6 deferred · D7/D10 Done · D8 soft · settings scroll-spy complete |
 | **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**（**Human XO first**）；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: residual #18–27 + XO #24–26 Console open tips + D1 re-audit **0 closable** **已在** tip `9bdaa053`；D6 #27 legacy-compat @ `1731ed47`；D12 first-8 readiness @ `8f13db32`；D8 soft sop/hub @ `adbe0afb`；gates **build+smoke 29 green**；settings TD-SET-04 scroll-spy **complete** @ `9fab3a58`；D2 radius long-tail **#6 deferred — diminishing returns**；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
+**一句话**: 主题 **code 收敛完成度高、共享 D6 边际递减**；tip `903dbf3e` **sample wave FREEZE**；gates **build+smoke 29 green**（本轮复验）；体验关闸 **只靠人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -242,45 +242,59 @@ Grep / call-site evidence (re-skim @ `147aa90c`):
   [`2026-07-26-theme-system-xo-signoff-status.md` §3](./2026-07-26-theme-system-xo-signoff-status.md#3-人类-xo-30-分钟手动浏览器脚本)
 - 矩阵: [`experience-acceptance-matrix.md`](./2026-07-26-theme-system-experience-acceptance-matrix.md)
 - 必测: X1 default↔minimal×3 · X2 ownership 抽检（**KH `wb-theme-rose` / PPC hero / MA indigo / Deep Chat terracotta**）· X5 dark×appearance · focus · 刷新持久化
-- **可选肉眼（XO §1.8 / §3.1）**: **Skills 试用 CTA** + **Deep Chat shell** chrome/focus（terracotta **不变**）+ **#10 SOPs overview focus** + **#11 NPI primary CTA** + **#13 AMZ Hub nav ownership orange** + **#14 email_templates CTA/focus** + **#15 qa_maintenance CTA/focus** + **#16 PromptLab DNA/autoPopulate** + **#18–26 residual MA/PPC/PromptLab + SafeModuleLoader + Home CTA + confirmModal + AppModal + import-conflict**（**#24–26 Console open tips** 见 XO §3.1）+ dark×minimal 肉眼复核；另可选 KH/#8 input / #12 RW
+- **可选肉眼（XO §1.8 / §3.1）**: **Skills 试用 CTA** + **Deep Chat shell** chrome/focus（terracotta **不变**）+ **#10 SOPs** + **#11 NPI** + **#13 Hub nav orange** + **#14–16** service/PromptLab + **#18–27 residual**（含 **#27 legacy-compat** primary/search；**#24–26 Console open tips** 见 XO §3.1）+ dark×minimal 肉眼复核；另可选 KH/#8 / #12 RW
 - **可选截图**: [D12 §6 首 8 张](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow) — **截图 ≠ visual Pass**
 - **不测**: 全站 D6 仍蓝（允许 Informational）
 - 签收后: 填 XO 结论 `PASS / PASS with debt / FAIL`；Tech Lead 仅勾 code gates §4.1；**Visual 保持 Yellow 直至 XO 签字**（**Human XO first**）
 
 ---
 
-## 7. Recommended next 3 agent waves
+## 7. Decision freeze + next waves（收益序）
+
+### 7.0 Tech Lead decision（本 refresh）
+
+| 决策 | 内容 |
+| --- | --- |
+| **Sample wave** | **FREEZE** — 停止主动 D6/D2/D5 样本冲量；共享 primary 高 ROI 已薄 |
+| **唯一 P0** | **Human XO 30 min**（体验关闸）；agent **不能**替代 |
+| **Code 侧仅允许** | XO 点名回归修复 · 门禁/format 红修 · 状态板诚实对齐 |
+| **明确不做** | 900+ blue 清零 · megaMenu Appearance 化 · terracotta 改写 · D1 强拆 allowlist · 强塞 `getWorkbenchCardClasses` · D12 email/qa 扩屏 |
+
+### 7.1 Next waves
 
 | #     | Wave                                              | 范围                                                                                                                         | 验证                                                                       |
 | ----- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **1** | **Human XO（始终优先 · 阻塞体验关闸）**           | 30 min 浏览器脚本 + 记录模板；X1/X2/X5 + 可选 Skills / Deep Chat shell / **#10 SOPs** / **#11 NPI** / **#13 Hub nav orange** / **#14 email_templates** / **#15 qa_maintenance** / **#16 PromptLab DNA** / **#18–26 residual MA/PPC/PromptLab + SafeModuleLoader + Home CTA + confirmModal + AppModal + import-conflict**                           | 矩阵勾选 + XO status 结论；**仍不宣称 visual Pass**                        |
-| **2** | **D12 首 8 人工截图 + scaffold 对照（可并发）**   | 按 [D12 §6](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow) 归档 8 张；scaffold 已 **24** opt-in（+ PromptLab + Skills + NPI）；可选 `test:visual:theme` | 截图 + MANIFEST；**不** fail-closed CI；**不** visual Pass                 |
-| **3** | **D6 下一业务样本（可并发 · 低优先）**            | #10–#16 + residual #18–**27** **已落**（含 **#13 Hub nav** @ `904f83d3` + #14–#15 @ `2f8d98ab` + **#16** @ `f99b0fc8` + **#18–20** @ `a05b12c8` + **#21** @ `f761e4e5` + **#22** @ `1711eec1` + **#23 Home CTA** @ `cbad435b` + **#24 confirmModal** @ `3b947dc6` + **#25 AppModal** @ `fb5384d6` + **#26 import-conflict** @ `77fd0cdc` + **#27 legacy-compat** @ `1731ed47`）；下一页 primary/chrome 样本（非 900+ 清零）；**禁止**重写 terracotta / phase 语义蓝 / RW 教学 INFO 卡 / Hub 归属橙 | hardcode gate 不升；**仍不宣称 visual Pass**                               |
+| **1** | **Human XO（P0 · 阻塞体验关闸）**           | 30 min 脚本 §3 / §3.1；X1/X2/X5 + 可选 residual **#18–27** + D12 首 8 并行可 | 矩阵勾选 + XO 结论 `PASS` / `PASS with debt` / `FAIL`；**仍不宣称 visual Pass until signed** |
+| **2** | **D12 首 8 人工截图（P1 · 可与 XO 并行）**   | [D12 §6](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow)；scaffold **24** opt-in | 截图 + MANIFEST；**不** fail-closed CI；**截图 ≠ Pass**                 |
+| **3** | **按 XO 债务清单修（P2 · 有条件）**            | 仅 FAIL / PASS-with-debt 点名项；**非**新开 D6 样本波 | 相关 smoke + 门禁；必要时二次 XO 抽检 |
 
-**下一波优先（不变）**: **Human XO 30 min** 仍第一（唯一体验关闸）；可选 D12 首 8 张；D6 长尾仅在 XO 不阻塞时穿插。  
-**禁止本周扩 scope**: 一次清零 900+ blue、换字体、重写 Deep Chat terracotta、white-label 引擎、未走 map 扩表流程的新 `wb-theme-*`、把 megaMenu 强行 Appearance 化。
+**下一波优先**: **Human XO** → 可选首 8 张 → 仅按签收债务修。  
+**禁止扩 scope**: 一次清零 900+ blue、换字体、重写 Deep Chat terracotta、white-label、未走 map 的新 `wb-theme-*`、megaMenu Appearance 化、无 XO 触发的新 D6 冲量。
 
 ---
 
-## 8. Commit list (`sops/main` → `HEAD`)
+## 8. Commit list (theme freeze tip)
 
 ```
-9bdaa053 docs(theme): re-audit D1 allowlist still zero closable  ← HEAD
+903dbf3e style: format legacy-compat and effort mappers  ← HEAD / sops/main
+a5f69eb7 feat(llm): align vendor effort APIs with EffortControlKind  (non-theme)
+a8acf646 docs(theme): refresh landing tip after D1 re-audit
+9bdaa053 docs(theme): re-audit D1 allowlist still zero closable
 47f21c08 docs(theme): refresh landing tip after concurrent wave
 3e600716 docs(theme): make XO residual #24-26 executable
-1731ed47 Migrate shared legacy-compat primary CTA to Appearance
+1731ed47 Migrate shared legacy-compat primary CTA to Appearance  (#27)
 8f13db32 Improve D12 first-8 human capture readiness
 adbe0afb test(theme): soft-check sop ops and hub advanced ownership
 66d08cef docs(theme): refresh landing tip after scroll-spy complete
 f464b373 style(theme): format AppModal residual chrome files
 9fab3a58 fix(settings): complete TD-SET-04 scroll-spy wiring and algorithm
 17694045 docs(theme): refresh landing tip after scroll-spy wire
-77fd0cdc feat(theme): migrate shared import-conflict primary chrome
+77fd0cdc feat(theme): migrate shared import-conflict primary chrome  (#26)
 f62283f3 fix(settings): wire isNavTargetCurrent scroll-spy methods
 d592be30 docs(theme): refresh landing tip after AppModal wave
 9bdc7ae9 test(settings): stabilize TD-SET-05 e2e assertion for KH deep-link
 21bec249 docs(theme): defer D2 workbench radius long-tail #6
-fb5384d6 feat(theme): migrate AppModal primary soft chrome
+fb5384d6 feat(theme): migrate AppModal primary soft chrome  (#25)
 aba5a951 fix(settings): close TD-SET-05/03/04 — KH nav, data-save contract, scroll-spy
 5bde2abb docs(theme): inventory D5 shared shell focus residual
 a72046bb docs(theme): tighten XO 30-min checklist for residual samples

@@ -1,6 +1,6 @@
 # 主题系统 XO 签字状态（Phase 1 code-aware review）
 
-**日期**: 2026-07-26（refresh @ HEAD `9bdaa053` · D1 re-audit 0 closable `9bdaa053` · XO #24–26 Console open tips `3e600716` · D6 #27 legacy-compat `1731ed47` · D12 first-8 readiness `8f13db32` · D8 soft sop/hub `adbe0afb` · style(theme) AppModal format `f464b373` · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict `77fd0cdc` · D6 #25 AppModal `fb5384d6` · residual #18–27 · D12×24 · build+smoke 29 green · Human XO first / Visual Yellow）
+**日期**: 2026-07-26（refresh @ HEAD `903dbf3e` · **sample wave FREEZE** · phase review build+smoke 29 re-green · residual #18–**27** · D12×24 · Human XO first / Visual Yellow · **未签**）
 **角色**: Experience Officer + QA（静态核验；**非**浏览器视觉签收）  
 **范围**: `docs/superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md`  
 **对照实现**: `src/common/config/themeConfig.ts` · `themeConfig.test.ts` · `tests/e2e/release-smoke.spec.ts` · Settings Appearance  
@@ -248,9 +248,9 @@
 **Ownership 必抽（X2）**: KH rose · PPC hero · MA indigo · Deep Chat terracotta。  
 **双轴必抽（X5）**: Settings dark + 保留/ 切换 Appearance；可选再开 KH 复核 rose class。
 
-**可选 +5~10 min（样本 through #26，非主脚本 Blocker）**: Skills 试用 CTA → Deep Chat shell chrome/focus → **#10 SOPs overview focus** → **#11 NPI primary CTA** → **#13 AMZ Hub nav ownership orange** → **#14 email_templates** → **#15 qa_maintenance** → **#16 PromptLab DNA/autoPopulate** → **#18–21 residual MA/PPC/PromptLab** → **#22 SafeModuleLoader primary CTA** → **#23 Home splash/floating CTA** → **#24 confirmModal primary chrome** → **#25 AppModal primary soft chrome** → **#26 import-conflict primary soft chrome** → dark×minimal KH 肉眼复核。见 §1.8。**不**声称 visual Pass。
+**可选 +5~10 min（样本 through #27，非主脚本 Blocker）**: Skills 试用 CTA → Deep Chat shell chrome/focus → **#10 SOPs** → **#11 NPI** → **#13 Hub nav orange** → **#14–16** → **#18–21 residual** → **#22 SafeModuleLoader** → **#23 Home CTA** → **#24 confirmModal** → **#25 AppModal** → **#26 import-conflict** → **#27 legacy-compat primary/search**（App Center/SOPs 旧按钮类若仍挂载）→ dark×minimal KH 肉眼复核。见 §1.8。**不**声称 visual Pass。
 
-**#24–26 快速打开（optional eye-check · Console · tip `9bdaa053`）**:
+**#24–26 快速打开（optional eye-check · Console · tip `903dbf3e`）:**
 
 ```js
 // #24 confirmModal theme primary chrome（非删除文案 → theme 变体，非 danger）
@@ -273,7 +273,7 @@ document.getElementById('import-conflict-modal')?.open?.();
 **记录模板**（贴 PR / RC）:
 
 ```text
-XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect 9bdaa053+)
+XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect 903dbf3e+ · sample wave FREEZE)
 Browser: ________  Viewport: ________
 X1 switch×3: Pass/Fail
 X2 ownership (KH rose / PPC / MA / DeepChat terracotta): Pass/Fail
@@ -295,10 +295,13 @@ Optional Home splash/floating CTA (#23): Pass/Fail / Skipped
 Optional confirmModal primary chrome (#24): Pass/Fail / Skipped
 Optional AppModal primary soft chrome (#25): Pass/Fail / Skipped
 Optional import-conflict primary soft chrome (#26): Pass/Fail / Skipped
+Optional legacy-compat primary/search (#27): Pass/Fail / Skipped
 Optional dark×minimal KH eye-check: Pass/Fail / Skipped
 D6 still-blue samples: (list, Informational)
 First-8 screenshots: Yes/No (path: ________)
+Sample wave FREEZE acknowledged: Yes
 Sign-off visual: Yes / No   ← default No until XO fills; keep Yellow
+Overall: PASS / PASS with debt / FAIL
 ```
 
 ---
