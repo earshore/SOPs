@@ -38,60 +38,60 @@
     class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 mb-6"
     aria-label="技能使用原则"
   >
-    <article class="bg-white border border-slate-200 rounded-lg p-5">
+    <article class="ui-card p-5">
       <div
         class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center mb-4"
       >
         <i class="fa-solid fa-compass" aria-hidden="true"></i>
       </div>
-      <h2 class="font-bold text-slate-900 mb-2">场景对齐</h2>
-      <p class="text-sm text-slate-600 leading-6">
+      <h2 class="ui-card__title font-bold mb-2">场景对齐</h2>
+      <p class="ui-card__muted text-sm leading-6">
         按广告、Listing、利润、选品等业务场景选技能，不把万能 skill 套到所有问题上。
       </p>
     </article>
-    <article class="bg-white border border-slate-200 rounded-lg p-5">
+    <article class="ui-card p-5">
       <div
         class="w-10 h-10 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center mb-4"
       >
         <i class="fa-solid fa-book-open" aria-hidden="true"></i>
       </div>
-      <h2 class="font-bold text-slate-900 mb-2">读清边界</h2>
-      <p class="text-sm text-slate-600 leading-6">
+      <h2 class="ui-card__title font-bold mb-2">读清边界</h2>
+      <p class="ui-card__muted text-sm leading-6">
         先看能力边界、输入要求与输出格式，再试用；避免把技能当成黑盒提示词。
       </p>
     </article>
-    <article class="bg-white border border-slate-200 rounded-lg p-5">
+    <article class="ui-card p-5">
       <div
         class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-4"
       >
         <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
       </div>
-      <h2 class="font-bold text-slate-900 mb-2">一键试用</h2>
-      <p class="text-sm text-slate-600 leading-6">
+      <h2 class="ui-card__title font-bold mb-2">一键试用</h2>
+      <p class="ui-card__muted text-sm leading-6">
         在 Deep Chat 挂载方法论为系统提示词；业务数据、报表与样本由你补充，模型不猜实时市场。
       </p>
     </article>
-    <article class="bg-white border border-slate-200 rounded-lg p-5">
+    <article class="ui-card p-5">
       <div
         class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4"
       >
         <i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
       </div>
-      <h2 class="font-bold text-slate-900 mb-2">结果可验收</h2>
-      <p class="text-sm text-slate-600 leading-6">
+      <h2 class="ui-card__title font-bold mb-2">结果可验收</h2>
+      <p class="ui-card__muted text-sm leading-6">
         输出要能进入 SOP、报表动作或审稿清单；拒绝「看起来很专业」的空话结论。
       </p>
     </article>
   </section>
 
   <!-- 技能使用公式 -->
-  <section class="bg-white border border-slate-200 rounded-lg p-6 mb-6" aria-label="技能使用公式">
+  <section class="ui-card p-6 mb-6" aria-label="技能使用公式">
     <div class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between mb-5">
       <div>
         <p class="text-xs font-semibold text-violet-600 uppercase">Skill Formula</p>
-        <h2 class="text-xl font-bold text-slate-900 mt-1">技能使用公式</h2>
+        <h2 class="ui-card__title text-xl font-bold mt-1">技能使用公式</h2>
       </div>
-      <p class="text-sm text-slate-500">先把业务问题对齐技能，再让模型按方法论产出。</p>
+      <p class="ui-card__muted text-sm">先把业务问题对齐技能，再让模型按方法论产出。</p>
     </div>
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
@@ -147,17 +147,17 @@
   </section>
 
   <!-- 技能目录（主入口；筛选不吸顶） -->
-  <section class="bg-white border border-slate-200 rounded-lg p-6 mb-6 skills-catalog">
+  <section class="ui-card p-6 mb-6 skills-catalog">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
       <div>
         <p class="text-xs font-semibold text-violet-600 uppercase">Skill Library</p>
-        <h2 class="text-xl font-bold text-slate-900 mt-1">可试用方法论</h2>
+        <h2 class="ui-card__title text-xl font-bold mt-1">可试用方法论</h2>
       </div>
-      <p id="skill-result-count" class="text-sm text-slate-500" aria-live="polite">
+      <p id="skill-result-count" class="ui-card__muted text-sm" aria-live="polite">
         显示 0 / 共 0 个技能
       </p>
     </div>
-    <p class="text-sm text-slate-500 mb-4">先读边界，再 Deep Chat 试用或复制全文。</p>
+    <p class="ui-card__muted text-sm mb-4">先读边界，再 Deep Chat 试用或复制全文。</p>
 
     <p
       id="skills-library-empty-hint"
@@ -197,13 +197,13 @@
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
       <div>
         <p class="text-xs font-semibold text-slate-500 uppercase">Seller Playbooks</p>
-        <h2 class="text-xl font-bold text-slate-900 mt-1">四条高频实战路径</h2>
+        <h2 class="ui-card__title text-xl font-bold mt-1">四条高频实战路径</h2>
       </div>
-      <p class="text-sm text-slate-500">从场景到技能：方法论负责判断与组织，你负责数据与拍板。</p>
+      <p class="ui-card__muted text-sm">从场景到技能：方法论负责判断与组织，你负责数据与拍板。</p>
     </div>
 
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-      <article class="bg-white border border-slate-200 rounded-lg p-5">
+      <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
             class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0"
@@ -211,8 +211,8 @@
             <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
           </div>
           <div>
-            <h3 class="font-bold text-slate-900">Listing 转化</h3>
-            <p class="text-sm text-slate-500 mt-1">
+            <h3 class="ui-card__title font-bold">Listing 转化</h3>
+            <p class="ui-card__muted text-sm mt-1">
               关键词 + 竞品页 + VOC → 标题/五点/A+ 结构与合规自检。
             </p>
           </div>
@@ -230,7 +230,7 @@
         </div>
       </article>
 
-      <article class="bg-white border border-slate-200 rounded-lg p-5">
+      <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
             class="w-10 h-10 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0"
@@ -238,8 +238,8 @@
             <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
           </div>
           <div>
-            <h3 class="font-bold text-slate-900">广告分诊</h3>
-            <p class="text-sm text-slate-500 mt-1">
+            <h3 class="ui-card__title font-bold">广告分诊</h3>
+            <p class="ui-card__muted text-sm mt-1">
               搜索词报表 + 毛利约束 → 加词、否词、降价、预算与 Listing 承接。
             </p>
           </div>
@@ -255,7 +255,7 @@
         </div>
       </article>
 
-      <article class="bg-white border border-slate-200 rounded-lg p-5">
+      <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
             class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0"
@@ -263,8 +263,8 @@
             <i class="fa-solid fa-calculator" aria-hidden="true"></i>
           </div>
           <div>
-            <h3 class="font-bold text-slate-900">利润与定价</h3>
-            <p class="text-sm text-slate-500 mt-1">
+            <h3 class="ui-card__title font-bold">利润与定价</h3>
+            <p class="ui-card__muted text-sm mt-1">
               费用、FBA、关税与毛利事实 → 定价区间、底线与调价风险。
             </p>
           </div>
@@ -280,7 +280,7 @@
         </div>
       </article>
 
-      <article class="bg-white border border-slate-200 rounded-lg p-5">
+      <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
             class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0"
@@ -288,8 +288,8 @@
             <i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i>
           </div>
           <div>
-            <h3 class="font-bold text-slate-900">选品与竞品</h3>
-            <p class="text-sm text-slate-500 mt-1">
+            <h3 class="ui-card__title font-bold">选品与竞品</h3>
+            <p class="ui-card__muted text-sm mt-1">
               词库、趋势与竞品页 → 机会点、风险与「可跟进 / 不建议模仿」。
             </p>
           </div>
@@ -309,15 +309,15 @@
 
   <!-- 业务规则如何进入技能 -->
   <section
-    class="bg-white border border-slate-200 rounded-lg p-6 mb-8"
+    class="ui-card p-6 mb-8"
     aria-label="业务规则如何进入技能"
   >
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
       <div>
         <p class="text-xs font-semibold text-slate-500 uppercase">Business Operating Rules</p>
-        <h2 class="text-xl font-bold text-slate-900 mt-1">业务规则如何进入技能</h2>
+        <h2 class="ui-card__title text-xl font-bold mt-1">业务规则如何进入技能</h2>
       </div>
-      <p class="text-sm text-slate-500">
+      <p class="ui-card__muted text-sm">
         把平台规则、报表事实和卖家实践，内化为技能的输入、边界与验收动作。
       </p>
     </div>
@@ -390,25 +390,25 @@
   <!-- 页脚：统计 + 来源 -->
   <footer class="skills-page-footer mb-6" aria-label="技能库统计与来源">
     <div class="grid grid-cols-2 gap-3 xl:grid-cols-4 mb-4">
-      <div class="border border-slate-200 rounded-lg p-4 bg-white">
+      <div class="ui-card p-4">
         <div class="text-xs font-semibold text-violet-700 mb-1">总数</div>
-        <div id="metric-total" class="text-xl font-bold text-slate-900">0</div>
-        <div class="text-xs text-slate-500 mt-0.5">已注册技能</div>
+        <div id="metric-total" class="ui-card__title text-xl font-bold">0</div>
+        <div class="ui-card__muted text-xs mt-0.5">已注册技能</div>
       </div>
-      <div class="border border-slate-200 rounded-lg p-4 bg-white">
+      <div class="ui-card p-4">
         <div class="text-xs font-semibold text-indigo-700 mb-1">分类</div>
-        <div id="metric-category" class="text-xl font-bold text-slate-900">0</div>
-        <div class="text-xs text-slate-500 mt-0.5">业务分类</div>
+        <div id="metric-category" class="ui-card__title text-xl font-bold">0</div>
+        <div class="ui-card__muted text-xs mt-0.5">业务分类</div>
       </div>
-      <div class="border border-slate-200 rounded-lg p-4 bg-white">
+      <div class="ui-card p-4">
         <div class="text-xs font-semibold text-fuchsia-700 mb-1">脚本</div>
-        <div id="metric-scripts" class="text-xl font-bold text-slate-900">0</div>
-        <div class="text-xs text-slate-500 mt-0.5">含辅助脚本</div>
+        <div id="metric-scripts" class="ui-card__title text-xl font-bold">0</div>
+        <div class="ui-card__muted text-xs mt-0.5">含辅助脚本</div>
       </div>
-      <div class="border border-slate-200 rounded-lg p-4 bg-white">
+      <div class="ui-card p-4">
         <div class="text-xs font-semibold text-amber-700 mb-1">试用版</div>
-        <div id="metric-beta" class="text-xl font-bold text-slate-900">0</div>
-        <div class="text-xs text-slate-500 mt-0.5">试用版技能</div>
+        <div id="metric-beta" class="ui-card__title text-xl font-bold">0</div>
+        <div class="ui-card__muted text-xs mt-0.5">试用版技能</div>
       </div>
     </div>
     <p class="text-xs text-slate-500 leading-6">
