@@ -1,743 +1,880 @@
 ﻿<div class="module-container">
-        <!-- Header -->
-        <!-- Welcome Banner -->
-        <div class="wb-container wb-container--simple wb-theme-safety">
-                <div class="wb-content">
-                        <div class="wb-icon">
-                                <i class="fas fa-file-shield"></i>
-                        </div>
-                        <div class="wb-title-row">
-                                <h1 class="wb-title">敏感产品合规销售 SOP</h1>
-                                <span aria-label="安全警告" class="wb-badge wb-badge-safety">
-                                        <i class="fa-solid fa-apple-whole"></i>SALE
-                                </span>
-                        </div>
-                        <p class="wb-description">欧洲敏感货合规要求：生物杀虫剂、电子3C、儿童玩具、化妆品 - EU/GB 准入前检查</p>
-                        <div class="wb-meta">
-                                <span><i class="fas fa-tag mr-1"></i>账号安全与风控体系</span>
-                                <span><i class="fas fa-tag mr-1"></i>产品合规</span>
-                        </div>
-                </div>
+  <!-- Header -->
+  <!-- Welcome Banner -->
+  <div class="wb-container wb-container--simple wb-theme-safety">
+    <div class="wb-content">
+      <div class="wb-icon">
+        <i class="fas fa-file-shield"></i>
+      </div>
+      <div class="wb-title-row">
+        <h1 class="wb-title">敏感产品合规销售 SOP</h1>
+        <span aria-label="安全警告" class="wb-badge wb-badge-safety">
+          <i class="fa-solid fa-apple-whole"></i>SALE
+        </span>
+      </div>
+      <p class="wb-description">
+        欧洲敏感货合规要求：生物杀虫剂、电子3C、儿童玩具、化妆品 - EU/GB 准入前检查
+      </p>
+      <div class="wb-meta">
+        <span><i class="fas fa-tag mr-1"></i>账号安全与风控体系</span>
+        <span><i class="fas fa-tag mr-1"></i>产品合规</span>
+      </div>
+    </div>
+  </div>
+  <section class="ui-card p-5 mb-6">
+    <h2 class="ui-card__title text-base font-bold mb-3 flex items-center gap-2">
+      <i class="fas fa-clipboard-list text-indigo-500"></i>作业元信息
+    </h2>
+    <dl class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-3 text-sm">
+      <div>
+        <dt class="ui-card__title font-semibold">Owner</dt>
+        <dd class="ui-card__muted">合规负责人/品类负责人</dd>
+      </div>
+      <div>
+        <dt class="ui-card__title font-semibold">更新时间</dt>
+        <dd class="ui-card__muted">2026-06</dd>
+      </div>
+      <div>
+        <dt class="ui-card__title font-semibold">适用站点</dt>
+        <dd class="ui-card__muted">EU/GB 敏感品类站点（DE/FR/IT/ES/NL/SE/PL/BE/GB/IE/TR）</dd>
+      </div>
+      <div>
+        <dt class="ui-card__title font-semibold">输入</dt>
+        <dd class="ui-card__muted">
+          品类、目标国家、Listing 文案、认证文件、欧代/厂家信息、包装标签
+        </dd>
+      </div>
+      <div>
+        <dt class="ui-card__title font-semibold">输出</dt>
+        <dd class="ui-card__muted">准入结论、缺失文件、整改动作、上架前合规检查记录</dd>
+      </div>
+      <div>
+        <dt class="ui-card__title font-semibold">人工确认点</dt>
+        <dd class="ui-card__muted">敏感品准入、证书有效性、上架提交和整改完成必须人工确认</dd>
+      </div>
+    </dl>
+  </section>
+  <!-- Critical Warning Banner -->
+  <div class="bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl p-4 mb-6">
+    <div class="flex items-center gap-3">
+      <i class="fas fa-skull-crossbones text-2xl"></i>
+      <div>
+        <h3 class="font-bold text-lg">⚠️ 敏感货销售红线警告</h3>
+        <p class="text-sm opacity-90">
+          欧洲站合规审查极其严格，一旦违规：1) 即刻下架；2) 资金冻结；3) 法律诉讼风险；4)
+          账号关联封禁。务必在上架前完成全部合规检查！
+        </p>
+      </div>
+    </div>
+  </div>
+  <section class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
+      <i class="fas fa-table-list text-emerald-600"></i>欧洲站产品准入矩阵（立项前必填）
+    </h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs">
+        <thead>
+          <tr class="bg-slate-100 text-slate-700">
+            <th class="px-3 py-2 text-left">品类/场景</th>
+            <th class="px-3 py-2 text-left">EU核心要求</th>
+            <th class="px-3 py-2 text-left">GB补充要求</th>
+            <th class="px-3 py-2 text-left">EPR/标签</th>
+            <th class="px-3 py-2 text-left">放行证据</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr>
+            <td class="px-3 py-2 font-semibold">普通消费品</td>
+            <td class="px-3 py-2">GPSR、EU Responsible Person、制造商/进口商信息、安全警示语言</td>
+            <td class="px-3 py-2">GB责任主体与当地标签要求按品类复核</td>
+            <td class="px-3 py-2">包装EPR；DE核对LUCID，FR等按UIN/EPR体系维护</td>
+            <td class="px-3 py-2">标签照片、后台GPSR截图、责任人协议</td>
+          </tr>
+          <tr>
+            <td class="px-3 py-2 font-semibold">电子/带电产品</td>
+            <td class="px-3 py-2">CE、DoC、EMC/LVD/RED、RoHS、REACH；含电池需电池安全资料</td>
+            <td class="px-3 py-2">UKCA/CE认可口径按当前GB指南和品类法规复核</td>
+            <td class="px-3 py-2">WEEE、电池法、包装法、垃圾桶标、能效标签（如适用）</td>
+            <td class="px-3 py-2">测试报告、DoC、EPR号、包装/铭牌照片</td>
+          </tr>
+          <tr>
+            <td class="px-3 py-2 font-semibold">儿童玩具/儿童用品</td>
+            <td class="px-3 py-2">Toy Safety、EN71、CE、年龄警示、可追溯批次</td>
+            <td class="px-3 py-2">英国玩具安全与UKCA/CE口径逐品类复核</td>
+            <td class="px-3 py-2">包装EPR；警示语必须为销售国语言</td>
+            <td class="px-3 py-2">EN71报告、DoC、年龄标签、实物包装照片</td>
+          </tr>
+          <tr>
+            <td class="px-3 py-2 font-semibold">食品接触材料</td>
+            <td class="px-3 py-2">FCM/DoC、LFGB（德国重点）、材料安全与迁移测试</td>
+            <td class="px-3 py-2">GB食品接触材料要求按材料和用途复核</td>
+            <td class="px-3 py-2">杯叉标、材料标识、包装EPR</td>
+            <td class="px-3 py-2">FCM/LFGB报告、DoC、材料证明、标签照片</td>
+          </tr>
+          <tr>
+            <td class="px-3 py-2 font-semibold">化妆品/个护</td>
+            <td class="px-3 py-2">EC 1223/2009、CPNP、PIF、CPSR、欧盟责任人</td>
+            <td class="px-3 py-2">SCPN/UK Responsible Person（如适用）</td>
+            <td class="px-3 py-2">成分、批号、PAO/有效期、当地语言标签、包装EPR</td>
+            <td class="px-3 py-2">CPNP/SCPN截图、CPSR、PIF目录、标签照片</td>
+          </tr>
+          <tr>
+            <td class="px-3 py-2 font-semibold">纺织/服装</td>
+            <td class="px-3 py-2">纤维成分标签、REACH、燃烧/儿童服装风险按品类复核</td>
+            <td class="px-3 py-2">GB纺织标签和安全要求按当地规则复核</td>
+            <td class="px-3 py-2">护理标签、成分标签、包装EPR；法国等关注纺织EPR</td>
+            <td class="px-3 py-2">成分报告、REACH声明、洗标/吊牌照片</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-3 text-xs text-red-600 font-semibold">
+      放行规则：任何新品未完成本矩阵，不得进入上架、FBA发货或促销提报。无法判断时默认升级合规负责人，不由运营自行猜测。
+    </p>
+  </section>
+  <!-- SOP Workflow Guidelines -->
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-6 flex items-center gap-2">
+      <i class="fas fa-list-check text-blue-600"></i>全生命周期标准化作业流程 (SOP)
+    </h2>
+    <div class="relative">
+      <!-- Connecting Line -->
+      <div
+        class="hidden lg:block absolute top-[28px] left-0 right-0 h-0.5 bg-slate-200 -z-10"
+      ></div>
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-y-8 gap-x-4">
+        <!-- Step 1: Research -->
+        <div
+          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-blue-400 transition duration-200 relative group"
+        >
+          <div
+            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-blue-500 rounded-full flex items-center justify-center text-xl text-blue-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-blue-500 group-hover:text-white transition-colors z-10 relative"
+          >
+            <i class="fas fa-magnifying-glass"></i>
+          </div>
+          <h3 class="text-center font-bold text-slate-800 mb-2">1. 选品调研</h3>
+          <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+            <li>确认目标国准入政策 (如德国BPR)</li>
+            <li>核算合规成本 (注册费/检测费)</li>
+            <li>排查敏感词/专利侵权风险</li>
+            <li><span class="text-red-600">决定是否准入做此品类</span></li>
+          </ul>
         </div>
-        <section class="ui-card p-5 mb-6">
-                <h2 class="ui-card__title text-base font-bold mb-3 flex items-center gap-2">
-                        <i class="fas fa-clipboard-list text-indigo-500"></i>作业元信息
-                </h2>
-                <dl class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-3 text-sm">
-                        <div>
-                                <dt class="ui-card__title font-semibold">Owner</dt>
-                                <dd class="ui-card__muted">合规负责人/品类负责人</dd>
-                        </div>
-                        <div>
-                                <dt class="ui-card__title font-semibold">更新时间</dt>
-                                <dd class="ui-card__muted">2026-06</dd>
-                        </div>
-                        <div>
-                                <dt class="ui-card__title font-semibold">适用站点</dt>
-                                <dd class="ui-card__muted">EU/GB 敏感品类站点（DE/FR/IT/ES/NL/SE/PL/BE/GB/IE/TR）</dd>
-                        </div>
-                        <div>
-                                <dt class="ui-card__title font-semibold">输入</dt>
-                                <dd class="ui-card__muted">品类、目标国家、Listing 文案、认证文件、欧代/厂家信息、包装标签</dd>
-                        </div>
-                        <div>
-                                <dt class="ui-card__title font-semibold">输出</dt>
-                                <dd class="ui-card__muted">准入结论、缺失文件、整改动作、上架前合规检查记录</dd>
-                        </div>
-                        <div>
-                                <dt class="ui-card__title font-semibold">人工确认点</dt>
-                                <dd class="ui-card__muted">敏感品准入、证书有效性、上架提交和整改完成必须人工确认</dd>
-                        </div>
-                </dl>
-        </section>
-        <!-- Critical Warning Banner -->
-        <div class="bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl p-4 mb-6">
-                <div class="flex items-center gap-3">
-                        <i class="fas fa-skull-crossbones text-2xl"></i>
-                        <div>
-                                <h3 class="font-bold text-lg">⚠️ 敏感货销售红线警告</h3>
-                                <p class="text-sm opacity-90">欧洲站合规审查极其严格，一旦违规：1) 即刻下架；2) 资金冻结；3) 法律诉讼风险；4)
-                                        账号关联封禁。务必在上架前完成全部合规检查！</p>
-                        </div>
-                </div>
+        <!-- Step 2: Listing -->
+        <div
+          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-indigo-400 transition duration-200 relative group"
+        >
+          <div
+            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-indigo-500 rounded-full flex items-center justify-center text-xl text-indigo-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-indigo-500 group-hover:text-white transition-colors z-10 relative"
+          >
+            <i class="fas fa-pen-nib"></i>
+          </div>
+          <h3 class="text-center font-bold text-slate-800 mb-2">2. 文案规避</h3>
+          <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+            <li>
+              使用<a
+                class="text-blue-600 underline"
+                data-action="switch-tab"
+                data-tab="sops_restricted_words"
+                href="#"
+                >高危词库</a
+              >自查标题描述
+            </li>
+            <li>绝对规避医疗/治愈/抗菌功效词</li>
+            <li>严禁"FDA认证"/CE认证作为卖点</li>
+            <li>图片去除非法认证标志</li>
+          </ul>
         </div>
-        <section class="ui-card p-6 mb-6">
-                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
-                        <i class="fas fa-table-list text-emerald-600"></i>欧洲站产品准入矩阵（立项前必填）
-                </h2>
-                <div class="overflow-x-auto">
-                        <table class="w-full text-xs">
-                                <thead>
-                                        <tr class="bg-slate-100 text-slate-700">
-                                                <th class="px-3 py-2 text-left">品类/场景</th>
-                                                <th class="px-3 py-2 text-left">EU核心要求</th>
-                                                <th class="px-3 py-2 text-left">GB补充要求</th>
-                                                <th class="px-3 py-2 text-left">EPR/标签</th>
-                                                <th class="px-3 py-2 text-left">放行证据</th>
-                                        </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100">
-                                        <tr>
-                                                <td class="px-3 py-2 font-semibold">普通消费品</td>
-                                                <td class="px-3 py-2">GPSR、EU Responsible Person、制造商/进口商信息、安全警示语言</td>
-                                                <td class="px-3 py-2">GB责任主体与当地标签要求按品类复核</td>
-                                                <td class="px-3 py-2">包装EPR；DE核对LUCID，FR等按UIN/EPR体系维护</td>
-                                                <td class="px-3 py-2">标签照片、后台GPSR截图、责任人协议</td>
-                                        </tr>
-                                        <tr>
-                                                <td class="px-3 py-2 font-semibold">电子/带电产品</td>
-                                                <td class="px-3 py-2">CE、DoC、EMC/LVD/RED、RoHS、REACH；含电池需电池安全资料</td>
-                                                <td class="px-3 py-2">UKCA/CE认可口径按当前GB指南和品类法规复核</td>
-                                                <td class="px-3 py-2">WEEE、电池法、包装法、垃圾桶标、能效标签（如适用）</td>
-                                                <td class="px-3 py-2">测试报告、DoC、EPR号、包装/铭牌照片</td>
-                                        </tr>
-                                        <tr>
-                                                <td class="px-3 py-2 font-semibold">儿童玩具/儿童用品</td>
-                                                <td class="px-3 py-2">Toy Safety、EN71、CE、年龄警示、可追溯批次</td>
-                                                <td class="px-3 py-2">英国玩具安全与UKCA/CE口径逐品类复核</td>
-                                                <td class="px-3 py-2">包装EPR；警示语必须为销售国语言</td>
-                                                <td class="px-3 py-2">EN71报告、DoC、年龄标签、实物包装照片</td>
-                                        </tr>
-                                        <tr>
-                                                <td class="px-3 py-2 font-semibold">食品接触材料</td>
-                                                <td class="px-3 py-2">FCM/DoC、LFGB（德国重点）、材料安全与迁移测试</td>
-                                                <td class="px-3 py-2">GB食品接触材料要求按材料和用途复核</td>
-                                                <td class="px-3 py-2">杯叉标、材料标识、包装EPR</td>
-                                                <td class="px-3 py-2">FCM/LFGB报告、DoC、材料证明、标签照片</td>
-                                        </tr>
-                                        <tr>
-                                                <td class="px-3 py-2 font-semibold">化妆品/个护</td>
-                                                <td class="px-3 py-2">EC 1223/2009、CPNP、PIF、CPSR、欧盟责任人</td>
-                                                <td class="px-3 py-2">SCPN/UK Responsible Person（如适用）</td>
-                                                <td class="px-3 py-2">成分、批号、PAO/有效期、当地语言标签、包装EPR</td>
-                                                <td class="px-3 py-2">CPNP/SCPN截图、CPSR、PIF目录、标签照片</td>
-                                        </tr>
-                                        <tr>
-                                                <td class="px-3 py-2 font-semibold">纺织/服装</td>
-                                                <td class="px-3 py-2">纤维成分标签、REACH、燃烧/儿童服装风险按品类复核</td>
-                                                <td class="px-3 py-2">GB纺织标签和安全要求按当地规则复核</td>
-                                                <td class="px-3 py-2">护理标签、成分标签、包装EPR；法国等关注纺织EPR</td>
-                                                <td class="px-3 py-2">成分报告、REACH声明、洗标/吊牌照片</td>
-                                        </tr>
-                                </tbody>
-                        </table>
-                </div>
-                <p class="mt-3 text-xs text-red-600 font-semibold">放行规则：任何新品未完成本矩阵，不得进入上架、FBA发货或促销提报。无法判断时默认升级合规负责人，不由运营自行猜测。</p>
-        </section>
-        <!-- SOP Workflow Guidelines -->
-        <div class="ui-card p-6 mb-6">
-                <h2 class="ui-card__title text-lg font-bold mb-6 flex items-center gap-2">
-                        <i class="fas fa-list-check text-blue-600"></i>全生命周期标准化作业流程 (SOP)
-                </h2>
-                <div class="relative">
-                        <!-- Connecting Line -->
-                        <div class="hidden lg:block absolute top-[28px] left-0 right-0 h-0.5 bg-slate-200 -z-10"></div>
-                        <div class="grid grid-cols-1 lg:grid-cols-4 gap-y-8 gap-x-4">
-                                <!-- Step 1: Research -->
-                                <div
-                                        class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-blue-400 transition duration-200 relative group">
-                                        <div
-                                                class="w-14 h-14 bg-white border-2 border-blue-500 rounded-full flex items-center justify-center text-xl text-blue-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-blue-500 group-hover:text-white transition-colors z-10 relative">
-                                                <i class="fas fa-magnifying-glass"></i>
-                                        </div>
-                                        <h3 class="text-center font-bold text-slate-800 mb-2">1. 选品调研</h3>
-                                        <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
-                                                <li>确认目标国准入政策 (如德国BPR)</li>
-                                                <li>核算合规成本 (注册费/检测费)</li>
-                                                <li>排查敏感词/专利侵权风险</li>
-                                                <li><span class="text-red-600">决定是否准入做此品类</span></li>
-                                        </ul>
-                                </div>
-                                <!-- Step 2: Listing -->
-                                <div
-                                        class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-indigo-400 transition duration-200 relative group">
-                                        <div
-                                                class="w-14 h-14 bg-white border-2 border-indigo-500 rounded-full flex items-center justify-center text-xl text-indigo-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-indigo-500 group-hover:text-white transition-colors z-10 relative">
-                                                <i class="fas fa-pen-nib"></i>
-                                        </div>
-                                        <h3 class="text-center font-bold text-slate-800 mb-2">2. 文案规避</h3>
-                                        <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
-                                                <li>使用<a class="text-blue-600 underline" data-action="switch-tab"
-                                                                data-tab="sops_restricted_words"
-                                                                href="#">高危词库</a>自查标题描述</li>
-                                                <li>绝对规避医疗/治愈/抗菌功效词</li>
-                                                <li>严禁"FDA认证"/CE认证作为卖点</li>
-                                                <li>图片去除非法认证标志</li>
-                                        </ul>
-                                </div>
-                                <!-- Step 3: Checklist -->
-                                <div
-                                        class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-purple-400 transition duration-200 relative group">
-                                        <div
-                                                class="w-14 h-14 bg-white border-2 border-purple-500 rounded-full flex items-center justify-center text-xl text-purple-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-purple-500 group-hover:text-white transition-colors z-10 relative">
-                                                <i class="fas fa-clipboard-check"></i>
-                                        </div>
-                                        <h3 class="text-center font-bold text-slate-800 mb-2">3. 合规清单</h3>
-                                        <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
-                                                <li>确认所需证书 (CE/ROHS/EN71)</li>
-                                                <li>注册EPR (WEEE/包装法/电池法)</li>
-                                                <li>指定欧盟责任人 (EU REP)</li>
-                                                <li>获得相关机构授权 (如Apple MFi)</li>
-                                        </ul>
-                                </div>
-                                <!-- Step 4: Procurement -->
-                                <div
-                                        class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-emerald-400 transition duration-200 relative group">
-                                        <div
-                                                class="w-14 h-14 bg-white border-2 border-emerald-500 rounded-full flex items-center justify-center text-xl text-emerald-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-emerald-500 group-hover:text-white transition-colors z-10 relative">
-                                                <i class="fas fa-handshake"></i>
-                                        </div>
-                                        <h3 class="text-center font-bold text-slate-800 mb-2">4. 采购质检</h3>
-                                        <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
-                                                <li>要求供应商提供全套检测报告</li>
-                                                <li><span class="text-emerald-700 font-bold">必须签署合规赔偿协议</span></li>
-                                                <li>产前样送第三方实验室复测</li>
-                                                <li>大货验货重点查合规标签</li>
-                                        </ul>
-                                </div>
-                                <!-- Step 5: Packaging -->
-                                <div
-                                        class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-amber-400 transition duration-200 relative group mt-4 lg:mt-0">
-                                        <div
-                                                class="w-14 h-14 bg-white border-2 border-amber-500 rounded-full flex items-center justify-center text-xl text-amber-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-amber-500 group-hover:text-white transition-colors z-10 relative">
-                                                <i class="fas fa-box-open"></i>
-                                        </div>
-                                        <h3 class="text-center font-bold text-slate-800 mb-2">5. 标签包装</h3>
-                                        <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
-                                                <li>印制CE标志/垃圾桶/回收标志</li>
-                                                <li>印制欧代信息 (公司/地址/邮箱)</li>
-                                                <li>印制批次号/生产日期 (追溯)</li>
-                                                <li>印制必要的警告语 (多语言)</li>
-                                        </ul>
-                                </div>
-                                <!-- Step 6: Shipping -->
-                                <div
-                                        class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-cyan-400 transition duration-200 relative group mt-4 lg:mt-0">
-                                        <div
-                                                class="w-14 h-14 bg-white border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl text-cyan-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-cyan-500 group-hover:text-white transition-colors z-10 relative">
-                                                <i class="fas fa-truck-fast"></i>
-                                        </div>
-                                        <h3 class="text-center font-bold text-slate-800 mb-2">6. 发货申报</h3>
-                                        <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
-                                                <li>如实申报海关编码 (HS Code)</li>
-                                                <li>随货附带DoC符合性声明文件</li>
-                                                <li>确认是否涉及危险品 (电池/液体)</li>
-                                                <li>提供MSDS/UN38.3报告</li>
-                                        </ul>
-                                </div>
-                                <!-- Step 7: Sales -->
-                                <div
-                                        class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-rose-400 transition duration-200 relative group mt-4 lg:mt-0">
-                                        <div
-                                                class="w-14 h-14 bg-white border-2 border-rose-500 rounded-full flex items-center justify-center text-xl text-rose-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-rose-500 group-hover:text-white transition-colors z-10 relative">
-                                                <i class="fas fa-chart-line"></i>
-                                        </div>
-                                        <h3 class="text-center font-bold text-slate-800 mb-2">7. 销售上传</h3>
-                                        <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
-                                                <li>后台上传EPR注册号并验证</li>
-                                                <li>关联网上上传CE DoC文件</li>
-                                                <li>上传六面图以供审核</li>
-                                                <li>填写GPSR责任人信息</li>
-                                        </ul>
-                                </div>
-                                <!-- Step 8: Removal Plan -->
-                                <div
-                                        class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-red-500 transition duration-200 relative group mt-4 lg:mt-0">
-                                        <div
-                                                class="w-14 h-14 bg-white border-2 border-red-500 rounded-full flex items-center justify-center text-xl text-red-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-red-500 group-hover:text-white transition-colors z-10 relative">
-                                                <i class="fas fa-fire-extinguisher"></i>
-                                        </div>
-                                        <h3 class="text-center font-bold text-slate-800 mb-2">8. 下架处理预案</h3>
-                                        <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
-                                                <li><span class="text-red-600 font-bold">立即停止FBA补货</span> (防止库存积压)</li>
-                                                <li>删除Listing中所有敏感文案/图片</li>
-                                                <li>准备申诉包 (DoC/六面图/发票)</li>
-                                                <li>申诉失败则立即创建移除订单 (弃置/移仓)</li>
-                                        </ul>
-                                </div>
-                        </div>
-                </div>
+        <!-- Step 3: Checklist -->
+        <div
+          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-purple-400 transition duration-200 relative group"
+        >
+          <div
+            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-purple-500 rounded-full flex items-center justify-center text-xl text-purple-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-purple-500 group-hover:text-white transition-colors z-10 relative"
+          >
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <h3 class="text-center font-bold text-slate-800 mb-2">3. 合规清单</h3>
+          <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+            <li>确认所需证书 (CE/ROHS/EN71)</li>
+            <li>注册EPR (WEEE/包装法/电池法)</li>
+            <li>指定欧盟责任人 (EU REP)</li>
+            <li>获得相关机构授权 (如Apple MFi)</li>
+          </ul>
         </div>
-        <!-- Category 1: Biocides (BPR) -->
-        <div class="ui-card p-6 mb-6">
-                <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
-                        <i class="fas fa-bug-slash text-emerald-600"></i>一、生物杀虫剂类 (Biocides) — BPR法规
-                </h2>
-                <p class="ui-card__muted text-xs mb-4">典型产品：驱蚊手环、防蚊贴、宠物驱虫项圈、抗菌砧板、防霉剂</p>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Left: Requirements -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-red-50 rounded-lg border border-red-200">
-                                        <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标 (缺一不可)</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-                                                        <div><strong>ECHA注册号：</strong>产品必须在欧洲化学品管理局 (ECHA)
-                                                                完成生物杀灭剂注册，获得唯一注册号。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                                                        <div><strong>活性物质批准：</strong>使用的驱虫/杀菌成分必须在EU活性物质正面清单内。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-                                                        <div><strong>销售国授权：</strong>每个销售国家需单独授权 (德国BAuA，法国ANSES等)。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
-                                                        <div><strong>欧盟责任人：</strong>必须有EU境内的责任人地址显示在包装上。</div>
-                                                </li>
-                                        </ul>
-                                </div>
-                                <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                        <h4 class="font-bold text-amber-800 mb-2">⚠️ Listing禁用词</h4>
-                                        <div class="flex flex-wrap gap-2 text-xs">
-                                                <span
-                                                        class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">Antibacterial</span>
-                                                <span
-                                                        class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">Antimicrobial</span>
-                                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">Kills
-                                                        99.9%</span>
-                                                <span
-                                                        class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">Anti-mite</span>
-                                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">Insect
-                                                        Repellent</span>
-                                        </div>
-                                </div>
-                        </div>
-                        <!-- Right: Sales Advice -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                                        <h4 class="font-bold text-emerald-800 mb-3">💡 头部卖家销售建议</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li>• <strong>替代策略：</strong>改卖"物理驱蚊"产品 (如电蚊拍、蚊帐)，无需BPR认证。</li>
-                                                <li>• <strong>供应链选择：</strong>找已有欧盟BPR授权的工厂贴牌，而非自己申请 (费用€5万-20万/国家)。</li>
-                                                <li>• <strong>文案规避：</strong>如果是芳香类产品，只写"Pleasant fragrance"，绝不提驱虫功效。
-                                                </li>
-                                                <li>• <strong>风险评估：</strong>此类目亚马逊随机抽查率极高，建议新手避开。</li>
-                                        </ul>
-                                </div>
-                                <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-600">
-                                        <strong>🔗 官方资源：</strong>
-                                        <a class="text-blue-600 underline"
-                                                href="https://echa.europa.eu/regulations/biocidal-products-regulation"
-                                                target="_blank">ECHA BPR法规官网</a>
-                                </div>
-                        </div>
-                </div>
+        <!-- Step 4: Procurement -->
+        <div
+          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-emerald-400 transition duration-200 relative group"
+        >
+          <div
+            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-emerald-500 rounded-full flex items-center justify-center text-xl text-emerald-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-emerald-500 group-hover:text-white transition-colors z-10 relative"
+          >
+            <i class="fas fa-handshake"></i>
+          </div>
+          <h3 class="text-center font-bold text-slate-800 mb-2">4. 采购质检</h3>
+          <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+            <li>要求供应商提供全套检测报告</li>
+            <li><span class="text-emerald-700 font-bold">必须签署合规赔偿协议</span></li>
+            <li>产前样送第三方实验室复测</li>
+            <li>大货验货重点查合规标签</li>
+          </ul>
         </div>
-        <!-- Category 2: Electronics (3C) -->
-        <div class="ui-card p-6 mb-6">
-                <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
-                        <i class="fas fa-plug text-blue-600"></i>二、电子3C类产品 — CE/WEEE/ErP
-                </h2>
-                <p class="ui-card__muted text-xs mb-4">典型产品：充电器、蓝牙耳机、LED灯、小家电、移动电源</p>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Left: Requirements -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-red-50 rounded-lg border border-red-200">
-                                        <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">CE</span>
-                                                        <div><strong>CE标志：</strong>DoC符合性声明 + 技术文档 (TCF)。<span
-                                                                        class="text-red-600">注意：Listing中禁止宣传"CE
-                                                                        Certified"！</span></div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">🗑️</span>
-                                                        <div><strong>WEEE注册：</strong>德国需在EAR
-                                                                stiftung注册，获得注册号并显示在Listing。法国/意大利/西班牙有各自的EPR系统。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">🔋</span>
-                                                        <div><strong>电池法 (BattG)：</strong>含电池产品需完成电池注册，提供回收方案。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">⚡</span>
-                                                        <div><strong>ErP能效标签：</strong>灯具/家电需EPREL数据库注册，显示A-G能效等级。</div>
-                                                </li>
-                                        </ul>
-                                </div>
-                                <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                        <h4 class="font-bold text-amber-800 mb-2">⚠️ 德国站特别注意</h4>
-                                        <ul class="text-xs text-slate-700 space-y-1">
-                                                <li>• <strong>包装法 (VerpackG)：</strong>必须在LUCID系统注册包装许可证号。</li>
-                                                <li>• <strong>电压标注：</strong>必须写 220V-240V，禁止写美规 110V。</li>
-                                                <li>• <strong>插头类型：</strong>德标Schuko (Type F)，图片必须展示。</li>
-                                        </ul>
-                                </div>
-                        </div>
-                        <!-- Right: Sales Advice -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                        <h4 class="font-bold text-blue-800 mb-3">💡 头部卖家销售建议</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li>• <strong>一站式服务商：</strong>推荐使用Compliance
-                                                        Gate、ecosistant等欧洲EPR合规服务商，年费约€200-500/国。</li>
-                                                <li>• <strong>工厂要求：</strong>下单前要求工厂提供CE测试报告 (EMC+LVD)、REACH声明、RoHS报告。
-                                                </li>
-                                                <li>• <strong>图片展示：</strong>仅展示实物/包装上真实存在的 CE、能效等标识；主图遵守亚马逊主图规则，合规细节优先放副图或安全图片位。</li>
-                                                <li>• <strong>GB站：</strong>UKCA 与 CE 认可口径按英国政府当前指南和品类法规执行；不要把 EU 的 CE/GPSR 资料直接等同于 GB 合规。</li>
-                                        </ul>
-                                </div>
-                                <div class="p-3 bg-slate-800 rounded-lg text-xs text-white">
-                                        <strong>📋 上架Checklist：</strong>
-                                        CE证书 ✓ | WEEE注册号 ✓ | 包装法注册号 ✓ | 电池法注册 ✓ | 能效标签(如适用) ✓
-                                </div>
-                        </div>
-                </div>
+        <!-- Step 5: Packaging -->
+        <div
+          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-amber-400 transition duration-200 relative group mt-4 lg:mt-0"
+        >
+          <div
+            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-amber-500 rounded-full flex items-center justify-center text-xl text-amber-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-amber-500 group-hover:text-white transition-colors z-10 relative"
+          >
+            <i class="fas fa-box-open"></i>
+          </div>
+          <h3 class="text-center font-bold text-slate-800 mb-2">5. 标签包装</h3>
+          <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+            <li>印制CE标志/垃圾桶/回收标志</li>
+            <li>印制欧代信息 (公司/地址/邮箱)</li>
+            <li>印制批次号/生产日期 (追溯)</li>
+            <li>印制必要的警告语 (多语言)</li>
+          </ul>
         </div>
-        <!-- Category 3: Toys -->
-        <div class="ui-card p-6 mb-6">
-                <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
-                        <i class="fas fa-puzzle-piece text-purple-600"></i>三、儿童玩具类 — EN71/GPSR
-                </h2>
-                <p class="ui-card__muted text-xs mb-4">典型产品：积木、毛绒玩具、婴儿摇铃、儿童文具、派对用品</p>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Left: Requirements -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-red-50 rounded-lg border border-red-200">
-                                        <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-                                                        <div><strong>EN71测试：</strong>EN71-1 (机械物理)、EN71-2 (燃烧性)、EN71-3
-                                                                (有害元素迁移) 三项必测。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                                                        <div><strong>年龄标识：</strong>必须明确标注适用年龄段 (如 "3+")，0-3岁产品要求更严格。
-                                                        </div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-                                                        <div><strong>GPSR (2024新规)：</strong>需提供EU境内责任人信息，二维码可追溯。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
-                                                        <div><strong>CE标志位置：</strong>必须印在产品本体或包装上，不能只贴标签。</div>
-                                                </li>
-                                        </ul>
-                                </div>
-                                <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                        <h4 class="font-bold text-amber-800 mb-2">⚠️ 高风险品类</h4>
-                                        <div class="grid grid-cols-2 gap-2 text-xs">
-                                                <div class="p-2 bg-red-100 rounded">
-                                                        <strong class="text-red-700">水弹枪：</strong>多国禁售
-                                                </div>
-                                                <div class="p-2 bg-red-100 rounded">
-                                                        <strong class="text-red-700">磁力球：</strong>小零件窒息风险
-                                                </div>
-                                                <div class="p-2 bg-red-100 rounded">
-                                                        <strong class="text-red-700">史莱姆：</strong>硼酸超标风险
-                                                </div>
-                                                <div class="p-2 bg-red-100 rounded">
-                                                        <strong class="text-red-700">激光笔：</strong>眼睛伤害风险
-                                                </div>
-                                        </div>
-                                </div>
-                        </div>
-                        <!-- Right: Sales Advice -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                                        <h4 class="font-bold text-purple-800 mb-3">💡 头部卖家销售建议</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li>• <strong>测试机构：</strong>选择TÜV、SGS、Intertek等权威机构，小机构报告可能不被亚马逊认可。</li>
-                                                <li>• <strong>批次管理：</strong>每批次货物保留样品，便于追溯。</li>
-                                                <li>• <strong>图片要求：</strong>主图不要出现儿童，避免年龄误导。</li>
-                                                <li>• <strong>Listing文案：</strong>必须包含"适用年龄"和"警告声明"(如：含小零件，不适合3岁以下)。</li>
-                                        </ul>
-                                </div>
-                                <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-600">
-                                        <strong>📋 上架Checklist：</strong>
-                                        EN71报告 ✓ | REACH声明 ✓ | 年龄标识 ✓ | EU责任人 ✓ | 警告声明 ✓
-                                </div>
-                        </div>
-                </div>
+        <!-- Step 6: Shipping -->
+        <div
+          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-cyan-400 transition duration-200 relative group mt-4 lg:mt-0"
+        >
+          <div
+            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl text-cyan-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-cyan-500 group-hover:text-white transition-colors z-10 relative"
+          >
+            <i class="fas fa-truck-fast"></i>
+          </div>
+          <h3 class="text-center font-bold text-slate-800 mb-2">6. 发货申报</h3>
+          <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+            <li>如实申报海关编码 (HS Code)</li>
+            <li>随货附带DoC符合性声明文件</li>
+            <li>确认是否涉及危险品 (电池/液体)</li>
+            <li>提供MSDS/UN38.3报告</li>
+          </ul>
         </div>
-        <!-- Category 4: Cosmetics -->
-        <div class="ui-card p-6 mb-6">
-                <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
-                        <i class="fas fa-pump-soap text-pink-600"></i>四、化妆品/护肤品类 — EC 1223/2009
-                </h2>
-                <p class="ui-card__muted text-xs mb-4">典型产品：面膜、护手霜、沐浴露、指甲油、香水、睫毛膏</p>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Left: Requirements -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-red-50 rounded-lg border border-red-200">
-                                        <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-                                                        <div><strong>CPNP通报：</strong>产品必须在EU化妆品门户网站 (CPNP) 完成通报。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                                                        <div><strong>安全评估报告 (CPSR)：</strong>由欧盟资质的安全评估师出具。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-                                                        <div><strong>成分表 (INCI)：</strong>必须以国际命名法列出全部成分。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
-                                                        <div><strong>责任人：</strong>EU境内公司地址，需完整显示在产品包装上。</div>
-                                                </li>
-                                        </ul>
-                                </div>
-                                <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                        <h4 class="font-bold text-amber-800 mb-2">⚠️ Listing禁用词</h4>
-                                        <div class="flex flex-wrap gap-2 text-xs">
-                                                <span
-                                                        class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">治疗/Treatment</span>
-                                                <span
-                                                        class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">医疗/Medical</span>
-                                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">FDA
-                                                        Approved</span>
-                                                <span
-                                                        class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">药用/Medicinal</span>
-                                        </div>
-                                        <p class="text-xs text-slate-500 mt-2">注意：承诺"治疗"功效会被归类为药品，需要药品许可证！</p>
-                                </div>
-                        </div>
-                        <!-- Right: Sales Advice -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-pink-50 rounded-lg border border-pink-200">
-                                        <h4 class="font-bold text-pink-800 mb-3">💡 头部卖家销售建议</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li>• <strong>找欧洲RP：</strong>如果没有欧洲公司，可找第三方责任人服务 (约€300-800/年)。</li>
-                                                <li>• <strong>配方审核：</strong>禁用成分超过1600种，上架前务必核对Annex II清单。</li>
-                                                <li>• <strong>保质期：</strong>开封后使用期限 (PAO) 必须用开盖罐图标标注。</li>
-                                                <li>• <strong>GB站：</strong>需单独按 UK SCPN 系统通报。</li>
-                                        </ul>
-                                </div>
-                                <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-600">
-                                        <strong>🔗 官方资源：</strong>
-                                        <a class="text-blue-600 underline"
-                                                href="https://ec.europa.eu/growth/sectors/cosmetics_en"
-                                                target="_blank">EU化妆品法规官网</a>
-                                </div>
-                        </div>
-                </div>
+        <!-- Step 7: Sales -->
+        <div
+          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-rose-400 transition duration-200 relative group mt-4 lg:mt-0"
+        >
+          <div
+            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-rose-500 rounded-full flex items-center justify-center text-xl text-rose-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-rose-500 group-hover:text-white transition-colors z-10 relative"
+          >
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3 class="text-center font-bold text-slate-800 mb-2">7. 销售上传</h3>
+          <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+            <li>后台上传EPR注册号并验证</li>
+            <li>关联网上上传CE DoC文件</li>
+            <li>上传六面图以供审核</li>
+            <li>填写GPSR责任人信息</li>
+          </ul>
         </div>
-        <!-- Category 5: Food Contact Materials -->
-        <div class="ui-card p-6 mb-6">
-                <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
-                        <i class="fas fa-utensils text-amber-600"></i>五、食品接触材料类 — LFGB/FCM
-                </h2>
-                <p class="ui-card__muted text-xs mb-4">典型产品：餐具、水杯、保鲜盒、砧板、烘焙模具、儿童餐盘</p>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Left: Requirements -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-red-50 rounded-lg border border-red-200">
-                                        <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-                                                        <div><strong>LFGB测试 (德国)：</strong>德国食品接触材料法规，最严格标准。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                                                        <div><strong>EU 10/2011 (塑料)：</strong>塑料制品需符合迁移限量测试。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-                                                        <div><strong>食品杯叉标志：</strong>产品/包装必须印有"玻璃杯+叉子"图标。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
-                                                        <div><strong>符合性声明 (DoC)：</strong>须提供材料成分及符合性声明文件。</div>
-                                                </li>
-                                        </ul>
-                                </div>
-                                <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                        <h4 class="font-bold text-amber-800 mb-2">⚠️ 材质特别注意</h4>
-                                        <ul class="text-xs text-slate-700 space-y-1">
-                                                <li>• <strong>竹纤维餐具：</strong>德国已禁止含三聚氰胺的竹纤维餐具！</li>
-                                                <li>• <strong>硅胶制品：</strong>需测试有机物挥发及硅氧烷迁移。</li>
-                                                <li>• <strong>不锈钢：</strong>需证明为食品级304/316，提供材质证明。</li>
-                                        </ul>
-                                </div>
-                        </div>
-                        <!-- Right: Sales Advice -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                        <h4 class="font-bold text-amber-800 mb-3">💡 头部卖家销售建议</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li>• <strong>测试选择：</strong>优先做LFGB (覆盖最广)，再补充EU 10/2011。</li>
-                                                <li>• <strong>图片展示：</strong>副图展示食品接触标志 (杯叉图标)。</li>
-                                                <li>• <strong>Listing文案：</strong>强调"Food Safe"、"BPA Free"，但不要写"FDA
-                                                        Approved"。</li>
-                                                <li>• <strong>儿童产品：</strong>如果目标是儿童，还需符合EN14372标准。</li>
-                                        </ul>
-                                </div>
-                                <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-600">
-                                        <strong>📋 上架Checklist：</strong>
-                                        LFGB报告 ✓ | REACH声明 ✓ | 杯叉标志 ✓ | 材质证明 ✓ | DoC声明 ✓
-                                </div>
-                        </div>
-                </div>
+        <!-- Step 8: Removal Plan -->
+        <div
+          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-red-500 transition duration-200 relative group mt-4 lg:mt-0"
+        >
+          <div
+            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-red-500 rounded-full flex items-center justify-center text-xl text-red-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-red-500 group-hover:text-white transition-colors z-10 relative"
+          >
+            <i class="fas fa-fire-extinguisher"></i>
+          </div>
+          <h3 class="text-center font-bold text-slate-800 mb-2">8. 下架处理预案</h3>
+          <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+            <li><span class="text-red-600 font-bold">立即停止FBA补货</span> (防止库存积压)</li>
+            <li>删除Listing中所有敏感文案/图片</li>
+            <li>准备申诉包 (DoC/六面图/发票)</li>
+            <li>申诉失败则立即创建移除订单 (弃置/移仓)</li>
+          </ul>
         </div>
-        <!-- Category 6: Textiles -->
-        <div class="ui-card p-6 mb-6">
-                <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
-                        <i class="fas fa-shirt text-indigo-600"></i>六、纺织品/服装类 — Textile Regulation
-                </h2>
-                <p class="ui-card__muted text-xs mb-4">典型产品：服装、床上用品、毛巾、袜子、内衣、窗帘</p>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Left: Requirements -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-red-50 rounded-lg border border-red-200">
-                                        <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-                                                        <div><strong>成分标签：</strong>必须按EU 1007/2011法规标注纤维成分百分比。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                                                        <div><strong>REACH合规：</strong>SVHC高关注物质 + 附件XVII限制物质测试。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-                                                        <div><strong>德国EPR：</strong>纺织品需在德国VerpackG + 纺织品回收系统注册。</div>
-                                                </li>
-                                                <li class="flex items-start gap-2">
-                                                        <span
-                                                                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
-                                                        <div><strong>护理标签：</strong>洗涤/烘干/熨烫图标，多语言说明。</div>
-                                                </li>
-                                        </ul>
-                                </div>
-                                <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                        <h4 class="font-bold text-amber-800 mb-2">⚠️ 材质命名红线</h4>
-                                        <div class="overflow-x-auto">
-                                                <table class="w-full text-xs">
-                                                        <thead class="bg-slate-100">
-                                                                <tr>
-                                                                        <th class="px-2 py-1 text-left">禁用词</th>
-                                                                        <th class="px-2 py-1 text-left">正确写法</th>
-                                                                </tr>
-                                                        </thead>
-                                                        <tbody class="divide-y">
-                                                                <tr>
-                                                                        <td class="px-2 py-1 text-red-600 font-bold">
-                                                                                Bamboo</td>
-                                                                        <td class="px-2 py-1">Viscose/Rayon</td>
-                                                                </tr>
-                                                                <tr>
-                                                                        <td class="px-2 py-1 text-red-600 font-bold">
-                                                                                Lycra</td>
-                                                                        <td class="px-2 py-1">Elastane</td>
-                                                                </tr>
-                                                                <tr>
-                                                                        <td class="px-2 py-1 text-red-600 font-bold">
-                                                                                Silk (非真丝)</td>
-                                                                        <td class="px-2 py-1">Satin/Polyester</td>
-                                                                </tr>
-                                                        </tbody>
-                                                </table>
-                                        </div>
-                                </div>
-                        </div>
-                        <!-- Right: Sales Advice -->
-                        <div class="space-y-4">
-                                <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-                                        <h4 class="font-bold text-indigo-800 mb-3">💡 头部卖家销售建议</h4>
-                                        <ul class="text-xs text-slate-700 space-y-2">
-                                                <li>• <strong>工厂要求：</strong>下单时要求成分检测报告 + 甲醛测试 + AZO染料测试。</li>
-                                                <li>• <strong>尺码表：</strong>欧洲尺码 (36/38/40) 和国际尺码 (S/M/L) 对照，减少退货。</li>
-                                                <li>• <strong>图片展示：</strong>副图展示成分标签和护理标签。</li>
-                                                <li>• <strong>退货率控制：</strong>详细尺寸表 + 模特净身高体重 = 降低50%退货。</li>
-                                        </ul>
-                                </div>
-                                <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-600">
-                                        <strong>📋 上架Checklist：</strong>
-                                        成分标签 ✓ | REACH报告 ✓ | 护理标签 ✓ | 尺码表 ✓ | EPR注册 ✓
-                                </div>
-                        </div>
-                </div>
+      </div>
+    </div>
+  </div>
+  <!-- Category 1: Biocides (BPR) -->
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
+      <i class="fas fa-bug-slash text-emerald-600"></i>一、生物杀虫剂类 (Biocides) — BPR法规
+    </h2>
+    <p class="ui-card__muted text-xs mb-4">
+      典型产品：驱蚊手环、防蚊贴、宠物驱虫项圈、抗菌砧板、防霉剂
+    </p>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left: Requirements -->
+      <div class="space-y-4">
+        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+          <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标 (缺一不可)</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >1</span
+              >
+              <div>
+                <strong>ECHA注册号：</strong>产品必须在欧洲化学品管理局 (ECHA)
+                完成生物杀灭剂注册，获得唯一注册号。
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >2</span
+              >
+              <div>
+                <strong>活性物质批准：</strong>使用的驱虫/杀菌成分必须在EU活性物质正面清单内。
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >3</span
+              >
+              <div>
+                <strong>销售国授权：</strong>每个销售国家需单独授权 (德国BAuA，法国ANSES等)。
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >4</span
+              >
+              <div><strong>欧盟责任人：</strong>必须有EU境内的责任人地址显示在包装上。</div>
+            </li>
+          </ul>
         </div>
-        <!-- Summary Card -->
-        <div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-xl p-6 mb-6">
-                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-                        <i class="fas fa-clipboard-check"></i>🚀 敏感货上架终极Checklist
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                        <div class="bg-white/10 rounded-lg p-4">
-                                <h4 class="font-bold text-emerald-300 mb-2">📦 上架前 (3-4周)</h4>
-                                <ul class="space-y-1 text-white/80">
-                                        <li>□ 确认产品分类，查阅对应法规</li>
-                                        <li>□ 联系工厂获取测试报告</li>
-                                        <li>□ 完成EPR/WEEE/包装法注册</li>
-                                        <li>□ 确认欧盟责任人 (RP)</li>
-                                </ul>
-                        </div>
-                        <div class="bg-white/10 rounded-lg p-4">
-                                <h4 class="font-bold text-blue-300 mb-2">✍️ 创建Listing时</h4>
-                                <ul class="space-y-1 text-white/80">
-                                        <li>□ 标题/五点禁用违规词</li>
-                                        <li>□ 填写合规属性字段</li>
-                                        <li>□ 上传相关证书文件</li>
-                                        <li>□ 图片只展示真实存在的合规标志，且主图/副图/安全图片位符合亚马逊当前规则</li>
-                                </ul>
-                        </div>
-                        <div class="bg-white/10 rounded-lg p-4">
-                                <h4 class="font-bold text-amber-300 mb-2">🔄 持续维护</h4>
-                                <ul class="space-y-1 text-white/80">
-                                        <li>□ 监控政策邮件/通知</li>
-                                        <li>□ 年度更新EPR注册</li>
-                                        <li>□ 批次样品留存备查</li>
-                                        <li>□ 定期复核Listing合规性</li>
-                                </ul>
-                        </div>
-                </div>
-                <div class="mt-4 flex flex-col sm:flex-row gap-2">
-                        <label class="flex-1 text-xs text-white/80">
-                                <span class="block font-semibold text-white mb-1">合规复盘负责人</span>
-                                <input id="product-compliance-owner" type="text" value="合规负责人"
-                                        class="w-full rounded-lg border border-white/20 bg-white px-3 py-2 text-sm text-slate-700 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
-                        </label>
-                        <button type="button" data-action="sops_copyProductComplianceTemplate"
-                                class="self-end inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">
-                                <i class="fas fa-copy"></i>
-                                复制合规复盘模板
-                        </button>
-                </div>
+        <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
+          <h4 class="font-bold text-amber-800 mb-2">⚠️ Listing禁用词</h4>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">Antibacterial</span>
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">Antimicrobial</span>
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">Kills 99.9%</span>
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">Anti-mite</span>
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono"
+              >Insect Repellent</span
+            >
+          </div>
         </div>
-        <!-- Video Resource -->
-        <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
-                <div class="flex items-center gap-3">
-                        <i class="fas fa-video text-blue-500 text-xl"></i>
-                        <div>
-                                <h3 class="font-bold text-slate-800">操作视频教程</h3>
-                                <p class="text-sm text-slate-600">访问公司网盘(待完善)观看详细操作录屏：<span class="text-blue-600 underline"
-                                                data-internal-only="true">仅限内网访问</span>→ 培训资料 → 欧洲合规专题</p>
-                        </div>
-                </div>
+      </div>
+      <!-- Right: Sales Advice -->
+      <div class="space-y-4">
+        <div class="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+          <h4 class="font-bold text-emerald-800 mb-3">💡 头部卖家销售建议</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li>• <strong>替代策略：</strong>改卖"物理驱蚊"产品 (如电蚊拍、蚊帐)，无需BPR认证。</li>
+            <li>
+              • <strong>供应链选择：</strong>找已有欧盟BPR授权的工厂贴牌，而非自己申请
+              (费用€5万-20万/国家)。
+            </li>
+            <li>
+              • <strong>文案规避：</strong>如果是芳香类产品，只写"Pleasant
+              fragrance"，绝不提驱虫功效。
+            </li>
+            <li>• <strong>风险评估：</strong>此类目亚马逊随机抽查率极高，建议新手避开。</li>
+          </ul>
         </div>
+        <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-600">
+          <strong>🔗 官方资源：</strong>
+          <a
+            class="text-blue-600 underline"
+            href="https://echa.europa.eu/regulations/biocidal-products-regulation"
+            target="_blank"
+            >ECHA BPR法规官网</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Category 2: Electronics (3C) -->
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
+      <i class="fas fa-plug text-blue-600"></i>二、电子3C类产品 — CE/WEEE/ErP
+    </h2>
+    <p class="ui-card__muted text-xs mb-4">典型产品：充电器、蓝牙耳机、LED灯、小家电、移动电源</p>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left: Requirements -->
+      <div class="space-y-4">
+        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+          <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >CE</span
+              >
+              <div>
+                <strong>CE标志：</strong>DoC符合性声明 + 技术文档 (TCF)。<span class="text-red-600"
+                  >注意：Listing中禁止宣传"CE Certified"！</span
+                >
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >🗑️</span
+              >
+              <div>
+                <strong>WEEE注册：</strong>德国需在EAR
+                stiftung注册，获得注册号并显示在Listing。法国/意大利/西班牙有各自的EPR系统。
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >🔋</span
+              >
+              <div><strong>电池法 (BattG)：</strong>含电池产品需完成电池注册，提供回收方案。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >⚡</span
+              >
+              <div><strong>ErP能效标签：</strong>灯具/家电需EPREL数据库注册，显示A-G能效等级。</div>
+            </li>
+          </ul>
+        </div>
+        <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
+          <h4 class="font-bold text-amber-800 mb-2">⚠️ 德国站特别注意</h4>
+          <ul class="text-xs text-slate-700 space-y-1">
+            <li>• <strong>包装法 (VerpackG)：</strong>必须在LUCID系统注册包装许可证号。</li>
+            <li>• <strong>电压标注：</strong>必须写 220V-240V，禁止写美规 110V。</li>
+            <li>• <strong>插头类型：</strong>德标Schuko (Type F)，图片必须展示。</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Right: Sales Advice -->
+      <div class="space-y-4">
+        <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h4 class="font-bold text-blue-800 mb-3">💡 头部卖家销售建议</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li>
+              • <strong>一站式服务商：</strong>推荐使用Compliance
+              Gate、ecosistant等欧洲EPR合规服务商，年费约€200-500/国。
+            </li>
+            <li>
+              • <strong>工厂要求：</strong>下单前要求工厂提供CE测试报告
+              (EMC+LVD)、REACH声明、RoHS报告。
+            </li>
+            <li>
+              • <strong>图片展示：</strong>仅展示实物/包装上真实存在的
+              CE、能效等标识；主图遵守亚马逊主图规则，合规细节优先放副图或安全图片位。
+            </li>
+            <li>
+              • <strong>GB站：</strong>UKCA 与 CE 认可口径按英国政府当前指南和品类法规执行；不要把
+              EU 的 CE/GPSR 资料直接等同于 GB 合规。
+            </li>
+          </ul>
+        </div>
+        <div class="p-3 bg-slate-800 rounded-lg text-xs text-white">
+          <strong>📋 上架Checklist：</strong>
+          CE证书 ✓ | WEEE注册号 ✓ | 包装法注册号 ✓ | 电池法注册 ✓ | 能效标签(如适用) ✓
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Category 3: Toys -->
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
+      <i class="fas fa-puzzle-piece text-purple-600"></i>三、儿童玩具类 — EN71/GPSR
+    </h2>
+    <p class="ui-card__muted text-xs mb-4">
+      典型产品：积木、毛绒玩具、婴儿摇铃、儿童文具、派对用品
+    </p>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left: Requirements -->
+      <div class="space-y-4">
+        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+          <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >1</span
+              >
+              <div>
+                <strong>EN71测试：</strong>EN71-1 (机械物理)、EN71-2 (燃烧性)、EN71-3 (有害元素迁移)
+                三项必测。
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >2</span
+              >
+              <div>
+                <strong>年龄标识：</strong>必须明确标注适用年龄段 (如 "3+")，0-3岁产品要求更严格。
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >3</span
+              >
+              <div><strong>GPSR (2024新规)：</strong>需提供EU境内责任人信息，二维码可追溯。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >4</span
+              >
+              <div><strong>CE标志位置：</strong>必须印在产品本体或包装上，不能只贴标签。</div>
+            </li>
+          </ul>
+        </div>
+        <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
+          <h4 class="font-bold text-amber-800 mb-2">⚠️ 高风险品类</h4>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="p-2 bg-red-100 rounded">
+              <strong class="text-red-700">水弹枪：</strong>多国禁售
+            </div>
+            <div class="p-2 bg-red-100 rounded">
+              <strong class="text-red-700">磁力球：</strong>小零件窒息风险
+            </div>
+            <div class="p-2 bg-red-100 rounded">
+              <strong class="text-red-700">史莱姆：</strong>硼酸超标风险
+            </div>
+            <div class="p-2 bg-red-100 rounded">
+              <strong class="text-red-700">激光笔：</strong>眼睛伤害风险
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Right: Sales Advice -->
+      <div class="space-y-4">
+        <div class="p-4 bg-purple-50 rounded-lg border border-purple-200">
+          <h4 class="font-bold text-purple-800 mb-3">💡 头部卖家销售建议</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li>
+              •
+              <strong>测试机构：</strong
+              >选择TÜV、SGS、Intertek等权威机构，小机构报告可能不被亚马逊认可。
+            </li>
+            <li>• <strong>批次管理：</strong>每批次货物保留样品，便于追溯。</li>
+            <li>• <strong>图片要求：</strong>主图不要出现儿童，避免年龄误导。</li>
+            <li>
+              •
+              <strong>Listing文案：</strong
+              >必须包含"适用年龄"和"警告声明"(如：含小零件，不适合3岁以下)。
+            </li>
+          </ul>
+        </div>
+        <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-600">
+          <strong>📋 上架Checklist：</strong>
+          EN71报告 ✓ | REACH声明 ✓ | 年龄标识 ✓ | EU责任人 ✓ | 警告声明 ✓
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Category 4: Cosmetics -->
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
+      <i class="fas fa-pump-soap text-pink-600"></i>四、化妆品/护肤品类 — EC 1223/2009
+    </h2>
+    <p class="ui-card__muted text-xs mb-4">典型产品：面膜、护手霜、沐浴露、指甲油、香水、睫毛膏</p>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left: Requirements -->
+      <div class="space-y-4">
+        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+          <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >1</span
+              >
+              <div><strong>CPNP通报：</strong>产品必须在EU化妆品门户网站 (CPNP) 完成通报。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >2</span
+              >
+              <div><strong>安全评估报告 (CPSR)：</strong>由欧盟资质的安全评估师出具。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >3</span
+              >
+              <div><strong>成分表 (INCI)：</strong>必须以国际命名法列出全部成分。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >4</span
+              >
+              <div><strong>责任人：</strong>EU境内公司地址，需完整显示在产品包装上。</div>
+            </li>
+          </ul>
+        </div>
+        <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
+          <h4 class="font-bold text-amber-800 mb-2">⚠️ Listing禁用词</h4>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">治疗/Treatment</span>
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">医疗/Medical</span>
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">FDA Approved</span>
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-mono">药用/Medicinal</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">
+            注意：承诺"治疗"功效会被归类为药品，需要药品许可证！
+          </p>
+        </div>
+      </div>
+      <!-- Right: Sales Advice -->
+      <div class="space-y-4">
+        <div class="p-4 bg-pink-50 rounded-lg border border-pink-200">
+          <h4 class="font-bold text-pink-800 mb-3">💡 头部卖家销售建议</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li>
+              • <strong>找欧洲RP：</strong>如果没有欧洲公司，可找第三方责任人服务 (约€300-800/年)。
+            </li>
+            <li>• <strong>配方审核：</strong>禁用成分超过1600种，上架前务必核对Annex II清单。</li>
+            <li>• <strong>保质期：</strong>开封后使用期限 (PAO) 必须用开盖罐图标标注。</li>
+            <li>• <strong>GB站：</strong>需单独按 UK SCPN 系统通报。</li>
+          </ul>
+        </div>
+        <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-600">
+          <strong>🔗 官方资源：</strong>
+          <a
+            class="text-blue-600 underline"
+            href="https://ec.europa.eu/growth/sectors/cosmetics_en"
+            target="_blank"
+            >EU化妆品法规官网</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Category 5: Food Contact Materials -->
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
+      <i class="fas fa-utensils text-amber-600"></i>五、食品接触材料类 — LFGB/FCM
+    </h2>
+    <p class="ui-card__muted text-xs mb-4">
+      典型产品：餐具、水杯、保鲜盒、砧板、烘焙模具、儿童餐盘
+    </p>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left: Requirements -->
+      <div class="space-y-4">
+        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+          <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >1</span
+              >
+              <div><strong>LFGB测试 (德国)：</strong>德国食品接触材料法规，最严格标准。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >2</span
+              >
+              <div><strong>EU 10/2011 (塑料)：</strong>塑料制品需符合迁移限量测试。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >3</span
+              >
+              <div><strong>食品杯叉标志：</strong>产品/包装必须印有"玻璃杯+叉子"图标。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >4</span
+              >
+              <div><strong>符合性声明 (DoC)：</strong>须提供材料成分及符合性声明文件。</div>
+            </li>
+          </ul>
+        </div>
+        <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
+          <h4 class="font-bold text-amber-800 mb-2">⚠️ 材质特别注意</h4>
+          <ul class="text-xs text-slate-700 space-y-1">
+            <li>• <strong>竹纤维餐具：</strong>德国已禁止含三聚氰胺的竹纤维餐具！</li>
+            <li>• <strong>硅胶制品：</strong>需测试有机物挥发及硅氧烷迁移。</li>
+            <li>• <strong>不锈钢：</strong>需证明为食品级304/316，提供材质证明。</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Right: Sales Advice -->
+      <div class="space-y-4">
+        <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
+          <h4 class="font-bold text-amber-800 mb-3">💡 头部卖家销售建议</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li>• <strong>测试选择：</strong>优先做LFGB (覆盖最广)，再补充EU 10/2011。</li>
+            <li>• <strong>图片展示：</strong>副图展示食品接触标志 (杯叉图标)。</li>
+            <li>
+              • <strong>Listing文案：</strong>强调"Food Safe"、"BPA Free"，但不要写"FDA Approved"。
+            </li>
+            <li>• <strong>儿童产品：</strong>如果目标是儿童，还需符合EN14372标准。</li>
+          </ul>
+        </div>
+        <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-600">
+          <strong>📋 上架Checklist：</strong>
+          LFGB报告 ✓ | REACH声明 ✓ | 杯叉标志 ✓ | 材质证明 ✓ | DoC声明 ✓
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Category 6: Textiles -->
+  <div class="ui-card p-6 mb-6">
+    <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
+      <i class="fas fa-shirt text-indigo-600"></i>六、纺织品/服装类 — Textile Regulation
+    </h2>
+    <p class="ui-card__muted text-xs mb-4">典型产品：服装、床上用品、毛巾、袜子、内衣、窗帘</p>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left: Requirements -->
+      <div class="space-y-4">
+        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+          <h4 class="font-bold text-red-800 mb-3">🚫 合规硬指标</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >1</span
+              >
+              <div><strong>成分标签：</strong>必须按EU 1007/2011法规标注纤维成分百分比。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >2</span
+              >
+              <div><strong>REACH合规：</strong>SVHC高关注物质 + 附件XVII限制物质测试。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >3</span
+              >
+              <div><strong>德国EPR：</strong>纺织品需在德国VerpackG + 纺织品回收系统注册。</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span
+                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >4</span
+              >
+              <div><strong>护理标签：</strong>洗涤/烘干/熨烫图标，多语言说明。</div>
+            </li>
+          </ul>
+        </div>
+        <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
+          <h4 class="font-bold text-amber-800 mb-2">⚠️ 材质命名红线</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead class="bg-slate-100">
+                <tr>
+                  <th class="px-2 py-1 text-left">禁用词</th>
+                  <th class="px-2 py-1 text-left">正确写法</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y">
+                <tr>
+                  <td class="px-2 py-1 text-red-600 font-bold">Bamboo</td>
+                  <td class="px-2 py-1">Viscose/Rayon</td>
+                </tr>
+                <tr>
+                  <td class="px-2 py-1 text-red-600 font-bold">Lycra</td>
+                  <td class="px-2 py-1">Elastane</td>
+                </tr>
+                <tr>
+                  <td class="px-2 py-1 text-red-600 font-bold">Silk (非真丝)</td>
+                  <td class="px-2 py-1">Satin/Polyester</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Right: Sales Advice -->
+      <div class="space-y-4">
+        <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+          <h4 class="font-bold text-indigo-800 mb-3">💡 头部卖家销售建议</h4>
+          <ul class="text-xs text-slate-700 space-y-2">
+            <li>• <strong>工厂要求：</strong>下单时要求成分检测报告 + 甲醛测试 + AZO染料测试。</li>
+            <li>
+              • <strong>尺码表：</strong>欧洲尺码 (36/38/40) 和国际尺码 (S/M/L) 对照，减少退货。
+            </li>
+            <li>• <strong>图片展示：</strong>副图展示成分标签和护理标签。</li>
+            <li>• <strong>退货率控制：</strong>详细尺寸表 + 模特净身高体重 = 降低50%退货。</li>
+          </ul>
+        </div>
+        <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-600">
+          <strong>📋 上架Checklist：</strong>
+          成分标签 ✓ | REACH报告 ✓ | 护理标签 ✓ | 尺码表 ✓ | EPR注册 ✓
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Summary Card -->
+  <div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-xl p-6 mb-6">
+    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+      <i class="fas fa-clipboard-check"></i>🚀 敏感货上架终极Checklist
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+      <div class="bg-white/10 rounded-lg p-4">
+        <h4 class="font-bold text-emerald-300 mb-2">📦 上架前 (3-4周)</h4>
+        <ul class="space-y-1 text-white/80">
+          <li>□ 确认产品分类，查阅对应法规</li>
+          <li>□ 联系工厂获取测试报告</li>
+          <li>□ 完成EPR/WEEE/包装法注册</li>
+          <li>□ 确认欧盟责任人 (RP)</li>
+        </ul>
+      </div>
+      <div class="bg-white/10 rounded-lg p-4">
+        <h4 class="font-bold text-blue-300 mb-2">✍️ 创建Listing时</h4>
+        <ul class="space-y-1 text-white/80">
+          <li>□ 标题/五点禁用违规词</li>
+          <li>□ 填写合规属性字段</li>
+          <li>□ 上传相关证书文件</li>
+          <li>□ 图片只展示真实存在的合规标志，且主图/副图/安全图片位符合亚马逊当前规则</li>
+        </ul>
+      </div>
+      <div class="bg-white/10 rounded-lg p-4">
+        <h4 class="font-bold text-amber-300 mb-2">🔄 持续维护</h4>
+        <ul class="space-y-1 text-white/80">
+          <li>□ 监控政策邮件/通知</li>
+          <li>□ 年度更新EPR注册</li>
+          <li>□ 批次样品留存备查</li>
+          <li>□ 定期复核Listing合规性</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-4 flex flex-col sm:flex-row gap-2">
+      <label class="flex-1 text-xs text-white/80">
+        <span class="block font-semibold text-white mb-1">合规复盘负责人</span>
+        <input
+          id="product-compliance-owner"
+          type="text"
+          value="合规负责人"
+          class="w-full rounded-lg border border-white/20 bg-white px-3 py-2 text-sm text-slate-700 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+        />
+      </label>
+      <button
+        type="button"
+        data-action="sops_copyProductComplianceTemplate"
+        class="self-end inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600"
+      >
+        <i class="fas fa-copy"></i>
+        复制合规复盘模板
+      </button>
+    </div>
+  </div>
+  <!-- Video Resource -->
+  <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+    <div class="flex items-center gap-3">
+      <i class="fas fa-video text-blue-500 text-xl"></i>
+      <div>
+        <h3 class="font-bold text-slate-800">操作视频教程</h3>
+        <p class="text-sm text-slate-600">
+          访问公司网盘(待完善)观看详细操作录屏：<span
+            class="text-blue-600 underline"
+            data-internal-only="true"
+            >仅限内网访问</span
+          >→ 培训资料 → 欧洲合规专题
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
