@@ -1,9 +1,12 @@
 # CI质量门禁文档
 
-**生成时间**: 2026-06-07  
-**版本**: 1.1.0  
+**Status:** active · SSOT（门禁命令清单）  
+**Updated:** 2026-07-26  
+**版本**: 1.2.0  
 **维护团队**: DevOps & Security Team  
-**维护说明**: 2026-07-26 — 仍为门禁清单 SSOT；测试**策略**见 [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)；活债务见 [TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)。若本文命令与 `package.json` 不一致，以 `package.json` 为准并应回写本文。
+
+> 测试**策略**见 [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)；活债务见 [TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)。  
+> **命令 SSOT：** `package.json` 的 `scripts`。本文与脚本不一致时，以 `package.json` 为准并应回写本文（关闭 TD-DOC-01 的卫生要求）。
 
 ---
 
@@ -32,19 +35,18 @@ npm run prebuild
    - Secret泄漏门
    - 循环依赖检查
 
-2. **代码质量检查** (`npm run ci:quality`)
-   - 架构 / CSS / 命名审计
-   - 壳层 `blue-*` 硬编码基线门禁 (D6)
-   - D1 原子 token 覆盖 allowlist 门禁
-   - TypeScript类型检查
-   - ESLint代码规范检查
-   - ESLint warning baseline gate
-   - 测试 TypeScript 类型检查
-   - 测试 ESLint 检查
-   - Prettier 格式检查
+2. **代码质量检查** (`npm run ci:quality`，顺序以 `package.json` 为准)
+   - `architecture:audit` / `css:audit`
+   - 壳层 `blue-*` 硬编码基线门禁：`theme:hardcode-baseline:gate` (D6)
+   - D1 原子 token 覆盖 allowlist：`token:override-audit:gate`
+   - `action-names:audit` / `import-paths:audit` / `source-names:audit`
+   - TypeScript：`type-check`
+   - ESLint：`lint` + `lint:warning-gate`
+   - 测试质量：`ci:test-quality`（含 `type-check:tests` / `lint:tests` 等，以脚本为准）
+   - 格式：`ci:format`（Prettier check）
 
-3. **构建验证** (`npm run build`)
-   - Vite构建成功
+3. **构建验证** (`npm run build` → `build:app`)
+   - Vite 构建成功
    - 无构建错误；构建警告进入后续优化清单
 
 ---
@@ -336,22 +338,24 @@ npm run theme:hardcode-baseline:update
 ### 开发环境
 
 ```bash
-# 手动运行完整检查
+# 手动运行完整检查（security + quality + build:app）
 npm run ci:all
 
-# 单独运行各项检查
-npm run circular:check      # 循环依赖
-npm run xss:gate           # XSS安全门
-npm run xss:scan           # XSS完整报告
-npm run type-check         # 类型检查
-npm run type-check:tests   # 测试类型检查
-npm run lint               # 代码规范
-npm run lint:tests         # 测试代码规范
-npm run lint:warning-gate  # ESLint warning 基线门
-npm run theme:hardcode-baseline:gate  # 壳层 blue-* 硬编码门 (D6)
-npm run token:override-audit:gate     # D1 原子 token 覆盖 allowlist 门
-npm run format:check       # 格式检查
-npm run build              # 构建验证
+# 聚合入口
+npm run ci:security   # xss:gate + secret:scan + circular:check
+npm run ci:quality    # 见上文 § prebuild 列表（含 architecture/css/theme/token/action/import/source + type-check + lint + warning-gate + ci:test-quality + ci:format）
+npm run build         # → build:app
+
+# 常用单项（非完整列表）
+npm run circular:check
+npm run xss:gate
+npm run secret:scan
+npm run type-check
+npm run lint
+npm run lint:warning-gate
+npm run theme:hardcode-baseline:gate
+npm run token:override-audit:gate
+npm run format:check
 ```
 
 ### CI/CD环境

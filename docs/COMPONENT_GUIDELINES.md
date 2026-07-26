@@ -169,7 +169,34 @@
 
 ---
 
-## 10. PR 检查清单（组件相关）
+## 10. 系统设置：保存语义矩阵（即时 vs 显式）
+
+> **SSOT 行为在代码：** `src/components/settings/systemSettings.ts`。改保存语义须同步改本表 + 相关单测/e2e。  
+> 关闭债：**TD-SET-02**（文档化）；API 收敛仍属 **TD-SET-01** 拆分范围。
+
+| 区域 / 控件 | 调用 | 模式 | Dirty 分区 | 面板关闭 |
+| --- | --- | --- | --- | --- |
+| LLM 主表单（Endpoint/Key/模型等）+「保存 LLM」 | `saveProviderConfig()` | **显式** | 清 LLM 脏 | **不**自动关 |
+| 推理开关 / 推理档位 | `autoSaveProviderConfig(...)` | **即时** | 不进「未保存表单」脏（已写盘） | 不关 |
+| 推理档位被模型能力降级 | `autoSaveProviderConfig(..., { silent: true })` | **即时静默** | 同上 | 不关 |
+| 工具策略表单数值/开关（改后未点保存） | `setRuntime*` / 工具目标模型 | **脏**直至显式保存 | 运行时/工具分区 | 关时确认 |
+| 「保存工具与运行策略」 | `saveToolStrategy()` | **显式**（同时写 tool + runtime） | 清对应脏 | **不**自动关 |
+| 运行策略预设按钮 | `persistRuntimeStrategySettings({ toast })` | **即时** | 已写盘 | 不关 |
+| Master Analysis 调度偏好 | `persistRuntimeStrategySettings` | **即时** | 已写盘 | 不关 |
+| 采集代理 Key/类型 + 保存 | `saveProxyConfig()` | **显式** | 网络分区 | 不关 |
+| 数据保留等「保存策略」 | `saveRuntimeStrategy()` | **显式** | 见数据区 | 不关 |
+| Appearance 主题 / 颜色模式 / 动效 | `ThemeManager` / `animationSettingsStore` | **即时**（独立 store） | 不走 LLM/工具脏分区 | 不关 |
+
+**开发者规则：**
+
+1. **按钮型偏好**（开关、档位、预设）→ 即时写盘 + 短 Toast；禁止「再找大保存」。  
+2. **表单型配置**（多字段、Key、Endpoint）→ 显式保存；保存后**禁止**强制关面板。  
+3. 新增设置控件时：先归入上表一行，再写代码；并在 PR 注明即时/显式。  
+4. 用户可见文案遵循 [CONTENT_DESIGN](./CONTENT_DESIGN.md)；安全边界见 [SECURITY_PLAYBOOK](./SECURITY_PLAYBOOK.md)。
+
+---
+
+## 11. PR 检查清单（组件相关）
 
 - [ ] 未新增平行 button/input/modal 体系  
 - [ ] Primary ≤ 1 / 操作区；Danger ≠ Primary  
@@ -181,7 +208,7 @@
 
 ---
 
-## 11. 反模式
+## 12. 反模式
 
 | 反模式 | 后果 |
 | --- | --- |
@@ -193,11 +220,12 @@
 
 ---
 
-## 12. 版本与演进
+## 13. 版本与演进
 
 | 版本 | 说明 |
 | --- | --- |
 | v1.0 | 初版：按钮/表单/反馈/卡片/弹层/清单 |
+| v1.1 | §10 系统设置即时 vs 显式保存矩阵（TD-SET-02） |
 | 后续 | 补 Table、DatePicker、虚拟列表；可加示意截图 |
 
 变更走 [PRODUCT_PRINCIPLES §5](./PRODUCT_PRINCIPLES.md#5-规范变更流程)。

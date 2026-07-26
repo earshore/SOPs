@@ -138,8 +138,9 @@
 系统设置是「契约 + e2e」样板：
 
 - 单测：`tests/unit/systemSettings*.test.ts`  
-- E2E：`tests/e2e/system-settings.spec.ts`  
+- E2E：`tests/e2e/system-settings.spec.ts`（含二级 nav 跳转、即时保存预设；`npm run test:e2e:settings`）  
 - 闭环：`npm run test:settings`  
+- **即时 vs 显式保存矩阵（开发契约）：** [COMPONENT_GUIDELINES §10](./COMPONENT_GUIDELINES.md#10-系统设置保存语义矩阵即时-vs-显式)  
 - Spec 级矩阵：`docs/superpowers/specs/2026-07-25-system-settings-enterprise-hardening-design.md` §7  
 
 新复杂配置面应复制该模式，而非只加手动清单。

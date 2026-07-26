@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- 设置 e2e 补强（TD-TEST-02）：二级 nav「数据采集」深链展开 + 运行策略预设即时保存后无脏关确认（`tests/e2e/system-settings.spec.ts`）。
+- COMPONENT 保存语义矩阵（TD-SET-02）：即时 vs 显式 / Dirty / 面板不关规则表（`docs/COMPONENT_GUIDELINES.md` §10）。
 - 企业设计规范 SSOT 栈落地：`docs/SECURITY_PLAYBOOK.md`（BYOK 威胁模型 + PR/RC 清单）；INDEX 30 秒决策树 / README 唯一入口 / SECURITY·PRODUCT 接线；活债务板 `TECH_DEBT_BOARD`（TD-OPS-01 / TD-DOC-STACK Closed，无 Open∩Closed 双真）；Release 模板 + `RELEASE_POLICY` 嵌入 OPS 冒烟与 a11y 抽检必勾项；`docs/superpowers` constitution-touch checklist；结构门禁 `tests/unit/enterpriseGuidelinesStack.test.ts`（14 项，防双真/断链/降级回退）。
 - D8 Ownership Role 代码 SSOT scaffold：`src/common/config/ownershipRoles.ts`（`OwnershipRoleId` × 19、`OWNERSHIP_ROLES`、`getPaletteForRole` / `getOwnershipRoleForModule`；纯 helper，无 Appearance 写入、无全站 DOM 绑定）。
 - D8 soft ownership unit expand：`ownershipRoles.test.ts` 补 `playground` / `amz_hub` / `app_center` / `sops` sidebar soft-check + hub/more category palette 对齐（无生产 API / 无全站 `data-ownership-role`）。
@@ -31,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- TD-DOC-01：`CI-QUALITY-GATES` 与现行 `ci:quality`/`ci:security` 脚本对齐；`development/best-practices` 标注 Zustand 现行、StateManager 历史。
 - D5 续：shell `.nav-trigger:focus-visible` 从 hard indigo `rgba(99,102,241,.35)` 迁到 `color-mix(--color-focus-ring)`；Settings runtime checkbox 从 `focus:ring-indigo-500` 迁到 shared `settings-checkbox`（跟 Appearance focus；megaMenu / sidebar-theme / wb / chat purple / ErrorBoundary 保留）。
 - D10：删除 deprecated 类型别名 `ThemeColors`；Appearance 预览/写入类型 SSOT 仅 `AppearanceThemeColors`（primary 族 + focus）。
 - D11：`variables.css` root 暗色语义 token 块扩为 dual-safe：补 `[data-color-mode-resolved='dark']`（保留 `.dark` / legacy `data-theme` / `data-color-mode='dark'`）。
@@ -68,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D6 业务样例 #21（PromptLab residual focus chrome）：展开/市场选择/DNA extract 字段按钮与复制 Prompt 工具钮 `focus-visible:ring-blue-500` 迁到 `--color-focus-ring`；复制钮 hover 迁到 `--color-primary*`（保留 extract 次要蓝 chrome、Listing/Visual mode 蓝/粉与 DNA 置信多色）。
 - D6 业务样例 #22（SafeModuleLoader）：error/actions 主 CTA 从 hard `bg-blue-500/600` 迁到 `--color-primary*`（次要 gray 与 loading spinner 保留）。
 - D6 业务样例 #23（Home splash/floating）：主 CTA `.home-primary-action--main` 与 floating workbench 图标/hover/focus 从 hard `--color-blue-*` / `rgba(37,99,235,*)` 迁到 `--color-primary*` / `--color-focus-ring`（保留 slogan 蓝绿渐变与 cyan 状态点）。
+- D6 业务样例 #24（shared confirmModal）：theme 主 CTA/头部/边框/checkbox 从 hard `#6257f5` 紫 迁到 `--color-primary*` / `--color-focus-ring`（保留 danger 红→橙）。
 - D5 续：`--shadow-primary-*` 改 `color-mix` 跟随 `--color-primary`（light/dark），不再写死蓝/indigo。
 - D5 续：root `--focus-ring-soft` + header search / forms dark / Overview search / nav-focus 从 hard blue 迁到 `--color-focus-ring`（megaMenu / sidebar-theme / wb ownership 保留）。
 - D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标；Keyword Hunter 报告 section 与 AI Analysis JSON 面板图标）；entry/overview / megaMenu 营销 lift 保留。

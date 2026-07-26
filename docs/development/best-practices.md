@@ -2,11 +2,16 @@
 
 ## 文档信息
 
-**版本：** 1.0  
-**最后更新：** 2026-04-17  
-**适用范围：** 所有使用新基础设施架构的开发者
+**版本：** 1.1  
+**最后更新：** 2026-07-26  
+**Status:** active · 实践手册（**非**产品/主题/组件宪法）  
+**适用范围：** 使用共享基础设施的开发者  
 
-> 维护说明（2026-07-09）：本文中的 StateManager 内容保留为迁移上下文；当前全局状态以 Zustand 相关文档和 `src/stores/` 实现为准。
+> **现行状态（2026-07-26）：**  
+> - 全局状态以 **Zustand**（`src/stores/`）与 [state-sync-best-practices](./state-sync-best-practices.md) 为准。  
+> - 文中 **StateManager** 段落仅作迁移历史上下文，**不得**当作新代码模板。  
+> - 产品/体验/测试/安全宪法入口：[INDEX.md](../INDEX.md)。  
+> - 活债务：[TECH_DEBT_BOARD.md](../TECH_DEBT_BOARD.md)。
 
 ---
 

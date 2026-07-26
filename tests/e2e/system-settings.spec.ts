@@ -198,4 +198,42 @@ test.describe('system settings', () => {
     await expect(nav.getByRole('button', { name: '数据采集', exact: true })).toBeVisible();
     await expect(nav.getByRole('button', { name: 'Master Analysis', exact: true })).toBeVisible();
   });
+
+  test('E2E-P1-nav secondary jump opens target submodule (数据采集)', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+
+    const nav = page.locator('nav.settings-panel-nav');
+    await nav.getByRole('button', { name: '工具策略', exact: true }).click();
+    await nav.getByRole('button', { name: '数据采集', exact: true }).click();
+
+    const scrape = page.locator('#settings-section-network');
+    await expect(scrape).toBeVisible({ timeout: 5000 });
+    // Deep-link expands ancestor details so proxy test is reachable without manual nest-click
+    await expect(settings.proxyTestButton()).toBeVisible({ timeout: 5000 });
+  });
+
+  test('E2E-P1-instant runtime preset saves without dirty-close confirm', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+    await settings.goToSection('工具策略');
+
+    const general = page.locator(
+      '#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]'
+    );
+    await general.locator('summary').click();
+    await page.getByTestId('settings-preset-cost').click();
+    await expect(page.getByText('已应用并保存运行策略预设', { exact: true })).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Instant persist: closing must not ask to discard
+    await settings.closeButton().click();
+    await expect(page.getByRole('heading', { name: '放弃未保存的更改？' })).toHaveCount(0, {
+      timeout: 2000,
+    });
+    await expect(page.getByTestId('settings-panel')).toHaveAttribute('data-state', 'closed', {
+      timeout: 3000,
+    });
+  });
 });
