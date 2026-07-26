@@ -39,13 +39,13 @@
 }
 
 .app-center-btn-primary {
-  /* 映射到 .btn-primary 样式 */
-  background: var(--color-blue-600, #2563eb);
-  color: white;
+  /* Map to shared primary CTA tokens (Appearance), not palette blue */
+  background: var(--button-primary-bg, var(--color-primary, #3b82f6));
+  color: var(--button-primary-fg, var(--color-primary-contrast, #ffffff));
 }
 
 .app-center-btn-primary:hover {
-  background: var(--color-blue-700, #1d4ed8);
+  background: var(--button-primary-hover-bg, var(--color-primary-dark, #2563eb));
 }
 
 .app-center-btn-secondary {
@@ -142,8 +142,13 @@
 
 .app-center-search-box:focus-within,
 .sop-search-box:focus-within {
-  border-color: var(--color-blue-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-focus-ring, var(--color-primary, #3b82f6));
+  box-shadow: 0 0 0 3px
+    color-mix(
+      in srgb,
+      var(--color-focus-ring, var(--color-primary, #3b82f6)) 14%,
+      transparent
+    );
 }
 
 .app-center-search-box input,
