@@ -16,7 +16,7 @@
   padding: 0 10px;
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 72%, transparent);
   color: #334155;
   font-size: 0.75rem;
   font-weight: 500;

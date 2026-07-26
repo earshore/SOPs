@@ -37,7 +37,7 @@
 
 .ppc-search-terms-report-type-control:focus-within {
   border-color: rgba(5, 150, 105, 0.34);
-  background: #ffffff;
+  background: var(--surface-card, #ffffff);
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
 }
 

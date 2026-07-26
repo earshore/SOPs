@@ -15,7 +15,11 @@
   padding: 12px;
   border: 1px solid var(--color-emerald-100, #d1fae5);
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  background: linear-gradient(180deg, var(--color-emerald-50, #ecfdf5), #ffffff);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-emerald-500, #10b981) 12%, var(--surface-panel, #ffffff)),
+    var(--surface-card, #ffffff)
+  );
 }
 
 .ppc-search-terms-results-panel .ppc-search-terms-delivery-note {
@@ -26,7 +30,7 @@
   margin: 0;
   padding: 10px 12px;
   border-bottom: 1px solid rgb(226, 232, 240);
-  background: rgba(248, 250, 252, 0.72);
+  background: color-mix(in srgb, var(--color-bg-secondary, #f8fafc) 72%, transparent);
   color: var(--ppc-search-terms-text-secondary, #475569);
   font-size: 12px;
   font-weight: 600;

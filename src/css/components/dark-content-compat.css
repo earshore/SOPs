@@ -2920,3 +2920,9 @@
   .ring-rose-200 {
   --tw-ring-color: color-mix(in srgb, var(--color-rose-500) 32%, transparent);
 }
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .focus\:bg-white:focus {
+  background-color: var(--surface-card, #1e293b);
+}

@@ -33,7 +33,7 @@
   padding: 8px 10px;
   border: 1px solid var(--color-slate-300, #cbd5e1);
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  background: var(--color-white, #ffffff);
+  background: var(--surface-card, #ffffff);
   color: var(--color-slate-900, #0f172a);
   font: inherit;
   resize: vertical;
@@ -51,7 +51,7 @@
   padding: 0 12px;
   border: 1px solid var(--color-slate-300, #cbd5e1);
   border-radius: 8px;
-  background: var(--color-white, #ffffff);
+  background: var(--surface-card, #ffffff);
   color: var(--color-slate-700, #334155);
   font-size: 12px;
   font-weight: 700;
@@ -81,7 +81,7 @@
   padding: 0 12px;
   border: 1px solid #cbd5e1;
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  background: rgba(255, 255, 255, 0.86);
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 86%, transparent);
   color: #64748b;
   transition:
     border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
@@ -91,7 +91,7 @@
 
 .ppc-search-terms-action-search:focus-within {
   border-color: var(--color-primary, var(--color-blue-600, #2563eb));
-  background: #ffffff;
+  background: var(--surface-card, #ffffff);
   box-shadow: 0 0 0 3px
     color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 16%, transparent);
 }
@@ -121,7 +121,7 @@
   padding: 0 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--surface-card, #ffffff);
   color: #334155;
   font-size: 13px;
   font-weight: 800;
@@ -133,13 +133,13 @@
 
 .ppc-search-terms-search-clear-btn:hover {
   border-color: #94a3b8;
-  background: #f8fafc;
+  background: var(--color-bg-secondary, #f8fafc);
 }
 
 .ppc-search-terms-search-clear-btn:disabled {
   cursor: not-allowed;
   border-color: #cbd5e1;
-  background: #f8fafc;
+  background: var(--color-bg-secondary, #f8fafc);
   color: #64748b;
 }
 
@@ -151,7 +151,7 @@
   padding: 0 13px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--surface-card, #ffffff);
   color: #334155;
   font-size: 13px;
   font-weight: 700;
@@ -163,13 +163,13 @@
 
 .ppc-search-terms-export-btn:hover {
   border-color: #94a3b8;
-  background: #f8fafc;
+  background: var(--color-bg-secondary, #f8fafc);
 }
 
 .ppc-search-terms-export-btn:disabled {
   cursor: not-allowed;
   border-color: #cbd5e1;
-  background: #f8fafc;
+  background: var(--color-bg-secondary, #f8fafc);
   color: #64748b;
 }
 

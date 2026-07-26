@@ -4,13 +4,21 @@
   border: 1px solid var(--ppc-search-terms-accent-border, rgba(5, 150, 105, 0.18));
   border-radius: var(--ppc-search-terms-radius-lg, var(--rounded-lg, 12px));
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.32) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.32) 1px, transparent 1px),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--surface-panel, #ffffff) 32%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-panel, #ffffff) 32%, transparent) 1px,
+      transparent 1px
+    ),
     linear-gradient(
       135deg,
-      var(--ppc-search-terms-accent-soft, var(--color-emerald-50, #ecfdf5)) 0%,
-      var(--color-teal-50, #f0fdfa) 46%,
-      var(--color-slate-50, #f8fafc) 100%
+      color-mix(in srgb, var(--color-emerald-500, #10b981) 12%, var(--surface-panel, #ffffff)) 0%,
+      color-mix(in srgb, var(--color-teal-500, #14b8a6) 9%, var(--surface-panel, #ffffff)) 46%,
+      var(--color-bg-secondary, #f8fafc) 100%
     );
   background-size:
     28px 28px,
@@ -93,7 +101,7 @@
   padding: 0 8px;
   border: 1px solid var(--ppc-search-terms-accent-border, rgba(5, 150, 105, 0.18));
   border-radius: var(--rounded-full, 999px);
-  background: rgba(255, 255, 255, 0.68);
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 68%, transparent);
   color: var(--ppc-search-terms-accent-strong, var(--color-emerald-700, #047857));
   font-size: 0.75rem;
   font-weight: 800;

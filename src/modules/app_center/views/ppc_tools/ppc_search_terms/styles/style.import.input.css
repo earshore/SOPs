@@ -2,9 +2,13 @@
   flex: 0 0 auto;
   align-items: start;
   padding: 12px;
-  border: 1px solid var(--color-slate-100, #f1f5f9);
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.86), #ffffff);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-bg-secondary, #f8fafc) 86%, transparent),
+    var(--surface-card, #ffffff)
+  );
 }
 
 .ppc-search-terms-paste-column {
@@ -24,7 +28,11 @@
   padding: 18px;
   border: 1px dashed var(--color-emerald-200, #a7f3d0);
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  background: linear-gradient(180deg, var(--color-emerald-50, #ecfdf5), #ffffff);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-emerald-500, #10b981) 12%, var(--surface-panel, #ffffff)),
+    var(--surface-card, #ffffff)
+  );
   text-align: center;
   font: inherit;
   appearance: none;
@@ -42,7 +50,11 @@
 
 .ppc-search-terms-dropzone:hover {
   border-color: var(--color-emerald-300, #6ee7b7);
-  background: var(--color-emerald-50, #ecfdf5);
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 12%,
+    var(--surface-panel, #ffffff)
+  );
 }
 
 .ppc-search-terms-dropzone-icon {
@@ -70,7 +82,7 @@
   flex: 1 1 auto;
   height: auto;
   min-height: 188px;
-  background: #ffffff;
+  background: var(--surface-card, #ffffff);
   color: #0f172a;
   line-height: 1.6;
   resize: vertical;
@@ -82,7 +94,7 @@
 
 .ppc-search-terms-app .ppc-search-terms-paste-column .ppc-search-terms-textarea:focus {
   border-color: var(--ppc-search-terms-accent, #16a34a);
-  background: #ffffff;
+  background: var(--surface-card, #ffffff);
   outline: none;
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
 }

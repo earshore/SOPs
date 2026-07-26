@@ -33,7 +33,11 @@
   flex: 0 0 18px;
   border-radius: 999px;
   border: 1px solid var(--color-emerald-100, #d1fae5);
-  background: var(--color-emerald-50, #ecfdf5);
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 12%,
+    var(--surface-panel, #ffffff)
+  );
   color: var(--color-emerald-700, #047857);
   font-size: 10px;
   font-weight: 900;
