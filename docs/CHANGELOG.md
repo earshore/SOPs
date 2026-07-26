@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- D9 局部 token 前缀生命周期（库存 / elevate·keep local·archive / PR 清单 / 与 D1 边界）：`docs/superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md`（docs only，无批量 CSS rename）。
+- D12 Appearance 截图 scaffold（opt-in）：`tests/visual/theme-appearance-scaffold.test.ts` + `npm run test:visual:theme`（`THEME_VISUAL=1`；默认 skip，基线 gitignore，不进 blocking CI）；计划见 `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`。
 - Ownership Role → Palette / `wb-theme-*` 映射表（Phase 4 预备）：`docs/superpowers/plans/2026-07-26-ownership-role-palette-map.md`。
 - D1 token 覆盖清点：`npm run token:override-audit`（`scripts/quality/audit-token-overrides.ts`）+ 库存报告 `docs/superpowers/plans/2026-07-26-token-override-inventory.md`。
 - 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
@@ -33,10 +35,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D6 业务样例 #3（AI Analysis）：运行分析主 CTA、Listing 目标选中/图标、ASIN 勾选 focus 从 hard indigo/blue 迁到 Appearance primary（保留 wb-theme-indigo 与结果系列色）。
 - D6 业务样例 #4（PPC Search Terms）：结果筛选 active / 续审 pressed CTA / 搜索 focus 从 hard blue 迁到 `--color-primary*` / `--color-focus-ring`（保留 emerald hero 与系列/info 状态色）。
 - D6 业务样例 #5（PromptLab）：Listing 生成主 CTA / focus 从 hard blue/indigo 迁到 `--color-primary*` / `--color-focus-ring`（保留 Visual pink、DNA 置信多色与 section 图标）。
-- D7：`ColorContext.setModuleColor` 标记 `@deprecated`；权威通道为 `inferColorFromModule`；Appearance 禁止调用。
-- D6 业务样例 #4（PPC Search Terms）：结果筛选 active / 绪审 pressed CTA / 搜索 focus 从 hard blue 迁到 `--color-primary*` / `--color-focus-ring`（保留 emerald hero 与系列/info 状态色）。
-- D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标）；entry/overview / megaMenu 营销 lift 保留。
+- D6 业务样例 #6（Skills catalog）：试用主 CTA「在 Deep Chat 试用」/ 搜索与卡片 focus 从 hard violet 迁到 `--color-primary*` / `--color-focus-ring`（保留分类筛选紫、状态/路径多色徽章）。
+- D6 业务样例 #7（Deep Chat shell）：top chrome / 模型选择 / 设置区 / 会话重命名 focus 从 hard blue·terracotta ring 迁到 `--color-primary*` / `--color-focus-ring`（保留发送钮与业务 terracotta 品牌色）。
+- D5 续：`--shadow-primary-*` 改 `color-mix` 跟随 `--color-primary`（light/dark），不再写死蓝/indigo。
+- D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标；Keyword Hunter 报告 section 与 AI Analysis JSON 面板图标）；entry/overview / megaMenu 营销 lift 保留。
 - Shared buttons：glow/筛选 active·focus 从 brand-blue 改为 `--color-primary*` / `--color-focus-ring` / `color-mix`（保留 `--button-filter-accent` 模块归属覆写）。
+- E2E smoke：`dark × minimal` 在 Keyword Hunter 共存（双轴文档根 + rose ownership）；PromptLab 路由后 `minimal` 持久化。
+- 主题宪法：明确 **导航 = Ownership**（megaMenu / sidebar 不归 Appearance 全控）。
 - D1 治理门禁：`token:override-audit:gate`（`--fail-on-unallowlisted-atomic`）并入 `ci:quality`（css:audit → hardcode → token gate）。
 - D2 R2/R3：高流量工作台面板圆角收敛到 `var(--workbench-radius)` / panel|card 别名（`analysis-widget-card`、PromptLab/AI Analysis 覆盖、Keyword Hunter textarea、PPC import 面板）；未改 entry/overview 卡。
 - D2 R3 续：Scraper 上传/策略面板覆盖、PPC filter/table/settings 壳、forms checkbox 工作台面 → `var(--workbench-radius, var(--panel-radius, 8px))`。

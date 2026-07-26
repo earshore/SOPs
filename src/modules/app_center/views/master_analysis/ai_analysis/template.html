@@ -1424,9 +1424,7 @@
                       @click="toggleJsonViewer()"
                       class="flex min-h-11 items-center gap-3 hover:opacity-80 transition-opacity"
                     >
-                      <div
-                        class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg"
-                      >
+                      <div :class="reportJsonIconClasses">
                         <i class="fa-solid fa-database text-white"></i>
                       </div>
                       <div class="text-left">

@@ -135,6 +135,21 @@ npm run test:e2e:report
 ### 主题测试
 
 - 深色模式（如果支持）
+- **D12 Appearance 轴 scaffold（默认跳过）**: `tests/visual/theme-appearance-scaffold.test.ts`
+  - 覆盖首批 3 屏：Settings Appearance、Keyword Hunter、Home × `default`/`minimal` × light
+  - 命名: `theme-default-light-*` / `theme-minimal-light-*`
+  - **不进 blocking CI**；未设 `THEME_VISUAL=1` 时整套 skip
+  - 手动跑：
+    ```bash
+    # Cross-platform (scripts/test/run-theme-visual.mjs sets THEME_VISUAL=1)
+    npm run test:visual:theme
+    npm run test:visual:theme:update   # 本地生成基线（gitignore，不提交）
+
+    # Equivalent direct env (PowerShell)
+    $env:THEME_VISUAL=1; npx playwright test tests/visual/theme-appearance-scaffold.test.ts
+    ```
+  - 计划与人工 XO: `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`
+  - **不**等于视觉签收 Pass
 
 ## 配置
 

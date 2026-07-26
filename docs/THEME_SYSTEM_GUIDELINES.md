@@ -82,6 +82,21 @@ npm run generate:tokens
 - 模块归属色（Layer B）权威通道：`ColorContext.inferColorFromModule` / `menuConfig`；`setModuleColor` 已废弃为兼容写 API（D7）；生产代码由 ESLint `no-restricted-properties` hard-gate 禁止调用。
 - `applyColorMode` / `restoreColorMode` 与 Appearance 独立；启动时先 restore color mode 再 restore appearance。
 
+#### 导航 = Ownership（Nav）
+
+**megaMenu + 左侧边栏是 Layer B Module Ownership，不是 Appearance 全控面。** 这是产品/架构决策，不是未完成的 D6 债。
+
+| 面 | 色源（Ownership） | 说明 |
+| --- | --- | --- |
+| **megaMenu** | `GLASS_COLORS` ← `menuConfig.themeColor` / categories | 多色入口身份（各模块玻璃色板独立） |
+| **left sidebar** | `sidebar-theme-*` ← `ColorContext.inferColorFromModule` + `menuConfig` | 随当前模块/目录归属变色 |
+
+- **Appearance 可写**：壳层 CTA、focus ring、设置主色等已语义化区域（`--color-primary*` / `--color-focus-ring`）。
+- **Color Mode 可写**：**中性**导航 chrome 表面（surface / border / text 明暗），**不**改模块身份色。
+- **禁止**：把 megaMenu / sidebar 强行收成单一 `--color-primary`——会压扁 KH rose / MA indigo / PPC emerald 等 wayfinding。
+- **壳层 hardcode 基线**保留 megaMenu blues（当前 **13**）是 **有意 Ownership**；`theme:hardcode-baseline` 锁的是「只降不升」，**不是**要求本轮把菜单改成 primary。
+- **优先级提醒**（同 A2）：**状态色 > 模块归属（Ownership / Nav）> Appearance primary > 中性 surface**。
+
 ### 2.3 Appearance Presets
 
 用户可选的全局外观预设（id → 名称 / colorScheme）：
@@ -262,7 +277,9 @@ npm run generate:tokens
 | Scraper 独有工作区      | `--scraper-*`    |
 | Playground 独有预览层   | `--playground-*` |
 
-局部 token 必须映射到全局 token 或明确记录原因：
+局部 token 必须映射到全局 token 或明确记录原因。**升全局 / 保持局部 / 归档**的触发条件、已知前缀库存与 PR 清单见：[Local Token Prefix Lifecycle (D9)](./superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md)（与 D1 allowlist 边界同文；本波次不做批量重命名）。
+
+示例：
 
 ```css
 .ppc-hero {
@@ -352,7 +369,7 @@ npm run generate:tokens
 | D6  | 大量 UI 硬编码 `blue-*`，Appearance 可见影响有限                                                                                                                          |
 | D7  | `ColorContext.setModuleColor` 全局写入与 DOM `wb-theme-*` 双通道；`setModuleColor` 已 `@deprecated`，权威通道为 `inferColorFromModule` / menu；Appearance 绝不得调用      |
 | D8  | `wb-theme-*` 混用角色名与色名，缺统一 Role→Palette 表                                                                                                                     |
-| D9  | 局部 token 前缀多，缺「升全局 / 归档」生命周期                                                                                                                            |
+| D9  | 局部 token 前缀生命周期：**文档已落** [local-token-prefix-lifecycle](./superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md)；代码侧冗余/归档执行仍 optional |
 | D10 | `ThemeColors` 接口含状态色字段，但 Appearance 实际不切换                                                                                                                  |
 | D11 | 暗色覆盖依赖 `data-theme='dark'`，与 D3 同源                                                                                                                              |
 | D12 | 缺 Appearance preset 壳层视觉回归矩阵                                                                                                                                     |

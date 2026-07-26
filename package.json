@@ -87,6 +87,8 @@
     "test:visual:update": "playwright test tests/visual --update-snapshots",
     "test:visual:headed": "playwright test tests/visual --headed",
     "test:visual:debug": "playwright test tests/visual --debug",
+    "test:visual:theme": "node scripts/test/run-theme-visual.mjs",
+    "test:visual:theme:update": "node scripts/test/run-theme-visual.mjs --update-snapshots",
     "playwright:install": "playwright install",
     "playwright:install:deps": "playwright install --with-deps",
     "playwright:check": "node tests/check-playwright-env.js",

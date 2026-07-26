@@ -230,10 +230,10 @@
   --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.04);
   --shadow-inner-lg: inset 0 4px 8px rgba(0, 0, 0, 0.06);
 
-  /* 彩色阴影 (主色投影) */
-  --shadow-primary-sm: 0 2px 8px rgba(59, 130, 246, 0.15);
-  --shadow-primary-md: 0 4px 14px rgba(59, 130, 246, 0.2);
-  --shadow-primary-lg: 0 8px 25px rgba(59, 130, 246, 0.25);
+  /* 彩色阴影 (主色投影) — follows --color-primary for Appearance */
+  --shadow-primary-sm: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  --shadow-primary-md: 0 4px 14px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  --shadow-primary-lg: 0 8px 25px color-mix(in srgb, var(--color-primary) 25%, transparent);
 
   /* 上方阴影 */
   --shadow-up-sm: 0 -1px 3px rgba(0, 0, 0, 0.06), 0 -1px 2px rgba(0, 0, 0, 0.04);
@@ -582,9 +582,9 @@
   --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.15);
   --shadow-inner-lg: inset 0 4px 8px rgba(0, 0, 0, 0.2);
 
-  --shadow-primary-sm: 0 2px 8px rgba(129, 140, 248, 0.2);
-  --shadow-primary-md: 0 4px 14px rgba(129, 140, 248, 0.25);
-  --shadow-primary-lg: 0 8px 25px rgba(129, 140, 248, 0.3);
+  --shadow-primary-sm: 0 2px 8px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  --shadow-primary-md: 0 4px 14px color-mix(in srgb, var(--color-primary) 25%, transparent);
+  --shadow-primary-lg: 0 8px 25px color-mix(in srgb, var(--color-primary) 30%, transparent);
 
   --shadow-up-sm: 0 -1px 3px rgba(0, 0, 0, 0.3), 0 -1px 2px rgba(0, 0, 0, 0.2);
   --shadow-up-md: 0 -4px 6px -1px rgba(0, 0, 0, 0.35), 0 -2px 4px -1px rgba(0, 0, 0, 0.2);

@@ -109,7 +109,7 @@
 
 .catalog-search-field:focus-within {
   border-color: transparent;
-  box-shadow: 0 0 0 2px var(--color-violet-500);
+  box-shadow: 0 0 0 2px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 
 .catalog-search-icon {
@@ -173,7 +173,7 @@
   outline: none;
   box-shadow:
     0 0 0 2px white,
-    0 0 0 4px var(--color-violet-500);
+    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 
 .skill-card {
@@ -200,7 +200,7 @@
   outline: none;
   box-shadow:
     0 0 0 2px white,
-    0 0 0 4px var(--color-violet-500);
+    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 
 .skill-title {
@@ -273,7 +273,7 @@
   outline: none;
   box-shadow:
     0 0 0 2px #fff,
-    0 0 0 4px var(--color-violet-500);
+    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 
 /* FB4：技能库为空 — 隐藏筛选、突出目录空态 */
@@ -289,7 +289,7 @@
   opacity: 0.72;
 }
 
-/* F3/C1：主操作「在 Deep Chat 试用」— 沿用技能页紫/品红，不串 Deep Chat 赤陶 */
+/* F3/C1 + D6：主操作「在 Deep Chat 试用」绑 Appearance primary（保留分类/状态多色） */
 .skill-cta-primary {
   display: inline-flex;
   align-items: center;
@@ -299,7 +299,7 @@
   padding: 0.4rem 0.85rem;
   border: 1px solid transparent;
   border-radius: var(--rounded-md, 0.375rem);
-  background: var(--color-violet-600);
+  background: var(--color-primary, #3b82f6);
   color: #fff;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -312,15 +312,15 @@
 }
 
 .skill-cta-primary:hover:not(:disabled) {
-  background: var(--color-violet-700);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-violet-600) 35%, transparent);
+  background: var(--color-primary-dark, #1d4ed8);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary, #3b82f6) 35%, transparent);
 }
 
 .skill-cta-primary:focus-visible {
   outline: none;
   box-shadow:
     0 0 0 2px #fff,
-    0 0 0 4px var(--color-violet-500);
+    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 
 .skill-cta-primary:disabled,
@@ -356,7 +356,7 @@
   outline: none;
   box-shadow:
     0 0 0 2px white,
-    0 0 0 4px var(--color-violet-500);
+    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 
 /* 与上游仓库 Available / Beta 标注对齐 */

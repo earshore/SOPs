@@ -30,7 +30,7 @@ Role → 默认 palette（menu / colorSchemes）→ 兼容 `wb-theme-*` class；
 | --- | --- | --- |
 | **M Color Mode** | 浅/深/跟随；`data-color-mode` | 模块归属、banner class |
 | **A Appearance** | `--color-primary*`、focus 等壳层语义 token | `wb-theme-*`、menu 色、状态色 |
-| **B Ownership** | 本表 role + menu `themeColor` / `category.color` + banner class | 用户主题 preset |
+| **B Ownership** | 本表 role + menu `themeColor` / `category.color` + banner class + **nav chrome**（megaMenu `GLASS_COLORS` / `sidebar-theme-*`） | 用户主题 preset；禁止收成单一 `--color-primary` |
 
 冲突优先级（宪法）：**状态色 > 模块归属（B）> Appearance primary（A）> 中性 surface**。
 

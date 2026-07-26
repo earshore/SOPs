@@ -429,8 +429,9 @@
 }
 
 .deep-chat-thread-name-input:focus-visible {
-  border-color: var(--color-blue-500, #3b82f6);
-  box-shadow: 0 0 0 2px var(--color-blue-100, #dbeafe);
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 18%, transparent);
 }
 
 .deep-chat-thread-meta {
@@ -1159,19 +1160,26 @@
   color: var(--deep-chat-accent-hover);
 }
 
+/* Top chrome / settings / model select: Appearance focus (not terracotta brand). */
 .deep-chat-top-icon:focus-visible,
 .deep-chat-tuning-panel summary:focus-visible,
+.deep-chat-config-link:focus-visible,
+.deep-chat-reset-tuning:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 22%, transparent);
+}
+
+/* Brand-adjacent shell chrome keeps Playground terracotta focus ring. */
 .deep-chat-new-thread:focus-visible,
 .deep-chat-search-chats:focus-visible,
 .deep-chat-skill-library-btn:focus-visible,
-.deep-chat-config-link:focus-visible,
 .deep-chat-thread-select:focus-visible,
 .deep-chat-thread-menu-toggle:focus-visible,
 .deep-chat-thread-menu-action:focus-visible,
 .deep-chat-prompt-draft:focus-visible,
 .deep-chat-prompt-delete:focus-visible,
 .deep-chat-prompt-empty-action:focus-visible,
-.deep-chat-reset-tuning:focus-visible,
 .deep-chat-search-new:focus-visible,
 .deep-chat-search-close:focus-visible {
   outline: none;
@@ -1204,9 +1212,11 @@
     background 200ms var(--deep-chat-ease, cubic-bezier(0, 0, 0.2, 1));
 }
 
-.deep-chat-select:focus {
-  border-color: rgba(var(--deep-chat-accent-rgb), 0.5);
-  box-shadow: 0 0 0 3px rgba(var(--deep-chat-accent-rgb), 0.2);
+.deep-chat-select:focus,
+.deep-chat-select:focus-visible {
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 20%, transparent);
 }
 
 .deep-chat-select:disabled {

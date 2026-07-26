@@ -21,6 +21,7 @@ import { appStore } from '@/stores/useAppStore';
 import { ErrorService } from '@/services/errorService';
 import { createSafeFragment, setSafeHtml } from '@/common/utils/security';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
+import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 import '../styles.css';
 
 // ==========================================
@@ -1134,6 +1135,12 @@ class KeywordHunterAnalysisModule extends BaseModule {
 
       container.classList.add('fade-in');
       renderer.renderTemplate(container, html);
+
+      // Workbench section icon — no marketing scale-110 (D4).
+      const reportIcon = container.querySelector('.keyword-hunter-analysis-report-icon');
+      if (reportIcon) {
+        reportIcon.className = `keyword-hunter-analysis-report-icon ${getWorkbenchIconContainerClasses('rose', 'sm')} text-white`;
+      }
     } catch (error) {
       if (!this.isCurrentMount(mountSignal)) return;
       handleAnalysisMountError(error);

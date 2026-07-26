@@ -17,5 +17,9 @@
 test-results/
 playwright-report/
 
+# D12 theme-axis scaffold baselines: mint locally only (THEME_VISUAL=1).
+# Keep out of git / blocking CI until human XO + stable OS/font strategy.
+theme-appearance-scaffold.test.ts-snapshots/
+
 # 日志文件
 *.log

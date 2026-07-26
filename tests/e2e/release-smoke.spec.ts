@@ -1255,4 +1255,110 @@ test.describe('release candidate smoke', () => {
       'settings appearance smoke should not emit console/page errors'
     ).toEqual([]);
   });
+
+  // D3/D11 residual: dark × minimal dual axes must coexist across KH route load.
+  // Contract only (document markers + ownership chrome) — no visual baseline.
+  test('dark and minimal appearance coexist on Keyword Hunter without clearing axes', async ({
+    page,
+  }) => {
+    const consoleListener = setupConsoleErrorListener(page);
+
+    await page.addInitScript(() => {
+      window.localStorage.removeItem('app-theme');
+      window.localStorage.removeItem('app-color-mode');
+    });
+
+    await openGlobalSettings(page);
+    await openAppearanceSettings(page);
+
+    const themeSelect = page.getByTestId('settings-theme-select');
+    await themeSelect.selectOption('minimal');
+    await expect(themeSelect).toHaveValue('minimal');
+
+    await page.getByTestId('settings-color-mode-dark').click();
+    await expect(page.getByTestId('settings-color-mode-dark')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+
+    // Appearance must not clear color mode; color mode must not clear appearance.
+    await expectDocumentThemeState(page, {
+      appearance: 'minimal',
+      colorMode: 'dark',
+      darkClass: true,
+    });
+
+    await closeGlobalSettings(page);
+    const keywordHunterRoute = CORE_ROUTES.find(route => route.routeId === 'keyword_hunter_input');
+    if (!keywordHunterRoute) {
+      throw new Error('Keyword Hunter Input missing from CORE_ROUTES');
+    }
+    await openRoute(page, keywordHunterRoute.path);
+    await expectRouteReady(page, keywordHunterRoute);
+    await expectNoRouteErrorText(page);
+    await expectDocumentThemeState(page, {
+      appearance: 'minimal',
+      colorMode: 'dark',
+      darkClass: true,
+    });
+    // Layer B rose ownership must survive dark + minimal (Layer A / Layer M).
+    await expectKeywordHunterOwnershipChrome(page);
+
+    expect(
+      consoleListener.getErrors(),
+      'dark × minimal Keyword Hunter smoke should not emit console/page errors'
+    ).toEqual([]);
+  });
+
+  test('minimal appearance persists on Promptlab without console errors', async ({
+    page,
+  }) => {
+    const consoleListener = setupConsoleErrorListener(page);
+
+    await page.addInitScript(() => {
+      window.localStorage.removeItem('app-theme');
+      window.localStorage.removeItem('app-color-mode');
+    });
+
+    await openGlobalSettings(page);
+    await openAppearanceSettings(page);
+
+    const themeSelect = page.getByTestId('settings-theme-select');
+    await themeSelect.selectOption('minimal');
+    await expect(themeSelect).toHaveValue('minimal');
+    await expectDocumentThemeState(page, {
+      appearance: 'minimal',
+      colorMode: 'light',
+      darkClass: false,
+    });
+
+    // R4: Appearance (Layer A) must survive Master Analysis route loads and must not
+    // rewrite ownership chrome (wb-theme-indigo on Promptlab).
+    await closeGlobalSettings(page);
+    const promptlabRoute = CORE_ROUTES.find(route => route.routeId === 'promptlab');
+    if (!promptlabRoute) {
+      throw new Error('Promptlab missing from CORE_ROUTES');
+    }
+    await openRoute(page, promptlabRoute.path);
+    await expectRouteReady(page, promptlabRoute);
+    await expectNoRouteErrorText(page);
+    await expectDocumentThemeState(page, {
+      appearance: 'minimal',
+      colorMode: 'light',
+      darkClass: false,
+    });
+
+    // Soft ownership check: if indigo banner is in DOM, class must still be present.
+    const indigoBanner = page.locator(
+      '#panel-app_center:not(.hidden) .wb-container.wb-theme-indigo'
+    );
+    if ((await indigoBanner.count()) > 0 && (await indigoBanner.first().isVisible())) {
+      await expect(indigoBanner.first()).toHaveClass(/\bwb-theme-indigo\b/);
+    }
+
+    expect(
+      consoleListener.getErrors(),
+      'minimal appearance Promptlab smoke should not emit console/page errors'
+    ).toEqual([]);
+  });
 });

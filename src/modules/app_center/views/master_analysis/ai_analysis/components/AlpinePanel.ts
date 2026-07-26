@@ -339,6 +339,11 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     return `${getWorkbenchIconContainerClasses('purple', 'lg')} text-white`;
   },
 
+  /** Workbench JSON panel icon — no marketing scale-110 (D4). */
+  get reportJsonIconClasses(): string {
+    return `${getWorkbenchIconContainerClasses('emerald', 'lg')} text-white`;
+  },
+
   get showSelectionSummary(): boolean {
     return !this.showSelectionPanel && (this.selectedAsins.length > 0 || this.hasReport);
   },
