@@ -136,7 +136,8 @@ export const A10_CHART_DATA: ChartData = {
   datasets: [
     {
       data: [35, 25, 20, 10, 5, 5],
-      backgroundColor: ['#1E293B', '#F59E0B', '#10B981', '#6366F1', '#3B82F6', '#94A3B8'],
+      // slate-500: readable on light card and dark card (was #1E293B, invisible in dark theme)
+      backgroundColor: ['#64748B', '#F59E0B', '#10B981', '#6366F1', '#3B82F6', '#94A3B8'],
       borderWidth: 0,
       hoverOffset: 4,
     },

@@ -318,18 +318,20 @@ function mapBg(used: UsedClass): BridgeRule[] {
 
 function mapText(used: UsedClass): BridgeRule[] {
   const parsed = parseColorBody(used.body);
-  if (!parsed || parsed.shade === null || parsed.alpha !== undefined) return [];
-  const { palette, shade } = parsed;
+  if (!parsed || parsed.shade === null) return [];
+  const { palette, shade, alpha } = parsed;
 
   if (NEUTRALS.has(palette)) {
     const value = NEUTRAL_TEXT[shade];
     if (!value) return [];
-    return [{ selector: selectorFor(used), decls: { color: value } }];
+    return [{ selector: selectorFor(used), decls: { color: withAlpha(value, alpha) } }];
   }
   if (HUES.has(palette)) {
     const target = HUE_TEXT[shade];
     if (target === undefined) return [];
-    return [{ selector: selectorFor(used), decls: { color: shadeVar(palette, target) } }];
+    return [
+      { selector: selectorFor(used), decls: { color: withAlpha(shadeVar(palette, target), alpha) } },
+    ];
   }
   return [];
 }
