@@ -223,14 +223,37 @@
 
 **压缩版（15 min）**: 设置切换 3 次 → 刷新 → KH + Deep Chat + PPC 三页 ownership → Tab focus 一次。
 
-**可选 +5~8 min（样本，非主脚本 Blocker）**: Skills 试用 CTA → Deep Chat shell chrome/focus → **SOPs overview focus** → **NPI primary CTA** → **AMZ Hub nav ownership orange** → **#14 email_templates CTA/focus** → **#15 qa_maintenance CTA/focus** →（若时间够）dark×minimal 再开 KH 肉眼复核。见 §1.8。
+### 3.1 Print-friendly 30-min order（可打印）
+
+一页跟跑；**不**等于 visual Pass。详细 Pass/停止见上表。
+
+| # | min | Route / action | Check |
+| --- | --- | --- | --- |
+| 1 | 0–2 | Home `/#/home` | 主内容可见，无白屏/红错 |
+| 2 | 2–5 | Settings → **外观与体验** | Appearance 区 + 主题 select + 颜色模式 |
+| 3 | 5–8 | **default → minimal ×3** | `data-appearance` 跟 select；`data-theme`=同 id；不把 `dark` 写进 theme 槽 |
+| 4 | 8–10 | 保持 **minimal** → **F5 刷新** | 仍 minimal；`app-theme` 记忆 |
+| 5 | 10–14 | KH `/#/app-center/keyword-hunter/…` | **rose** ownership 不变（`wb-theme-rose` / sidebar） |
+| 6 | 14–17 | PPC Search Terms | `.ppc-hero` emerald/teal **不变** |
+| 7 | 17–20 | Deep Chat | **terracotta** 发送/accent 不被 Appearance 顶替 |
+| 8 | 20–23 | Master Analysis（Scraper 或 AI） | indigo banner 叙事不变 |
+| 9 | 23–25 | App Center + SOPs + AMZ Hub 各 20s | purple / blue / orange 归属大体稳 |
+| 10 | 25–27 | Tab focus（搜索/侧栏/设置） | focus 环可见；minimal 更偏 slate（若已 token） |
+| 11 | 27–28 | Settings 面板自身 | 可仍偏旧蓝 → 记 X6 debt，勿谎称 Pass |
+| 12 | 28–30 | **dark × appearance** | 颜色模式→深色；`.dark` + `data-color-mode=dark` 与 `data-appearance` 并存 |
+| 13 | 收尾 | 切回 **default + light** | 可恢复，不卡死 |
+
+**Ownership 必抽（X2）**: KH rose · PPC hero · MA indigo · Deep Chat terracotta。  
+**双轴必抽（X5）**: Settings dark + 保留/ 切换 Appearance；可选再开 KH 复核 rose class。
+
+**可选 +5~10 min（样本 through #24，非主脚本 Blocker）**: Skills 试用 CTA → Deep Chat shell chrome/focus → **#10 SOPs overview focus** → **#11 NPI primary CTA** → **#13 AMZ Hub nav ownership orange** → **#14 email_templates** → **#15 qa_maintenance** → **#16 PromptLab DNA/autoPopulate** → **#18–21 residual MA/PPC/PromptLab** → **#22 SafeModuleLoader primary CTA** → **#23 Home splash/floating CTA** → **#24 confirmModal primary chrome** → dark×minimal KH 肉眼复核。见 §1.8。**不**声称 visual Pass。
 
 **首 8 张人工截图（可选，与 30 min 并行或紧随）**: 见 [D12 §6](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow)（Settings default/minimal · KH 对 · PPC 对 · Deep Chat minimal · Home minimal）。**截图 ≠ visual Pass**，只加速 XO 归档。
 
 **记录模板**（贴 PR / RC）:
 
 ```text
-XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect 2f8d98ab+)
+XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect 02ab689f+)
 Browser: ________  Viewport: ________
 X1 switch×3: Pass/Fail
 X2 ownership (KH rose / PPC / MA / DeepChat terracotta): Pass/Fail
@@ -245,9 +268,15 @@ Optional NPI primary CTA (#11): Pass/Fail / Skipped
 Optional AMZ Hub nav ownership orange (#13): Pass/Fail / Skipped
 Optional email_templates CTA/focus (#14): Pass/Fail / Skipped
 Optional qa_maintenance CTA/focus (#15): Pass/Fail / Skipped
+Optional PromptLab DNA/autoPopulate (#16): Pass/Fail / Skipped
+Optional residual MA/PPC/PromptLab chrome (#18–21): Pass/Fail / Skipped
+Optional SafeModuleLoader primary CTA (#22): Pass/Fail / Skipped
+Optional Home splash/floating CTA (#23): Pass/Fail / Skipped
+Optional confirmModal primary chrome (#24): Pass/Fail / Skipped
+Optional dark×minimal KH eye-check: Pass/Fail / Skipped
 D6 still-blue samples: (list, Informational)
 First-8 screenshots: Yes/No (path: ________)
-Sign-off visual: Yes / No   ← default No until XO fills
+Sign-off visual: Yes / No   ← default No until XO fills; keep Yellow
 ```
 
 ---
