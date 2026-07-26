@@ -78,6 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D6 业务样例 #23（Home splash/floating）：主 CTA `.home-primary-action--main` 与 floating workbench 图标/hover/focus 从 hard `--color-blue-*` / `rgba(37,99,235,*)` 迁到 `--color-primary*` / `--color-focus-ring`（保留 slogan 蓝绿渐变与 cyan 状态点）。
 - D6 业务样例 #24（shared confirmModal）：theme 主 CTA/头部/边框/checkbox 从 hard `#6257f5` 紫 迁到 `--color-primary*` / `--color-focus-ring`（保留 danger 红→橙）。
 - D6 业务样例 #25（shared AppModal）：title icon / accent soft chrome 从 hard `blue-50/indigo-100` 与 `rgba(59,130,246,*)` 迁到 `--color-primary*` / `color-mix`（保留 panel surface 与 close control neutrals）。
+- D6 业务样例 #26（shared import-conflict modal）：推荐 badge / 智能合并图标 soft chrome 从 hard `to-indigo-500` / `to-indigo-100` 迁到 `--color-primary*` / `color-mix`（保留 amber 冲突横幅与 danger overwrite）。
 - D5 续：`--shadow-primary-*` 改 `color-mix` 跟随 `--color-primary`（light/dark），不再写死蓝/indigo。
 - D5 续：root `--focus-ring-soft` + header search / forms dark / Overview search / nav-focus 从 hard blue 迁到 `--color-focus-ring`（megaMenu / sidebar-theme / wb ownership 保留）。
 - D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标；Keyword Hunter 报告 section 与 AI Analysis JSON 面板图标）；entry/overview / megaMenu 营销 lift 保留。

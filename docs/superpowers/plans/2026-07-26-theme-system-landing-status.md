@@ -1,7 +1,7 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ HEAD `9bdc7ae9` · D6 #25 AppModal `fb5384d6` · D2 #6 deferred `21bec249` · D5 inventory `5bde2abb` · XO checklist `a72046bb` · adjacent settings TD-SET `aba5a951`→`9bdc7ae9` · Visual Yellow · Human XO first）  
-**范围**: `main` ahead of `sops/main`； residual 主题波 + D6 #24 confirmModal + **#25 AppModal** + **D2 #6 docs deferral** + D5 residual inventory + XO checklist tighten；adjacent settings TD-SET scaffold/e2e **已在** tip（full `isNavTargetCurrent` scroll-spy bind body may still be dirty outside tip）  
+**日期**: 2026-07-26（refresh @ HEAD `f62283f3` · settings scroll-spy wire `f62283f3` · D6 #25 AppModal `fb5384d6` · D2 #6 deferred `21bec249` · D5 inventory `5bde2abb` · XO checklist `a72046bb` · adjacent settings TD-SET `aba5a951`→`9bdc7ae9`→`f62283f3` · Visual Yellow · Human XO first）  
+**范围**: `main` ahead of `sops/main`； residual 主题波 + D6 #24 confirmModal + **#25 AppModal** + **D2 #6 docs deferral** + D5 residual inventory + XO checklist tighten；adjacent settings TD-SET scaffold/e2e + **`isNavTargetCurrent` scroll-spy methods wire** **已在** tip  
 **角色**: Tech Lead / Release docs  
 **诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称 visual Pass。
 
@@ -21,11 +21,11 @@
 
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Code / 契约**    | **Green**  | tip `9bdc7ae9`: D6 #18–**25**（**#25 AppModal** @ `fb5384d6`）· D12×**24** · D2 #2–#5 + **#6 deferred** @ `21bec249` · D5 residual inventory @ `5bde2abb` · XO checklist @ `a72046bb` · D8 soft · shell nav/settings focus |
+| **Code / 契约**    | **Green**  | tip `f62283f3`: D6 #18–**25**（**#25 AppModal** @ `fb5384d6`）· D12×**24** · D2 #2–#5 + **#6 deferred** @ `21bec249` · D5 residual inventory @ `5bde2abb` · XO checklist @ `a72046bb` · settings scroll-spy wire @ `f62283f3` · D8 soft · shell nav/settings focus |
 | **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**（**Human XO first**）；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: residual #18–24 + **#25 AppModal** primary soft chrome **已在** tip `9bdc7ae9`；D2 radius long-tail **#6 deferred — diminishing returns**；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
+**一句话**: residual #18–24 + **#25 AppModal** primary soft chrome **已在** tip `f62283f3`；settings `isNavTargetCurrent` scroll-spy **已 wire**；D2 radius long-tail **#6 deferred — diminishing returns**；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -141,7 +141,7 @@ Leave alone unless product reclassifies ownership:
 | AppModal `--modal-accent-soft` / title icon blue soft | Soft chrome, not focus-visible | Focus path already `var(--modal-focus-ring)` → primary; leave soft rgba |
 | Toast `.toast-action:focus-visible` | Status/info semantics | Uses `--color-info`, not hard blue/indigo brand focus |
 
-**Migrated earlier residual (code @ tip `9bdc7ae9` lineage):**
+**Migrated earlier residual (code @ tip `f62283f3` lineage):**
 
 | Surface | Change | Note |
 | --- | --- | --- |
@@ -153,7 +153,7 @@ Leave alone unless product reclassifies ownership:
 | Scope | Result | Verdict |
 | --- | --- | --- |
 | `src/css/components` + `src/components` hard `focus-visible` blue/indigo | **0** clear shared-shell targets beyond §5.1 leave-alone | **No migrate** |
-| Settings (`systemSettings.*`) | TD-SET scaffold/e2e @ `aba5a951`→`9bdc7ae9`；theme board **does not** claim scroll-spy visual Pass | **Adjacent non-theme** |
+| Settings (`systemSettings.*`) | TD-SET scaffold/e2e @ `aba5a951`→`9bdc7ae9`→`f62283f3`（scroll-spy methods wire）；theme board **does not** claim scroll-spy visual Pass | **Adjacent non-theme** |
 | Business module hard focus (`focus:ring-indigo-500` etc.) | D6 long-tail (AMZ EU insights / GPSR / PromptLab handoff residual…) | **Not D5 shell** |
 | `theme:hardcode-baseline:gate` + `css:audit` | shell **13/13** · CSS vars **0** noncompliant | Green |
 
@@ -265,7 +265,9 @@ Grep / call-site evidence (re-skim @ `147aa90c`):
 ## 8. Commit list (`sops/main` → `HEAD`)
 
 ```
-9bdc7ae9 test(settings): stabilize TD-SET-05 e2e assertion for KH deep-link  ← HEAD
+f62283f3 fix(settings): wire isNavTargetCurrent scroll-spy methods  ← HEAD
+d592be30 docs(theme): refresh landing tip after AppModal wave
+9bdc7ae9 test(settings): stabilize TD-SET-05 e2e assertion for KH deep-link
 21bec249 docs(theme): defer D2 workbench radius long-tail #6
 fb5384d6 feat(theme): migrate AppModal primary soft chrome
 aba5a951 fix(settings): close TD-SET-05/03/04 — KH nav, data-save contract, scroll-spy
@@ -328,11 +330,11 @@ f8f925a8 docs(theme): enterprise audit and convergence roadmap
 - XO 30-min checklist tighten @ `a72046bb`
 - D8 soft expand @ `4c029537`；D9 F2 skim @ `ec2598aa`；shell nav/settings focus @ `3218a505`
 - D8 ownershipRoles optional hub/more category guard（`type-check:tests`）@ `52795047`（format @ `be4329f1`）
-- Adjacent settings TD-SET scaffold/e2e @ `aba5a951` → stabilize @ `9bdc7ae9`（theme board tip；**not** visual Pass）
+- Adjacent settings TD-SET scaffold/e2e @ `aba5a951` → stabilize @ `9bdc7ae9` → **scroll-spy methods wire** @ `f62283f3`（theme board tip；**not** visual Pass）
 - D4 card helper still **0** production callers
 - full prebuild / smoke **Green 再次**（不代表 visual Pass）
 - **Visual Yellow** · **Human XO first**（仍未签）
-- **无** new D6 样本 beyond residual #18–25（本轮 tip 含 **#25 AppModal**）
+- **无** new D6 样本 beyond residual #18–25（prior **#25 AppModal** @ `fb5384d6`；tip 仅 settings scroll-spy + docs refresh）
 
 **前主题 tip (`f99b0fc8`)**: D6 #16 PromptLab · D10 ThemeColors removed · D12×20。
 
