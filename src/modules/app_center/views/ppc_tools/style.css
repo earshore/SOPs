@@ -37,8 +37,8 @@
   --ppc-search-terms-warning-text: var(--color-amber-800, #92400e);
   --ppc-search-terms-success-soft: var(--color-green-100, #dcfce7);
   --ppc-search-terms-success-text: var(--color-green-800, #166534);
-  --ppc-search-terms-radius: var(--rounded-panel, var(--rounded-md, 8px));
-  --ppc-search-terms-radius-lg: var(--rounded-lg, 12px);
+  --ppc-search-terms-radius: var(--workbench-radius, var(--rounded-panel, 8px));
+  --ppc-search-terms-radius-lg: var(--workbench-radius-lg, var(--rounded-lg, 12px));
   --ppc-search-terms-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
   --ppc-search-terms-shadow-panel: var(--shadow-panel, 0 12px 30px -28px rgba(15, 23, 42, 0.45));
   --ppc-search-terms-shadow-accent: 0 8px 18px -14px

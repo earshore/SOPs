@@ -16,7 +16,7 @@
   min-width: 280px;
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--rounded-lg);
+  border-radius: var(--workbench-radius, var(--card-radius, 8px));
   padding: var(--spacing-lg);
   display: flex;
   align-items: flex-start;

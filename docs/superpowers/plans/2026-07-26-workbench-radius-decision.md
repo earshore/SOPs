@@ -103,10 +103,13 @@ D2 的根因不是「缺 8px」，而是 **缺少工作台专用语义 SSOT**，
 | `.route-loading-skeleton__card` | **已迁** `var(--workbench-radius…)` | — | long-tail #3 |
 | `.app-center-card` | **已迁** `var(--workbench-radius…)` | — | long-tail #4（legacy → card 映射） |
 | Settings `--settings-radius-card` / `.settings-card` | **已迁** `var(--workbench-radius…)` | — | long-tail #4 |
+| Settings section/LLM/collapsible/nav shells | **已迁** `var(--settings-radius-card…)` | — | long-tail #5 |
+| Shared `.insight-card` / `.stat-card` | **已迁** `var(--workbench-radius…)` | — | long-tail #5 |
+| Skills/Prompts catalog tool cards + search field | **已迁** `var(--workbench-radius…)` | — | long-tail #5 |
 | `.app-overview-card` | `--rounded-xl` | **允许**（entry） | 保持 entry 映射 |
 | 各模块 scraper / PPC / keyword hunter 内联 panel | 混用 lg/xl / hardcode（部分已覆盖） | M2 审计热点 | 按 `workbench-ui:audit` 逐模块 |
 
-**Long-tail 记（2026-07-26）:** 高流量 CSS 主面板以 `--workbench-radius` / panel|card 别名为主；**#3** 再收 `.amz_card-hover` / `.zn-notice-card` / route loading shell；**#4** shared `.app-center-card` + Settings card radius token/shell；剩余偏差多为 Tailwind utility 类名、按钮/icon well、entry/overview、modal chrome、Settings 控件级 radius——**不**在同一 PR 批量压到 8px。
+**Long-tail 记（2026-07-26）:** 高流量 CSS 主面板以 `--workbench-radius` / panel|card 别名为主；**#3** 再收 `.amz_card-hover` / `.zn-notice-card` / route loading shell；**#4** shared `.app-center-card` + Settings card radius token/shell；**#5** Settings 段壳 / insight·stat / forms bulk / PPC radius-lg 别名 / Skills·Prompts catalog 工具面；剩余偏差多为 Tailwind utility 类名、按钮/icon well、entry/overview、modal chrome、Settings 控件级 radius、Deep Chat brand——**不**在同一 PR 批量压到 8px。
 
 ## 迁移顺序（低风险优先）
 

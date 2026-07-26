@@ -13,7 +13,7 @@
   box-sizing: border-box;
   background-color: white;
   border: 1px solid var(--color-slate-200);
-  border-radius: 0.75rem;
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
 }
 
 .catalog-search-field:focus-within {
@@ -124,7 +124,7 @@
 /* 提示词卡片样式 */
 .prompt-card {
   background-color: white;
-  border-radius: var(--rounded-lg);
+  border-radius: var(--workbench-radius, var(--card-radius, 8px));
   border: 1px solid var(--color-slate-200);
   padding: 1.25rem;
   transition:
@@ -263,7 +263,7 @@
   .prompt-business-rule,
   .category-btn,
   .btn-icon {
-    border-radius: 8px;
+    border-radius: var(--workbench-radius, 8px);
   }
 
   .prompt-card:hover,
