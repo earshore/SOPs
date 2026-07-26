@@ -89,7 +89,9 @@
 }
 
 .dark .ppc-search-terms-filter-btn.active .ppc-search-terms-filter-count,
-[data-color-mode-resolved='dark'] .ppc-search-terms-filter-btn.active .ppc-search-terms-filter-count {
+[data-color-mode-resolved='dark']
+  .ppc-search-terms-filter-btn.active
+  .ppc-search-terms-filter-count {
   background: color-mix(
     in srgb,
     var(--color-primary, var(--color-blue-400, #60a5fa)) 24%,

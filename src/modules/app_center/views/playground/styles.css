@@ -178,8 +178,7 @@
   --deep-chat-warn-ink: var(--color-amber-300);
   --deep-chat-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --deep-chat-shadow-md: 0 8px 20px -14px rgba(0, 0, 0, 0.6), 0 2px 6px -2px rgba(0, 0, 0, 0.35);
-  --deep-chat-shadow-lg:
-    0 18px 36px -22px rgba(0, 0, 0, 0.7), 0 8px 16px -12px rgba(0, 0, 0, 0.45);
+  --deep-chat-shadow-lg: 0 18px 36px -22px rgba(0, 0, 0, 0.7), 0 8px 16px -12px rgba(0, 0, 0, 0.45);
 }
 
 .deep-chat-shell {
@@ -955,7 +954,11 @@
   margin-bottom: var(--spacing-1, 0.25rem);
   border: 1px solid rgba(var(--deep-chat-accent-rgb), 0.2);
   border-radius: var(--deep-chat-radius-lg, 0.85rem);
-  background: linear-gradient(180deg, var(--deep-chat-surface) 0%, var(--deep-chat-accent-soft) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--deep-chat-surface) 0%,
+    var(--deep-chat-accent-soft) 100%
+  );
   color: var(--deep-chat-accent);
   font-size: 1rem;
   box-shadow: var(--deep-chat-shadow-sm);

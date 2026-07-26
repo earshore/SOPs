@@ -89,7 +89,10 @@
 }
 
 .dark .ppc-search-terms-stat-tile-orange .ppc-search-terms-stat-label i,
-[data-color-mode-resolved='dark'] .ppc-search-terms-stat-tile-orange .ppc-search-terms-stat-label i {
+[data-color-mode-resolved='dark']
+  .ppc-search-terms-stat-tile-orange
+  .ppc-search-terms-stat-label
+  i {
   background: color-mix(
     in srgb,
     var(--color-orange-400, #fb923c) 16%,
@@ -99,7 +102,10 @@
 }
 
 .dark .ppc-search-terms-stat-tile-violet .ppc-search-terms-stat-label i,
-[data-color-mode-resolved='dark'] .ppc-search-terms-stat-tile-violet .ppc-search-terms-stat-label i {
+[data-color-mode-resolved='dark']
+  .ppc-search-terms-stat-tile-violet
+  .ppc-search-terms-stat-label
+  i {
   background: color-mix(
     in srgb,
     var(--color-violet-400, #a78bfa) 16%,

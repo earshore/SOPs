@@ -10,6 +10,7 @@ coverage
 .lighthouseci
 
 # Generated files
+src/css/foundation/utility-bridge.generated.css
 *.min.js
 *.min.css
 
