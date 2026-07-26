@@ -4,8 +4,10 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 > 本 README 已按当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
+**文档唯一入口（规范 / 决策树 / 现行 SSOT）：** [docs/INDEX.md](./docs/INDEX.md)
+
 **生产站点：** [https://sops.hongecb.store](https://sops.hongecb.store)  
-**发布策略：** [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md) · **安全策略：** [SECURITY.md](./SECURITY.md)
+**发布策略：** [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md) · **安全策略：** [SECURITY.md](./SECURITY.md) · **安全 Playbook：** [docs/SECURITY_PLAYBOOK.md](./docs/SECURITY_PLAYBOOK.md)
 
 ## 产品收敛方向
 

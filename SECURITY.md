@@ -42,7 +42,13 @@ You should receive an acknowledgement within **3 business days**. Critical produ
 - Broader audit helpers: `npm run security:audit`
 - CI aggregates security checks via `npm run ci:security`
 
-Related product/engineering docs: [docs/PRODUCT_PRINCIPLES.md](./docs/PRODUCT_PRINCIPLES.md), [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md), open security/ops debt on [docs/TECH_DEBT_BOARD.md](./docs/TECH_DEBT_BOARD.md).
+## Playbook (threat model + acceptance)
+
+Operational security guidance for this **BYOK static** product (threat model, residual risk, PR/RC checklists):
+
+→ **[docs/SECURITY_PLAYBOOK.md](./docs/SECURITY_PLAYBOOK.md)**
+
+Related: [docs/PRODUCT_PRINCIPLES.md](./docs/PRODUCT_PRINCIPLES.md), [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md), [docs/OPS_RUNBOOK.md](./docs/OPS_RUNBOOK.md), open debt on [docs/TECH_DEBT_BOARD.md](./docs/TECH_DEBT_BOARD.md). Doc index: [docs/INDEX.md](./docs/INDEX.md).
 
 ## Production monitoring decision
 

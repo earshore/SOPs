@@ -24,6 +24,7 @@
 | 部署 Cloudflare / CSP | **[DEPLOYMENT.md](./DEPLOYMENT.md)** |
 | 线上故障 / 回滚 / 白屏 / LLM 挂 | **[OPS_RUNBOOK.md](./OPS_RUNBOOK.md)** |
 | 安全报告 / 密钥边界 | **[SECURITY.md](../SECURITY.md)** |
+| 威胁模型 / 安全验收清单 | **[SECURITY_PLAYBOOK.md](./SECURITY_PLAYBOOK.md)** |
 | 查当前技术债 | **[TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)**（活） |
 | 做新功能设计 | `docs/superpowers/specs/` + 触及的上述宪法 |
 | 历史审计/旧计划 | `docs/archive/`、`.kiro/`（**只读**） |
@@ -76,6 +77,7 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / TESTI
 - [发布策略](./RELEASE_POLICY.md)
 - [Release Notes 模板](./templates/RELEASE_NOTES_TEMPLATE.md)
 - [安全策略](../SECURITY.md)
+- [安全 Playbook](./SECURITY_PLAYBOOK.md) — BYOK 威胁模型 + PR/RC 验收清单。
 - [贡献指南（历史 Kiro 路径）](../.kiro/CONTRIBUTING.md) — 若与 README/`docs/` 冲突，以现行 `docs/` 与根 README 为准。
 
 ### 开发实践（注意日期）

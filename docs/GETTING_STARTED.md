@@ -2,6 +2,9 @@
 
 本项目当前按 Cloudflare Pages 静态部署：静态页面由 Pages 托管，生产 LLM 请求由浏览器直接调用自部署 new-api 中转站 `https://new.hongecb.store/v1`。
 
+**全部规范与决策树（唯一入口）：** [INDEX.md](./INDEX.md)  
+产品原则 / 测试策略 / 安全 Playbook / 运维 Runbook 均从 INDEX 跳转，勿以 `archive/` 或 `.kiro/` 为现行依据。
+
 ## 本地运行
 
 ```bash

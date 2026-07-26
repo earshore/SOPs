@@ -33,8 +33,7 @@
 | **TD-CMP-01** | 组件 | 业务页仍可自由拼按钮/表单 | 视觉孤岛 | 执行 COMPONENT_GUIDELINES；后续加 lint/示例 | P1 |
 | **TD-TEST-01** | 测试 | 视觉回归未进默认 CI | 主题/壳层回归靠人 | 发版 checklist 强制关键截图或 CI 抽样 | P2 |
 | **TD-TEST-02** | 测试 | 设置即时保存/二级 nav 跳转 e2e 覆盖不全 | 回归漏洞 | 扩展 `system-settings.spec.ts` | P2 |
-| **TD-OPS-01** | 运维 | 缺一页事故 Runbook（白屏/LLM 全挂/Pages 回滚） | 值班靠人 | 写 `docs/OPS_RUNBOOK.md` | P1 |
-| **TD-OPS-02** | 可观测 | Sentry 默认关 | 线上无聚合错误 | 保持产品决策；补「最低信号包」到 Runbook | P2 |
+| **TD-OPS-02** | 可观测 | Sentry 默认关（产品决策） | 无线上聚合错误 | 保持关闭；Runbook 最低信号包已覆盖无 Sentry 值班 | P2 |
 | **TD-DOC-01** | 文档 | `CI-QUALITY-GATES` / 部分 best-practices 日期旧 | 误导 | 刷新与 scripts 对齐 | P2 |
 | **TD-REL-01** | 发布 | main 提交粒过度碎时 review 成本高 | 审计成本 | RC 前按主题整理 notes（已有 CHANGELOG） | P3 |
 
@@ -44,9 +43,10 @@
 
 | ID | 关闭日期 | 说明 |
 | --- | --- | --- |
-| TD-DOC-02 | 2026-07-26 | 落地 CONTENT_DESIGN / ACCESSIBILITY / OPS_RUNBOOK |
-| TD-OPS-01 | 2026-07-26 | 初版 OPS_RUNBOOK（白屏/LLM/设置/回滚）；后续可增厚 |
-| TD-SET-DENSITY | 2026-07-26 | 移除 density 模式死代码（`settingsUiPreferences`、deepLink.density） |
+| TD-DOC-STACK | 2026-07-26 | 企业规范栈落地：PRODUCT / COMPONENT / TESTING / CONTENT / A11Y / OPS / SECURITY_PLAYBOOK + INDEX 决策树 |
+| TD-DOC-02 | 2026-07-26 | CONTENT_DESIGN / ACCESSIBILITY / OPS_RUNBOOK |
+| TD-OPS-01 | 2026-07-26 | OPS_RUNBOOK（白屏/LLM/设置/回滚 + 最低信号包）— **仅此 Closed，勿再列入 Open** |
+| TD-SET-DENSITY | 2026-07-26 | 移除 density 模式死代码 |
 | TD-SET-LINT-AUTO | 2026-07-26 | `autoSaveProviderConfig` complexity 降到 warning-gate 内 |
 | TD-SET-REASONING-ZOD | 2026-07-25 | Zod 支持 xhigh/max，修复推理无法持久化 |
 | TD-SET-SEARCH-PAD | 2026-07-25 | 搜索框 icon/placeholder 重叠 |

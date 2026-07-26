@@ -106,5 +106,6 @@
 | [CONTENT_DESIGN.md](./CONTENT_DESIGN.md) | 文案与语气 |
 | [ACCESSIBILITY.md](./ACCESSIBILITY.md) | 无障碍底线与抽检 |
 | [OPS_RUNBOOK.md](./OPS_RUNBOOK.md) | 运维最低信号包与回滚 |
-| [SECURITY.md](../SECURITY.md) | 安全策略 |
+| [SECURITY.md](../SECURITY.md) | 安全策略（报告渠道） |
+| [SECURITY_PLAYBOOK.md](./SECURITY_PLAYBOOK.md) | 威胁模型 + 安全验收清单 |
 | [OPERATING_SYSTEM_ROADMAP.md](./OPERATING_SYSTEM_ROADMAP.md) | 产品作业系统路线（规划，非组件 SSOT） |

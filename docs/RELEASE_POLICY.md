@@ -103,6 +103,10 @@
 - [ ] 核心 SOP / App Center 路径可进入
 - [ ] LLM 网关连通（用户自备 key，不把生产 key 写入仓库）
 - [ ] 回滚版本号已写在 Release notes
+- [ ] **OPS 发版冒烟**勾选完整（模板内清单，对照 [OPS_RUNBOOK §4](./OPS_RUNBOOK.md#4-发版后冒烟rc生产)）
+- [ ] **A11y 键盘抽检**勾选（模板内清单，对照 [ACCESSIBILITY §3](./ACCESSIBILITY.md#3-关键路径抽检清单发版--大改-ui)）
+
+Release body 模板见 [templates/RELEASE_NOTES_TEMPLATE.md](./templates/RELEASE_NOTES_TEMPLATE.md)（含 OPS / A11y 必勾项，禁止只写「见 runbook」）。
 
 ## 6. 产物（Artifacts）
 

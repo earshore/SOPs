@@ -33,9 +33,31 @@
 ### 运维与部署
 
 - 是否需要清 CDN/浏览器缓存：是 / 否
-- CSP / 网关白名单变更：无 / 见 DEPLOYMENT.md
+- CSP / 网关白名单变更：无 / 见 [DEPLOYMENT.md](../DEPLOYMENT.md)
 - 建议回滚版本：{{PREVIOUS_GA}}
-- 验证清单：首页 200、核心路由可进、LLM 网关连通、`npm run test:e2e:smoke`
+- 完整事故/回滚步骤：见 [OPS_RUNBOOK.md](../OPS_RUNBOOK.md)
+
+#### 发版后冒烟（OPS — 必勾，不可只写「见 runbook」）
+
+对照 [OPS_RUNBOOK §4](../OPS_RUNBOOK.md#4-发版后冒烟rc生产)：
+
+- [ ] `https://sops.hongecb.store`（或本版部署目标）可打开
+- [ ] 浏览器控制台无致命红错
+- [ ] 系统设置可打开；侧栏一级/二级可点
+- [ ] AI 连接：测试连接（值班自有 Key）
+- [ ] 一处工具主路径冒烟（如 Deep Chat 发一句或打开分析页）
+- [ ] CSP `connect-src` 仍含网关域（`new.hongecb.store`）
+- [ ] 自动化：`npm run test:e2e:smoke`（CI 或本地）已绿
+
+#### 无障碍发版抽检（A11y — RC 建议 / GA 必做）
+
+对照 [ACCESSIBILITY §3](../ACCESSIBILITY.md#3-关键路径抽检清单发版--大改-ui)：
+
+- [ ] Tab 可达顶栏 → 主内容；focus-visible 可见
+- [ ] 系统设置：Esc / 脏数据确认可用键盘
+- [ ] 确认弹层：焦点在对话框内，关闭后焦点不丢
+- [ ] 至少一处业务主 CTA 可键盘触发
+- [ ] 图标按钮有 accessible name（抽检）
 
 ### 产物
 
