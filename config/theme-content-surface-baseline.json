@@ -1,11 +1,11 @@
 {
   "version": 1,
   "scope": "modules",
-  "bgWhite": 214,
+  "bgWhite": 206,
   "textSlate": 2542,
   "filesScanned": 374,
   "filesWithHits": 75,
-  "updatedAt": "2026-07-26T12:11:01.380Z",
+  "updatedAt": "2026-07-26T12:15:18.067Z",
   "files": {
     "src/modules/sops/views/growth/ppc_advertising/template.html": {
       "bgWhite": 0,
@@ -107,13 +107,13 @@
       "bgWhite": 1,
       "textSlate": 48
     },
-    "src/modules/sops/views/safety/product_compliance/template.html": {
-      "bgWhite": 9,
-      "textSlate": 40
-    },
     "src/modules/sops/views/backend/fba_shipping/template.html": {
       "bgWhite": 5,
       "textSlate": 41
+    },
+    "src/modules/sops/views/safety/product_compliance/template.html": {
+      "bgWhite": 1,
+      "textSlate": 40
     },
     "src/modules/more/views/overview/template.html": {
       "bgWhite": 3,
