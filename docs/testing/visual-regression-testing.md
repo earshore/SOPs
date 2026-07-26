@@ -149,8 +149,8 @@ npm run test:e2e:report
     # Equivalent direct env (PowerShell)
     $env:THEME_VISUAL=1; npx playwright test tests/visual/theme-appearance-scaffold.test.ts
     ```
-  - 计划与人工 XO: `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`
-  - **不**等于视觉签收 Pass
+  - 计划与人工 XO: `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`（**§6 首 8 张** capture order / filename checklist）
+  - **截图 ≠ Pass**：人工 8 张归档或 scaffold 24 张跑通，**都不等于**视觉签收 Pass；Email / QA 等长内容路由为 scaffold ROI 故意跳过
 
 ## 配置
 

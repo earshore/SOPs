@@ -261,6 +261,8 @@ theme-default-light-app-center.png
 theme-minimal-light-app-center.png
 theme-default-light-scraper.png
 theme-minimal-light-scraper.png
+theme-default-light-promptlab.png
+theme-minimal-light-promptlab.png
 theme-default-light-ppc-search-terms.png
 theme-minimal-light-ppc-search-terms.png
 theme-default-light-sops-overview.png
@@ -271,6 +273,8 @@ theme-default-light-deep-chat.png
 theme-minimal-light-deep-chat.png
 theme-default-light-skills.png
 theme-minimal-light-skills.png
+theme-default-light-npi-tracker.png
+theme-minimal-light-npi-tracker.png
 ```
 
 **用例标题**:
@@ -321,35 +325,102 @@ theme appearance: skills minimal light desktop
 
 ---
 
-## 6. First 8 screenshots to capture tomorrow
+## 6. First 8 screenshots to capture (human XO readiness)
 
-**交叉引用**: 人类 XO 30 min 脚本见 [`theme-system-xo-signoff-status.md` §3](./2026-07-26-theme-system-xo-signoff-status.md#3-人类-xo-30-分钟手动浏览器脚本)；本表为首 8 张**可选**归档清单（**截图 ≠ visual Pass**）。
+> ### 截图 ≠ Pass
+>
+> | 说法 | 是否成立 |
+> | --- | --- |
+> | 落盘 8 张人工截图 | **不等于** visual Pass / 主题 RC 签收 |
+> | `THEME_VISUAL=1` scaffold 跑出 24 张 | **不等于** 人工真相；**不**进 blocking CI |
+> | 本清单勾完 | 只保证「能拍、能对、能写 XO 记录」 |
+>
+> **交叉引用**: 人类 XO 30 min 脚本
+> [`theme-system-xo-signoff-status.md` §3](./2026-07-26-theme-system-xo-signoff-status.md#3-人类-xo-30-分钟手动浏览器脚本)。
 
-**目标**: 用最少张数覆盖 XO 脚本核心（切换、归属三剑客、Deep Chat、壳层/设置），为后续 18 张主包扩样。
+**目标**: 用最少 8 张覆盖 XO 核心（Settings 切换、KH/PPC 归属、Deep Chat terracotta、Home 壳层）；对齐当前 scaffold **12×2=24** 屏名空间，但不把 24 张都当人工首批。
 
-| # | 文件名（建议） | 路由 | Appearance | Color | 截什么 | 为何在首 8 |
+### 6.1 Scaffold 12 屏 ↔ 人工首 8（对照）
+
+Scaffold 顺序（与 `theme-appearance-scaffold.test.ts` 一致）:
+**settings · KH · home · app-center · scraper · promptlab · ppc · sops · hub · deep-chat · skills · npi**。
+
+| Scaffold slug | 首 8 角色 | 人工截图 | 备注 |
+| --- | --- | --- | --- |
+| `settings-appearance` | #1 default + #2 minimal | 必拍成对 | 切换起点 / Must change |
+| `keyword-hunter` | #3 default + #4 minimal | 必拍成对 | ownership banner NOT |
+| `ppc-search-terms` | #5 default + #6 minimal | 必拍成对 | `.ppc-hero` emerald NOT |
+| `deep-chat` | #7 **minimal only** | 必拍 | terracotta 压测（最易被 primary 顶替） |
+| `home` | #8 **minimal only** | 必拍 | 跨模块壳层扫读 |
+| `app-center` | — | 首 8 外 | 多色总览；扫一眼 / 扩样 |
+| `scraper` | — | 首 8 外 | indigo ownership |
+| `promptlab` | — | 首 8 外 | indigo ownership |
+| `sops-overview` | — | 首 8 外 | 总览 blue |
+| `amz-hub-overview` | — | 首 8 外 | orange ownership |
+| `skills` | — | 首 8 外 | violet D6 样本 |
+| `npi-tracker` | — | 首 8 外 | growth D6 样本 |
+
+**Scaffold ROI 跳过**（不占首 8、也未进 12 屏 scaffold）: **Email Templates**、**QA Maintenance** 及其他长内容/低频路由——归属信号弱、动态/copy 噪声高；需要时再扩样，**不**拉低人工首批 ROI。
+
+**有意未进首 8（但在 scaffold 24 内）**: app-center / scraper / promptlab / sops / hub / skills / npi 的 default+minimal 对；dark 对；deep-chat default（minimal 已足以证「不被顶替」）。
+
+### 6.2 首 8 清单（文件名 + 截什么）
+
+| # | 人工归档名（长形 §5.1） | Scaffold 短形（对照） | Path / 定位 | Appearance | 截什么 | 为何在首 8 |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `theme__r7__settings-appearance__default__light__desktop.png` | R7 Settings | default | light | Appearance 面板 + 主题 select | 切换起点；对照预览 |
-| 2 | `theme__r7__settings-appearance__minimal__light__desktop.png` | R7 | minimal | light | 同区域切到极简后 | Must change：预览/选中；X1 |
-| 3 | `theme__r4__keyword-hunter__default__light__desktop.png` | R4 KH | default | light | 含 banner + 侧栏 + 主工具区 | 归属基线 **rose**（`wb-theme-rose`） |
-| 4 | `theme__r4__keyword-hunter__minimal__light__desktop.png` | R4 | minimal | light | 同构图 | banner NOT + 壳层可变 |
-| 5 | `theme__r5__ppc-search-terms__default__light__desktop.png` | R5 PPC | default | light | 含 `.ppc-hero` | emerald 基线 |
-| 6 | `theme__r5__ppc-search-terms__minimal__light__desktop.png` | R5 | minimal | light | 同构图 | hero 不得工业灰吞叙事 |
-| 7 | `theme__r6__deep-chat__minimal__light__desktop.png` | R6 Deep Chat | **minimal** | light | 含发送/accent 区 | terracotta 在「最易被 primary 顶替」态下仍在 |
-| 8 | `theme__r1__home__minimal__light__desktop.png` | R1 Home | minimal | light | 首页 + 可见壳层 chrome | 跨模块扫读；侧栏归属 NOT |
+| 1 | `theme__r7__settings-appearance__default__light__desktop.png` | `theme-default-light-settings-appearance.png` | Settings → 外观与体验 | default | Appearance 面板 + theme select | 切换起点；对照预览 |
+| 2 | `theme__r7__settings-appearance__minimal__light__desktop.png` | `theme-minimal-light-settings-appearance.png` | 同上 | minimal | 同区域切到极简后 | Must change；X1 |
+| 3 | `theme__r4__keyword-hunter__default__light__desktop.png` | `theme-default-light-keyword-hunter.png` | `/#/app-center/keyword-hunter/input` | default | banner + 侧栏 + 主工具区 | ownership 基线 |
+| 4 | `theme__r4__keyword-hunter__minimal__light__desktop.png` | `theme-minimal-light-keyword-hunter.png` | 同上 | minimal | 同构图 | banner NOT + 壳层可变 |
+| 5 | `theme__r5__ppc-search-terms__default__light__desktop.png` | `theme-default-light-ppc-search-terms.png` | `/#/app-center/ppc-tools/ppc-search-terms` | default | 含 `.ppc-hero` | emerald 基线 |
+| 6 | `theme__r5__ppc-search-terms__minimal__light__desktop.png` | `theme-minimal-light-ppc-search-terms.png` | 同上 | minimal | 同构图 | hero 不得被 primary 吞 |
+| 7 | `theme__r6__deep-chat__minimal__light__desktop.png` | `theme-minimal-light-deep-chat.png` | `/#/app-center/playground/deep-chat` | **minimal** | 发送/accent 区 | terracotta 压测 |
+| 8 | `theme__r1__home__minimal__light__desktop.png` | `theme-minimal-light-home.png` | `/#/home` | minimal | 首页 + 可见 chrome | 侧栏归属 NOT |
 
-**有意未进首 8**: R2/R3/R8/R9 全量对（扫一眼即可）；dark 对；default Deep Chat（有 minimal 即可证「不被顶替」）。  
-**操作顺序建议**: #1 → 切 minimal → #2 → 刷新确认持久化（可另记文字，不占第 9 张）→ #4 → #6 → #7 → #8；#3/#5 可在 default 会话或再切回 default 补齐。
-
-**明日执行清单（勾选）**:
+### 6.3 截取顺序（一次会话，减少切换）
 
 ```text
-[ ] Viewport 1280×720；build/SHA 写入 MANIFEST
-[ ] 从 default light 开始；动画减少
-[ ] 8 张按上表命名落盘 docs/screenshots/theme-d12/2026-07-27/（或当日）
-[ ] 成对 diff：#1↔#2、#3↔#4、#5↔#6；单张解读 #7 #8
-[ ] 记录 data-appearance / data-color-mode
+A. default light 会话
+   1) 打开 Settings 外观 → 拍 #1
+   2) 不关 Settings（或先关）→ KH → 拍 #3
+   3) PPC Search Terms → 拍 #5
+
+B. 切到 minimal（Settings 选中 + 应用）并确认 html[data-appearance=minimal]
+   4) Settings 外观 → 拍 #2
+   5) 刷新一次（文字记录持久化即可，不占第 9 张）
+   6) KH → 拍 #4
+   7) PPC → 拍 #6
+   8) Deep Chat → 拍 #7
+   9) Home → 拍 #8
+```
+
+**对齐 diff 读法**: #1↔#2、#3↔#4、#5↔#6；#7/#8 单张解读（minimal 压测）。
+
+### 6.4 Filename 勾选清单（人工归档）
+
+落盘目录: `docs/screenshots/theme-d12/YYYY-MM-DD/` + `MANIFEST.md`（SHA、浏览器、viewport、步骤）。
+
+```text
+[ ] theme__r7__settings-appearance__default__light__desktop.png
+[ ] theme__r7__settings-appearance__minimal__light__desktop.png
+[ ] theme__r4__keyword-hunter__default__light__desktop.png
+[ ] theme__r4__keyword-hunter__minimal__light__desktop.png
+[ ] theme__r5__ppc-search-terms__default__light__desktop.png
+[ ] theme__r5__ppc-search-terms__minimal__light__desktop.png
+[ ] theme__r6__deep-chat__minimal__light__desktop.png
+[ ] theme__r1__home__minimal__light__desktop.png
+```
+
+### 6.5 执行前检查（勾选）
+
+```text
+[ ] Viewport 1280×720；动画减少 / reduced-motion 可选
+[ ] 从 default light 开始；build/SHA 写入 MANIFEST
+[ ] 8 张按 §6.2 长形命名落盘（不提交 binary baseline）
+[ ] 成对 diff + 单张解读（§6.3）
+[ ] 记录 data-appearance / data-color-mode 与文件名一致
 [ ] 结论贴 XO 记录模板（xo-signoff §3）
+[ ] 不声称 visual Pass；不挂 CI fail-closed；不 mint 仓库快照
 ```
 
 ---
@@ -407,7 +478,7 @@ theme appearance: skills minimal light desktop
 - [x] Tooling A/B/C 与现有 `test:visual` 关系  
 - [x] CI 分期建议（**仍未**挂 blocking job）  
 - [x] 命名约定  
-- [x] 明日 8 张清单  
+- [x] 首 8 张人工清单（§6：对齐 scaffold 12 屏名空间 + 截取顺序 + 文件名勾选 + **截图≠Pass**）  
 - [x] Pass / Fail 标准  
 - [x] **Opt-in scaffold**（12 屏 × 2 appearance = **24**；含 PromptLab + Deep Chat + Skills catalog + NPI Tracker；`THEME_VISUAL=1`；基线 gitignore）
 
@@ -422,10 +493,10 @@ theme appearance: skills minimal light desktop
 | 文档 | `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md` |
 | Light 主包快照 | **18**（9×2） |
 | Dark 可选 | **+18** |
-| **明日首批** | **8** |
+| **人工首批** | **8**（§6 顺序/文件名/截图≠Pass；Email·QA 跳过） |
 | 工具 | 人工 XO 定真相 → Playwright `test:visual:theme` 固化；smoke 不塞截图 |
-| Scaffold | **24** 张 opt-in（Settings / KH / Home / App Center / Scraper / PromptLab / PPC / SOPs / Amazon Hub / Deep Chat / Skills / NPI × default/minimal light） |
+| Scaffold | **24** 张 opt-in（settings / KH / home / app-center / scraper / promptlab / ppc / sops / hub / deep-chat / skills / npi × default/minimal light） |
 | CI | 先 local/artifact；**未**挂 job；稳定后独立 non-blocking → path-filter blocking |
 | 当前视觉签收 | 仍依赖人类；D12 = 计划 + scaffold，**非** Pass |
 
-**一句话**: 用 **18** 张 light 主包 + scaffold 扩样（现 **24**，含 Skills + NPI）、**8** 张人工 XO；永不让 visual flaky 绑架 release-smoke。
+**一句话**: 用 **18** 张 light 主包 + scaffold 扩样（现 **24**）、**8** 张人工 XO（截图≠Pass）；永不让 visual flaky 绑架 release-smoke。
