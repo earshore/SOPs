@@ -1,6 +1,6 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ `5f602882`）  
+**日期**: 2026-07-26（refresh @ `5b6684f9`）  
 **范围**: `main` ahead of `sops/main` 主题收敛链（Phase 0 起 → HEAD）  
 **角色**: Tech Lead / Release docs  
 **诚实声明**: **Code gates 可运营；Visual / XO 未签收。** 不得宣称「主题体验 RC 已过」。
@@ -20,11 +20,11 @@
 
 | 层 | 灯 | 一句话 |
 | --- | --- | --- |
-| **Code / 契约** | **Green** | Phase 0–3 主线 + Ownership map + KH/Scraper/AI Analysis primary 样本 + workbench helpers（API + unit + **AI/PromptLab/Scraper icon 调用点**）+ smoke（Appearance / color-mode / KH ownership）已合入 `5f602882` |
+| **Code / 契约** | **Green** | Phase 0–3 主线 + Ownership map + workbench helpers（API + unit + MA icons）+ D7 `setModuleColor` **@deprecated** + ColorContext unit + D6 样本（KH + Scraper + AI Analysis + **PPC**）+ smoke 已合入 `5b6684f9` |
 | **Visual / XO** | **Yellow** | 人类 30 min 脚本 **仍未跑**；default↔minimal 可见体验与 dark 组合 **未签**；自动化仅契约子集，**无**全套色差/截图签收 |
 | **主题 RC 体验门** | **Open** | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: 工程主线已过「可防回归 + Ownership e2e + entry/workbench helper 拆分 + 调用点首批（MA icons）+ D6 业务样本（KH + Scraper + AI Analysis）」；体验主线仍卡在 **人工 XO**；并发下一波优先 **D7 deprecate + PPC 样本**（互不阻塞，**不得**跳过 XO）。
+**一句话**: 工程主线已过「可防回归 + Ownership e2e + entry/workbench helper + MA icon 调用点 + D7 deprecate（API + tests）+ D6 业务样本（KH + Scraper + AI + PPC）」；体验主线仍卡在 **人工 XO**；下一波可选 **eslint 硬门** / **D6 长尾** / **D4 card 调用点**（互不阻塞，**不得**跳过 XO）。
 
 ---
 
@@ -36,8 +36,8 @@
 | **1** Color Mode × Appearance | 修 D3/D11 运行时 | **Done (code)** / **Visual open** | `data-appearance` + `data-color-mode`；Settings 颜色模式 UI；壳层 nav/search/modal primary；unit + smoke 文档根属性 |
 | **2** Token 事实源 | 修 D1/D2 结构 | **Partial** | 清点文档；192 条原子 identical 删除；allowlist **20**；`--workbench-radius` SSOT + 多批消费者（含 buttons glow / radius batch 3）；**未**完成 `variables.semantic.css` 全拆 |
 | **3** 壳层 Appearance 可见面 | 用户看得见换肤 | **Partial** | Settings primary chrome + form tokens/focus；buttons primary glow 跟 Appearance；壳层部分 CTA；sidebar 去 marketing scale；**XO 未签「肉眼明确变化」** |
-| **4** Ownership / colorSchemes | 修 D4/D7/D8 | **Partial (helpers + first call sites)** | **Role → Palette 映射文档**（19 roles）+ smoke KH `wb-theme-rose`；**helpers**: `getWorkbenchCardClasses` / `getWorkbenchIconContainerClasses`（禁 translate/scale）+ `colorSchemes.test.ts`；**sidebar** category icon 去 `group-hover:scale-110`；**调用点 @ 5f602882**: AI Analysis selection icon、PromptLab section icons、Scraper strategy icon → `getWorkbenchIconContainerClasses`；**`setModuleColor` deprecate / ColorContext 双通道 / 全量调用点迁仍 open** |
-| **5** D6 业务页分期 | 业务 `blue-*` 降 | **Partial (samples)** | 业务 ~900+ 仍 Informational 基线；**样本**: **KH** 主 CTA / primary chrome；**Scraper** data tabs / site select / history load hover / import focus-ring；**AI Analysis** run CTA + listing selection chrome（ASIN/target 选中、focus-ring）→ `var(--color-primary*)`；壳层仅 megaMenu **13** |
+| **4** Ownership / colorSchemes | 修 D4/D7/D8 | **Partial (D7 code Done; D4 long tail open)** | **Role → Palette 映射文档**（19 roles）+ smoke KH `wb-theme-rose`；**helpers**: `getWorkbenchCardClasses` / `getWorkbenchIconContainerClasses` + `colorSchemes.test.ts`；**sidebar** category icon 去 scale；**调用点**: AI/PromptLab/Scraper icons；**D7 code @ 5b6684f9**: `setModuleColor` **@deprecated**（infer SSOT；Appearance 禁止调用）+ `ColorContext.test.ts`（infer / legacy write / 解耦）；**可选** eslint 硬门 / 全量调用点迁 / dual-channel 彻底下线 **may be in flight** |
+| **5** D6 业务页分期 | 业务 `blue-*` 降 | **Partial (samples)** | 业务 ~900+ 仍 Informational 基线；**样本**: **KH** 主 CTA；**Scraper** tabs/site/history/import；**AI Analysis** run CTA + listing selection；**PPC** filter active / resume CTA / search focus → `var(--color-primary*)`；壳层仅 megaMenu **13** |
 
 图例：Done (code) = 契约/门禁/实现；Visual open = 浏览器签收缺失；Partial (samples) = 个别业务面已动手，非全量 D6 清零。
 
@@ -54,6 +54,7 @@
 | D1 原子覆盖 | `npm run token:override-audit:gate` | unallowlisted atomic **失败** |
 | Theme 契约（PR 必跑） | `npx vitest run src/common/config/themeConfig.test.ts` | Appearance / Color Mode |
 | colorSchemes workbench（D4 子集） | `npx vitest run src/common/constants/colorSchemes.test.ts` | entry 保留 motion；workbench 禁 translate/scale |
+| ColorContext（D7 子集） | `npx vitest run src/common/utils/ColorContext.test.ts` | infer SSOT；deprecated write 兼容；与 infer 解耦 |
 | UI 结构 | `npm run ui:audit`（含 `workbench-ui:audit`） | card/callout/workbench |
 | Token 生成 | `npm run generate:tokens` | Phase 2+ 无手工污染 generated |
 | 类型 / 全量 | `npm run type-check` · `npm run ci:all` | merge / 发版 |
@@ -70,7 +71,9 @@
 | Appearance 切换后持久化 minimal 等 | **In smoke** | 设置面板路径 |
 | KH ownership class 在 minimal 后仍在 | **In smoke @ a5079e23+** | `wb-theme-rose`（banner）或 `sidebar-theme-rose`；证明 A 不冲 B |
 | colorSchemes entry vs workbench helpers | **Unit @ 0c3cb2be+** | 非 e2e；契约在 `colorSchemes.test.ts` |
+| ColorContext infer / deprecated write | **Unit @ 5b6684f9** | 非 e2e；`ColorContext.test.ts`；**无** eslint 硬门（optional / may be in flight） |
 | AI/PromptLab/Scraper icon helpers 调用点 | **Code @ 5f602882** | **无** e2e 断言；回归靠 unit + 人工 XO 抽检 |
+| PPC primary chrome 样本 | **Code @ 5b6684f9** | filter / resume / search focus → primary；**无** e2e；肉眼抽检可选 |
 | default↔minimal 全路由色差 / 截图 | **Not in CI** | 仍依赖人类 XO + 未来 D12 |
 | dark×minimal 视觉签收 | **Open** | 契约可测；**视觉未签** |
 
@@ -85,9 +88,10 @@
 | **Atomic override allowlist** | **20** | radius 6 + shadow 6 + z-index 7 + easing 1；unallowlisted **0** |
 | Handwritten `:root`（D1 首刀后） | ~267 | 去 192 identical 后；语义 + intentional 冲突保留 |
 | XO 场景（签收文档） | ~12 automated / ~22 code / ~**38 manual** / visual **0 full Pass** | 见 XO status；**人类 30 min 仍 required** |
-| 业务 `blue-*`（D6） | ~900+ 行级基线 | Phase 5；**样本**: KH + Scraper primary chrome + **AI Analysis run CTA / listing 选中**；**非**全量清零；不阻塞 code Green |
+| 业务 `blue-*`（D6） | ~900+ 行级基线 | Phase 5；**样本**: KH + Scraper + AI Analysis + **PPC** primary chrome；**非**全量清零；不阻塞 code Green |
 | Ownership Role 表 | **19 roles 文档** | `2026-07-26-ownership-role-palette-map.md`；实现未绑 `data-ownership-role` 全站 |
-| Workbench colorSchemes helpers | **API + unit + 首批调用点** | helpers 已导出；**AI / PromptLab / Scraper section icons** 已迁 `getWorkbenchIcon*`；**card 调用点 / 其余模块 icon 全量未做** |
+| Workbench colorSchemes helpers | **API + unit + 首批调用点** | helpers 已导出；**AI / PromptLab / Scraper section icons** 已迁；**card 调用点 / 其余模块 icon 全量未做** |
+| D7 `setModuleColor` | **Deprecated (code)** | JSDoc `@deprecated` + unit；**legacy write 仍可用**；eslint 硬门 / 双通道彻底下线 **optional / in flight** |
 
 ---
 
@@ -99,9 +103,9 @@
 | **D2** | P1 语义 | **Partial** | SSOT 已有；长尾模块 `rounded-md/lg/xl` 误用与 R4 引用改名未清 |
 | **D3** | P0 运行时 | **Code fixed** | 停双写 `data-theme` 兼容计划；e2e dark×minimal 共存加厚；**视觉签** |
 | **D4** | P1 体验 | **Partial (helpers + MA icons)** | Role 表 + workbench helpers + unit + sidebar scale 修 + **AI/PromptLab/Scraper icon 调用点**；**长尾**: entry helper 误用审计 / card 与其余模块迁 `getWorkbench*` |
-| **D5** | P2 | **Partial** | focus soft 全站跟手；剩余蓝偏 focus 登记例外；buttons glow 已跟 primary；Scraper start / AI Analysis run focus 已跟 focus-ring |
-| **D6** | P1 可见面 | **Shell locked / biz samples** | 壳层 megaMenu **13** 保持 Ownership；**KH + Scraper + AI Analysis primary 样本已落地**；其余业务页（**下一优先 PPC**）仍 Informational |
-| **D7** | P1 | **Open（下一波）** | ColorContext 双通道 → menu + class 单信；**`setModuleColor` deprecate 路径仍 open**（`applyTheme` 已不调；API 本身未 deprecate） |
+| **D5** | P2 | **Partial** | focus soft 全站跟手；剩余蓝偏 focus 登记例外；buttons glow 已跟 primary；Scraper start / AI Analysis run / **PPC search** focus 已跟 focus-ring |
+| **D6** | P1 可见面 | **Shell locked / biz samples** | 壳层 megaMenu **13** 保持 Ownership；**KH + Scraper + AI Analysis + PPC primary 样本已落地**；其余业务页仍 Informational 长尾 |
+| **D7** | P1 | **Code Done（deprecate）** | `setModuleColor` **@deprecated** + unit @ `5b6684f9`；infer 为 ownership SSOT；**剩余**: 可选 eslint 硬门 / 调用点清零 / dual-channel 彻底下线（lint gate may be in flight） |
 | **D8** | P1 | **Partial (doc)** | Role → Palette **表已写**；禁色名增生流程已定；代码侧 role id / 扩表执法未绑死 |
 | **D9** | P2 | **Open** | 局部 token 前缀生命周期（升全局 / 归档） |
 | **D10** | P1 | **Partial** | 类型已收窄 primary 族；调用方误用状态色文档/审计可再紧 |
@@ -112,13 +116,13 @@
 
 ## 6. Human XO — next action
 
-**阻塞体验关闸的唯一最短路径**: 人类按 **30 分钟浏览器脚本**跑完并贴记录。**本 refresh 后仍 required**（自动化 ownership / colorSchemes unit / 样本 primary **不**替代 XO）。
+**阻塞体验关闸的唯一最短路径**: 人类按 **30 分钟浏览器脚本**跑完并贴记录。**本 refresh 后仍 required**（自动化 ownership / colorSchemes unit / ColorContext unit / 样本 primary **不**替代 XO）。
 
 - 脚本与记录模板:  
   [`2026-07-26-theme-system-xo-signoff-status.md` §3](./2026-07-26-theme-system-xo-signoff-status.md#3-人类-xo-30-分钟手动浏览器脚本)
 - 矩阵: [`experience-acceptance-matrix.md`](./2026-07-26-theme-system-experience-acceptance-matrix.md)
 - 必测: X1 default↔minimal×3 · X2 ownership 抽检（**含 KH rose banner / 侧栏无 marketing scale**）· X5 dark×appearance · focus · 刷新持久化
-- **可选肉眼**: KH 主 CTA + Scraper tabs/site + **AI Analysis run / listing 选中**是否跟 Appearance；MA section icons **无** `scale-110`（**不**当全站 D6 Pass）
+- **可选肉眼**: KH 主 CTA + Scraper tabs/site + AI Analysis run/listing + **PPC filter/resume/search** 是否跟 Appearance；MA section icons **无** `scale-110`（**不**当全站 D6 Pass）
 - **不测**: 全站 D6 仍蓝（允许 Informational）
 - 签收后: 填 XO 结论 `PASS / PASS with debt / FAIL`；Tech Lead 仅勾 code gates §4.1
 
@@ -128,11 +132,11 @@
 
 | # | Wave | 范围 | 验证 |
 | --- | --- | --- | --- |
-| **1** | **D7 deprecate（可并发）** | `setModuleColor` **deprecate 路径**（文档/类型/调用审计）；ColorContext 双通道收敛计划；**不**绑 visual 签收 | 审查 §3.4 + map §5；`applyTheme` 不回归；硬编码 gate 不升 |
-| **2** | **D6 PPC 样本（可与 D7 并发）** | PPC 主 CTA / 关键 chrome 跟 Appearance primary（**禁止** 900+ 清零；可顺带小刀 filter/table 已 radius 区的 blue） | hardcode gate 不升 + smoke 绿；**仍不宣称 visual Pass** |
-| **3** | **XO 陪跑 + D4 长尾** | 人类 30 min 记录；e2e：dark×appearance 共存、ownership 抽检（PPC hero / MA indigo）；entry vs workbench **card/其余 icon 调用点**审计 | 矩阵勾选 + `colorSchemes.test.ts`；**仍不宣称 visual Pass** |
+| **1** | **Human XO（始终优先）** | 30 min 浏览器脚本记录；X1/X2/X5 + 可选业务样本肉眼 | 矩阵勾选 + XO status 结论；**仍不宣称 visual Pass** |
+| **2** | **D7 可选硬门（可并发）** | eslint / lint 禁生产新调 `setModuleColor`（allow test/legacy）；调用点清零审计；双通道退役计划 | `ColorContext.test.ts` 绿；hardcode gate 不升；**lint gate may be in flight** |
+| **3** | **D6 长尾 + D4 card** | 下一业务样本（非 900+ 清零）或 workbench **card** / 其余 icon 调用点迁 `getWorkbench*` | hardcode gate 不升 + unit；**仍不宣称 visual Pass** |
 
-**并发约定**: Wave 1（D7）与 Wave 2（PPC）可并行；Wave 3（XO）**始终 required**，不因 code Green / 样本扩展而关闭。  
+**并发约定**: Wave 2（D7 lint）与 Wave 3（D6/D4 长尾）可并行；Wave 1（XO）**始终 required**，不因 code Green / 样本扩展 / deprecate 而关闭。  
 **禁止本周扩 scope**: 一次清零 900+ blue、换字体、重写 Deep Chat terracotta、white-label 引擎、未走 map 扩表流程的新 `wb-theme-*`。
 
 ---
@@ -140,6 +144,7 @@
 ## 8. Commit list (`sops/main` → `HEAD`)
 
 ```
+5b6684f9 feat(theme): deprecate setModuleColor and PPC primary chrome
 5f602882 feat(theme): workbench icon helpers and AI Analysis primary CTAs
 0c3cb2be feat(theme): workbench colorSchemes helpers and scraper primary chrome
 a5079e23 feat(theme): ownership map, KH primary CTAs, e2e ownership check
@@ -158,12 +163,13 @@ d1a8c774 feat(theme): settings color mode, token audit, XO status
 f8f925a8 docs(theme): enterprise audit and convergence roadmap
 ```
 
-**HEAD 要点 (`5f602882`)**:  
-- AI Analysis / PromptLab / Scraper section icons → `getWorkbenchIconContainerClasses`（D4 调用点首批）  
-- AI Analysis run CTA + listing selection chrome → Appearance `var(--color-primary*)` / focus-ring（D6 第三业务样本）  
-- 本文件对齐 HEAD；**Visual / XO 仍 unsigned**
+**HEAD 要点 (`5b6684f9`)**:  
+- D7: `ColorContext.setModuleColor` **@deprecated**；ownership SSOT = `inferColorFromModule`；`ColorContext.test.ts`（infer / legacy write / 解耦）  
+- D6 样本 #4: PPC filter active / resume CTA / search focus → Appearance `var(--color-primary*)` / focus-ring  
+- 本文件对齐 HEAD；**Visual / XO 仍 unsigned**；eslint 硬门 **optional / may be in flight**
 
-**前一发 (`0c3cb2be`)**: workbench card/icon helpers + unit；Scraper primary chrome；sidebar 去 scale。  
+**前一发 (`5f602882`)**: workbench icon helpers 调用点（AI/PromptLab/Scraper）；AI Analysis primary CTAs。  
+**再前 (`0c3cb2be`)**: workbench card/icon helpers + unit；Scraper primary chrome；sidebar 去 scale。  
 **再前 (`a5079e23`)**: Ownership Role map；KH primary CTAs；smoke ownership class。
 
 ---

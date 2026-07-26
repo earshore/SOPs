@@ -453,8 +453,9 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   },
 
   get listingGenerateButtonClass(): string {
+    // Appearance primary (not hard blue/indigo) for listing Master Prompt CTA.
     return this.isListingReady
-      ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 cursor-pointer'
+      ? 'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] hover:from-[var(--color-primary)] hover:to-[var(--color-primary-darker)] text-white shadow-lg shadow-[0_10px_15px_-3px_color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:shadow-xl hover:shadow-[0_20px_25px_-5px_color-mix(in_srgb,var(--color-primary)_40%,transparent)] cursor-pointer'
       : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none';
   },
 

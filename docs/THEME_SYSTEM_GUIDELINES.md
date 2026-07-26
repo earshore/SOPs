@@ -79,7 +79,7 @@ npm run generate:tokens
 - DOM：`data-appearance` + 兼容 `data-theme`=appearance id；Color Mode 用 `data-color-mode`（及 resolved / `.dark`），**禁止**再把 `data-theme` 当作 dark 槽位。
 - **已删除** `src/common/config/themes.ts`；不得再引入平行主题配置文件。
 - `applyTheme` 只写 Appearance（primary / focus + appearance 标记）；**不得**改 color mode，**不得**调用 `ColorContext.setModuleColor` 或改写模块归属。
-- 模块归属色（Layer B）权威通道：`ColorContext.inferColorFromModule` / `menuConfig`；`setModuleColor` 已废弃为兼容写 API（D7）。
+- 模块归属色（Layer B）权威通道：`ColorContext.inferColorFromModule` / `menuConfig`；`setModuleColor` 已废弃为兼容写 API（D7）；生产代码由 ESLint `no-restricted-properties` hard-gate 禁止调用。
 - `applyColorMode` / `restoreColorMode` 与 Appearance 独立；启动时先 restore color mode 再 restore appearance。
 
 ### 2.3 Appearance Presets

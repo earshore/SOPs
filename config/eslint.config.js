@@ -79,6 +79,24 @@ export default [
           selector: "AssignmentExpression[left.property.name='outerHTML']",
           message: '避免直接使用outerHTML。请使用更安全的DOM操作方法。',
         },
+        // D7: bare setModuleColor(...) call sites (destructured / unbound)
+        {
+          selector: "CallExpression[callee.name='setModuleColor']",
+          message:
+            'setModuleColor is deprecated (D7). Use ColorContext.inferColorFromModule for module ownership color; Appearance/ThemeManager must never write Layer B colors.',
+        },
+      ],
+
+      // D7 hard-gate: ban ColorContext.setModuleColor in production (A2 / Layer B)
+      // Definition in ColorContext.ts is a MethodDefinition and is not matched.
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'ColorContext',
+          property: 'setModuleColor',
+          message:
+            'ColorContext.setModuleColor is deprecated (D7). Use ColorContext.inferColorFromModule for module ownership color; Appearance/ThemeManager must never write Layer B module colors.',
+        },
       ],
 
       // 🎯 防止循环依赖 - 禁止基础设施层导入Logger
@@ -187,6 +205,7 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
       'no-restricted-globals': 'off',
       'no-restricted-syntax': 'off',
+      'no-restricted-properties': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
