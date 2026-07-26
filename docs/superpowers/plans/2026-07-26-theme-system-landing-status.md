@@ -13,7 +13,8 @@
 [Token 覆盖库存](./2026-07-26-token-override-inventory.md) ·  
 [Workbench radius 决策](./2026-07-26-workbench-radius-decision.md) ·  
 [Ownership Role → Palette 映射](./2026-07-26-ownership-role-palette-map.md) ·  
-[Local token 前缀生命周期 (D9)](./2026-07-26-local-token-prefix-lifecycle.md)
+[Local token 前缀生命周期 (D9)](./2026-07-26-local-token-prefix-lifecycle.md) ·  
+[Ownership 深绑定面审查（mega/sidebar/banner）](./2026-07-26-theme-ownership-surfaces-deep-review.md)
 
 ---
 
@@ -27,7 +28,7 @@
 
 **一句话**: code FREEZE + agent-contract **本机可复现 PASS with debt**；下一步只剩 **人类 10–30 min 签字**（或点名债务）。smoke：`npm run test:e2e:smoke`（4173）。
 
-**Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
+**Nav ownership（产品决策）**: megaMenu + left sidebar + welcome banner = **Layer B**；Appearance **不得**洗成单 primary。治理目标：主题系统管 **palette recipe + 中性面**，业务只绑 role/menu。深审查与 O0–O4 路线：[theme-ownership-surfaces-deep-review](./2026-07-26-theme-ownership-surfaces-deep-review.md)。宪法 [§2.2](../../THEME_SYSTEM_GUIDELINES.md)。megaMenu hardcode **13** = 有意 Ownership 基线。
 
 ---
 

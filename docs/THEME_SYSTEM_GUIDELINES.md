@@ -97,6 +97,7 @@ npm run generate:tokens
 - **禁止**：把 megaMenu / sidebar 强行收成单一 `--color-primary`——会压扁 KH rose / MA indigo / PPC emerald 等 wayfinding。
 - **壳层 hardcode 基线**保留 megaMenu blues（当前 **13**）是 **有意 Ownership**；`theme:hardcode-baseline` 锁的是「只降不升」，**不是**要求本轮把菜单改成 primary。
 - **优先级提醒**（同 A2）：**状态色 > 模块归属（Ownership / Nav）> Appearance primary > 中性 surface**。
+- **深绑定面治理（megaMenu / 侧栏 / welcome banner）**: 主题系统应管理 **palette recipe 与中性 chrome**，业务只声明 role/palette；**禁止**收成单一 `--color-primary`。分阶段处方与崩溃禁区见 [Ownership 深绑定面深度审查](./superpowers/plans/2026-07-26-theme-ownership-surfaces-deep-review.md)。
 
 ### 2.3 Appearance Presets
 
