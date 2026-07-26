@@ -1,7 +1,7 @@
 # 企业级主题系统重构蓝图：主题 = 浅色/深色/系统
 
 **日期**: 2026-07-26  
-**状态**: T0 **Done** · T1 核心项 **Done**（primary stomp / FOUC / prefers 孤岛 / CONFIG_KEYS） · T2 **Partial**（settings / header / sidebar / home / modal） · **非**全量业务 CSS 重写  
+**状态**: T0 **Done** · T1 **Done**（全 6 项） · T2 **Done**（settings / header / sidebar / home / modal） · T3 **Partial**（forms / secondary / ui-card） · T4 **Partial**（skills/workflows · competitor_monitoring · amz knowledge 样本） · **非**全量业务 CSS 重写  
 **触发**: 产品纠正——当前将 Appearance 预设误称为「主题」，颜色模式（浅/深/系统）未达企业级一体化  
 **范围**: 运行时 · Token · 壳层 · 共享组件 · 业务模块 · 设置 IA · 命名  
 **关联**: `THEME_SYSTEM_GUIDELINES` · Ownership 深绑定审查 · D11/D3 债务  
@@ -207,10 +207,10 @@ Header / mega 面板 / settings / home dock / modal **只许**用 shell/surface�
 2. [x] **Head 同步主题脚本 + critical 语义化**（灭 FOUC） — `9db508ba`  
 3. [x] `prefers-color-scheme` 孤岛 → `data-color-mode-resolved` — `ee599bb5`  
 4. [x] `app-color-mode` 进入 export/CONFIG_KEYS — `f1a1dd00`  
-5. [ ] 默认新用户 → `system`（可配置）  
-6. [ ] 模式切换：`color-scheme` + 可选短过渡  
+5. [x] 默认新用户 → `system`（可配置）  
+6. [x] 模式切换：`color-scheme` + 可选短过渡（bootstrap / critical / `data-theme-ready`）  
 
-**状态:** **核心项 Done**（1–4）；5–6 仍 open  
+**状态:** **Done**（全 6 项）  
 **验收:**  
 - 冷启动 dark/system→dark **零浅色闪**  
 - `minimal + dark` primary 仍是 slate 系，**不是 indigo**  
@@ -227,13 +227,21 @@ Header / mega 面板 / settings / home dock / modal **只许**用 shell/surface�
 - [ ] Ownership soft 双明度（侧栏 active 不再浅色粉岛）  
 - [ ] 全壳层 elevation / border 统一收口 + 体验签收  
 
-**状态:** **Partial** — settings / header / sidebar / home / modal 已走 dual-theme surface；Ownership soft 双明度与统一签收仍 open  
+**状态:** **Done** — settings / header / sidebar / home / modal 已走 dual-theme surface；Ownership soft 双明度与统一签收仍 open（不阻壳层主面落地）  
 **验收:** 设置/侧栏/顶栏在深色下像同一产品，不是白岛+补丁。
 
 ### Phase T3 — 共享组件「一个设计系统」
 
 参照 toast 标准：forms 本地 token 进全局 Theme 图；secondary button hover；timeline 白边；loading skeleton。  
 
+- [x] forms 双主题 field token（`3c697fc3`）  
+- [x] secondary button surfaces（`ad754b8d`）  
+- [x] `.ui-card` 语义原语 + 样本页（`d41f99ea` + 后续迁移）  
+- [ ] timeline 白边  
+- [ ] loading skeleton  
+- [ ] 组件 scorecard 全面提升  
+
+**状态:** **Partial** — forms / secondary buttons / ui-card primitive + samples 已落地；timeline / skeleton / scorecard 仍 open  
 **验收:** 组件 scorecard 从 ~6/10 → ≥8.5/10。
 
 ### Phase T4 — 业务内容表面工业化
@@ -244,6 +252,14 @@ Header / mega 面板 / settings / home dock / modal **只许**用 shell/surface�
 - 引入 `.ui-card` / `.ui-panel` 语义原语  
 - 淘汰 amz 仅桌面 cardization 补丁  
 
+已迁移样本：  
+- [x] more skills / workflows（`f151e180`）  
+- [x] sops `competitor_monitoring`（`f151e180`）  
+- [x] amz knowledge 样本（eu_insights / seo_strategy，`53f20d02`）  
+- [ ] app center（未落地）  
+- [ ] 其余 Top 模板与 lint 门  
+
+**状态:** **Partial** — more skills/workflows、sops competitor_monitoring、amz knowledge 样本已走 ui-card；app center 与大面积业务页仍 open  
 **验收:** Top 20 最差模板改完后，Dark 下无大面积白卡。
 
 ### Phase T5 — Ownership palette 包 + 门禁
