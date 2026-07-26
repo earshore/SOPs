@@ -1,6 +1,6 @@
 // tests/visual/theme-appearance-scaffold.test.ts
 // ================================================================
-// D12 theme-axis scaffold (Appearance default vs minimal · light only)
+// D12 theme-axis scaffold (Appearance default vs minimal · light + dark)
 //
 // Skipped by default so normal `npm run test:visual` / CI smoke stay green.
 // Opt in with THEME_VISUAL=1. Snapshots are local-mint only (gitignored);
@@ -13,8 +13,11 @@
 // Naming (short scaffold form; full plan matrix uses theme__r*__…):
 //   theme-default-light-<screen>.png
 //   theme-minimal-light-<screen>.png
+//   theme-default-dark-<screen>.png
+//   theme-minimal-dark-<screen>.png
 //
 // Plan: docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md
+// T5 matrix: docs/superpowers/specs/2026-07-26-enterprise-theme-system-redesign.md
 // ================================================================
 
 import { test, expect, type Page } from '@playwright/test';
@@ -220,6 +223,15 @@ const THEME_SCREENS: ThemeScreen[] = [
 
 const APPEARANCES: AppearanceId[] = ['default', 'minimal'];
 
+type ColorModeId = 'light' | 'dark';
+
+/**
+ * T5 matrix rows: Theme (light/dark) × Accent (default/minimal).
+ * Dark rows assert the enterprise redesign — neutral surfaces flip, ownership
+ * hue and Accent primary survive (no indigo stomp, no white islands).
+ */
+const COLOR_MODES: ColorModeId[] = ['light', 'dark'];
+
 async function waitForStablePage(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
     // Soft: some SPA routes never fully idle
@@ -231,22 +243,31 @@ async function waitForStablePage(page: Page): Promise<void> {
  * Seed Appearance + Color Mode before first navigation.
  * StorageService persists via JSON.stringify — values must be JSON strings.
  */
-async function seedThemePreferences(page: Page, appearance: AppearanceId): Promise<void> {
+async function seedThemePreferences(
+  page: Page,
+  appearance: AppearanceId,
+  colorMode: ColorModeId
+): Promise<void> {
   await page.addInitScript(
-    ({ theme, colorMode }) => {
+    ({ theme, mode }) => {
       window.localStorage.setItem('app-theme', JSON.stringify(theme));
-      window.localStorage.setItem('app-color-mode', JSON.stringify(colorMode));
+      window.localStorage.setItem('app-color-mode', JSON.stringify(mode));
     },
-    { theme: appearance, colorMode: 'light' as const }
+    { theme: appearance, mode: colorMode }
   );
 }
 
-async function expectDocumentAppearance(page: Page, appearance: AppearanceId): Promise<void> {
+async function expectDocumentAppearance(
+  page: Page,
+  appearance: AppearanceId,
+  colorMode: ColorModeId
+): Promise<void> {
   const root = page.locator('html');
   await expect(root).toHaveAttribute('data-appearance', appearance, { timeout: 15000 });
   // Backward-compat mirror (must never be "dark")
   await expect(root).toHaveAttribute('data-theme', appearance);
-  await expect(root).toHaveAttribute('data-color-mode', 'light');
+  await expect(root).toHaveAttribute('data-color-mode', colorMode);
+  await expect(root).toHaveAttribute('data-color-mode-resolved', colorMode);
 }
 
 async function openAppearanceSettings(page: Page, appearance: AppearanceId): Promise<void> {
@@ -273,46 +294,50 @@ suite('Theme appearance axis (D12 scaffold · opt-in THEME_VISUAL=1)', () => {
 
   test.describe.configure({ mode: 'serial' });
 
-  for (const appearance of APPEARANCES) {
-    for (const screen of THEME_SCREENS) {
-      const snapshotName = `theme-${appearance}-light-${screen.slug}.png`;
+  for (const colorMode of COLOR_MODES) {
+    for (const appearance of APPEARANCES) {
+      for (const screen of THEME_SCREENS) {
+        const snapshotName = `theme-${appearance}-${colorMode}-${screen.slug}.png`;
 
-      test(`theme appearance: ${screen.slug} ${appearance} light desktop`, async ({ page }) => {
-        await seedThemePreferences(page, appearance);
-        await page.goto(screen.path);
+        test(`theme appearance: ${screen.slug} ${appearance} ${colorMode} desktop`, async ({
+          page,
+        }) => {
+          await seedThemePreferences(page, appearance, colorMode);
+          await page.goto(screen.path);
 
-        if (screen.waitForSelector) {
-          await page.waitForSelector(screen.waitForSelector, { timeout: 15000 });
-        }
+          if (screen.waitForSelector) {
+            await page.waitForSelector(screen.waitForSelector, { timeout: 15000 });
+          }
 
-        await expectDocumentAppearance(page, appearance);
+          await expectDocumentAppearance(page, appearance, colorMode);
 
-        if (screen.openAppearanceSettings) {
-          await openAppearanceSettings(page, appearance);
-        }
+          if (screen.openAppearanceSettings) {
+            await openAppearanceSettings(page, appearance);
+          }
 
-        if (screen.beforeScreenshot) {
-          await screen.beforeScreenshot(page);
-        }
+          if (screen.beforeScreenshot) {
+            await screen.beforeScreenshot(page);
+          }
 
-        await waitForStablePage(page);
+          await waitForStablePage(page);
 
-        // Full-page theme pairs use STANDARD; shell-only crops (future) may go STRICT.
-        const thresholdConfig = adjustThresholdForViewport(
-          screen.openAppearanceSettings
-            ? getThresholdConfig(ThresholdLevel.STANDARD)
-            : getThresholdForPageType(screen.pageType),
-          'desktop'
-        );
+          // Full-page theme pairs use STANDARD; shell-only crops (future) may go STRICT.
+          const thresholdConfig = adjustThresholdForViewport(
+            screen.openAppearanceSettings
+              ? getThresholdConfig(ThresholdLevel.STANDARD)
+              : getThresholdForPageType(screen.pageType),
+            'desktop'
+          );
 
-        await expect(page).toHaveScreenshot(snapshotName, {
-          fullPage: true,
-          animations: 'disabled',
-          mask: screen.maskSelectors?.map(selector => page.locator(selector)) || [],
-          threshold: thresholdConfig.threshold,
-          maxDiffPixels: thresholdConfig.maxDiffPixels,
+          await expect(page).toHaveScreenshot(snapshotName, {
+            fullPage: true,
+            animations: 'disabled',
+            mask: screen.maskSelectors?.map(selector => page.locator(selector)) || [],
+            threshold: thresholdConfig.threshold,
+            maxDiffPixels: thresholdConfig.maxDiffPixels,
+          });
         });
-      });
+      }
     }
   }
 });
