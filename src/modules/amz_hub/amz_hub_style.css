@@ -87,16 +87,21 @@
 }
 
 .amz_nav-btn:hover {
-  color: var(--color-blue-500);
-  background: var(--color-primary-light);
+  color: var(--module-accent, var(--color-orange-500, #f97316));
+  background: var(--module-accent-soft, var(--color-orange-50, #fff7ed));
 }
 
-/* 激活态：渐变色块 */
+/* 激活态：Hub 归属橙（themeColor orange），非 Appearance primary */
 .amz_nav-btn.active,
 .tab-active {
-  background: linear-gradient(135deg, var(--color-blue-500) 0%, var(--color-blue-600) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--module-accent, var(--color-orange-500, #f97316)) 0%,
+    var(--module-accent-text, var(--color-orange-600, #ea580c)) 100%
+  );
   color: white !important;
-  box-shadow: 0 4px 12px var(--color-primary-light);
+  box-shadow: 0 4px 12px
+    color-mix(in srgb, var(--module-accent, var(--color-orange-500, #f97316)) 28%, transparent);
   border: none;
   transform: translateY(-1px);
 }

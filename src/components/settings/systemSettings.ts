@@ -1399,10 +1399,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
    * Returns true when demoted. With persist:true, writes clamped prefs so demotion
    * toast is once-only across reloads (AC3).
    */
-  clampReasoningPrefsToActiveModel(options?: {
-    announce?: boolean;
-    persist?: boolean;
-  }): boolean {
+  clampReasoningPrefsToActiveModel(options?: { announce?: boolean; persist?: boolean }): boolean {
     const prefs = normalizeReasoningUserPrefs(this.llm.reasoningPrefs);
     const allowed = this.reasoningEffortOptions;
     if (allowed.length === 0) return false;
@@ -2561,10 +2558,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     const raw = isReasoningEffortLevel(level) ? level : DEFAULT_REASONING_PREFS.effort;
     // Only persist efforts the current model can actually send (nearest-tier clamp).
     const allowed = this.reasoningEffortOptions;
-    const effort =
-      allowed.length > 0
-        ? clampEffort(raw, allowed)
-        : DEFAULT_REASONING_PREFS.effort;
+    const effort = allowed.length > 0 ? clampEffort(raw, allowed) : DEFAULT_REASONING_PREFS.effort;
     this.llm.reasoningPrefs = {
       ...normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
       effort,

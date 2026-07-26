@@ -617,6 +617,8 @@
    ---------------------------------------- */
 .dark .layout-sidebar__aside,
 .dark .layout-app__sidebar,
+[data-color-mode-resolved='dark'] .layout-sidebar__aside,
+[data-color-mode-resolved='dark'] .layout-app__sidebar,
 [data-theme='dark'] .layout-sidebar__aside,
 [data-theme='dark'] .layout-app__sidebar {
   background: var(--color-bg-secondary, #1e293b);
@@ -624,42 +626,50 @@
 }
 
 .dark .layout-sidebar--right .layout-sidebar__aside,
+[data-color-mode-resolved='dark'] .layout-sidebar--right .layout-sidebar__aside,
 [data-theme='dark'] .layout-sidebar--right .layout-sidebar__aside {
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .layout-app__footer,
+[data-color-mode-resolved='dark'] .layout-app__footer,
 [data-theme='dark'] .layout-app__footer {
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .section--divided,
+[data-color-mode-resolved='dark'] .section--divided,
 [data-theme='dark'] .section--divided {
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .section-title,
+[data-color-mode-resolved='dark'] .section-title,
 [data-theme='dark'] .section-title {
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .section-subtitle,
+[data-color-mode-resolved='dark'] .section-subtitle,
 [data-theme='dark'] .section-subtitle {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 .dark .sidebar-nav-item,
+[data-color-mode-resolved='dark'] .sidebar-nav-item,
 [data-theme='dark'] .sidebar-nav-item {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 .dark .sidebar-nav-item:hover,
+[data-color-mode-resolved='dark'] .sidebar-nav-item:hover,
 [data-theme='dark'] .sidebar-nav-item:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .sidebar-nav-item--active,
+[data-color-mode-resolved='dark'] .sidebar-nav-item--active,
 [data-theme='dark'] .sidebar-nav-item--active {
   background: rgba(129, 140, 248, 0.1);
   color: var(--color-primary, #818cf8);
@@ -667,6 +677,8 @@
 
 .dark .sidebar-header,
 .dark .sidebar-footer,
+[data-color-mode-resolved='dark'] .sidebar-header,
+[data-color-mode-resolved='dark'] .sidebar-footer,
 [data-theme='dark'] .sidebar-header,
 [data-theme='dark'] .sidebar-footer {
   border-color: rgba(255, 255, 255, 0.06);

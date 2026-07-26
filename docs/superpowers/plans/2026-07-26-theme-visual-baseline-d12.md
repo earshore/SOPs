@@ -27,7 +27,7 @@
 | --- | --- |
 | Code gates | 可预签；**不等于**视觉 Pass |
 | release-smoke | 路由可达；**无** Appearance 切换/色差 |
-| `tests/visual` | 已有通用页面截图骨架；**已有** opt-in theme-axis scaffold（`THEME_VISUAL=1`，7 屏 = 14 快照，默认 skip）；**仍无** 全量 18 张主包 / visual Pass |
+| `tests/visual` | 已有通用页面截图骨架；**已有** opt-in theme-axis scaffold（`THEME_VISUAL=1`，8 屏 = 16 快照，默认 skip）；**仍无** 全量 18 张主包 / visual Pass |
 | 全站视觉签收 | **未签**；本文补基线 **计划**，非签收本身 |
 
 ---
@@ -265,6 +265,8 @@ theme-default-light-ppc-search-terms.png
 theme-minimal-light-ppc-search-terms.png
 theme-default-light-sops-overview.png
 theme-minimal-light-sops-overview.png
+theme-default-light-amz-hub-overview.png
+theme-minimal-light-amz-hub-overview.png
 ```
 
 **用例标题**:
@@ -276,6 +278,7 @@ theme appearance: app-center default light desktop
 theme appearance: scraper minimal light desktop
 theme appearance: ppc-search-terms default light desktop
 theme appearance: sops-overview default light desktop
+theme appearance: amz-hub-overview default light desktop
 ```
 
 全量主包仍建议 §5.1 长形 `theme__r*__…`；scaffold 用短形以免与 generic visual 冲突。  
@@ -288,8 +291,8 @@ theme appearance: sops-overview default light desktop
 | 文件 | `tests/visual/theme-appearance-scaffold.test.ts` |
 | 开关 | `THEME_VISUAL=1`（缺省 / 非 1 → **整套 skip**） |
 | 命令 | `npm run test:visual:theme` · `npm run test:visual:theme:update` |
-| 屏 | Settings Appearance、Keyword Hunter、Home、**App Center**、**Scraper**、**PPC Search Terms**、**SOPs overview** × default/minimal × light = **14** |
-| Ownership 注意 | App Center 多色总览 / Scraper indigo / PPC emerald / SOPs overview **不得**被 Appearance primary 吞掉 |
+| 屏 | Settings Appearance、Keyword Hunter、Home、**App Center**、**Scraper**、**PPC Search Terms**、**SOPs overview**、**Amazon Hub overview** × default/minimal × light = **16** |
+| Ownership 注意 | App Center 多色总览 / Scraper indigo / PPC emerald / SOPs overview / Amazon Hub orange **不得**被 Appearance primary 吞掉 |
 | 基线仓库 | **不提交**（`tests/visual/.gitignore` 忽略 `theme-appearance-scaffold.test.ts-snapshots/`） |
 | CI | **不挂**；**不** fail-closed；**不**塞 release-smoke |
 | 等价签收？ | **否** — 仅骨架；人工首 8 张 XO 仍 required |
@@ -398,7 +401,7 @@ theme appearance: sops-overview default light desktop
 - [x] 命名约定  
 - [x] 明日 8 张清单  
 - [x] Pass / Fail 标准  
-- [x] **Opt-in scaffold**（7 屏 × 2 appearance = 14；`THEME_VISUAL=1`；基线 gitignore）  
+- [x] **Opt-in scaffold**（8 屏 × 2 appearance = 16；`THEME_VISUAL=1`；基线 gitignore）  
 
 **仍不在 D12 范围**: 提交 binary baseline、挂 CI fail-closed、宣称 visual Pass、塞 release-smoke。
 
@@ -413,8 +416,8 @@ theme appearance: sops-overview default light desktop
 | Dark 可选 | **+18** |
 | **明日首批** | **8** |
 | 工具 | 人工 XO 定真相 → Playwright `test:visual:theme` 固化；smoke 不塞截图 |
-| Scaffold | **14** 张 opt-in（Settings / KH / Home / App Center / Scraper / PPC / SOPs × default/minimal light） |
+| Scaffold | **16** 张 opt-in（Settings / KH / Home / App Center / Scraper / PPC / SOPs / Amazon Hub × default/minimal light） |
 | CI | 先 local/artifact；**未**挂 job；稳定后独立 non-blocking → path-filter blocking |
 | 当前视觉签收 | 仍依赖人类；D12 = 计划 + scaffold，**非** Pass |
 
-**一句话**: 用 **18** 张 light 全矩阵作目标、**8** 张人工 XO、**14** 张 Playwright scaffold（opt-in）；永不让 visual flaky 绑架 release-smoke。
+**一句话**: 用 **18** 张 light 全矩阵作目标、**8** 张人工 XO、**16** 张 Playwright scaffold（opt-in）；永不让 visual flaky 绑架 release-smoke。

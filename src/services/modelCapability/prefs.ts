@@ -54,15 +54,8 @@ export function clampEffort(
 }
 
 /** True when intent was demoted to fit the model allowlist. */
-export function isEffortDemoted(
-  requested: ReasoningEffort,
-  effective: ReasoningEffort
-): boolean {
-  return (
-    requested !== 'off' &&
-    effective !== 'off' &&
-    requested !== effective
-  );
+export function isEffortDemoted(requested: ReasoningEffort, effective: ReasoningEffort): boolean {
+  return requested !== 'off' && effective !== 'off' && requested !== effective;
 }
 
 export function normalizeReasoningUserPrefs(

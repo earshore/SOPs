@@ -1,7 +1,7 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ post-`c5bd4080` · D6#12 RW · D11 code-highlight/shell residual · D12×14 · D10 audit · XO docs）  
-**范围**: `main` ahead of `sops/main`（含非主题 commit 如 llm）；主题链 Phase 0 → 本波待合入  
+**日期**: 2026-07-26（refresh @ post-`35ebb671` · D6#13 hub · D11 reset/container/variables · D12×16 · llm test unblock）  
+**范围**: `main` ahead of `sops/main`；主题 + 旁路 llm 测试修复  
 **角色**: Tech Lead / Release docs  
 **诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称 visual Pass。
 
@@ -21,11 +21,11 @@
 
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Code / 契约**    | **Green**  | 前 tip `c5bd4080` + **本波**: D6 #12 Restricted Words · D11 code-highlight×26 + header-main/icon/scrollbar/timeline · D12 scaffold **14** · D10 call-site audit · XO 文档 |
+| **Code / 契约**    | **Green**  | 前 tip `35ebb671` + **本波**: D6 #13 AMZ Hub nav · D11 reset/container/variables dual-safe · D12×**16** · llm `requestedEffort` 测试解阻 |
 | **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: 本波再收 #12 RW + D11 residual + D12×14；体验关闸仍只靠 **人工 XO**。smoke 用 **`npm run test:e2e:smoke`**（preview **4173**）。
+**一句话**: 本波再收 #13 hub + D11 foundation dual-safe + D12×16，并解阻 full type-check:tests；体验关闸仍只靠 **人工 XO**。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -121,7 +121,7 @@
 | **D9**  | P2        | **Partial (Doc done)**              | 生命周期文档已落地；代码侧 F 波次 optional |
 | **D10** | P1        | **Done（type narrow + call-site audit）** | `AppearanceThemeColors` 仅 primary 族 + focus；`ThemeColors` deprecated 别名；**0** prod 误用状态色字段（§5.4）；删除 deprecated 别名 **optional** |
 | **D11** | P2        | **Code fixed / CSS residual**       | **`forms`×31 + `header`×25 + `cards`×19 + `interactive`×24 + `loading` 全量 + `code-highlight`×26** tri-selector；其余见 §10                                                                                                                                          |
-| **D12** | P2 | **Open（scaffold opt-in）** | `theme-appearance-scaffold`：**7 屏 × 2 = 14**（settings/KH/home + App Center/Scraper/PPC + SOPs overview）；`test:visual:theme` opt-in；**不** visual Pass；人工首 8 张 XO 仍 required |
+| **D12** | P2 | **Open（scaffold opt-in）** | `theme-appearance-scaffold`：**8 屏 × 2 = 16**（settings/KH/home + App Center/Scraper/PPC + SOPs + Amazon Hub overview）；`test:visual:theme` opt-in；**不** visual Pass；人工首 8 张 XO 仍 required |
 
 ### 5.1 D5 — remaining intentional blue / non-Appearance focus
 
@@ -221,7 +221,8 @@ Leave alone unless product reclassifies ownership:
 ## 8. Commit list (`sops/main` → `HEAD`)
 
 ```
-HEAD     feat(theme): D6 RW chrome, D11 residual dual-safe, D12x14
+HEAD     feat(theme): hub nav, foundation dual-safe, D12x16
+35ebb671 feat(theme): D6 RW chrome, D11 residual dual-safe, D12x14
 c5bd4080 feat(theme): D6 SOPs/NPI samples and D11 shell dual-safe
 b2560d98 feat(theme): D6 process chrome, cards dual-safe, D12x12
 5ad7b1c1 feat(theme): D6 input focus, D8 roles, D5/D11 polish
@@ -248,14 +249,14 @@ d1a8c774 feat(theme): settings color mode, token audit, XO status
 f8f925a8 docs(theme): enterprise audit and convergence roadmap
 ```
 
-**HEAD 要点 (`feat(theme): D6 RW chrome, D11 residual dual-safe, D12x14`)**:
-- D6 #12 Restricted Words search CTA/focus
-- D11 code-highlight + header-main / icon / scrollbar / timeline tri-selector
-- D12 scaffold **14**（+ SOPs overview）；D10 ThemeColors misuse audit clean
-- XO / 矩阵可选 #10/#11；**Visual Yellow**
-- smoke **必须** `npm run test:e2e:smoke`（preview **4173**）
+**HEAD 要点 (`feat(theme): hub nav, foundation dual-safe, D12x16`)**:
+- D6 #13 AMZ Hub shell nav → ownership orange/module-accent
+- D11 `reset.css`×12 · `container.css`×10 · `variables.css` root resolved
+- D12 scaffold **16**（+ Amazon Hub overview）
+- llm tests: `requestedEffort` fixtures 解阻 full prebuild
+- **Visual Yellow**；smoke 用 `npm run test:e2e:smoke`（4173）
 
-**前主题 tip (`c5bd4080`)**: D6 #10 SOPs · #11 NPI · D11 forms/header/interactive/loading。
+**前主题 tip (`35ebb671`)**: D6 #12 RW · code-highlight/shell residual · D12×14。
 
 ---
 
@@ -266,7 +267,7 @@ f8f925a8 docs(theme): enterprise audit and convergence roadmap
 | 类别 | 数量 | 说明 |
 | --- | --- | --- |
 | CSS `[data-theme='dark']` 选择器出现次数 | **217** | 15 个 CSS 文件；**全部**已与 `.dark` 并列 |
-| 已含 `[data-color-mode='dark']` 的 dark 规则 | **1 块** | `variables.css` 语义 token 覆盖（三选一） |
+| 已含 color-mode / resolved 的 root dark 规则 | **1 块** | `variables.css` 语义 token 覆盖（`.dark` + legacy + preference + resolved 四选一） |
 | 仍缺 color-mode / resolved 的 component 规则 | **~216** | 仅靠 `.dark` 运行时生效（ThemeManager 会加 class） |
 | 运行时 `dataset.theme = 'dark'` 生产写 | **0** | 仅测试构造 + legacy 一次性迁移 |
 | Appearance 兼容双写 `data-theme`=appearance id | **保留** | `ThemeManager.applyTheme` 故意双写；**禁止**当 dark 删 |
@@ -288,8 +289,8 @@ f8f925a8 docs(theme): enterprise audit and convergence roadmap
 1. **新样式 / 改样式**: 优先  
    `.dark …, [data-color-mode-resolved='dark'] …`  
    （可选保留 legacy `[data-theme='dark'] …` 一版，勿单独依赖）  
-2. **Token 层**: 继续对齐 `variables.css` 形态：  
-   `.dark, [data-theme='dark'], [data-color-mode='dark']` 或加 resolved  
+2. **Token 层**: 对齐 `variables.css` root 形态（**已 dual-safe**）：  
+   `.dark, [data-theme='dark'], [data-color-mode='dark'], [data-color-mode-resolved='dark']`  
 3. **分批迁 component CSS**（高流量先）: forms → cards → code-highlight → header → interactive → 其余  
 4. **勿**在未证安全前去掉 ThemeManager 的 appearance→`data-theme` 双写  
 5. **勿** bulk-delete `[data-theme='dark']` 直到 e2e/XO 确认 dark×appearance 与 system mode  
@@ -299,6 +300,10 @@ f8f925a8 docs(theme): enterprise audit and convergence roadmap
 
 将双选组扩成 dual-safe（保留 legacy，**不**把 appearance id 当 dark）:
 
+- **`src/css/foundation/variables.css` root dark block** — 语义 token 覆盖扩为 dual-safe：  
+  **before**: `.dark, [data-theme='dark'], [data-color-mode='dark']`  
+  **after**: `.dark, [data-theme='dark'], [data-color-mode='dark'], [data-color-mode-resolved='dark']`  
+  （补 resolved 有效暗色属性路；system 解析为 dark 时 `data-color-mode` 仍为 `system`，仅靠 class/优选 preference 不够）  
 - `src/css/components/tabs.css` — pill tabs（2 规则）  
 - `src/css/components/loading.css` — **全量 done**：`.loading-overlay` + route-loading-skeleton ×2 + loading-skeleton ×2（**5** 规则）  
 - `src/css/animations/keyframes.css` — reduced-motion skeleton  
@@ -311,9 +316,11 @@ f8f925a8 docs(theme): enterprise audit and convergence roadmap
 - **`src/css/components/icon-container.css` batch done** — **6** 规则  
 - **`src/css/components/scrollbar.css` batch done** — **11** 规则  
 - **`src/css/components/timeline.css` batch done** — **5** 规则  
+- **`src/css/layouts/container.css` batch done** — layout/sidebar 暗色 **10** 规则  
 - 跳过（无 dual dark 对）: `toast.css` / `status.css` / `progress.css` / `modals.css`  
 
-模式: `.dark …, [data-color-mode-resolved='dark'] …, [data-theme='dark'] …`
+模式（component）: `.dark …, [data-color-mode-resolved='dark'] …, [data-theme='dark'] …`  
+模式（root token）: `.dark, [data-theme='dark'], [data-color-mode='dark'], [data-color-mode-resolved='dark']`
 
 ### 10.4 Residual risk
 

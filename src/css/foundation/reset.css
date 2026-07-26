@@ -952,12 +952,14 @@ a {
    21. 暗色模式基础
    ======================================== */
 .dark,
+[data-color-mode-resolved='dark'],
 [data-theme='dark'] {
   color-scheme: dark;
 }
 
 /* 暗色模式下的选中色 */
 .dark ::selection,
+[data-color-mode-resolved='dark'] ::selection,
 [data-theme='dark'] ::selection {
   background: var(--color-primary, #818cf8);
   color: var(--color-primary-contrast, #ffffff);
@@ -965,6 +967,7 @@ a {
 
 /* 暗色模式下的占位符 */
 .dark ::placeholder,
+[data-color-mode-resolved='dark'] ::placeholder,
 [data-theme='dark'] ::placeholder {
   color: var(--color-text-placeholder, #6b7280);
 }
@@ -973,6 +976,9 @@ a {
 .dark input:-webkit-autofill,
 .dark textarea:-webkit-autofill,
 .dark select:-webkit-autofill,
+[data-color-mode-resolved='dark'] input:-webkit-autofill,
+[data-color-mode-resolved='dark'] textarea:-webkit-autofill,
+[data-color-mode-resolved='dark'] select:-webkit-autofill,
 [data-theme='dark'] input:-webkit-autofill,
 [data-theme='dark'] textarea:-webkit-autofill,
 [data-theme='dark'] select:-webkit-autofill {
@@ -983,29 +989,34 @@ a {
 
 /* 暗色模式下的滚动条 */
 .dark,
+[data-color-mode-resolved='dark'],
 [data-theme='dark'] {
   scrollbar-color: var(--scrollbar-thumb, rgba(255, 255, 255, 0.15))
     var(--scrollbar-track, transparent);
 }
 
 .dark ::-webkit-scrollbar-thumb,
+[data-color-mode-resolved='dark'] ::-webkit-scrollbar-thumb,
 [data-theme='dark'] ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover,
+[data-color-mode-resolved='dark'] ::-webkit-scrollbar-thumb:hover,
 [data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
 /* 暗色模式下的水平线 */
 .dark hr,
+[data-color-mode-resolved='dark'] hr,
 [data-theme='dark'] hr {
   background: var(--color-border-light, rgba(255, 255, 255, 0.06));
 }
 
 /* 暗色模式下的 mark */
 .dark mark,
+[data-color-mode-resolved='dark'] mark,
 [data-theme='dark'] mark {
   background: rgba(250, 204, 21, 0.2);
   color: inherit;
@@ -1013,17 +1024,20 @@ a {
 
 /* 暗色模式下的 dialog */
 .dark dialog,
+[data-color-mode-resolved='dark'] dialog,
 [data-theme='dark'] dialog {
   background: var(--color-bg-elevated, #1e293b);
 }
 
 .dark dialog::backdrop,
+[data-color-mode-resolved='dark'] dialog::backdrop,
 [data-theme='dark'] dialog::backdrop {
   background: var(--color-bg-backdrop, rgba(0, 0, 0, 0.6));
 }
 
 /* 暗色模式下的 figcaption */
 .dark figcaption,
+[data-color-mode-resolved='dark'] figcaption,
 [data-theme='dark'] figcaption {
   color: var(--color-text-secondary, #d1d5db);
 }

@@ -187,7 +187,7 @@
 | `themeConfig.test.ts` | applyTheme / minimal vars / 不触 ColorContext / applyColorMode / 轴独立 / legacy dark 迁移 / preview | 浏览器渲染、业务 DOM |
 | `system-settings.spec.ts` E2E-P1-04 | Appearance section 可见、theme select 存在 | 选 minimal 后色值、刷新 |
 | `UT-P1-06` | `setAppearanceTheme` → `ThemeManager.applyTheme`；appearance 不进 dirty runtime | 视觉 |
-| `tests/visual/theme-appearance-scaffold.test.ts` | opt-in 7 屏 × default/minimal light = 14（含 App Center / Scraper / PPC / SOPs overview） | 默认 skip；**非** visual Pass / **非** CI |
+| `tests/visual/theme-appearance-scaffold.test.ts` | opt-in 8 屏 × default/minimal light = 16（含 App Center / Scraper / PPC / SOPs / Amazon Hub overview） | 默认 skip；**非** visual Pass / **非** CI |
 
 ---
 

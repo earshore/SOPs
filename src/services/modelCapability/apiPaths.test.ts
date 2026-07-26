@@ -50,7 +50,7 @@ describe('protocol bodies', () => {
       maxTokens: 100,
       stream: false,
       capability: cap,
-      reasoning: { enabled: true, effort: 'high' },
+      reasoning: { enabled: true, effort: 'high', requestedEffort: 'high' },
     });
     expect(body.system).toBe('sys');
     expect(body.thinking).toEqual({ type: 'enabled', budget_tokens: 10_000 });
@@ -70,7 +70,7 @@ describe('protocol bodies', () => {
         supportsReasoning: true,
         mapRequest: () => ({}),
       } as unknown as ResolvedModelCapability,
-      reasoning: { enabled: true, effort: 'medium' },
+      reasoning: { enabled: true, effort: 'medium', requestedEffort: 'medium' },
     });
     expect(body.systemInstruction).toBeTruthy();
     expect(Array.isArray(body.contents)).toBe(true);

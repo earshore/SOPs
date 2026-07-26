@@ -18,6 +18,7 @@ describe('applyReasoningToRequestBody', () => {
     const body = applyReasoningToRequestBody({ model: 'm', messages: [] }, baseCap, {
       enabled: true,
       effort: 'high',
+      requestedEffort: 'high',
     });
     expect(body.reasoning_effort).toBeUndefined();
     expect(body.model).toBe('m');
@@ -34,7 +35,7 @@ describe('applyReasoningToRequestBody', () => {
           messages: 'nope',
         }),
       },
-      { enabled: true, effort: 'high' }
+      { enabled: true, effort: 'high', requestedEffort: 'high' }
     );
     expect(body.reasoning_effort).toBe('high');
     expect(body.model).toBe('m');
@@ -50,7 +51,7 @@ describe('applyReasoningToRequestBody', () => {
           enabled && effort !== 'off' ? { reasoning_effort: effort } : {},
         supportsReasoning: true,
       },
-      { enabled: true, effort: 'low' },
+      { enabled: true, effort: 'low', requestedEffort: 'low' },
       { temperature: 0.7 }
     );
     expect(body.temperature).toBeUndefined();
@@ -67,7 +68,7 @@ describe('applyReasoningToRequestBody', () => {
         }),
         supportsReasoning: true,
       },
-      { enabled: true, effort: 'high' }
+      { enabled: true, effort: 'high', requestedEffort: 'high' }
     );
     expect(body.max_tokens).toBeGreaterThanOrEqual(2000 + 512);
   });
@@ -96,7 +97,7 @@ describe('buildChatCompletionsBody', () => {
       temperature: 0.5,
       stream: true,
       capability,
-      reasoning: { enabled: true, effort: 'high' },
+      reasoning: { enabled: true, effort: 'high', requestedEffort: 'high' },
     });
 
     expect(body.stream).toBe(true);
@@ -126,7 +127,7 @@ describe('buildChatCompletionsBody', () => {
       maxTokens: 256,
       stream: false,
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
 
     expect(body.max_completion_tokens).toBe(256);
@@ -153,7 +154,7 @@ describe('buildChatCompletionsBody', () => {
       messages: [{ role: 'user', content: 'hi' }],
       maxTokens: 128,
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
 
     expect(body.max_tokens).toBe(128);
@@ -182,7 +183,7 @@ describe('buildChatCompletionsBody', () => {
       messages: [{ role: 'user', content: 'hi' }],
       maxTokens: 100,
       capability,
-      reasoning: { enabled: true, effort: 'high' },
+      reasoning: { enabled: true, effort: 'high', requestedEffort: 'high' },
     });
 
     expect(body.max_tokens).toBeGreaterThanOrEqual(2000 + 512);
@@ -211,7 +212,7 @@ describe('buildChatCompletionsBody', () => {
       model: 'deepseek-v4-flash',
       messages: [{ role: 'user', content: 'see image' }],
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
       tools: [{ type: 'function', function: { name: 't', parameters: {} } }],
       toolChoice: 'auto',
       parallelToolCalls: false,
@@ -261,7 +262,7 @@ describe('buildChatCompletionsBody', () => {
         strict: false,
       },
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
 
     expect(body.stream).toBe(true);
@@ -300,7 +301,7 @@ describe('buildResponsesBody', () => {
       messages: [{ role: 'user', content: 'hi' }],
       stream: true,
       maxTokens: 100,
-      reasoning: { enabled: true, effort: 'high' },
+      reasoning: { enabled: true, effort: 'high', requestedEffort: 'high' },
     });
 
     expect(built.surface).toBe('responses');
@@ -336,7 +337,7 @@ describe('buildResponsesBody', () => {
         { role: 'user', content: 'c' },
       ],
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
     expect(body.instructions).toBe('You are helpful');
     expect(Array.isArray(body.input)).toBe(true);
@@ -366,7 +367,7 @@ describe('buildResponsesBody', () => {
       tools: [{ type: 'function', name: 'lookup', parameters: { type: 'object' } }],
       visionUserParts: [{ type: 'input_image', image_url: 'https://x/a.png' }],
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
 
     expect(body.text).toEqual({ format: { type: 'json_object' } });
@@ -401,7 +402,7 @@ describe('buildResponsesBody', () => {
       ],
       previousResponseId: 'resp_prev',
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
 
     expect(body.previous_response_id).toBe('resp_prev');
@@ -431,7 +432,7 @@ describe('buildResponsesBody', () => {
       previousResponseId: 'resp_prev',
       store: true,
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
 
     expect(body.previous_response_id).toBe('resp_prev');
@@ -461,7 +462,7 @@ describe('buildResponsesBody', () => {
       store: true,
       followUpInputItems: [{ type: 'function_call_output', call_id: 'call_1', output: '5' }],
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
 
     expect(body.previous_response_id).toBe('resp_1');
@@ -500,7 +501,7 @@ describe('buildResponsesBody', () => {
       previousResponseId: 'resp_ignored',
       store: true,
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
 
     expect(body.previous_response_id).toBeUndefined();
@@ -547,7 +548,7 @@ describe('buildResponsesBody', () => {
       maxTokens: 50,
       stream: false,
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
       topP: 0.8,
       topLogprobs: 3,
       metadata: { k: 'v' },
@@ -599,7 +600,7 @@ describe('buildResponsesBody', () => {
         strict: true,
       },
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
 
     expect(body.text).toEqual({

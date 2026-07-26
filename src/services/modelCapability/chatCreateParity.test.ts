@@ -62,7 +62,7 @@ describe('chat Create true-full body parity (shipped builder)', () => {
       jsonSchema: { name: 'r', schema: { type: 'object' }, strict: false },
       serviceTier: 'default',
       capability,
-      reasoning: { enabled: true, effort: 'low' },
+      reasoning: { enabled: true, effort: 'low', requestedEffort: 'low' },
       tools: [{ type: 'function', function: { name: 't', parameters: { type: 'object' } } }],
       toolChoice: 'auto',
       parallelToolCalls: true,
@@ -123,7 +123,7 @@ describe('chat Create true-full body parity (shipped builder)', () => {
       messages: [{ role: 'user', content: 'x' }],
       maxTokens: 256,
       capability,
-      reasoning: { enabled: false, effort: 'off' },
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
     });
     expect(body.max_completion_tokens).toBe(256);
     expect(body.max_tokens).toBeUndefined();
