@@ -1,9 +1,10 @@
 # 主题系统 XO 签字状态（Phase 1 code-aware review）
 
-**日期**: 2026-07-26（refresh @ HEAD `f464b373` · style(theme) AppModal format `f464b373` · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict `77fd0cdc` · D6 #25 AppModal `fb5384d6` · residual #18–26 · D12×24 · Human XO first / Visual Yellow）
+**日期**: 2026-07-26（refresh @ tip docs-after-wave · expected code tip `f464b373+` / current after wave · style(theme) AppModal format `f464b373` · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict `77fd0cdc` · D6 #25 AppModal `fb5384d6` · residual #18–26 · D12×24 · Human XO first / Visual Yellow）
 **角色**: Experience Officer + QA（静态核验；**非**浏览器视觉签收）  
 **范围**: `docs/superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md`  
 **对照实现**: `src/common/config/themeConfig.ts` · `themeConfig.test.ts` · `tests/e2e/release-smoke.spec.ts` · Settings Appearance  
+**Expected code tip**: `f464b373+` / **current after wave**（AppModal format + #25/#26 residual 已在 code tip；本文仅 docs，**不**代 visual Pass）  
 **诚实声明**: 本文**不**声称「全站视觉已 Pass」。凡肉眼对比、对比度体感、长时作业刺激、归属「一眼扫读」，一律 **Needs manual browser** 或由人类 XO 补签。**Visual / XO = Yellow / 未签**。
 
 ---
@@ -124,7 +125,7 @@
 | X5 | minimal+dark / default+dark | **Pass (automated)** dark×minimal 双轴 smoke + **Needs manual browser** 视觉 |
 | X6 | 设置面板自洽吃 token | **Needs manual browser** / debt | 颜色模式 UI 已有；accent 等仍可能硬编码 blue（D6 Informational） |
 
-### 1.7 状态计数（本签收文档 · refresh `f464b373`）
+### 1.7 状态计数（本签收文档 · refresh `f464b373+` / current after wave）
 
 | 状态 | 约计（场景行，含路由检查 / A11y / 长时 / XO / Env） |
 | --- | --- |
@@ -153,9 +154,9 @@
 | ☐ | **residual MA/PPC/PromptLab chrome**（D6 #18–21） | Scraper/AI/PPC residual + PromptLab residual focus 跟 primary / focus-ring；ownership / series 色保留 | 归属 indigo/emerald/growth 被冲成一套灰；或已迁 token 却无差 |
 | ☐ | **SafeModuleLoader primary CTA**（D6 #22） | 模块加载 error/actions 主 CTA 跟 `--color-primary*`（minimal 偏 slate） | CTA 仍死锁旧蓝且已迁 token 却无差；或次要 gray / spinner 被误改 |
 | ☐ | **Home splash / floating CTA**（D6 #23 · `/#/`） | 主 CTA `.home-primary-action--main` + floating workbench 图标/hover/focus 跟 primary / focus-ring | slogan 蓝绿渐变或 cyan 状态点被冲成一套灰；或已迁 token 却无差 |
-| ☐ | **confirmModal primary chrome**（D6 #24） | theme confirm CTA/header/border/checkbox 跟 `--color-primary*` / `--color-focus-ring`（minimal 偏 slate）；danger 仍 red→orange | theme confirm 仍死锁旧蓝且已迁 token 却无差；或 danger 被 Appearance 冲掉 |
-| ☐ | **AppModal primary soft chrome**（D6 #25） | title icon / accent soft 跟 Appearance primary via color-mix（minimal 偏 slate）；neutrals 保留 | title chrome 仍死锁旧蓝且已迁 token 却无差；或 neutrals / focus 被误改 |
-| ☐ | **import-conflict primary soft chrome**（D6 #26） | recommended badge / 智能合并图标 soft chrome 跟 Appearance primary（minimal 偏 slate）；amber 冲突横幅 / danger overwrite 保留 | recommended soft chrome 仍死锁 indigo 且已迁 token 却无差；或 amber/danger 被 Appearance 冲掉 |
+| ☐ | **confirmModal primary chrome**（D6 #24） | 打开：任何页 Console 跑 `import('/src/components/modal/confirmModal.ts').then(m => m.confirmWithModal('主题确认抽检','仅 eye-check primary chrome（非删除）','','确认'))`；theme confirm CTA/header/border/checkbox 跟 `--color-primary*` / `--color-focus-ring`（minimal 偏 slate）；danger 仍 red→orange | theme confirm 仍死锁旧蓝且已迁 token 却无差；或 danger 被 Appearance 冲掉 |
+| ☐ | **AppModal primary soft chrome**（D6 #25） | 打开：任何已有 `<app-modal>` 的页（例：Restricted Words / NPI Next Step / Settings 相关）Console：`(document.querySelector('app-modal')||document.querySelector('#import-conflict-modal'))?.open?.()`；看 title icon / accent soft 跟 Appearance primary via color-mix（minimal 偏 slate）；neutrals 保留 | title chrome 仍死锁旧蓝且已迁 token 却无差；或 neutrals / focus 被误改 |
+| ☐ | **import-conflict primary soft chrome**（D6 #26） | 打开：任何页等 `#modal-container` 装载后 Console：`document.getElementById('import-conflict-modal')?.open?.()`（若 null：先进 Scraper/AI 或任何会拉 sharedModals 的流程）；recommended badge / 智能合并图标 soft chrome 跟 Appearance primary（minimal 偏 slate）；amber 冲突横幅 / danger overwrite 保留 | recommended soft chrome 仍死锁 indigo 且已迁 token 却无差；或 amber/danger 被 Appearance 冲掉 |
 | ☐ | **dark × minimal 烟测复核**（自动化已有） | 设置切 deep + 极简后打开 KH：`<html data-appearance=minimal data-color-mode=dark class~dark>`；rose banner/sidebar 类仍在 | 轴互擦；ownership 类消失（契约回归） |
 
 > dark×minimal **文档根 + KH ownership class 已在 smoke 自动化**；上表 dark×minimal 行仅 optional 肉眼复核，**不**等于 visual 签收。SOPs/NPI/Hub nav/#14/#15/#16/#18–26 为 D6 样本抽检，**不**阻塞 30 min 主脚本，**不**声称 visual Pass。
@@ -176,7 +177,7 @@
 
 ### 2.2 Appearance default↔minimal — **已补契约 vs 仍缺视觉**
 
-| 项 | 现状 @ HEAD `f464b373` |
+| 项 | 现状 @ expected code tip `f464b373+` / current after wave |
 | --- | --- |
 | 切换 Appearance（Settings select） | smoke **有** `settings-theme-select` → `minimal` / `default` |
 | `data-appearance` / `data-theme` / `data-color-mode` | smoke **有** `expectDocumentThemeState` |
@@ -250,12 +251,30 @@
 
 **可选 +5~10 min（样本 through #26，非主脚本 Blocker）**: Skills 试用 CTA → Deep Chat shell chrome/focus → **#10 SOPs overview focus** → **#11 NPI primary CTA** → **#13 AMZ Hub nav ownership orange** → **#14 email_templates** → **#15 qa_maintenance** → **#16 PromptLab DNA/autoPopulate** → **#18–21 residual MA/PPC/PromptLab** → **#22 SafeModuleLoader primary CTA** → **#23 Home splash/floating CTA** → **#24 confirmModal primary chrome** → **#25 AppModal primary soft chrome** → **#26 import-conflict primary soft chrome** → dark×minimal KH 肉眼复核。见 §1.8。**不**声称 visual Pass。
 
+**#24–26 快速打开（optional eye-check · Console · expected code tip `f464b373+` / current after wave）**:
+
+```js
+// #24 confirmModal theme primary chrome（非删除文案 → theme 变体，非 danger）
+import('/src/components/modal/confirmModal.ts').then((m) =>
+  m.confirmWithModal('主题确认抽检', '仅 eye-check primary chrome（非删除）', '', '确认')
+);
+
+// #25 AppModal title icon / accent soft chrome
+(document.querySelector('app-modal') || document.querySelector('#import-conflict-modal'))?.open?.();
+
+// #26 import-conflict recommended badge / 智能合并图标 soft chrome
+// 若 getElementById 为 null：先进 Scraper/AI 或任何会拉 sharedModals 的流程，再执行
+document.getElementById('import-conflict-modal')?.open?.();
+```
+
+看点：**#24** theme CTA/header/checkbox 跟 primary；**#25** title icon / accent soft 跟 primary color-mix（minimal 偏 slate）、neutrals 不被误改；**#26** 推荐 badge/智能合并图标 跟 primary，amber 横幅 + danger overwrite **保留**。**勾选 ≠ visual Pass**。
+
 **首 8 张人工截图（可选，与 30 min 并行或紧随）**: 见 [D12 §6](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow)（Settings default/minimal · KH 对 · PPC 对 · Deep Chat minimal · Home minimal）。**截图 ≠ visual Pass**，只加速 XO 归档。
 
 **记录模板**（贴 PR / RC）:
 
 ```text
-XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect f464b373+)
+XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect f464b373+ / current after wave)
 Browser: ________  Viewport: ________
 X1 switch×3: Pass/Fail
 X2 ownership (KH rose / PPC / MA / DeepChat terracotta): Pass/Fail
@@ -381,7 +400,7 @@ Sign-off visual: Yes / No   ← default No until XO fills; keep Yellow
 | D10 ThemeColors | **removed**（AppearanceThemeColors only） |
 | D12 scaffold | opt-in **12×2=24**（+ PromptLab + Skills + NPI；terracotta / Skills violet / NPI growth **不**当 primary）；**非** visual Pass / **非** CI |
 | smoke Appearance | **文档根 + KH ownership + dark×minimal 已有**；**仍无**色差/截图/terracotta 色值 |
-| full prebuild | **Green 再次**（llm fixtures + D8 ownershipRoles optional category guard @ `52795047` 解阻 type-check:tests；confirmModal format @ `be4329f1`；AppModal #25 @ `fb5384d6`；import-conflict #26 @ `77fd0cdc`；settings scroll-spy complete @ `9fab3a58`；AppModal format @ `f464b373`；tip `f464b373`；full build+smoke green 再次） |
+| full prebuild | **Green 再次**（llm fixtures + D8 ownershipRoles optional category guard @ `52795047` 解阻 type-check:tests；confirmModal format @ `be4329f1`；AppModal #25 @ `fb5384d6`；import-conflict #26 @ `77fd0cdc`；settings scroll-spy complete @ `9fab3a58`；AppModal format @ `f464b373`；expected code tip `f464b373+` / current after wave；full build+smoke green 再次） |
 | system 模式 | API + matchMedia 单测有；设置「跟随系统」UI 存在，跨 OS 体感仍人工 |
 
 ---
@@ -402,7 +421,7 @@ Sign-off visual: Yes / No   ← default No until XO fills; keep Yellow
 | 指标 | 值 |
 | --- | --- |
 | 文档路径 | `docs/superpowers/plans/2026-07-26-theme-system-xo-signoff-status.md` |
-| HEAD 对照 | `f464b373`（style(theme) AppModal format · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict · D6 #25 AppModal · residual #18–26 · D12×24 · Visual Yellow · Human XO first） |
+| Expected code tip | `f464b373+` / **current after wave**（style(theme) AppModal format · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict · D6 #25 AppModal · residual #18–26 · D12×24 · Visual Yellow · Human XO first） |
 | Pass (automated) | **~16** |
 | Pass (code contract) | **~20** |
 | Needs manual browser | **~34** |
