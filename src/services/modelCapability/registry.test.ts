@@ -104,17 +104,22 @@ describe('multi-protocol flagship catalog', () => {
     expect(claudeEffort.effortControlKind).toBe('anthropic_output_effort');
     expect(claudeEffort.defaultEffort).toBe('high');
     expect(claudeEffort.mapRequest?.({ enabled: true, effort: 'xhigh' })).toEqual({
-      thinking: { type: 'adaptive' },
+      thinking: { type: 'adaptive', display: 'summarized' },
       output_config: { effort: 'xhigh' },
     });
 
-    // Claude 4.6 generation: xhigh is a 4.7+ tier, absent from the allowlist.
+    // Claude 4.6 generation: xhigh is a 4.7+ tier, absent from the allowlist;
+    // thinking.display is also 4.7+ — 4.6 must not send it (already summarizes).
     const claude46 = resolveModelCapability(
       { provider: 'new_api', modelId: 'claude-sonnet-4-6' },
       getModelCapabilityRules()
     );
     expect(claude46.effortControlKind).toBe('anthropic_output_effort');
     expect(claude46.reasoningEfforts).toEqual(['low', 'medium', 'high', 'max']);
+    expect(claude46.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
+      thinking: { type: 'adaptive' },
+      output_config: { effort: 'high' },
+    });
 
     expect(MODEL_CAPABILITY_CATALOG_META.productReasoningEfforts).toEqual([
       'low',
@@ -198,7 +203,7 @@ describe('multi-protocol flagship catalog', () => {
       expect(cap.apiSurface, modelId).toBe('anthropic_messages');
       expect(cap.effortControlKind, modelId).toBe('anthropic_output_effort');
       expect(cap.mapRequest?.({ enabled: true, effort: 'high' }), modelId).toEqual({
-        thinking: { type: 'adaptive' },
+        thinking: { type: 'adaptive', display: 'summarized' },
         output_config: { effort: 'high' },
       });
     }

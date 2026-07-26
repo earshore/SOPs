@@ -11,6 +11,7 @@
 
 import {
   mapAnthropicOutputEffort,
+  mapAnthropicOutputEffortSummarized,
   mapAnthropicThinking,
   mapGeminiThinking,
   mapOpenAiReasoningEffort,
@@ -114,8 +115,13 @@ function surfaceResponses(opts?: EffortProfile): SurfaceCapability {
  * Claude official effort string API (adaptive thinking era).
  * Wire: output_config.effort = low|medium|high|xhigh|max (NOT "extra").
  * Default high matches Anthropic docs.
+ * summarizedDisplay: 4.7+ defaults thinking.display to "omitted" (empty thinking
+ * text on the stream) — opt into "summarized" so the 深度思考 UI gets content.
+ * 4.6 must NOT send display (param arrived with 4.7; 4.6 already summarizes).
  */
-function surfaceAnthropicOutputEffort(opts?: EffortProfile): SurfaceCapability {
+function surfaceAnthropicOutputEffort(
+  opts?: EffortProfile & { summarizedDisplay?: boolean }
+): SurfaceCapability {
   const { reasoningEfforts, defaultEffort } = resolveEffortFields({
     reasoningEfforts: DEFAULT_REASONING_EFFORTS,
     defaultEffort: 'high',
@@ -127,7 +133,10 @@ function surfaceAnthropicOutputEffort(opts?: EffortProfile): SurfaceCapability {
     defaultEffort,
     temperatureIgnored: true,
     effortControlKind: 'anthropic_output_effort',
-    mapRequest: mapAnthropicOutputEffort,
+    mapRequest:
+      opts?.summarizedDisplay === false
+        ? mapAnthropicOutputEffort
+        : mapAnthropicOutputEffortSummarized,
     supportsStructuredOutput: true,
     supportsTools: true,
     supportsVision: true,
@@ -231,7 +240,9 @@ function chatEffort(
 function claudeOutputEffort(
   modelPattern: string,
   contextWindow: number,
-  effort?: Pick<EffortProfile, 'reasoningEfforts' | 'defaultEffort'>
+  effort?: Pick<EffortProfile, 'reasoningEfforts' | 'defaultEffort'> & {
+    summarizedDisplay?: boolean;
+  }
 ): ModelCapabilityRule {
   const surface = surfaceAnthropicOutputEffort(effort);
   return entry(
@@ -389,11 +400,24 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   claudeOutputEffort('claude-fable-5-*', 1_000_000),
   claudeOutputEffort('claude-mythos-5', 1_000_000),
   claudeOutputEffort('claude-mythos-5-*', 1_000_000),
-  // Claude 4.6 generation: adaptive + effort, but xhigh only arrived with 4.7.
-  claudeOutputEffort('claude-opus-4-6', 200_000, { reasoningEfforts: CLAUDE_46_EFFORTS }),
-  claudeOutputEffort('claude-opus-4-6-*', 200_000, { reasoningEfforts: CLAUDE_46_EFFORTS }),
-  claudeOutputEffort('claude-sonnet-4-6', 200_000, { reasoningEfforts: CLAUDE_46_EFFORTS }),
-  claudeOutputEffort('claude-sonnet-4-6-*', 200_000, { reasoningEfforts: CLAUDE_46_EFFORTS }),
+  // Claude 4.6 generation: adaptive + effort, but xhigh only arrived with 4.7,
+  // and thinking.display did too — 4.6 defaults to summarized, never send display.
+  claudeOutputEffort('claude-opus-4-6', 200_000, {
+    reasoningEfforts: CLAUDE_46_EFFORTS,
+    summarizedDisplay: false,
+  }),
+  claudeOutputEffort('claude-opus-4-6-*', 200_000, {
+    reasoningEfforts: CLAUDE_46_EFFORTS,
+    summarizedDisplay: false,
+  }),
+  claudeOutputEffort('claude-sonnet-4-6', 200_000, {
+    reasoningEfforts: CLAUDE_46_EFFORTS,
+    summarizedDisplay: false,
+  }),
+  claudeOutputEffort('claude-sonnet-4-6-*', 200_000, {
+    reasoningEfforts: CLAUDE_46_EFFORTS,
+    summarizedDisplay: false,
+  }),
   // Legacy budget_tokens: 4.5 and older only support thinking.enabled + budget;
   // adaptive thinking / output_config.effort are 4.6+ parameters (400 earlier).
   claudeBudgetThinking('claude-opus-4-5', 200_000),
@@ -456,6 +480,7 @@ export const MODEL_CAPABILITY_CATALOG_META = {
 // Re-export mappers for tests / diagnostics
 export {
   mapAnthropicOutputEffort,
+  mapAnthropicOutputEffortSummarized,
   mapAnthropicThinking,
   mapGeminiThinking,
   mapOpenAiReasoningEffort,
