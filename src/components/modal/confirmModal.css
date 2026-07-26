@@ -3,14 +3,20 @@
 }
 
 .app-confirm-modal {
-  border: 1px solid rgba(98, 87, 245, 0.24);
+  border: 1px solid
+    color-mix(in srgb, var(--color-primary, #6257f5) 24%, transparent);
   box-shadow:
-    0 24px 64px -32px rgba(98, 87, 245, 0.42),
+    0 24px 64px -32px
+      color-mix(in srgb, var(--color-primary, #6257f5) 42%, transparent),
     0 18px 48px -34px rgba(15, 23, 42, 0.5) !important;
 }
 
 .app-confirm-modal--theme .app-confirm-modal-header {
-  background: linear-gradient(135deg, #6257f5, #8b5cf6);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #6257f5),
+    var(--color-primary-dark, #8b5cf6)
+  );
 }
 
 .app-confirm-modal--danger .app-confirm-modal-header {
@@ -18,18 +24,19 @@
 }
 
 .app-confirm-modal--theme .app-confirm-modal-confirm {
-  background: #6257f5;
-  --tw-ring-color: rgba(98, 87, 245, 0.3);
+  background: var(--color-primary, #6257f5);
+  --tw-ring-color: color-mix(in srgb, var(--color-primary, #6257f5) 30%, transparent);
 }
 
 .app-confirm-modal--theme .app-confirm-modal-confirm:hover {
-  background: #4f46e5;
+  background: var(--color-primary-dark, #4f46e5);
 }
 
 .app-confirm-modal--theme .app-confirm-modal-confirm:focus-visible {
   box-shadow:
     0 0 0 2px var(--color-white, #ffffff),
-    0 0 0 4px rgba(98, 87, 245, 0.35);
+    0 0 0 4px
+      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #6257f5)) 35%, transparent);
 }
 
 .app-confirm-modal--danger .app-confirm-modal-confirm {
@@ -48,10 +55,11 @@
 }
 
 .app-confirm-modal-checkbox {
-  accent-color: #6257f5;
+  accent-color: var(--color-primary, #6257f5);
 }
 
 .app-confirm-modal-checkbox:focus-visible {
-  outline: 2px solid rgba(98, 87, 245, 0.45);
+  outline: 2px solid
+    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #6257f5)) 45%, transparent);
   outline-offset: 2px;
 }
