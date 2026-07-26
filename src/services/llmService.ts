@@ -1651,6 +1651,10 @@ function createLLMAbortResources(
  * Always sets Content-Type + Bearer when key present (new-api / OpenAI-compatible).
  * Anthropic path also sets anthropic-version + x-api-key (native Anthropic / dual-auth gateways).
  * Gemini path also sets x-goog-api-key (Google AI Studio style).
+ *
+ * 设计意图(勿"修复"):BYOK 网关依赖 Authorization: Bearer,原生 Anthropic/Gemini 端点
+ * 只读各自的 x-api-key / x-goog-api-key 并忽略多余头。双认证头同时下发是刻意兼容策略,
+ * 移除 Bearer 会导致网关 401。
  */
 function buildLLMRequestHeaders(
   apiPath: ApiPathId,

@@ -17,6 +17,21 @@ describe('multi-protocol mappers', () => {
     });
   });
 
+  it('openai effort clamps xhigh/max to high (official enum: minimal|low|medium|high)', () => {
+    expect(mapOpenAiReasoningEffort({ enabled: true, effort: 'xhigh' })).toEqual({
+      reasoning_effort: 'high',
+    });
+    expect(mapOpenAiReasoningEffort({ enabled: true, effort: 'max' })).toEqual({
+      reasoning_effort: 'high',
+    });
+    expect(mapResponsesReasoning({ enabled: true, effort: 'xhigh' })).toEqual({
+      reasoning: { effort: 'high', summary: 'auto' },
+    });
+    expect(mapResponsesReasoning({ enabled: true, effort: 'max' })).toEqual({
+      reasoning: { effort: 'high', summary: 'auto' },
+    });
+  });
+
   it('responses reasoning object requests summary channel for UI', () => {
     expect(mapResponsesReasoning({ enabled: true, effort: 'low' })).toEqual({
       reasoning: { effort: 'low', summary: 'auto' },
