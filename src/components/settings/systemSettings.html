@@ -2539,7 +2539,13 @@
                     </span>
                     <div class="min-w-0">
                       <h4 class="settings-appearance-row__title">主题</h4>
-                      <p class="settings-appearance-row__hint">工作台明暗：浅色 / 深色 / 跟随系统</p>
+                      <p class="settings-appearance-row__hint">
+                        工作台明暗：浅色 / 深色 / 跟随系统<span
+                          x-show="appearanceColorModeIsSystem"
+                          data-testid="settings-color-mode-resolved-hint"
+                          x-text="appearanceColorModeSystemHint"
+                        ></span>
+                      </p>
                     </div>
                   </div>
                   <div

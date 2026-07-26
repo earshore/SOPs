@@ -320,7 +320,7 @@ it('does not stack EventBus or $watch subscriptions when init is called twice', 
 
   expect(panel.$watch).toHaveBeenCalledTimes(2);
   expect(panel._subscriptionsInitialized).toBe(true);
-  expect(panel._unsubscribers).toHaveLength(3);
+  expect(panel._unsubscribers).toHaveLength(4);
   expect(openAfterFirst - openBefore).toBe(1);
   expect(closeAfterFirst - closeBefore).toBe(1);
   expect(openAfterSecond - openAfterFirst).toBe(0);
