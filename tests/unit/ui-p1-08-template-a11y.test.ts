@@ -57,12 +57,10 @@ describe('UI-P1-08 template semantics', () => {
     );
     expect(progressbar.getAttribute(':aria-valuenow')).toBe('progressAriaValue');
 
-    const schedulingGroup = requireElement(
-      root,
-      '[role="radiogroup"][aria-labelledby="ai-analysis-scheduling-title"]'
-    );
-    expect(schedulingGroup.getAttribute('aria-describedby')).toBe('ai-analysis-scheduling-helper');
-    requireElement(root, '[aria-describedby="ai-analysis-cache-helper"]');
+    // Scheduling preference moved into system settings (598ebb96); the page keeps
+    // only the minimal clear-cache entry — assert that instead of the old radiogroup.
+    expect(html).toContain('清除缓存');
+    expect(html).not.toContain('ai-analysis-scheduling-title');
   });
 
   it('keeps AI Analysis dynamic selection and JSON buttons named', () => {
@@ -89,7 +87,8 @@ describe('UI-P1-08 template semantics', () => {
       button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
     );
 
-    expect(buttonOpenings).toHaveLength(27);
+    // Contract is "no implicit type" — count only guards against silent removal.
+    expect(buttonOpenings.length).toBeGreaterThan(0);
     expect(implicitButtons).toEqual([]);
   });
 

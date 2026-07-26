@@ -30,7 +30,7 @@ concurrency:
 jobs:
   release:
     name: validate-build-publish
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout

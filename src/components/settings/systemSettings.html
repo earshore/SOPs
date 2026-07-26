@@ -70,8 +70,8 @@
     <div
       class="settings-status-bar settings-status-bar--info"
       data-testid="settings-external-change-notice"
-      x-show="externalChangeNotice"
-      x-cloak
+      hidden
+      :hidden="!externalChangeNotice"
       role="status"
     >
       <span class="settings-status-bar__icon" aria-hidden="true">
@@ -112,8 +112,8 @@
     <div
       class="settings-status-bar settings-status-bar--warning"
       data-testid="settings-quota-warning"
-      x-show="quotaWarningVisible"
-      x-cloak
+      hidden
+      :hidden="!quotaWarningVisible"
       role="status"
     >
       <span class="settings-status-bar__icon" aria-hidden="true">
@@ -411,7 +411,7 @@
                     </button>
                     <div class="settings-section-tip__popover" role="tooltip">
                       <p x-text="llmSetupReadinessText"></p>
-                      <ul x-show="healthMessages.length > 0" role="list">
+                      <ul hidden :hidden="healthMessages.length === 0" role="list">
                         <template x-for="msg in healthMessages" :key="msg">
                           <li x-text="msg"></li>
                         </template>
@@ -1216,7 +1216,8 @@
                         <p
                           class="settings-proxy-form__status"
                           :class="proxy.status === 'ok' ? 'is-ok' : 'is-err'"
-                          x-show="proxy.testMessage"
+                          hidden
+                          :hidden="!proxy.testMessage"
                           x-text="proxy.testMessage"
                           data-testid="settings-proxy-test-message"
                         ></p>

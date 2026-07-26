@@ -13,6 +13,14 @@ function findImplicitButtons(html: string): string[] {
   return buttonOpenings.filter(button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button));
 }
 
+/** Prettier splits captions across lines; assert content with whitespace-tolerant match. */
+function expectSrOnlyCaption(html: string, text: string): void {
+  const pattern = new RegExp(
+    `<caption class="sr-only">\\s*${text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*</caption>`
+  );
+  expect(html).toMatch(pattern);
+}
+
 afterEach(() => {
   unmountPromoTools();
   document.body.replaceChildren();
@@ -50,7 +58,7 @@ it('keeps the NPI lifecycle table named, described, and grouped', () => {
   expect(html).toContain('aria-labelledby="npi-lifecycle-table-title"');
   expect(html).toContain('aria-describedby="npi-lifecycle-table-help"');
   expect(html).toContain('id="npi-lifecycle-table"');
-  expect(html).toContain('<caption class="sr-only">新品生命周期跟踪明细表</caption>');
+  expectSrOnlyCaption(html, '新品生命周期跟踪明细表');
 
   const tableStart = html.indexOf('id="npi-lifecycle-table"');
   const tableBodyStart = html.indexOf('<tbody class="divide-y divide-slate-100"', tableStart);
@@ -72,7 +80,7 @@ it('keeps NPI supporting rule tables named, described, and column-scoped', () =>
   expect(html).toContain('aria-labelledby="npi-stage-rules-table-title"');
   expect(html).toContain('aria-describedby="npi-stage-rules-table-help"');
   expect(html).toContain('id="npi-stage-rules-table"');
-  expect(html).toContain('<caption class="sr-only">新品阶段升降级规则速查表</caption>');
+  expectSrOnlyCaption(html, '新品阶段升降级规则速查表');
 
   expect(html).toContain('id="npi-review-archive-table-title"');
   expect(html).toContain('id="npi-review-archive-table-help"');
@@ -80,7 +88,7 @@ it('keeps NPI supporting rule tables named, described, and column-scoped', () =>
   expect(html).toContain('aria-labelledby="npi-review-archive-table-title"');
   expect(html).toContain('aria-describedby="npi-review-archive-table-help"');
   expect(html).toContain('id="npi-review-archive-table"');
-  expect(html).toContain('<caption class="sr-only">SKU 复盘归档模板</caption>');
+  expectSrOnlyCaption(html, 'SKU 复盘归档模板');
 
   const stageTableStart = html.indexOf('id="npi-stage-rules-table"');
   const stageTableEnd = html.indexOf('</table>', stageTableStart);
@@ -106,7 +114,7 @@ it('keeps Restricted Words lookup tables named and column-scoped', () => {
   expect(html).toContain('id="rw-multilingual-title"');
   expect(html).toContain('id="rw-multilingual-description"');
   expect(html).toContain('aria-describedby="rw-multilingual-description"');
-  expect(html).toContain('<caption class="sr-only">多语言高危词对照表</caption>');
+  expectSrOnlyCaption(html, '多语言高危词对照表');
   expect(html).toContain('id="rw-results-title"');
   expect(html).toContain('id="rw-results-description"');
   expect(html).toContain('id="rw-results-table-help"');
@@ -117,13 +125,13 @@ it('keeps Restricted Words lookup tables named and column-scoped', () => {
     'aria-describedby="rw-results-description rw-results-table-help rw-stats-display"'
   );
   expect(html).toContain('id="rw-results-table"');
-  expect(html).toContain('<caption class="sr-only">完整高危词条检索结果表</caption>');
+  expectSrOnlyCaption(html, '完整高危词条检索结果表');
   expect(html).toContain('aria-describedby="rw-results-description rw-results-table-help"');
   expect(html).toContain('表格支持横向滚动');
   expect(html).toContain('id="rw-alternatives-title"');
   expect(html).toContain('id="rw-alternatives-description"');
   expect(html).toContain('aria-describedby="rw-alternatives-description"');
-  expect(html).toContain('<caption class="sr-only">高危词安全替代词速查表</caption>');
+  expectSrOnlyCaption(html, '高危词安全替代词速查表');
 
   const multilingualStart = html.indexOf('id="rw-multilingual-title"');
   const resultsStart = html.indexOf('id="rw-results-title"');
@@ -156,21 +164,21 @@ it('keeps PPC Advertising long-page tables named, described, and column-scoped',
   expect(html).toContain('id="ppc-stage-goals-table-wrapper"');
   expect(html).toContain('aria-labelledby="ppc-stage-goals-table-title"');
   expect(html).toContain('aria-describedby="ppc-stage-goals-table-help"');
-  expect(html).toContain('<caption class="sr-only">PPC 分阶段目标表</caption>');
+  expectSrOnlyCaption(html, 'PPC 分阶段目标表');
 
   expect(html).toContain('id="ppc-bid-rules-table-title"');
   expect(html).toContain('id="ppc-bid-rules-table-help"');
   expect(html).toContain('id="ppc-bid-rules-table-wrapper"');
   expect(html).toContain('aria-labelledby="ppc-bid-rules-table-title"');
   expect(html).toContain('aria-describedby="ppc-bid-rules-table-help"');
-  expect(html).toContain('<caption class="sr-only">PPC 出价调整规则表</caption>');
+  expectSrOnlyCaption(html, 'PPC 出价调整规则表');
 
   expect(html).toContain('id="ppc-weekly-fields-table-title"');
   expect(html).toContain('id="ppc-weekly-fields-table-help"');
   expect(html).toContain('id="ppc-weekly-fields-table-wrapper"');
   expect(html).toContain('aria-labelledby="ppc-weekly-fields-table-title"');
   expect(html).toContain('aria-describedby="ppc-weekly-fields-table-help"');
-  expect(html).toContain('<caption class="sr-only">PPC 周度数据追踪字段表</caption>');
+  expectSrOnlyCaption(html, 'PPC 周度数据追踪字段表');
 
   const stageTableStart = html.indexOf('id="ppc-stage-goals-table"');
   const bidTableStart = html.indexOf('id="ppc-bid-rules-table"');
@@ -193,17 +201,17 @@ it('keeps Email Templates long-page tables named, described, and scoped', () => 
   expect(html).toContain('id="email-priority-matrix-title"');
   expect(html).toContain('id="email-priority-matrix-description"');
   expect(html).toContain('id="email-priority-matrix-wrapper"');
-  expect(html).toContain('<caption class="sr-only">消息分级响应矩阵</caption>');
+  expectSrOnlyCaption(html, '消息分级响应矩阵');
 
   expect(html).toContain('id="email-phrase-table-title"');
   expect(html).toContain('id="email-phrase-table-description"');
   expect(html).toContain('id="email-phrase-table-wrapper"');
-  expect(html).toContain('<caption class="sr-only">五语高频短语速查表</caption>');
+  expectSrOnlyCaption(html, '五语高频短语速查表');
 
   expect(html).toContain('id="email-refund-matrix-title"');
   expect(html).toContain('id="email-refund-matrix-description"');
   expect(html).toContain('id="email-refund-matrix-wrapper"');
-  expect(html).toContain('<caption class="sr-only">退款决策速查矩阵</caption>');
+  expectSrOnlyCaption(html, '退款决策速查矩阵');
 
   const priorityStart = html.indexOf('id="email-priority-matrix-table"');
   const phraseStart = html.indexOf('id="email-phrase-table"');
@@ -226,12 +234,12 @@ it('keeps QA Maintenance long-page tables named, described, and scoped', () => {
   expect(html).toContain('id="qa-tracking-fields-title"');
   expect(html).toContain('id="qa-tracking-fields-description"');
   expect(html).toContain('id="qa-tracking-fields-wrapper"');
-  expect(html).toContain('<caption class="sr-only">QA 管理追踪字段表</caption>');
+  expectSrOnlyCaption(html, 'QA 管理追踪字段表');
 
   expect(html).toContain('id="qa-baseline-table-title"');
   expect(html).toContain('id="qa-baseline-table-description"');
   expect(html).toContain('id="qa-baseline-table-wrapper"');
-  expect(html).toContain('<caption class="sr-only">QA 数量建设基准线表</caption>');
+  expectSrOnlyCaption(html, 'QA 数量建设基准线表');
 
   const trackingStart = html.indexOf('id="qa-tracking-fields-table"');
   const baselineStart = html.indexOf('id="qa-baseline-table"');
@@ -277,7 +285,7 @@ it('keeps Mature Phase advertising budget table named, described, and scoped', (
   expect(html).toContain('tabindex="0"');
   expect(html).toContain('id="mature-ad-budget-table"');
   expect(html).toContain('min-w-[720px]');
-  expect(html).toContain('<caption class="sr-only">成熟期广告预算再分配表</caption>');
+  expectSrOnlyCaption(html, '成熟期广告预算再分配表');
 
   const tableStart = html.indexOf('id="mature-ad-budget-table"');
   const tableHtml = html.slice(tableStart, html.indexOf('</table>', tableStart));

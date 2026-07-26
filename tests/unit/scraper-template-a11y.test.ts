@@ -30,7 +30,10 @@ describe('Scraper template accessibility semantics', () => {
     expect(template).not.toContain('@click="triggerImport()"');
     expect(hiddenFileInput).toContain('aria-label="导入 JSON 产品数据文件"');
     expect(template).toContain('aria-label="重新导入 JSON 产品数据文件"');
-    expect(template).toContain('focus-visible:ring-2 focus-visible:ring-blue-500');
+    // Focus ring is Appearance-tokenized (theme Phase 1–2), not hard blue.
+    expect(template).toContain(
+      'focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))]'
+    );
     expect(emptyStateButton).not.toContain('role="button"');
     expect(emptyStateButton).not.toContain('tabindex="0"');
     expect(emptyStateButton).not.toContain('@keydown.enter.prevent="triggerImport()"');
