@@ -18,7 +18,17 @@ export interface CountryData {
  * 注意：英国使用 GB（非 uk），与营销日历保持一致
  */
 export type CountryCode =
-  'DE' | 'GB' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'TR' | 'IE';
+  | 'DE'
+  | 'GB'
+  | 'FR'
+  | 'IT'
+  | 'ES'
+  | 'NL'
+  | 'SE'
+  | 'PL'
+  | 'BE'
+  | 'TR'
+  | 'IE';
 
 /**
  * 欧洲国家画像数据

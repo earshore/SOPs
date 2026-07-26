@@ -36,7 +36,10 @@ export function isReasoningEffortLevel(value: unknown): value is ReasoningEffort
  * - gemini_generate: POST {origin}/v1beta/models/{model}:generateContent
  */
 export type ApiSurface =
-  'chat_completions' | 'responses' | 'anthropic_messages' | 'gemini_generate';
+  | 'chat_completions'
+  | 'responses'
+  | 'anthropic_messages'
+  | 'gemini_generate';
 
 /**
  * Extended surface flags beyond reasoning (OpenAI Responses capability matrix).

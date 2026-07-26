@@ -33,7 +33,19 @@ export interface UIState {
  * 采集站点类型（简短代码）
  */
 export type ScraperSite =
-  'US' | 'DE' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'IE' | 'UK' | 'CA' | 'JP';
+  | 'US'
+  | 'DE'
+  | 'FR'
+  | 'IT'
+  | 'ES'
+  | 'NL'
+  | 'SE'
+  | 'PL'
+  | 'BE'
+  | 'IE'
+  | 'UK'
+  | 'CA'
+  | 'JP';
 
 /**
  * 采集状态
@@ -810,7 +822,11 @@ export type KeywordTrackerPath =
  * 所有可用的状态路径(类型安全)
  */
 export type ValidStatePath =
-  UIPath | ScraperPath | AnalysisPath | PromptLabPath | KeywordTrackerPath;
+  | UIPath
+  | ScraperPath
+  | AnalysisPath
+  | PromptLabPath
+  | KeywordTrackerPath;
 
 // ==================== 状态操作类型 ====================
 

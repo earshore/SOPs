@@ -7,7 +7,10 @@
  */
 
 export type PlatformCapabilityStatus =
-  'implemented' | 'partial' | 'gateway_dependent' | 'not_in_scope';
+  | 'implemented'
+  | 'partial'
+  | 'gateway_dependent'
+  | 'not_in_scope';
 
 export interface PlatformCapabilityRow {
   id: string;

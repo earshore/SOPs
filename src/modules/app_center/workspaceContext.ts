@@ -6,7 +6,18 @@ export const APP_CENTER_WORKSPACE_CONTEXT_STORAGE_KEY = 'app_center_workspace_co
 export const APP_CENTER_WORKSPACE_CONTEXT_CHANGED = 'app-center:workspace-context-changed';
 
 export type AppCenterMarketplace =
-  'DE' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'IE' | 'UK' | 'US' | '';
+  | 'DE'
+  | 'FR'
+  | 'IT'
+  | 'ES'
+  | 'NL'
+  | 'SE'
+  | 'PL'
+  | 'BE'
+  | 'IE'
+  | 'UK'
+  | 'US'
+  | '';
 
 export interface AppCenterWorkspaceContext {
   workItemId: string | null;
