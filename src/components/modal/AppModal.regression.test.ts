@@ -101,6 +101,18 @@ describe('AppModal regression visibility', () => {
     expect(styleText).not.toContain('transition: all 0.2s');
   });
 
+  it('tracks Appearance primary for accent soft chrome and title icon', () => {
+    const styleText = readModalStyles();
+
+    expect(styleText).toContain('--modal-accent: var(--color-primary');
+    expect(styleText).toContain('--modal-accent-soft: color-mix(');
+    expect(styleText).toContain('var(--color-primary-light');
+    expect(styleText).not.toContain('--modal-accent-soft: rgba(59, 130, 246');
+    expect(styleText).not.toContain('var(--color-blue-50');
+    expect(styleText).not.toContain('var(--color-indigo-100');
+    expect(styleText).not.toContain('box-shadow: 0 1px 2px rgba(59, 130, 246');
+  });
+
   it('removes and restores native hidden state across open and close', () => {
     vi.useFakeTimers();
     const modal = createModal();

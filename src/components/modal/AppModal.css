@@ -12,11 +12,15 @@
   --modal-control-hover-bg: var(--color-slate-100, #f1f5f9);
   --modal-control-active-bg: var(--color-slate-200, #e2e8f0);
   --modal-accent: var(--color-primary, #3b82f6);
-  --modal-accent-soft: rgba(59, 130, 246, 0.15);
+  --modal-accent-soft: color-mix(
+    in srgb,
+    var(--color-primary, #3b82f6) 15%,
+    transparent
+  );
   --modal-title-icon-bg: linear-gradient(
     135deg,
-    var(--color-blue-50, #eff6ff),
-    var(--color-indigo-100, #e0e7ff)
+    var(--color-primary-light, color-mix(in srgb, var(--color-primary, #3b82f6) 10%, transparent)),
+    color-mix(in srgb, var(--color-primary, #3b82f6) 16%, transparent)
   );
   --modal-floating-bg: rgba(255, 255, 255, 0.92);
   --modal-scrollbar-thumb: var(--color-slate-300, #cbd5e1);
@@ -192,7 +196,8 @@
   border-radius: 0.5rem;
   background: var(--modal-title-icon-bg);
   flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba(59, 130, 246, 0.08);
+  box-shadow: 0 1px 2px
+    color-mix(in srgb, var(--color-primary, #3b82f6) 8%, transparent);
 }
 
 .title-icon-wrapper svg {
