@@ -85,10 +85,7 @@ export function mapAnthropicThinking(prefs: {
 }
 
 /** Shared Gemini thinking budget ladder (product L1 → official thinkingBudget). */
-export const GEMINI_THINKING_BUDGET_BY_EFFORT: Record<
-  Exclude<ReasoningEffort, 'off'>,
-  number
-> = {
+export const GEMINI_THINKING_BUDGET_BY_EFFORT: Record<Exclude<ReasoningEffort, 'off'>, number> = {
   low: 1_024,
   medium: 4_096,
   high: 8_192,

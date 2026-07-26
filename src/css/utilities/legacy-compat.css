@@ -144,11 +144,7 @@
 .sop-search-box:focus-within {
   border-color: var(--color-focus-ring, var(--color-primary, #3b82f6));
   box-shadow: 0 0 0 3px
-    color-mix(
-      in srgb,
-      var(--color-focus-ring, var(--color-primary, #3b82f6)) 14%,
-      transparent
-    );
+    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 14%, transparent);
 }
 
 .app-center-search-box input,
