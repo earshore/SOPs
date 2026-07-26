@@ -97,6 +97,7 @@
     "screenshots:cleanup:all": "tsx tests/scripts/cleanup-screenshots.ts --all",
     "generate:tokens": "tsx scripts/build/generate-all-tokens.ts",
     "generate:css-vars": "tsx scripts/build/generate-css-variables.ts",
+    "generate:bridge": "tsx scripts/build/generate-utility-bridge.ts",
     "generate:tailwind": "tsx scripts/build/generate-tailwind-config.ts",
     "generate:types": "tsx scripts/build/generate-design-token-types.ts",
     "ui:audit": "npm run card-ui:audit && npm run callout-ui:audit && npm run workbench-ui:audit",
