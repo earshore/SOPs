@@ -411,6 +411,12 @@ npm run generate:tokens
 ### 必跑命令
 
 ```bash
+npm run theme:bridge:gate    # utility-bridge 与源码颜色类同步（ci:quality 自动跑）
+npm run test:theme:matrix    # Theme×Accent×Ownership 六格正交契约（需 preview 4273）
+```
+
+
+```bash
 npm run css:audit
 npm run ui:audit
 git diff --check

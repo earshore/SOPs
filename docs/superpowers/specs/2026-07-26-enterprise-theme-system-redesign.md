@@ -1,7 +1,7 @@
 # 企业级主题系统重构蓝图：主题 = 浅色/深色/系统
 
 **日期**: 2026-07-26  
-**状态**: T0–T3 **Done** · T4 **Done（桥接方案）** — utility-bridge 生成器把源码内全部浅色工具类映射为深色语义（浅色零改动），配合逐模块审查修复（sops/amz/more/MA/KH/PPC/DeepChat/settings）· 默认 system **Done** · 整屋调光过渡 **Done** · T5 Open（视觉矩阵门禁）
+**状态**: T0–T3 **Done** · T4 **Done（桥接方案）** — utility-bridge 生成器把源码内全部浅色工具类映射为深色语义（浅色零改动），配合逐模块审查修复（sops/amz/more/MA/KH/PPC/DeepChat/settings）· 默认 system **Done** · 整屋调光过渡 **Done** · T5 **Done（契约层）** — `theme:bridge:gate` 入 ci:quality 防桥接漂移；`test:theme:matrix` 断言 Theme×Accent×Ownership 六格正交（视觉快照矩阵仍为 opt-in scaffold）
 **触发**: 产品纠正——当前将 Appearance 预设误称为「主题」，颜色模式（浅/深/系统）未达企业级一体化  
 **范围**: 运行时 · Token · 壳层 · 共享组件 · 业务模块 · 设置 IA · 命名  
 **关联**: `THEME_SYSTEM_GUIDELINES` · Ownership 深绑定审查 · D11/D3 债务  
