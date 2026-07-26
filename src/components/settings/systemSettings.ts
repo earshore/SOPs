@@ -423,6 +423,7 @@ interface SettingsPanelData {
   dismissExternalChangeNotice(): void;
   reloadFromExternalChange(): Promise<void>;
   undoLastSettingsSave(partition: SettingsRollbackPartition): Promise<void>;
+  restoreLlmSettingsSnapshot(payload: unknown): Promise<void>;
   openPerformanceMonitor(): Promise<void>;
   loadProviderConfig(provider: string): Promise<void>;
   fetchModels(): Promise<void>;
@@ -1986,16 +1987,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
         saveToolStrategySettings(payload as ToolStrategySettings);
         this.loadToolStrategyDefaults();
       } else if (partition === 'llm') {
-        const snap = payload as {
-          provider?: string;
-          config?: LLMProviderConfig;
-        };
-        if (snap?.provider && snap.config) {
-          StorageService.setLLMConfig(snap.provider, snap.config);
-          this.llm.provider = snap.provider;
-          await this.loadProviderConfig(snap.provider);
-          updateModelStatus();
-        }
+        await this.restoreLlmSettingsSnapshot(payload);
       }
       this.captureSettingsBaseline();
       this.refreshRollbackUi();
@@ -2006,6 +1998,18 @@ const settingsPanelBehavior: SettingsPanelPart = {
         module: 'settings',
       });
     }
+  },
+
+  async restoreLlmSettingsSnapshot(payload: unknown): Promise<void> {
+    const snap = payload as {
+      provider?: string;
+      config?: LLMProviderConfig;
+    };
+    if (!snap?.provider || !snap.config) return;
+    StorageService.setLLMConfig(snap.provider, snap.config);
+    this.llm.provider = snap.provider;
+    await this.loadProviderConfig(snap.provider);
+    updateModelStatus();
   },
 
   captureSettingsBaseline(): void {
