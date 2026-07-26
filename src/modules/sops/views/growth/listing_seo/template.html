@@ -19,34 +19,34 @@
             </div>
         </div>
     </div>
-    <section class="bg-white rounded-xl border border-slate-200 p-5 mb-6">
-        <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+    <section class="ui-card p-5 mb-6">
+        <h2 class="ui-card__title text-base font-bold mb-3 flex items-center gap-2">
             <i class="fas fa-clipboard-list text-indigo-500"></i>作业元信息
         </h2>
         <dl class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-3 text-sm">
             <div>
-                <dt class="font-semibold text-slate-700">Owner</dt>
-                <dd class="text-slate-600">运营/内容负责人</dd>
+                <dt class="ui-card__title font-semibold">Owner</dt>
+                <dd class="ui-card__muted">运营/内容负责人</dd>
             </div>
             <div>
-                <dt class="font-semibold text-slate-700">更新时间</dt>
-                <dd class="text-slate-600">2026-06</dd>
+                <dt class="ui-card__title font-semibold">更新时间</dt>
+                <dd class="ui-card__muted">2026-06</dd>
             </div>
             <div>
-                <dt class="font-semibold text-slate-700">适用站点</dt>
-                <dd class="text-slate-600">Amazon EU/GB 主推站点（DE/FR/IT/ES/NL/SE/PL/BE/GB/IE/TR）</dd>
+                <dt class="ui-card__title font-semibold">适用站点</dt>
+                <dd class="ui-card__muted">Amazon EU/GB 主推站点（DE/FR/IT/ES/NL/SE/PL/BE/GB/IE/TR）</dd>
             </div>
             <div>
-                <dt class="font-semibold text-slate-700">输入</dt>
-                <dd class="text-slate-600">ASIN、目标站点、竞品 ASIN、当前 Listing、关键词、Review 痛点</dd>
+                <dt class="ui-card__title font-semibold">输入</dt>
+                <dd class="ui-card__muted">ASIN、目标站点、竞品 ASIN、当前 Listing、关键词、Review 痛点</dd>
             </div>
             <div>
-                <dt class="font-semibold text-slate-700">输出</dt>
-                <dd class="text-slate-600">新版 Title、Bullets、Search Terms、改稿 Prompt</dd>
+                <dt class="ui-card__title font-semibold">输出</dt>
+                <dd class="ui-card__muted">新版 Title、Bullets、Search Terms、改稿 Prompt</dd>
             </div>
             <div>
-                <dt class="font-semibold text-slate-700">人工确认点</dt>
-                <dd class="text-slate-600">高危词、合规声明、最终上线内容必须人工复核</dd>
+                <dt class="ui-card__title font-semibold">人工确认点</dt>
+                <dd class="ui-card__muted">高危词、合规声明、最终上线内容必须人工复核</dd>
             </div>
         </dl>
     </section>
@@ -245,8 +245,8 @@ Search Terms:
         <!-- Left Column -->
         <div class="space-y-6">
             <!-- Title Formula -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <div class="ui-card p-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="fas fa-heading text-blue-500"></i>标题 (Title) 编写公式
                 </h2>
                 <div class="bg-slate-50 rounded-lg p-4 mb-4">
@@ -276,8 +276,8 @@ Search Terms:
                 </div>
             </div>
             <!-- Bullet Points (EU Anti-Return Logic) -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+            <div class="ui-card p-6">
+                <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
                     <i class="fas fa-list-ul text-blue-500"></i>五点描述 (Bullet Points)
                 </h2>
                 <p class="text-xs text-slate-500 mb-4">核心原则：移动端只展示前3点的前70字符，把最硬核信息（尺寸/兼容性/材质）前置。</p>
@@ -452,8 +452,8 @@ Search Terms:
         <!-- Right Column -->
         <div class="space-y-6">
             <!-- Search Terms -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <div class="ui-card p-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="fas fa-search text-blue-500"></i>Search Terms 填充规范
                 </h2>
                 <div class="grid grid-cols-2 gap-4">
@@ -731,11 +731,11 @@ Search Terms:
             </div>
 
             <div class="space-y-4">
-                <div class="bg-white rounded-xl border border-slate-200 p-4">
-                    <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm">
+                <div class="ui-card p-4">
+                    <h3 class="ui-card__title font-bold mb-3 flex items-center gap-2 text-sm">
                         <i class="fas fa-triangle-exclamation text-amber-500"></i>搜不到时优先排查
                     </h3>
-                    <ul class="space-y-2 text-xs text-slate-600 list-disc pl-4">
+                    <ul class="ui-card__muted space-y-2 text-xs list-disc pl-4">
                         <li>关键词是否只埋在低权重位置，标题/前 3 点完全没覆盖。</li>
                         <li>Search Terms 是否被重复词、无关词、品牌词占满，浪费了可收录空间。</li>
                         <li>词本身是否类目相关性不足，或者表达不符合当地买家真实搜索习惯。</li>
@@ -766,12 +766,12 @@ Search Terms:
                     <strong class="block mb-1">检查结论写法建议：</strong>
                     <span>把结果拆成“<span class="font-bold">是否收录</span> / <span class="font-bold">自然排名区间</span> / <span class="font-bold">下一步动作</span>”三列记录，团队复盘时最清晰。</span>
                 </div>
-                <div class="bg-white rounded-xl border border-slate-200 p-4">
-                    <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm">
+                <div class="ui-card p-4">
+                    <h3 class="ui-card__title font-bold mb-3 flex items-center gap-2 text-sm">
                         <i class="fa-solid fa-headset text-amber-500"></i>排查后无法解决？
                         
                     </h3>
-                    <ul class="space-y-2 text-xs text-slate-600 list-disc pl-4">
+                    <ul class="ui-card__muted space-y-2 text-xs list-disc pl-4">
                         <li>开Case联系客服调查，大概率可以解决。</li>
                     </ul>
                 </div>
