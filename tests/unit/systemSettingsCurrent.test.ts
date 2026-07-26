@@ -425,6 +425,8 @@ it('loads and saves LLM provider configuration', async () => {
   expect(panel.llm.model).toBe('custom-model');
   expect(panel.getModelValue({ id: 'model-a' })).toBe('model-a');
   expect(panel.getModelLabel('model-b')).toBe('model-b');
+  expect(panel.isModelSelected('custom-model')).toBe(true);
+  expect(panel.isModelSelected({ id: 'model-a' })).toBe(false);
 
   panel.llm.apiKey = '';
   await panel.saveProviderConfig();
@@ -1353,10 +1355,9 @@ it('AC3: fetchModels auto-switch clamps effort to new model allowlist', async ()
   expect(panel.llm.model).toBe('grok-4.5');
   expect(panel.llm.reasoningPrefs.effort).toBe('high');
   expect(panel.reasoningEffortOptions).toEqual(['low', 'medium', 'high']);
-  expect(showToast).toHaveBeenCalledWith(
-    expect.stringMatching(/推理等级已从 max 调整为 high/),
-    { type: 'info' }
-  );
+  expect(showToast).toHaveBeenCalledWith(expect.stringMatching(/推理等级已从 max 调整为 high/), {
+    type: 'info',
+  });
   // Demotion persisted so orphan max is not left for a later save
   expect(StorageService.setLLMConfig).toHaveBeenCalledWith(
     'new_api',
@@ -1385,10 +1386,9 @@ it('AC3: loadProviderConfig demotion toasts once and persists high', async () =>
 
   expect(panel.llm.model).toBe('grok-4.5');
   expect(panel.llm.reasoningPrefs.effort).toBe('high');
-  expect(showToast).toHaveBeenCalledWith(
-    expect.stringMatching(/推理等级已从 max 调整为 high/),
-    { type: 'info' }
-  );
+  expect(showToast).toHaveBeenCalledWith(expect.stringMatching(/推理等级已从 max 调整为 high/), {
+    type: 'info',
+  });
   expect(StorageService.setLLMConfig).toHaveBeenCalledWith(
     'new_api',
     expect.objectContaining({

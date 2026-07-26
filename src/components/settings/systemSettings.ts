@@ -471,6 +471,7 @@ interface SettingsPanelData {
   toggleProxyKeyVisibility(): void;
   getModelValue(model: ModelOption): string;
   getModelLabel(model: ModelOption): string;
+  isModelSelected(model: ModelOption): boolean;
   refreshLocalDataUsage(): Promise<void>;
   isPartialLocalDataExport: boolean;
   exportLocalDataButtonText: string;
@@ -2778,6 +2779,16 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   getModelLabel(model: ModelOption): string {
     return this.getModelValue(model);
+  },
+
+  /**
+   * Keep the rendered option list in sync with llm.model. Alpine's x-for reuses
+   * <option> nodes when the models array is replaced (e.g. 获取模型列表), and the
+   * browser resets <select>.value if the selected option node is briefly removed
+   * — :selected re-asserts the saved model after every re-render.
+   */
+  isModelSelected(model: ModelOption): boolean {
+    return this.getModelValue(model) === this.llm.model;
   },
 
   async refreshLocalDataUsage(): Promise<void> {

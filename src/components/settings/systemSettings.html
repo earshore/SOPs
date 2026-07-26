@@ -705,8 +705,12 @@
                             :disabled="modelSelectDisabled"
                           >
                             <option value="">— 请选择 —</option>
-                            <template x-for="(m, index) in llm.models" :key="index">
-                              <option :value="getModelValue(m)" x-text="getModelLabel(m)"></option>
+                            <template x-for="m in llm.models" :key="getModelValue(m)">
+                              <option
+                                :value="getModelValue(m)"
+                                :selected="isModelSelected(m)"
+                                x-text="getModelLabel(m)"
+                              ></option>
                             </template>
                           </select>
                           <div
