@@ -6,7 +6,7 @@ import {
   type ThemeConfig,
 } from './themeConfig';
 import { ColorContext } from '../utils/ColorContext';
-import { getRuntimeCssRuleText } from '../utils/runtimeStyles';
+import { clearRuntimeCssRule, getRuntimeCssRuleText } from '../utils/runtimeStyles';
 import { StorageService } from '../../services/storageService';
 import eventBus from '../EventBus';
 
@@ -61,6 +61,7 @@ beforeEach(() => {
   document.documentElement.removeAttribute('data-color-mode-resolved');
   document.documentElement.classList.remove('dark');
   document.documentElement.removeAttribute('style');
+  clearRuntimeCssRule('theme-manager-vars');
   resetThemeManager();
   mocks.setModuleColor.mockReset();
   mocks.storageGet.mockReset();
@@ -283,6 +284,55 @@ describe('ThemeManager', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false);
     expect(document.documentElement.style.colorScheme).toBe('light');
     expect(ThemeManager.getResolvedColorMode()).toBe('light');
+  });
+
+  it('applyColorMode dark preserves minimal appearance primary (no indigo rewrite)', () => {
+    ThemeManager.applyTheme('minimal', { animate: false });
+
+    const appearanceRuleBefore = getRuntimeCssRuleText('theme-manager-vars');
+    expect(appearanceRuleBefore).toContain('--color-primary:var(--color-slate-700)');
+    expect(appearanceRuleBefore).toContain('--color-primary-light:var(--color-slate-100)');
+    expect(appearanceRuleBefore).toContain('--color-primary-dark:var(--color-slate-800)');
+    expect(appearanceRuleBefore).toContain('--color-primary-darker:var(--color-slate-900)');
+    expect(appearanceRuleBefore).toContain('--color-focus-ring:var(--color-slate-700)');
+    expect(appearanceRuleBefore).not.toMatch(/indigo/i);
+
+    mocks.storageSet.mockClear();
+    mocks.emit.mockClear();
+
+    ThemeManager.applyColorMode('dark');
+
+    // Color mode markers + UA colorScheme only
+    expect(document.documentElement.dataset.colorMode).toBe('dark');
+    expect(document.documentElement.dataset.colorModeResolved).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(document.documentElement.style.colorScheme).toBe('dark');
+
+    // Appearance axis untouched
+    expect(document.documentElement.dataset.appearance).toBe('minimal');
+    expect(document.documentElement.dataset.theme).toBe('minimal');
+    expect(ThemeManager.getCurrentTheme()).toBe('minimal');
+
+    // Primary-family runtime rule still slate from minimal; dark must not inject indigo
+    const appearanceRuleAfter = getRuntimeCssRuleText('theme-manager-vars');
+    expect(appearanceRuleAfter).toBe(appearanceRuleBefore);
+    expect(appearanceRuleAfter).toContain('--color-primary:var(--color-slate-700)');
+    expect(appearanceRuleAfter).toContain('--color-focus-ring:var(--color-slate-700)');
+    expect(appearanceRuleAfter).not.toMatch(/indigo/i);
+
+    expect(StorageService.set).toHaveBeenCalledWith('app-color-mode', 'dark');
+    expect(StorageService.set).not.toHaveBeenCalledWith('app-theme', expect.anything());
+    expect(ColorContext.setModuleColor).not.toHaveBeenCalled();
+  });
+
+  it('applyColorMode alone never writes appearance primary vars or requires indigo', () => {
+    ThemeManager.applyColorMode('dark');
+
+    expect(document.documentElement.style.colorScheme).toBe('dark');
+    expect(getRuntimeCssRuleText('theme-manager-vars')).toBeNull();
+    expect(document.documentElement.dataset.appearance).toBeUndefined();
+    // No ThemeManager path should hardcode indigo as a dark-mode brand primary
+    expect(document.documentElement.getAttribute('style') ?? '').not.toMatch(/indigo/i);
   });
 
   it('applyColorMode system resolves via prefers-color-scheme and keeps preference as system', () => {

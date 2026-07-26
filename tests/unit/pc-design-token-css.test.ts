@@ -71,6 +71,23 @@ describe('PC design token CSS contract', () => {
     expect(css).not.toMatch(/--focus-ring-soft:\s*rgba\(37,\s*99,\s*235/);
   });
 
+  it('does not stomp Appearance primary/focus with indigo under dark mode (T1)', () => {
+    const css = readFileSync(variablesCssPath, 'utf8');
+
+    expect(css).toContain('Appearance primary / focus / link tokens stay on Layer A');
+    // Dark foundation must not hard-assign brand primary/focus/link to indigo.
+    expect(css).not.toMatch(/--color-primary:\s*var\(--color-indigo-/);
+    expect(css).not.toMatch(/--color-primary-dark:\s*var\(--color-indigo-/);
+    expect(css).not.toMatch(/--color-primary-darker:\s*var\(--color-indigo-/);
+    expect(css).not.toMatch(/--color-focus-ring:\s*var\(--color-indigo-/);
+    expect(css).not.toMatch(/--color-border-focus:\s*var\(--color-indigo-/);
+    expect(css).not.toMatch(/--color-text-link:\s*var\(--color-indigo-/);
+    // Soft halo still follows Appearance focus-ring under dark selectors
+    expect(css).toMatch(
+      /\[data-color-mode-resolved='dark'\][\s\S]*--focus-ring-soft:\s*color-mix\(in srgb, var\(--color-focus-ring\)/
+    );
+  });
+
   it('routes primary action buttons through semantic button aliases', () => {
     const css = readFileSync(buttonsCssPath, 'utf8');
 
