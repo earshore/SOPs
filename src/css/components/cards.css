@@ -622,7 +622,11 @@
 /* --- 内容提示卡：默认显示语义左侧色条 --- */
 .content-callout {
   --callout-accent: var(--color-blue-500, #3b82f6);
-  --callout-bg: var(--color-blue-50, #eff6ff);
+  --callout-bg: color-mix(
+    in srgb,
+    var(--color-blue-500, #3b82f6) 10%,
+    var(--surface-card, #ffffff)
+  );
   --callout-border: rgba(59, 130, 246, 0.22);
   --callout-rail-width: 4px;
 
@@ -646,61 +650,93 @@
 
 .content-callout--info {
   --callout-accent: var(--color-blue-500, #3b82f6);
-  --callout-bg: var(--color-blue-50, #eff6ff);
+  --callout-bg: color-mix(
+    in srgb,
+    var(--color-blue-500, #3b82f6) 10%,
+    var(--surface-card, #ffffff)
+  );
   --callout-border: rgba(59, 130, 246, 0.22);
 }
 
 .content-callout--success {
   --callout-accent: var(--color-emerald-500, #10b981);
-  --callout-bg: var(--color-emerald-50, #ecfdf5);
+  --callout-bg: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 10%,
+    var(--surface-card, #ffffff)
+  );
   --callout-border: rgba(16, 185, 129, 0.22);
 }
 
 .content-callout--warning {
   --callout-accent: var(--color-amber-500, #f59e0b);
-  --callout-bg: var(--color-amber-50, #fffbeb);
+  --callout-bg: color-mix(
+    in srgb,
+    var(--color-amber-500, #f59e0b) 10%,
+    var(--surface-card, #ffffff)
+  );
   --callout-border: rgba(245, 158, 11, 0.24);
 }
 
 .content-callout--danger {
   --callout-accent: var(--color-red-500, #ef4444);
-  --callout-bg: var(--color-red-50, #fef2f2);
+  --callout-bg: color-mix(in srgb, var(--color-red-500, #ef4444) 10%, var(--surface-card, #ffffff));
   --callout-border: rgba(239, 68, 68, 0.24);
 }
 
 .content-callout--purple {
   --callout-accent: var(--color-purple-500, #8b5cf6);
-  --callout-bg: var(--color-purple-50, #faf5ff);
+  --callout-bg: color-mix(
+    in srgb,
+    var(--color-purple-500, #8b5cf6) 10%,
+    var(--surface-card, #ffffff)
+  );
   --callout-border: rgba(139, 92, 246, 0.22);
 }
 
 .content-callout--indigo {
   --callout-accent: var(--color-indigo-500, #6366f1);
-  --callout-bg: var(--color-indigo-50, #eef2ff);
+  --callout-bg: color-mix(
+    in srgb,
+    var(--color-indigo-500, #6366f1) 10%,
+    var(--surface-card, #ffffff)
+  );
   --callout-border: rgba(99, 102, 241, 0.22);
 }
 
 .content-callout--orange {
   --callout-accent: var(--color-orange-500, #f97316);
-  --callout-bg: var(--color-orange-50, #fff7ed);
+  --callout-bg: color-mix(
+    in srgb,
+    var(--color-orange-500, #f97316) 10%,
+    var(--surface-card, #ffffff)
+  );
   --callout-border: rgba(249, 115, 22, 0.22);
 }
 
 .content-callout--teal {
   --callout-accent: var(--color-teal-500, #14b8a6);
-  --callout-bg: var(--color-teal-50, #f0fdfa);
+  --callout-bg: color-mix(
+    in srgb,
+    var(--color-teal-500, #14b8a6) 10%,
+    var(--surface-card, #ffffff)
+  );
   --callout-border: rgba(20, 184, 166, 0.22);
 }
 
 .content-callout--rose {
   --callout-accent: var(--color-rose-500, #f43f5e);
-  --callout-bg: var(--color-rose-50, #fff1f2);
+  --callout-bg: color-mix(
+    in srgb,
+    var(--color-rose-500, #f43f5e) 10%,
+    var(--surface-card, #ffffff)
+  );
   --callout-border: rgba(244, 63, 94, 0.22);
 }
 
 .content-callout--neutral {
   --callout-accent: var(--color-slate-400, #94a3b8);
-  --callout-bg: var(--color-slate-50, #f8fafc);
+  --callout-bg: var(--color-bg-secondary, #f8fafc);
   --callout-border: rgba(148, 163, 184, 0.26);
 }
 

@@ -521,6 +521,12 @@ body {
   color: var(--color-slate-300, #cbd5e1);
 }
 
+.dark .model-status :is(.text-slate-500, .text-slate-600),
+[data-color-mode='dark'] .model-status :is(.text-slate-500, .text-slate-600),
+[data-color-mode-resolved='dark'] .model-status :is(.text-slate-500, .text-slate-600) {
+  color: var(--color-slate-300, #cbd5e1);
+}
+
 .dark .mega-menu-inner,
 [data-color-mode='dark'] .mega-menu-inner,
 [data-color-mode-resolved='dark'] .mega-menu-inner {

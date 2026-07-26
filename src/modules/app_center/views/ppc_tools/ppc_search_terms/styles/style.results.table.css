@@ -7,13 +7,13 @@
 }
 
 .ppc-search-terms-table-wrapper {
-  border: 1px solid rgb(226, 232, 240);
+  border: 1px solid var(--border-subtle, rgb(226, 232, 240));
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
 }
 
 .ppc-search-terms-delivery-note {
   padding: 12px;
-  border: 1px solid var(--color-emerald-100, #d1fae5);
+  border: 1px solid var(--ppc-search-terms-accent-line-soft, var(--color-emerald-100, #d1fae5));
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: linear-gradient(
     180deg,
@@ -29,7 +29,7 @@
 .ppc-search-terms-table-help {
   margin: 0;
   padding: 10px 12px;
-  border-bottom: 1px solid rgb(226, 232, 240);
+  border-bottom: 1px solid var(--border-subtle, rgb(226, 232, 240));
   background: color-mix(in srgb, var(--color-bg-secondary, #f8fafc) 72%, transparent);
   color: var(--ppc-search-terms-text-secondary, #475569);
   font-size: 12px;
@@ -37,7 +37,7 @@
 }
 
 .ppc-search-terms-results-table thead tr {
-  background: var(--color-slate-50);
+  background: var(--color-bg-secondary, var(--color-slate-50));
 }
 
 .ppc-search-terms-action-badge {
@@ -52,67 +52,67 @@
 }
 
 .ppc-search-terms-action-negative_exact {
-  background: rgb(254, 226, 226);
-  color: rgb(153, 27, 27);
+  background: var(--ppc-search-terms-danger-soft, rgb(254, 226, 226));
+  color: var(--ppc-search-terms-danger-text, rgb(153, 27, 27));
 }
 
 .ppc-search-terms-action-harvest_exact,
 .ppc-search-terms-action-scale_budget {
-  background: rgb(220, 252, 231);
-  color: rgb(22, 101, 52);
+  background: var(--ppc-search-terms-success-soft, rgb(220, 252, 231));
+  color: var(--ppc-search-terms-success-text, rgb(22, 101, 52));
 }
 
 .ppc-search-terms-action-bid_down {
-  background: rgb(254, 243, 199);
-  color: rgb(146, 64, 14);
+  background: var(--ppc-search-terms-warning-soft, rgb(254, 243, 199));
+  color: var(--ppc-search-terms-warning-text, rgb(146, 64, 14));
 }
 
 .ppc-search-terms-action-listing_term {
-  background: rgb(237, 233, 254);
-  color: rgb(91, 33, 182);
+  background: var(--ppc-search-terms-violet-soft, rgb(237, 233, 254));
+  color: var(--ppc-search-terms-violet-text, rgb(91, 33, 182));
 }
 
 .ppc-search-terms-action-campaign_fix_status {
-  background: rgb(254, 226, 226);
-  color: rgb(153, 27, 27);
+  background: var(--ppc-search-terms-danger-soft, rgb(254, 226, 226));
+  color: var(--ppc-search-terms-danger-text, rgb(153, 27, 27));
 }
 
 .ppc-search-terms-action-campaign_pause,
 .ppc-search-terms-action-campaign_bid_down {
-  background: rgb(254, 243, 199);
-  color: rgb(146, 64, 14);
+  background: var(--ppc-search-terms-warning-soft, rgb(254, 243, 199));
+  color: var(--ppc-search-terms-warning-text, rgb(146, 64, 14));
 }
 
 .ppc-search-terms-action-campaign_scale {
-  background: rgb(220, 252, 231);
-  color: rgb(22, 101, 52);
+  background: var(--ppc-search-terms-success-soft, rgb(220, 252, 231));
+  color: var(--ppc-search-terms-success-text, rgb(22, 101, 52));
 }
 
 .ppc-search-terms-action-campaign_structure {
-  background: rgb(224, 242, 254);
-  color: rgb(7, 89, 133);
+  background: var(--ppc-search-terms-sky-soft, rgb(224, 242, 254));
+  color: var(--ppc-search-terms-sky-text, rgb(7, 89, 133));
 }
 
 .ppc-search-terms-action-observe {
-  background: rgb(226, 232, 240);
-  color: rgb(51, 65, 85);
+  background: var(--color-bg-tertiary, rgb(226, 232, 240));
+  color: var(--ppc-search-terms-ink-strong, rgb(51, 65, 85));
 }
 
 .ppc-search-terms-results-row {
-  border-bottom: 1px solid rgb(226, 232, 240);
+  border-bottom: 1px solid var(--border-subtle, rgb(226, 232, 240));
 }
 
 .ppc-search-terms-results-row-reviewed {
-  background: rgba(240, 253, 250, 0.96);
-  box-shadow: inset 3px 0 0 rgb(20, 184, 166);
+  background: var(--ppc-search-terms-review-soft, rgba(240, 253, 250, 0.96));
+  box-shadow: inset 3px 0 0 var(--color-teal-500, rgb(20, 184, 166));
 }
 
 .ppc-search-terms-results-row:hover {
-  background: rgb(240, 249, 255);
+  background: color-mix(in srgb, var(--color-sky-500, #0ea5e9) 6%, var(--surface-panel, #ffffff));
 }
 
 .ppc-search-terms-results-row-reviewed:hover {
-  background: rgba(204, 251, 241, 0.72);
+  background: color-mix(in srgb, var(--color-teal-500, #14b8a6) 16%, var(--surface-panel, #ffffff));
 }
 
 .ppc-search-terms-results-row td {
@@ -129,8 +129,8 @@
   padding: 0 8px;
   border: 1px solid rgba(13, 148, 136, 0.28);
   border-radius: 999px;
-  background: rgb(240, 253, 250);
-  color: rgb(15, 118, 110);
+  background: var(--ppc-search-terms-review-soft, rgb(240, 253, 250));
+  color: var(--ppc-search-terms-review-accent, rgb(15, 118, 110));
   font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
@@ -140,7 +140,7 @@
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: rgb(20, 184, 166);
+  background: var(--color-teal-500, rgb(20, 184, 166));
   content: '';
 }
 
@@ -148,16 +148,16 @@
   padding: 8px 10px;
   border: 1px solid rgba(20, 184, 166, 0.28);
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  background: rgba(240, 253, 250, 0.9);
+  background: var(--ppc-search-terms-review-soft, rgba(240, 253, 250, 0.9));
 }
 
 .ppc-search-terms-review-reason-label {
   margin-bottom: 4px;
-  color: rgb(15, 118, 110);
+  color: var(--ppc-search-terms-review-accent, rgb(15, 118, 110));
   font-size: 11px;
   font-weight: 900;
 }
 
 .ppc-search-terms-review-reason-text {
-  color: rgb(22, 78, 99);
+  color: var(--ppc-search-terms-review-ink, rgb(22, 78, 99));
 }

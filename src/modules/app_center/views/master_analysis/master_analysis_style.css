@@ -626,7 +626,7 @@
     padding: 0.875rem 1rem;
     border: 1px solid var(--border-muted, var(--color-slate-200));
     border-radius: var(--workbench-radius, var(--card-radius, 8px));
-    color: var(--color-slate-600);
+    color: var(--color-text-secondary, var(--color-slate-600));
     background: var(--surface-card-hover, var(--color-slate-50));
     appearance: none;
     cursor: pointer;
@@ -640,7 +640,7 @@
   }
 
   .ma-workflow-step:hover {
-    color: var(--color-slate-800);
+    color: var(--color-text-primary, var(--color-slate-800));
     border-color: var(--ma-accent-muted);
     background: var(--ma-accent-soft);
   }
@@ -664,7 +664,7 @@
     justify-content: center;
     flex: 0 0 auto;
     border-radius: 999px;
-    color: var(--color-slate-500);
+    color: var(--color-text-secondary, var(--color-slate-500));
     background: var(--color-white);
     border: 1px solid var(--color-slate-200);
     font-size: 0.75rem;
@@ -691,7 +691,7 @@
   .ma-workflow-meta {
     display: block;
     margin-top: 0.125rem;
-    color: var(--color-slate-500);
+    color: var(--color-text-secondary, var(--color-slate-500));
     font-size: 0.75rem;
     line-height: 1rem;
     white-space: nowrap;
@@ -885,31 +885,31 @@
   }
 
   [x-data='promptlabPanel'] :where(#card-analysis, #card-product-dna, #card-strategy) {
-    border-color: var(--color-slate-300, #cbd5e1) !important;
+    border-color: var(--color-border-strong, #cbd5e1) !important;
     box-shadow: 0 14px 30px -24px rgb(15 23 42 / 0.45) !important;
   }
 
   [x-data='promptlabPanel']
     :where(#card-analysis, #card-product-dna, #card-strategy)
     > div:first-child {
-    background: var(--color-white, #ffffff);
-    border-bottom-color: var(--color-slate-200, #e2e8f0) !important;
+    background: var(--surface-card, #ffffff);
+    border-bottom-color: var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
   }
 
   #console-card-inner > div:first-child > div {
-    background: var(--color-slate-50, #f8fafc) !important;
-    border: 1px solid var(--color-slate-200, #e2e8f0) !important;
+    background: var(--color-bg-secondary, #f8fafc) !important;
+    border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
     border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
-    color: var(--color-slate-700, #334155) !important;
+    color: var(--color-text-primary, #334155) !important;
   }
 
   #console-card-inner > div:last-child > div {
-    background: var(--color-slate-50, #f8fafc) !important;
-    border: 1px solid var(--color-slate-200, #e2e8f0) !important;
+    background: var(--color-bg-secondary, #f8fafc) !important;
+    border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
     border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
-    color: var(--color-slate-700, #334155) !important;
+    color: var(--color-text-primary, #334155) !important;
   }
 
   #console-card-inner :where(.absolute[class*='blur-'][class*='rounded-full'], .absolute.inset-0),
@@ -918,21 +918,21 @@
   }
 
   #console-card-inner > div > div > .pr-28 h3 {
-    color: var(--color-slate-700, #334155) !important;
+    color: var(--color-text-primary, #334155) !important;
     font-size: 0.875rem !important;
   }
 
   #console-card-inner > div > div > .pr-28 :where(span, p) {
-    color: var(--color-slate-500, #64748b) !important;
+    color: var(--color-text-secondary, #64748b) !important;
   }
 
   #embed-toggle-container {
-    background: var(--color-slate-200, #e2e8f0) !important;
-    border-color: var(--color-slate-200, #e2e8f0) !important;
+    background: var(--color-bg-tertiary, #e2e8f0) !important;
+    border-color: var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
   }
 
   #mode-toggle-glider {
-    background: var(--color-white, #ffffff) !important;
+    background: var(--surface-card, #ffffff) !important;
   }
 
   [x-data='promptlabPanel'] textarea.promptlab-textarea-expanded {
@@ -968,27 +968,50 @@
   }
 
   #console-card-inner :where(#btn-generate-prompt, #btn-generate-visual):disabled {
-    background: var(--color-slate-300, #cbd5e1) !important;
+    background: var(--color-bg-tertiary, #cbd5e1) !important;
     box-shadow: none !important;
   }
 
   #prompt-output-card {
-    background: var(--color-slate-50, #f8fafc) !important;
-    border-color: var(--color-slate-200, #e2e8f0) !important;
+    background: var(--color-bg-secondary, #f8fafc) !important;
+    border-color: var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
     box-shadow: none !important;
   }
 
   #prompt-output-card > div:first-child {
-    background: var(--color-slate-50, #f8fafc) !important;
-    border-bottom-color: var(--color-slate-200, #e2e8f0) !important;
+    background: var(--color-bg-secondary, #f8fafc) !important;
+    border-bottom-color: var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
   }
 
   #prompt-output-card #output-preview-title {
-    color: var(--color-slate-500, #64748b) !important;
+    color: var(--color-text-secondary, #64748b) !important;
     font-weight: 600 !important;
   }
 
   #prompt-output-card #final-prompt-output {
-    color: var(--color-slate-600, #475569) !important;
+    color: var(--color-text-secondary, #475569) !important;
   }
+}
+
+/* Dark: MA violet accent + purple label ink lift for canvas readability */
+.dark [x-data='promptlabPanel'],
+.dark [x-data='aiAnalysisPanel'],
+.dark [x-data='scraperPanel'],
+[data-color-mode-resolved='dark'] [x-data='promptlabPanel'],
+[data-color-mode-resolved='dark'] [x-data='aiAnalysisPanel'],
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'],
+[data-theme='dark'] [x-data='promptlabPanel'],
+[data-theme='dark'] [x-data='aiAnalysisPanel'],
+[data-theme='dark'] [x-data='scraperPanel'] {
+  --ma-accent: #a8a3f8;
+  --ma-accent-hover: #c0bcfa;
+  --ma-accent-soft: color-mix(in srgb, #6257f5 20%, var(--surface-card, #1e293b));
+  --ma-accent-tint: color-mix(in srgb, #6257f5 26%, var(--surface-card, #1e293b));
+  --ma-accent-muted: color-mix(in srgb, #6257f5 34%, var(--surface-card, #1e293b));
+}
+
+.dark [x-data='promptlabPanel'] :is(.text-purple-600, .text-purple-500),
+[data-color-mode-resolved='dark'] [x-data='promptlabPanel'] :is(.text-purple-600, .text-purple-500),
+[data-theme='dark'] [x-data='promptlabPanel'] :is(.text-purple-600, .text-purple-500) {
+  color: var(--color-purple-300, #d8b4fe);
 }

@@ -11,8 +11,8 @@
   margin-right: auto;
   padding: 0.75rem 1rem;
   box-sizing: border-box;
-  background-color: white;
-  border: 1px solid var(--color-slate-200);
+  background-color: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-subtle, var(--color-slate-200));
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
 }
 
@@ -41,7 +41,7 @@
   background: transparent;
   font-size: 0.9375rem;
   line-height: 1.5;
-  color: var(--color-slate-800);
+  color: var(--color-text-primary, var(--color-slate-800));
 }
 
 .catalog-search-input::placeholder {
@@ -87,9 +87,9 @@
 .category-btn {
   padding: 0.5rem 1rem;
   border-radius: var(--rounded-md);
-  border: 1px solid var(--color-slate-200);
-  background-color: white;
-  color: var(--color-slate-500);
+  border: 1px solid var(--border-subtle, var(--color-slate-200));
+  background-color: var(--surface-card, #ffffff);
+  color: var(--color-text-secondary, var(--color-slate-500));
   transition:
     background-color var(--duration-fast),
     border-color var(--duration-fast),
@@ -123,9 +123,9 @@
 
 /* 提示词卡片样式 */
 .prompt-card {
-  background-color: white;
+  background-color: var(--surface-card, #ffffff);
   border-radius: var(--workbench-radius, var(--card-radius, 8px));
-  border: 1px solid var(--color-slate-200);
+  border: 1px solid var(--border-subtle, var(--color-slate-200));
   padding: 1.25rem;
   transition:
     background-color var(--duration-fast),
@@ -143,7 +143,7 @@
 .prompt-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-slate-800);
+  color: var(--color-text-primary, var(--color-slate-800));
   margin-bottom: 0.5rem;
   transition: color var(--duration-fast);
 }
@@ -154,7 +154,7 @@
 
 .prompt-description {
   font-size: 0.875rem;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   line-height: 1.625;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -185,17 +185,17 @@
 
 /* 语言切换按钮样式 */
 .lang-btn {
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   background-color: transparent;
   cursor: pointer;
 }
 
 .lang-btn:hover {
-  color: var(--color-slate-800);
+  color: var(--color-text-primary, var(--color-slate-800));
 }
 
 .lang-btn.active {
-  background-color: white;
+  background-color: var(--surface-card, #ffffff);
   color: var(--color-violet-600);
   font-weight: 600;
   box-shadow: 0 1px 2px 0 var(--color-black-alpha-5);
@@ -229,7 +229,7 @@
 
 .prompt-source-card p {
   margin-top: 0.5rem;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   font-size: 0.875rem;
   line-height: 1.625;
 }

@@ -14,10 +14,10 @@
   gap: 6px;
   min-height: 28px;
   padding: 0 10px 0 6px;
-  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border: 1px solid var(--border-subtle, var(--color-slate-200, #e2e8f0));
   border-radius: 999px;
   background: var(--surface-panel, #ffffff);
-  color: var(--color-slate-600, #475569);
+  color: var(--ppc-search-terms-ink, var(--color-slate-600, #475569));
   font-size: 11px;
   font-weight: 800;
   line-height: 1;
@@ -32,13 +32,13 @@
   justify-content: center;
   flex: 0 0 18px;
   border-radius: 999px;
-  border: 1px solid var(--color-emerald-100, #d1fae5);
+  border: 1px solid var(--ppc-search-terms-accent-line-soft, var(--color-emerald-100, #d1fae5));
   background: color-mix(
     in srgb,
     var(--color-emerald-500, #10b981) 12%,
     var(--surface-panel, #ffffff)
   );
-  color: var(--color-emerald-700, #047857);
+  color: var(--ppc-search-terms-accent, var(--color-emerald-700, #047857));
   font-size: 10px;
   font-weight: 900;
 }

@@ -8,7 +8,7 @@
   border: 1px solid var(--ppc-search-terms-info-border);
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: var(--ppc-search-terms-info-soft);
-  color: var(--color-slate-900, #0f172a);
+  color: var(--ppc-search-terms-text-primary, var(--color-slate-900, #0f172a));
 }
 
 .ppc-search-terms-resume-review h3,
@@ -23,7 +23,7 @@
 
 .ppc-search-terms-resume-review p {
   margin-top: 4px;
-  color: var(--color-slate-600, #475569);
+  color: var(--ppc-search-terms-ink, var(--color-slate-600, #475569));
   font-size: 12px;
   line-height: 1.5;
 }
@@ -31,10 +31,10 @@
 .ppc-search-terms-resume-review-note {
   min-height: 44px;
   padding: 8px 10px;
-  border: 1px solid var(--color-slate-300, #cbd5e1);
+  border: 1px solid var(--ppc-search-terms-border-strong, var(--color-slate-300, #cbd5e1));
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: var(--surface-card, #ffffff);
-  color: var(--color-slate-900, #0f172a);
+  color: var(--ppc-search-terms-text-primary, var(--color-slate-900, #0f172a));
   font: inherit;
   resize: vertical;
 }
@@ -49,10 +49,10 @@
 .ppc-search-terms-resume-review-action {
   min-height: 44px;
   padding: 0 12px;
-  border: 1px solid var(--color-slate-300, #cbd5e1);
+  border: 1px solid var(--ppc-search-terms-border-strong, var(--color-slate-300, #cbd5e1));
   border-radius: 8px;
   background: var(--surface-card, #ffffff);
-  color: var(--color-slate-700, #334155);
+  color: var(--ppc-search-terms-ink-strong, var(--color-slate-700, #334155));
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -79,10 +79,10 @@
   align-items: center;
   gap: 9px;
   padding: 0 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--ppc-search-terms-border-strong, #cbd5e1);
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: color-mix(in srgb, var(--surface-panel, #ffffff) 86%, transparent);
-  color: #64748b;
+  color: var(--color-text-secondary, #64748b);
   transition:
     border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     box-shadow 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
@@ -101,14 +101,14 @@
   min-height: 38px;
   border: 0;
   background: transparent;
-  color: #0f172a;
+  color: var(--color-text-primary, #0f172a);
   font-size: 13px;
   font-weight: 700;
   outline: none;
 }
 
 .ppc-search-terms-action-search input::placeholder {
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
   font-weight: 600;
 }
 
@@ -119,10 +119,10 @@
   gap: 7px;
   min-height: 40px;
   padding: 0 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border-strong, #d1d5db);
   border-radius: 8px;
   background: var(--surface-card, #ffffff);
-  color: #334155;
+  color: var(--color-text-primary, #334155);
   font-size: 13px;
   font-weight: 800;
   transition:
@@ -132,15 +132,15 @@
 }
 
 .ppc-search-terms-search-clear-btn:hover {
-  border-color: #94a3b8;
+  border-color: var(--color-text-tertiary, #94a3b8);
   background: var(--color-bg-secondary, #f8fafc);
 }
 
 .ppc-search-terms-search-clear-btn:disabled {
   cursor: not-allowed;
-  border-color: #cbd5e1;
+  border-color: var(--border-muted, #cbd5e1);
   background: var(--color-bg-secondary, #f8fafc);
-  color: #64748b;
+  color: var(--color-text-secondary, #64748b);
 }
 
 .ppc-search-terms-export-btn {
@@ -149,10 +149,10 @@
   gap: 8px;
   min-height: 38px;
   padding: 0 13px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border-strong, #d1d5db);
   border-radius: 8px;
   background: var(--surface-card, #ffffff);
-  color: #334155;
+  color: var(--color-text-primary, #334155);
   font-size: 13px;
   font-weight: 700;
   transition:
@@ -162,15 +162,15 @@
 }
 
 .ppc-search-terms-export-btn:hover {
-  border-color: #94a3b8;
+  border-color: var(--color-text-tertiary, #94a3b8);
   background: var(--color-bg-secondary, #f8fafc);
 }
 
 .ppc-search-terms-export-btn:disabled {
   cursor: not-allowed;
-  border-color: #cbd5e1;
+  border-color: var(--border-muted, #cbd5e1);
   background: var(--color-bg-secondary, #f8fafc);
-  color: #64748b;
+  color: var(--color-text-secondary, #64748b);
 }
 
 @media (max-width: 640px) {

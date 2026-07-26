@@ -186,7 +186,7 @@
 
 .home-primary-action--main {
   border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
-  background: var(--color-primary, #3b82f6);
+  background: var(--color-primary-dark, var(--color-primary, #3b82f6));
   color: var(--color-primary-contrast, var(--color-white, #ffffff));
   box-shadow: 0 18px 36px -28px color-mix(in srgb, var(--color-primary, #3b82f6) 72%, transparent);
 }

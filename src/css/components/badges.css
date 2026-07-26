@@ -606,3 +606,121 @@
 [data-theme='dark'] .badge-stack .badge {
   border-color: var(--color-slate-900);
 }
+
+/* SOP status + stage badges: same-hue low-luminance duals (Theme owns neutrals) */
+.dark .sop-status-active,
+[data-color-mode-resolved='dark'] .sop-status-active,
+[data-theme='dark'] .sop-status-active {
+  background: color-mix(in srgb, var(--color-green-500, #22c55e) 18%, var(--surface-card, #1e293b));
+  color: var(--color-green-300, #86efac);
+}
+
+.dark .sop-status-draft,
+[data-color-mode-resolved='dark'] .sop-status-draft,
+[data-theme='dark'] .sop-status-draft {
+  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 18%, var(--surface-card, #1e293b));
+  color: var(--color-amber-300, #fcd34d);
+}
+
+.dark .sop-status-pending,
+[data-color-mode-resolved='dark'] .sop-status-pending,
+[data-theme='dark'] .sop-status-pending {
+  background: color-mix(
+    in srgb,
+    var(--color-indigo-500, #6366f1) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-indigo-300, #a5b4fc);
+}
+
+.dark .stage-test,
+[data-color-mode-resolved='dark'] .stage-test,
+[data-theme='dark'] .stage-test {
+  background: color-mix(in srgb, var(--color-blue-500, #3b82f6) 18%, var(--surface-card, #1e293b));
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .stage-growth,
+[data-color-mode-resolved='dark'] .stage-growth,
+[data-theme='dark'] .stage-growth {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .stage-stable,
+[data-color-mode-resolved='dark'] .stage-stable,
+[data-theme='dark'] .stage-stable {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-500, #8b5cf6) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .stage-clearance,
+[data-color-mode-resolved='dark'] .stage-clearance,
+[data-theme='dark'] .stage-clearance {
+  background: color-mix(in srgb, var(--color-red-500, #ef4444) 18%, var(--surface-card, #1e293b));
+  color: var(--color-red-300, #fca5a5);
+}
+
+/* Category badges: dark duals (same-hue low-luminance chips, light ink) */
+.dark .category-badge.blue,
+[data-color-mode-resolved='dark'] .category-badge.blue,
+[data-theme='dark'] .category-badge.blue {
+  background-color: color-mix(
+    in srgb,
+    var(--color-blue-500, #3b82f6) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .category-badge.purple,
+[data-color-mode-resolved='dark'] .category-badge.purple,
+[data-theme='dark'] .category-badge.purple {
+  background-color: color-mix(
+    in srgb,
+    var(--color-purple-500, #a855f7) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-purple-300, #d8b4fe);
+}
+
+.dark .category-badge.green,
+[data-color-mode-resolved='dark'] .category-badge.green,
+[data-theme='dark'] .category-badge.green {
+  background-color: color-mix(
+    in srgb,
+    var(--color-green-500, #22c55e) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-green-300, #86efac);
+}
+
+.dark .category-badge.orange,
+[data-color-mode-resolved='dark'] .category-badge.orange,
+[data-theme='dark'] .category-badge.orange {
+  background-color: color-mix(
+    in srgb,
+    var(--color-orange-500, #f97316) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-orange-300, #fdba74);
+}
+
+.dark .category-badge.red,
+[data-color-mode-resolved='dark'] .category-badge.red,
+[data-theme='dark'] .category-badge.red {
+  background-color: color-mix(
+    in srgb,
+    var(--color-red-500, #ef4444) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-red-300, #fca5a5);
+}

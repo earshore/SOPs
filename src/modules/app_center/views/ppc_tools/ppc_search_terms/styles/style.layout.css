@@ -62,7 +62,7 @@
   align-items: center;
   justify-content: center;
   flex: 0 0 36px;
-  border: 1px solid var(--color-emerald-100, #d1fae5);
+  border: 1px solid var(--ppc-search-terms-accent-line-soft, var(--color-emerald-100, #d1fae5));
   border-radius: 8px;
   background: color-mix(
     in srgb,
@@ -147,7 +147,7 @@
   align-items: center;
   gap: 10px;
   margin: 0;
-  color: var(--color-slate-800, #1e293b);
+  color: var(--ppc-search-terms-ink-heading, var(--color-slate-800, #1e293b));
   font-size: 15px;
   font-weight: 800;
   line-height: 1.35;
@@ -166,7 +166,7 @@
 }
 
 .ppc-search-terms-card-title-icon-emerald {
-  border-color: var(--color-emerald-100, #d1fae5);
+  border-color: var(--ppc-search-terms-accent-line-soft, var(--color-emerald-100, #d1fae5));
   background: color-mix(
     in srgb,
     var(--color-emerald-500, #10b981) 12%,
@@ -210,13 +210,13 @@
 }
 
 .ppc-search-terms-secondary-action {
-  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border: 1px solid var(--border-subtle, var(--color-slate-200, #e2e8f0));
   background: var(--surface-card, #ffffff);
-  color: var(--color-slate-600, #475569);
+  color: var(--ppc-search-terms-ink, var(--color-slate-600, #475569));
 }
 
 .ppc-search-terms-secondary-action:hover {
-  border-color: var(--color-emerald-200, #a7f3d0);
+  border-color: var(--ppc-search-terms-accent-line, var(--color-emerald-200, #a7f3d0));
   background: color-mix(
     in srgb,
     var(--color-emerald-500, #10b981) 12%,
@@ -236,13 +236,13 @@
 
 .ppc-search-terms-primary-action {
   border: 1px solid transparent;
-  background: var(--ppc-search-terms-accent, #16a34a);
+  background: var(--ppc-search-terms-cta-bg, #16a34a);
   color: rgb(255, 255, 255);
   box-shadow: 0 10px 20px -18px rgba(22, 163, 74, 0.72);
 }
 
 .ppc-search-terms-primary-action:hover {
-  background: var(--ppc-search-terms-accent-strong, #15803d);
+  background: var(--ppc-search-terms-cta-bg-hover, #15803d);
   box-shadow: 0 12px 24px -18px rgba(21, 128, 61, 0.78);
 }
 
@@ -254,9 +254,9 @@
 }
 
 .ppc-search-terms-ghost-action {
-  border: 1px solid rgb(203, 213, 225);
+  border: 1px solid var(--ppc-search-terms-border-strong, rgb(203, 213, 225));
   background: var(--surface-card, #ffffff);
-  color: rgb(51, 65, 85);
+  color: var(--ppc-search-terms-ink-strong, rgb(51, 65, 85));
 }
 
 .ppc-search-terms-ghost-action:hover {

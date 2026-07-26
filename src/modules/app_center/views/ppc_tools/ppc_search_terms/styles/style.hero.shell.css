@@ -36,7 +36,11 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--ppc-search-terms-radius-lg, var(--rounded-lg, 12px));
-  background: linear-gradient(135deg, var(--ppc-search-terms-accent), var(--color-teal-500));
+  background: linear-gradient(
+    135deg,
+    var(--ppc-search-terms-cta-bg, #047857),
+    var(--color-teal-500)
+  );
   color: var(--color-success-contrast, #ffffff);
   box-shadow: var(--ppc-search-terms-shadow-accent, 0 8px 18px -14px rgba(5, 150, 105, 0.72));
   transition:

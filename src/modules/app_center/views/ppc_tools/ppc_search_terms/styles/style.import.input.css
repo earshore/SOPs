@@ -26,7 +26,7 @@
   align-items: center;
   justify-content: center;
   padding: 18px;
-  border: 1px dashed var(--color-emerald-200, #a7f3d0);
+  border: 1px dashed var(--ppc-search-terms-accent-line, var(--color-emerald-200, #a7f3d0));
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: linear-gradient(
     180deg,
@@ -49,7 +49,7 @@
 }
 
 .ppc-search-terms-dropzone:hover {
-  border-color: var(--color-emerald-300, #6ee7b7);
+  border-color: var(--ppc-search-terms-accent-line-strong, var(--color-emerald-300, #6ee7b7));
   background: color-mix(
     in srgb,
     var(--color-emerald-500, #10b981) 12%,
@@ -64,7 +64,7 @@
 }
 
 .ppc-search-terms-dropzone-title {
-  color: var(--color-slate-800, #1e293b);
+  color: var(--ppc-search-terms-ink-heading, var(--color-slate-800, #1e293b));
   font-size: 14px;
   font-weight: 800;
   line-height: 1.3;
@@ -72,7 +72,7 @@
 
 .ppc-search-terms-dropzone-meta {
   margin-top: 4px;
-  color: var(--color-slate-500, #64748b);
+  color: var(--ppc-search-terms-ink-soft, var(--color-slate-500, #64748b));
   font-size: 12px;
   line-height: 1.45;
 }
@@ -83,7 +83,7 @@
   height: auto;
   min-height: 188px;
   background: var(--surface-card, #ffffff);
-  color: #0f172a;
+  color: var(--color-text-primary, #0f172a);
   line-height: 1.6;
   resize: vertical;
   transition:
@@ -101,7 +101,7 @@
 
 .ppc-search-terms-field-label {
   margin-bottom: 8px;
-  color: #334155;
+  color: var(--color-text-primary, #334155);
   font-size: 12px;
   font-weight: 800;
 }
@@ -156,33 +156,33 @@
 }
 
 .ppc-search-terms-status-line--error {
-  border-color: #fecaca;
-  background: #fef2f2;
-  color: #b91c1c;
+  border-color: var(--ppc-search-terms-danger-border, #fecaca);
+  background: var(--ppc-search-terms-danger-soft, #fef2f2);
+  color: var(--ppc-search-terms-danger-ink, #b91c1c);
 }
 
 .ppc-search-terms-status-line--error .ppc-search-terms-status-line-icon {
-  color: #dc2626;
+  color: var(--ppc-search-terms-danger-icon, #dc2626);
 }
 
 .ppc-search-terms-status-line--error .ppc-search-terms-status-line-title {
-  color: #7f1d1d;
+  color: var(--ppc-search-terms-danger-ink-strong, #7f1d1d);
 }
 
 .ppc-search-terms-status-line--error .ppc-search-terms-status-line-message {
-  color: #991b1b;
+  color: var(--ppc-search-terms-danger-text, #991b1b);
 }
 
 .ppc-search-terms-field-helper {
   margin-top: 8px;
-  color: #64748b;
+  color: var(--color-text-secondary, #64748b);
   font-size: 12px;
   line-height: 1.5;
 }
 
 .ppc-search-terms-field-error {
   margin-top: 6px;
-  color: #b91c1c;
+  color: var(--ppc-search-terms-danger-ink, #b91c1c);
   font-size: 12px;
   font-weight: 700;
   line-height: 1.5;

@@ -257,3 +257,30 @@
 .category-filter-btn[aria-pressed='true'] em {
   background: color-mix(in srgb, var(--button-filter-active-color, #ffffff) 18%, transparent);
 }
+
+/* Dark: ownership-colored active filter deepens one shade so white ink clears AA */
+.dark .category-filter-btn.active,
+.dark .category-filter-btn[aria-pressed='true'],
+[data-color-mode-resolved='dark'] .category-filter-btn.active,
+[data-color-mode-resolved='dark'] .category-filter-btn[aria-pressed='true'],
+[data-theme='dark'] .category-filter-btn.active,
+[data-theme='dark'] .category-filter-btn[aria-pressed='true'] {
+  background: color-mix(
+    in srgb,
+    var(--button-filter-active-bg, var(--button-filter-accent, var(--color-primary))) 76%,
+    #000
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--button-filter-active-border, var(--button-filter-accent, var(--color-primary))) 76%,
+    #000
+  ) !important;
+}
+
+/* Dark: Accent primary buttons use the deeper primary shade (white ink on
+   primary-500 measures 3.7:1; -dark clears AA while keeping the Accent hue) */
+.dark .action-btn-primary,
+[data-color-mode-resolved='dark'] .action-btn-primary,
+[data-theme='dark'] .action-btn-primary {
+  --button-primary-bg: var(--color-primary-dark, var(--color-primary));
+}

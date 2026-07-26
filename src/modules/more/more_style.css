@@ -66,7 +66,7 @@
   width: 100%;
   max-width: 100%;
   margin: 0;
-  color: #1f2937;
+  color: var(--color-text-primary, #1f2937);
   font-size: 15px;
   line-height: 1.7;
   letter-spacing: 0;
@@ -195,8 +195,8 @@
 .zn-chat-card,
 .zn-notice-title {
   margin: 0 0 18px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e5e7eb);
   border-radius: 14px;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
 }
@@ -223,7 +223,7 @@
 .zn-summary h2,
 .zn-notice-title h1 {
   margin: 0 0 8px;
-  color: rgba(0, 0, 0, 0.85);
+  color: var(--color-text-primary, rgba(0, 0, 0, 0.85));
   font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.4;
@@ -234,7 +234,7 @@
 .zn-summary-head p,
 .zn-notice-title p {
   margin: 6px 0 14px;
-  color: #6b7280;
+  color: var(--color-text-secondary, #6b7280);
   font-size: 0.875rem;
   line-height: 1.6;
 }
@@ -248,7 +248,7 @@
 .zn-phase-grid article {
   min-height: 116px;
   padding: 12px 14px;
-  background: #fafbfd;
+  background: var(--color-bg-secondary, #fafbfd);
   border: 1px solid #eef2f7;
   border-radius: 10px;
 }
@@ -258,7 +258,7 @@
   align-items: center;
   gap: 7px;
   margin: 0 0 6px;
-  color: #111827;
+  color: var(--color-text-primary, #111827);
   font-size: 14.5px;
   font-weight: 700;
   line-height: 1.7;
@@ -278,7 +278,7 @@
 
 .zn-phase-grid p {
   margin: 0;
-  color: #6b7280;
+  color: var(--color-text-secondary, #6b7280);
   font-size: 13px;
   line-height: 1.55;
 }
@@ -291,14 +291,14 @@
 }
 
 .zn-intro dt {
-  color: #6b7280;
+  color: var(--color-text-secondary, #6b7280);
   font-size: 13px;
   font-weight: 700;
 }
 
 .zn-intro dd {
   margin: 0;
-  color: #1f2937;
+  color: var(--color-text-primary, #1f2937);
   font-size: 14.5px;
   line-height: 1.65;
 }
@@ -318,7 +318,7 @@
 
 .zn-chat-header h2 {
   margin: 0;
-  color: #1f2937;
+  color: var(--color-text-primary, #1f2937);
   font-size: 15.5px;
   font-weight: 700;
   line-height: 1.7;
@@ -326,7 +326,7 @@
 
 .zn-chat-header p {
   margin: 0;
-  color: #6b7280;
+  color: var(--color-text-secondary, #6b7280);
   font-size: 12.5px;
   line-height: 1.7;
 }
@@ -350,6 +350,11 @@
 
 .zn-avatar--user {
   background: #f97316;
+}
+
+.ziniao-case-shell[data-case-theme='ad-acos-diagnosis'] .zn-avatar--assistant {
+  /* amber accent: white fails 2.15:1 — use deep amber ink */
+  color: var(--color-amber-950, #451a03);
 }
 
 .zn-chat-stage + .zn-chat-stage {
@@ -425,9 +430,9 @@
 .zn-bubble {
   width: 100%;
   padding: 12px 16px;
-  color: #1f2937;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  color: var(--color-text-primary, #1f2937);
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e5e7eb);
   border-radius: 4px 14px 14px;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
@@ -455,18 +460,18 @@
 
 .zn-msg-meta {
   margin-bottom: 6px;
-  color: #64748b;
+  color: var(--color-text-secondary, #64748b);
   font-size: 12px;
   font-weight: 700;
 }
 
 .zn-msg--user .zn-msg-meta {
-  color: rgba(255, 255, 255, 0.72);
+  color: #ffffff;
 }
 
 .zn-time {
   margin-top: 4px;
-  color: #6b7280;
+  color: var(--color-text-secondary, #6b7280);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -474,8 +479,8 @@
 .zn-tool {
   margin-top: 10px;
   padding: 10px 12px;
-  color: #334155;
-  background: #f8fafc;
+  color: var(--color-text-primary, #334155);
+  background: var(--color-bg-secondary, #f8fafc);
   border: 1px solid #e2e8f0;
   border-radius: 10px;
 }
@@ -486,7 +491,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  color: #64748b;
+  color: var(--color-text-secondary, #64748b);
   font-size: 12px;
   line-height: 1.7;
 }
@@ -495,7 +500,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #334155;
+  color: var(--color-text-primary, #334155);
   font-weight: 700;
 }
 
@@ -506,7 +511,7 @@
 
 .zn-tool-body p {
   margin: 4px 0 0;
-  color: #475569;
+  color: var(--color-text-secondary, #475569);
   font-size: 12.5px;
   line-height: 1.65;
 }
@@ -526,7 +531,7 @@
 .zn-rule-grid article,
 .zn-notice-grid article {
   padding: 14px;
-  background: #fafbfd;
+  background: var(--color-bg-secondary, #fafbfd);
   border: 1px solid #eef2f7;
   border-radius: 10px;
 }
@@ -536,7 +541,7 @@
 .zn-notice-grid strong {
   display: block;
   margin: 0 0 6px;
-  color: #111827;
+  color: var(--color-text-primary, #111827);
   font-size: 14px;
   font-weight: 800;
   line-height: 1.55;
@@ -545,7 +550,7 @@
 .zn-summary-grid p,
 .zn-notice-grid span {
   margin: 0;
-  color: #6b7280;
+  color: var(--color-text-secondary, #6b7280);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -566,7 +571,7 @@
 .zn-rule-grid li {
   display: flex;
   gap: 8px;
-  color: #475569;
+  color: var(--color-text-secondary, #475569);
   font-size: 13.5px;
   line-height: 1.6;
 }
@@ -611,15 +616,15 @@
 }
 
 .zn-notice-card--danger {
-  color: #7f1d1d;
-  background: #fef2f2;
-  border-color: #fecaca;
+  color: var(--color-red-800, #7f1d1d);
+  background: color-mix(in srgb, var(--color-red-500, #ef4444) 12%, var(--surface-card, #ffffff));
+  border-color: color-mix(in srgb, var(--color-red-500, #ef4444) 34%, transparent);
 }
 
 .zn-notice-card--warning {
-  color: #78350f;
-  background: #fffbeb;
-  border-color: #fde68a;
+  color: var(--color-amber-800, #78350f);
+  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 12%, var(--surface-card, #ffffff));
+  border-color: color-mix(in srgb, var(--color-amber-500, #f59e0b) 34%, transparent);
 }
 
 .zn-notice-grid {
@@ -777,4 +782,17 @@
     var(--surface-card, #1e293b)
   );
   --button-filter-hover-color: var(--color-emerald-300, #6ee7b7);
+}
+
+/* Dark: notice chip ink lifts to -300 (bg already same-hue low-luminance mix) */
+.dark .zn-notice-card--danger,
+[data-color-mode-resolved='dark'] .zn-notice-card--danger,
+[data-theme='dark'] .zn-notice-card--danger {
+  color: var(--color-red-300, #fca5a5);
+}
+
+.dark .zn-notice-card--warning,
+[data-color-mode-resolved='dark'] .zn-notice-card--warning,
+[data-theme='dark'] .zn-notice-card--warning {
+  color: var(--color-amber-300, #fcd34d);
 }

@@ -210,7 +210,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-red-600 {
-  color: var(--color-red-400);
+  color: var(--color-red-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -297,7 +297,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-orange-600 {
-  color: var(--color-orange-400);
+  color: var(--color-orange-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -384,7 +384,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-amber-600 {
-  color: var(--color-amber-400);
+  color: var(--color-amber-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -471,7 +471,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-yellow-600 {
-  color: var(--color-yellow-400);
+  color: var(--color-yellow-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -558,7 +558,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-lime-600 {
-  color: var(--color-lime-400);
+  color: var(--color-lime-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -645,7 +645,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-green-600 {
-  color: var(--color-green-400);
+  color: var(--color-green-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -740,7 +740,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-emerald-600 {
-  color: var(--color-emerald-400);
+  color: var(--color-emerald-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -827,7 +827,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-teal-600 {
-  color: var(--color-teal-400);
+  color: var(--color-teal-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -914,7 +914,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-cyan-600 {
-  color: var(--color-cyan-400);
+  color: var(--color-cyan-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -1001,7 +1001,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-sky-600 {
-  color: var(--color-sky-400);
+  color: var(--color-sky-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -1088,7 +1088,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-blue-600 {
-  color: var(--color-blue-400);
+  color: var(--color-blue-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -1175,7 +1175,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-indigo-600 {
-  color: var(--color-indigo-400);
+  color: var(--color-indigo-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -1262,7 +1262,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-violet-600 {
-  color: var(--color-violet-400);
+  color: var(--color-violet-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -1349,7 +1349,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-purple-600 {
-  color: var(--color-purple-400);
+  color: var(--color-purple-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -1444,7 +1444,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-fuchsia-600 {
-  color: var(--color-fuchsia-400);
+  color: var(--color-fuchsia-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -1531,7 +1531,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-pink-600 {
-  color: var(--color-pink-400);
+  color: var(--color-pink-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -1618,7 +1618,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-rose-600 {
-  color: var(--color-rose-400);
+  color: var(--color-rose-300);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -2925,4 +2925,146 @@
   :is(.module-container, .settings-panel-root)
   .focus\:bg-white:focus {
   background-color: var(--surface-card, #1e293b);
+}
+
+/* text-gray-* ink (gray family missed by the slate remaps) */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.text-gray-900, .text-gray-800, .text-gray-700) {
+  color: var(--color-text-primary, #f8fafc);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.text-gray-600, .text-gray-500) {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+/* gray-family neutral chips (bg-gray-50/100, border-gray-100/200) */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .bg-gray-50 {
+  background-color: var(--color-bg-secondary, #1e293b);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .bg-gray-100 {
+  background-color: var(--color-bg-tertiary, rgba(255, 255, 255, 0.06));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.border-gray-100, .border-gray-200) {
+  border-color: var(--border-subtle, rgba(148, 163, 184, 0.18));
+}
+
+/* Saturated -500/-400/-600 chip fills with white text: keep hue, deepen for
+   4.5:1 (500-level chips measured 2.1-4.3:1 with white ink) */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-amber-500, .bg-amber-600).text-white {
+  background-color: var(--color-amber-700, #b45309);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-orange-500, .bg-orange-600).text-white {
+  background-color: var(--color-orange-700, #c2410c);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-emerald-500, .bg-emerald-600).text-white {
+  background-color: var(--color-emerald-700, #047857);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-teal-500, .bg-teal-600).text-white {
+  background-color: var(--color-teal-700, #0f766e);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-green-500, .bg-green-600).text-white {
+  background-color: var(--color-green-700, #15803d);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-blue-500, .bg-sky-500).text-white {
+  background-color: var(--color-blue-700, #1d4ed8);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-purple-500, .bg-violet-500).text-white {
+  background-color: var(--color-purple-700, #7e22ce);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-rose-500, .bg-red-400).text-white {
+  background-color: var(--color-rose-700, #be123c);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .bg-slate-400.text-white {
+  background-color: var(--color-slate-600, #475569);
+}
+
+/* Amber CTA buttons (bg-amber-600 hover:bg-amber-700 text-white): deepen */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .hover\:bg-amber-700:hover {
+  background-color: var(--color-amber-800, #92400e);
+}
+
+/* Saturated -500 ink on dark cards (red-500 on slate-800 = 3.9) → -400 */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .text-red-500 {
+  color: var(--color-red-400, #f87171);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .text-rose-500 {
+  color: var(--color-rose-400, #fb7185);
+}
+
+/* Red warning gradient banner: deepen stops so white body copy clears 4.5:1 */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .from-red-600 {
+  --tw-gradient-from: var(--color-red-700, #b91c1c);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .to-rose-600 {
+  --tw-gradient-to: var(--color-rose-800, #9f1239);
+}
+
+/* -600 hue ink variants seen on dark cards (blue/violet quotes, tab labels) */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.text-blue-500, .text-sky-500) {
+  color: var(--color-blue-300, #93c5fd);
+}
+
+/* Accent-primary text on dark canvas: default blue-500 primary reads 3.9:1 —
+   lift text usages to primary-light family inside dark module content */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .text-\[var\(--color-primary\)\] {
+  color: color-mix(in srgb, var(--color-primary, #3b82f6) 60%, #ffffff);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .bg-sky-600.text-white {
+  background-color: var(--color-sky-700, #0369a1);
 }

@@ -294,7 +294,7 @@
 
 .app-overview-eyebrow {
   margin: 0.25rem 0 0;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.5;
@@ -548,7 +548,7 @@
 }
 
 .app-flow-copy small {
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.4;
@@ -1778,44 +1778,56 @@
 
 .app-card-qwen {
   --color-accent: #6257f5;
-  --color-bg-selected: #f5f3ff;
-  --color-border-light: #ddd6fe;
+  --color-bg-selected: color-mix(in srgb, #6257f5 10%, var(--surface-card, #ffffff));
+  --color-border-light: color-mix(in srgb, #6257f5 28%, transparent);
 }
 
 .app-card-rose {
   --color-accent: var(--color-rose-600);
-  --color-bg-selected: var(--color-rose-50);
-  --color-border-light: var(--color-rose-100);
+  --color-bg-selected: color-mix(
+    in srgb,
+    var(--color-rose-500, #f43f5e) 10%,
+    var(--surface-card, #ffffff)
+  );
+  --color-border-light: color-mix(in srgb, var(--color-rose-500, #f43f5e) 28%, transparent);
 }
 
 .app-card-emerald {
   --color-accent: var(--color-emerald-600);
-  --color-bg-selected: var(--color-emerald-50);
-  --color-border-light: var(--color-emerald-100);
+  --color-bg-selected: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 10%,
+    var(--surface-card, #ffffff)
+  );
+  --color-border-light: color-mix(in srgb, var(--color-emerald-500, #10b981) 28%, transparent);
 }
 
 .app-card-cyan {
   --color-accent: var(--color-cyan-600);
-  --color-bg-selected: var(--color-cyan-50);
-  --color-border-light: var(--color-cyan-100);
+  --color-bg-selected: color-mix(
+    in srgb,
+    var(--color-cyan-500, #06b6d4) 10%,
+    var(--surface-card, #ffffff)
+  );
+  --color-border-light: color-mix(in srgb, var(--color-cyan-500, #06b6d4) 28%, transparent);
 }
 
 .app-card-claude {
   --color-accent: #a85f3f;
-  --color-bg-selected: #faf3ee;
-  --color-border-light: #ead6c8;
+  --color-bg-selected: color-mix(in srgb, #a85f3f 12%, var(--surface-card, #ffffff));
+  --color-border-light: color-mix(in srgb, #a85f3f 30%, transparent);
 }
 
 .app-overview-card[data-category='master_analysis'] {
   --color-accent: #6257f5;
-  --color-bg-selected: #f5f3ff;
-  --color-border-light: #ddd6fe;
+  --color-bg-selected: color-mix(in srgb, #6257f5 10%, var(--surface-card, #ffffff));
+  --color-border-light: color-mix(in srgb, #6257f5 28%, transparent);
 }
 
 .app-overview-card[data-category='playground'] {
   --color-accent: #a85f3f;
-  --color-bg-selected: #faf3ee;
-  --color-border-light: #ead6c8;
+  --color-bg-selected: color-mix(in srgb, #a85f3f 12%, var(--surface-card, #ffffff));
+  --color-border-light: color-mix(in srgb, #a85f3f 30%, transparent);
 }
 
 .app-card-head,
@@ -1866,7 +1878,7 @@
 
 .app-card-title-row p {
   margin: 0.25rem 0 0;
-  color: var(--color-slate-500, #64748b);
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.35;
@@ -1910,7 +1922,7 @@
 
 .app-card-desc {
   margin: 0 0 0.75rem;
-  color: var(--color-slate-500, #64748b);
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
   font-size: 0.875rem;
   line-height: 1.5;
   min-height: 3.9rem;
@@ -2131,7 +2143,7 @@
 }
 
 .app-overview-empty-title {
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
   font-size: 0.9375rem;
   font-weight: 800;
 }
@@ -2381,10 +2393,66 @@
   );
   --app-overview-shadow: 0 12px 30px -28px rgba(0, 0, 0, 0.85);
   --module-accent-text: color-mix(in srgb, var(--app-overview-accent) 55%, #ffffff);
+  /* badge/count ink: minimax red lifted for dark canvas (was #a91f3a, 2.5:1) */
+  --app-overview-accent-strong: color-mix(in srgb, var(--app-overview-accent) 45%, #ffffff);
+  --app-overview-text-inverse: var(--color-text-primary, #f8fafc);
 }
 
 .dark .app-overview-hero .wb-badge,
 [data-color-mode-resolved='dark'] .app-overview-hero .wb-badge,
 [data-theme='dark'] .app-overview-hero .wb-badge {
   color: color-mix(in srgb, var(--app-overview-accent) 55%, #ffffff) !important;
+}
+
+/* Dark: per-app accent ink lifts (badges/links sit on dark canvas or same-hue mixes) */
+.dark .app-overview-container,
+[data-color-mode-resolved='dark'] .app-overview-container,
+[data-theme='dark'] .app-overview-container {
+  --app-recent-accent-strong: color-mix(in srgb, var(--app-recent-accent) 45%, #ffffff);
+}
+
+.dark
+  .app-overview-container
+  :is(.app-card-rose, .app-overview-card[data-category='keyword_hunter']),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  :is(.app-card-rose, .app-overview-card[data-category='keyword_hunter']),
+[data-theme='dark']
+  .app-overview-container
+  :is(.app-card-rose, .app-overview-card[data-category='keyword_hunter']) {
+  --color-accent: var(--color-rose-300, #fda4af);
+}
+
+.dark .app-overview-container .app-card-emerald,
+[data-color-mode-resolved='dark'] .app-overview-container .app-card-emerald,
+[data-theme='dark'] .app-overview-container .app-card-emerald {
+  --color-accent: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .app-overview-container .app-card-cyan,
+[data-color-mode-resolved='dark'] .app-overview-container .app-card-cyan,
+[data-theme='dark'] .app-overview-container .app-card-cyan {
+  --color-accent: var(--color-cyan-300, #67e8f9);
+}
+
+.dark .app-overview-container :is(.app-card-claude, .app-overview-card[data-category='playground']),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  :is(.app-card-claude, .app-overview-card[data-category='playground']),
+[data-theme='dark']
+  .app-overview-container
+  :is(.app-card-claude, .app-overview-card[data-category='playground']) {
+  --color-accent: #d9a284;
+}
+
+.dark
+  .app-overview-container
+  :is(.app-card-violet, .app-overview-card[data-category='master_analysis']),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  :is(.app-card-violet, .app-overview-card[data-category='master_analysis']),
+[data-theme='dark']
+  .app-overview-container
+  :is(.app-card-violet, .app-overview-card[data-category='master_analysis']) {
+  --color-accent: var(--color-violet-300, #c4b5fd);
 }

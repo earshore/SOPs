@@ -139,7 +139,8 @@ const NAMING_PATTERNS = {
     /^--field-(height|height-compact|padding-x|padding-y|radius|border|border-hover|bg|bg-muted|text|placeholder|focus|focus-ring)$/,
   componentCheckRadio:
     /^--(check|radio)-(size|size-sm|size-lg|radius|border|border-hover|bg|color-active|ring-focus)$/,
-  componentHeader: /^--header-(height|height-sm|bg|bg-solid|border|text|shadow|shadow-scrolled)$/,
+  componentHeader:
+    /^--header-(height|height-sm|bg|bg-solid|border|text|shadow|shadow-scrolled|nav-idle)$/,
   componentCode: /^--(code|syntax|json|terminal)-[\w-]+$/,
   transition: /^--transition-[\w-]+$/,
   componentPanel: /^--panel-[\w-]+$/,

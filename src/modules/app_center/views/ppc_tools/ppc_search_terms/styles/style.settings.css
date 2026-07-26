@@ -8,10 +8,10 @@
   display: block;
   min-width: 0;
   padding: 10px;
-  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border: 1px solid var(--border-subtle, var(--color-slate-200, #e2e8f0));
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: var(--surface-panel, #ffffff);
-  color: var(--color-slate-600, #475569);
+  color: var(--ppc-search-terms-ink, var(--color-slate-600, #475569));
 }
 
 .ppc-search-terms-threshold-grid input,
@@ -19,7 +19,7 @@
 .ppc-search-terms-context-fields input,
 .ppc-search-terms-context-fields textarea {
   background: var(--surface-card, #ffffff);
-  color: var(--color-slate-900, #0f172a);
+  color: var(--ppc-search-terms-text-primary, var(--color-slate-900, #0f172a));
   transition:
     border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     box-shadow 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
@@ -37,7 +37,7 @@
 .ppc-search-terms-threshold-helper {
   display: block;
   margin-top: 4px;
-  color: rgb(100, 116, 139);
+  color: var(--ppc-search-terms-ink-soft, rgb(100, 116, 139));
   font-size: 11px;
   font-weight: 500;
   line-height: 1.45;
@@ -51,10 +51,10 @@
   gap: 8px;
   flex: 0 0 auto;
   padding: 0 12px;
-  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border: 1px solid var(--border-subtle, var(--color-slate-200, #e2e8f0));
   border-radius: 8px;
   background: var(--surface-card, #ffffff);
-  color: var(--color-slate-600, #475569);
+  color: var(--ppc-search-terms-ink, var(--color-slate-600, #475569));
   font-size: 12px;
   font-weight: 800;
   transition:
@@ -64,7 +64,7 @@
 }
 
 .ppc-search-terms-threshold-toggle:hover {
-  border-color: var(--color-emerald-200, #a7f3d0);
+  border-color: var(--ppc-search-terms-accent-line, var(--color-emerald-200, #a7f3d0));
   background: color-mix(
     in srgb,
     var(--color-emerald-500, #10b981) 12%,
@@ -93,7 +93,7 @@
   gap: 14px;
   margin-top: 18px;
   padding-top: 16px;
-  border-top: 1px solid var(--color-slate-200, #e2e8f0);
+  border-top: 1px solid var(--border-subtle, var(--color-slate-200, #e2e8f0));
 }
 
 .ppc-search-terms-check-row {
@@ -102,10 +102,10 @@
   gap: 10px;
   min-height: 44px;
   padding: 10px;
-  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border: 1px solid var(--border-subtle, var(--color-slate-200, #e2e8f0));
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: var(--color-bg-secondary, #f8fafc);
-  color: rgb(51, 65, 85);
+  color: var(--ppc-search-terms-ink-strong, rgb(51, 65, 85));
   font-size: 12px;
 }
 
