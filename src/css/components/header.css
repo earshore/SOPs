@@ -23,12 +23,13 @@
 :root {
   --header-height: 64px;
   --header-height-sm: 56px;
-  --header-bg: rgba(255, 255, 255, 0.8);
-  --header-bg-solid: #ffffff;
-  --header-border: rgba(0, 0, 0, 0.06);
+  /* T2 shell neutrals — surface tokens, not white-only glass */
+  --header-bg: color-mix(in srgb, var(--surface-panel, #ffffff) 80%, transparent);
+  --header-bg-solid: var(--surface-panel, #ffffff);
+  --header-border: var(--color-border-light, rgba(0, 0, 0, 0.06));
   --header-text: var(--color-text-primary, #1a1a2e);
-  --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --header-shadow-scrolled: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --header-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04));
+  --header-shadow-scrolled: 0 2px 8px color-mix(in srgb, var(--color-slate-900, #0f172a) 8%, transparent);
   --z-header: 40;
 }
 
@@ -36,12 +37,12 @@
 .dark,
 [data-color-mode-resolved='dark'],
 [data-theme='dark'] {
-  --header-bg: rgba(15, 23, 42, 0.8);
-  --header-bg-solid: #0f172a;
-  --header-border: rgba(255, 255, 255, 0.06);
-  --header-text: #f9fafb;
-  --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --header-shadow-scrolled: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --header-bg: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, transparent);
+  --header-bg-solid: var(--surface-panel, #0f172a);
+  --header-border: var(--color-border-light, rgba(255, 255, 255, 0.06));
+  --header-text: var(--color-text-primary, #f9fafb);
+  --header-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2));
+  --header-shadow-scrolled: 0 2px 8px color-mix(in srgb, #000 40%, transparent);
 }
 
 /* ========================================

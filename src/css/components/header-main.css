@@ -9,14 +9,15 @@
    ======================================== */
 .header {
   position: relative;
-  background: rgba(255, 255, 255, 0.92);
+  /* T2 shell: surface token frost — dual-theme safe (not white-only glass) */
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 92%, transparent);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  border-bottom: 1px solid var(--border-subtle, rgba(226, 232, 240, 0.8));
   z-index: var(--z-header, 40);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.5) inset,
-    0 4px 12px rgba(0, 0, 0, 0.03);
+    0 1px 0 color-mix(in srgb, var(--surface-panel, #ffffff) 50%, transparent) inset,
+    0 4px 12px color-mix(in srgb, var(--color-slate-900, #0f172a) 3%, transparent);
 }
 
 .header-inner {
@@ -322,16 +323,17 @@
   margin: 0 auto;
   padding: 24px 28px;
   pointer-events: auto;
-  background: rgba(255, 255, 255, 0.965);
+  /* T2 shell: elevated panel surface — readable in light and dark */
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 96.5%, transparent);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgba(203, 213, 225, 0.82);
+  border: 1px solid var(--border-muted, rgba(203, 213, 225, 0.82));
   border-top: 0;
   border-radius: 0 0 12px 12px;
   box-shadow:
-    0 24px 60px -24px rgba(15, 23, 42, 0.32),
-    0 8px 20px -18px rgba(15, 23, 42, 0.22),
-    0 1px 0 rgba(255, 255, 255, 0.75) inset;
+    0 24px 60px -24px color-mix(in srgb, var(--color-slate-900, #0f172a) 32%, transparent),
+    0 8px 20px -18px color-mix(in srgb, var(--color-slate-900, #0f172a) 22%, transparent),
+    0 1px 0 color-mix(in srgb, var(--surface-panel, #ffffff) 75%, transparent) inset;
 }
 
 .nav-group:not(.is-open) .mega-menu,
@@ -820,8 +822,9 @@
 .dark .header,
 [data-color-mode-resolved='dark'] .header,
 [data-theme='dark'] .header {
-  background: rgba(15, 23, 42, 0.85);
-  border-bottom-color: rgba(255, 255, 255, 0.06);
+  /* surface-panel already dark; keep slightly denser frost for chrome */
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, transparent);
+  border-bottom-color: var(--color-border-light, rgba(255, 255, 255, 0.06));
 }
 
 .dark .logo-text-main,
@@ -854,11 +857,12 @@
 .dark .mega-menu-inner,
 [data-color-mode-resolved='dark'] .mega-menu-inner,
 [data-theme='dark'] .mega-menu-inner {
-  background: rgba(15, 23, 42, 0.92);
-  border-color: rgba(255, 255, 255, 0.08);
+  /* Avoid white-glass failure: opaque-enough elevated shell */
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 96%, var(--color-bg-elevated, #1e293b));
+  border-color: var(--color-border-light, rgba(255, 255, 255, 0.08));
   box-shadow:
-    0 24px 60px -24px rgba(0, 0, 0, 0.65),
-    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+    0 24px 60px -24px color-mix(in srgb, #000 65%, transparent),
+    0 1px 0 color-mix(in srgb, var(--surface-panel, #0f172a) 8%, transparent) inset;
 }
 
 .dark .model-status,
