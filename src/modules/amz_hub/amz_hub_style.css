@@ -419,3 +419,48 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==================== 智库总览深色主题（Theme dual-safe） ==================== */
+/* Ownership orange/red 保持色相；hero/badge 洗底转低明度 color-mix，文字走语义 token */
+.dark .amz-hub-overview,
+[data-color-mode-resolved='dark'] .amz-hub-overview,
+[data-theme='dark'] .amz-hub-overview {
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark .amz-hub-overview .amz-hub-hero,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero,
+[data-theme='dark'] .amz-hub-overview .amz-hub-hero {
+  background:
+    radial-gradient(
+      circle at 82% 18%,
+      color-mix(in srgb, var(--color-red-600, #dc2626) 16%, transparent),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-orange-500, #f97316) 12%, var(--surface-panel, #0f172a)),
+      var(--surface-panel, #0f172a) 54%,
+      color-mix(in srgb, var(--color-red-600, #dc2626) 10%, var(--surface-panel, #0f172a))
+    ) !important;
+  --wb-text-primary: var(--color-text-primary, #f8fafc) !important;
+  --wb-text-secondary: var(--color-text-secondary, #cbd5e1) !important;
+  --wb-tag-bg: color-mix(in srgb, var(--surface-card, #1e293b) 78%, transparent) !important;
+}
+
+.dark .amz-hub-overview .amz-hub-hero .wb-title,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-title,
+[data-theme='dark'] .amz-hub-overview .amz-hub-hero .wb-title {
+  color: var(--color-text-primary, #f8fafc) !important;
+}
+
+.dark .amz-hub-overview .amz-hub-hero .wb-badge,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-badge,
+[data-theme='dark'] .amz-hub-overview .amz-hub-hero .wb-badge {
+  background: color-mix(
+    in srgb,
+    var(--color-orange-500, #f97316) 16%,
+    var(--surface-card, #1e293b)
+  ) !important;
+  color: var(--color-orange-300, #fdba74) !important;
+}

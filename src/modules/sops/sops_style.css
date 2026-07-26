@@ -1171,3 +1171,92 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     width: 1rem;
   }
 }
+
+/* ==================== 深色主题（Theme dual-safe） ==================== */
+/* Ownership violet 保持色相，soft/surface 改为低明度 color-mix；文字走语义 token */
+.dark .sops-overview,
+[data-color-mode-resolved='dark'] .sops-overview,
+[data-theme='dark'] .sops-overview {
+  --sops-qwen-soft: color-mix(in srgb, var(--sops-qwen-violet) 16%, var(--surface-panel, #0f172a));
+  --sops-qwen-surface: color-mix(
+    in srgb,
+    var(--sops-qwen-violet) 10%,
+    var(--surface-panel, #0f172a)
+  );
+}
+
+.dark .sops-overview-scope-note,
+[data-color-mode-resolved='dark'] .sops-overview-scope-note,
+[data-theme='dark'] .sops-overview-scope-note {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--sops-qwen-violet) 14%, var(--surface-card, #1e293b)),
+    color-mix(in srgb, var(--sops-qwen-blue) 10%, var(--surface-card, #1e293b))
+  ) !important;
+}
+
+.dark .sops-overview-scope-note h3,
+[data-color-mode-resolved='dark'] .sops-overview-scope-note h3,
+[data-theme='dark'] .sops-overview-scope-note h3 {
+  color: var(--color-text-primary, #f8fafc) !important;
+}
+
+.dark .sops-overview-scope-note p,
+[data-color-mode-resolved='dark'] .sops-overview-scope-note p,
+[data-theme='dark'] .sops-overview-scope-note p {
+  color: var(--color-text-secondary, #cbd5e1) !important;
+}
+
+.dark .sops-overview-scope-note i,
+[data-color-mode-resolved='dark'] .sops-overview-scope-note i,
+[data-theme='dark'] .sops-overview-scope-note i {
+  color: color-mix(in srgb, var(--sops-qwen-violet) 65%, #ffffff) !important;
+}
+
+.dark .sops-overview-topic-badge,
+[data-color-mode-resolved='dark'] .sops-overview-topic-badge,
+[data-theme='dark'] .sops-overview-topic-badge {
+  color: color-mix(in srgb, var(--sops-qwen-violet) 62%, #ffffff) !important;
+}
+
+.dark .sops-collapsible-action,
+[data-color-mode-resolved='dark'] .sops-collapsible-action,
+[data-theme='dark'] .sops-collapsible-action {
+  background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.06));
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .sops-overview .wb-container--simple,
+[data-color-mode-resolved='dark'] .sops-overview .wb-container--simple,
+[data-theme='dark'] .sops-overview .wb-container--simple {
+  background:
+    radial-gradient(
+      circle at 82% 18%,
+      color-mix(in srgb, var(--sops-qwen-violet) 18%, transparent),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 18% 8%,
+      color-mix(in srgb, var(--sops-qwen-cyan) 12%, transparent),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--sops-qwen-violet) 14%, var(--surface-panel, #0f172a)),
+      var(--surface-panel, #0f172a) 54%,
+      color-mix(in srgb, var(--sops-qwen-blue) 10%, var(--surface-panel, #0f172a))
+    ) !important;
+  box-shadow: 0 18px 40px -32px rgba(0, 0, 0, 0.8) !important;
+  --wb-tag-bg: color-mix(in srgb, var(--surface-card, #1e293b) 78%, transparent) !important;
+}
+
+.dark .sops-overview .wb-badge,
+[data-color-mode-resolved='dark'] .sops-overview .wb-badge,
+[data-theme='dark'] .sops-overview .wb-badge {
+  background: color-mix(
+    in srgb,
+    var(--sops-qwen-violet) 16%,
+    var(--surface-card, #1e293b)
+  ) !important;
+  color: color-mix(in srgb, var(--sops-qwen-violet) 62%, #ffffff) !important;
+}

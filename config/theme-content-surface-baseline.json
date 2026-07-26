@@ -1,11 +1,11 @@
 {
   "version": 1,
   "scope": "modules",
-  "bgWhite": 206,
-  "textSlate": 2542,
+  "bgWhite": 196,
+  "textSlate": 2391,
   "filesScanned": 374,
-  "filesWithHits": 75,
-  "updatedAt": "2026-07-26T12:15:18.067Z",
+  "filesWithHits": 72,
+  "updatedAt": "2026-07-26T13:37:30.922Z",
   "files": {
     "src/modules/sops/views/growth/ppc_advertising/template.html": {
       "bgWhite": 0,
@@ -38,10 +38,6 @@
     "src/modules/sops/views/service/qa_maintenance/template.html": {
       "bgWhite": 0,
       "textSlate": 94
-    },
-    "src/modules/sops/views/overview/template.html": {
-      "bgWhite": 4,
-      "textSlate": 87
     },
     "src/modules/amz_hub/views/advanced/conversion_optimization/template.html": {
       "bgWhite": 9,
@@ -114,14 +110,6 @@
     "src/modules/sops/views/safety/product_compliance/template.html": {
       "bgWhite": 1,
       "textSlate": 40
-    },
-    "src/modules/more/views/overview/template.html": {
-      "bgWhite": 3,
-      "textSlate": 35
-    },
-    "src/modules/amz_hub/views/overview/template.html": {
-      "bgWhite": 3,
-      "textSlate": 29
     },
     "src/modules/app_center/views/keyword_hunter/process/template.html": {
       "bgWhite": 5,
