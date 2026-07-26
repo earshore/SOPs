@@ -168,26 +168,45 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
 
   it('soft-cross-checks hub/more category palettes with menuConfig colors (no production wire)', () => {
     // Category-level soft map only — Skills/Scraper/PromptLab are routes, not module keys.
+    // hubCategories / moreCategories are typed optional on MenuConfig; runtime MENU_CONFIG defines them.
+    const hubCategories = MENU_CONFIG.hubCategories;
+    const moreCategories = MENU_CONFIG.moreCategories;
+    expect(hubCategories).toBeDefined();
+    expect(moreCategories).toBeDefined();
+    if (!hubCategories || !moreCategories) {
+      throw new Error('MENU_CONFIG hubCategories/moreCategories required for ownership soft checks');
+    }
+
+    const hubKnowledge = hubCategories.knowledge;
+    const hubPractice = hubCategories.practice;
+    const moreBusiness = moreCategories.business_scenarios;
+    const moreExplore = moreCategories.explore;
+    expect(hubKnowledge).toBeDefined();
+    expect(hubPractice).toBeDefined();
+    expect(moreBusiness).toBeDefined();
+    expect(moreExplore).toBeDefined();
+    if (!hubKnowledge || !hubPractice || !moreBusiness || !moreExplore) {
+      throw new Error('MENU_CONFIG hub/more category entries required for ownership soft checks');
+    }
+
     expect(getOwnershipRoleForCategory('hub', 'knowledge')).toBe('role-hub-knowledge');
-    expect(getPaletteForRole('role-hub-knowledge')).toBe(MENU_CONFIG.hubCategories.knowledge.color);
+    expect(getPaletteForRole('role-hub-knowledge')).toBe(hubKnowledge.color);
     expect(getPaletteForRole('role-hub-knowledge')).toBe('indigo');
     expect(`sidebar-theme-${getPaletteForRole('role-hub-knowledge')}`).toBe('sidebar-theme-indigo');
 
     expect(getOwnershipRoleForCategory('hub', 'practice')).toBe('role-hub-practice');
-    expect(getPaletteForRole('role-hub-practice')).toBe(MENU_CONFIG.hubCategories.practice.color);
+    expect(getPaletteForRole('role-hub-practice')).toBe(hubPractice.color);
     expect(getPaletteForRole('role-hub-practice')).toBe('green');
     expect(`sidebar-theme-${getPaletteForRole('role-hub-practice')}`).toBe('sidebar-theme-green');
 
     expect(getOwnershipRoleForCategory('more', 'business_scenarios')).toBe('role-more-business');
-    expect(getPaletteForRole('role-more-business')).toBe(
-      MENU_CONFIG.moreCategories.business_scenarios.color
-    );
+    expect(getPaletteForRole('role-more-business')).toBe(moreBusiness.color);
     expect(getPaletteForRole('role-more-business')).toBe('cyan');
     expect(`sidebar-theme-${getPaletteForRole('role-more-business')}`).toBe('sidebar-theme-cyan');
 
     // Skills catalog lives under more/explore → role-more-llm (violet), not a module id.
     expect(getOwnershipRoleForCategory('more', 'explore')).toBe('role-more-llm');
-    expect(getPaletteForRole('role-more-llm')).toBe(MENU_CONFIG.moreCategories.explore.color);
+    expect(getPaletteForRole('role-more-llm')).toBe(moreExplore.color);
     expect(getPaletteForRole('role-more-llm')).toBe('violet');
     expect(`sidebar-theme-${getPaletteForRole('role-more-llm')}`).toBe('sidebar-theme-violet');
   });
