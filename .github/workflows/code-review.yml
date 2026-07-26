@@ -8,25 +8,27 @@ jobs:
   # 自动代码审查
   auto-review:
     name: 自动代码审查
-    runs-on: windows-latest
-    
+    # ubuntu = 1x billing minutes (windows is 2x); pwsh steps declare shell explicitly
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout 代码
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: 设置 Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
-      
+
       - name: 安装依赖
         run: npm ci
-      
+
       - name: 分析代码变更
         id: changes
+        shell: pwsh
         run: |
           $files = git diff --name-only origin/${{ github.base_ref }}...HEAD
           $tsFiles = $files | Where-Object { $_ -match '\.(ts|tsx)$' }
@@ -44,11 +46,13 @@ jobs:
       
       - name: 检查测试覆盖
         if: steps.changes.outputs.test_count == '0' && (steps.changes.outputs.ts_count > 0 || steps.changes.outputs.js_count > 0)
+        shell: pwsh
         run: |
           Write-Warning "⚠️ 代码变更未包含测试文件"
           echo "::warning::建议为新增代码添加测试用例"
-      
+
       - name: 检查大文件
+        shell: pwsh
         run: |
           $largeFiles = git diff --name-only origin/${{ github.base_ref }}...HEAD | ForEach-Object {
             if (Test-Path $_) {
@@ -71,6 +75,7 @@ jobs:
           }
       
       - name: 检查复杂度
+        shell: pwsh
         run: |
           npm run code:analyze:complexity
         continue-on-error: true
@@ -110,7 +115,7 @@ jobs:
   # 检查 PR 标题
   check-pr-title:
     name: 检查 PR 标题
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     
     steps:
       - name: 验证 PR 标题格式
@@ -132,7 +137,7 @@ jobs:
   # 检查分支名称
   check-branch:
     name: 检查分支名称
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     
     steps:
       - name: 验证分支名称

@@ -1,7 +1,7 @@
 # SOPs 发布策略
 
 **Status:** active · SSOT  
-**Updated:** 2026-07-26  
+**Updated:** 2026-07-27
 
 本文档定义 GitHub Releases、版本号、变更说明与发版门禁的企业级约定。  
 与 [变更日志](./CHANGELOG.md)、[部署指南](./DEPLOYMENT.md)、[CI 质量门禁](./CI-QUALITY-GATES.md)、[OPS_RUNBOOK.md](./OPS_RUNBOOK.md)、[ACCESSIBILITY.md](./ACCESSIBILITY.md) 配套使用。
@@ -53,7 +53,8 @@
 - `v3.0.11-rc.8`（2026-07-25）为生产验证候选：系统设置企业级硬化（保存契约、二级导航、推理 5 档、UX 收敛）；**Pre-release**，Latest 仍为 `v3.0.10`。
 - `v3.0.11-rc.9`（2026-07-26）为生产验证候选：主题架构企业级收口（极简素色 / A2）、可行动 LLM 失败体验、文档权威整理；**Pre-release**，Latest 仍为 `v3.0.10`。
 - `v3.0.11-rc.10`（2026-07-26）为生产验证候选：推理档企业闭环与厂商 API 对齐、主题 Phase 1–2（颜色模式 + Appearance 迁样）、设置 TD；**Pre-release**，Latest 仍为 `v3.0.10`。
-- GA 后不得再发 `v3.0.10-rc.*`；当前 patch 候选为 `v3.0.11-rc.10`，GA 定稿后升 `v3.0.11`；若后续变更体量升 minor 则为 `v3.1.0-rc.1`。
+- `v3.0.11-rc.11`（2026-07-27）为生产验证候选：企业主题 v2 双色轴全面落地、Claude/Gemini 厂商 API 对齐修复、CI 迁 ubuntu 恢复全绿；**Pre-release**，Latest 仍为 `v3.0.10`。
+- GA 后不得再发 `v3.0.10-rc.*`；当前 patch 候选为 `v3.0.11-rc.11`，GA 定稿后升 `v3.0.11`；若后续变更体量升 minor 则为 `v3.1.0-rc.1`。
 
 ## 3. 何时创建 GitHub Release
 

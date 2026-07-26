@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   GEMINI_THINKING_LEVEL_BY_EFFORT,
   mapAnthropicOutputEffort,
+  mapAnthropicOutputEffortSummarized,
   mapAnthropicThinking,
   mapGeminiThinking,
   mapOpenAiReasoningEffort,
@@ -50,6 +51,14 @@ describe('multi-protocol mappers', () => {
       output_config: { effort: 'max' },
     });
     expect(mapAnthropicOutputEffort({ enabled: false, effort: 'high' })).toEqual({});
+  });
+
+  it('anthropic 4.7+ variant opts into summarized thinking display', () => {
+    expect(mapAnthropicOutputEffortSummarized({ enabled: true, effort: 'high' })).toEqual({
+      thinking: { type: 'adaptive', display: 'summarized' },
+      output_config: { effort: 'high' },
+    });
+    expect(mapAnthropicOutputEffortSummarized({ enabled: false, effort: 'high' })).toEqual({});
   });
 
   it('anthropic thinking budgets by effort (legacy)', () => {

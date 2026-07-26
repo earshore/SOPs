@@ -60,6 +60,9 @@ const NAMING_PATTERNS = {
     /^--(text-(primary|secondary|tertiary|disabled|inverse)|bg-(primary|secondary|tertiary|surface|overlay)|border(-dark|-focus)?)$/,
   confidenceAlias: /^--confidence-(high|medium|low)-(bg|bg-alpha|text|text-light|border)$/,
   surfaceAlias: /^--surface-(workbench|panel|card|card-hover)$/,
+  // 软色 wash（浅色=色阶50，深色=tint on surface；见 variables.css 暗色块）
+  washToken:
+    /^--wash-(blue|indigo|emerald|amber|red|purple|teal|neutral)$/,
 
   // 间距: --spacing-{value}
   spacing: /^--spacing-(\d+(\.\d+)?|\d+-\d+|px|2xs|xs|sm|md|lg|xl|2xl|3xl|4xl|5xl)$/,

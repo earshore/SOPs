@@ -161,3 +161,129 @@
 .ppc-search-terms-review-reason-text {
   color: var(--ppc-search-terms-review-ink, rgb(22, 78, 99));
 }
+
+/* ==================== 暗色模式适配 ==================== */
+.dark .ppc-search-terms-empty-state,
+[data-color-mode-resolved='dark'] .ppc-search-terms-empty-state {
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.dark .ppc-search-terms-table-wrapper,
+[data-color-mode-resolved='dark'] .ppc-search-terms-table-wrapper {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+}
+
+.dark .ppc-search-terms-delivery-note,
+[data-color-mode-resolved='dark'] .ppc-search-terms-delivery-note {
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 30%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-emerald-400, #34d399) 10%, var(--surface-card, #1e293b)),
+    var(--surface-card, #1e293b)
+  );
+}
+
+.dark .ppc-search-terms-table-help,
+[data-color-mode-resolved='dark'] .ppc-search-terms-table-help {
+  border-bottom-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dark .ppc-search-terms-results-table thead tr,
+[data-color-mode-resolved='dark'] .ppc-search-terms-results-table thead tr {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .ppc-search-terms-action-negative_exact,
+.dark .ppc-search-terms-action-campaign_fix_status,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-negative_exact,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-campaign_fix_status {
+  background: color-mix(in srgb, var(--color-red-400, #f87171) 18%, var(--surface-card, #1e293b));
+  color: var(--color-red-300, #fca5a5);
+}
+
+.dark .ppc-search-terms-action-harvest_exact,
+.dark .ppc-search-terms-action-scale_budget,
+.dark .ppc-search-terms-action-campaign_scale,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-harvest_exact,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-scale_budget,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-campaign_scale {
+  background: color-mix(in srgb, var(--color-green-400, #4ade80) 18%, var(--surface-card, #1e293b));
+  color: var(--color-green-300, #86efac);
+}
+
+.dark .ppc-search-terms-action-bid_down,
+.dark .ppc-search-terms-action-campaign_pause,
+.dark .ppc-search-terms-action-campaign_bid_down,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-bid_down,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-campaign_pause,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-campaign_bid_down {
+  background: color-mix(in srgb, var(--color-amber-400, #fbbf24) 18%, var(--surface-card, #1e293b));
+  color: var(--color-amber-300, #fcd34d);
+}
+
+.dark .ppc-search-terms-action-listing_term,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-listing_term {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .ppc-search-terms-action-campaign_structure,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-campaign_structure {
+  background: color-mix(in srgb, var(--color-sky-400, #38bdf8) 18%, var(--surface-card, #1e293b));
+  color: var(--color-sky-300, #7dd3fc);
+}
+
+.dark .ppc-search-terms-action-observe,
+[data-color-mode-resolved='dark'] .ppc-search-terms-action-observe {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .ppc-search-terms-results-row,
+[data-color-mode-resolved='dark'] .ppc-search-terms-results-row {
+  border-bottom-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+}
+
+.dark .ppc-search-terms-results-row-reviewed,
+[data-color-mode-resolved='dark'] .ppc-search-terms-results-row-reviewed {
+  background: color-mix(in srgb, var(--color-teal-400, #2dd4bf) 10%, var(--surface-panel, #0f172a));
+  box-shadow: inset 3px 0 0 var(--color-teal-400, #2dd4bf);
+}
+
+.dark .ppc-search-terms-results-row:hover,
+[data-color-mode-resolved='dark'] .ppc-search-terms-results-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .ppc-search-terms-results-row-reviewed:hover,
+[data-color-mode-resolved='dark'] .ppc-search-terms-results-row-reviewed:hover {
+  background: color-mix(in srgb, var(--color-teal-400, #2dd4bf) 15%, var(--surface-panel, #0f172a));
+}
+
+.dark .ppc-search-terms-review-chip,
+[data-color-mode-resolved='dark'] .ppc-search-terms-review-chip {
+  border-color: color-mix(in srgb, var(--color-teal-400, #2dd4bf) 34%, transparent);
+  background: color-mix(in srgb, var(--color-teal-400, #2dd4bf) 12%, var(--surface-card, #1e293b));
+  color: var(--color-teal-300, #5eead4);
+}
+
+.dark .ppc-search-terms-review-reason,
+[data-color-mode-resolved='dark'] .ppc-search-terms-review-reason {
+  border-color: color-mix(in srgb, var(--color-teal-400, #2dd4bf) 30%, transparent);
+  background: color-mix(in srgb, var(--color-teal-400, #2dd4bf) 10%, var(--surface-card, #1e293b));
+}
+
+.dark .ppc-search-terms-review-reason-label,
+[data-color-mode-resolved='dark'] .ppc-search-terms-review-reason-label {
+  color: var(--color-teal-300, #5eead4);
+}
+
+.dark .ppc-search-terms-review-reason-text,
+[data-color-mode-resolved='dark'] .ppc-search-terms-review-reason-text {
+  color: var(--color-cyan-200, #a5f3fc);
+}

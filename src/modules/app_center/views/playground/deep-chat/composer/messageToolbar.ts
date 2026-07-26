@@ -16,6 +16,12 @@ export const TOOLBAR_LIVE_STATUS_CLASS = 'deep-chat-toolbar-live-status';
 let messageToolbarObserver: MutationObserver | null = null;
 let messageToolbarTimer: number | null = null;
 let messageToolbarFrame: number | null = null;
+/**
+ * Guard set BEFORE requestAnimationFrame. Guarding on messageToolbarFrame breaks
+ * under synchronous rAF (jsdom mocks): the callback nulls the id first, then the
+ * assignment overwrites it, wedging every later scheduled render shut.
+ */
+let messageToolbarFramePending = false;
 let lastToolbarChat: DeepChatElement | null = null;
 let lastGetStoredMessages: (() => DeepChatMessage[]) | null = null;
 let lastToolbarActions: MessageToolbarActions = {};
@@ -103,6 +109,7 @@ export function cleanupMessageToolbars(): void {
     window.cancelAnimationFrame(messageToolbarFrame);
     messageToolbarFrame = null;
   }
+  messageToolbarFramePending = false;
 }
 
 function scheduleRenderMessageToolbars(
@@ -110,11 +117,13 @@ function scheduleRenderMessageToolbars(
   getStoredMessages: () => DeepChatMessage[],
   actions: MessageToolbarActions
 ): void {
-  if (messageToolbarFrame !== null) {
+  if (messageToolbarFramePending) {
     return;
   }
 
+  messageToolbarFramePending = true;
   messageToolbarFrame = window.requestAnimationFrame(() => {
+    messageToolbarFramePending = false;
     messageToolbarFrame = null;
     const skillContexts = actions.getSkillContexts?.() || [];
     if (chat.shadowRoot && skillContexts.length > 0) {

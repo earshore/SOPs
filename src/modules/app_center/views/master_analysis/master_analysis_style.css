@@ -993,25 +993,120 @@
   }
 }
 
-/* Dark: MA violet accent + purple label ink lift for canvas readability */
-.dark [x-data='promptlabPanel'],
-.dark [x-data='aiAnalysisPanel'],
-.dark [x-data='scraperPanel'],
-[data-color-mode-resolved='dark'] [x-data='promptlabPanel'],
-[data-color-mode-resolved='dark'] [x-data='aiAnalysisPanel'],
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'],
-[data-theme='dark'] [x-data='promptlabPanel'],
-[data-theme='dark'] [x-data='aiAnalysisPanel'],
-[data-theme='dark'] [x-data='scraperPanel'] {
-  --ma-accent: #a8a3f8;
-  --ma-accent-hover: #c0bcfa;
-  --ma-accent-soft: color-mix(in srgb, #6257f5 20%, var(--surface-card, #1e293b));
-  --ma-accent-tint: color-mix(in srgb, #6257f5 26%, var(--surface-card, #1e293b));
-  --ma-accent-muted: color-mix(in srgb, #6257f5 34%, var(--surface-card, #1e293b));
+/* ==================== 暗色主题收口 ====================
+   accent 色相 (qwen violet) 不变；软面/浅面在深色下落到 surface + tint。
+   桌面扁平化块的浅色钉死规则在此以同特异度 + 文件序后置覆盖。 */
+.dark #master_analysis_content_area,
+[data-color-mode-resolved='dark'] #master_analysis_content_area {
+  background: linear-gradient(to bottom, var(--surface-workbench), var(--surface-panel));
 }
 
-.dark [x-data='promptlabPanel'] :is(.text-purple-600, .text-purple-500),
-[data-color-mode-resolved='dark'] [x-data='promptlabPanel'] :is(.text-purple-600, .text-purple-500),
-[data-theme='dark'] [x-data='promptlabPanel'] :is(.text-purple-600, .text-purple-500) {
-  color: var(--color-purple-300, #d8b4fe);
+.dark :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel']),
+[data-color-mode-resolved='dark']
+  :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel']) {
+  --ma-accent-soft: color-mix(in srgb, var(--ma-accent) 16%, var(--surface-card));
+  --ma-accent-tint: color-mix(in srgb, var(--ma-accent) 24%, var(--surface-card));
+  --ma-accent-muted: color-mix(in srgb, var(--ma-accent) 34%, var(--surface-card));
+}
+
+@media (min-width: 1024px) {
+  .dark
+    [x-data='promptlabPanel']
+    :where(#card-analysis, #card-product-dna, #card-strategy)
+    > div:first-child,
+  [data-color-mode-resolved='dark']
+    [x-data='promptlabPanel']
+    :where(#card-analysis, #card-product-dna, #card-strategy)
+    > div:first-child {
+    background: var(--surface-card);
+    border-bottom-color: var(--color-border-light) !important;
+  }
+
+  .dark [x-data='promptlabPanel'] :where(#card-analysis, #card-product-dna, #card-strategy),
+  [data-color-mode-resolved='dark']
+    [x-data='promptlabPanel']
+    :where(#card-analysis, #card-product-dna, #card-strategy) {
+    border-color: var(--color-border-default) !important;
+  }
+
+  .dark #console-card-inner > div:first-child > div,
+  [data-color-mode-resolved='dark'] #console-card-inner > div:first-child > div,
+  .dark #console-card-inner > div:last-child > div,
+  [data-color-mode-resolved='dark'] #console-card-inner > div:last-child > div {
+    background: var(--surface-card) !important;
+    border-color: var(--border-subtle) !important;
+    color: var(--color-text-secondary) !important;
+  }
+
+  .dark #console-card-inner > div > div > .pr-28 h3,
+  [data-color-mode-resolved='dark'] #console-card-inner > div > div > .pr-28 h3 {
+    color: var(--color-text-primary) !important;
+  }
+
+  .dark #console-card-inner > div > div > .pr-28 :where(span, p),
+  [data-color-mode-resolved='dark'] #console-card-inner > div > div > .pr-28 :where(span, p) {
+    color: var(--color-text-secondary) !important;
+  }
+
+  .dark #embed-toggle-container,
+  [data-color-mode-resolved='dark'] #embed-toggle-container {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .dark #mode-toggle-glider,
+  [data-color-mode-resolved='dark'] #mode-toggle-glider {
+    background: var(--color-slate-600) !important;
+  }
+
+  .dark #console-card-inner :where(#btn-generate-prompt, #btn-generate-visual):disabled,
+  [data-color-mode-resolved='dark']
+    #console-card-inner
+    :where(#btn-generate-prompt, #btn-generate-visual):disabled {
+    background: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .dark #prompt-output-card,
+  [data-color-mode-resolved='dark'] #prompt-output-card {
+    background: var(--surface-panel) !important;
+    border-color: var(--color-border-default) !important;
+  }
+
+  .dark #prompt-output-card > div:first-child,
+  [data-color-mode-resolved='dark'] #prompt-output-card > div:first-child {
+    background: var(--surface-panel) !important;
+    border-bottom-color: var(--color-border-light) !important;
+  }
+
+  .dark #prompt-output-card #output-preview-title,
+  [data-color-mode-resolved='dark'] #prompt-output-card #output-preview-title {
+    color: var(--color-text-secondary) !important;
+  }
+
+  .dark #prompt-output-card #final-prompt-output,
+  [data-color-mode-resolved='dark'] #prompt-output-card #final-prompt-output {
+    color: var(--color-text-primary) !important;
+  }
+
+  /* WCAG lift: violet accent-as-ink + purple labels readable on dark canvas */
+  .dark [x-data='promptlabPanel'],
+  .dark [x-data='aiAnalysisPanel'],
+  .dark [x-data='scraperPanel'],
+  [data-color-mode-resolved='dark'] [x-data='promptlabPanel'],
+  [data-color-mode-resolved='dark'] [x-data='aiAnalysisPanel'],
+  [data-color-mode-resolved='dark'] [x-data='scraperPanel'],
+  [data-theme='dark'] [x-data='promptlabPanel'],
+  [data-theme='dark'] [x-data='aiAnalysisPanel'],
+  [data-theme='dark'] [x-data='scraperPanel'] {
+    --ma-accent: #a8a3f8;
+    --ma-accent-hover: #c0bcfa;
+  }
+
+  .dark [x-data='promptlabPanel'] :is(.text-purple-600, .text-purple-500),
+  [data-color-mode-resolved='dark']
+    [x-data='promptlabPanel']
+    :is(.text-purple-600, .text-purple-500),
+  [data-theme='dark'] [x-data='promptlabPanel'] :is(.text-purple-600, .text-purple-500) {
+    color: var(--color-purple-300, #d8b4fe);
+  }
 }

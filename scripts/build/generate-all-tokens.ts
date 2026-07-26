@@ -9,7 +9,8 @@ import { execSync } from 'child_process';
 const scripts = [
   { name: 'CSS 变量', command: 'tsx scripts/build/generate-css-variables.ts' },
   { name: 'Tailwind 配置', command: 'tsx scripts/build/generate-tailwind-config.ts' },
-  { name: 'TypeScript 类型', command: 'tsx scripts/build/generate-design-token-types.ts' }
+  { name: 'TypeScript 类型', command: 'tsx scripts/build/generate-design-token-types.ts' },
+  { name: 'Utility Bridge (深色映射)', command: 'tsx scripts/build/generate-utility-bridge.ts' }
 ];
 
 console.log('🚀 开始生成设计令牌文件...\n');

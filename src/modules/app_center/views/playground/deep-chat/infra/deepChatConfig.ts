@@ -76,21 +76,21 @@ function configureDeepChatTextInputStyles(chat: DeepChatElement): void {
   chat.textInput = {
     placeholder: {
       text: '有问题，尽管问',
-      style: { color: '#9a9a9a' },
+      style: { color: 'var(--deep-chat-input-placeholder, #9a9a9a)' },
     },
     styles: {
       container: {
         width: '100%',
         margin: '0',
         borderRadius: '29px',
-        border: '1px solid #cbd5e1',
-        backgroundColor: '#ffffff',
+        border: '1px solid var(--deep-chat-field-border, #cbd5e1)',
+        backgroundColor: 'var(--deep-chat-surface, #ffffff)',
         boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)',
         minHeight: '58px',
         maxHeight: 'min(42vh, 420px)',
       },
       text: {
-        color: '#0f172a',
+        color: 'var(--deep-chat-ink, #0f172a)',
         fontSize: '15px',
         lineHeight: '1.45',
         padding: '18px 62px 16px 22px',
@@ -135,7 +135,7 @@ function configureDeepChatSubmitButtonStyles(chat: DeepChatElement): void {
     disabled: {
       container: {
         borderRadius: '999px',
-        backgroundColor: '#94a3b8',
+        backgroundColor: 'var(--deep-chat-ink-faint, #94a3b8)',
         width: buttonSize,
         height: buttonSize,
       },
@@ -159,7 +159,7 @@ function configureDeepChatMessageStyles(chat: DeepChatElement): void {
       user: {
         bubble: {
           backgroundColor: 'var(--deep-chat-accent-soft, #faf3ee)',
-          color: '#0f172a',
+          color: 'var(--deep-chat-ink, #0f172a)',
           border: '0',
           borderRadius: '18px',
           padding: '10px 14px',
@@ -174,7 +174,7 @@ function configureDeepChatMessageStyles(chat: DeepChatElement): void {
           width: '100%',
           maxWidth: '100%',
           backgroundColor: 'transparent',
-          color: '#1e293b',
+          color: 'var(--deep-chat-ink-strong, #1e293b)',
           border: '0',
           borderRadius: '0',
           padding: '0',

@@ -48,3 +48,22 @@
     width: 100%;
   }
 }
+
+/* ==================== 暗色模式适配 ==================== */
+.dark .ppc-search-terms-flow-steps li,
+[data-color-mode-resolved='dark'] .ppc-search-terms-flow-steps li {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  background: var(--surface-card, #1e293b);
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .ppc-search-terms-flow-steps span,
+[data-color-mode-resolved='dark'] .ppc-search-terms-flow-steps span {
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 30%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-400, #34d399) 14%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-emerald-300, #6ee7b7);
+}

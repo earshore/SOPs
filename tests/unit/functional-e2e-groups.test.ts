@@ -46,7 +46,11 @@ describe('functional E2E groups', () => {
       },
       {
         name: 'operations',
-        files: ['tests/e2e/npi-tracker.spec.ts', 'tests/e2e/restricted-words.spec.ts'],
+        files: [
+          'tests/e2e/npi-tracker.spec.ts',
+          'tests/e2e/restricted-words.spec.ts',
+          'tests/e2e/system-settings.spec.ts',
+        ],
       },
     ]);
   });

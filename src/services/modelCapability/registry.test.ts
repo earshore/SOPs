@@ -47,6 +47,7 @@ describe('multi-protocol flagship catalog', () => {
       'deepseek-v4-flash',
       'claude-sonnet-4-5-20250929',
       'claude-opus-4.5',
+      'claude-opus-4-8',
       'claude-fable-5',
       'gemini-3.6-flash',
       'gemini-2.5-pro',
@@ -97,14 +98,27 @@ describe('multi-protocol flagship catalog', () => {
     });
 
     const claudeEffort = resolveModelCapability(
-      { provider: 'new_api', modelId: 'claude-opus-4.5' },
+      { provider: 'new_api', modelId: 'claude-opus-4-8' },
       getModelCapabilityRules()
     );
     expect(claudeEffort.effortControlKind).toBe('anthropic_output_effort');
     expect(claudeEffort.defaultEffort).toBe('high');
     expect(claudeEffort.mapRequest?.({ enabled: true, effort: 'xhigh' })).toEqual({
-      thinking: { type: 'adaptive' },
+      thinking: { type: 'adaptive', display: 'summarized' },
       output_config: { effort: 'xhigh' },
+    });
+
+    // Claude 4.6 generation: xhigh is a 4.7+ tier, absent from the allowlist;
+    // thinking.display is also 4.7+ — 4.6 must not send it (already summarizes).
+    const claude46 = resolveModelCapability(
+      { provider: 'new_api', modelId: 'claude-sonnet-4-6' },
+      getModelCapabilityRules()
+    );
+    expect(claude46.effortControlKind).toBe('anthropic_output_effort');
+    expect(claude46.reasoningEfforts).toEqual(['low', 'medium', 'high', 'max']);
+    expect(claude46.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
+      thinking: { type: 'adaptive' },
+      output_config: { effort: 'high' },
     });
 
     expect(MODEL_CAPABILITY_CATALOG_META.productReasoningEfforts).toEqual([
@@ -161,21 +175,43 @@ describe('multi-protocol flagship catalog', () => {
     );
   });
 
-  it('uses anthropic output_config.effort for Claude Opus 4.5', () => {
-    const cap = resolveModelCapability(
-      { provider: 'new_api', modelId: 'claude-opus-4.5' },
-      getModelCapabilityRules()
-    );
-    expect(cap.apiSurface).toBe('anthropic_messages');
-    expect(cap.effortControlKind).toBe('anthropic_output_effort');
-    expect(cap.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
-      thinking: { type: 'adaptive' },
-      output_config: { effort: 'high' },
-    });
+  it('keeps Claude 4.5 and dotted aliases on the legacy budget path (adaptive is 4.6+)', () => {
+    for (const modelId of ['claude-opus-4.5', 'claude-opus-4-5-20251101']) {
+      const cap = resolveModelCapability(
+        { provider: 'new_api', modelId },
+        getModelCapabilityRules()
+      );
+      expect(cap.apiSurface, modelId).toBe('anthropic_messages');
+      expect(cap.effortControlKind, modelId).toBe('anthropic_budget_tokens');
+      expect(cap.mapRequest?.({ enabled: true, effort: 'high' }), modelId).toEqual(
+        mapAnthropicThinking({ enabled: true, effort: 'high' })
+      );
+    }
+  });
+
+  it('routes official hyphenated 4.7/4.8 ids to adaptive + output_config.effort', () => {
+    for (const modelId of [
+      'claude-opus-4-8',
+      'claude-opus-4-7',
+      'claude-opus-4.8',
+      'claude-opus-4-8-20260115',
+    ]) {
+      const cap = resolveModelCapability(
+        { provider: 'new_api', modelId },
+        getModelCapabilityRules()
+      );
+      expect(cap.apiSurface, modelId).toBe('anthropic_messages');
+      expect(cap.effortControlKind, modelId).toBe('anthropic_output_effort');
+      expect(cap.mapRequest?.({ enabled: true, effort: 'high' }), modelId).toEqual({
+        thinking: { type: 'adaptive', display: 'summarized' },
+        output_config: { effort: 'high' },
+      });
+    }
   });
 
   it('keeps plain chat models fail-closed', () => {
-    for (const modelId of ['gpt-4o', 'gpt-4.1', 'gpt-4.1-mini']) {
+    // claude-3-5-sonnet never supported extended thinking — no rule, fail-closed.
+    for (const modelId of ['gpt-4o', 'gpt-4.1', 'gpt-4.1-mini', 'claude-3-5-sonnet-20241022']) {
       const cap = resolveModelCapability(
         { provider: 'new_api', modelId },
         getModelCapabilityRules()

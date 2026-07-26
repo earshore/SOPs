@@ -131,6 +131,11 @@
   --ppc-search-terms-accent: var(--color-emerald-400, #34d399);
   --ppc-search-terms-accent-strong: var(--color-emerald-300, #6ee7b7);
   --ppc-search-terms-info-text: var(--color-blue-300, #93c5fd);
+  --ppc-search-terms-accent-border: color-mix(
+    in srgb,
+    var(--color-emerald-400, #34d399) 28%,
+    transparent
+  );
   --ppc-search-terms-primary-text: color-mix(
     in srgb,
     var(--color-primary, #3b82f6) 55%,

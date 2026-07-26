@@ -740,6 +740,18 @@
   --callout-border: rgba(148, 163, 184, 0.26);
 }
 
+/*
+ * Dark theme: callout washes become hue tints on the card surface so the
+ * bridge-lightened body text stays readable. Accent rail keeps its hue.
+ */
+.dark .content-callout,
+[data-color-mode-resolved='dark'] .content-callout,
+[data-theme='dark'] .content-callout {
+  --callout-bg: color-mix(in srgb, var(--callout-accent) 14%, var(--surface-card, #1e293b));
+  --callout-border: color-mix(in srgb, var(--callout-accent) 32%, transparent);
+  color: var(--color-text-primary, #f1f5f9);
+}
+
 /* --- 顶部装饰条 --- */
 .card-accent--top {
   padding-left: var(--card-padding);

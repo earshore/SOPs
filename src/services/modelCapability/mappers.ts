@@ -80,6 +80,23 @@ export function mapAnthropicOutputEffort(prefs: {
 }
 
 /**
+ * Anthropic 4.7+ variant: thinking.display defaults to "omitted" there (thinking
+ * blocks stream with EMPTY text), so the 深度思考 UI would show nothing. Opt into
+ * "summarized" — the Anthropic analogue of mapResponsesReasoning's summary:'auto'.
+ * Not for 4.6: display arrived with 4.7, and 4.6 already defaults to summarized.
+ */
+export function mapAnthropicOutputEffortSummarized(prefs: {
+  enabled: boolean;
+  effort: ReasoningEffort;
+}): Record<string, unknown> {
+  const base = mapAnthropicOutputEffort(prefs);
+  if (!('thinking' in base)) {
+    return base;
+  }
+  return { ...base, thinking: { type: 'adaptive', display: 'summarized' } };
+}
+
+/**
  * Anthropic legacy extended thinking ONLY (no output_config.effort).
  * Product effort ladder → `thinking.budget_tokens` hard budget.
  * Orthogonal concept from adaptive-era `output_config.effort`.
@@ -157,6 +174,12 @@ export function mapGeminiThinking(prefs: {
     },
   };
 }
+
+/**
+ * Answer-text headroom kept above thinking.budget_tokens when clamping max_tokens.
+ * 512 proved too tight: a fully-used budget left almost no visible answer tokens.
+ */
+export const THINKING_BUDGET_ANSWER_HEADROOM = 4_096;
 
 /** Extract thinking budget from a body fragment (for max_tokens clamp). */
 export function readThinkingBudgetTokens(extra: Record<string, unknown>): number | undefined {

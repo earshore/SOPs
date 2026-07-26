@@ -26,6 +26,9 @@ const content = [
 export default {
   ...generatedConfig,
   content,
+  // 主题轴 (浅/深/系统) 由 ThemeManager 解析为 .dark / data-color-mode-resolved。
+  // dark: 变体必须跟随应用主题，绝不直接跟 OS 媒体查询。
+  darkMode: ['selector', ':is(.dark, [data-color-mode-resolved="dark"])'],
   theme: {
     ...generatedConfig.theme,
     extend: {

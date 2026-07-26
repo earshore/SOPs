@@ -249,8 +249,9 @@ it('computes input, task, site, and history branch states', () => {
   expect(panel.isTaskSuccess(panel.tasks[2])).toBe(true);
   expect(panel.isTaskNotSuccess(panel.tasks[0])).toBe(true);
   expect(panel.getSiteButtonClass('DE')).toContain('selected');
-  expect(panel.getSiteButtonClass('FR')).toContain('hover:border-blue-300');
-  expect(panel.getSiteNameClass('DE')).toBe('text-blue-700');
+  // Hover/selected chrome is Appearance-tokenized (theme Phase 1–2), not hard blue.
+  expect(panel.getSiteButtonClass('FR')).toContain('hover:border-[color-mix');
+  expect(panel.getSiteNameClass('DE')).toBe('text-[var(--color-primary-dark)]');
   expect(panel.getDataTabButtonClass('preview')).toContain('active');
   expect(panel.getDataTabButtonClass('json')).toContain('hover:text-slate-600');
   expect(panel.showHistoryClear).toBe(true);

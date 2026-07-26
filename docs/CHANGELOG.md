@@ -13,6 +13,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [3.0.11-rc.11] - 2026-07-27
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.10` 之后的**企业主题 v2 双色轴全面落地**（light/dark/system × Appearance 正交、ui-card 语义面、utility bridge）、**Claude/Gemini 厂商 API 对齐修复**与 **CI 恢复**（ubuntu runner + 全绿测试）。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- 企业主题 v2（#3）：light/dark/system 颜色模式轴与 Appearance 主题轴正交共存；新用户默认跟随系统；切换模式时整页 ~260ms 调光过渡。
+- `ui-card` 语义表面原语 + 双主题表单 token；SOP（backend/growth/safety/service）、App Center、amz_hub、explore/scenario 等业务卡片全面迁移。
+- Utility bridge：为遗留 light 工具类提供暗色语义（含 alpha 边框类映射、`--deep-chat-*` / `--wash-*` 变量桥）；bridge drift 门禁纳入 `ci:quality`，T5 正交矩阵检查。
+- 暗色表面高程阶梯（surface elevation ladder）与暗色关键 chrome（critical、mega glass、wb badge soft duals）。
+- 设置外观区「跟随系统」实时解析提示（当前为浅色/深色）。
+- 内容表面 hardcode 门禁扩展到业务模块；`--wash-*` token 纳入 CSS 变量审计。
+
+### Changed
+
+- 四个 GitHub Actions workflow 全部迁至 `ubuntu-latest`（免费计划 1x 计费；Windows 2x 计费致 7 月配额中旬耗尽、Quality Gate/Release 自 07-14 起全部拒绝启动）。PowerShell 步骤显式 `shell: pwsh`；Playwright 安装补 `--with-deps`。
+- Claude 能力注册表改用官方连字符模型 ID（`claude-opus-4-8` 等），点号网关别名归一化后匹配；4.6 代档位表移除 xhigh（4.7 引入）；Opus 4.5 移回 legacy budget_tokens 路径；新增 `claude-fable-5` / `claude-mythos-5`（1M 上下文，adaptive + effort 五档）；`claude-3-5-sonnet*` 不再声明推理（fail-closed）。
+- Claude 4.7+ 现代路径显式 `thinking.display: "summarized"`（默认 omitted 会让深度思考面板空白）；4.6 代不发 display。
+- Gemini 原生路径 `thinkingConfig` 收进 `generationConfig`（官方 v1beta 形状）；legacy budget 的 max_tokens 答案余量 512 → 4096。
+- 单测断言与已落地产品契约对齐（rc.9 Toast options 对象、aria-current token 化导航、Appearance color-mix chrome、调度偏好迁设置、prepare-release 版本断言改读 package.json 等 18 处）。
+
+### Fixed
+
+- CHANGELOG rc.10 章节反引号损坏修复并补录遗漏条目（pre-paint 防 FOUC、暗色孤岛绑定等）；GitHub Release notes 重建为完整模板。
+- deep-chat 消息工具栏 rAF 调度守卫竞态：同步 rAF 环境下 handle 先清后覆，导致后续渲染全部静默丢弃、工具栏永不挂载。
+- 设置面板 5 处 `x-show` 违反 inline-style 策略（含主题 v2 合并回归的 1 处），统一改 `hidden` + `:hidden` 绑定。
+- 主题 v2 合并后的暗色可读性收尾：settings drawer、data-backup、dev-diagnostics、ziniao scenario、ppc search terms 14 个拆分样式、深聊双主题变量桥。
+- 发布冒烟 e2e：两处主题断言仍期待 pre-seed 时代的 `system` 默认，与测试自身注入的 light 起点矛盾（发布跑必红），改断言注入值。
+- 企业主题 v2 union-merge 带入的 18 个文件 Prettier 格式漂移。
+
 ## [3.0.11-rc.10] - 2026-07-26
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
@@ -49,6 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 颜色模式 pre-paint bootstrap：首屏按已存偏好预绘制，避免暗色偏好下的 FOUC 闪烁。
 - 暗色模式不再覆盖 Appearance primary；常暗「暗色孤岛」改绑 `data-color-mode-resolved`，与颜色模式解析结果对齐。
 - 多处模块 focus / 主 CTA hard blue·indigo 迁 Appearance，避免与颜色模式冲突。
+
 ## [3.0.11-rc.9] - 2026-07-26
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。

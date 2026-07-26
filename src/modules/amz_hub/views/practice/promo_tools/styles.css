@@ -36,7 +36,7 @@
   margin: 0;
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
 }
 
 .amzpt_dual_desc {
@@ -44,7 +44,7 @@
   max-width: 780px;
   font-size: 0.92rem;
   line-height: 1.75;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
 }
 
 .amzpt_dual_grid {
@@ -108,14 +108,14 @@
   font-size: 1.02rem;
   font-weight: 700;
   line-height: 1.5;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
 }
 
 .amzpt_dual_card_desc {
   margin: 0;
   font-size: 0.92rem;
   line-height: 1.75;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
 }
 
 .amzpt_dual_points {
@@ -130,7 +130,7 @@
   padding: 6px 10px;
   border-radius: 999px;
   background: #f1f5f9;
-  color: #475569;
+  color: var(--color-text-secondary, #475569);
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -179,7 +179,7 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
   line-height: 1.35;
 }
 
@@ -188,7 +188,7 @@
   max-width: 780px;
   font-size: 0.92rem;
   line-height: 1.75;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
 }
 
 .amzpt_anchor_tip {
@@ -199,7 +199,7 @@
   border-radius: 14px;
   background: #f8fafc;
   border: 1px solid var(--color-slate-200);
-  color: #475569;
+  color: var(--color-text-secondary, #475569);
   font-size: 0.82rem;
   font-weight: 600;
   white-space: nowrap;
@@ -327,13 +327,13 @@
   margin-bottom: 6px;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
   line-height: 1.4;
 }
 
 .amzpt_nav_step_desc {
   font-size: 0.84rem;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   line-height: 1.65;
 }
 
@@ -364,19 +364,19 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
   line-height: 1.35;
 }
 
 .amzpt_text {
   margin-bottom: 20px;
   font-size: 1rem;
-  color: #475569;
+  color: var(--color-text-secondary, #475569);
   line-height: 1.85;
 }
 
 .amzpt_text strong {
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
 }
 
 .amzpt_section_header {
@@ -386,7 +386,7 @@
   margin: 28px 0 14px;
   font-size: 1.08rem;
   font-weight: 700;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
 }
 
 .amzpt_section_header i {
@@ -507,13 +507,13 @@
 .amzpt_sub_title {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
   line-height: 1.4;
 }
 
 .amzpt_sub_desc {
   font-size: 0.92rem;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   line-height: 1.75;
   flex: 1;
 }
@@ -531,7 +531,7 @@
   padding: 6px 10px;
   border-radius: 999px;
   background: #f1f5f9;
-  color: #475569;
+  color: var(--color-text-secondary, #475569);
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -628,7 +628,7 @@
 
 .amzpt_table tbody th[scope='row'] {
   font-weight: 700;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
   text-align: left;
 }
 
@@ -872,4 +872,87 @@
   .amzpt_table thead {
     background: var(--color-primary, var(--color-blue-500));
   }
+}
+
+/* ========================================
+   暗色主题收口（全宽度）
+   浅色面/软 callout → Theme surface / hue tint。
+   insight/core/formula 墨面与饱和图标底保持品牌一致，不翻。
+   ======================================== */
+.dark .amzpt_card,
+[data-color-mode-resolved='dark'] .amzpt_card,
+.dark .amzpt_sub_item,
+[data-color-mode-resolved='dark'] .amzpt_sub_item,
+.dark .amzpt_nav_step,
+[data-color-mode-resolved='dark'] .amzpt_nav_step,
+.dark .amzpt_dual_card,
+[data-color-mode-resolved='dark'] .amzpt_dual_card,
+.dark .amzpt_dual_guide,
+[data-color-mode-resolved='dark'] .amzpt_dual_guide,
+.dark .amzpt_anchor_nav,
+[data-color-mode-resolved='dark'] .amzpt_anchor_nav {
+  background: var(--surface-card);
+  border-color: var(--border-subtle);
+}
+
+.dark .amzpt_dual_card.is-current,
+[data-color-mode-resolved='dark'] .amzpt_dual_card.is-current,
+.dark .amzpt_anchor_tip,
+[data-color-mode-resolved='dark'] .amzpt_anchor_tip {
+  background: var(--surface-card-hover);
+  border-color: var(--border-subtle);
+}
+
+.dark .amzpt_dual_eyebrow,
+[data-color-mode-resolved='dark'] .amzpt_dual_eyebrow {
+  background: color-mix(in srgb, var(--color-emerald-400) 16%, transparent);
+}
+
+.dark .amzpt_anchor_eyebrow,
+[data-color-mode-resolved='dark'] .amzpt_anchor_eyebrow,
+.dark .amzpt_sub_icon,
+[data-color-mode-resolved='dark'] .amzpt_sub_icon {
+  background: color-mix(in srgb, var(--color-blue-400) 16%, transparent);
+}
+
+.dark .amzpt_dual_badge--soft,
+[data-color-mode-resolved='dark'] .amzpt_dual_badge--soft {
+  background: color-mix(in srgb, var(--color-emerald-400) 16%, transparent);
+  color: var(--color-emerald-300);
+}
+
+.dark .amzpt_dual_points span,
+[data-color-mode-resolved='dark'] .amzpt_dual_points span {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dark .amzpt_nav_step::before,
+[data-color-mode-resolved='dark'] .amzpt_nav_step::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.dark .amzpt_nav_step::after,
+[data-color-mode-resolved='dark'] .amzpt_nav_step::after {
+  background: var(--surface-card);
+}
+
+.dark .amzpt_callout--warning,
+[data-color-mode-resolved='dark'] .amzpt_callout--warning {
+  background: color-mix(in srgb, var(--color-amber-400) 14%, var(--surface-card));
+  border-color: color-mix(in srgb, var(--color-amber-400) 32%, transparent);
+  color: var(--color-amber-200);
+}
+
+.dark .amzpt_callout--success,
+[data-color-mode-resolved='dark'] .amzpt_callout--success {
+  background: color-mix(in srgb, var(--color-emerald-400) 14%, var(--surface-card));
+  border-color: color-mix(in srgb, var(--color-emerald-400) 32%, transparent);
+  color: var(--color-emerald-200);
+}
+
+.dark .amzpt_callout--tip,
+[data-color-mode-resolved='dark'] .amzpt_callout--tip {
+  background: color-mix(in srgb, var(--color-blue-400) 14%, var(--surface-card));
+  border-color: color-mix(in srgb, var(--color-blue-400) 32%, transparent);
+  color: var(--color-blue-200);
 }

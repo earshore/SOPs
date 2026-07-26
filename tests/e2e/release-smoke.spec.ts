@@ -1189,7 +1189,8 @@ test.describe('release candidate smoke', () => {
 
     await page.addInitScript(() => {
       window.localStorage.removeItem('app-theme');
-      window.localStorage.removeItem('app-color-mode');
+      // Deterministic light starting point (new-user default is now `system`).
+      window.localStorage.setItem('app-color-mode', JSON.stringify('light'));
     });
 
     await openGlobalSettings(page);
@@ -1198,10 +1199,11 @@ test.describe('release candidate smoke', () => {
     const themeSelect = page.getByTestId('settings-theme-select');
     await themeSelect.selectOption('minimal');
     await expect(themeSelect).toHaveValue('minimal');
-    // Fresh user: preference defaults to system (T1-5); Playwright emulates light OS.
+    // Seeded light starting point (init script); fresh-user system default is
+    // covered by theme-bootstrap unit tests.
     await expectDocumentThemeState(page, {
       appearance: 'minimal',
-      colorMode: 'system',
+      colorMode: 'light',
       darkClass: false,
     });
 
@@ -1218,7 +1220,7 @@ test.describe('release candidate smoke', () => {
     await expectNoRouteErrorText(page);
     await expectDocumentThemeState(page, {
       appearance: 'minimal',
-      colorMode: 'system',
+      colorMode: 'light',
       darkClass: false,
     });
     await expectKeywordHunterOwnershipChrome(page);
@@ -1266,7 +1268,8 @@ test.describe('release candidate smoke', () => {
 
     await page.addInitScript(() => {
       window.localStorage.removeItem('app-theme');
-      window.localStorage.removeItem('app-color-mode');
+      // Deterministic light starting point (new-user default is now `system`).
+      window.localStorage.setItem('app-color-mode', JSON.stringify('light'));
     });
 
     await openGlobalSettings(page);
@@ -1316,7 +1319,8 @@ test.describe('release candidate smoke', () => {
 
     await page.addInitScript(() => {
       window.localStorage.removeItem('app-theme');
-      window.localStorage.removeItem('app-color-mode');
+      // Deterministic light starting point (new-user default is now `system`).
+      window.localStorage.setItem('app-color-mode', JSON.stringify('light'));
     });
 
     await openGlobalSettings(page);
@@ -1325,10 +1329,11 @@ test.describe('release candidate smoke', () => {
     const themeSelect = page.getByTestId('settings-theme-select');
     await themeSelect.selectOption('minimal');
     await expect(themeSelect).toHaveValue('minimal');
-    // Fresh user: preference defaults to system (T1-5); Playwright emulates light OS.
+    // Seeded light starting point (init script); fresh-user system default is
+    // covered by theme-bootstrap unit tests.
     await expectDocumentThemeState(page, {
       appearance: 'minimal',
-      colorMode: 'system',
+      colorMode: 'light',
       darkClass: false,
     });
 
@@ -1344,7 +1349,7 @@ test.describe('release candidate smoke', () => {
     await expectNoRouteErrorText(page);
     await expectDocumentThemeState(page, {
       appearance: 'minimal',
-      colorMode: 'system',
+      colorMode: 'light',
       darkClass: false,
     });
 

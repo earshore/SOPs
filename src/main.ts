@@ -657,9 +657,11 @@ registerActionsWithLegacy({
   renderMegaMenu,
 
   // === Utilities 工具函数 ===
-  showToast: (params: Record<string, unknown>) => {
+  showToast: (params: Record<string, unknown>, options?: unknown) => {
     if (typeof params === 'string') {
-      showToast(params as string);
+      // Legacy two-arg call: showToast(message, { type })
+      const opts = (options ?? {}) as { type?: ToastType };
+      showToast(params as string, opts.type ? { type: opts.type } : undefined);
     } else if (params.message) {
       showToast(params.message as string, { type: params.type as ToastType });
     }

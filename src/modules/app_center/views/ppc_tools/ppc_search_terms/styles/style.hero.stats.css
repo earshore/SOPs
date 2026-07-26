@@ -65,3 +65,63 @@
   );
   color: var(--ppc-search-terms-ink-violet, var(--color-violet-600));
 }
+
+/* ==================== 暗色模式适配 ==================== */
+.dark .ppc-search-terms-stat-tile,
+[data-color-mode-resolved='dark'] .ppc-search-terms-stat-tile {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  background: color-mix(in srgb, var(--surface-card, #1e293b) 72%, transparent);
+  box-shadow: 0 10px 24px -22px rgba(0, 0, 0, 0.72);
+}
+
+.dark .ppc-search-terms-stat-label,
+[data-color-mode-resolved='dark'] .ppc-search-terms-stat-label {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .ppc-search-terms-stat-number,
+[data-color-mode-resolved='dark'] .ppc-search-terms-stat-number {
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark .ppc-search-terms-stat-tile-blue .ppc-search-terms-stat-label i,
+[data-color-mode-resolved='dark'] .ppc-search-terms-stat-tile-blue .ppc-search-terms-stat-label i {
+  background: color-mix(in srgb, var(--color-blue-400, #60a5fa) 16%, var(--surface-card, #1e293b));
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .ppc-search-terms-stat-tile-green .ppc-search-terms-stat-label i,
+[data-color-mode-resolved='dark'] .ppc-search-terms-stat-tile-green .ppc-search-terms-stat-label i {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-400, #34d399) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .ppc-search-terms-stat-tile-orange .ppc-search-terms-stat-label i,
+[data-color-mode-resolved='dark']
+  .ppc-search-terms-stat-tile-orange
+  .ppc-search-terms-stat-label
+  i {
+  background: color-mix(
+    in srgb,
+    var(--color-orange-400, #fb923c) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-orange-300, #fdba74);
+}
+
+.dark .ppc-search-terms-stat-tile-violet .ppc-search-terms-stat-label i,
+[data-color-mode-resolved='dark']
+  .ppc-search-terms-stat-tile-violet
+  .ppc-search-terms-stat-label
+  i {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-violet-300, #c4b5fd);
+}

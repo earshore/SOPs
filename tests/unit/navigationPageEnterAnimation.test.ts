@@ -84,11 +84,10 @@ describe('navigation page enter animation', () => {
 
     await updateUIForRoute('sops_overview');
 
+    // Active styling is tokenized in header-main.css via [aria-current='page'];
+    // the attribute is the contract, not JS-added utility classes.
     expect(sopsNav.getAttribute('aria-current')).toBe('page');
-    expect(sopsNav.classList.contains('text-blue-700')).toBe(true);
-    expect(sopsNav.classList.contains('border-blue-600')).toBe(true);
     expect(appCenterNav.hasAttribute('aria-current')).toBe(false);
-    expect(appCenterNav.classList.contains('border-transparent')).toBe(true);
   });
 
   it('reveals main content after the route layout is stable', async () => {

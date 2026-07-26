@@ -17,6 +17,16 @@
   --settings-focus-ring: 0 0 0 3px color-mix(in srgb, var(--settings-focus-color) 25%, transparent);
 }
 
+/* Dark theme: accent soft/strong re-derived from the Accent hue itself —
+ * primary-light/dark tokens are light-mode ladders (minimal → slate-100)
+ * and would render near-white chips / too-dark text on dark surfaces. */
+.dark .settings-panel-root,
+[data-color-mode-resolved='dark'] .settings-panel-root,
+[data-theme='dark'] .settings-panel-root {
+  --settings-accent-soft: color-mix(in srgb, var(--settings-accent) 22%, transparent);
+  --settings-accent-strong: color-mix(in srgb, var(--settings-accent) 60%, #ffffff);
+}
+
 /* Drawer shell: panel elevation + soft footer gradient (not hard white). */
 .settings-panel-shell {
   background: linear-gradient(
@@ -2145,7 +2155,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 }
 
 .settings-local-data-progress[data-bucket='cache'] {
-  --settings-local-data-progress-color: #64748b;
+  --settings-local-data-progress-color: var(--settings-text-muted, #64748b);
 }
 
 .settings-local-data-progress[data-bucket='other'] {

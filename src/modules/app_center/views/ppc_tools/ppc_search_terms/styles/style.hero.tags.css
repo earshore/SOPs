@@ -43,3 +43,31 @@
 .ppc-search-terms-tag-dot-orange {
   background: var(--ppc-search-terms-ink-orange, var(--color-orange-600));
 }
+
+/* ==================== 暗色模式适配 ==================== */
+.dark .ppc-search-terms-hero-tag,
+[data-color-mode-resolved='dark'] .ppc-search-terms-hero-tag {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  background: color-mix(in srgb, var(--surface-card, #1e293b) 72%, transparent);
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .ppc-search-terms-tag-dot-blue,
+[data-color-mode-resolved='dark'] .ppc-search-terms-tag-dot-blue {
+  background: var(--color-blue-400, #60a5fa);
+}
+
+.dark .ppc-search-terms-tag-dot-green,
+[data-color-mode-resolved='dark'] .ppc-search-terms-tag-dot-green {
+  background: var(--color-emerald-400, #34d399);
+}
+
+.dark .ppc-search-terms-tag-dot-violet,
+[data-color-mode-resolved='dark'] .ppc-search-terms-tag-dot-violet {
+  background: var(--color-violet-400, #a78bfa);
+}
+
+.dark .ppc-search-terms-tag-dot-orange,
+[data-color-mode-resolved='dark'] .ppc-search-terms-tag-dot-orange {
+  background: var(--color-orange-400, #fb923c);
+}

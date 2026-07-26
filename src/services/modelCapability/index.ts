@@ -141,11 +141,13 @@ export {
   GEMINI_THINKING_BUDGET_BY_EFFORT,
   GEMINI_THINKING_LEVEL_BY_EFFORT,
   mapAnthropicOutputEffort,
+  mapAnthropicOutputEffortSummarized,
   mapAnthropicThinking,
   mapGeminiThinking,
   mapOpenAiReasoningEffort,
   mapResponsesReasoning,
   readThinkingBudgetTokens,
+  THINKING_BUDGET_ANSWER_HEADROOM,
 } from './mappers';
 export type { ApiPathId, ApiPathOption } from './apiPaths';
 export {
