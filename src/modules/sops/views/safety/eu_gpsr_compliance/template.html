@@ -20,34 +20,34 @@
                         </div>
                 </div>
         </div>
-        <section class="bg-white rounded-xl border border-slate-200 p-5 mb-6">
-                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+        <section class="ui-card p-5 mb-6">
+                <h2 class="ui-card__title text-base font-bold mb-3 flex items-center gap-2">
                         <i class="fas fa-clipboard-list text-indigo-500"></i>作业元信息
                 </h2>
                 <dl class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-3 text-sm">
                         <div>
-                                <dt class="font-semibold text-slate-700">Owner</dt>
-                                <dd class="text-slate-600">合规负责人/运营负责人</dd>
+                                <dt class="ui-card__title font-semibold">Owner</dt>
+                                <dd class="ui-card__muted">合规负责人/运营负责人</dd>
                         </div>
                         <div>
-                                <dt class="font-semibold text-slate-700">更新时间</dt>
-                                <dd class="text-slate-600">2026-06</dd>
+                                <dt class="ui-card__title font-semibold">更新时间</dt>
+                                <dd class="ui-card__muted">2026-06</dd>
                         </div>
                         <div>
-                                <dt class="font-semibold text-slate-700">适用站点</dt>
-                                <dd class="text-slate-600">欧盟销售站点</dd>
+                                <dt class="ui-card__title font-semibold">适用站点</dt>
+                                <dd class="ui-card__muted">欧盟销售站点</dd>
                         </div>
                         <div>
-                                <dt class="font-semibold text-slate-700">输入</dt>
-                                <dd class="text-slate-600">ASIN、产品类别、欧代信息、厂家信息、安全文件、包装标签、站点语言</dd>
+                                <dt class="ui-card__title font-semibold">输入</dt>
+                                <dd class="ui-card__muted">ASIN、产品类别、欧代信息、厂家信息、安全文件、包装标签、站点语言</dd>
                         </div>
                         <div>
-                                <dt class="font-semibold text-slate-700">输出</dt>
-                                <dd class="text-slate-600">GPSR 交付件清单、缺失项、上传记录、整改闭环</dd>
+                                <dt class="ui-card__title font-semibold">输出</dt>
+                                <dd class="ui-card__muted">GPSR 交付件清单、缺失项、上传记录、整改闭环</dd>
                         </div>
                         <div>
-                                <dt class="font-semibold text-slate-700">人工确认点</dt>
-                                <dd class="text-slate-600">欧代/厂家信息、安全文件、后台上传和整改完成必须人工确认</dd>
+                                <dt class="ui-card__title font-semibold">人工确认点</dt>
+                                <dd class="ui-card__muted">欧代/厂家信息、安全文件、后台上传和整改完成必须人工确认</dd>
                         </div>
                 </dl>
         </section>
@@ -62,11 +62,11 @@
                 </div>
         </div>
         <!-- Deliverables Overview -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-clipboard-check text-indigo-600"></i>合规交付件清单 (Deliverables)
                 </h2>
-                <p class="text-sm text-slate-600 mb-4">对每个 ASIN（尤其是子 ASIN），在每个欧盟站点至少完成以下三类信息的闭环：</p>
+                <p class="ui-card__muted text-sm mb-4">对每个 ASIN（尤其是子 ASIN），在每个欧盟站点至少完成以下三类信息的闭环：</p>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <!-- Deliverable 1 -->
                         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -115,13 +115,13 @@
                         </div>
                 </div>
         </div>
-        <section class="bg-white rounded-xl border border-indigo-200 p-6 mb-6 shadow-sm">
+        <section class="ui-card p-6 mb-6">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
                         <div>
-                                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <h2 class="ui-card__title text-lg font-bold flex items-center gap-2">
                                         <i class="fas fa-file-pen text-indigo-600"></i>GPSR 交付件归档输出
                                 </h2>
-                                <p class="text-sm text-slate-500 mt-1">把每次补齐、驳回整改或多站点复核沉淀成可追溯记录。</p>
+                                <p class="ui-card__muted text-sm mt-1">把每次补齐、驳回整改或多站点复核沉淀成可追溯记录。</p>
                         </div>
                         <button class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors"
                                 type="button" data-action="sops_copyGpsrComplianceTemplate">
@@ -130,7 +130,7 @@
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <label class="block">
-                                <span class="text-xs font-semibold text-slate-600">作业负责人</span>
+                                <span class="ui-card__title text-xs font-semibold">作业负责人</span>
                                 <input id="gpsr-compliance-owner"
                                         class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                                         type="text" value="合规负责人/运营负责人" />
@@ -147,8 +147,8 @@
                 </div>
         </section>
         <!-- Scope Determination -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-filter text-blue-600"></i>1. 范围判定：你的商品是否在 GPSR 管辖内？
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -202,8 +202,8 @@
                 </div>
         </div>
         <!-- Roles and Responsibilities -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-users text-purple-600"></i>2. 角色与责任：先把"谁写在标签上"定下来
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -252,8 +252,8 @@
                 </div>
         </div>
         <!-- Label and Documentation SOP -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-tag text-amber-600"></i>3. 标签与随附文件 SOP（实物合规）
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -308,8 +308,8 @@
                 </div>
         </div>
         <!-- Amazon Backend Submission SOP -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-upload text-indigo-600"></i>4. 亚马逊后台提交 SOP
                 </h2>
                 <div class="mb-4 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
@@ -317,10 +317,10 @@
                                 <i class="fas fa-location-dot"></i>入口路径
                         </h4>
                         <p class="text-sm text-slate-700 mb-2">Seller Central 欧盟任一站点：</p>
-                        <div class="bg-white p-3 rounded border border-indigo-200">
-                                <p class="text-xs font-mono text-slate-600">账户状况（Account Health）→ 监管合规性（Regulatory
+                        <div class="ui-card p-3">
+                                <p class="ui-card__muted text-xs font-mono">账户状况（Account Health）→ 监管合规性（Regulatory
                                         Compliance）</p>
-                                <p class="text-xs text-slate-500 mt-1">
+                                <p class="ui-card__muted text-xs mt-1">
                                         示例路径（DE站）：sellercentral.amazon.de/performance/account/health/product-policies?t=regulatory-compliance
                                 </p>
                         </div>
@@ -361,17 +361,17 @@
                         </h4>
                         <p class="text-sm text-slate-700 mb-3">在"警告和安全信息"里通常出现三个选项：</p>
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                                <div class="bg-white p-3 rounded border border-amber-200">
-                                        <h5 class="font-bold text-sm text-slate-800 mb-1">选项1：商品安全文件</h5>
-                                        <p class="text-xs text-slate-600">PDF（≤10MB），需使用/包含销售站点语言</p>
+                                <div class="ui-card p-3">
+                                        <h5 class="ui-card__title font-bold text-sm mb-1">选项1：商品安全文件</h5>
+                                        <p class="ui-card__muted text-xs">PDF（≤10MB），需使用/包含销售站点语言</p>
                                 </div>
-                                <div class="bg-white p-3 rounded border border-amber-200">
-                                        <h5 class="font-bold text-sm text-slate-800 mb-1">选项2：警告和安全图片</h5>
-                                        <p class="text-xs text-slate-600">展示安全警示信息的产品/包装图（对应站点语言）</p>
+                                <div class="ui-card p-3">
+                                        <h5 class="ui-card__title font-bold text-sm mb-1">选项2：警告和安全图片</h5>
+                                        <p class="ui-card__muted text-xs">展示安全警示信息的产品/包装图（对应站点语言）</p>
                                 </div>
-                                <div class="bg-white p-3 rounded border border-amber-200">
-                                        <h5 class="font-bold text-sm text-slate-800 mb-1">选项3：商品安全证明</h5>
-                                        <p class="text-xs text-slate-600">仅当系统判断该 ASIN 可能不需要警告信息时才出现</p>
+                                <div class="ui-card p-3">
+                                        <h5 class="ui-card__title font-bold text-sm mb-1">选项3：商品安全证明</h5>
+                                        <p class="ui-card__muted text-xs">仅当系统判断该 ASIN 可能不需要警告信息时才出现</p>
                                 </div>
                         </div>
                         <p class="text-xs text-red-600 mt-3 font-bold">⚠️ 若选项3不出现，意味着必须在前两项中二选一！</p>
@@ -398,8 +398,8 @@
                 </div>
         </div>
         <!-- Multi-Site and Language SOP -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-globe text-green-600"></i>5. 多站点与语言 SOP（欧洲站常见坑位）
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -435,8 +435,8 @@
                 </div>
         </div>
         <!-- Batch Processing SOP -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-layer-group text-cyan-600"></i>6. 批量处理 SOP（ASIN 多时的效率打法）
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -458,7 +458,7 @@
                                 <h4 class="font-bold text-purple-800 mb-2 flex items-center gap-2">
                                         <i class="fas fa-folder-tree"></i>内部文件结构推荐
                                 </h4>
-                                <div class="text-xs text-slate-700 font-mono bg-white p-2 rounded mt-2">
+                                <div class="ui-card text-xs font-mono p-2 mt-2">
                                         /GPSR/Brand/ASIN/<br />
                                         ├─ Label/<br />
                                         ├─ PS_images/<br />
@@ -470,8 +470,8 @@
                 </div>
         </div>
         <!-- Review and Tracking SOP -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-clock-rotate-left text-orange-600"></i>7. 提交后审核与追踪 SOP
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -501,8 +501,8 @@
                 </div>
         </div>
         <!-- Inventory and Shipping SOP -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-warehouse text-teal-600"></i>8. 库存与发货 SOP（FBA/FBM）
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -525,8 +525,8 @@
                 </div>
         </div>
         <!-- Change Management SOP -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-rotate text-rose-600"></i>9. 变更管理 SOP（最容易"过期不合规"）
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -561,8 +561,8 @@
                 </div>
         </div>
         <!-- Delisting and Relisting SOP -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-power-off text-red-600"></i>10. 下架与重新启售 SOP（止损流程）
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -584,8 +584,8 @@
                 </div>
         </div>
         <!-- Self-Check Checklist -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-list-check text-green-600"></i>11. 运营自查清单（每周/每次上新必跑）
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -655,49 +655,49 @@
                         <i class="fas fa-triangle-exclamation"></i>12. 常见误区（直接避坑）
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div class="bg-white p-4 rounded-lg border border-red-200">
+                        <div class="ui-card p-4">
                                 <div class="flex items-start gap-3">
                                         <i class="fas fa-xmark text-red-600 text-xl mt-1"></i>
                                         <div>
-                                                <h4 class="font-bold text-slate-800 text-sm mb-1">只上传了图片/文件，没提交负责人/制造商
+                                                <h4 class="ui-card__title font-bold text-sm mb-1">只上传了图片/文件，没提交负责人/制造商
                                                 </h4>
-                                                <p class="text-xs text-slate-600">→ 不闭环，不算合规</p>
+                                                <p class="ui-card__muted text-xs">→ 不闭环，不算合规</p>
                                         </div>
                                 </div>
                         </div>
-                        <div class="bg-white p-4 rounded-lg border border-red-200">
+                        <div class="ui-card p-4">
                                 <div class="flex items-start gap-3">
                                         <i class="fas fa-xmark text-red-600 text-xl mt-1"></i>
                                         <div>
-                                                <h4 class="font-bold text-slate-800 text-sm mb-1">只在一个站点提交负责人信息</h4>
-                                                <p class="text-xs text-slate-600">→ 其他站点仍可能未解决</p>
+                                                <h4 class="ui-card__title font-bold text-sm mb-1">只在一个站点提交负责人信息</h4>
+                                                <p class="ui-card__muted text-xs">→ 其他站点仍可能未解决</p>
                                         </div>
                                 </div>
                         </div>
-                        <div class="bg-white p-4 rounded-lg border border-red-200">
+                        <div class="ui-card p-4">
                                 <div class="flex items-start gap-3">
                                         <i class="fas fa-xmark text-red-600 text-xl mt-1"></i>
                                         <div>
-                                                <h4 class="font-bold text-slate-800 text-sm mb-1">变体只传父 ASIN</h4>
-                                                <p class="text-xs text-slate-600">→ 前台不展示/不算合规</p>
+                                                <h4 class="ui-card__title font-bold text-sm mb-1">变体只传父 ASIN</h4>
+                                                <p class="ui-card__muted text-xs">→ 前台不展示/不算合规</p>
                                         </div>
                                 </div>
                         </div>
-                        <div class="bg-white p-4 rounded-lg border border-red-200">
+                        <div class="ui-card p-4">
                                 <div class="flex items-start gap-3">
                                         <i class="fas fa-xmark text-red-600 text-xl mt-1"></i>
                                         <div>
-                                                <h4 class="font-bold text-slate-800 text-sm mb-1">用二维码替代文字联系方式</h4>
-                                                <p class="text-xs text-slate-600">→ 不满足标签要求</p>
+                                                <h4 class="ui-card__title font-bold text-sm mb-1">用二维码替代文字联系方式</h4>
+                                                <p class="ui-card__muted text-xs">→ 不满足标签要求</p>
                                         </div>
                                 </div>
                         </div>
-                        <div class="bg-white p-4 rounded-lg border border-red-200">
+                        <div class="ui-card p-4">
                                 <div class="flex items-start gap-3">
                                         <i class="fas fa-xmark text-red-600 text-xl mt-1"></i>
                                         <div>
-                                                <h4 class="font-bold text-slate-800 text-sm mb-1">PDF 只上传一个站点，以为会同步</h4>
-                                                <p class="text-xs text-slate-600">→ 不会自动同步，需逐站点上传</p>
+                                                <h4 class="ui-card__title font-bold text-sm mb-1">PDF 只上传一个站点，以为会同步</h4>
+                                                <p class="ui-card__muted text-xs">→ 不会自动同步，需逐站点上传</p>
                                         </div>
                                 </div>
                         </div>
@@ -715,8 +715,8 @@
                 </div>
         </div>
         <!-- Official Resources -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="ui-card p-6 mb-6">
+                <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-link text-blue-600"></i>官方资源与参考链接
                 </h2>
                 <p class="text-xs text-slate-500 mb-4">以下链接为官方权威来源，建议每季度验证一次有效性。法规更新以 EU 官方发布为准。</p>

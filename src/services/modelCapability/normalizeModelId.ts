@@ -25,6 +25,17 @@ export function stripVendorPrefix(modelId: string): string {
 }
 
 /**
+ * Anthropic official ids are hyphenated (claude-opus-4-8, claude-sonnet-4-6);
+ * gateways sometimes emit dotted aliases (claude-opus-4.8). Canonicalize dots in
+ * version segments to hyphens so registry patterns only need the official spelling.
+ * Without this, dotted registry patterns miss official ids and Claude 4.7/4.8
+ * fall through to the legacy budget_tokens wildcard (400 on the official API).
+ */
+function normalizeClaudeVersionDots(id: string): string {
+  return id.replace(/(\d)\.(\d+)/g, '$1-$2');
+}
+
+/**
  * Normalize model id for capability registry matching (not for request body model field).
  * Request body should still use the original id the gateway expects.
  */
@@ -36,6 +47,10 @@ export function normalizeModelIdForCapability(modelId: string): string {
   const aliased = MODEL_ID_ALIASES[lower];
   if (aliased) {
     return aliased;
+  }
+
+  if (lower.startsWith('claude') && id.includes('.')) {
+    return normalizeClaudeVersionDots(id);
   }
 
   // Bare "5.x-*" gateway codenames → gpt-5.x-*

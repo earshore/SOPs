@@ -47,7 +47,8 @@ function resetThemeManager(): void {
   };
   manager.teardownSystemColorModeListener();
   manager.currentTheme = 'default';
-  manager.currentColorMode = 'light';
+  // Production default (T1-5): new users follow system
+  manager.currentColorMode = 'system';
   manager.customThemes = new Map();
   manager.systemColorSchemeMql = null;
   manager.systemColorSchemeListener = null;

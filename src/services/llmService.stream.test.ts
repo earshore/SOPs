@@ -406,7 +406,9 @@ describe('callLLM streaming', () => {
     const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
     expect(body.systemInstruction).toBeTruthy();
     expect(Array.isArray(body.contents)).toBe(true);
-    expect(body.thinkingConfig).toMatchObject({ includeThoughts: true });
+    expect(
+      (body.generationConfig as { thinkingConfig?: unknown } | undefined)?.thinkingConfig
+    ).toMatchObject({ includeThoughts: true });
   });
 
   it('runs responses tool loop until final text', async () => {

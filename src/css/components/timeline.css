@@ -45,7 +45,7 @@
   height: 16px;
   border-radius: 50%;
   background: var(--color-blue-500, #3b82f6);
-  border: 3px solid white;
+  border: 3px solid var(--surface-card, #ffffff);
   box-shadow: 0 0 0 2px var(--color-blue-500, #3b82f6);
   transition:
     background-color var(--duration-normal, 300ms) var(--ease-smooth),
@@ -79,7 +79,8 @@
 
 /* 待处理 */
 .timeline-dot--pending {
-  background: white;
+  background: var(--surface-card, #ffffff);
+  /* slate-400 中阶灰在浅/深卡面上均可读，免除暗色补丁 */
   box-shadow: 0 0 0 2px var(--color-slate-400, #94a3b8);
 }
 
@@ -374,18 +375,7 @@
    暗色模式
    ======================================== */
 
-.dark .timeline-dot,
-[data-color-mode-resolved='dark'] .timeline-dot,
-[data-theme='dark'] .timeline-dot {
-  border-color: var(--color-bg-secondary, #1e293b);
-}
-
-.dark .timeline-dot--pending,
-[data-color-mode-resolved='dark'] .timeline-dot--pending,
-[data-theme='dark'] .timeline-dot--pending {
-  background: var(--color-bg-secondary, #1e293b);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
-}
+/* dot 边框/pending 填充由 --surface-card / --color-border-strong 双主题令牌自动翻转 */
 
 .dark .timeline-title,
 [data-color-mode-resolved='dark'] .timeline-title,

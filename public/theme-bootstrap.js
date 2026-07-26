@@ -2,6 +2,7 @@
  * Pre-paint color-mode bootstrap (T1-2 FOUC).
  * Blocking sync script in <head> — must stay free of imports / async.
  * Reads StorageService-compatible values: JSON-stringified or plain.
+ * New users default to `system` (T1-5); stored preferences always win.
  */
 (function () {
   var KEY = 'app-color-mode';
@@ -13,7 +14,7 @@
   function readMode() {
     try {
       var raw = localStorage.getItem(KEY);
-      if (raw == null || raw === '') return 'light';
+      if (raw == null || raw === '') return 'system';
       try {
         var parsed = JSON.parse(raw);
         if (parsed === 'light' || parsed === 'dark' || parsed === 'system') return parsed;
@@ -28,7 +29,7 @@
     } catch (_) {
       /* private mode / blocked storage */
     }
-    return 'light';
+    return 'system';
   }
 
   function resolve(mode) {

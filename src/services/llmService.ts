@@ -1221,7 +1221,13 @@ function extractOutboundReasoningMarker(body: Record<string, unknown>): string |
   if (thinking?.budget_tokens !== undefined) {
     return `budget:${String(thinking.budget_tokens)}`;
   }
-  const thinkingConfig = body.thinkingConfig as { thinkingBudget?: unknown } | undefined;
+  // Gemini official: generationConfig.thinkingConfig (top-level kept for legacy bodies)
+  const generationConfig = body.generationConfig as
+    | { thinkingConfig?: { thinkingBudget?: unknown } }
+    | undefined;
+  const thinkingConfig =
+    generationConfig?.thinkingConfig ??
+    (body.thinkingConfig as { thinkingBudget?: unknown } | undefined);
   if (thinkingConfig?.thinkingBudget !== undefined) {
     return `geminiBudget:${String(thinkingConfig.thinkingBudget)}`;
   }
