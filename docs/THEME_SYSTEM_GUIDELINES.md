@@ -142,6 +142,21 @@ npm run generate:tokens
 
 ---
 
+### 2.4 Utility Bridge（存量浅色工具类的深色语义）
+
+`src/css/foundation/utility-bridge.generated.css`（生成器 `scripts/build/generate-utility-bridge.ts`，随 `npm run generate:tokens` 更新）扫描源码中实际使用的 Tailwind 颜色工具类（bg/text/border/divide/ring/placeholder/shadow/渐变端点，含 hover/focus/group-hover 与 `/NN` 透明度变体），在 `:is(.dark, [data-color-mode-resolved="dark"])` 下重定义为 Theme token 语义：
+
+- 中性面（bg-white / bg-slate-50…）→ `--surface-*` / 白透明阶；中性文字 → 亮灰阶；中性边框 → 白透明阶
+- 彩色软底/软线（*-50/100/200）→ `color-mix` hue tint（色相保留，明度换轨）
+- 彩色深读文字（*-500…950）→ 亮档平移（400/300/200）
+- 饱和实色（400-600 CTA、图标底）与暗墨面板（slate-800/900 hero）不翻转 —— 两种主题同为墨面
+- 元素级逃生舱：`twb-keep` class 使元素保持字面值
+
+规则：
+1. 新页面仍应优先语义 token / `.ui-card`；桥接是存量兜底，不是新增浅色类的许可。
+2. 模块 CSS **不得**用 `!important` 钉浅色表面 —— 会击穿桥接；需要模块专属表面时引用 `--wash-*` 或语义 token（深色自动翻转）。
+3. `--wash-{hue}`（variables.css）：浅色=色阶 50，深色=hue tint on surface，用于"模块 CSS 需要软色底"的场景。
+
 ## 3. 颜色归属
 
 ### 3.1 决策顺序
