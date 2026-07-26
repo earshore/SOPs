@@ -1,7 +1,7 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ HEAD `be4329f1` · D6 #24 confirmModal · format · D8 type-check:tests · residual #18–23 · D12×24 · D2 long-tail #5 · D9 F2 · shell focus）  
-**范围**: `main` ahead of `sops/main`； residual 主题波 + D12 NPI + SafeModuleLoader/Home CTA + D6 #24 confirmModal primary chrome + D8 ownershipRoles type-check:tests + style format **已合入**（tip `be4329f1`）  
+**日期**: 2026-07-26（refresh @ HEAD `be4329f1` · D5 residual focus audit · D6 #24 confirmModal · format · D8 type-check:tests · residual #18–23 · D12×24 · D2 long-tail #5 · D9 F2 · shell focus）  
+**范围**: `main` ahead of `sops/main`； residual 主题波 + D12 NPI + SafeModuleLoader/Home CTA + D6 #24 confirmModal primary chrome + D8 ownershipRoles type-check:tests + style format **已合入**（tip `be4329f1`）；**本轮 D5 residual**：shared shell `focus-visible` hard blue/indigo **0 clear**（docs inventory only；settings WIP skip）  
 **角色**: Tech Lead / Release docs  
 **诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称 visual Pass。
 
@@ -21,11 +21,11 @@
 
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Code / 契约**    | **Green**  | tip `be4329f1`: D6 #18–23 residual + **#24 confirmModal** · format · D12×**24** · D2 long-tail #5 · D8 soft + type-check:tests · D9 F2 · shell nav/settings focus |
+| **Code / 契约**    | **Green**  | tip `be4329f1` + D5 residual focus audit: **0** clear shared-shell hard blue/indigo `focus-visible` left · D6 #18–24 · D12×**24** · D2 #5 · D8 soft · D9 F2 · shell nav/settings focus already in tip |
 | **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**（**Human XO first**）；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: residual #18–23 + D6 #24 confirmModal + format + D12×24 + D2 #5 + D8 type-check:tests **已在** tip `be4329f1`；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
+**一句话**: residual #18–24 + shell focus **已在** tip `be4329f1`；D5 residual re-grep：**0** clear shared-shell hard focus migrate（inventory only）；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -114,7 +114,7 @@
 | **D2**  | P1 语义   | **Partial**                         | SSOT 已有；R2/R3 + long-tail #2–#5（SOPs collapsible / progress / amz_card-hover / app-center-card / Settings shells / insight·stat / Skills·Prompts catalog）；长尾模块 Tailwind `rounded-xl/2xl` 与 R4 atom 引用改名仍未清（entry 保留） |
 | **D3**  | P0 运行时 | **Code fixed**                      | 双轴已拆；e2e dark×minimal **已进 smoke**；兼容 `data-theme` 读路径仍在；**视觉签 Open**                                                                                                                                         |
 | **D4**  | P1 体验   | **Partial (helpers + MA/KH icons; misuse audit clean; card helper 0 prod)** | Role 表 + workbench helpers + unit + sidebar scale 修 + **AI/PromptLab/Scraper/KH report/AI JSON icon 调用点** + **#2 residual** + **§5.2 misuse (HEAD `5ad7b1c1`)** + **card residual re-audit (`147aa90c`)**: **0** production `getCardClasses`/`getIconContainerClasses` 误用；**0** 非 entry `scale-110` / workbench marketing translate；**`getWorkbenchCardClasses` still 0 production callers** — preferred AI/Scraper/PromptLab TS panels lack natural scheme-border card shells; candidate modules listed in §5.2 |
-| **D5**  | P2        | **Partial**                         | root `--focus-ring-soft` → `color-mix(focus-ring)`；header search / forms dark / Overview search / nav-focus 已跟 focus-ring；**本轮**: shell `.nav-trigger:focus-visible` + Settings runtime checkbox focus 跟 Appearance；**剩余 intentional 例外见 §5.1**；业务页蓝 focus 仍 D6 长尾                          |
+| **D5**  | P2        | **Partial (shell focus residual closed)** | root `--focus-ring-soft` → `color-mix(focus-ring)`；header search / forms dark / Overview search / nav-focus / `.nav-trigger:focus-visible` / Settings runtime checkbox **已跟** focus-ring；**residual re-grep** `src/css/components` + `src/components`：**0** clear shared-shell hard blue/indigo `focus-visible`（settings WIP skip；intentional 例外 §5.1）；业务蓝 focus 仍 D6 长尾 |
 | **D6**  | P1 可见面 | **Shell locked / biz samples**      | 壳层 megaMenu **13** = **有意 Ownership**；**样本 through #16 + residual #18–24**: KH…#9 + **#10 SOPs** + **#11 NPI** + **#12 Restricted Words** + **#13 AMZ Hub nav**（hover/active → ownership orange / `module-accent`）+ **#14 email_templates** + **#15 qa_maintenance** + **#16 PromptLab DNA/autoPopulate** + **#18 Scraper / #19 AI / #20 PPC residual** @ `a05b12c8` + **#21 PromptLab residual focus** @ `f761e4e5` + **#22 SafeModuleLoader primary CTA** @ `1711eec1` + **#23 Home splash/floating CTA** @ `cbad435b` + **#24 confirmModal primary chrome** @ `3b947dc6`（format @ `be4329f1`） + Skills/DeepChat…；其余 Informational 长尾 |
 | **D7**  | P1        | **Done（deprecate + ESLint + call-site audit）** | `setModuleColor` **@deprecated** + unit + ESLint hard-gate；**0** production callers（§5.3）；dual-channel API 彻底下线 **optional**                                                                      |
 | **D8**  | P1        | **Partial (doc + code scaffold + soft tests)**   | Role 表 + **`ownershipRoles.ts`**；soft unit: KH/ppc/MA + **playground / amz_hub / app_center / sops** + hub/more categories；**`52795047`**: optional `hubCategories`/`moreCategories` guard 解阻 `type-check:tests`（format @ `be4329f1`）；**未**全站 `data-ownership-role` 绑定                                                                 |
@@ -138,13 +138,24 @@ Leave alone unless product reclassifies ownership:
 | Business `focus:ring-blue-*` long tail | D6 Informational | KH/PromptLab/etc. sample pages only where already migrated |
 | Settings developer diagnostics emerald checkbox rings | Status/dev tooling accent | Not shell primary chrome; leave until product reclassifies |
 | header-main marketing gradients / logo indigo–pink rails | Brand decoration (not focus) | `.nav-trigger::after` / logo hover gradients — not focus-ring debt |
+| AppModal `--modal-accent-soft` / title icon blue soft | Soft chrome, not focus-visible | Focus path already `var(--modal-focus-ring)` → primary; leave soft rgba |
+| Toast `.toast-action:focus-visible` | Status/info semantics | Uses `--color-info`, not hard blue/indigo brand focus |
 
-**Migrated this residual (code):**
+**Migrated earlier residual (code @ tip `be4329f1` lineage):**
 
 | Surface | Change | Note |
 | --- | --- | --- |
 | Shell `.nav-trigger:focus-visible` (`header-main.css`) | Hard `rgba(99,102,241,.35)` → `color-mix(--color-focus-ring)` | Shell chrome; Appearance-visible |
 | Settings runtime strategy checkboxes (`systemSettings.html`) | `text-indigo-600 focus:ring-indigo-500` → `settings-checkbox` | Shared settings focus tokens; 11 controls |
+
+**Residual re-grep (this wave · docs only · no code):**
+
+| Scope | Result | Verdict |
+| --- | --- | --- |
+| `src/css/components` + `src/components` hard `focus-visible` blue/indigo | **0** clear shared-shell targets beyond §5.1 leave-alone | **No migrate** |
+| Settings WIP (`systemSettings.*` dirty tree) | Skipped to avoid conflict | **Skip this wave** |
+| Business module hard focus (`focus:ring-indigo-500` etc.) | D6 long-tail (AMZ EU insights / GPSR / PromptLab handoff residual…) | **Not D5 shell** |
+| `theme:hardcode-baseline:gate` + `css:audit` | shell **13/13** · CSS vars **0** noncompliant | Green |
 
 ### 5.2 D4 — marketing helper misuse audit (`5ad7b1c1`) + card helper production residual (`904f83d3` → re-audit `147aa90c`)
 
