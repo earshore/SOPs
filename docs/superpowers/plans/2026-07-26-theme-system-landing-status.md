@@ -1,7 +1,7 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ HEAD `3e600716` · XO #24–26 Console open tips `3e600716` · D6 #27 legacy-compat `1731ed47` · D12 first-8 readiness `8f13db32` · D8 soft sop/hub `adbe0afb` · style(theme) AppModal format `f464b373` · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict `77fd0cdc` · D6 #25 AppModal `fb5384d6` · D2 #6 deferred `21bec249` · D5 inventory `5bde2abb` · XO checklist `a72046bb` · adjacent settings TD-SET `aba5a951`→`9bdc7ae9`→`f62283f3`→`9fab3a58` · Visual Yellow · Human XO first）  
-**范围**: `main` ahead of `sops/main`； residual 主题波 + D6 #24 confirmModal + **#25 AppModal** + **#26 import-conflict** + **#27 legacy-compat** + AppModal format + D12 first-8 readiness + D8 soft sop/hub + XO #24–26 Console open tips + **D2 #6 docs deferral** + D5 residual inventory + XO checklist tighten；adjacent settings TD-SET scaffold/e2e + **TD-SET-04 scroll-spy complete** **已在** tip  
+**日期**: 2026-07-26（refresh @ HEAD `9bdaa053` · D1 re-audit 0 closable `9bdaa053` · XO #24–26 Console open tips `3e600716` · D6 #27 legacy-compat `1731ed47` · D12 first-8 readiness `8f13db32` · D8 soft sop/hub `adbe0afb` · style(theme) AppModal format `f464b373` · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict `77fd0cdc` · D6 #25 AppModal `fb5384d6` · D2 #6 deferred `21bec249` · D5 inventory `5bde2abb` · XO checklist `a72046bb` · adjacent settings TD-SET `aba5a951`→`9bdc7ae9`→`f62283f3`→`9fab3a58` · Visual Yellow · Human XO first）  
+**范围**: `main` ahead of `sops/main`； residual 主题波 + D6 #24 confirmModal + **#25 AppModal** + **#26 import-conflict** + **#27 legacy-compat** + AppModal format + D12 first-8 readiness + D8 soft sop/hub + XO #24–26 Console open tips + **D1 re-audit 0 closable** + **D2 #6 docs deferral** + D5 residual inventory + XO checklist tighten；adjacent settings TD-SET scaffold/e2e + **TD-SET-04 scroll-spy complete** **已在** tip  
 **角色**: Tech Lead / Release docs  
 **诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称 visual Pass。
 
@@ -21,11 +21,11 @@
 
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Code / 契约**    | **Green**  | tip `3e600716`: D6 #18–**27**（**#25 AppModal** @ `fb5384d6` · **#26 import-conflict** @ `77fd0cdc` · **#27 legacy-compat** @ `1731ed47` · AppModal format @ `f464b373`）· D12×**24** + first-8 readiness @ `8f13db32` · D2 #2–#5 + **#6 deferred** @ `21bec249` · D5 residual inventory @ `5bde2abb` · XO checklist @ `a72046bb` · XO #24–26 open tips @ `3e600716` · D8 soft (+ sop/hub @ `adbe0afb`) · settings scroll-spy complete @ `9fab3a58` · shell nav/settings focus |
+| **Code / 契约**    | **Green**  | tip `9bdaa053`: D6 #18–**27**（**#25 AppModal** @ `fb5384d6` · **#26 import-conflict** @ `77fd0cdc` · **#27 legacy-compat** @ `1731ed47` · AppModal format @ `f464b373`）· D12×**24** + first-8 readiness @ `8f13db32` · D1 re-audit **0 closable** @ `9bdaa053` · D2 #2–#5 + **#6 deferred** @ `21bec249` · D5 residual inventory @ `5bde2abb` · XO checklist @ `a72046bb` · XO #24–26 open tips @ `3e600716` · D8 soft (+ sop/hub @ `adbe0afb`) · settings scroll-spy complete @ `9fab3a58` · shell nav/settings focus · **build+smoke 29 green** |
 | **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**（**Human XO first**）；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: residual #18–27 + XO #24–26 Console open tips **已在** tip `3e600716`；D6 #27 legacy-compat @ `1731ed47`；D12 first-8 readiness @ `8f13db32`；settings TD-SET-04 scroll-spy **complete** @ `9fab3a58`；D2 radius long-tail **#6 deferred — diminishing returns**；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
+**一句话**: residual #18–27 + XO #24–26 Console open tips + D1 re-audit **0 closable** **已在** tip `9bdaa053`；D6 #27 legacy-compat @ `1731ed47`；D12 first-8 readiness @ `8f13db32`；D8 soft sop/hub @ `adbe0afb`；gates **build+smoke 29 green**；settings TD-SET-04 scroll-spy **complete** @ `9fab3a58`；D2 radius long-tail **#6 deferred — diminishing returns**；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -96,7 +96,7 @@
 | -------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Shell blue 硬编码**            | **13**                                                             | **仅** `src/common/ui/megaMenu.ts`（模块玻璃色板 / Ownership，Informational）                                                                                                                       |
 | **Workbench radius 已落区**      | R0–R3 + batch 3 + long-tail #2–#5；**#6 deferred**                     | 语义 token + cards/panel 别名；analysis-widget、PromptLab/AI/MA、KH、PPC、Scraper、forms、app-center shells；**+** collapsible/progress / amz_card-hover / app-center-card / Settings shells / insight·stat / Skills·Prompts catalog → `var(--workbench-radius…)`；**entry/overview 卡未压**；#6 inventory = clamp/entry/icon/modal/settings control/story/chat（见 decision 文） |
-| **Atomic override allowlist**    | **20**                                                             | radius 6 + shadow 6 + z-index 7 + easing 1；unallowlisted **0**                                                                                                                                     |
+| **Atomic override allowlist**    | **20**                                                             | radius 6 + shadow 6 + z-index 7 + easing 1；unallowlisted **0**；D1 re-audit @ `9bdaa053` still **0 closable**                                                                                                                                     |
 | Handwritten `:root`（D1 首刀后） | ~267                                                               | 去 192 identical 后；语义 + intentional 冲突保留                                                                                                                                                    |
 | XO 场景（签收文档）              | ~**16** automated / ~**20** code / ~**34** manual / visual **0 full Pass** | 见 XO status refresh；**人类 30 min 仍 required**；**Visual Yellow**                                                                                                                          |
 | 业务 `blue-*`（D6）              | ~900+ 行级基线                                                     | Phase 5；**样本 through #16 + residual #18–27**: KH…#9 + **#10 SOPs** + **#11 NPI** + **#12 Restricted Words** + **#13 AMZ Hub nav** + **#14 email_templates** + **#15 qa_maintenance** + **#16 PromptLab DNA** + **#18–20 residual MA/PPC** @ `a05b12c8` + **#21 PromptLab residual focus** @ `f761e4e5` + **#22 SafeModuleLoader** @ `1711eec1` + **#23 Home splash/floating CTA** @ `cbad435b` + **#24 confirmModal** @ `3b947dc6` + **#25 AppModal** @ `fb5384d6` + **#26 import-conflict** @ `77fd0cdc` + **#27 legacy-compat** @ `1731ed47` + Skills #6 / Deep Chat #7；`--shadow-primary*` 跟 primary；**非**全量清零；不阻塞 code Green |
@@ -110,18 +110,18 @@
 
 | ID      | 严重度    | 状态                                | 剩余工作                                                                                                                                                                                                                         |
 | ------- | --------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **D1**  | P0 结构   | **Partial**                         | 20 条 intentional atomic 仍手写覆盖；远期 semantic 文件拆分 / 消费者迁 workbench 后再收 allowlist                                                                                                                                |
+| **D1**  | P0 结构   | **Partial（0 closable re-audit）** | 20 条 intentional atomic 仍手写覆盖；**re-audit @ `9bdaa053`**: still **0 closable**（allowlist 20 / unallowlisted 0；no consumer migrate / value align）；远期 semantic 文件拆分 / 消费者迁 workbench 后再收 allowlist                                                                                                                                |
 | **D2**  | P1 语义   | **Partial (#6 deferred)**           | SSOT 已有；R2/R3 + long-tail #2–#5（SOPs collapsible / progress / amz_card-hover / app-center-card / Settings shells / insight·stat / Skills·Prompts catalog）；**#6 deferred — diminishing returns**（无高 ROI CSS 主面板；剩余 = Tailwind utility + clamp 已覆盖 / entry / icon / modal / settings control / story / chat）；R4 atom 引用改名仍 optional（entry 保留） |
 | **D3**  | P0 运行时 | **Code fixed**                      | 双轴已拆；e2e dark×minimal **已进 smoke**；兼容 `data-theme` 读路径仍在；**视觉签 Open**                                                                                                                                         |
 | **D4**  | P1 体验   | **Partial (helpers + MA/KH icons; misuse audit clean; card helper 0 prod)** | Role 表 + workbench helpers + unit + sidebar scale 修 + **AI/PromptLab/Scraper/KH report/AI JSON icon 调用点** + **#2 residual** + **§5.2 misuse (HEAD `5ad7b1c1`)** + **card residual re-audit (`147aa90c`)**: **0** production `getCardClasses`/`getIconContainerClasses` 误用；**0** 非 entry `scale-110` / workbench marketing translate；**`getWorkbenchCardClasses` still 0 production callers** — preferred AI/Scraper/PromptLab TS panels lack natural scheme-border card shells; candidate modules listed in §5.2 |
 | **D5**  | P2        | **Partial (shell focus residual closed)** | root `--focus-ring-soft` → `color-mix(focus-ring)`；header search / forms dark / Overview search / nav-focus / `.nav-trigger:focus-visible` / Settings runtime checkbox **已跟** focus-ring；**residual re-grep** @ `5bde2abb`：`src/css/components` + `src/components` **0** clear shared-shell hard blue/indigo `focus-visible`（intentional 例外 §5.1）；业务蓝 focus 仍 D6 长尾 |
 | **D6**  | P1 可见面 | **Shell locked / biz samples**      | 壳层 megaMenu **13** = **有意 Ownership**；**样本 through #16 + residual #18–27**: KH…#9 + **#10 SOPs** + **#11 NPI** + **#12 Restricted Words** + **#13 AMZ Hub nav**（hover/active → ownership orange / `module-accent`）+ **#14 email_templates** + **#15 qa_maintenance** + **#16 PromptLab DNA/autoPopulate** + **#18 Scraper / #19 AI / #20 PPC residual** @ `a05b12c8` + **#21 PromptLab residual focus** @ `f761e4e5` + **#22 SafeModuleLoader primary CTA** @ `1711eec1` + **#23 Home splash/floating CTA** @ `cbad435b` + **#24 confirmModal primary chrome** @ `3b947dc6` + **#25 AppModal title/accent soft chrome** @ `fb5384d6` + **#26 import-conflict recommended badge/icon soft chrome** @ `77fd0cdc` + **#27 shared legacy-compat primary CTA + search focus** @ `1731ed47` + Skills/DeepChat…；其余 Informational 长尾 |
 | **D7**  | P1        | **Done（deprecate + ESLint + call-site audit）** | `setModuleColor` **@deprecated** + unit + ESLint hard-gate；**0** production callers（§5.3）；dual-channel API 彻底下线 **optional**                                                                      |
-| **D8**  | P1        | **Partial (doc + code scaffold + soft tests)**   | Role 表 + **`ownershipRoles.ts`**；soft unit: KH/ppc/MA + **playground / amz_hub / app_center / sops** + hub/more categories；**`52795047`**: optional `hubCategories`/`moreCategories` guard 解阻 `type-check:tests`（format @ `be4329f1`）；**未**全站 `data-ownership-role` 绑定                                                                 |
+| **D8**  | P1        | **Partial (doc + code scaffold + soft tests)**   | Role 表 + **`ownershipRoles.ts`**；soft unit: KH/ppc/MA + **playground / amz_hub / app_center / sops** + hub/more categories；**sop ops / hub advanced** soft @ `adbe0afb`；**`52795047`**: optional `hubCategories`/`moreCategories` guard 解阻 `type-check:tests`（format @ `be4329f1`）；**未**全站 `data-ownership-role` 绑定                                                                 |
 | **D9**  | P2        | **Partial (Doc + F2 skim)**         | 生命周期文档已落地；**F2 code skim**: `--ppc-hero-*` / `--kh-*` / `--playground-*` = docs+audit-only（`src/` 0 声明 0 消费）；**0 CSS 删除**；F3+ 仍 optional |
 | **D10** | P1        | **Done（ThemeColors removed）** | `AppearanceThemeColors` 仅 primary 族 + focus；deprecated 别名 **`ThemeColors` removed**；**0** prod 误用状态色字段（§5.4） |
 | **D11** | P2        | **Code fixed / legacy residual only** | **`src/css` 全15 文件 / 185 dark 规则组均已 tri**（`.dark` + `data-color-mode-resolved` + legacy `data-theme`）；**0** 缺 resolved 的 dual-only；剩余仅 intentional legacy 选择器（§10） |
-| **D12** | P2 | **Open（scaffold opt-in）** | `theme-appearance-scaffold`：**12 屏 × 2 = 24**（settings/KH/home + App Center/Scraper/PromptLab/PPC + SOPs + Amazon Hub + Deep Chat + **Skills** + **NPI**）；terracotta send / Skills violet / NPI growth **不**当 primary；`test:visual:theme` opt-in；**不** visual Pass；人工首 8 张 XO 仍 required |
+| **D12** | P2 | **Open（scaffold opt-in + first-8 readiness）** | `theme-appearance-scaffold`：**12 屏 × 2 = 24**（settings/KH/home + App Center/Scraper/PromptLab/PPC + SOPs + Amazon Hub + Deep Chat + **Skills** + **NPI**）；terracotta send / Skills violet / NPI growth **不**当 primary；`test:visual:theme` opt-in；first-8 human capture readiness @ `8f13db32`；**不** visual Pass；人工首 8 张 XO 仍 required |
 
 ### 5.1 D5 — remaining intentional blue / non-Appearance focus
 
@@ -141,7 +141,7 @@ Leave alone unless product reclassifies ownership:
 | AppModal `--modal-accent-soft` / title icon blue soft | Soft chrome, not focus-visible | Focus path already `var(--modal-focus-ring)` → primary; leave soft rgba |
 | Toast `.toast-action:focus-visible` | Status/info semantics | Uses `--color-info`, not hard blue/indigo brand focus |
 
-**Migrated earlier residual (code @ tip `3e600716` lineage):**
+**Migrated earlier residual (code @ tip `9bdaa053` lineage):**
 
 | Surface | Change | Note |
 | --- | --- | --- |
@@ -265,7 +265,9 @@ Grep / call-site evidence (re-skim @ `147aa90c`):
 ## 8. Commit list (`sops/main` → `HEAD`)
 
 ```
-3e600716 docs(theme): make XO residual #24-26 executable  ← HEAD
+9bdaa053 docs(theme): re-audit D1 allowlist still zero closable  ← HEAD
+47f21c08 docs(theme): refresh landing tip after concurrent wave
+3e600716 docs(theme): make XO residual #24-26 executable
 1731ed47 Migrate shared legacy-compat primary CTA to Appearance
 8f13db32 Improve D12 first-8 human capture readiness
 adbe0afb test(theme): soft-check sop ops and hub advanced ownership
@@ -345,9 +347,9 @@ f8f925a8 docs(theme): enterprise audit and convergence roadmap
 - D8 ownershipRoles optional hub/more category guard（`type-check:tests`）@ `52795047`（format @ `be4329f1`）
 - Adjacent settings TD-SET scaffold/e2e @ `aba5a951` → stabilize @ `9bdc7ae9` → scroll-spy methods wire @ `f62283f3` → **TD-SET-04 scroll-spy complete** @ `9fab3a58`（theme board tip；**not** visual Pass）
 - D4 card helper still **0** production callers
-- full prebuild / smoke **Green 再次**（不代表 visual Pass）
+- full prebuild / **build+smoke 29 green**（不代表 visual Pass）
 - **Visual Yellow** · **Human XO first**（仍未签）
-- tip `3e600716` 含 XO §3.1 **#24–26 Console open tips** + D6 **#27 legacy-compat** @ `1731ed47` + D12 first-8 readiness @ `8f13db32` + D8 soft sop/hub @ `adbe0afb` + AppModal format @ `f464b373` + settings scroll-spy complete @ `9fab3a58` + **#26 import-conflict** @ `77fd0cdc` + prior **#25 AppModal** @ `fb5384d6`（**仍** Visual Yellow · **Human XO first**）
+- tip `9bdaa053` 含 D1 re-audit **0 closable** @ `9bdaa053` + XO §3.1 **#24–26 Console open tips** @ `3e600716` + D6 **#27 legacy-compat** @ `1731ed47` + D12 first-8 readiness @ `8f13db32` + D8 soft sop/hub @ `adbe0afb` + AppModal format @ `f464b373` + settings scroll-spy complete @ `9fab3a58` + **#26 import-conflict** @ `77fd0cdc` + prior **#25 AppModal** @ `fb5384d6`（**仍** Visual Yellow · **Human XO first**）
 
 **前主题 tip (`f99b0fc8`)**: D6 #16 PromptLab · D10 ThemeColors removed · D12×20。
 

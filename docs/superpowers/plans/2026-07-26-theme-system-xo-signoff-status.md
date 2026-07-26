@@ -1,6 +1,6 @@
 # 主题系统 XO 签字状态（Phase 1 code-aware review）
 
-**日期**: 2026-07-26（refresh @ HEAD `3e600716` · XO #24–26 Console open tips `3e600716` · D6 #27 legacy-compat `1731ed47` · D12 first-8 readiness `8f13db32` · D8 soft sop/hub `adbe0afb` · style(theme) AppModal format `f464b373` · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict `77fd0cdc` · D6 #25 AppModal `fb5384d6` · residual #18–27 · D12×24 · Human XO first / Visual Yellow）
+**日期**: 2026-07-26（refresh @ HEAD `9bdaa053` · D1 re-audit 0 closable `9bdaa053` · XO #24–26 Console open tips `3e600716` · D6 #27 legacy-compat `1731ed47` · D12 first-8 readiness `8f13db32` · D8 soft sop/hub `adbe0afb` · style(theme) AppModal format `f464b373` · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict `77fd0cdc` · D6 #25 AppModal `fb5384d6` · residual #18–27 · D12×24 · build+smoke 29 green · Human XO first / Visual Yellow）
 **角色**: Experience Officer + QA（静态核验；**非**浏览器视觉签收）  
 **范围**: `docs/superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md`  
 **对照实现**: `src/common/config/themeConfig.ts` · `themeConfig.test.ts` · `tests/e2e/release-smoke.spec.ts` · Settings Appearance  
@@ -124,7 +124,7 @@
 | X5 | minimal+dark / default+dark | **Pass (automated)** dark×minimal 双轴 smoke + **Needs manual browser** 视觉 |
 | X6 | 设置面板自洽吃 token | **Needs manual browser** / debt | 颜色模式 UI 已有；accent 等仍可能硬编码 blue（D6 Informational） |
 
-### 1.7 状态计数（本签收文档 · refresh `3e600716`）
+### 1.7 状态计数（本签收文档 · refresh `9bdaa053`）
 
 | 状态 | 约计（场景行，含路由检查 / A11y / 长时 / XO / Env） |
 | --- | --- |
@@ -176,7 +176,7 @@
 
 ### 2.2 Appearance default↔minimal — **已补契约 vs 仍缺视觉**
 
-| 项 | 现状 @ HEAD `3e600716` |
+| 项 | 现状 @ HEAD `9bdaa053` |
 | --- | --- |
 | 切换 Appearance（Settings select） | smoke **有** `settings-theme-select` → `minimal` / `default` |
 | `data-appearance` / `data-theme` / `data-color-mode` | smoke **有** `expectDocumentThemeState` |
@@ -250,7 +250,7 @@
 
 **可选 +5~10 min（样本 through #26，非主脚本 Blocker）**: Skills 试用 CTA → Deep Chat shell chrome/focus → **#10 SOPs overview focus** → **#11 NPI primary CTA** → **#13 AMZ Hub nav ownership orange** → **#14 email_templates** → **#15 qa_maintenance** → **#16 PromptLab DNA/autoPopulate** → **#18–21 residual MA/PPC/PromptLab** → **#22 SafeModuleLoader primary CTA** → **#23 Home splash/floating CTA** → **#24 confirmModal primary chrome** → **#25 AppModal primary soft chrome** → **#26 import-conflict primary soft chrome** → dark×minimal KH 肉眼复核。见 §1.8。**不**声称 visual Pass。
 
-**#24–26 快速打开（optional eye-check · Console · tip `3e600716`）**:
+**#24–26 快速打开（optional eye-check · Console · tip `9bdaa053`）**:
 
 ```js
 // #24 confirmModal theme primary chrome（非删除文案 → theme 变体，非 danger）
@@ -273,7 +273,7 @@ document.getElementById('import-conflict-modal')?.open?.();
 **记录模板**（贴 PR / RC）:
 
 ```text
-XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect 3e600716+)
+XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect 9bdaa053+)
 Browser: ________  Viewport: ________
 X1 switch×3: Pass/Fail
 X2 ownership (KH rose / PPC / MA / DeepChat terracotta): Pass/Fail
@@ -397,9 +397,10 @@ Sign-off visual: Yes / No   ← default No until XO fills; keep Yellow
 | D6 业务 `blue-*` | 仍 Informational 长尾；样本 through **#16 + residual #18–27**：Skills CTA + Deep Chat shell + **#10 SOPs** + **#11 NPI** + **#12 RW** + **#13 AMZ Hub nav ownership orange** + **#14 email_templates** + **#15 qa_maintenance** + **#16 PromptLab DNA** + **#18–20 residual MA/PPC** @ `a05b12c8` + **#21 PromptLab residual focus** @ `f761e4e5` + **#22 SafeModuleLoader** @ `1711eec1` + **#23 Home CTA** @ `cbad435b` + **#24 confirmModal** @ `3b947dc6` + **#25 AppModal** @ `fb5384d6` + **#26 import-conflict** @ `77fd0cdc` + **#27 legacy-compat** @ `1731ed47` |
 | D5 focus soft | 部分壳层已迁（含 shell nav / settings focus @ `3218a505`）；shared-shell residual inventory @ `5bde2abb`；业务页长尾仍 D6 |
 | D10 ThemeColors | **removed**（AppearanceThemeColors only） |
-| D12 scaffold | opt-in **12×2=24**（+ PromptLab + Skills + NPI；terracotta / Skills violet / NPI growth **不**当 primary）；**非** visual Pass / **非** CI |
+| D12 scaffold | opt-in **12×2=24**（+ PromptLab + Skills + NPI；terracotta / Skills violet / NPI growth **不**当 primary）；first-8 readiness @ `8f13db32`；**非** visual Pass / **非** CI |
+| D1 allowlist | **20** intentional；re-audit @ `9bdaa053` still **0 closable** |
 | smoke Appearance | **文档根 + KH ownership + dark×minimal 已有**；**仍无**色差/截图/terracotta 色值 |
-| full prebuild | **Green 再次**（llm fixtures + D8 ownershipRoles optional category guard @ `52795047` 解阻 type-check:tests；confirmModal format @ `be4329f1`；AppModal #25 @ `fb5384d6`；import-conflict #26 @ `77fd0cdc`；settings scroll-spy complete @ `9fab3a58`；AppModal format @ `f464b373`；D6 #27 @ `1731ed47`；D12 first-8 readiness @ `8f13db32`；D8 soft sop/hub @ `adbe0afb`；XO #24–26 tips @ `3e600716`；tip `3e600716`；full build+smoke green 再次） |
+| full prebuild | **Green 再次**（llm fixtures + D8 ownershipRoles optional category guard @ `52795047` 解阻 type-check:tests；confirmModal format @ `be4329f1`；AppModal #25 @ `fb5384d6`；import-conflict #26 @ `77fd0cdc`；settings scroll-spy complete @ `9fab3a58`；AppModal format @ `f464b373`；D6 #27 @ `1731ed47`；D12 first-8 readiness @ `8f13db32`；D8 soft sop/hub @ `adbe0afb`；XO #24–26 tips @ `3e600716`；D1 re-audit 0 closable @ `9bdaa053`；tip `9bdaa053`；**build+smoke 29 green**） |
 | system 模式 | API + matchMedia 单测有；设置「跟随系统」UI 存在，跨 OS 体感仍人工 |
 
 ---
@@ -420,13 +421,13 @@ Sign-off visual: Yes / No   ← default No until XO fills; keep Yellow
 | 指标 | 值 |
 | --- | --- |
 | 文档路径 | `docs/superpowers/plans/2026-07-26-theme-system-xo-signoff-status.md` |
-| HEAD 对照 | `3e600716`（XO #24–26 Console open tips · D6 #27 legacy-compat `1731ed47` · D12 first-8 readiness `8f13db32` · D8 soft sop/hub `adbe0afb` · style(theme) AppModal format · settings scroll-spy complete `9fab3a58` · residual #18–27 · D12×24 · Visual Yellow · Human XO first） |
+| HEAD 对照 | `9bdaa053`（D1 re-audit 0 closable `9bdaa053` · XO #24–26 Console open tips `3e600716` · D6 #27 legacy-compat `1731ed47` · D12 first-8 readiness `8f13db32` · D8 soft sop/hub `adbe0afb` · style(theme) AppModal format · settings scroll-spy complete `9fab3a58` · residual #18–27 · D12×24 · build+smoke 29 green · Visual Yellow · Human XO first） |
 | Pass (automated) | **~16** |
 | Pass (code contract) | **~20** |
 | Needs manual browser | **~34** |
 | Blocked（产品路径） | **0**；visual / RC 体验 **Open** |
 | 视觉全站 Pass | **否（明确未签 · Yellow）** |
-| full prebuild | **Green 再次**（llm + D8 type-check:tests + AppModal #25 + import-conflict #26 + #27 legacy-compat + settings scroll-spy complete + AppModal format + D12 first-8 readiness + XO #24–26 tips；build+smoke green） |
+| full prebuild | **Green 再次**（llm + D8 type-check:tests + AppModal #25 + import-conflict #26 + #27 legacy-compat + settings scroll-spy complete + AppModal format + D12 first-8 readiness + XO #24–26 tips + D1 re-audit 0 closable；**build+smoke 29 green**） |
 | Tech Lead code 预签 | **允许** |
 | XO 体验签 | **仍要求（Human XO first）** |
 | 最大体验阻断 | **人类 30 分钟脚本未跑**；Settings 局部 blue 债；**无**全站色差/截图 Pass |
