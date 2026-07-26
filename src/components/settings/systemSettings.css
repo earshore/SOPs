@@ -1,11 +1,12 @@
 /* Settings component semantic tokens — map once to global design tokens (§14.2)
  * Accent/focus follow Appearance primary (A2 shell), not hard-coded blue. */
 .settings-panel-root {
-  --settings-surface: var(--color-bg-elevated, #fff);
-  --settings-surface-muted: var(--color-slate-50, #f8fafc);
-  --settings-border: var(--color-slate-200, #e2e8f0);
-  --settings-text: var(--color-slate-700, #334155);
-  --settings-text-muted: var(--color-slate-500, #64748b);
+  /* Semantic surfaces/text: flip once via global dark tokens (T2 dual-theme). */
+  --settings-surface: var(--color-bg-elevated, var(--surface-panel, #fff));
+  --settings-surface-muted: var(--color-bg-secondary, #f8fafc);
+  --settings-border: var(--color-border-default, #e2e8f0);
+  --settings-text: var(--color-text-primary, #334155);
+  --settings-text-muted: var(--color-text-secondary, #64748b);
   --settings-accent: var(--color-primary, #3b82f6);
   --settings-accent-soft: var(--color-primary-light, #dbeafe);
   --settings-accent-strong: var(--color-primary-dark, #1d4ed8);
@@ -14,6 +15,44 @@
   --settings-radius-control: var(--workbench-radius-lg, var(--rounded-lg, 12px));
   --settings-focus-color: var(--color-focus-ring, var(--color-primary, #3b82f6));
   --settings-focus-ring: 0 0 0 3px color-mix(in srgb, var(--settings-focus-color) 25%, transparent);
+}
+
+/* Drawer shell: panel elevation + soft footer gradient (not hard white). */
+.settings-panel-shell {
+  background: linear-gradient(
+    180deg,
+    var(--surface-panel, var(--settings-surface)),
+    color-mix(in srgb, var(--settings-surface-muted) 80%, var(--surface-panel, var(--settings-surface)))
+  );
+  box-shadow: -8px 0 30px color-mix(in srgb, #000 12%, transparent);
+  color: var(--settings-text);
+}
+
+.settings-panel-header {
+  background: transparent;
+}
+
+.settings-panel-title {
+  color: var(--color-text-primary, var(--settings-text));
+}
+
+.settings-panel-close-btn {
+  color: var(--color-text-tertiary, #94a3b8);
+  background: transparent;
+}
+
+.settings-panel-close-btn:hover {
+  color: var(--color-text-secondary, var(--settings-text-muted));
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
+}
+
+.settings-panel-separator {
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-border-default, var(--settings-border)),
+    transparent
+  );
 }
 
 /* Drawer chrome: top accent + title icon follow Appearance primary */
@@ -34,13 +73,13 @@
   justify-content: center;
   border-radius: 0.75rem;
   background: linear-gradient(135deg, var(--settings-accent), var(--settings-accent-strong));
-  color: #fff;
+  color: var(--color-primary-contrast, #fff);
   box-shadow: 0 8px 18px color-mix(in srgb, var(--settings-accent) 25%, transparent);
 }
 
 .settings-panel-chrome-icon i {
   font-size: 0.875rem;
-  color: #fff;
+  color: var(--color-primary-contrast, #fff);
 }
 
 .settings-panel-close-btn:focus-visible {
@@ -76,42 +115,70 @@
 /* Proxy form secret uses settings-proxy-form__secret padding (aligned with select height) */
 
 .settings-section-frame {
-  border: 1px solid rgba(226, 232, 240, 0.85);
+  border: 1px solid color-mix(in srgb, var(--settings-border) 85%, transparent);
   border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 4%, transparent);
   padding: 1rem;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.72));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--settings-surface) 92%, transparent),
+    color-mix(in srgb, var(--settings-surface-muted) 72%, var(--settings-surface))
+  );
 }
 
-/* Soft tint per section — keep same structure, mild accent only */
+/* Soft tint per section — color-mix into surface (dual-safe, not fixed pastels) */
 .settings-section-frame--llm {
-  background: linear-gradient(135deg, rgba(245, 243, 255, 0.88), rgba(248, 250, 252, 0.7));
-  border-color: rgba(221, 214, 254, 0.78);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, #8b5cf6 8%, var(--settings-surface)),
+    color-mix(in srgb, var(--settings-surface-muted) 70%, var(--settings-surface))
+  );
+  border-color: color-mix(in srgb, #8b5cf6 22%, var(--settings-border));
 }
 
 .settings-section-frame--strategy {
-  background: linear-gradient(135deg, rgba(238, 242, 255, 0.88), rgba(248, 250, 252, 0.7));
-  border-color: rgba(199, 210, 254, 0.75);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, #6366f1 8%, var(--settings-surface)),
+    color-mix(in srgb, var(--settings-surface-muted) 70%, var(--settings-surface))
+  );
+  border-color: color-mix(in srgb, #6366f1 22%, var(--settings-border));
 }
 
 .settings-section-frame--network {
-  background: linear-gradient(135deg, rgba(236, 254, 255, 0.88), rgba(248, 250, 252, 0.7));
-  border-color: rgba(165, 243, 252, 0.72);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, #06b6d4 8%, var(--settings-surface)),
+    color-mix(in srgb, var(--settings-surface-muted) 70%, var(--settings-surface))
+  );
+  border-color: color-mix(in srgb, #06b6d4 22%, var(--settings-border));
 }
 
 .settings-section-frame--data {
-  background: linear-gradient(135deg, rgba(239, 246, 255, 0.9), rgba(248, 250, 252, 0.7));
-  border-color: rgba(191, 219, 254, 0.75);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, #3b82f6 8%, var(--settings-surface)),
+    color-mix(in srgb, var(--settings-surface-muted) 70%, var(--settings-surface))
+  );
+  border-color: color-mix(in srgb, #3b82f6 22%, var(--settings-border));
 }
 
 .settings-section-frame--performance {
-  background: linear-gradient(135deg, rgba(236, 253, 245, 0.88), rgba(248, 250, 252, 0.7));
-  border-color: rgba(167, 243, 208, 0.72);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, #10b981 8%, var(--settings-surface)),
+    color-mix(in srgb, var(--settings-surface-muted) 70%, var(--settings-surface))
+  );
+  border-color: color-mix(in srgb, #10b981 22%, var(--settings-border));
 }
 
 .settings-section-frame--appearance {
-  background: linear-gradient(135deg, rgba(248, 250, 252, 0.95), rgba(241, 245, 249, 0.72));
-  border-color: rgba(226, 232, 240, 0.9);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--settings-surface-muted) 95%, var(--settings-surface)),
+    color-mix(in srgb, var(--settings-surface-muted) 72%, var(--settings-surface))
+  );
+  border-color: color-mix(in srgb, var(--settings-border) 90%, transparent);
 }
 
 /* Section title row (icon + title row + short desc) */
@@ -147,40 +214,40 @@
 }
 
 .settings-section-head__icon--violet {
-  background: #ede9fe;
+  background: color-mix(in srgb, #8b5cf6 14%, var(--settings-surface));
   color: #8b5cf6;
 }
 
 .settings-section-head__icon--indigo {
-  background: #e0e7ff;
+  background: color-mix(in srgb, #6366f1 14%, var(--settings-surface));
   color: #6366f1;
 }
 
 .settings-section-head__icon--cyan {
-  background: #cffafe;
+  background: color-mix(in srgb, #06b6d4 14%, var(--settings-surface));
   color: #06b6d4;
 }
 
 .settings-section-head__icon--blue {
-  background: #dbeafe;
+  background: color-mix(in srgb, #3b82f6 14%, var(--settings-surface));
   color: #3b82f6;
 }
 
 .settings-section-head__icon--emerald {
-  background: #d1fae5;
+  background: color-mix(in srgb, #10b981 14%, var(--settings-surface));
   color: #10b981;
 }
 
 .settings-section-head__icon--slate {
-  background: #f1f5f9;
-  color: #64748b;
+  background: color-mix(in srgb, var(--settings-text-muted) 12%, var(--settings-surface));
+  color: var(--settings-text-muted);
 }
 
 .settings-section-head__title {
   margin: 0;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--settings-text-muted);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   line-height: 1.25;
@@ -191,7 +258,7 @@
   font-size: 0.6875rem;
   font-weight: 400;
   line-height: 1.4;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
   max-width: 42rem;
 }
 
@@ -212,7 +279,7 @@
   border: 0;
   border-radius: 9999px;
   background: transparent;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
   font-size: 0.6875rem;
   cursor: help;
   padding: 0;
@@ -220,13 +287,13 @@
 
 .settings-section-tip__btn:hover,
 .settings-section-tip__btn:focus-visible {
-  color: #64748b;
-  background: #f1f5f9;
+  color: var(--settings-text-muted);
+  background: var(--color-bg-tertiary, var(--settings-surface-muted));
   outline: none;
 }
 
 .settings-section-tip.is-warn .settings-section-tip__btn {
-  color: #d97706;
+  color: var(--color-warning-dark, #d97706);
 }
 
 .settings-section-tip__popover {
@@ -237,13 +304,13 @@
   width: min(18rem, 70vw);
   padding: 0.5rem 0.625rem;
   border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+  border: 1px solid var(--settings-border);
+  background: var(--settings-surface);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text-primary, #0f172a) 10%, transparent);
   font-size: 0.6875rem;
   font-weight: 400;
   line-height: 1.45;
-  color: #64748b;
+  color: var(--settings-text-muted);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -273,7 +340,7 @@
 
 .settings-section-tip__popover li {
   margin: 0.15rem 0;
-  color: #b45309;
+  color: var(--color-warning-dark, #b45309);
 }
 
 /* Expand / collapse bar for tool-strategy app groups */
@@ -288,26 +355,26 @@
 .settings-expand-bar__btn {
   min-height: 1.75rem;
   padding: 0.2rem 0.55rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--settings-border);
   border-radius: 0.5rem;
-  background: #fff;
-  color: #64748b;
+  background: var(--settings-surface);
+  color: var(--settings-text-muted);
   font-size: 0.625rem;
   font-weight: 500;
   cursor: pointer;
 }
 
 .settings-expand-bar__btn:hover {
-  background: #f8fafc;
-  color: #475569;
+  background: var(--settings-surface-muted);
+  color: var(--settings-text);
 }
 
-/* Inner white cards (runtime blocks, app groups, etc.) */
+/* Inner cards (runtime blocks, app groups, etc.) — elevated surface, not hard white */
 .settings-card {
-  border: 1px solid rgba(226, 232, 240, 0.95);
+  border: 1px solid color-mix(in srgb, var(--settings-border) 95%, transparent);
   border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  background: color-mix(in srgb, var(--settings-surface) 88%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 3%, transparent);
   padding: 0.75rem;
 }
 
@@ -323,7 +390,7 @@
   margin: 0;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--settings-text);
   line-height: 1.3;
 }
 
@@ -332,7 +399,7 @@
   font-size: 0.625rem;
   font-weight: 400;
   line-height: 1.45;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
 }
 
 .settings-card__badge {
@@ -342,12 +409,12 @@
   padding: 0.2rem 0.5rem;
   font-size: 0.625rem;
   font-weight: 500;
-  color: #64748b;
-  background: #f1f5f9;
+  color: var(--settings-text-muted);
+  background: var(--color-bg-tertiary, var(--settings-surface-muted));
   white-space: nowrap;
 }
 
-/* Scope / impact badges (Spec §3.5 / §15.5) */
+/* Scope / impact badges (Spec §3.5 / §15.5) — color-mix soft tints on surface */
 .settings-badge {
   display: inline-flex;
   align-items: center;
@@ -356,43 +423,43 @@
   font-size: 0.625rem;
   font-weight: 500;
   white-space: nowrap;
-  background: #f1f5f9;
-  color: #475569;
+  background: color-mix(in srgb, var(--settings-text-muted) 12%, var(--settings-surface));
+  color: var(--settings-text);
 }
 
 .settings-badge--local {
-  background: #f1f5f9;
-  color: #475569;
+  background: color-mix(in srgb, var(--settings-text-muted) 12%, var(--settings-surface));
+  color: var(--settings-text);
 }
 
 .settings-badge--ai-cost {
-  background: #fffbeb;
-  color: #92400e;
+  background: color-mix(in srgb, var(--color-warning, #f59e0b) 14%, var(--settings-surface));
+  color: var(--color-warning-dark, #92400e);
 }
 
 .settings-badge--scrape {
-  background: #ecfeff;
-  color: #155e75;
+  background: color-mix(in srgb, #06b6d4 14%, var(--settings-surface));
+  color: #0891b2;
 }
 
 .settings-badge--destructive {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: color-mix(in srgb, var(--color-error, #ef4444) 12%, var(--settings-surface));
+  color: var(--color-error-dark, #b91c1c);
 }
 
 .settings-badge--dev {
-  background: #ecfdf5;
-  color: #065f46;
+  background: color-mix(in srgb, var(--color-success, #10b981) 12%, var(--settings-surface));
+  color: var(--color-success-dark, #065f46);
 }
 
 .settings-badge--instant {
-  background: #f5f3ff;
-  color: #6d28d9;
+  background: color-mix(in srgb, #8b5cf6 12%, var(--settings-surface));
+  color: #7c3aed;
 }
 
 .settings-badge--global {
-  background: #eef2ff;
-  color: #3730a3;
+  background: color-mix(in srgb, #6366f1 12%, var(--settings-surface));
+  color: #4f46e5;
 }
 
 /* Runtime strategy preset buttons (P1-6) — full width equal columns */
@@ -610,7 +677,7 @@
   transform: translateY(-50%);
   align-items: center;
   justify-content: center;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
   font-size: 0.75rem;
 }
 
@@ -623,7 +690,7 @@
 .settings-search-empty {
   margin: 0;
   font-size: 0.6875rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
 }
 
 /* Unified form controls across all sections */
@@ -645,7 +712,7 @@
 }
 
 .settings-control:hover {
-  border-color: #cbd5e1;
+  border-color: var(--color-border-strong, #cbd5e1);
 }
 
 .settings-control:focus,
@@ -657,7 +724,7 @@
 
 .settings-control:disabled {
   background: var(--settings-surface-muted, #f8fafc);
-  color: #94a3b8;
+  color: var(--color-text-disabled, #94a3b8);
   cursor: not-allowed;
 }
 
@@ -677,7 +744,7 @@ select.settings-control {
   margin-bottom: 0.375rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #475569;
+  color: var(--settings-text);
 }
 
 /* X6 shell chrome helpers — accent/focus follow Appearance primary via --settings-* */
@@ -706,7 +773,7 @@ select.settings-control {
   border: 1px solid transparent;
   border-radius: 0.75rem;
   background: linear-gradient(90deg, var(--settings-accent), var(--settings-accent-strong));
-  color: #fff;
+  color: var(--color-primary-contrast, #fff);
   font-size: 0.875rem;
   font-weight: 600;
   box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--settings-accent) 25%, transparent);
@@ -831,8 +898,8 @@ select.settings-control {
   height: 1.75rem;
   flex-shrink: 0;
   border-radius: 0.5rem;
-  background: #f1f5f9;
-  color: #64748b;
+  background: color-mix(in srgb, var(--settings-text-muted) 12%, var(--settings-surface));
+  color: var(--settings-text-muted);
   font-size: 0.6875rem;
   align-self: center;
 }
@@ -862,7 +929,7 @@ select.settings-control {
 
 .settings-appearance-divider {
   height: 1px;
-  background: #f1f5f9;
+  background: var(--color-border-light, var(--settings-border));
   margin: 0;
 }
 
@@ -1992,14 +2059,15 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   flex: 1 1 auto;
   min-height: 0; /* critical: allow flex child to scroll without growing panel */
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: var(--scrollbar-thumb, #cbd5e1) transparent;
 }
 
 .settings-panel-footer {
   flex-shrink: 0;
   position: relative;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.92);
+  background: color-mix(in srgb, var(--settings-surface) 92%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--settings-border) 70%, transparent);
 }
 
 .settings-panel-root[data-state='closed'] {
@@ -2015,13 +2083,13 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   display: block;
   appearance: none;
   border: 0;
-  background: #f1f5f9;
-  color: var(--settings-local-data-progress-color, #64748b);
+  background: var(--color-bg-tertiary, var(--settings-surface-muted));
+  color: var(--settings-local-data-progress-color, var(--settings-text-muted));
 }
 
 .settings-local-data-progress::-webkit-progress-bar {
   border-radius: 9999px;
-  background: #f1f5f9;
+  background: var(--color-bg-tertiary, var(--settings-surface-muted));
 }
 
 .settings-local-data-progress::-webkit-progress-value {
@@ -2088,10 +2156,10 @@ details.settings-submodule[open] .settings-collapsible-chevron {
     max-height: calc(100vh - 8rem);
     overflow-y: auto;
     padding: 0.75rem;
-    border: 1px solid rgba(226, 232, 240, 0.76);
+    border: 1px solid color-mix(in srgb, var(--settings-border) 76%, transparent);
     border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-    background: rgba(255, 255, 255, 0.72);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    background: color-mix(in srgb, var(--settings-surface) 72%, transparent);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 4%, transparent);
     scrollbar-width: thin;
   }
 
@@ -2100,7 +2168,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
     font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: #64748b;
+    color: var(--settings-text-muted);
     text-transform: uppercase;
   }
 
@@ -2120,7 +2188,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
     border: 0;
     border-radius: 0.625rem;
     background: transparent;
-    color: #475569;
+    color: var(--settings-text);
     cursor: pointer;
     font-family: inherit;
     font-size: 0.75rem;
@@ -2147,7 +2215,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
     flex-shrink: 0;
     width: 0.75rem;
     font-size: 0.5625rem;
-    color: #94a3b8;
+    color: var(--color-text-tertiary, #94a3b8);
     transition: transform 160ms ease;
   }
 
@@ -2167,7 +2235,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
     gap: 0.0625rem;
     padding: 0.125rem 0 0.25rem 0.25rem;
     margin: 0 0 0.125rem 0.75rem;
-    border-left: 1px solid #e2e8f0;
+    border-left: 1px solid var(--settings-border);
   }
 
   .settings-panel-nav-link--secondary {
@@ -2175,19 +2243,19 @@ details.settings-submodule[open] .settings-collapsible-chevron {
     padding: 0.25rem 0.5rem 0.25rem 0.625rem;
     font-size: 0.6875rem;
     font-weight: 500;
-    color: #64748b;
+    color: var(--settings-text-muted);
   }
 
   .settings-panel-nav-link:hover,
   .settings-panel-nav-link:focus-visible {
-    background: #f1f5f9;
+    background: var(--color-bg-tertiary, var(--settings-surface-muted));
     color: var(--settings-accent-strong);
     outline: none;
   }
 
   .settings-panel-nav-link--secondary:hover,
   .settings-panel-nav-link--secondary:focus-visible {
-    background: #f8fafc;
+    background: var(--settings-surface-muted);
     color: var(--settings-accent);
   }
 
@@ -2197,7 +2265,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   }
 
   .settings-panel-nav-link--secondary.is-current {
-    background: color-mix(in srgb, var(--settings-accent-soft) 85%, #fff);
+    background: color-mix(in srgb, var(--settings-accent-soft) 85%, var(--settings-surface));
     color: var(--settings-accent);
     font-weight: 600;
   }

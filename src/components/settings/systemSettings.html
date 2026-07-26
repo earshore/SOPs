@@ -16,19 +16,19 @@
 
   <!-- Modal Panel -->
   <div
-    class="relative h-full w-full max-w-[min(860px,calc(100vw-48px))] bg-gradient-to-b from-white to-slate-50/80 shadow-[-8px_0_30px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col"
+    class="settings-panel-shell relative h-full w-full max-w-[min(860px,calc(100vw-48px))] overflow-hidden flex flex-col"
   >
     <!-- Decorative top accent line (Appearance primary) -->
     <div class="settings-panel-chrome-bar" aria-hidden="true"></div>
 
     <!-- Header -->
-    <div class="relative p-5 pb-4 flex items-center justify-between">
+    <div class="settings-panel-header relative p-5 pb-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="settings-panel-chrome-icon" aria-hidden="true">
           <i class="fas fa-sliders-h"></i>
         </div>
         <div>
-          <h2 class="text-[15px] font-bold text-slate-800 tracking-tight">系统设置</h2>
+          <h2 class="settings-panel-title text-[15px] font-bold tracking-tight">系统设置</h2>
         </div>
       </div>
       <button
@@ -36,14 +36,14 @@
         @click="close()"
         aria-label="关闭系统设置"
         title="关闭系统设置"
-        class="settings-panel-close-btn w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none"
+        class="settings-panel-close-btn w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200 focus-visible:outline-none"
       >
         <i class="fas fa-times text-sm"></i>
       </button>
     </div>
 
     <!-- Subtle separator -->
-    <div class="mx-5 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+    <div class="settings-panel-separator mx-5 h-px"></div>
 
     <!-- In-panel search -->
     <div class="settings-toolbar settings-toolbar--search-only">
