@@ -1349,6 +1349,10 @@ input[type='radio']:disabled {
 .dark input[type='checkbox'],
 .dark .form-radio,
 .dark input[type='radio'],
+[data-color-mode-resolved='dark'] .form-checkbox,
+[data-color-mode-resolved='dark'] input[type='checkbox'],
+[data-color-mode-resolved='dark'] .form-radio,
+[data-color-mode-resolved='dark'] input[type='radio'],
 [data-theme='dark'] .form-checkbox,
 [data-theme='dark'] input[type='checkbox'],
 [data-theme='dark'] .form-radio,
@@ -1366,6 +1370,8 @@ input[type='radio']:disabled {
 
 .dark .form-checkbox:disabled,
 .dark input[type='checkbox']:disabled,
+[data-color-mode-resolved='dark'] .form-checkbox:disabled,
+[data-color-mode-resolved='dark'] input[type='checkbox']:disabled,
 [data-theme='dark'] .form-checkbox:disabled,
 [data-theme='dark'] input[type='checkbox']:disabled {
   background-color: rgba(255, 255, 255, 0.04);
@@ -1373,6 +1379,8 @@ input[type='radio']:disabled {
 
 .dark .form-checkbox:disabled:checked,
 .dark input[type='checkbox']:disabled:checked,
+[data-color-mode-resolved='dark'] .form-checkbox:disabled:checked,
+[data-color-mode-resolved='dark'] input[type='checkbox']:disabled:checked,
 [data-theme='dark'] .form-checkbox:disabled:checked,
 [data-theme='dark'] input[type='checkbox']:disabled:checked {
   background-color: rgba(255, 255, 255, 0.15);
@@ -1380,6 +1388,7 @@ input[type='radio']:disabled {
 }
 
 .dark .form-checkbox:hover:checked:not(:disabled),
+[data-color-mode-resolved='dark'] .form-checkbox:hover:checked:not(:disabled),
 [data-theme='dark'] .form-checkbox:hover:checked:not(:disabled) {
   background-color: var(--color-indigo-400, #818cf8);
   border-color: var(--color-indigo-400, #818cf8);
@@ -1387,23 +1396,27 @@ input[type='radio']:disabled {
 
 /* --- 标签暗色 --- */
 .dark .form-checkbox-label,
+[data-color-mode-resolved='dark'] .form-checkbox-label,
 [data-theme='dark'] .form-checkbox-label {
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .form-checkbox-label-description,
+[data-color-mode-resolved='dark'] .form-checkbox-label-description,
 [data-theme='dark'] .form-checkbox-label-description {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 /* --- 卡片暗色 --- */
 .dark .form-checkbox-card,
+[data-color-mode-resolved='dark'] .form-checkbox-card,
 [data-theme='dark'] .form-checkbox-card {
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.02);
 }
 
 .dark .form-checkbox-card:hover,
+[data-color-mode-resolved='dark'] .form-checkbox-card:hover,
 [data-theme='dark'] .form-checkbox-card:hover {
   border-color: rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.04);
@@ -1412,6 +1425,9 @@ input[type='radio']:disabled {
 .dark .form-checkbox-card:has(.form-checkbox:checked),
 .dark .form-checkbox-card:has(input[type='checkbox']:checked),
 .dark .form-checkbox-card.is-checked,
+[data-color-mode-resolved='dark'] .form-checkbox-card:has(.form-checkbox:checked),
+[data-color-mode-resolved='dark'] .form-checkbox-card:has(input[type='checkbox']:checked),
+[data-color-mode-resolved='dark'] .form-checkbox-card.is-checked,
 [data-theme='dark'] .form-checkbox-card:has(.form-checkbox:checked),
 [data-theme='dark'] .form-checkbox-card:has(input[type='checkbox']:checked),
 [data-theme='dark'] .form-checkbox-card.is-checked {
@@ -1420,28 +1436,33 @@ input[type='radio']:disabled {
 }
 
 .dark .form-checkbox-card:has(:disabled),
+[data-color-mode-resolved='dark'] .form-checkbox-card:has(:disabled),
 [data-theme='dark'] .form-checkbox-card:has(:disabled) {
   background: rgba(255, 255, 255, 0.02);
 }
 
 .dark .form-checkbox-card-title,
+[data-color-mode-resolved='dark'] .form-checkbox-card-title,
 [data-theme='dark'] .form-checkbox-card-title {
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .form-checkbox-card-description,
+[data-color-mode-resolved='dark'] .form-checkbox-card-description,
 [data-theme='dark'] .form-checkbox-card-description {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 /* 卡片图标暗色 */
 .dark .form-checkbox-card-icon,
+[data-color-mode-resolved='dark'] .form-checkbox-card-icon,
 [data-theme='dark'] .form-checkbox-card-icon {
   background: rgba(255, 255, 255, 0.06);
   color: var(--color-text-tertiary, #9ca3af);
 }
 
 .dark .form-checkbox-card--icon:has(:checked) .form-checkbox-card-icon,
+[data-color-mode-resolved='dark'] .form-checkbox-card--icon:has(:checked) .form-checkbox-card-icon,
 [data-theme='dark'] .form-checkbox-card--icon:has(:checked) .form-checkbox-card-icon {
   background: rgba(129, 140, 248, 0.12);
   color: var(--color-primary, #818cf8);
@@ -1449,21 +1470,31 @@ input[type='radio']:disabled {
 
 /* --- 开关暗色 --- */
 .dark .form-checkbox-switch-track,
+[data-color-mode-resolved='dark'] .form-checkbox-switch-track,
 [data-theme='dark'] .form-checkbox-switch-track {
   background: rgba(255, 255, 255, 0.15);
 }
 
 .dark .form-checkbox-switch:hover input:not(:disabled) + .form-checkbox-switch-track,
+[data-color-mode-resolved='dark']
+  .form-checkbox-switch:hover
+  input:not(:disabled)
+  + .form-checkbox-switch-track,
 [data-theme='dark'] .form-checkbox-switch:hover input:not(:disabled) + .form-checkbox-switch-track {
   background: rgba(255, 255, 255, 0.2);
 }
 
 .dark .form-checkbox-switch input:checked + .form-checkbox-switch-track,
+[data-color-mode-resolved='dark'] .form-checkbox-switch input:checked + .form-checkbox-switch-track,
 [data-theme='dark'] .form-checkbox-switch input:checked + .form-checkbox-switch-track {
   background: var(--color-primary, #818cf8);
 }
 
 .dark .form-checkbox-switch:hover input:checked:not(:disabled) + .form-checkbox-switch-track,
+[data-color-mode-resolved='dark']
+  .form-checkbox-switch:hover
+  input:checked:not(:disabled)
+  + .form-checkbox-switch-track,
 [data-theme='dark']
   .form-checkbox-switch:hover
   input:checked:not(:disabled)
@@ -1472,34 +1503,43 @@ input[type='radio']:disabled {
 }
 
 .dark .form-checkbox-switch-text,
+[data-color-mode-resolved='dark'] .form-checkbox-switch-text,
 [data-theme='dark'] .form-checkbox-switch-text {
   color: var(--color-text-primary, #f9fafb);
 }
 
 /* --- 组暗色 --- */
 .dark .form-checkbox-group--bordered,
+[data-color-mode-resolved='dark'] .form-checkbox-group--bordered,
 [data-theme='dark'] .form-checkbox-group--bordered {
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .form-checkbox-group--divided > .form-checkbox-label + .form-checkbox-label,
+[data-color-mode-resolved='dark']
+  .form-checkbox-group--divided
+  > .form-checkbox-label
+  + .form-checkbox-label,
 [data-theme='dark'] .form-checkbox-group--divided > .form-checkbox-label + .form-checkbox-label {
   border-top-color: rgba(255, 255, 255, 0.06);
 }
 
 /* --- 全选栏暗色 --- */
 .dark .form-checkbox-select-all,
+[data-color-mode-resolved='dark'] .form-checkbox-select-all,
 [data-theme='dark'] .form-checkbox-select-all {
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .form-checkbox-select-all-text,
+[data-color-mode-resolved='dark'] .form-checkbox-select-all-text,
 [data-theme='dark'] .form-checkbox-select-all-text {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 /* --- 批量操作栏暗色 --- */
 .dark .form-checkbox-bulk-bar,
+[data-color-mode-resolved='dark'] .form-checkbox-bulk-bar,
 [data-theme='dark'] .form-checkbox-bulk-bar {
   background: rgba(129, 140, 248, 0.08);
   border-color: rgba(129, 140, 248, 0.15);
@@ -1511,6 +1551,10 @@ input[type='radio']:disabled {
 .dark .editor-input-modern,
 .dark .form-textarea,
 .dark .form-select,
+[data-color-mode-resolved='dark'] .form-input,
+[data-color-mode-resolved='dark'] .editor-input-modern,
+[data-color-mode-resolved='dark'] .form-textarea,
+[data-color-mode-resolved='dark'] .form-select,
 [data-theme='dark'] .form-input,
 [data-theme='dark'] .editor-input-modern,
 [data-theme='dark'] .form-textarea,
@@ -1523,6 +1567,9 @@ input[type='radio']:disabled {
 .dark .form-input:hover,
 .dark .form-textarea:hover,
 .dark .form-select:hover,
+[data-color-mode-resolved='dark'] .form-input:hover,
+[data-color-mode-resolved='dark'] .form-textarea:hover,
+[data-color-mode-resolved='dark'] .form-select:hover,
 [data-theme='dark'] .form-input:hover,
 [data-theme='dark'] .form-textarea:hover,
 [data-theme='dark'] .form-select:hover {
@@ -1532,6 +1579,9 @@ input[type='radio']:disabled {
 .dark .form-input:focus,
 .dark .form-textarea:focus,
 .dark .form-select:focus,
+[data-color-mode-resolved='dark'] .form-input:focus,
+[data-color-mode-resolved='dark'] .form-textarea:focus,
+[data-color-mode-resolved='dark'] .form-select:focus,
 [data-theme='dark'] .form-input:focus,
 [data-theme='dark'] .form-textarea:focus,
 [data-theme='dark'] .form-select:focus {
@@ -1542,6 +1592,9 @@ input[type='radio']:disabled {
 .dark .form-input:disabled,
 .dark .form-textarea:disabled,
 .dark .form-select:disabled,
+[data-color-mode-resolved='dark'] .form-input:disabled,
+[data-color-mode-resolved='dark'] .form-textarea:disabled,
+[data-color-mode-resolved='dark'] .form-select:disabled,
 [data-theme='dark'] .form-input:disabled,
 [data-theme='dark'] .form-textarea:disabled,
 [data-theme='dark'] .form-select:disabled {
@@ -1550,16 +1603,19 @@ input[type='radio']:disabled {
 }
 
 .dark .form-label,
+[data-color-mode-resolved='dark'] .form-label,
 [data-theme='dark'] .form-label {
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .form-help,
+[data-color-mode-resolved='dark'] .form-help,
 [data-theme='dark'] .form-help {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 .dark .form-select,
+[data-color-mode-resolved='dark'] .form-select,
 [data-theme='dark'] .form-select {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }

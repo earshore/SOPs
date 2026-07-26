@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- D11：`forms.css` 暗色覆盖 31 规则扩为 `.dark, [data-color-mode-resolved='dark'], [data-theme='dark']` tri-selector（保留 legacy）。
+- D11：`header.css` 暗色覆盖 **25** 规则同上 tri-selector（保留 legacy）。
+- D11：`interactive.css` 暗色覆盖 **24** 规则扩为 `.dark, [data-color-mode-resolved='dark'], [data-theme='dark']` tri-selector（保留 legacy）。
+- D11：`loading.css` 剩余 4 规则（route-loading-skeleton ×2 + loading-skeleton ×2）同上 tri-selector；overlay 已先迁（文件内暗色 **5** 规则全量 done）。
 - D11：`cards.css` 暗色覆盖 19 规则扩为 `.dark, [data-color-mode-resolved='dark'], [data-theme='dark']` tri-selector（保留 legacy）。
 - D6/D5 hybrid：App Center overview focus 从 `var(--module-accent, var(--color-blue-500))` 迁到 `var(--module-accent, var(--color-focus-ring, #3b82f6))`（保留 module-accent；**不**在模块 CSS 覆盖/直引 `--color-primary`）。
 - D7：ESLint hard-gate 禁止生产代码调用 `ColorContext.setModuleColor`（`no-restricted-properties` error；优先 `inferColorFromModule`）。
@@ -42,6 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D6 业务样例 #7（Deep Chat shell）：top chrome / 模型选择 / 设置区 / 会话重命名 focus 从 hard blue·terracotta ring 迁到 `--color-primary*` / `--color-focus-ring`（保留发送钮与业务 terracotta 品牌色）。
 - D6 业务样例 #8（Keyword Hunter input）：关键词输入壳 focus / 词数徽章 / 区段图标从 hard `blue-*` 迁到 `--color-primary*` / `--color-focus-ring`（保留 Listing emerald 区与 amber 重复状态徽章）。
 - D6 业务样例 #9（Keyword Hunter process/filter）：筛选 focus / 快照选中 chrome 从 hard blue 迁到 `--color-primary*` / `--color-focus-ring`；draft `current/saving/loading` 用 `--color-info*`（保留 coverage 多色梯度与 rose ownership）。
+- D6 业务样例 #10（SOPs overview）：collapsible / table-scroll focus、search focus-within 边框、process step hover 边框/标题/箭头与 step-number 默认背景 fallback 从 hard `blue-*` 迁到 `module-accent` + `--color-focus-ring`（**不**在模块 CSS 引 `--color-primary`；保留 phase-blue / category tab / multi-color step palette / SEO 教学卡）。
+- D6 业务样例 #11（NPI Tracker）：`copyNpiReviewTemplate` / `saveNextSteps` 主 CTA 从 hard `bg-blue-500` 迁到 shared `action-btn action-btn-primary`（Appearance `--color-primary*`）。
 - D5 续：`--shadow-primary-*` 改 `color-mix` 跟随 `--color-primary`（light/dark），不再写死蓝/indigo。
 - D5 续：root `--focus-ring-soft` + header search / forms dark / Overview search / nav-focus 从 hard blue 迁到 `--color-focus-ring`（megaMenu / sidebar-theme / wb ownership 保留）。
 - D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标；Keyword Hunter 报告 section 与 AI Analysis JSON 面板图标）；entry/overview / megaMenu 营销 lift 保留。

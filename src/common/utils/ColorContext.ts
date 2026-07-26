@@ -46,6 +46,10 @@ export class ColorContext {
    * Sidebar and ownership UI should infer from menuConfig; keep this only for legacy
    * `getModuleColor` / `onThemeChange` compatibility until dual-channel D7 is fully retired.
    *
+   * Residual audit (D7): **0** production call sites remain. Live write uses are test-only
+   * (`ColorContext.test.ts`); `themeConfig.test.ts` mocks/asserts non-call; definition kept
+   * intentionally — do **not** mass-delete this API until dual-channel retire.
+   *
    * @param color - 颜色方案名称
    */
   static setModuleColor(color: ColorSchemeName): void {

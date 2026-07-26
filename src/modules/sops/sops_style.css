@@ -151,7 +151,7 @@
 }
 
 .sops-collapsible-summary:focus-visible {
-  outline: 2px solid var(--module-accent, var(--color-blue-500, #3b82f6));
+  outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
   outline-offset: 3px;
 }
 
@@ -296,7 +296,7 @@
 }
 
 .npi-lifecycle-table-scroll:focus-visible {
-  outline: 2px solid var(--module-accent, var(--color-blue-500));
+  outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
   outline-offset: -2px;
 }
 
@@ -607,7 +607,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-search-box:focus-within {
-  border-color: var(--color-blue-500);
+  border-color: var(--color-focus-ring, var(--module-accent, #3b82f6));
   box-shadow: 0 0 0 3px var(--module-accent-focus, var(--focus-ring-soft));
 }
 
@@ -685,7 +685,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:hover {
-  border-color: var(--module-accent, var(--color-blue-500));
+  border-color: var(--module-accent, var(--color-focus-ring, #3b82f6));
   background: var(--surface-card-hover, var(--color-slate-50));
   box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
 }
@@ -696,7 +696,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   height: 40px;
   margin: 0 auto var(--spacing-sm, 0.75rem);
   border-radius: 50%;
-  background: var(--module-accent, var(--color-blue-500));
+  background: var(--module-accent, var(--color-focus-ring, #3b82f6));
   color: white;
   font-size: var(--text-md, 1rem);
   font-weight: var(--font-bold, 700);
@@ -709,7 +709,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:hover .sop-step-number {
-  background: var(--module-accent-text, var(--color-blue-600));
+  background: var(--module-accent-text, var(--module-accent, var(--color-focus-ring, #3b82f6)));
 }
 
 /* 步骤内容 */
@@ -731,7 +731,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:hover .sop-step-title {
-  color: var(--module-accent, var(--color-blue-500));
+  color: var(--module-accent, var(--color-focus-ring, #3b82f6));
 }
 
 /* 步骤描述 */
@@ -766,7 +766,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 /* 当相邻步骤悬停时，箭头也有动画效果 */
 .sop-process-step:hover + .sop-process-arrow,
 .sop-process-arrow:has(+ .sop-process-step:hover) {
-  color: var(--module-accent, var(--color-blue-500));
+  color: var(--module-accent, var(--color-focus-ring, #3b82f6));
 }
 
 .sop-process-step:hover + .sop-process-arrow i,

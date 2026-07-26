@@ -112,7 +112,9 @@ describe('PC design token CSS contract', () => {
 
     expect(sopsCss).toContain('--module-accent: var(--sops-qwen-violet)');
     expect(sopsCss).toContain('--module-accent-focus: var(--sops-qwen-focus)');
-    expect(sopsCss).toContain('outline: 2px solid var(--module-accent, var(--color-blue-500');
+    expect(sopsCss).toContain(
+      'outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6))'
+    );
     expect(sopsCss).not.toMatch(localPrimaryDefinition);
     expect(sopsCss).not.toMatch(localPrimaryReference);
   });

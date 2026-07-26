@@ -1258,81 +1258,97 @@
 
 /* ========================================
    18. 暗色模式适配
+   D11 residual: dual-safe dark — never key dark off appearance id on data-theme
    ======================================== */
 .dark .hoverable:hover,
+[data-color-mode-resolved='dark'] .hoverable:hover,
 [data-theme='dark'] .hoverable:hover {
   background-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .hoverable:active,
+[data-color-mode-resolved='dark'] .hoverable:active,
 [data-theme='dark'] .hoverable:active {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark .drag-handle:hover,
+[data-color-mode-resolved='dark'] .drag-handle:hover,
 [data-theme='dark'] .drag-handle:hover {
   color: var(--color-text-secondary, #d1d5db);
   background: rgba(255, 255, 255, 0.06);
 }
 
 .dark .drop-zone,
+[data-color-mode-resolved='dark'] .drop-zone,
 [data-theme='dark'] .drop-zone {
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark .drop-zone--active,
+[data-color-mode-resolved='dark'] .drop-zone--active,
 [data-theme='dark'] .drop-zone--active {
   border-color: var(--color-primary, #818cf8);
   background: rgba(129, 140, 248, 0.06);
 }
 
 .dark .thin-scrollbar,
+[data-color-mode-resolved='dark'] .thin-scrollbar,
 [data-theme='dark'] .thin-scrollbar {
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 .dark .thin-scrollbar::-webkit-scrollbar-thumb,
+[data-color-mode-resolved='dark'] .thin-scrollbar::-webkit-scrollbar-thumb,
 [data-theme='dark'] .thin-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
 }
 
 .dark .thin-scrollbar::-webkit-scrollbar-thumb:hover,
+[data-color-mode-resolved='dark'] .thin-scrollbar::-webkit-scrollbar-thumb:hover,
 [data-theme='dark'] .thin-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
 .dark .scroll-fade-x::before,
+[data-color-mode-resolved='dark'] .scroll-fade-x::before,
 [data-theme='dark'] .scroll-fade-x::before {
   background: linear-gradient(to right, var(--color-bg-primary, #0f172a), transparent);
 }
 
 .dark .scroll-fade-x::after,
+[data-color-mode-resolved='dark'] .scroll-fade-x::after,
 [data-theme='dark'] .scroll-fade-x::after {
   background: linear-gradient(to left, var(--color-bg-primary, #0f172a), transparent);
 }
 
 .dark .scroll-fade-y::before,
+[data-color-mode-resolved='dark'] .scroll-fade-y::before,
 [data-theme='dark'] .scroll-fade-y::before {
   background: linear-gradient(to bottom, var(--color-bg-primary, #0f172a), transparent);
 }
 
 .dark .scroll-fade-y::after,
+[data-color-mode-resolved='dark'] .scroll-fade-y::after,
 [data-theme='dark'] .scroll-fade-y::after {
   background: linear-gradient(to top, var(--color-bg-primary, #0f172a), transparent);
 }
 
 .dark .text-expandable.is-clamped::after,
+[data-color-mode-resolved='dark'] .text-expandable.is-clamped::after,
 [data-theme='dark'] .text-expandable.is-clamped::after {
   background: linear-gradient(to bottom, transparent, var(--color-bg-primary, #0f172a));
 }
 
 .dark .is-loading::after,
+[data-color-mode-resolved='dark'] .is-loading::after,
 [data-theme='dark'] .is-loading::after {
   border-color: rgba(255, 255, 255, 0.1);
   border-top-color: var(--color-primary, #818cf8);
 }
 
 .dark .is-stale::before,
+[data-color-mode-resolved='dark'] .is-stale::before,
 [data-theme='dark'] .is-stale::before {
   background: repeating-linear-gradient(
     -45deg,
@@ -1344,50 +1360,60 @@
 }
 
 .dark .is-new::after,
+[data-color-mode-resolved='dark'] .is-new::after,
 [data-theme='dark'] .is-new::after {
   background: var(--color-primary, #818cf8);
   box-shadow: 0 0 0 2px var(--color-bg-primary, #0f172a);
 }
 
 .dark .sortable-item:hover,
+[data-color-mode-resolved='dark'] .sortable-item:hover,
 [data-theme='dark'] .sortable-item:hover {
   background: rgba(255, 255, 255, 0.04);
 }
 
 .dark .sortable-item.is-dragging,
+[data-color-mode-resolved='dark'] .sortable-item.is-dragging,
 [data-theme='dark'] .sortable-item.is-dragging {
   background: var(--color-bg-secondary, #1e293b);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .dark .drag-placeholder,
+[data-color-mode-resolved='dark'] .drag-placeholder,
 [data-theme='dark'] .drag-placeholder {
   border-color: var(--color-primary, #818cf8);
   background: rgba(129, 140, 248, 0.06);
 }
 
 .dark .card-loading::after,
+[data-color-mode-resolved='dark'] .card-loading::after,
 [data-theme='dark'] .card-loading::after {
   background: rgba(15, 23, 42, 0.6);
 }
 
 .dark .link,
+[data-color-mode-resolved='dark'] .link,
 [data-theme='dark'] .link {
   color: var(--color-primary, #818cf8);
 }
 
 .dark .link:hover,
+[data-color-mode-resolved='dark'] .link:hover,
 [data-theme='dark'] .link:hover {
   color: #a5b4fc;
 }
 
 .dark ::selection,
+[data-color-mode-resolved='dark'] ::selection,
 [data-theme='dark'] ::selection {
   background: var(--color-primary, #818cf8);
 }
 
 .dark .nav-focus[data-focus='true'],
 .dark .nav-focus.is-focused,
+[data-color-mode-resolved='dark'] .nav-focus[data-focus='true'],
+[data-color-mode-resolved='dark'] .nav-focus.is-focused,
 [data-theme='dark'] .nav-focus[data-focus='true'],
 [data-theme='dark'] .nav-focus.is-focused {
   background: rgba(129, 140, 248, 0.1);
