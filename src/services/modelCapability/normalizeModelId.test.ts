@@ -20,6 +20,17 @@ describe('normalizeModelIdForCapability', () => {
     expect(cap.source.registryMatched).toBe(true);
     expect(cap.apiSurface).toBe('responses');
   });
+
+  it('canonicalizes dotted Claude versions to official hyphen ids', () => {
+    expect(normalizeModelIdForCapability('claude-opus-4.8')).toBe('claude-opus-4-8');
+    expect(normalizeModelIdForCapability('claude-sonnet-4.6')).toBe('claude-sonnet-4-6');
+    expect(normalizeModelIdForCapability('anthropic/claude-opus-4.7')).toBe('claude-opus-4-7');
+    // Hyphenated official ids pass through untouched.
+    expect(normalizeModelIdForCapability('claude-opus-4-8')).toBe('claude-opus-4-8');
+    // Non-Claude dotted ids are untouched.
+    expect(normalizeModelIdForCapability('grok-4.5')).toBe('grok-4.5');
+    expect(normalizeModelIdForCapability('gemini-2.5-pro')).toBe('gemini-2.5-pro');
+  });
 });
 
 describe('jsonMode surface force (reliability, not always-broken)', () => {

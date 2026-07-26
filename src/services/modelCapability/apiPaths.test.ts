@@ -74,9 +74,13 @@ describe('protocol bodies', () => {
     });
     expect(body.systemInstruction).toBeTruthy();
     expect(Array.isArray(body.contents)).toBe(true);
-    expect((body.generationConfig as { responseMimeType?: string }).responseMimeType).toBe(
-      'application/json'
-    );
-    expect(body.thinkingConfig).toMatchObject({ includeThoughts: true });
+    const generationConfig = body.generationConfig as {
+      responseMimeType?: string;
+      thinkingConfig?: unknown;
+    };
+    expect(generationConfig.responseMimeType).toBe('application/json');
+    // Official v1beta shape: thinkingConfig nests under generationConfig.
+    expect(generationConfig.thinkingConfig).toMatchObject({ includeThoughts: true });
+    expect(body.thinkingConfig).toBeUndefined();
   });
 });

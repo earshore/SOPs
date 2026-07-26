@@ -11,7 +11,7 @@ import {
 import type { ApiPathId } from './apiPaths';
 import { normalizeToolsForChat } from './chatTools';
 import { normalizeToolsForResponses } from './responsesTools';
-import { GEMINI_THINKING_BUDGET_BY_EFFORT } from './mappers';
+import { GEMINI_THINKING_BUDGET_BY_EFFORT, THINKING_BUDGET_ANSWER_HEADROOM } from './mappers';
 
 export type ChatMessageLike = { role: string; content: string };
 
@@ -54,7 +54,7 @@ function applyThinkingBudgetFloor(body: Record<string, unknown>): void {
   const thinking = body.thinking as { budget_tokens?: number } | undefined;
   const budget = thinking?.budget_tokens;
   if (typeof budget !== 'number') return;
-  const min = budget + 512;
+  const min = budget + THINKING_BUDGET_ANSWER_HEADROOM;
   if (typeof body.max_tokens !== 'number' || body.max_tokens < min) {
     body.max_tokens = min;
   }
@@ -154,6 +154,10 @@ function buildGeminiGenerationConfig(args: {
   return generationConfig;
 }
 
+/**
+ * Official generateContent nests thinking under generationConfig.thinkingConfig;
+ * a top-level thinkingConfig is rejected/ignored by the v1beta endpoint.
+ */
 function applyGeminiThinkingConfig(
   body: Record<string, unknown>,
   capability: ResolvedModelCapability,
@@ -161,7 +165,9 @@ function applyGeminiThinkingConfig(
 ): void {
   if (!capability.mapRequest || !reasoning.enabled || reasoning.effort === 'off') return;
   const budget = GEMINI_THINKING_BUDGET_BY_EFFORT[reasoning.effort] ?? 4_096;
-  body.thinkingConfig = { thinkingBudget: budget, includeThoughts: true };
+  const generationConfig = (body.generationConfig ?? {}) as Record<string, unknown>;
+  generationConfig.thinkingConfig = { thinkingBudget: budget, includeThoughts: true };
+  body.generationConfig = generationConfig;
 }
 
 export type BuildBodyForApiPathArgs = {
