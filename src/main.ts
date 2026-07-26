@@ -545,6 +545,8 @@ async function continueStartup(
   initializeStartupUtilities();
   ThemeManager.restoreColorMode();
   ThemeManager.restoreTheme();
+  // T1-2: allow post-hydrate theme transitions after pre-paint bootstrap
+  document.documentElement.setAttribute('data-theme-ready', '1');
   initializeAnimationSystem();
   initializeLazyEnhancements();
   renderGlobalMenus();

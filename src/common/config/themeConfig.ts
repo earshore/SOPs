@@ -400,6 +400,9 @@ export class ThemeManager {
       root.classList.remove('dark');
     }
 
+    // Keep UA form controls / scrollbars aligned with effective mode (FOUC bootstrap does the same pre-paint).
+    root.style.colorScheme = resolved;
+
     this.ensureSystemColorModeListener(mode === 'system');
   }
 

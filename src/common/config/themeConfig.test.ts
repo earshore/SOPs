@@ -267,6 +267,7 @@ describe('ThemeManager', () => {
     expect(document.documentElement.dataset.colorMode).toBe('dark');
     expect(document.documentElement.dataset.colorModeResolved).toBe('dark');
     expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(document.documentElement.style.colorScheme).toBe('dark');
     expect(ThemeManager.getCurrentColorMode()).toBe('dark');
     expect(ThemeManager.getResolvedColorMode()).toBe('dark');
     expect(eventBus.emit).toHaveBeenCalledWith('color-mode-changed', {
@@ -280,6 +281,7 @@ describe('ThemeManager', () => {
     expect(StorageService.set).toHaveBeenCalledWith('app-color-mode', 'light');
     expect(document.documentElement.dataset.colorMode).toBe('light');
     expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(document.documentElement.style.colorScheme).toBe('light');
     expect(ThemeManager.getResolvedColorMode()).toBe('light');
   });
 
