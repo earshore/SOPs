@@ -203,7 +203,7 @@ export class SidebarRenderer {
       // Reset icon
       const iconContainer = el.querySelector('.sidebar-icon-container') as HTMLElement;
       if (iconContainer) {
-        iconContainer.classList.remove('scale-105', 'sidebar-icon-container--active');
+        iconContainer.classList.remove('sidebar-icon-container--active');
         iconContainer.classList.add('bg-slate-100');
       }
       const icon = el.querySelector('.sidebar-icon') as HTMLElement;
@@ -241,7 +241,7 @@ export class SidebarRenderer {
       const iconContainer = activeBtn.querySelector('.sidebar-icon-container');
       if (iconContainer) {
         iconContainer.classList.remove('bg-slate-100');
-        iconContainer.classList.add('scale-105', 'sidebar-icon-container--active');
+        iconContainer.classList.add('sidebar-icon-container--active');
       }
       const icon = activeBtn.querySelector('.sidebar-icon');
       if (icon) {
@@ -442,9 +442,7 @@ export class SidebarRenderer {
       containerCls: isActive
         ? 'sidebar-btn--active border-l-2 shadow-sm'
         : 'border-l-2 border-transparent hover:bg-slate-50/80 hover:border-slate-200',
-      iconContainerCls: isActive
-        ? 'sidebar-icon-container--active scale-105'
-        : inactiveIconContainerCls,
+      iconContainerCls: isActive ? 'sidebar-icon-container--active' : inactiveIconContainerCls,
       iconCls: isActive ? 'sidebar-icon--active' : inactiveIconCls,
       labelCls: isActive
         ? 'sidebar-label--active font-semibold'

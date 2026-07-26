@@ -41,6 +41,7 @@ import type { ScrapedData, ScrapedProduct, HistoryItem } from '@/types/modules-b
 import { DataPreview, DataPreviewState } from './DataPreview';
 import { HistoryPanel } from './HistoryPanel';
 import { emitHistoryUpdated } from '../../services/historyEvents';
+import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 
 type ScraperPanelState = {
   inputAsins: string;
@@ -187,6 +188,11 @@ function attachScraperPanelBehavior(
  */
 const scraperPanelBehavior: ScraperPanelBehavior = {
   // ========== Computed Properties ==========
+
+  /** Workbench section icon — no marketing scale-110 (D4). */
+  get workbenchStrategyIconClasses(): string {
+    return `${getWorkbenchIconContainerClasses('orange', 'sm')} text-white`;
+  },
 
   get validAsins(): string[] {
     return extractValidAsins(this.inputAsins);

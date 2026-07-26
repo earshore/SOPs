@@ -78,6 +78,7 @@ import {
 } from './uiHelpers';
 
 import type { UserProductProfile } from '@/types/state';
+import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -343,6 +344,19 @@ function isVisualReadyForUi(ctx: PromptlabPanelThis): boolean {
  */
 const promptlabPanelBehavior: PromptlabPanelBehavior = {
   // ========== Computed Getters ==========
+
+  /** Workbench section icons — no marketing scale-110 (D4). */
+  get workbenchSectionIconAnalysis(): string {
+    return `${getWorkbenchIconContainerClasses('blue', 'sm')} text-white`;
+  },
+
+  get workbenchSectionIconDna(): string {
+    return `${getWorkbenchIconContainerClasses('indigo', 'sm')} text-white`;
+  },
+
+  get workbenchSectionIconStrategy(): string {
+    return `${getWorkbenchIconContainerClasses('orange', 'sm')} text-white`;
+  },
 
   get hasReport(): boolean {
     void this.reportRevision;

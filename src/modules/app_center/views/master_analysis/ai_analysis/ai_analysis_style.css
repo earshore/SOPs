@@ -7,6 +7,13 @@
 /* 注意：fadeInUp、fadeIn、scaleIn 等通用动画辅助类已统一定义在全局 CSS（src/css/animations/keyframes.css） */
 /* 只保留模块特有的动画，避免覆盖全局动画 */
 
+/* Workbench focus chrome follows Appearance (D6 sample #3); ownership banner stays indigo. */
+.ai-analysis-wrapper
+  :where(button, a, input, select, textarea).ai-analysis-focus-primary:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-primary));
+  outline-offset: 2px;
+}
+
 .animate-pulse-glow {
   animation: pulse-glow var(--duration-2s) var(--ease-in-out) infinite;
 }

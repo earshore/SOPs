@@ -61,9 +61,7 @@
         <div class="px-6 pt-5 pb-4 border-b border-slate-100">
           <div class="flex items-center justify-between">
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-              <div
-                class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm shadow-blue-500/20"
-              >
+              <div :class="workbenchSectionIconAnalysis">
                 <span class="text-xs font-bold text-white">1</span>
               </div>
               AI 分析报告
@@ -162,9 +160,7 @@
         <div class="px-6 pt-5 pb-4 border-b border-slate-100">
           <div class="flex items-center justify-between">
             <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-              <div
-                class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm shadow-indigo-500/20"
-              >
+              <div :class="workbenchSectionIconDna">
                 <span class="text-xs font-bold text-white">2</span>
               </div>
               产品 DNA 补充
@@ -564,9 +560,7 @@
         <!-- Card Header -->
         <div class="px-6 pt-5 pb-4 border-b border-slate-100">
           <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-            <div
-              class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-sm shadow-orange-500/20"
-            >
+            <div :class="workbenchSectionIconStrategy">
               <span class="text-xs font-bold text-white">3</span>
             </div>
             生成策略配置

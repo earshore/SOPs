@@ -17,6 +17,7 @@ import { createMultipleStateSyncs, cleanupSubscriptions } from '@/common/utils/s
 import { createPerformanceSettingsPanel } from './PerformanceSettings';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
+import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 
 type AlpineWatchContext = {
   $watch: (property: string, callback: (newValue: unknown) => void) => void;
@@ -333,6 +334,11 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     return this.showSelectionPanel ? 'bg-slate-50/70 border-b border-slate-200/70' : '';
   },
 
+  /** Workbench chrome icon — no marketing scale-110 (D4). */
+  get selectionConfigIconClasses(): string {
+    return `${getWorkbenchIconContainerClasses('purple', 'lg')} text-white`;
+  },
+
   get showSelectionSummary(): boolean {
     return !this.showSelectionPanel && (this.selectedAsins.length > 0 || this.hasReport);
   },
@@ -392,12 +398,14 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   getAsinTextClass(asin: string): string {
-    return this.selectedAsins.includes(asin) ? 'text-indigo-700' : 'text-slate-700';
+    return this.selectedAsins.includes(asin)
+      ? 'text-[var(--color-primary-dark,var(--color-primary))]'
+      : 'text-slate-700';
   },
 
   getListingTargetCardClass(targetId: string): string {
     return this.isTargetSelected(targetId)
-      ? 'border-blue-300 bg-blue-50 shadow-sm'
+      ? 'border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] bg-[var(--color-primary-light)] shadow-sm'
       : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white';
   },
 
@@ -408,11 +416,13 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   getListingTargetIconWrapClass(targetId: string): string {
-    return this.isTargetSelected(targetId) ? 'bg-blue-50' : 'bg-slate-100 group-hover:bg-slate-200';
+    return this.isTargetSelected(targetId)
+      ? 'bg-[var(--color-primary-light)]'
+      : 'bg-slate-100 group-hover:bg-slate-200';
   },
 
   getListingTargetIconClass(targetId: string): string {
-    return `${this.getTargetById(targetId)?.icon || 'fa-solid fa-circle'} text-blue-600`;
+    return `${this.getTargetById(targetId)?.icon || 'fa-solid fa-circle'} text-[var(--color-primary)]`;
   },
 
   getReviewTargetIconWrapClass(targetId: string): string {
@@ -586,10 +596,11 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     if (this.isAnalyzing)
       return 'bg-white/20 text-white cursor-wait backdrop-blur-sm border border-white/30 shadow-2xl';
     if (this.canRunAnalysis && !this.analysisHeroIsStrong) {
-      return 'bg-indigo-600 text-white hover:bg-indigo-700 border border-indigo-600 shadow-sm';
+      // Appearance primary (not ownership indigo) for default workbench CTA.
+      return 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border border-[var(--color-primary)] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2';
     }
     return this.canRunAnalysis
-      ? 'bg-white text-indigo-600 hover:bg-indigo-50 border border-white/50 shadow-2xl'
+      ? 'bg-white text-[var(--color-primary)] hover:bg-[var(--color-primary-light)] border border-white/50 shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2'
       : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none';
   },
 
