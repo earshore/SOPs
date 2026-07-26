@@ -305,16 +305,16 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
   getDataTabButtonClass(tab: DataTab): string {
     return this.currentDataTab === tab
-      ? 'active text-blue-600'
+      ? 'active text-[var(--color-primary)]'
       : 'text-slate-400 hover:text-slate-600';
   },
 
   getDataTabIconWrapClass(tab: DataTab): string {
-    return this.currentDataTab === tab ? 'bg-blue-50' : 'bg-slate-100';
+    return this.currentDataTab === tab ? 'bg-[var(--color-primary-light)]' : 'bg-slate-100';
   },
 
   getDataTabIconClass(tab: DataTab): string {
-    return this.currentDataTab === tab ? 'text-blue-500' : 'text-slate-400';
+    return this.currentDataTab === tab ? 'text-[var(--color-primary)]' : 'text-slate-400';
   },
 
   isDataTab(tab: DataTab): boolean {
@@ -327,13 +327,13 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
   getSiteButtonClass(site: ScraperSite): string {
     return this.isSelectedSite(site)
-      ? 'selected border-blue-500 bg-gradient-to-b from-blue-50 to-white ring-2 ring-blue-500/20 shadow-sm shadow-blue-100'
-      : 'border-slate-150 bg-white hover:border-blue-300 hover:bg-blue-50/30';
+      ? 'selected border-[var(--color-primary)] bg-gradient-to-b from-[var(--color-primary-light)] to-white ring-2 ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] shadow-sm shadow-[0_1px_2px_color-mix(in_srgb,var(--color-primary)_12%,transparent)]'
+      : 'border-slate-150 bg-white hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary-light)_30%,transparent)]';
   },
 
   getSiteNameClass(site: ScraperSite): string {
     return this.isSelectedSite(site)
-      ? 'text-blue-700'
+      ? 'text-[var(--color-primary-dark)]'
       : 'text-slate-500 group-hover:text-slate-700';
   },
 
@@ -687,7 +687,10 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
       );
     } catch (e) {
       console.error('[Scraper] startScrape 异常:', e);
-      ErrorService.handle(e as Error, { action: 'startScrape', module: 'scraper' });
+      ErrorService.handle(e as Error, {
+        action: 'startScrape',
+        module: 'scraper',
+      });
       showToast('采集任务异常中断', { type: 'error' });
       scrapeInterrupted = true;
     } finally {

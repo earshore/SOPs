@@ -10,6 +10,11 @@
  * - 带色阴影系统 (colored shadow system)
  * - 统一圆角体系 (rounded-xl / rounded-2xl)
  * - 微交互动效 (scale, translate, opacity transitions)
+ *
+ * Motion boundary (Phase 4 / D4 · THEME_SYSTEM_GUIDELINES §4):
+ * - Entry / marketing helpers may use hover translateY and icon scale.
+ * - Workbench helpers must NOT: no hover:-translate-y*, no scale-110 on chrome.
+ * Prefer getWorkbench* for tool panels, forms, data chrome, sidebar chrome.
  */
 
 // ═══════════════════════════════════════════════════════════
@@ -30,6 +35,7 @@ export interface ColorScheme {
   iconBg: string;
   iconGradient: string;
   iconText: string;
+  /** Entry/marketing motion only — do not apply on workbench chrome. */
   iconScale: string;
   iconShadow: string;
 
@@ -134,6 +140,7 @@ function createScheme(
     iconBg: `bg-${color}-100`,
     iconGradient: `bg-gradient-to-br from-${color}-500 to-${to}-600`,
     iconText: `text-${color}-500`,
+    // Entry/marketing only; workbench helpers must not consume this token.
     iconScale: 'group-hover/card:scale-110 transition-transform duration-300',
     iconShadow: `shadow-lg shadow-${color}-500/20`,
 
@@ -247,8 +254,9 @@ export function getColorScheme(color: string): ColorScheme {
 }
 
 /**
- * 获取卡片完整样式类名
- * 用于生成统一风格的卡片容器
+ * [Entry / marketing] 获取卡片完整样式类名
+ * 用于模块总览入口卡、营销式介绍卡。
+ * Includes hover:-translate-y — NOT for workbench chrome (use getWorkbenchCardClasses).
  *
  * @example
  * ```ts
@@ -267,7 +275,22 @@ export function getCardClasses(color: ColorSchemeName): string {
 }
 
 /**
- * 获取卡片顶部悬浮线样式
+ * [Workbench] Card chrome without marketing lift motion.
+ * Hover may change border / shadow / bg only — no translateY or layout jump.
+ * Use for tool panels, forms, data/config cards (THEME §4.1 / §4.2).
+ */
+export function getWorkbenchCardClasses(color: ColorSchemeName): string {
+  const s = getColorScheme(color);
+  return [
+    'group/card relative rounded-lg border overflow-hidden',
+    s.border,
+    s.shadow,
+    'transition-colors duration-200',
+  ].join(' ');
+}
+
+/**
+ * [Entry / marketing] 获取卡片顶部悬浮线样式
  *
  * @example
  * ```html
@@ -284,7 +307,7 @@ export function getTopLineClasses(color: ColorSchemeName): string {
 }
 
 /**
- * 获取左侧渐变色条样式
+ * 获取左侧渐变色条样式（无 marketing motion，entry / workbench 均可）
  */
 export function getAccentBarClasses(color: ColorSchemeName): string {
   const s = getColorScheme(color);
@@ -292,8 +315,9 @@ export function getAccentBarClasses(color: ColorSchemeName): string {
 }
 
 /**
- * 获取渐变图标容器样式
- * 用于 section header 中的图标
+ * [Entry / marketing] 获取渐变图标容器样式
+ * Includes scale-110 on group hover — NOT for workbench chrome
+ * (use getWorkbenchIconContainerClasses).
  *
  * @param color - 颜色名称
  * @param size - 尺寸: 'sm' (7×7) | 'md' (9×9) | 'lg' (10×10)
@@ -314,6 +338,29 @@ export function getIconContainerClasses(
     'flex items-center justify-center',
     s.iconShadow,
     s.iconScale,
+  ].join(' ');
+}
+
+/**
+ * [Workbench] Gradient icon container without scale-110.
+ * Safe for sidebar / tool chrome; palette still comes from color scheme.
+ */
+export function getWorkbenchIconContainerClasses(
+  color: ColorSchemeName,
+  size: 'sm' | 'md' | 'lg' = 'md'
+): string {
+  const s = getColorScheme(color);
+  const sizeMap = {
+    sm: 'w-7 h-7 rounded-lg',
+    md: 'w-9 h-9 rounded-lg',
+    lg: 'w-10 h-10 rounded-lg',
+  };
+  return [
+    sizeMap[size],
+    s.iconGradient,
+    'flex items-center justify-center',
+    s.iconShadow,
+    // intentionally omit s.iconScale (entry/marketing only)
   ].join(' ');
 }
 

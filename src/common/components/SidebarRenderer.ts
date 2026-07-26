@@ -499,9 +499,8 @@ export class SidebarRenderer {
           class="sidebar-category-btn group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
             transition-all duration-200 mt-0.5">
 
-          <!-- Category Icon -->
-          <div class="w-6 h-6 rounded-md ${scheme.badgeBg} flex items-center justify-center
-            group-hover:scale-110 transition-transform duration-200">
+          <!-- Category Icon (workbench chrome: no marketing scale) -->
+          <div class="w-6 h-6 rounded-md ${scheme.badgeBg} flex items-center justify-center">
             <i class="${category.icon} text-[10px] ${scheme.badgeText}"></i>
           </div>
 

@@ -1241,6 +1241,15 @@
   color: rgba(255, 255, 255, 0.92);
 }
 
+[x-data='scraperPanel'] .manual-start-button:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-white, #ffffff),
+    0 0 0 4px
+      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 35%, transparent),
+    0 12px 24px -20px rgba(var(--ma-accent-rgb, 98, 87, 245), 0.9);
+}
+
 @container (max-width: 540px) {
   [x-data='scraperPanel'] .manual-config-grid {
     grid-template-columns: 1fr;
