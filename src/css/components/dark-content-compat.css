@@ -1664,3 +1664,1259 @@
   .bg-slate-50\/70 {
   background-color: color-mix(in srgb, var(--color-bg-secondary, #1e293b) 70%, transparent);
 }
+
+/* ---- Opacity-suffixed variants (bg-red-50/75, border-slate-200/80, …).
+   Attribute selectors keep class-level specificity; scope + later source
+   order beat the Tailwind utility. Dark scrims (slate-900/…) untouched. ---- */
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-slate-50/'] {
+  background-color: color-mix(in srgb, var(--color-bg-secondary, #1e293b) 75%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-slate-100/'] {
+  background-color: var(--color-bg-tertiary, rgba(255, 255, 255, 0.06));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-slate-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-slate-200/'] {
+  border-color: var(--border-subtle, rgba(148, 163, 184, 0.18));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-slate-300/'] {
+  border-color: var(--color-border-strong, rgba(255, 255, 255, 0.16));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-slate-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-bg-secondary, #1e293b) 80%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-slate-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-bg-secondary, #1e293b) 80%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .via-slate-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .via-slate-200 {
+  --tw-gradient-stops:
+    var(--tw-gradient-from), var(--border-muted, rgba(148, 163, 184, 0.22)), var(--tw-gradient-to);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .group:hover
+  .group-hover\:bg-white {
+  background-color: var(--surface-card-hover, #334155);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-white/'] {
+  --tw-ring-color: color-mix(in srgb, var(--surface-card, #1e293b) 70%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-slate-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-slate-200 {
+  --tw-ring-color: var(--border-subtle, rgba(148, 163, 184, 0.18));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-red-50/'] {
+  background-color: color-mix(in srgb, var(--color-red-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-red-100/'] {
+  background-color: color-mix(in srgb, var(--color-red-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-red-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-red-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-red-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-red-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-red-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-red-200/'] {
+  border-color: color-mix(in srgb, var(--color-red-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-red-600/'] {
+  color: color-mix(in srgb, var(--color-red-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-red-700/'] {
+  color: color-mix(in srgb, var(--color-red-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-red-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-red-900/'] {
+  color: color-mix(in srgb, var(--color-red-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-red-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-red-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-red-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-red-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-red-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-orange-50/'] {
+  background-color: color-mix(in srgb, var(--color-orange-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-orange-100/'] {
+  background-color: color-mix(in srgb, var(--color-orange-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-orange-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-orange-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-orange-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-orange-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-orange-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-orange-200/'] {
+  border-color: color-mix(in srgb, var(--color-orange-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-orange-600/'] {
+  color: color-mix(in srgb, var(--color-orange-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-orange-700/'] {
+  color: color-mix(in srgb, var(--color-orange-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-orange-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-orange-900/'] {
+  color: color-mix(in srgb, var(--color-orange-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-orange-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-orange-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-orange-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-orange-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-orange-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-amber-50/'] {
+  background-color: color-mix(in srgb, var(--color-amber-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-amber-100/'] {
+  background-color: color-mix(in srgb, var(--color-amber-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-amber-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-amber-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-amber-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-amber-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-amber-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-amber-200/'] {
+  border-color: color-mix(in srgb, var(--color-amber-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-amber-600/'] {
+  color: color-mix(in srgb, var(--color-amber-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-amber-700/'] {
+  color: color-mix(in srgb, var(--color-amber-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-amber-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-amber-900/'] {
+  color: color-mix(in srgb, var(--color-amber-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-amber-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-amber-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-amber-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-amber-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-amber-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-yellow-50/'] {
+  background-color: color-mix(in srgb, var(--color-yellow-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-yellow-100/'] {
+  background-color: color-mix(in srgb, var(--color-yellow-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-yellow-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-yellow-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-yellow-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-yellow-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-yellow-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-yellow-200/'] {
+  border-color: color-mix(in srgb, var(--color-yellow-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-yellow-600/'] {
+  color: color-mix(in srgb, var(--color-yellow-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-yellow-700/'] {
+  color: color-mix(in srgb, var(--color-yellow-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-yellow-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-yellow-900/'] {
+  color: color-mix(in srgb, var(--color-yellow-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-yellow-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-yellow-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-yellow-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-yellow-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-yellow-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-lime-50/'] {
+  background-color: color-mix(in srgb, var(--color-lime-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-lime-100/'] {
+  background-color: color-mix(in srgb, var(--color-lime-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-lime-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-lime-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-lime-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-lime-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-lime-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-lime-200/'] {
+  border-color: color-mix(in srgb, var(--color-lime-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-lime-600/'] {
+  color: color-mix(in srgb, var(--color-lime-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-lime-700/'] {
+  color: color-mix(in srgb, var(--color-lime-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-lime-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-lime-900/'] {
+  color: color-mix(in srgb, var(--color-lime-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-lime-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-lime-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-lime-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-lime-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-lime-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-green-50/'] {
+  background-color: color-mix(in srgb, var(--color-green-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-green-100/'] {
+  background-color: color-mix(in srgb, var(--color-green-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-green-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-green-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-green-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-green-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-green-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-green-200/'] {
+  border-color: color-mix(in srgb, var(--color-green-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-green-600/'] {
+  color: color-mix(in srgb, var(--color-green-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-green-700/'] {
+  color: color-mix(in srgb, var(--color-green-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-green-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-green-900/'] {
+  color: color-mix(in srgb, var(--color-green-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-green-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-green-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-green-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-green-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-green-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-emerald-50/'] {
+  background-color: color-mix(in srgb, var(--color-emerald-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-emerald-100/'] {
+  background-color: color-mix(in srgb, var(--color-emerald-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-emerald-50/'] {
+  --tw-gradient-from: color-mix(
+    in srgb,
+    var(--color-emerald-500) 12%,
+    var(--surface-card, #1e293b)
+  );
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-emerald-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-emerald-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-emerald-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-emerald-200/'] {
+  border-color: color-mix(in srgb, var(--color-emerald-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-emerald-600/'] {
+  color: color-mix(in srgb, var(--color-emerald-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-emerald-700/'] {
+  color: color-mix(in srgb, var(--color-emerald-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-emerald-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-emerald-900/'] {
+  color: color-mix(in srgb, var(--color-emerald-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-emerald-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-emerald-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-emerald-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-emerald-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-emerald-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-teal-50/'] {
+  background-color: color-mix(in srgb, var(--color-teal-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-teal-100/'] {
+  background-color: color-mix(in srgb, var(--color-teal-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-teal-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-teal-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-teal-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-teal-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-teal-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-teal-200/'] {
+  border-color: color-mix(in srgb, var(--color-teal-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-teal-600/'] {
+  color: color-mix(in srgb, var(--color-teal-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-teal-700/'] {
+  color: color-mix(in srgb, var(--color-teal-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-teal-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-teal-900/'] {
+  color: color-mix(in srgb, var(--color-teal-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-teal-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-teal-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-teal-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-teal-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-teal-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-cyan-50/'] {
+  background-color: color-mix(in srgb, var(--color-cyan-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-cyan-100/'] {
+  background-color: color-mix(in srgb, var(--color-cyan-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-cyan-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-cyan-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-cyan-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-cyan-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-cyan-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-cyan-200/'] {
+  border-color: color-mix(in srgb, var(--color-cyan-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-cyan-600/'] {
+  color: color-mix(in srgb, var(--color-cyan-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-cyan-700/'] {
+  color: color-mix(in srgb, var(--color-cyan-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-cyan-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-cyan-900/'] {
+  color: color-mix(in srgb, var(--color-cyan-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-cyan-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-cyan-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-cyan-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-cyan-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-cyan-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-sky-50/'] {
+  background-color: color-mix(in srgb, var(--color-sky-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-sky-100/'] {
+  background-color: color-mix(in srgb, var(--color-sky-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-sky-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-sky-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-sky-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-sky-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-sky-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-sky-200/'] {
+  border-color: color-mix(in srgb, var(--color-sky-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-sky-600/'] {
+  color: color-mix(in srgb, var(--color-sky-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-sky-700/'] {
+  color: color-mix(in srgb, var(--color-sky-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-sky-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-sky-900/'] {
+  color: color-mix(in srgb, var(--color-sky-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-sky-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-sky-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-sky-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-sky-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-sky-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-blue-50/'] {
+  background-color: color-mix(in srgb, var(--color-blue-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-blue-100/'] {
+  background-color: color-mix(in srgb, var(--color-blue-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-blue-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-blue-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-blue-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-blue-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-blue-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-blue-200/'] {
+  border-color: color-mix(in srgb, var(--color-blue-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-blue-600/'] {
+  color: color-mix(in srgb, var(--color-blue-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-blue-700/'] {
+  color: color-mix(in srgb, var(--color-blue-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-blue-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-blue-900/'] {
+  color: color-mix(in srgb, var(--color-blue-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-blue-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-blue-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-blue-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-blue-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-blue-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-indigo-50/'] {
+  background-color: color-mix(in srgb, var(--color-indigo-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-indigo-100/'] {
+  background-color: color-mix(in srgb, var(--color-indigo-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-indigo-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-indigo-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-indigo-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-indigo-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-indigo-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-indigo-200/'] {
+  border-color: color-mix(in srgb, var(--color-indigo-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-indigo-600/'] {
+  color: color-mix(in srgb, var(--color-indigo-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-indigo-700/'] {
+  color: color-mix(in srgb, var(--color-indigo-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-indigo-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-indigo-900/'] {
+  color: color-mix(in srgb, var(--color-indigo-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-indigo-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-indigo-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-indigo-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-indigo-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-indigo-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-violet-50/'] {
+  background-color: color-mix(in srgb, var(--color-violet-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-violet-100/'] {
+  background-color: color-mix(in srgb, var(--color-violet-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-violet-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-violet-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-violet-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-violet-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-violet-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-violet-200/'] {
+  border-color: color-mix(in srgb, var(--color-violet-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-violet-600/'] {
+  color: color-mix(in srgb, var(--color-violet-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-violet-700/'] {
+  color: color-mix(in srgb, var(--color-violet-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-violet-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-violet-900/'] {
+  color: color-mix(in srgb, var(--color-violet-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-violet-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-violet-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-violet-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-violet-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-violet-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-purple-50/'] {
+  background-color: color-mix(in srgb, var(--color-purple-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-purple-100/'] {
+  background-color: color-mix(in srgb, var(--color-purple-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-purple-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-purple-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-purple-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-purple-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-purple-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-purple-200/'] {
+  border-color: color-mix(in srgb, var(--color-purple-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-purple-600/'] {
+  color: color-mix(in srgb, var(--color-purple-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-purple-700/'] {
+  color: color-mix(in srgb, var(--color-purple-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-purple-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-purple-900/'] {
+  color: color-mix(in srgb, var(--color-purple-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-purple-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-purple-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-purple-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-purple-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-purple-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-fuchsia-50/'] {
+  background-color: color-mix(in srgb, var(--color-fuchsia-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-fuchsia-100/'] {
+  background-color: color-mix(in srgb, var(--color-fuchsia-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-fuchsia-50/'] {
+  --tw-gradient-from: color-mix(
+    in srgb,
+    var(--color-fuchsia-500) 12%,
+    var(--surface-card, #1e293b)
+  );
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-fuchsia-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-fuchsia-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-fuchsia-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-fuchsia-200/'] {
+  border-color: color-mix(in srgb, var(--color-fuchsia-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-fuchsia-600/'] {
+  color: color-mix(in srgb, var(--color-fuchsia-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-fuchsia-700/'] {
+  color: color-mix(in srgb, var(--color-fuchsia-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-fuchsia-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-fuchsia-900/'] {
+  color: color-mix(in srgb, var(--color-fuchsia-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-fuchsia-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-fuchsia-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-fuchsia-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-fuchsia-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-fuchsia-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-pink-50/'] {
+  background-color: color-mix(in srgb, var(--color-pink-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-pink-100/'] {
+  background-color: color-mix(in srgb, var(--color-pink-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-pink-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-pink-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-pink-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-pink-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-pink-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-pink-200/'] {
+  border-color: color-mix(in srgb, var(--color-pink-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-pink-600/'] {
+  color: color-mix(in srgb, var(--color-pink-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-pink-700/'] {
+  color: color-mix(in srgb, var(--color-pink-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-pink-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-pink-900/'] {
+  color: color-mix(in srgb, var(--color-pink-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-pink-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-pink-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-pink-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-pink-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-pink-500) 32%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-rose-50/'] {
+  background-color: color-mix(in srgb, var(--color-rose-500) 14%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-rose-100/'] {
+  background-color: color-mix(in srgb, var(--color-rose-500) 22%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='from-rose-50/'] {
+  --tw-gradient-from: color-mix(in srgb, var(--color-rose-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='to-rose-50/'] {
+  --tw-gradient-to: color-mix(in srgb, var(--color-rose-500) 12%, var(--surface-card, #1e293b));
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-rose-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='border-rose-200/'] {
+  border-color: color-mix(in srgb, var(--color-rose-500) 34%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-rose-600/'] {
+  color: color-mix(in srgb, var(--color-rose-400) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-rose-700/'] {
+  color: color-mix(in srgb, var(--color-rose-300) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-rose-800/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='text-rose-900/'] {
+  color: color-mix(in srgb, var(--color-rose-200) 88%, transparent);
+}
+
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-rose-100,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-rose-100/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='ring-rose-200/'],
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .ring-rose-200 {
+  --tw-ring-color: color-mix(in srgb, var(--color-rose-500) 32%, transparent);
+}
