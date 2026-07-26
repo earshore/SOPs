@@ -1,6 +1,6 @@
 # 主题系统 XO 签字状态（Phase 1 code-aware review）
 
-**日期**: 2026-07-26（refresh @ HEAD `77fd0cdc` · D6 #26 import-conflict `77fd0cdc` · settings scroll-spy wire `f62283f3` · D6 #25 AppModal `fb5384d6` · D2 #6 deferred `21bec249` · D5 inventory `5bde2abb` · XO checklist `a72046bb` · residual #18–25 · D12×24 · Human XO first / Visual Yellow）  
+**日期**: 2026-07-26（refresh @ HEAD `f464b373` · style(theme) AppModal format `f464b373` · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict `77fd0cdc` · D6 #25 AppModal `fb5384d6` · residual #18–26 · D12×24 · Human XO first / Visual Yellow）
 **角色**: Experience Officer + QA（静态核验；**非**浏览器视觉签收）  
 **范围**: `docs/superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md`  
 **对照实现**: `src/common/config/themeConfig.ts` · `themeConfig.test.ts` · `tests/e2e/release-smoke.spec.ts` · Settings Appearance  
@@ -124,7 +124,7 @@
 | X5 | minimal+dark / default+dark | **Pass (automated)** dark×minimal 双轴 smoke + **Needs manual browser** 视觉 |
 | X6 | 设置面板自洽吃 token | **Needs manual browser** / debt | 颜色模式 UI 已有；accent 等仍可能硬编码 blue（D6 Informational） |
 
-### 1.7 状态计数（本签收文档 · refresh `77fd0cdc`）
+### 1.7 状态计数（本签收文档 · refresh `f464b373`）
 
 | 状态 | 约计（场景行，含路由检查 / A11y / 长时 / XO / Env） |
 | --- | --- |
@@ -176,7 +176,7 @@
 
 ### 2.2 Appearance default↔minimal — **已补契约 vs 仍缺视觉**
 
-| 项 | 现状 @ HEAD `77fd0cdc` |
+| 项 | 现状 @ HEAD `f464b373` |
 | --- | --- |
 | 切换 Appearance（Settings select） | smoke **有** `settings-theme-select` → `minimal` / `default` |
 | `data-appearance` / `data-theme` / `data-color-mode` | smoke **有** `expectDocumentThemeState` |
@@ -255,7 +255,7 @@
 **记录模板**（贴 PR / RC）:
 
 ```text
-XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect 77fd0cdc+)
+XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect f464b373+)
 Browser: ________  Viewport: ________
 X1 switch×3: Pass/Fail
 X2 ownership (KH rose / PPC / MA / DeepChat terracotta): Pass/Fail
@@ -381,7 +381,7 @@ Sign-off visual: Yes / No   ← default No until XO fills; keep Yellow
 | D10 ThemeColors | **removed**（AppearanceThemeColors only） |
 | D12 scaffold | opt-in **12×2=24**（+ PromptLab + Skills + NPI；terracotta / Skills violet / NPI growth **不**当 primary）；**非** visual Pass / **非** CI |
 | smoke Appearance | **文档根 + KH ownership + dark×minimal 已有**；**仍无**色差/截图/terracotta 色值 |
-| full prebuild | **Green 再次**（llm fixtures + D8 ownershipRoles optional category guard @ `52795047` 解阻 type-check:tests；confirmModal format @ `be4329f1`；AppModal #25 @ `fb5384d6`；settings scroll-spy @ `f62283f3`；import-conflict #26 @ `77fd0cdc`；tip `77fd0cdc`；full build+smoke green 再次） |
+| full prebuild | **Green 再次**（llm fixtures + D8 ownershipRoles optional category guard @ `52795047` 解阻 type-check:tests；confirmModal format @ `be4329f1`；AppModal #25 @ `fb5384d6`；import-conflict #26 @ `77fd0cdc`；settings scroll-spy complete @ `9fab3a58`；AppModal format @ `f464b373`；tip `f464b373`；full build+smoke green 再次） |
 | system 模式 | API + matchMedia 单测有；设置「跟随系统」UI 存在，跨 OS 体感仍人工 |
 
 ---
@@ -402,13 +402,13 @@ Sign-off visual: Yes / No   ← default No until XO fills; keep Yellow
 | 指标 | 值 |
 | --- | --- |
 | 文档路径 | `docs/superpowers/plans/2026-07-26-theme-system-xo-signoff-status.md` |
-| HEAD 对照 | `77fd0cdc`（D6 #26 import-conflict · settings scroll-spy wire · D6 #25 AppModal · D2 #6 deferred · D5 inventory · residual #18–25 · D12×24 · Visual Yellow · Human XO first） |
+| HEAD 对照 | `f464b373`（style(theme) AppModal format · settings scroll-spy complete `9fab3a58` · D6 #26 import-conflict · D6 #25 AppModal · residual #18–26 · D12×24 · Visual Yellow · Human XO first） |
 | Pass (automated) | **~16** |
 | Pass (code contract) | **~20** |
 | Needs manual browser | **~34** |
 | Blocked（产品路径） | **0**；visual / RC 体验 **Open** |
 | 视觉全站 Pass | **否（明确未签 · Yellow）** |
-| full prebuild | **Green 再次**（llm + D8 type-check:tests + AppModal #25 + import-conflict #26；build+smoke green） |
+| full prebuild | **Green 再次**（llm + D8 type-check:tests + AppModal #25 + import-conflict #26 + settings scroll-spy complete + AppModal format；build+smoke green） |
 | Tech Lead code 预签 | **允许** |
 | XO 体验签 | **仍要求（Human XO first）** |
 | 最大体验阻断 | **人类 30 分钟脚本未跑**；Settings 局部 blue 债；**无**全站色差/截图 Pass |
