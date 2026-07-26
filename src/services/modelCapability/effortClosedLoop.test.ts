@@ -17,8 +17,10 @@ type Case = {
   expectAllowlistExcludes?: ReasoningEffortLevel[];
   /** When mapRequest emits reasoning_effort string */
   expectBodyEffort?: string;
-  /** Claude thinking.budget_tokens present */
+  /** Claude thinking.budget_tokens present (legacy extended thinking) */
   expectThinkingBudget?: boolean;
+  /** Claude thinking.type=adaptive (modern; pairs with output_config.effort) */
+  expectAdaptiveThinking?: boolean;
   /** Gemini thinking_config present */
   expectGeminiBudget?: boolean;
 };
@@ -71,12 +73,13 @@ const CASES: Case[] = [
     expectThinkingBudget: true,
   },
   {
-    name: 'claude opus-4.5 official output_config.effort max',
+    name: 'claude opus-4.5 adaptive thinking + output_config.effort max',
     modelId: 'claude-opus-4.5',
     requested: 'max',
     expectEffective: 'max',
     expectAllowlistIncludes: ['low', 'medium', 'high', 'xhigh', 'max'],
     expectBodyEffort: 'max',
+    expectAdaptiveThinking: true,
   },
   {
     name: 'claude opus-4.5 xhigh is not demoted (no extra alias)',
@@ -84,6 +87,7 @@ const CASES: Case[] = [
     requested: 'xhigh',
     expectEffective: 'xhigh',
     expectBodyEffort: 'xhigh',
+    expectAdaptiveThinking: true,
   },
   {
     name: 'gemini max maps to thinking_config',
@@ -147,9 +151,19 @@ describe('reasoning effort closed loop (registry → resolve → mapRequest)', (
       }
 
       if (c.expectThinkingBudget) {
-        const thinking = fragment.thinking as { budget_tokens?: number } | undefined;
+        const thinking = fragment.thinking as { type?: string; budget_tokens?: number } | undefined;
+        expect(thinking?.type).toBe('enabled');
         expect(typeof thinking?.budget_tokens).toBe('number');
         expect(thinking!.budget_tokens!).toBeGreaterThan(0);
+      }
+
+      if (c.expectAdaptiveThinking) {
+        const thinking = fragment.thinking as { type?: string; budget_tokens?: number } | undefined;
+        expect(thinking?.type).toBe('adaptive');
+        expect(thinking?.budget_tokens).toBeUndefined();
+        expect(fragment.output_config).toMatchObject({
+          effort: c.expectBodyEffort ?? c.expectEffective,
+        });
       }
 
       if (c.expectGeminiBudget) {

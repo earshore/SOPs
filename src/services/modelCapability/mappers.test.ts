@@ -23,11 +23,14 @@ describe('multi-protocol mappers', () => {
     expect(mapResponsesReasoning({ enabled: false, effort: 'high' })).toEqual({});
   });
 
-  it('anthropic official output_config.effort (not extra)', () => {
+  it('anthropic adaptive thinking + output_config.effort are paired (not effort alone)', () => {
+    // effort ≠ thinking: both fields required on modern Claude path
     expect(mapAnthropicOutputEffort({ enabled: true, effort: 'xhigh' })).toEqual({
+      thinking: { type: 'adaptive' },
       output_config: { effort: 'xhigh' },
     });
     expect(mapAnthropicOutputEffort({ enabled: true, effort: 'max' })).toEqual({
+      thinking: { type: 'adaptive' },
       output_config: { effort: 'max' },
     });
     expect(mapAnthropicOutputEffort({ enabled: false, effort: 'high' })).toEqual({});

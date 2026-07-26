@@ -37,8 +37,8 @@
 |------|----------|----------|
 | `openai_reasoning_effort` | `reasoning_effort` | Chat Completions（GPT / Grok 网关） |
 | `openai_responses_reasoning` | `reasoning.effort` | Responses |
-| `anthropic_output_effort` | `output_config.effort` | Claude effort 能力代（Opus 4.5+ / Sonnet 4.6+ / …） |
-| `anthropic_budget_tokens` | `thinking.budget_tokens` | Claude 旧 extended thinking |
+| `anthropic_output_effort` | **`thinking: {type:"adaptive"}` + `output_config.effort`**（两者不同：前者开自适应思考模式，后者调深度/花费） | Claude adaptive 代 |
+| `anthropic_budget_tokens` | **仅** `thinking: {type:"enabled", budget_tokens}`（无 output_config.effort） | Claude 旧 extended thinking |
 | `gemini_thinking_budget` | `thinkingConfig.thinkingBudget` + 网关 effort | Gemini |
 | `none` | 不写字段 | 未知 / fail-closed |
 
@@ -52,8 +52,8 @@
 |------|-----------|---------|---------|----------|
 | GPT-5 / o | low…max | openai_* | medium | OpenAI Reasoning |
 | Grok-4.5 | low\|medium\|high | openai_reasoning_effort | high | xAI Reasoning |
-| Claude effort 代 | low…max | **output_config.effort** | **high** | Anthropic Effort |
-| Claude legacy | low…max → budget | thinking.budget_tokens | medium | Extended thinking (legacy) |
+| Claude adaptive 代 | low…max | **thinking.adaptive + output_config.effort** | **high** | Effort + adaptive thinking docs |
+| Claude legacy | low…max → budget | **thinking.enabled + budget_tokens only** | medium | Extended thinking (legacy) |
 | Gemini | low…max → budget | thinkingBudget | medium | Gemini thinking |
 
 Claude **没有** `extra`；产品与 wire 均为 **`xhigh`**。
@@ -94,8 +94,9 @@ Claude **没有** `extra`；产品与 wire 均为 **`xhigh`**。
 
 ## 7. 成功标准
 
-1. Claude Opus 4.5 + max → body `output_config.effort === "max"`。  
-2. Claude Sonnet 4.5 + max → body `thinking.budget_tokens`（legacy）。  
+1. Claude Opus 4.5 + max → body 同时含 `thinking.type==="adaptive"` 与 `output_config.effort==="max"`（不得只发其一）。  
+2. Claude Sonnet 4.5 + max → body `thinking.type==="enabled"` + `budget_tokens`（无 adaptive / 无混用 effort 字段冒充 thinking）。  
+3. 概念上：**effort ≠ thinking**；产品「推理开关」在不同 kind 下映射到不同字段组合，禁止互相替代。  
 3. 无 `extra` 字符串出现在类型或 mapper 输出。  
 4. GPT/Grok 既有 allowlist 行为保持。  
 5. 表驱动单测 + type-check 通过。

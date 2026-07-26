@@ -36,10 +36,16 @@ export function mapResponsesReasoning(prefs: {
 }
 
 /**
- * Anthropic Messages API — official adaptive-era control:
- * `output_config.effort` ∈ low|medium|high|xhigh|max
- * (docs: platform.claude.com effort / Messages output_config).
- * Prefer this for Claude 4.5+ models that list effort support; do NOT invent "extra".
+ * Anthropic modern path: THINKING and EFFORT are different API controls.
+ *
+ * - `thinking: { type: "adaptive" }` — enables adaptive thinking mode (not a depth scale).
+ * - `output_config.effort` — behavioral token/thoroughness signal (low…max); affects text,
+ *   tools, AND thinking depth when thinking is active. Does NOT require inventing "extra".
+ *
+ * Official migration pairs both fields. Sending only effort omits adaptive thinking;
+ * sending only budget is the legacy extended-thinking path (mapAnthropicThinking).
+ *
+ * @see https://platform.claude.com/docs/en/build-with-claude/effort
  */
 export function mapAnthropicOutputEffort(prefs: {
   enabled: boolean;
@@ -49,6 +55,7 @@ export function mapAnthropicOutputEffort(prefs: {
     return {};
   }
   return {
+    thinking: { type: 'adaptive' },
     output_config: {
       effort: prefs.effort,
     },
@@ -56,10 +63,10 @@ export function mapAnthropicOutputEffort(prefs: {
 }
 
 /**
- * Anthropic extended thinking (legacy / pre-adaptive models).
- * Maps product effort → thinking.budget_tokens.
+ * Anthropic legacy extended thinking ONLY (no output_config.effort).
+ * Product effort ladder → `thinking.budget_tokens` hard budget.
+ * Orthogonal concept from adaptive-era `output_config.effort`.
  * Callers must ensure max_tokens > budget_tokens (see applyToRequest).
- * Still used on Claude 4.5-and-earlier thinking-only models and some gateways.
  */
 export function mapAnthropicThinking(prefs: {
   enabled: boolean;

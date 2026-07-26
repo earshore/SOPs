@@ -102,6 +102,7 @@ describe('multi-protocol flagship catalog', () => {
     expect(claudeEffort.effortControlKind).toBe('anthropic_output_effort');
     expect(claudeEffort.defaultEffort).toBe('high');
     expect(claudeEffort.mapRequest?.({ enabled: true, effort: 'xhigh' })).toEqual({
+      thinking: { type: 'adaptive' },
       output_config: { effort: 'xhigh' },
     });
 
@@ -167,6 +168,7 @@ describe('multi-protocol flagship catalog', () => {
     expect(cap.apiSurface).toBe('anthropic_messages');
     expect(cap.effortControlKind).toBe('anthropic_output_effort');
     expect(cap.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
+      thinking: { type: 'adaptive' },
       output_config: { effort: 'high' },
     });
   });
