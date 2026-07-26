@@ -1,6 +1,6 @@
 # 主题系统体验验收矩阵（Appearance / Ownership / Dark）
 
-**日期**: 2026-07-26（automation refresh @ HEAD `cbad435b` · residual #18–23 · D12×24 · D2 #5 · Visual Yellow · Human XO first）  
+**日期**: 2026-07-26（automation refresh @ HEAD `52795047` · residual #18–23 · D8 type-check:tests · D12×24 · D2 #5 · Visual Yellow · Human XO first）  
 **角色**: Experience Officer（体验官）+ Visual QA  
 **状态**: 可执行验收基线（Phase 0–3 主用；Dark **产品路径已解锁**；**视觉签收仍 Open / 未 Pass**）  
 **权威文档链**:

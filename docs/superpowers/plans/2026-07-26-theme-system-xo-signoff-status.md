@@ -1,6 +1,6 @@
 # 主题系统 XO 签字状态（Phase 1 code-aware review）
 
-**日期**: 2026-07-26（refresh @ HEAD `cbad435b` · residual #18–23 · D12×24 · D2 #5 · Human XO first / Visual Yellow）  
+**日期**: 2026-07-26（refresh @ HEAD `52795047` · residual #18–23 · D8 type-check:tests · D12×24 · D2 #5 · Human XO first / Visual Yellow）  
 **角色**: Experience Officer + QA（静态核验；**非**浏览器视觉签收）  
 **范围**: `docs/superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md`  
 **对照实现**: `src/common/config/themeConfig.ts` · `themeConfig.test.ts` · `tests/e2e/release-smoke.spec.ts` · Settings Appearance  
@@ -124,7 +124,7 @@
 | X5 | minimal+dark / default+dark | **Pass (automated)** dark×minimal 双轴 smoke + **Needs manual browser** 视觉 |
 | X6 | 设置面板自洽吃 token | **Needs manual browser** / debt | 颜色模式 UI 已有；accent 等仍可能硬编码 blue（D6 Informational） |
 
-### 1.7 状态计数（本签收文档 · refresh `cbad435b`）
+### 1.7 状态计数（本签收文档 · refresh `52795047`）
 
 | 状态 | 约计（场景行，含路由检查 / A11y / 长时 / XO / Env） |
 | --- | --- |
@@ -173,7 +173,7 @@
 
 ### 2.2 Appearance default↔minimal — **已补契约 vs 仍缺视觉**
 
-| 项 | 现状 @ HEAD `cbad435b` |
+| 项 | 现状 @ HEAD `52795047` |
 | --- | --- |
 | 切换 Appearance（Settings select） | smoke **有** `settings-theme-select` → `minimal` / `default` |
 | `data-appearance` / `data-theme` / `data-color-mode` | smoke **有** `expectDocumentThemeState` |
@@ -347,7 +347,7 @@ Sign-off visual: Yes / No   ← default No until XO fills
 | D10 ThemeColors | **removed**（AppearanceThemeColors only） |
 | D12 scaffold | opt-in **12×2=24**（+ PromptLab + Skills + NPI；terracotta / Skills violet / NPI growth **不**当 primary）；**非** visual Pass / **非** CI |
 | smoke Appearance | **文档根 + KH ownership + dark×minimal 已有**；**仍无**色差/截图/terracotta 色值 |
-| full prebuild | **Green 再次**（llm `requestedEffort` 测试 fixtures 解阻 type-check:tests） |
+| full prebuild | **Green 再次**（llm fixtures + D8 ownershipRoles optional category guard @ `52795047` 解阻 type-check:tests） |
 | system 模式 | API + matchMedia 单测有；设置「跟随系统」UI 存在，跨 OS 体感仍人工 |
 
 ---
@@ -368,13 +368,13 @@ Sign-off visual: Yes / No   ← default No until XO fills
 | 指标 | 值 |
 | --- | --- |
 | 文档路径 | `docs/superpowers/plans/2026-07-26-theme-system-xo-signoff-status.md` |
-| HEAD 对照 | `cbad435b`（residual #18–23 · D12×24 · D2 #5 · Visual Yellow · Human XO first） |
+| HEAD 对照 | `52795047`（residual #18–23 · D8 type-check:tests · D12×24 · D2 #5 · Visual Yellow · Human XO first） |
 | Pass (automated) | **~16** |
 | Pass (code contract) | **~20** |
 | Needs manual browser | **~34** |
 | Blocked（产品路径） | **0**；visual / RC 体验 **Open** |
 | 视觉全站 Pass | **否（明确未签 · Yellow）** |
-| full prebuild | **Green 再次**（llm 测试解阻后） |
+| full prebuild | **Green 再次**（llm + D8 ownershipRoles type-check:tests） |
 | Tech Lead code 预签 | **允许** |
 | XO 体验签 | **仍要求（Human XO first）** |
 | 最大体验阻断 | **人类 30 分钟脚本未跑**；Settings 局部 blue 债；**无**全站色差/截图 Pass |

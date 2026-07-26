@@ -1,7 +1,7 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ HEAD `cbad435b` · residual #18–23 · D12×24 · D2 long-tail #5 · D8 soft · D9 F2 · shell focus）  
-**范围**: `main` ahead of `sops/main`； residual 主题波 + D12 NPI + SafeModuleLoader/Home CTA **已合入**（tip `cbad435b`）  
+**日期**: 2026-07-26（refresh @ HEAD `52795047` · residual #18–23 · D8 type-check:tests · D12×24 · D2 long-tail #5 · D9 F2 · shell focus）  
+**范围**: `main` ahead of `sops/main`； residual 主题波 + D12 NPI + SafeModuleLoader/Home CTA + D8 ownershipRoles type-check:tests **已合入**（tip `52795047`）  
 **角色**: Tech Lead / Release docs  
 **诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称 visual Pass。
 
@@ -21,11 +21,11 @@
 
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Code / 契约**    | **Green**  | tip `cbad435b`: D6 #18–23 residual · D12×**24** · D2 long-tail #5 · D8 soft · D9 F2 · shell nav/settings focus |
+| **Code / 契约**    | **Green**  | tip `52795047`: D6 #18–23 residual · D12×**24** · D2 long-tail #5 · D8 soft + type-check:tests · D9 F2 · shell nav/settings focus |
 | **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**（**Human XO first**）；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: residual #18–23 + D12×24 + D2 #5 **已在** tip `cbad435b`；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
+**一句话**: residual #18–23 + D12×24 + D2 #5 + D8 type-check:tests **已在** tip `52795047`；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -117,7 +117,7 @@
 | **D5**  | P2        | **Partial**                         | root `--focus-ring-soft` → `color-mix(focus-ring)`；header search / forms dark / Overview search / nav-focus 已跟 focus-ring；**本轮**: shell `.nav-trigger:focus-visible` + Settings runtime checkbox focus 跟 Appearance；**剩余 intentional 例外见 §5.1**；业务页蓝 focus 仍 D6 长尾                          |
 | **D6**  | P1 可见面 | **Shell locked / biz samples**      | 壳层 megaMenu **13** = **有意 Ownership**；**样本 through #16 + residual #18–23**: KH…#9 + **#10 SOPs** + **#11 NPI** + **#12 Restricted Words** + **#13 AMZ Hub nav**（hover/active → ownership orange / `module-accent`）+ **#14 email_templates** + **#15 qa_maintenance** + **#16 PromptLab DNA/autoPopulate** + **#18 Scraper / #19 AI / #20 PPC residual** @ `a05b12c8` + **#21 PromptLab residual focus** @ `f761e4e5` + **#22 SafeModuleLoader primary CTA** @ `1711eec1` + **#23 Home splash/floating CTA** @ `cbad435b` + Skills/DeepChat…；其余 Informational 长尾 |
 | **D7**  | P1        | **Done（deprecate + ESLint + call-site audit）** | `setModuleColor` **@deprecated** + unit + ESLint hard-gate；**0** production callers（§5.3）；dual-channel API 彻底下线 **optional**                                                                      |
-| **D8**  | P1        | **Partial (doc + code scaffold + soft tests)**   | Role 表 + **`ownershipRoles.ts`**；soft unit: KH/ppc/MA + **playground / amz_hub / app_center / sops** + hub/more categories；**未**全站 `data-ownership-role` 绑定                                                                 |
+| **D8**  | P1        | **Partial (doc + code scaffold + soft tests)**   | Role 表 + **`ownershipRoles.ts`**；soft unit: KH/ppc/MA + **playground / amz_hub / app_center / sops** + hub/more categories；**`52795047`**: optional `hubCategories`/`moreCategories` guard 解阻 `type-check:tests`；**未**全站 `data-ownership-role` 绑定                                                                 |
 | **D9**  | P2        | **Partial (Doc + F2 skim)**         | 生命周期文档已落地；**F2 code skim**: `--ppc-hero-*` / `--kh-*` / `--playground-*` = docs+audit-only（`src/` 0 声明 0 消费）；**0 CSS 删除**；F3+ 仍 optional |
 | **D10** | P1        | **Done（ThemeColors removed）** | `AppearanceThemeColors` 仅 primary 族 + focus；deprecated 别名 **`ThemeColors` removed**；**0** prod 误用状态色字段（§5.4） |
 | **D11** | P2        | **Code fixed / legacy residual only** | **`src/css` 全15 文件 / 185 dark 规则组均已 tri**（`.dark` + `data-color-mode-resolved` + legacy `data-theme`）；**0** 缺 resolved 的 dual-only；剩余仅 intentional legacy 选择器（§10） |
@@ -254,7 +254,9 @@ Grep / call-site evidence (re-skim @ `147aa90c`):
 ## 8. Commit list (`sops/main` → `HEAD`)
 
 ```
-cbad435b feat(theme): migrate Home primary CTA residual  ← HEAD
+52795047 fix(theme): guard optional menu categories in D8 tests  ← HEAD
+3a8505e9 docs(theme): refresh landing board to residual tip
+cbad435b feat(theme): migrate Home primary CTA residual
 1711eec1 feat(theme): SafeModuleLoader primary CTA sample
 b85cd597 feat(theme): migrate D2 workbench radius long-tail #5
 f761e4e5 feat(theme): PromptLab residual focus chrome sample
@@ -299,8 +301,10 @@ f8f925a8 docs(theme): enterprise audit and convergence roadmap
 - D12 scaffold **24**（+ PromptLab + Skills + NPI）@ `023b8952`
 - D2 workbench radius long-tail #5 @ `b85cd597`
 - D8 soft expand @ `4c029537`；D9 F2 skim @ `ec2598aa`；shell nav/settings focus @ `3218a505`
+- D8 ownershipRoles optional hub/more category guard（`type-check:tests`）@ `52795047`
 - D4 card helper still **0** production callers
 - **Visual Yellow** · **Human XO first**（仍未签）
+- **无** new D6 样本 beyond residual #18–23
 
 **前主题 tip (`f99b0fc8`)**: D6 #16 PromptLab · D10 ThemeColors removed · D12×20。
 
