@@ -126,6 +126,12 @@ export function mapGeminiThinking(prefs: {
   };
 }
 
+/**
+ * Answer-text headroom kept above thinking.budget_tokens when clamping max_tokens.
+ * 512 proved too tight: a fully-used budget left almost no visible answer tokens.
+ */
+export const THINKING_BUDGET_ANSWER_HEADROOM = 4_096;
+
 /** Extract thinking budget from a body fragment (for max_tokens clamp). */
 export function readThinkingBudgetTokens(extra: Record<string, unknown>): number | undefined {
   const thinking = extra.thinking as { budget_tokens?: unknown } | undefined;

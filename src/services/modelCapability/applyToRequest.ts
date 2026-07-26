@@ -1,4 +1,4 @@
-import { readThinkingBudgetTokens } from './mappers';
+import { readThinkingBudgetTokens, THINKING_BUDGET_ANSWER_HEADROOM } from './mappers';
 import { applyVisionPartsToChatMessages } from './chatVision';
 import type { EffectiveReasoningPrefs, ResolvedModelCapability } from './types';
 
@@ -39,7 +39,7 @@ function ensureMaxTokensAboveThinkingBudget(body: Record<string, unknown>): void
   if (budget === undefined) {
     return;
   }
-  const minMax = budget + 512;
+  const minMax = budget + THINKING_BUDGET_ANSWER_HEADROOM;
   delete body.max_completion_tokens;
   const current = typeof body.max_tokens === 'number' ? body.max_tokens : 0;
   if (current < minMax) {
