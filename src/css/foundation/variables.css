@@ -528,10 +528,11 @@
   --color-bg-overlay: rgba(0, 0, 0, 0.7);
 
   /* ---- 工作台表面 ---- */
+  /* Elevation ladder: workbench < panel < card ≈ elevated < card-hover */
   --surface-workbench: var(--color-slate-950);
   --surface-panel: var(--color-slate-900);
-  --surface-card: var(--color-slate-900);
-  --surface-card-hover: var(--color-slate-800);
+  --surface-card: var(--color-slate-800);
+  --surface-card-hover: var(--color-slate-700);
 
   /* ---- 边框 ---- */
   --color-border-lightest: rgba(255, 255, 255, 0.03);
