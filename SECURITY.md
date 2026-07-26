@@ -42,6 +42,8 @@ You should receive an acknowledgement within **3 business days**. Critical produ
 - Broader audit helpers: `npm run security:audit`
 - CI aggregates security checks via `npm run ci:security`
 
+Related product/engineering docs: [docs/PRODUCT_PRINCIPLES.md](./docs/PRODUCT_PRINCIPLES.md), [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md), open security/ops debt on [docs/TECH_DEBT_BOARD.md](./docs/TECH_DEBT_BOARD.md).
+
 ## Production monitoring decision
 
 - **Default:** Sentry is **disabled**. No DSN is shipped in the repository or Cloudflare Pages project for LLM/model access, and `.env.example` leaves monitoring off.

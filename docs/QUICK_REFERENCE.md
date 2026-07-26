@@ -2,6 +2,11 @@
 
 本文档提供 SOPs 项目的快速参考信息。
 
+**规范导航：** [INDEX.md](./INDEX.md)（含 30 秒决策树）  
+**产品原则：** [PRODUCT_PRINCIPLES.md](./PRODUCT_PRINCIPLES.md)  
+**测试策略：** [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)  
+**活债务：** [TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)
+
 ---
 
 ## 🚀 快速命令
@@ -25,6 +30,9 @@ npm run format           # Prettier 格式化
 ```bash
 npm run test             # 单元测试
 npm run test:e2e         # E2E 测试
+npm run test:e2e:smoke   # Release smoke
+npm run test:unit:settings
+npm run test:settings    # 设置域闭环
 npm run test:coverage    # 覆盖率报告
 ```
 

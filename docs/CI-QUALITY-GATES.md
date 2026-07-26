@@ -2,7 +2,8 @@
 
 **生成时间**: 2026-06-07  
 **版本**: 1.1.0  
-**维护团队**: DevOps & Security Team
+**维护团队**: DevOps & Security Team  
+**维护说明**: 2026-07-26 — 仍为门禁清单 SSOT；测试**策略**见 [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)；活债务见 [TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)。若本文命令与 `package.json` 不一致，以 `package.json` 为准并应回写本文。
 
 ---
 
