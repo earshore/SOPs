@@ -45,7 +45,7 @@
   height: 16px;
   border-radius: 50%;
   background: var(--color-blue-500, #3b82f6);
-  border: 3px solid white;
+  border: 3px solid var(--surface-card, white);
   box-shadow: 0 0 0 2px var(--color-blue-500, #3b82f6);
   transition:
     background-color var(--duration-normal, 300ms) var(--ease-smooth),
@@ -79,7 +79,7 @@
 
 /* 待处理 */
 .timeline-dot--pending {
-  background: white;
+  background: var(--surface-card, white);
   box-shadow: 0 0 0 2px var(--color-slate-400, #94a3b8);
 }
 
