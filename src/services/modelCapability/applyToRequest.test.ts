@@ -618,3 +618,86 @@ describe('buildResponsesBody', () => {
     });
   });
 });
+
+describe('verbosity and service_tier normalization', () => {
+  const chatCap = {
+    modelId: 'gpt-5.5',
+    apiSurface: 'chat_completions' as const,
+    supportsReasoning: false,
+    temperatureIgnored: false,
+    mapRequest: null,
+  } as unknown as ResolvedModelCapability;
+
+  const respCap = {
+    modelId: 'gpt-5.5',
+    apiSurface: 'responses' as const,
+    supportsReasoning: false,
+    temperatureIgnored: false,
+    mapRequest: null,
+    supportsStructuredOutput: true,
+    supportsPreviousResponseId: false,
+    supportsStore: false,
+  } as unknown as ResolvedModelCapability;
+
+  const off = { enabled: false, effort: 'off', requestedEffort: 'off' } as const;
+
+  it('chat: emits top-level verbosity and accepts service_tier scale', () => {
+    const body = buildChatCompletionsBody({
+      model: 'gpt-5.5',
+      messages: [{ role: 'user', content: 'hi' }],
+      capability: chatCap,
+      reasoning: off,
+      verbosity: 'high',
+      serviceTier: 'scale',
+    });
+    expect(body.verbosity).toBe('high');
+    expect(body.service_tier).toBe('scale');
+  });
+
+  it('chat: drops invalid verbosity and unknown service_tier', () => {
+    const body = buildChatCompletionsBody({
+      model: 'gpt-5.5',
+      messages: [{ role: 'user', content: 'hi' }],
+      capability: chatCap,
+      reasoning: off,
+      verbosity: 'ultra',
+      serviceTier: 'vip',
+    });
+    expect(body.verbosity).toBeUndefined();
+    expect(body.service_tier).toBeUndefined();
+  });
+
+  it('responses: merges text.verbosity with existing text.format', () => {
+    const body = buildResponsesBody({
+      model: 'gpt-5.5',
+      messages: [{ role: 'user', content: 'hi' }],
+      jsonMode: true,
+      capability: respCap,
+      reasoning: off,
+      verbosity: 'high',
+    });
+    expect(body.text).toEqual({ format: { type: 'json_object' }, verbosity: 'high' });
+  });
+
+  it('responses: sets text.verbosity alone when no format', () => {
+    const body = buildResponsesBody({
+      model: 'gpt-5.5',
+      messages: [{ role: 'user', content: 'hi' }],
+      capability: respCap,
+      reasoning: off,
+      verbosity: 'low',
+    });
+    expect(body.text).toEqual({ verbosity: 'low' });
+  });
+
+  it('responses: drops invalid verbosity leaving text untouched', () => {
+    const body = buildResponsesBody({
+      model: 'gpt-5.5',
+      messages: [{ role: 'user', content: 'hi' }],
+      capability: respCap,
+      reasoning: off,
+      verbosity: 'nope',
+    });
+    expect(body.text).toBeUndefined();
+  });
+});

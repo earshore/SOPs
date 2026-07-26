@@ -5,7 +5,10 @@ import {
   extractResponsesOutputText,
   extractResponsesReasoningSummary,
   extractResponsesRefusal,
+  getResponsesFailureFromEvent,
+  getResponsesFailureFromPayload,
   getResponsesReasoningStreamDelta,
+  getResponsesRefusalDelta,
   getResponsesStreamTextDelta,
   harvestResponsesReasoningIncrement,
   isResponsesTerminalEvent,
@@ -121,5 +124,76 @@ describe('responsesParse', () => {
         status: 'completed',
       })
     ).toBeNull();
+  });
+});
+
+describe('responses failure parsing', () => {
+  it('parses response.failed event with code and message', () => {
+    const failure = getResponsesFailureFromEvent('response.failed', {
+      type: 'response.failed',
+      response: {
+        status: 'failed',
+        error: { code: 'server_error', message: 'boom' },
+      },
+    });
+    expect(failure?.kind).toBe('failed');
+    expect(failure?.code).toBe('server_error');
+    expect(failure?.message).toContain('boom');
+  });
+
+  it('parses response.incomplete event with reason', () => {
+    const failure = getResponsesFailureFromEvent('response.incomplete', {
+      type: 'response.incomplete',
+      response: {
+        status: 'incomplete',
+        incomplete_details: { reason: 'max_output_tokens' },
+      },
+    });
+    expect(failure?.kind).toBe('incomplete');
+    expect(failure?.code).toBe('max_output_tokens');
+    expect(failure?.message).toContain('max_output_tokens');
+  });
+
+  it('returns null for unrelated events', () => {
+    expect(getResponsesFailureFromEvent('response.completed', { response: {} })).toBeNull();
+    expect(getResponsesFailureFromEvent('response.output_text.delta', {})).toBeNull();
+  });
+
+  it('handles missing error details gracefully', () => {
+    const failure = getResponsesFailureFromEvent('response.failed', { type: 'response.failed' });
+    expect(failure?.kind).toBe('failed');
+    expect(failure?.message).toContain('未知错误');
+  });
+
+  it('parses non-stream payload status variants', () => {
+    expect(
+      getResponsesFailureFromPayload({
+        status: 'failed',
+        error: { code: 'rate_limit_exceeded', message: 'slow down' },
+      })?.message
+    ).toContain('slow down');
+    expect(
+      getResponsesFailureFromPayload({
+        status: 'incomplete',
+        incomplete_details: { reason: 'content_filter' },
+      })?.message
+    ).toContain('安全策略');
+    expect(getResponsesFailureFromPayload({ status: 'completed' })).toBeNull();
+    expect(getResponsesFailureFromPayload(null)).toBeNull();
+  });
+});
+
+describe('responses refusal deltas', () => {
+  it('reads refusal.delta and refusal.done fields', () => {
+    expect(getResponsesRefusalDelta('response.refusal.delta', { delta: 'I can' })).toBe('I can');
+    expect(getResponsesRefusalDelta('response.refusal.done', { refusal: 'refused' })).toBe(
+      'refused'
+    );
+  });
+
+  it('returns null for other events or malformed payloads', () => {
+    expect(getResponsesRefusalDelta('response.output_text.delta', { delta: 'x' })).toBeNull();
+    expect(getResponsesRefusalDelta('response.refusal.delta', { delta: 5 })).toBeNull();
+    expect(getResponsesRefusalDelta('response.refusal.done', null)).toBeNull();
   });
 });

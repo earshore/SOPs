@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  GEMINI_THINKING_LEVEL_BY_EFFORT,
   mapAnthropicOutputEffort,
   mapAnthropicThinking,
   mapGeminiThinking,
@@ -60,5 +61,15 @@ describe('multi-protocol mappers', () => {
         thinking: { type: 'enabled', budget_tokens: 2000 },
       })
     ).toBe(2000);
+  });
+
+  it('gemini thinkingLevel ladder clamps xhigh/max to high', () => {
+    expect(GEMINI_THINKING_LEVEL_BY_EFFORT).toEqual({
+      low: 'low',
+      medium: 'medium',
+      high: 'high',
+      xhigh: 'high',
+      max: 'high',
+    });
   });
 });

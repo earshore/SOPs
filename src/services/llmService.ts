@@ -22,7 +22,13 @@ import {
   buildBodyForApiPath,
   buildFullApiUrl,
   extractAnthropicMessagesText,
+  extractAnthropicStopReason,
+  extractAnthropicToolUses,
+  extractAnthropicUsage,
+  extractGeminiFinishDiagnostics,
+  extractGeminiFunctionCalls,
   extractGeminiGenerateText,
+  extractGeminiUsage,
   DEFAULT_MAX_TOOL_ROUNDS,
   appendChatToolRoundMessages,
   describeResponsesEmptyBody,
@@ -33,9 +39,14 @@ import {
   extractResponsesId,
   extractResponsesIdFromStreamEvent,
   extractResponsesReasoningSummary,
+  getAnthropicStreamInputJsonDelta,
   getAnthropicStreamTextDelta,
+  getAnthropicStreamToolUseStart,
   getGeminiStreamTextDelta,
+  getResponsesFailureFromEvent,
+  getResponsesFailureFromPayload,
   getResponsesReasoningStreamDelta,
+  getResponsesRefusalDelta,
   getResponsesStreamTextDelta,
   harvestResponsesReasoningIncrement,
   isResponsesTerminalEvent,
@@ -53,8 +64,10 @@ import {
   textLooksLikeEmittedToolCalls,
   type ApiPathId,
   type ApiSurface,
+  type AnthropicToolUse,
   type ChatFunctionToolCall,
   type CollectedToolOutput,
+  type GeminiFunctionCall,
   type ModelsListEntry,
   type ReasoningUserPrefs,
   type ResponsesJsonSchemaFormat,
@@ -452,6 +465,12 @@ interface OpenAIStreamState {
   chatToolCalls?: ChatFunctionToolCall[];
   /** Last usage object seen on stream (include_usage). */
   usage?: Record<string, unknown>;
+  /** Anthropic SSE tool_use accumulation: index → partial call. */
+  anthropicToolUses?: Map<number, { id: string; name: string; json: string }>;
+  /** Anthropic prompt tokens from message_start (merged into message_delta usage). */
+  anthropicPromptTokens?: number;
+  /** Gemini stream functionCall parts (converted to chat tool_calls). */
+  geminiToolCalls?: ChatFunctionToolCall[];
 }
 
 interface OpenAIStreamLineContext {
@@ -585,12 +604,15 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
   }
 
   assertStreamPayloadIsOk(payload, data, context.response);
+  assertResponsesStreamNotFailed(payload, data, context);
   reportResponsesStreamIdOnce(payload, context);
   harvestResponsesStreamSideChannels(payload, context);
   harvestChatStreamToolCalls(payload, context);
+  harvestAnthropicStreamSideChannels(payload, context);
+  harvestGeminiStreamSideChannels(payload, context);
   harvestStreamUsage(payload, context);
 
-  const delta = getStreamDelta(payload, context.apiSurface);
+  const delta = resolveStreamTextDelta(payload, context);
   const reasoningDelta = resolveStreamReasoningDelta(payload, context);
   if (!delta && !reasoningDelta) {
     return;
@@ -599,10 +621,141 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
   emitOpenAIStreamUpdate(context, delta, reasoningDelta);
 }
 
+/** Responses SSE terminal failures (response.failed / response.incomplete) → ApiError. */
+function assertResponsesStreamNotFailed(
+  payload: Record<string, unknown>,
+  data: string,
+  context: OpenAIStreamLineContext
+): void {
+  if (context.apiSurface !== 'responses') return;
+  const eventType = typeof payload.type === 'string' ? payload.type : '';
+  if (!eventType) return;
+  const failure = getResponsesFailureFromEvent(eventType, payload);
+  if (!failure) return;
+  throw new ApiError(failure.message, 'API_STREAM_ERROR', context.response.status, data, {
+    module: 'LLMService',
+    action: 'readOpenAIStream',
+    ...(failure.code ? { errorCode: failure.code } : {}),
+  });
+}
+
+/** Refusal deltas double as visible text so the user sees the refusal reason. */
+function resolveStreamTextDelta(
+  payload: Record<string, unknown>,
+  context: OpenAIStreamLineContext
+): string {
+  const delta = getStreamDelta(payload, context.apiSurface);
+  if (delta) return delta;
+  if (context.apiSurface !== 'responses') return '';
+  const eventType = typeof payload.type === 'string' ? payload.type : '';
+  if (eventType !== 'response.refusal.delta') return '';
+  return getResponsesRefusalDelta(eventType, payload) ?? '';
+}
+
+/** Anthropic SSE: usage (message_start/message_delta) + tool_use input accumulation. */
+function harvestAnthropicStreamSideChannels(
+  payload: Record<string, unknown>,
+  context: OpenAIStreamLineContext
+): void {
+  if (context.apiSurface !== 'anthropic_messages') return;
+  const state = context.state;
+
+  const usage = extractAnthropicUsage(payload);
+  if (usage) {
+    if (payload.type === 'message_start') {
+      state.anthropicPromptTokens = usage.prompt_tokens;
+    }
+    const prompt = Math.max(usage.prompt_tokens, state.anthropicPromptTokens ?? 0);
+    state.usage = {
+      prompt_tokens: prompt,
+      completion_tokens: usage.completion_tokens,
+      total_tokens: prompt + usage.completion_tokens,
+    };
+    context.options.onUsage?.(state.usage);
+  }
+
+  const toolStart = getAnthropicStreamToolUseStart(payload);
+  if (toolStart) {
+    state.anthropicToolUses ??= new Map();
+    state.anthropicToolUses.set(toolStart.index, {
+      id: toolStart.id,
+      name: toolStart.name,
+      json: '',
+    });
+    return;
+  }
+  const jsonDelta = getAnthropicStreamInputJsonDelta(payload);
+  if (jsonDelta) {
+    const entry = state.anthropicToolUses?.get(jsonDelta.index);
+    if (entry) entry.json += jsonDelta.partialJson;
+  }
+}
+
+/** Gemini SSE chunks share the generateContent shape: harvest usage + functionCalls. */
+function harvestGeminiStreamSideChannels(
+  payload: Record<string, unknown>,
+  context: OpenAIStreamLineContext
+): void {
+  if (context.apiSurface !== 'gemini_generate') return;
+  const usage = extractGeminiUsage(payload);
+  if (usage) {
+    context.state.usage = { ...usage };
+    context.options.onUsage?.(context.state.usage);
+  }
+  const calls = extractGeminiFunctionCalls(payload);
+  if (calls.length > 0) {
+    context.state.geminiToolCalls = [
+      ...(context.state.geminiToolCalls ?? []),
+      ...geminiFunctionCallsToChatToolCalls(calls, context.state.geminiToolCalls?.length ?? 0),
+    ];
+  }
+}
+
+function geminiFunctionCallsToChatToolCalls(
+  calls: GeminiFunctionCall[],
+  startIndex: number
+): ChatFunctionToolCall[] {
+  return calls.map((call, i) => ({
+    id: `gemini_call_${startIndex + i + 1}`,
+    type: 'function' as const,
+    function: { name: call.name, arguments: JSON.stringify(call.args) },
+  }));
+}
+
+function anthropicToolUsesToChatToolCalls(
+  toolUses: AnthropicToolUse[]
+): ChatFunctionToolCall[] {
+  return toolUses.map(use => ({
+    id: use.id,
+    type: 'function' as const,
+    function: { name: use.name, arguments: JSON.stringify(use.input) },
+  }));
+}
+
+function anthropicStreamToolUsesToChatToolCalls(
+  map: Map<number, { id: string; name: string; json: string }> | undefined
+): ChatFunctionToolCall[] {
+  if (!map?.size) return [];
+  return [...map.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([, entry]) => ({
+      id: entry.id,
+      type: 'function' as const,
+      function: { name: entry.name, arguments: entry.json || '{}' },
+    }));
+}
+
 function harvestStreamUsage(
   payload: Record<string, unknown>,
   context: OpenAIStreamLineContext
 ): void {
+  // Anthropic / Gemini usage is normalized + reported in their surface harvesters.
+  if (
+    context.apiSurface === 'anthropic_messages' ||
+    context.apiSurface === 'gemini_generate'
+  ) {
+    return;
+  }
   const usage = payload.usage;
   if (!usage || typeof usage !== 'object') return;
   context.state.usage = usage as Record<string, unknown>;
@@ -843,9 +996,18 @@ function createOpenAIStreamResult(
     return bufferedResponses;
   }
 
+  const bufferedNative = tryBufferedNativeStreamResult(state, fallbackRecord, apiSurface);
+  if (bufferedNative) {
+    return bufferedNative;
+  }
+
   // Prefer streamed tool_calls; fall back to non-stream shaped buffered JSON.
   let chatToolCalls = state.chatToolCalls;
-  if ((!chatToolCalls || chatToolCalls.length === 0) && fallbackRecord) {
+  if (apiSurface === 'anthropic_messages') {
+    chatToolCalls = anthropicStreamToolUsesToChatToolCalls(state.anthropicToolUses);
+  } else if (apiSurface === 'gemini_generate') {
+    chatToolCalls = state.geminiToolCalls;
+  } else if ((!chatToolCalls || chatToolCalls.length === 0) && fallbackRecord) {
     chatToolCalls = extractChatToolCallsFromCompletion(fallbackRecord);
   }
 
@@ -860,6 +1022,52 @@ function createOpenAIStreamResult(
     reasoningContent: state.reasoningContent,
     usage: state.usage,
   };
+}
+
+/**
+ * Gateways may ignore stream:true and return one whole native JSON body
+ * (Anthropic Messages / Gemini generateContent shape) on the streaming URL.
+ */
+function tryBufferedNativeStreamResult(
+  state: OpenAIStreamState,
+  fallbackRecord: Record<string, unknown> | null,
+  apiSurface: ApiSurface
+): OpenAIStreamReadResult | null {
+  if (state.content || !fallbackRecord) return null;
+  if (apiSurface === 'anthropic_messages') {
+    const toolCalls = anthropicToolUsesToChatToolCalls(extractAnthropicToolUses(fallbackRecord));
+    return {
+      content: extractAnthropicMessagesText(fallbackRecord),
+      fallbackJson: null,
+      firstChunkMs: state.firstChunkMs,
+      chunkCount: state.chunkCount,
+      chatToolCalls: toolCalls.length ? toolCalls : undefined,
+      reasoningContent: state.reasoningContent,
+      usage: toUsageRecord(extractAnthropicUsage(fallbackRecord)) ?? state.usage,
+    };
+  }
+  if (apiSurface === 'gemini_generate') {
+    const toolCalls = geminiFunctionCallsToChatToolCalls(
+      extractGeminiFunctionCalls(fallbackRecord),
+      0
+    );
+    return {
+      content: extractGeminiGenerateText(fallbackRecord),
+      fallbackJson: null,
+      firstChunkMs: state.firstChunkMs,
+      chunkCount: state.chunkCount,
+      chatToolCalls: toolCalls.length ? toolCalls : undefined,
+      reasoningContent: state.reasoningContent,
+      usage: toUsageRecord(extractGeminiUsage(fallbackRecord)) ?? state.usage,
+    };
+  }
+  return null;
+}
+
+function toUsageRecord(
+  usage: import('./modelCapability').NormalizedUsage | null
+): Record<string, unknown> | undefined {
+  return usage ? { ...usage } : undefined;
 }
 
 async function readOpenAIStream(
@@ -1274,10 +1482,11 @@ function resolveTransportPathId(
 ): ApiPathId {
   if (forcePath) return forcePath;
   const current = options.apiPath ?? 'chat_completions';
-  // jsonMode: keep Gemini native; keep Responses when structured output (text.format) is supported;
-  // otherwise force chat_completions + response_format.
+  // jsonMode: keep Gemini/Anthropic native (Anthropic has no response_format — JSON is
+  // prompt-constrained; switching path would 404 on native endpoints); keep Responses when
+  // structured output (text.format) is supported; otherwise force chat_completions + response_format.
   if (options.jsonMode === true) {
-    if (current === 'gemini_generate') return 'gemini_generate';
+    if (current === 'gemini_generate' || current === 'anthropic_messages') return current;
     if (current === 'responses' && capabilitySupportsStructuredOutput) return 'responses';
     return 'chat_completions';
   }
@@ -1365,7 +1574,9 @@ function createLLMTransport(args: {
     include: args.options.include,
   });
 
-  const { fullUrl, pathSuffix } = buildFullApiUrl(args.endpoint, pathId, args.model);
+  const { fullUrl, pathSuffix } = buildFullApiUrl(args.endpoint, pathId, args.model, {
+    stream: args.options.stream === true,
+  });
 
   logReasoningTransport({
     model: args.model,
@@ -1549,6 +1760,86 @@ async function createLLMResponseError(
   });
 }
 
+/** Non-stream Responses body with status failed → throw; incomplete without text → throw. */
+function throwIfResponsesPayloadFailed(
+  data: Record<string, unknown>,
+  context: LLMCallContext
+): void {
+  const failure = getResponsesFailureFromPayload(data);
+  if (!failure) return;
+  // Keep partial text for incomplete bodies; only fail closed when nothing usable.
+  if (failure.kind === 'incomplete' && extractAssistantTextFromResponsesOrChat(data).trim()) {
+    return;
+  }
+  throw new ApiError(failure.message, 'API_INVALID_RESPONSE', 200, data, {
+    module: 'LLMService',
+    action: 'callLLM',
+    model: context.model,
+    endpoint: context.normalizedEndpoint,
+    ...(failure.code ? { errorCode: failure.code } : {}),
+  });
+}
+
+function readAnthropicNonStreamPayload(
+  data: Record<string, unknown>,
+  context: LLMCallContext
+): LLMResponsePayload {
+  const usage = extractAnthropicUsage(data);
+  if (usage) {
+    context.options.onUsage?.({ ...usage });
+  }
+  const content = extractAnthropicMessagesText(data);
+  const toolCalls = anthropicToolUsesToChatToolCalls(extractAnthropicToolUses(data));
+  const stopReason = extractAnthropicStopReason(data);
+  if (!content.trim() && toolCalls.length === 0 && stopReason === 'max_tokens') {
+    throw new ApiError(
+      '模型输出已达到 max tokens 上限被截断（stop_reason=max_tokens），请增大输出上限后重试。',
+      'API_EMPTY_RESPONSE',
+      200,
+      data,
+      {
+        module: 'LLMService',
+        action: 'callLLM',
+        model: context.model,
+        endpoint: context.normalizedEndpoint,
+      }
+    );
+  }
+  return {
+    data: null,
+    content,
+    chatToolCalls: toolCalls.length ? toolCalls : undefined,
+  };
+}
+
+function readGeminiNonStreamPayload(
+  data: Record<string, unknown>,
+  context: LLMCallContext
+): LLMResponsePayload {
+  const usage = extractGeminiUsage(data);
+  if (usage) {
+    context.options.onUsage?.({ ...usage });
+  }
+  const content = extractGeminiGenerateText(data);
+  const toolCalls = geminiFunctionCallsToChatToolCalls(extractGeminiFunctionCalls(data), 0);
+  if (!content.trim() && toolCalls.length === 0) {
+    const diagnostics = extractGeminiFinishDiagnostics(data);
+    if (diagnostics) {
+      throw new ApiError(diagnostics.message, 'API_EMPTY_RESPONSE', 200, data, {
+        module: 'LLMService',
+        action: 'callLLM',
+        model: context.model,
+        endpoint: context.normalizedEndpoint,
+      });
+    }
+  }
+  return {
+    data: null,
+    content,
+    chatToolCalls: toolCalls.length ? toolCalls : undefined,
+  };
+}
+
 async function readLLMResponsePayload(
   response: Response,
   context: LLMCallContext,
@@ -1561,6 +1852,7 @@ async function readLLMResponsePayload(
       if (responseId) {
         context.options.onResponseId?.(responseId);
       }
+      throwIfResponsesPayloadFailed(data, context);
       // Non-stream / tool-loop: still surface reasoning summary for 深度思考 UI
       emitResponsesReasoningFromPayload(data, context.options.onStreamUpdate, requestStartedAt);
       return {
@@ -1570,10 +1862,10 @@ async function readLLMResponsePayload(
       };
     }
     if (context.apiSurface === 'anthropic_messages') {
-      return { data: null, content: extractAnthropicMessagesText(data) };
+      return readAnthropicNonStreamPayload(data, context);
     }
     if (context.apiSurface === 'gemini_generate') {
-      return { data: null, content: extractGeminiGenerateText(data) };
+      return readGeminiNonStreamPayload(data, context);
     }
     const usage = data.usage;
     if (usage && typeof usage === 'object') {
@@ -1914,10 +2206,15 @@ function shouldUseResponsesToolLoop(options: ResolvedLLMOptions): boolean {
   return hasToolLoopPrerequisites(options) && options.apiPath === 'responses';
 }
 
-/** Official Chat Completions tools multi-round (messages + tool_calls). */
+/** Official Chat Completions tools multi-round (messages + tool_calls). Native
+ * Anthropic/Gemini paths reuse the same loop: their tool calls are normalized to
+ * ChatFunctionToolCall and tool results are replayed as plain-text rounds. */
 function shouldUseChatToolLoop(options: ResolvedLLMOptions): boolean {
   const path = options.apiPath ?? 'chat_completions';
-  return hasToolLoopPrerequisites(options) && path === 'chat_completions';
+  return (
+    hasToolLoopPrerequisites(options) &&
+    (path === 'chat_completions' || path === 'anthropic_messages' || path === 'gemini_generate')
+  );
 }
 
 /** Fail closed when enableToolLoop is set without executor/tools. */

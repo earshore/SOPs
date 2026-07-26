@@ -53,10 +53,14 @@ export {
   extractResponsesOutputText,
   extractResponsesReasoningSummary,
   extractResponsesRefusal,
+  getResponsesFailureFromEvent,
+  getResponsesFailureFromPayload,
   getResponsesReasoningStreamDelta,
+  getResponsesRefusalDelta,
   getResponsesStreamTextDelta,
   harvestResponsesReasoningIncrement,
   isResponsesTerminalEvent,
+  type ResponsesFailure,
 } from './responsesParse';
 export {
   OPENAI_PLATFORM_CAPABILITY_MATRIX,
@@ -135,6 +139,7 @@ export {
 } from './structuredAnalysisOptions';
 export {
   GEMINI_THINKING_BUDGET_BY_EFFORT,
+  GEMINI_THINKING_LEVEL_BY_EFFORT,
   mapAnthropicOutputEffort,
   mapAnthropicThinking,
   mapGeminiThinking,
@@ -156,10 +161,25 @@ export {
   buildAnthropicMessagesBody,
   buildBodyForApiPath,
   buildGeminiGenerateBody,
+  type RichChatMessage,
 } from './protocolBodies';
 export {
   extractAnthropicMessagesText,
+  extractAnthropicStopReason,
+  extractAnthropicToolUses,
+  extractAnthropicUsage,
+  extractGeminiFinishDiagnostics,
+  extractGeminiFunctionCalls,
   extractGeminiGenerateText,
+  extractGeminiUsage,
+  getAnthropicStreamInputJsonDelta,
   getAnthropicStreamTextDelta,
+  getAnthropicStreamToolUseStart,
   getGeminiStreamTextDelta,
+  type AnthropicStreamInputJsonDelta,
+  type AnthropicStreamToolUseStart,
+  type AnthropicToolUse,
+  type GeminiFinishDiagnostics,
+  type GeminiFunctionCall,
+  type NormalizedUsage,
 } from './protocolParse';

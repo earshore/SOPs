@@ -47,6 +47,7 @@ describe('multi-protocol flagship catalog', () => {
       'deepseek-v4-flash',
       'claude-sonnet-4-5-20250929',
       'claude-opus-4.5',
+      'claude-fable-5',
       'gemini-3.6-flash',
       'gemini-2.5-pro',
     ];

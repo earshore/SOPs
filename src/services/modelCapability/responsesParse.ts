@@ -324,3 +324,89 @@ export function extractResponsesIdFromStreamEvent(
   }
   return undefined;
 }
+
+// ---------------------------------------------------------------------------
+// Failure / refusal parsing (official Responses API terminal shapes)
+// ---------------------------------------------------------------------------
+
+export interface ResponsesFailure {
+  kind: 'failed' | 'incomplete';
+  code?: string;
+  message: string;
+}
+
+function readErrorFields(error: unknown): { code?: string; message?: string } {
+  if (!error || typeof error !== 'object') return {};
+  const e = error as { code?: unknown; message?: unknown };
+  return {
+    ...(typeof e.code === 'string' && e.code ? { code: e.code } : {}),
+    ...(typeof e.message === 'string' && e.message ? { message: e.message } : {}),
+  };
+}
+
+function buildFailedFailure(error: unknown): ResponsesFailure {
+  const { code, message } = readErrorFields(error);
+  const detail = message || code || '未知错误';
+  return {
+    kind: 'failed',
+    ...(code ? { code } : {}),
+    message: `模型请求失败（response.failed）：${detail}`,
+  };
+}
+
+function buildIncompleteFailure(reason: string): ResponsesFailure {
+  const message =
+    describeIncompleteEmptyBody('incomplete', reason) ??
+    '模型输出未完成（status=incomplete）。请增大输出上限或稍后重试。';
+  return { kind: 'incomplete', ...(reason ? { code: reason } : {}), message };
+}
+
+/**
+ * Terminal failure from a stream event. Handles `response.failed`
+ * (`payload.response.error.{code,message}`) and `response.incomplete`
+ * (`payload.response.incomplete_details.reason`). Null for other events.
+ */
+export function getResponsesFailureFromEvent(
+  eventType: string,
+  payload: Record<string, unknown> | null | undefined
+): ResponsesFailure | null {
+  if (eventType !== 'response.failed' && eventType !== 'response.incomplete') return null;
+  const nested =
+    payload &&
+    typeof payload === 'object' &&
+    payload.response &&
+    typeof payload.response === 'object'
+      ? (payload.response as Record<string, unknown>)
+      : ({} as Record<string, unknown>);
+  if (eventType === 'response.failed') return buildFailedFailure(nested.error);
+  return buildIncompleteFailure(readIncompleteReason(nested));
+}
+
+/** Non-stream variant: checks `data.status === 'failed' | 'incomplete'`. */
+export function getResponsesFailureFromPayload(
+  data: Record<string, unknown> | null | undefined
+): ResponsesFailure | null {
+  if (!data || typeof data !== 'object') return null;
+  const status = typeof data.status === 'string' ? data.status : '';
+  if (status === 'failed') return buildFailedFailure(data.error);
+  if (status === 'incomplete') return buildIncompleteFailure(readIncompleteReason(data));
+  return null;
+}
+
+/**
+ * Refusal text from stream events: `response.refusal.delta` (field `delta`)
+ * and `response.refusal.done` (field `refusal`). Null otherwise.
+ */
+export function getResponsesRefusalDelta(
+  eventType: string,
+  payload: Record<string, unknown> | null | undefined
+): string | null {
+  if (!payload || typeof payload !== 'object') return null;
+  if (eventType === 'response.refusal.delta') {
+    return typeof payload.delta === 'string' ? payload.delta : null;
+  }
+  if (eventType === 'response.refusal.done') {
+    return typeof payload.refusal === 'string' ? payload.refusal : null;
+  }
+  return null;
+}

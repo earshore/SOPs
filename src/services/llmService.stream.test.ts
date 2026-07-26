@@ -406,7 +406,53 @@ describe('callLLM streaming', () => {
     const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
     expect(body.systemInstruction).toBeTruthy();
     expect(Array.isArray(body.contents)).toBe(true);
-    expect(body.thinkingConfig).toMatchObject({ includeThoughts: true });
+    expect((body.generationConfig as Record<string, unknown>).thinkingConfig).toMatchObject({
+      includeThoughts: true,
+    });
+  });
+
+  it('streams Gemini via :streamGenerateContent?alt=sse with usage callback', async () => {
+    const onUsage = vi.fn();
+    const fetchMock = vi.fn(
+      async (_url: RequestInfo | URL, _init?: RequestInit): Promise<Response> => {
+        void _url;
+        void _init;
+        return createSseResponse([
+          'data: {"candidates":[{"content":{"parts":[{"text":"Hel"}]}}]}',
+          'data: {"candidates":[{"content":{"parts":[{"text":"lo"}]},"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":5,"candidatesTokenCount":2,"totalTokenCount":7}}',
+        ]);
+      }
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'gemini-2.5-flash',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'gemini_generate',
+        onUsage,
+      }
+    );
+
+    expect(text).toBe('Hello');
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      'https://new.hongecb.store/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse'
+    );
+    const body = JSON.parse(
+      String((fetchMock.mock.calls[0]?.[1] as RequestInit | undefined)?.body)
+    ) as Record<string, unknown>;
+    // Streaming is URL-based for Gemini; the body never carries stream.
+    expect(body.stream).toBeUndefined();
+    expect(onUsage).toHaveBeenCalledWith({
+      prompt_tokens: 5,
+      completion_tokens: 2,
+      total_tokens: 7,
+    });
   });
 
   it('runs responses tool loop until final text', async () => {

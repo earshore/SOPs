@@ -5,6 +5,23 @@
 
 import type { ReasoningEffort } from './types';
 
+/**
+ * Official OpenAI `reasoning_effort` only accepts minimal/low/medium/high
+ * (gpt-5.1 adds `none`, but product-side off is handled via enabled=false).
+ * Product-side xhigh/max are clamped to `high` at the OpenAI egress only.
+ */
+const OPENAI_EFFORT_BY_PRODUCT_EFFORT: Record<string, string> = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+  xhigh: 'high',
+  max: 'high',
+};
+
+function clampOpenAiEffort(effort: ReasoningEffort): string {
+  return OPENAI_EFFORT_BY_PRODUCT_EFFORT[effort] ?? 'high';
+}
+
 export function mapOpenAiReasoningEffort(prefs: {
   enabled: boolean;
   effort: ReasoningEffort;
@@ -12,7 +29,7 @@ export function mapOpenAiReasoningEffort(prefs: {
   if (!prefs.enabled || prefs.effort === 'off') {
     return {};
   }
-  return { reasoning_effort: prefs.effort };
+  return { reasoning_effort: clampOpenAiEffort(prefs.effort) };
 }
 
 /**
@@ -29,7 +46,7 @@ export function mapResponsesReasoning(prefs: {
   }
   return {
     reasoning: {
-      effort: prefs.effort,
+      effort: clampOpenAiEffort(prefs.effort),
       summary: 'auto',
     },
   };
@@ -98,6 +115,21 @@ export const GEMINI_THINKING_BUDGET_BY_EFFORT: Record<Exclude<ReasoningEffort, '
   high: 8_192,
   xhigh: 16_384,
   max: 32_768,
+};
+
+/**
+ * Gemini 3+ official thinkingLevel enum ladder.
+ * Product 5-tier clamps onto the official enum: xhigh/max → 'high'.
+ */
+export const GEMINI_THINKING_LEVEL_BY_EFFORT: Record<
+  Exclude<ReasoningEffort, 'off'>,
+  'minimal' | 'low' | 'medium' | 'high'
+> = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+  xhigh: 'high',
+  max: 'high',
 };
 
 /**

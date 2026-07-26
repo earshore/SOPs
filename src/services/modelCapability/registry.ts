@@ -378,6 +378,8 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   claudeOutputEffort('claude-opus-4.5', 200_000),
   claudeOutputEffort('claude-opus-4.5-*', 200_000),
   claudeOutputEffort('claude-opus-4-5-*', 200_000),
+  claudeOutputEffort('claude-fable-5', 200_000),
+  claudeOutputEffort('claude-fable-5-*', 200_000),
   claudeOutputEffort('claude-opus-5', 200_000),
   claudeOutputEffort('claude-opus-5-*', 200_000),
   claudeOutputEffort('claude-sonnet-5', 200_000),

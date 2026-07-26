@@ -66,12 +66,16 @@ export function stripTrailingSlash(url: string): string {
 /**
  * Join user endpoint with path mode.
  * - append modes use endpoint as base (expect …/v1)
- * - gemini replaces trailing /v1 with /v1beta/models/{model}:generateContent, else origin + path
+ * - gemini strips a single trailing /v1 or /v1beta from the base (preserving any
+ *   gateway prefix before it) and appends /v1beta/models/{model}:generateContent
+ *   (or :streamGenerateContent when opts.stream is true; fullUrl then carries
+ *   ?alt=sse while pathSuffix stays query-free for logging/labels).
  */
 export function buildFullApiUrl(
   endpoint: string,
   pathId: ApiPathId,
-  model: string
+  model: string,
+  opts?: { stream?: boolean }
 ): { fullUrl: string; pathSuffix: string } {
   const base = stripTrailingSlash((endpoint || '').trim());
   if (!base) {
@@ -93,20 +97,14 @@ export function buildFullApiUrl(
 
   // gemini_generate
   const modelSeg = encodeURIComponent(model || '{model}');
-  const geminiPath = `/v1beta/models/${modelSeg}:generateContent`;
-  try {
-    const u = new URL(base.includes('://') ? base : `https://${base}`);
-    // If endpoint ends with /v1 or /v1beta, use origin only for gemini
-    const origin = u.origin;
-    const pathSuffix = geminiPath;
-    return { fullUrl: `${origin}${pathSuffix}`, pathSuffix };
-  } catch {
-    const withoutV1 = base.replace(/\/v1$/i, '').replace(/\/v1beta$/i, '');
-    return {
-      fullUrl: `${withoutV1}${geminiPath}`,
-      pathSuffix: geminiPath,
-    };
-  }
+  const stream = opts?.stream === true;
+  const method = stream ? 'streamGenerateContent' : 'generateContent';
+  const pathSuffix = `/v1beta/models/${modelSeg}:${method}`;
+  // Strip a single trailing /v1 or /v1beta (case-insensitive), keeping any
+  // gateway prefix (e.g. https://host/gateway/v1 → https://host/gateway).
+  const geminiBase = base.replace(/\/v1(beta)?$/i, '');
+  const query = stream ? '?alt=sse' : '';
+  return { fullUrl: `${geminiBase}${pathSuffix}${query}`, pathSuffix };
 }
 
 /** Map path id → capability surface key (for registry mapRequest selection). */

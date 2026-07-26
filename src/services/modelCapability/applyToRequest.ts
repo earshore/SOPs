@@ -172,6 +172,8 @@ export type ChatCompletionsBodyExtras = {
   prediction?: Record<string, unknown>;
   /** Built-in web search options (OpenAI) */
   webSearchOptions?: Record<string, unknown>;
+  /** GPT-5 text verbosity: 'low' | 'medium' | 'high'; invalid values dropped. */
+  verbosity?: string;
 };
 
 function setIfDefined(body: Record<string, unknown>, key: string, value: unknown): void {
@@ -180,11 +182,22 @@ function setIfDefined(body: Record<string, unknown>, key: string, value: unknown
   }
 }
 
+/** Official OpenAI service tiers; invalid values are dropped silently. */
+const OFFICIAL_SERVICE_TIERS = ['auto', 'default', 'flex', 'scale', 'priority'] as const;
+
+function normalizeServiceTier(value: string | undefined): string | undefined {
+  return value && (OFFICIAL_SERVICE_TIERS as readonly string[]).includes(value) ? value : undefined;
+}
+
+function normalizeVerbosity(value: string | undefined): 'low' | 'medium' | 'high' | undefined {
+  return value === 'low' || value === 'medium' || value === 'high' ? value : undefined;
+}
+
 function applyChatSamplingFields(
   body: Record<string, unknown>,
   args: ChatCompletionsBodyExtras
 ): void {
-  setIfDefined(body, 'service_tier', args.serviceTier);
+  setIfDefined(body, 'service_tier', normalizeServiceTier(args.serviceTier));
   setIfDefined(body, 'top_p', args.topP);
   setIfDefined(body, 'frequency_penalty', args.frequencyPenalty);
   setIfDefined(body, 'presence_penalty', args.presencePenalty);
@@ -203,6 +216,7 @@ function applyChatSamplingFields(
   setIfDefined(body, 'audio', args.audio);
   setIfDefined(body, 'prediction', args.prediction);
   setIfDefined(body, 'web_search_options', args.webSearchOptions);
+  setIfDefined(body, 'verbosity', normalizeVerbosity(args.verbosity));
 }
 
 function applyChatToolsFields(
@@ -345,6 +359,8 @@ export type ResponsesBodyExtras = {
   background?: boolean;
   maxToolCalls?: number;
   include?: string[];
+  /** GPT-5 text verbosity: 'low' | 'medium' | 'high'; invalid values dropped. */
+  verbosity?: string;
 };
 
 /**
@@ -478,6 +494,18 @@ function applyResponsesTextFormat(
   }
 }
 
+/** Set text.verbosity, merging with any text.format already applied. */
+function applyResponsesTextVerbosity(
+  body: Record<string, unknown>,
+  verbosity: string | undefined
+): void {
+  const v = normalizeVerbosity(verbosity);
+  if (!v) return;
+  const text =
+    body.text && typeof body.text === 'object' ? (body.text as Record<string, unknown>) : {};
+  body.text = { ...text, verbosity: v };
+}
+
 function applyResponsesCreatePassThrough(
   body: Record<string, unknown>,
   args: {
@@ -494,7 +522,7 @@ function applyResponsesCreatePassThrough(
     include?: string[];
   }
 ): void {
-  setIfDefined(body, 'service_tier', args.serviceTier);
+  setIfDefined(body, 'service_tier', normalizeServiceTier(args.serviceTier));
   setIfDefined(body, 'top_p', args.topP);
   setIfDefined(body, 'top_logprobs', args.topLogprobs);
   setIfDefined(body, 'metadata', args.metadata);
@@ -529,10 +557,12 @@ function applyResponsesOptionalFields(
     background?: boolean;
     maxToolCalls?: number;
     include?: string[];
+    verbosity?: string;
   }
 ): void {
   applyResponsesCreatePassThrough(body, args);
   applyResponsesTextFormat(body, args);
+  applyResponsesTextVerbosity(body, args.verbosity);
   const prev = args.previousResponseId?.trim();
   if (prev && args.capability.supportsPreviousResponseId) {
     body.previous_response_id = prev;
