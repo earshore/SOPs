@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- 企业设计规范 SSOT 栈落地：`docs/SECURITY_PLAYBOOK.md`（BYOK 威胁模型 + PR/RC 清单）；INDEX 30 秒决策树 / README 唯一入口 / SECURITY·PRODUCT 接线；活债务板 `TECH_DEBT_BOARD`（TD-OPS-01 / TD-DOC-STACK Closed，无 Open∩Closed 双真）；Release 模板 + `RELEASE_POLICY` 嵌入 OPS 冒烟与 a11y 抽检必勾项；`docs/superpowers` constitution-touch checklist；结构门禁 `tests/unit/enterpriseGuidelinesStack.test.ts`（14 项，防双真/断链/降级回退）。
 - D8 Ownership Role 代码 SSOT scaffold：`src/common/config/ownershipRoles.ts`（`OwnershipRoleId` × 19、`OWNERSHIP_ROLES`、`getPaletteForRole` / `getOwnershipRoleForModule`；纯 helper，无 Appearance 写入、无全站 DOM 绑定）。
 - D8 soft ownership unit expand：`ownershipRoles.test.ts` 补 `playground` / `amz_hub` / `app_center` / `sops` sidebar soft-check + hub/more category palette 对齐（无生产 API / 无全站 `data-ownership-role`）。
 - D9 局部 token 前缀生命周期（库存 / elevate·keep local·archive / PR 清单 / 与 D1 边界）：`docs/superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md`（docs only，无批量 CSS rename）。
