@@ -722,9 +722,7 @@ function geminiFunctionCallsToChatToolCalls(
   }));
 }
 
-function anthropicToolUsesToChatToolCalls(
-  toolUses: AnthropicToolUse[]
-): ChatFunctionToolCall[] {
+function anthropicToolUsesToChatToolCalls(toolUses: AnthropicToolUse[]): ChatFunctionToolCall[] {
   return toolUses.map(use => ({
     id: use.id,
     type: 'function' as const,
@@ -750,10 +748,7 @@ function harvestStreamUsage(
   context: OpenAIStreamLineContext
 ): void {
   // Anthropic / Gemini usage is normalized + reported in their surface harvesters.
-  if (
-    context.apiSurface === 'anthropic_messages' ||
-    context.apiSurface === 'gemini_generate'
-  ) {
+  if (context.apiSurface === 'anthropic_messages' || context.apiSurface === 'gemini_generate') {
     return;
   }
   const usage = payload.usage;
