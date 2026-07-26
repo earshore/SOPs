@@ -1,7 +1,7 @@
 # 企业级主题系统重构蓝图：主题 = 浅色/深色/系统
 
 **日期**: 2026-07-26  
-**状态**: T0–T2 **Done** · T3 **主体 Done**（forms/secondary/ui-card）· T4 **高流量 Partial**（more/sops/amz/KH/PromptLab 多波 ui-card）· T5 Open · 默认 system follow-up · **非**全站模板 100% 清零
+**状态**: T0–T3 **Done**（scorecard 复评 open）· T4 **主体 Done**（Top 模板多波 ui-card + content-surface 门禁）· T5 **Partial**（dark 视觉矩阵脚手架 + Ownership 双明度已落，`--own-*` SSOT open）· 默认 `system` **Done** · **非**全站模板 100% 清零
 **触发**: 产品纠正——当前将 Appearance 预设误称为「主题」，颜色模式（浅/深/系统）未达企业级一体化  
 **范围**: 运行时 · Token · 壳层 · 共享组件 · 业务模块 · 设置 IA · 命名  
 **关联**: `THEME_SYSTEM_GUIDELINES` · Ownership 深绑定审查 · D11/D3 债务  
@@ -207,7 +207,7 @@ Header / mega 面板 / settings / home dock / modal **只许**用 shell/surface�
 2. [x] **Head 同步主题脚本 + critical 语义化**（灭 FOUC） — `9db508ba`  
 3. [x] `prefers-color-scheme` 孤岛 → `data-color-mode-resolved` — `ee599bb5`  
 4. [x] `app-color-mode` 进入 export/CONFIG_KEYS — `f1a1dd00`  
-5. [x] 默认新用户 → `system`（可配置）  
+5. [x] 默认新用户 → `system`（`themeConfig` + `theme-bootstrap` 双端；旧存量偏好不受影响）  
 6. [x] 模式切换：`color-scheme` + 可选短过渡（bootstrap / critical / `data-theme-ready`）  
 
 **状态:** **Done**（全 6 项）  
@@ -224,7 +224,8 @@ Header / mega 面板 / settings / home dock / modal **只许**用 shell/surface�
 - [x] Header/mega 中性面（`4e768321`）  
 - [x] Sidebar 中性壳（`808b4f08`）  
 - [x] Home 浮动 + Modal（`bee360ba`）  
-- [ ] Ownership soft 双明度（侧栏 active 不再浅色粉岛）  
+- [x] Ownership soft 双明度（侧栏 active `808b4f08` dark color-mix；banner badge/soft 暗色同色相低明度 `32187aaa`）  
+- [x] 冷启动壳层 dark（critical.css header/mega/skeleton/scrollbar 首帧暗色 `32187aaa`）  
 - [ ] 全壳层 elevation / border 统一收口 + 体验签收  
 
 **状态:** **Done** — settings / header / sidebar / home / modal 已走 dual-theme surface；Ownership soft 双明度与统一签收仍 open（不阻壳层主面落地）  
@@ -237,11 +238,11 @@ Header / mega 面板 / settings / home dock / modal **只许**用 shell/surface�
 - [x] forms 双主题 field token（`3c697fc3`）  
 - [x] secondary button surfaces（`ad754b8d`）  
 - [x] `.ui-card` 语义原语 + 样本页（`d41f99ea` + 后续迁移）  
-- [ ] timeline 白边  
-- [ ] loading skeleton  
+- [x] timeline 白边（dot border/pending 走 `--surface-card`，`4e2ae4a8`）  
+- [x] loading skeleton（card 边框 / route 表面走 border/bg token，`4e2ae4a8`）  
 - [ ] 组件 scorecard 全面提升  
 
-**状态:** **Partial** — forms / secondary buttons / ui-card primitive + samples 已落地；timeline / skeleton / scorecard 仍 open  
+**状态:** **主体 Done** — forms / secondary buttons / ui-card / timeline / skeleton 已语义化；scorecard 复评 open  
 **验收:** 组件 scorecard 从 ~6/10 → ≥8.5/10。
 
 ### Phase T4 — 业务内容表面工业化
@@ -253,20 +254,25 @@ Header / mega 面板 / settings / home dock / modal **只许**用 shell/surface�
 - 淘汰 amz 仅桌面 cardization 补丁  
 
 已迁移样本：  
-- [x] more skills / workflows（`f151e180`）  
+- [x] more skills / workflows（`f151e180` + workflows 深迁 `6c798fe0`）  
 - [x] sops `competitor_monitoring`（`f151e180`）  
 - [x] amz knowledge 样本（eu_insights / seo_strategy，`53f20d02`）  
-- [ ] app center（未落地）  
-- [ ] 其余 Top 模板与 lint 门  
+- [x] sops growth 内层深迁（ppc/competitor/listing_seo/rw/promo，`e8751f69`）  
+- [x] sops safety/backend/service 内层深迁（`93da3a48`）  
+- [x] amz quality_listing / new_product_30days + AI 分析静态壳（`6c798fe0`）  
+- [x] **lint 门**：`content-surface:gate` 进 `ci:quality`（bg-white 508→214 · text-slate 2941→2542 只降不升）  
+- [ ] 剩余长尾（overlay/控件白与 scenario 长尾按门禁逐波清）  
 
-**状态:** **Partial** — more skills/workflows、sops competitor_monitoring、amz knowledge 样本已走 ui-card；app center 与大面积业务页仍 open  
+**状态:** **主体 Done** — Top 密度模板已走 ui-card；content-surface 基线门禁在 CI 锁死回归；长尾按波次收敛  
 **验收:** Top 20 最差模板改完后，Dark 下无大面积白卡。
 
 ### Phase T5 — Ownership palette 包 + 门禁
 
-- `--own-*` SSOT；mega/sidebar/banner 收敛  
-- 视觉矩阵：**Theme × Accent × 关键壳**（含 dark）  
-- Agent-contract 扩展 Theme 断言  
+- [ ] `--own-*` SSOT；mega/sidebar/banner 收敛  
+- [x] 视觉矩阵：**Theme × Accent × 关键壳**（含 dark）— 脚手架 `theme-appearance-scaffold` 扩至 light/dark × default/minimal × 12 屏（`3a6d7c4f`，THEME_VISUAL=1 本地铸造）  
+- [ ] Agent-contract 扩展 Theme 断言  
+
+**状态:** **Partial** — dark 视觉矩阵脚手架与 Ownership soft 双明度（T2 项）已落；`--own-*` SSOT 与 agent-contract Theme 断言 open  
 
 ---
 
