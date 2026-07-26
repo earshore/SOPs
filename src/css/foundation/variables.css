@@ -494,14 +494,10 @@
 [data-theme='dark'],
 [data-color-mode='dark'],
 [data-color-mode-resolved='dark'] {
-  /* ---- 主色 ---- */
-  --color-primary: var(--color-indigo-400);
-  --color-primary-light: rgba(129, 140, 248, 0.12);
-  --color-primary-dark: var(--color-indigo-500);
-  --color-primary-darker: var(--color-indigo-600);
-  --color-primary-contrast: #ffffff;
+  /* Appearance primary / focus / link tokens stay on Layer A (ThemeManager).
+     Dark mode only adjusts neutral surfaces, text, borders, status shades. */
 
-  /* ---- 次要色 ---- */
+  /* ---- 次要色（中性 slate 明度，非 brand stomp） ---- */
   --color-secondary: var(--color-slate-400);
   --color-secondary-light: rgba(148, 163, 184, 0.12);
   --color-secondary-dark: var(--color-slate-500);
@@ -518,8 +514,6 @@
   --color-text-placeholder: var(--color-slate-500);
   --color-text-disabled: var(--color-slate-600);
   --color-text-inverse: var(--color-slate-900);
-  --color-text-link: var(--color-indigo-400);
-  --color-text-link-hover: var(--color-indigo-300);
 
   /* ---- 背景 ---- */
   --color-bg-primary: var(--color-slate-900);
@@ -529,7 +523,6 @@
   --color-bg-sunken: var(--color-slate-950);
   --color-bg-hover: rgba(255, 255, 255, 0.06);
   --color-bg-active: rgba(255, 255, 255, 0.1);
-  --color-bg-selected: rgba(129, 140, 248, 0.12);
   --color-bg-disabled: rgba(255, 255, 255, 0.04);
   --color-bg-backdrop: rgba(0, 0, 0, 0.6);
   --color-bg-overlay: rgba(0, 0, 0, 0.7);
@@ -545,13 +538,11 @@
   --color-border-light: rgba(255, 255, 255, 0.06);
   --color-border-default: rgba(255, 255, 255, 0.1);
   --color-border-strong: rgba(255, 255, 255, 0.16);
-  --color-border-focus: var(--color-indigo-400);
   --color-border-error: var(--color-red-400);
   --border-subtle: rgba(148, 163, 184, 0.18);
   --border-muted: rgba(148, 163, 184, 0.22);
 
-  /* ---- 焦点环 ---- */
-  --color-focus-ring: var(--color-indigo-400);
+  /* ---- 焦点环 soft halo（跟随 Appearance --color-focus-ring） ---- */
   --focus-ring-soft: color-mix(in srgb, var(--color-focus-ring) 18%, transparent);
 
   /* ---- 状态色 ---- */
