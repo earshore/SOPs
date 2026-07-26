@@ -109,6 +109,8 @@ const CONFIG_KEYS = new Set([
   'ai_analysis_performance_settings',
   'app_theme',
   'app-theme',
+  'app_color_mode',
+  'app-color-mode',
   'app:animation-settings',
   'performance_metrics',
   'debug_events',
