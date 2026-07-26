@@ -1223,8 +1223,7 @@ function extractOutboundReasoningMarker(body: Record<string, unknown>): string |
   }
   // Gemini official: generationConfig.thinkingConfig (top-level kept for legacy bodies)
   const generationConfig = body.generationConfig as
-    | { thinkingConfig?: { thinkingBudget?: unknown } }
-    | undefined;
+    { thinkingConfig?: { thinkingBudget?: unknown } } | undefined;
   const thinkingConfig =
     generationConfig?.thinkingConfig ??
     (body.thinkingConfig as { thinkingBudget?: unknown } | undefined);
