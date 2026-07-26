@@ -54,7 +54,8 @@
 - `v3.0.11-rc.9`（2026-07-26）为生产验证候选：主题架构企业级收口（极简素色 / A2）、可行动 LLM 失败体验、文档权威整理；**Pre-release**，Latest 仍为 `v3.0.10`。
 - `v3.0.11-rc.10`（2026-07-26）为生产验证候选：推理档企业闭环与厂商 API 对齐、主题 Phase 1–2（颜色模式 + Appearance 迁样）、设置 TD；**Pre-release**，Latest 仍为 `v3.0.10`。
 - `v3.0.11-rc.11`（2026-07-27）为生产验证候选：企业主题 v2 双色轴全面落地、Claude/Gemini 厂商 API 对齐修复、CI 迁 ubuntu 恢复全绿；**Pre-release**，Latest 仍为 `v3.0.10`。
-- GA 后不得再发 `v3.0.10-rc.*`；当前 patch 候选为 `v3.0.11-rc.11`，GA 定稿后升 `v3.0.11`；若后续变更体量升 minor 则为 `v3.1.0-rc.1`。
+- `v3.0.11-rc.12`（2026-07-27）为生产验证候选：四路径 LLM API 官方对齐（传输层/协议层）、jsonMode 原生路径与 OpenAI effort clamp 残留风险修复、暗色 WCAG 对比度清零；**Pre-release**，Latest 仍为 `v3.0.10`。
+- GA 后不得再发 `v3.0.10-rc.*`；当前 patch 候选为 `v3.0.11-rc.12`，GA 定稿后升 `v3.0.11`；若后续变更体量升 minor 则为 `v3.1.0-rc.1`。
 
 ## 3. 何时创建 GitHub Release
 

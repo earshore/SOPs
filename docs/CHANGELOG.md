@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [3.0.11-rc.12] - 2026-07-27
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.11` 之后的**四条大模型 API 路径官方对齐**（`/chat/completions`、`/responses`、`/messages`、`:generateContent` 传输层与协议层全量补齐）、**上线前残留风险修复**（jsonMode 原生路径保持、OpenAI effort 出口 clamp）与**暗色 WCAG 对比度清零**。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- Gemini 原生流式：`buildFullApiUrl` 支持 stream 时切 `:streamGenerateContent` + `?alt=sse`（保留网关前缀，pathSuffix 不带 query）。
+- 协议解析层新增纯函数：`extractAnthropicUsage`（三形态 + cache 折入 prompt）、`extractGeminiUsage`（thoughts 计入 completion）、`extractAnthropicToolUses` / `extractGeminiFunctionCalls`、`extractGeminiFinishDiagnostics`、`extractAnthropicStopReason`、Anthropic 流式 tool_use start / input_json_delta 读取器。
+- Responses 失败通道：`getResponsesFailureFromEvent/FromPayload` + `getResponsesRefusalDelta`（refusal 并入可见文本；response.failed/incomplete 抛中文 ApiError，部分文本保留）。
+- 传输层：Anthropic/Gemini 流式旁路收割（usage 合并、tool_use/functionCall 累积→chatToolCalls）、非流式 payload 读取（空文本 + max_tokens/finish 诊断抛错）、整段原生 JSON 回落解析；三 surface 共用 chat 工具循环。
+- Chat vision 部件补齐：`input_audio`、`file`；verbosity（chat 顶层 / responses `text.verbosity` 与 format 合并）；service_tier 白名单加 `scale`。
+
+### Changed
+
+- OpenAI 出口 effort clamp：`reasoning_effort` / `reasoning.effort` 把产品侧 `xhigh`/`max` 钳制为官方枚举上限 `high`（仅 OpenAI 两个 mapper；Anthropic `output_config.effort` 与产品侧 5 档不变）。
+- jsonMode 不再把 `anthropic_messages` 静默切到 `chat_completions`（原生 Anthropic 端点会 404；Anthropic 无 response_format，JSON 靠 prompt 约束）。
+- 双认证头（Bearer + x-api-key / x-goog-api-key）补设计意图注释：BYOK 网关依赖 Bearer，原生端点忽略多余头，刻意兼容策略勿“修复”。
+- 设置面板 `undoLastSettingsSave` 提取 `restoreLlmSettingsSnapshot` helper，清除 deep-nesting 中位技术债（tech-debt gate 回归 0 中以上）。
+
+### Fixed
+
+- 暗色 WCAG 对比度扫描 440 处失败清零；PPC 搜索词 / Keyword Hunter 深度双主题补齐；amz hub 残留 ink 色 token 化。
+- 设置模型下拉改按 value 键控（`isModelSelected`），修复同名不同渠道模型选中态错乱。
+- Gemini 流式 usage 不再被通用 harvest 覆盖归一化结果；Anthropic 相邻同角色消息合并 + thinking budget floor。
+
 ## [3.0.11-rc.11] - 2026-07-27
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。

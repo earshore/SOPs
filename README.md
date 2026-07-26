@@ -25,17 +25,24 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-| 通道                         | 版本            | 说明                                                                    |
-| ---------------------------- | --------------- | ----------------------------------------------------------------------- |
-| **GitHub Latest（稳定 GA）** | `v3.0.10`       | 生产推荐版本                                                            |
-| **当前 Pre-release 候选**    | `v3.0.11-rc.11` | 企业主题 v2 双色轴 + Claude/Gemini API 对齐 + CI 恢复；**勿**默认当生产 |
-| package.json                 | `3.0.11-rc.11`  | 与 RC tag / Release 一致（GA 前）                                       |
-| 上一 GA                      | `v3.0.10`       | 回滚参考                                                                |
+| 通道                         | 版本            | 说明                                                                      |
+| ---------------------------- | --------------- | ------------------------------------------------------------------------- |
+| **GitHub Latest（稳定 GA）** | `v3.0.10`       | 生产推荐版本                                                              |
+| **当前 Pre-release 候选**    | `v3.0.11-rc.12` | 四路径 LLM API 官方对齐 + 残留风险修复 + 暗色对比度清零；**勿**默认当生产 |
+| package.json                 | `3.0.11-rc.12`  | 与 RC tag / Release 一致（GA 前）                                         |
+| 上一 GA                      | `v3.0.10`       | 回滚参考                                                                  |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.11` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.12` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.11`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.12`。
+
+`v3.0.11-rc.12`（2026-07-27，Pre-release）收口 rc.11 之后的四路径 LLM API 官方对齐与上线前残留风险修复：
+
+- **LLM 传输层**：Gemini 原生流式 `:streamGenerateContent?alt=sse`；Anthropic/Gemini 流式 usage/tool_use 旁路收割与工具循环；Responses failed/incomplete/refusal 失败通道；非流式 finish 诊断中文报错。
+- **风险修复**：jsonMode 不再把 Anthropic 原生路径静默切到 chat_completions（避免原生端点 404）；OpenAI 出口 `reasoning_effort` 把 xhigh/max clamp 到官方枚举上限 high（Anthropic 5 档不变）；双认证头设计意图注释化。
+- **主题收尾**：暗色 WCAG 对比度 440 处失败清零；Keyword Hunter / PPC 搜索词深度双主题；设置模型下拉选中态修复。
+- GitHub Latest **仍指向** `v3.0.10`；回滚基线为 `v3.0.10`。
 
 `v3.0.11-rc.11`（2026-07-27，Pre-release）收口 rc.10 之后的企业主题 v2、厂商 API 修复与 CI 恢复：
 
