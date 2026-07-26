@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- D5 续：shell `.nav-trigger:focus-visible` 从 hard indigo `rgba(99,102,241,.35)` 迁到 `color-mix(--color-focus-ring)`；Settings runtime checkbox 从 `focus:ring-indigo-500` 迁到 shared `settings-checkbox`（跟 Appearance focus；megaMenu / sidebar-theme / wb / chat purple / ErrorBoundary 保留）。
 - D10：删除 deprecated 类型别名 `ThemeColors`；Appearance 预览/写入类型 SSOT 仅 `AppearanceThemeColors`（primary 族 + focus）。
 - D11：`variables.css` root 暗色语义 token 块扩为 dual-safe：补 `[data-color-mode-resolved='dark']`（保留 `.dark` / legacy `data-theme` / `data-color-mode='dark'`）。
 - D11：`reset.css` 暗色 foundation **12** 规则（selection/placeholder/autofill/scrollbar/hr/mark/dialog 等）扩为 tri-selector。
@@ -78,6 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D2 long-tail：`.sops-overview-collapsible`、shared `.progress-card` → `var(--workbench-radius, var(--panel-radius, 8px))`（未改 entry/overview 卡）。
 - D2 long-tail #3：shared `.amz_card-hover`、`.zn-notice-card`、`.route-loading-skeleton__card` → `var(--workbench-radius…)`（未改 entry/overview / pill / modal）。
 - D2 long-tail #4：shared `.app-center-card`、Settings `--settings-radius-card` / `.settings-card` → `var(--workbench-radius…)`（未改 entry/overview / pill / modal / icon well）。
+- D2 long-tail #5：Settings section/LLM/collapsible/nav shells、shared insight/stat cards、forms bulk bar、PPC radius-lg 别名、Skills/Prompts catalog 工具卡/search → `var(--workbench-radius…)`（未改 entry/overview / pill / modal / Deep Chat brand / icon well）。
 - Settings 壳层 chrome：`--settings-accent` / focus / 分段 active / 主 CTA 映射 Appearance primary token（X6 partial）。
 - Settings X6 收尾：`systemSettings` 主保存 CTA、通用输入 focus、brand accent 标签/勾选改 `--settings-*` / `settings-btn-primary`（保留 section indigo 与进度桶色）。
 - D1 Phase 2 prep：从 `variables.css` 移除与 generated 值完全相同的原子重复（色板 / 字号字重 / leading / tracking / 数字 spacing），语义与 intentional 冲突尺度保留。

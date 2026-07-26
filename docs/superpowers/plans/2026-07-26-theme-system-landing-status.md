@@ -95,7 +95,7 @@
 | 指标                             | 值                                                                 | 备注                                                                                                                                                                                                |
 | -------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Shell blue 硬编码**            | **13**                                                             | **仅** `src/common/ui/megaMenu.ts`（模块玻璃色板 / Ownership，Informational）                                                                                                                       |
-| **Workbench radius 已落区**      | R0–R3 + batch 3 + long-tail #2                                      | 语义 token + cards/panel 别名；analysis-widget、PromptLab/AI/MA、KH、PPC、Scraper、forms、app-center shells；**+** `.sops-overview-collapsible` / shared `.progress-card` → `var(--workbench-radius…)`；**entry/overview 卡未压** |
+| **Workbench radius 已落区**      | R0–R3 + batch 3 + long-tail #2–#5                                   | 语义 token + cards/panel 别名；analysis-widget、PromptLab/AI/MA、KH、PPC、Scraper、forms、app-center shells；**+** collapsible/progress / amz_card-hover / app-center-card / Settings shells / insight·stat / Skills·Prompts catalog → `var(--workbench-radius…)`；**entry/overview 卡未压** |
 | **Atomic override allowlist**    | **20**                                                             | radius 6 + shadow 6 + z-index 7 + easing 1；unallowlisted **0**                                                                                                                                     |
 | Handwritten `:root`（D1 首刀后） | ~267                                                               | 去 192 identical 后；语义 + intentional 冲突保留                                                                                                                                                    |
 | XO 场景（签收文档）              | ~**16** automated / ~**20** code / ~**34** manual / visual **0 full Pass** | 见 XO status refresh；**人类 30 min 仍 required**；**Visual Yellow**                                                                                                                          |
@@ -114,7 +114,7 @@
 | **D2**  | P1 语义   | **Partial**                         | SSOT 已有；R2/R3 + long-tail #2（SOPs collapsible / `progress-card`）+ **#4** settings/legacy-compat @ `a05b12c8`；长尾模块 Tailwind `rounded-xl/2xl` 与 R4 atom 引用改名仍未清（entry 保留） |
 | **D3**  | P0 运行时 | **Code fixed**                      | 双轴已拆；e2e dark×minimal **已进 smoke**；兼容 `data-theme` 读路径仍在；**视觉签 Open**                                                                                                                                         |
 | **D4**  | P1 体验   | **Partial (helpers + MA/KH icons; misuse audit clean; card helper 0 prod)** | Role 表 + workbench helpers + unit + sidebar scale 修 + **AI/PromptLab/Scraper/KH report/AI JSON icon 调用点** + **#2 residual** + **§5.2 misuse (HEAD `5ad7b1c1`)** + **card residual re-audit (`d557491b`)**: **0** production `getCardClasses`/`getIconContainerClasses` 误用；**0** 非 entry `scale-110` / workbench marketing translate；**`getWorkbenchCardClasses` still 0 production callers** — preferred AI/Scraper/PromptLab TS panels lack natural scheme-border card shells; candidate modules listed in §5.2 |
-| **D5**  | P2        | **Partial**                         | root `--focus-ring-soft` → `color-mix(focus-ring)`；header search / forms dark / Overview search / nav-focus 已跟 focus-ring；**剩余 intentional 例外见 §5.1**；业务页蓝 focus 仍 D6 长尾                                        |
+| **D5**  | P2        | **Partial**                         | root `--focus-ring-soft` → `color-mix(focus-ring)`；header search / forms dark / Overview search / nav-focus 已跟 focus-ring；**本轮**: shell `.nav-trigger:focus-visible` + Settings runtime checkbox focus 跟 Appearance；**剩余 intentional 例外见 §5.1**；业务页蓝 focus 仍 D6 长尾                          |
 | **D6**  | P1 可见面 | **Shell locked / biz samples**      | 壳层 megaMenu **13** = **有意 Ownership**；**样本 through #16 + residual #18–20**: KH…#9 + **#10 SOPs** + **#11 NPI** + **#12 Restricted Words** + **#13 AMZ Hub nav**（hover/active → ownership orange / `module-accent`）+ **#14 email_templates** + **#15 qa_maintenance** + **#16 PromptLab DNA/autoPopulate** + **#18 Scraper / #19 AI / #20 PPC residual** @ `a05b12c8` + Skills/DeepChat…；其余 Informational 长尾 |
 | **D7**  | P1        | **Done（deprecate + ESLint + call-site audit）** | `setModuleColor` **@deprecated** + unit + ESLint hard-gate；**0** production callers（§5.3）；dual-channel API 彻底下线 **optional**                                                                      |
 | **D8**  | P1        | **Partial (doc + code scaffold + soft tests)**   | Role 表 + **`ownershipRoles.ts`**；soft unit: KH/ppc/MA + **playground / amz_hub / app_center / sops** + hub/more categories；**未**全站 `data-ownership-role` 绑定                                                                 |
@@ -136,6 +136,15 @@ Leave alone unless product reclassifies ownership:
 | **ErrorBoundary** slate / severity color rings | Status/action semantics | Not Appearance brand |
 | Shared focus fallbacks `#3b82f6` after `var(--color-focus-ring, …)` | Dead fallback only | Live path is CSS var; optional later cleanup |
 | Business `focus:ring-blue-*` long tail | D6 Informational | KH/PromptLab/etc. sample pages only where already migrated |
+| Settings developer diagnostics emerald checkbox rings | Status/dev tooling accent | Not shell primary chrome; leave until product reclassifies |
+| header-main marketing gradients / logo indigo–pink rails | Brand decoration (not focus) | `.nav-trigger::after` / logo hover gradients — not focus-ring debt |
+
+**Migrated this residual (code):**
+
+| Surface | Change | Note |
+| --- | --- | --- |
+| Shell `.nav-trigger:focus-visible` (`header-main.css`) | Hard `rgba(99,102,241,.35)` → `color-mix(--color-focus-ring)` | Shell chrome; Appearance-visible |
+| Settings runtime strategy checkboxes (`systemSettings.html`) | `text-indigo-600 focus:ring-indigo-500` → `settings-checkbox` | Shared settings focus tokens; 11 controls |
 
 ### 5.2 D4 — marketing helper misuse audit (`5ad7b1c1`) + card helper production residual (`904f83d3` → re-audit `d557491b`)
 

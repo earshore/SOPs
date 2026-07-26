@@ -1403,7 +1403,7 @@
                           type="checkbox"
                           :checked="runtimeStrategy.settings.masterAnalysis.enableCache"
                           @change="setRuntimeBoolean('masterAnalysis.enableCache', $event)"
-                          class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
                         />
                         启用分析缓存
                       </label>
@@ -1517,7 +1517,7 @@
                       <input
                         id="runtime-deep-chat-enable-business-tools"
                         type="checkbox"
-                        class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        class="settings-checkbox mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300"
                         :checked="runtimeStrategy.settings.deepChat.enableBusinessTools"
                         @change="setRuntimeBoolean('deepChat.enableBusinessTools', $event)"
                       />
@@ -1718,7 +1718,7 @@
                             type="checkbox"
                             :checked="runtimeStrategy.settings.keywordHunterSeoProcess.enableLlmCache"
                             @change="setRuntimeBoolean('keywordHunterSeoProcess.enableLlmCache', $event)"
-                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                            class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
                           />SEO 处理缓存</label
                         >
                         <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
@@ -1726,7 +1726,7 @@
                             type="checkbox"
                             :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchPartial"
                             @change="setRuntimeBoolean('keywordHunterSeoProcess.matchPartial', $event)"
-                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                            class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
                           />允许部分匹配</label
                         >
                         <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
@@ -1734,7 +1734,7 @@
                             type="checkbox"
                             :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchPlural"
                             @change="setRuntimeBoolean('keywordHunterSeoProcess.matchPlural', $event)"
-                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                            class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
                           />复数匹配</label
                         >
                         <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
@@ -1742,7 +1742,7 @@
                             type="checkbox"
                             :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchStem"
                             @change="setRuntimeBoolean('keywordHunterSeoProcess.matchStem', $event)"
-                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                            class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
                           />词干匹配</label
                         >
                         <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
@@ -1750,7 +1750,7 @@
                             type="checkbox"
                             :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchCase"
                             @change="setRuntimeBoolean('keywordHunterSeoProcess.matchCase', $event)"
-                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                            class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
                           />区分大小写</label
                         >
                       </div>
@@ -1834,7 +1834,7 @@
                           type="checkbox"
                           :checked="runtimeStrategy.settings.keywordHunterListingReview.enableLlmCache"
                           @change="setRuntimeBoolean('keywordHunterListingReview.enableLlmCache', $event)"
-                          class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
                         />Listing 评审缓存</label
                       >
                     </div>
@@ -1967,7 +1967,7 @@
                         type="checkbox"
                         :checked="runtimeStrategy.settings.ppcSearchTerms.enableLlmCache"
                         @change="setRuntimeBoolean('ppcSearchTerms.enableLlmCache', $event)"
-                        class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
                       />启用 LLM 缓存</label
                     >
                     <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
@@ -1975,7 +1975,7 @@
                         type="checkbox"
                         :checked="runtimeStrategy.settings.ppcSearchTerms.useAgent"
                         @change="setRuntimeBoolean('ppcSearchTerms.useAgent', $event)"
-                        class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
                       />默认启用 Agent</label
                     >
                     <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
@@ -1983,7 +1983,7 @@
                         type="checkbox"
                         :checked="runtimeStrategy.settings.ppcSearchTerms.allowLocalFallback"
                         @change="setRuntimeBoolean('ppcSearchTerms.allowLocalFallback', $event)"
-                        class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
                       />允许本地回退</label
                     >
                   </div>

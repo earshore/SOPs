@@ -271,7 +271,9 @@
 
 .nav-trigger:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.35);
+  /* D5: shell nav focus tracks Appearance focus-ring (not hard indigo). */
+  box-shadow: inset 0 0 0 2px
+    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #6366f1)) 35%, transparent);
   border-radius: 12px;
 }
 
