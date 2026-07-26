@@ -736,3 +736,142 @@
     border-radius: 8px !important;
   }
 }
+
+/* ==================== 紫鸟场景暗色主题收口 ====================
+   白卡/浅灰面 → Theme surface；灰阶文字 → 语义 text token。
+   hero 深蓝渐变、用户气泡蓝底、stage banner 与状态标签色相不变。 */
+.dark .ziniao-case-shell,
+[data-color-mode-resolved='dark'] .ziniao-case-shell,
+.dark .ziniao-notice-shell,
+[data-color-mode-resolved='dark'] .ziniao-notice-shell {
+  color: var(--color-text-primary);
+}
+
+.dark .zn-card,
+[data-color-mode-resolved='dark'] .zn-card,
+.dark .zn-chat-card,
+[data-color-mode-resolved='dark'] .zn-chat-card,
+.dark .zn-notice-title,
+[data-color-mode-resolved='dark'] .zn-notice-title {
+  background: var(--surface-card);
+  border-color: var(--color-border-default);
+  box-shadow: var(--shadow-card);
+}
+
+.dark .zn-card h2,
+[data-color-mode-resolved='dark'] .zn-card h2,
+.dark .zn-intro h2,
+[data-color-mode-resolved='dark'] .zn-intro h2,
+.dark .zn-summary h2,
+[data-color-mode-resolved='dark'] .zn-summary h2,
+.dark .zn-notice-title h1,
+[data-color-mode-resolved='dark'] .zn-notice-title h1,
+.dark .zn-chat-header h2,
+[data-color-mode-resolved='dark'] .zn-chat-header h2,
+.dark .zn-intro dd,
+[data-color-mode-resolved='dark'] .zn-intro dd,
+.dark .zn-phase-grid h3,
+[data-color-mode-resolved='dark'] .zn-phase-grid h3,
+.dark .zn-summary-grid strong,
+[data-color-mode-resolved='dark'] .zn-summary-grid strong,
+.dark .zn-rule-grid h3,
+[data-color-mode-resolved='dark'] .zn-rule-grid h3,
+.dark .zn-notice-grid strong,
+[data-color-mode-resolved='dark'] .zn-notice-grid strong {
+  color: var(--color-text-primary);
+}
+
+.dark .zn-lead,
+[data-color-mode-resolved='dark'] .zn-lead,
+.dark .zn-intro > p,
+[data-color-mode-resolved='dark'] .zn-intro > p,
+.dark .zn-summary-head p,
+[data-color-mode-resolved='dark'] .zn-summary-head p,
+.dark .zn-notice-title p,
+[data-color-mode-resolved='dark'] .zn-notice-title p,
+.dark .zn-chat-header p,
+[data-color-mode-resolved='dark'] .zn-chat-header p,
+.dark .zn-intro dt,
+[data-color-mode-resolved='dark'] .zn-intro dt,
+.dark .zn-phase-grid p,
+[data-color-mode-resolved='dark'] .zn-phase-grid p,
+.dark .zn-summary-grid p,
+[data-color-mode-resolved='dark'] .zn-summary-grid p,
+.dark .zn-notice-grid span,
+[data-color-mode-resolved='dark'] .zn-notice-grid span,
+.dark .zn-msg-meta,
+[data-color-mode-resolved='dark'] .zn-msg-meta,
+.dark .zn-time,
+[data-color-mode-resolved='dark'] .zn-time {
+  color: var(--color-text-secondary);
+}
+
+.dark .zn-phase-grid article,
+[data-color-mode-resolved='dark'] .zn-phase-grid article,
+.dark .zn-summary-grid article,
+[data-color-mode-resolved='dark'] .zn-summary-grid article,
+.dark .zn-rule-grid article,
+[data-color-mode-resolved='dark'] .zn-rule-grid article,
+.dark .zn-notice-grid article,
+[data-color-mode-resolved='dark'] .zn-notice-grid article {
+  background: var(--surface-panel);
+  border-color: var(--border-subtle);
+}
+
+.dark .zn-phase-grid h3 span,
+[data-color-mode-resolved='dark'] .zn-phase-grid h3 span {
+  background: color-mix(in srgb, var(--color-accent) 18%, var(--surface-card));
+}
+
+.dark .zn-bubble,
+[data-color-mode-resolved='dark'] .zn-bubble {
+  background: var(--surface-panel);
+  border-color: var(--color-border-default);
+  color: var(--color-text-primary);
+}
+
+.dark .zn-msg--user .zn-bubble,
+[data-color-mode-resolved='dark'] .zn-msg--user .zn-bubble {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.dark .zn-tool,
+[data-color-mode-resolved='dark'] .zn-tool {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-border-light);
+  color: var(--color-text-primary);
+}
+
+.dark .zn-tool-head,
+[data-color-mode-resolved='dark'] .zn-tool-head,
+.dark .zn-tool-head span,
+[data-color-mode-resolved='dark'] .zn-tool-head span,
+.dark .zn-tool-body p,
+[data-color-mode-resolved='dark'] .zn-tool-body p,
+.dark .zn-rule-grid li,
+[data-color-mode-resolved='dark'] .zn-rule-grid li {
+  color: var(--color-text-secondary);
+}
+
+.dark .zn-notice-card--danger,
+[data-color-mode-resolved='dark'] .zn-notice-card--danger {
+  color: var(--color-red-200);
+  background: color-mix(in srgb, var(--color-red-400) 14%, var(--surface-card));
+  border-color: color-mix(in srgb, var(--color-red-400) 32%, transparent);
+}
+
+.dark .zn-notice-card--warning,
+[data-color-mode-resolved='dark'] .zn-notice-card--warning {
+  color: var(--color-amber-200);
+  background: color-mix(in srgb, var(--color-amber-400) 14%, var(--surface-card));
+  border-color: color-mix(in srgb, var(--color-amber-400) 32%, transparent);
+}
+
+.dark .ziniao-notice-shell .zn-notice-title,
+[data-color-mode-resolved='dark'] .ziniao-notice-shell .zn-notice-title {
+  border-color: color-mix(in srgb, var(--color-cyan-400) 30%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-400) 12%, var(--surface-card)) !important;
+  color: var(--color-cyan-200) !important;
+}
