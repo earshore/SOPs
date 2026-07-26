@@ -81,19 +81,29 @@ Related:
 - `--playground-*`：audit 允许；现网 Deep Chat 主用 `--deep-chat-*`。新代码优先既有 `--deep-chat-*`，勿平行新建 `--playground-*` 族除非独立预览层且清单通过。
 - `--kh-*`：audit 允许；现网主用 `--keyword-hunter-*` / `--keyword-status-*`。不要无迁移地双写两套。
 
-### 2.4 疑似 archive 候选（本 PR **只登记不删**）
+### 2.4 Archive 候选 + code-side skim verdict
 
-**Inventory skim（`src/`，2026-07-26）**: 对几个已登记 / 漂移前缀做了 0-consumer 抽样；**不删 CSS**。
+**Code-side skim（`src/`，2026-07-26 D9 F2）**: 对 handoff 三个漂移前缀做全 `src/` grep（声明 + `var()` 消费）。**无可删 CSS 定义**（不存在 0-consumer 死代码块）；仅 docs / audit 空名。**不** mass-delete；**不** 收紧 `NAMING_PATTERNS`（空允许名：敏感、且为 intentional future API 槽）。
 
-| 候选 | `src/` 状态 | 条件 | 动作（未来 PR） |
+| 候选族 | 判决 | `src/` 证据 | 实网 / 替代 | 动作 |
+| --- | --- | --- | --- | --- |
+| `--ppc-hero-*` | **archive-candidate（docs-only）** | **0** 声明 / **0** 消费 | keep: `--ppc-search-terms-*`（hero shell 等多文件） | 定义文档改指实名；勿教新代码使用；**无 CSS 可删** |
+| `--kh-*` / `--kh-status-*` | **archive-candidate（docs + audit regex only）** | **0** 声明 / **0** 消费 | keep: `--keyword-hunter-*` / `--keyword-status-*` | 勿并行引入；定义示例改指长名；**不** 删 `kh` audit 分支（仍是允许命名槽，非死 token 定义） |
+| `--playground-*` | **archive-candidate（docs + empty allowlist name）** | **0** 声明 / **0** 消费 | keep: `--deep-chat-*`（Playground 主品牌） | 优先写 `--deep-chat-*`；若无独立预览层 PR，可后续收紧 `modulePlayground`；**无 CSS 可删** |
+| 模块内重复 surface/radius/focus 别名 | 未本波次全量核对 | — | 已 100% 等于 `--surface-*` / `--workbench-radius` / `--color-focus-ring` 且无覆写点时 | 可就地删别名或改为注释映射；**分模块小 PR** |
+| 废弃交互残留 | 未发现 | — | 功能下线后 0 引用 | 删声明 + 移入§2.5 Archived |
+
+**本波次判决摘要**:
+
+- **keep（有消费）**: `--ppc-search-terms-*`、`--keyword-hunter-*`、`--keyword-status-*`、`--deep-chat-*`、`--scraper-*`、`--module-*`、`--brand-risk-*` 等。
+- **archive-candidate（无代码体）**: `--ppc-hero-*`、`--kh-*`、`--playground-*` — 仅文档/空允许名；**不符合**「定义存在且 0 引用→删 CSS」；本波次 **0 CSS 删除**。
+- **dead（可立即删声明）**: **无**（上述三族在 `src/` **从未声明**）。
+
+### 2.5 Archived（已执行删除）
+
+| 前缀 | 删除日期 | 证据 | 备注 |
 | --- | --- | --- | --- |
-| `--ppc-hero-*` | **0** 声明 / **0** 消费（仅 docs 示例） | 文档-only | 定义文档改指 `--ppc-search-terms-*`；勿再教新代码使用 |
-| `--kh-*` / `--kh-status-*` | **0** 声明 / **0** 消费（仅 docs + audit regex） | 文档-only；实网为 `--keyword-hunter-*` / `--keyword-status-*` | 更新定义示例；勿并行引入；整前缀死亡后可从 `NAMING_PATTERNS` 去掉 `kh` 分支 |
-| `--playground-*` | **0** 声明 / **0** 消费（audit 允许；现网 `--deep-chat-*`） | 空允许名 + docs 示例 | 优先写 `--deep-chat-*`；若无独立预览层需求，可 archive docs 示例并考虑收紧 audit pattern |
-| 模块内重复 surface/radius/focus 别名 | 未本波次全量核对 | 已 100% 等于 `--surface-*` / `--workbench-radius` / `--color-focus-ring` 且无覆写点 | 可就地删别名或改为注释映射；**分模块小 PR** |
-| 废弃交互残留 | 未发现 | 功能下线后 0 引用 | 删声明 + 从本节 inventory 移入「Archived」附录 |
-
-**本次 skim 仍有消费（非 archive）**: `--ppc-search-terms-*`、`--keyword-hunter-*`、`--keyword-status-*`、`--deep-chat-*`、`--scraper-*`、`--module-*`、`--brand-risk-*` 等在 `src/` 仍有引用。
+| — | — | — | 尚无代码侧归档执行；D9 F2 skim 仅确认 docs-only 候选 |
 
 ---
 

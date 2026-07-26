@@ -1,6 +1,6 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ post-`f99b0fc8` · D6#18–20 residual · D12×22 · D2 #4 · D8 soft expand）  
+**日期**: 2026-07-26（refresh @ post-`f99b0fc8` · D6#18–20 residual · D12×24 · D2 #4 · D8 soft expand）
 **范围**: `main` ahead of `sops/main`；本波主题待合入  
 **角色**: Tech Lead / Release docs  
 **诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称 visual Pass。
@@ -21,11 +21,11 @@
 
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Code / 契约**    | **Green**  | 前 tip `f99b0fc8` + **本波**: D6 #18 Scraper · #19 AI · #20 PPC residual · D12×**22** PromptLab · D2 #4 settings/legacy-compat · D8 soft ppc/MA tests |
+| **Code / 契约**    | **Green**  | 前 tip `f99b0fc8` + **本波**: D6 #18 Scraper · #19 AI · #20 PPC residual · D12×**24** (+NPI) · D2 #4 settings/legacy-compat · D8 soft ppc/MA tests |
 | **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**（**Human XO first**）；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: 本波再收 MA/Scraper/PPC 残 chrome + D12×22；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
+**一句话**: 本波再收 MA/Scraper/PPC 残 chrome + D12×24（+NPI）；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -273,7 +273,7 @@ f8f925a8 docs(theme): enterprise audit and convergence roadmap
 
 **本波要点（待 commit）**:
 - D6 #18 Scraper residual · #19 AI Analysis residual · #20 PPC residual
-- D12 scaffold **22**（+ PromptLab）
+- D12 scaffold **24**（+ PromptLab + NPI）
 - D2 #4: app-center-card / settings-radius-card
 - D8 soft: ppc_tools emerald · master_analysis indigo
 - D4 card helper still **0** production callers
