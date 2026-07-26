@@ -858,7 +858,11 @@
 [data-color-mode-resolved='dark'] .mega-menu-inner,
 [data-theme='dark'] .mega-menu-inner {
   /* Avoid white-glass failure: opaque-enough elevated shell */
-  background: color-mix(in srgb, var(--surface-panel, #0f172a) 96%, var(--color-bg-elevated, #1e293b));
+  background: color-mix(
+    in srgb,
+    var(--surface-panel, #0f172a) 96%,
+    var(--color-bg-elevated, #1e293b)
+  );
   border-color: var(--color-border-light, rgba(255, 255, 255, 0.08));
   box-shadow:
     0 24px 60px -24px color-mix(in srgb, #000 65%, transparent),

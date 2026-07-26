@@ -29,7 +29,8 @@
   --header-border: var(--color-border-light, rgba(0, 0, 0, 0.06));
   --header-text: var(--color-text-primary, #1a1a2e);
   --header-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04));
-  --header-shadow-scrolled: 0 2px 8px color-mix(in srgb, var(--color-slate-900, #0f172a) 8%, transparent);
+  --header-shadow-scrolled: 0 2px 8px
+    color-mix(in srgb, var(--color-slate-900, #0f172a) 8%, transparent);
   --z-header: 40;
 }
 

@@ -22,7 +22,11 @@
   background: linear-gradient(
     180deg,
     var(--surface-panel, var(--settings-surface)),
-    color-mix(in srgb, var(--settings-surface-muted) 80%, var(--surface-panel, var(--settings-surface)))
+    color-mix(
+      in srgb,
+      var(--settings-surface-muted) 80%,
+      var(--surface-panel, var(--settings-surface))
+    )
   );
   box-shadow: -8px 0 30px color-mix(in srgb, #000 12%, transparent);
   color: var(--settings-text);

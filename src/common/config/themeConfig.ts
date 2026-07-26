@@ -92,8 +92,7 @@ export const THEME_PRESETS: Record<string, ThemeConfig> = {
   minimal: {
     id: 'minimal',
     name: '极简素色',
-    description:
-      '工业中性强调色，低刺激；仅调整全局 primary/focus，不改变模块归属与 banner',
+    description: '工业中性强调色，低刺激；仅调整全局 primary/focus，不改变模块归属与 banner',
     colorScheme: 'slate',
     customVars: {
       '--color-primary': 'var(--color-slate-700)',
