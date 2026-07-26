@@ -471,6 +471,8 @@
 [data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-tag {
   border-color: rgba(148, 163, 184, 0.24) !important;
   box-shadow: none;
+}
+
 /* ==================== 智库总览深色主题（Theme dual-safe） ==================== */
 /* Ownership orange/red 保持色相；hero/badge 洗底转低明度 color-mix，文字走语义 token */
 .dark .amz-hub-overview,

@@ -874,6 +874,8 @@
   border-color: color-mix(in srgb, var(--color-cyan-400) 30%, transparent);
   background: color-mix(in srgb, var(--color-cyan-400) 12%, var(--surface-card)) !important;
   color: var(--color-cyan-200) !important;
+}
+
 /* ==================== 更多总览深色主题（Theme dual-safe） ==================== */
 /* Ownership emerald 保持色相；hero 洗底转低明度 color-mix，文字走语义 token */
 .dark .more-overview .wb-container--simple,

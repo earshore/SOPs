@@ -1207,6 +1207,8 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 .dark .sops-overview-scope-note h3,
 [data-color-mode-resolved='dark'] .sops-overview-scope-note h3 {
   color: var(--color-indigo-200) !important;
+}
+
 /* ==================== 深色主题（Theme dual-safe） ==================== */
 /* Ownership violet 保持色相，soft/surface 改为低明度 color-mix；文字走语义 token */
 .dark .sops-overview,
@@ -1238,9 +1240,6 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 
 .dark .sops-overview-scope-note p,
 [data-color-mode-resolved='dark'] .sops-overview-scope-note p,
-.dark .sops-overview-scope-note i,
-[data-color-mode-resolved='dark'] .sops-overview-scope-note i {
-  color: var(--color-indigo-300) !important;
 [data-theme='dark'] .sops-overview-scope-note p {
   color: var(--color-text-secondary, #cbd5e1) !important;
 }
