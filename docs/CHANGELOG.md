@@ -67,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D6 业务样例 #20（PPC Search Terms residual）：导入 status-line / 续审 resume-review 信息壳 hard blue 迁到 `--ppc-search-terms-info-*` / `--color-info*`（保留 emerald hero 归属与系列蓝 stats/tags）。
 - D6 业务样例 #21（PromptLab residual focus chrome）：展开/市场选择/DNA extract 字段按钮与复制 Prompt 工具钮 `focus-visible:ring-blue-500` 迁到 `--color-focus-ring`；复制钮 hover 迁到 `--color-primary*`（保留 extract 次要蓝 chrome、Listing/Visual mode 蓝/粉与 DNA 置信多色）。
 - D6 业务样例 #22（SafeModuleLoader）：error/actions 主 CTA 从 hard `bg-blue-500/600` 迁到 `--color-primary*`（次要 gray 与 loading spinner 保留）。
+- D6 业务样例 #23（Home splash/floating）：主 CTA `.home-primary-action--main` 与 floating workbench 图标/hover/focus 从 hard `--color-blue-*` / `rgba(37,99,235,*)` 迁到 `--color-primary*` / `--color-focus-ring`（保留 slogan 蓝绿渐变与 cyan 状态点）。
 - D5 续：`--shadow-primary-*` 改 `color-mix` 跟随 `--color-primary`（light/dark），不再写死蓝/indigo。
 - D5 续：root `--focus-ring-soft` + header search / forms dark / Overview search / nav-focus 从 hard blue 迁到 `--color-focus-ring`（megaMenu / sidebar-theme / wb ownership 保留）。
 - D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标；Keyword Hunter 报告 section 与 AI Analysis JSON 面板图标）；entry/overview / megaMenu 营销 lift 保留。

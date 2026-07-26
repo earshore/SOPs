@@ -182,28 +182,32 @@
 }
 
 .home-primary-action--main {
-  border-color: rgba(37, 99, 235, 0.28);
-  background: var(--color-blue-600);
-  color: var(--color-white);
-  box-shadow: 0 18px 36px -28px rgba(37, 99, 235, 0.72);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
+  background: var(--color-primary, #3b82f6);
+  color: var(--color-primary-contrast, var(--color-white, #ffffff));
+  box-shadow: 0 18px 36px -28px color-mix(in srgb, var(--color-primary, #3b82f6) 72%, transparent);
 }
 
 .home-primary-action:hover {
-  border-color: rgba(37, 99, 235, 0.28);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
   background: var(--surface-panel, #ffffff);
-  color: var(--color-blue-700);
+  color: var(--color-primary-dark, #1d4ed8);
   box-shadow: 0 18px 38px -28px rgba(15, 23, 42, 0.56);
 }
 
 .home-primary-action--main:hover {
-  background: var(--color-blue-700);
-  color: var(--color-white);
+  background: var(--color-primary-dark, #1d4ed8);
+  color: var(--color-primary-contrast, var(--color-white, #ffffff));
 }
 
 .home-primary-action:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px var(--focus-ring-soft, rgba(37, 99, 235, 0.16)),
+    0 0 0 3px
+      var(
+        --focus-ring-soft,
+        color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 16%, transparent)
+      ),
     0 18px 38px -28px rgba(15, 23, 42, 0.56);
 }
 
@@ -275,7 +279,7 @@
 
 .floating-workbench.is-expanded {
   gap: 6px;
-  border-color: rgba(37, 99, 235, 0.18);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 18%, transparent);
   box-shadow: 0 18px 44px -30px rgba(15, 23, 42, 0.56);
 }
 
@@ -311,16 +315,20 @@
 
 .floating-workbench__trigger:hover {
   background: var(--surface-panel, #ffffff);
-  color: var(--color-blue-700);
+  color: var(--color-primary-dark, #1d4ed8);
 }
 
 .floating-workbench__trigger:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--focus-ring-soft, rgba(37, 99, 235, 0.16));
+  box-shadow: 0 0 0 3px
+    var(
+      --focus-ring-soft,
+      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 16%, transparent)
+    );
 }
 
 .floating-workbench__trigger i {
-  color: var(--color-blue-600);
+  color: var(--color-primary, #3b82f6);
   font-size: 13px;
 }
 
@@ -376,22 +384,26 @@
 }
 
 .floating-workbench__item:hover {
-  border-color: rgba(37, 99, 235, 0.22);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 22%, transparent);
   background: var(--surface-panel, #ffffff);
-  color: var(--color-blue-700);
+  color: var(--color-primary-dark, #1d4ed8);
   box-shadow: 0 10px 24px -20px rgba(15, 23, 42, 0.42);
 }
 
 .floating-workbench__item:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--focus-ring-soft, rgba(37, 99, 235, 0.16));
+  box-shadow: 0 0 0 3px
+    var(
+      --focus-ring-soft,
+      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 16%, transparent)
+    );
 }
 
 .floating-workbench__item i {
   display: inline-flex;
   flex: 0 0 auto;
   justify-content: center;
-  color: var(--color-blue-600);
+  color: var(--color-primary, #3b82f6);
   font-size: 14px;
 }
 
