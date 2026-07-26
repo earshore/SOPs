@@ -1052,6 +1052,79 @@
   --wb-tag-dot-border: color-mix(in srgb, var(--surface-panel, #1e293b) 78%, transparent);
 }
 
+/*
+ * T2 Ownership soft 双明度（banner 侧）：badge/soft 洗底在暗色下改为
+ * 「同色相 × 低明度」配方（对齐 sidebar-shell 深色 soft 处理），
+ * 保持 Ownership 色相身份，避免浅色粉岛。
+ */
+.dark .wb-container,
+[data-color-mode-resolved='dark'] .wb-container,
+[data-theme='dark'] .wb-container {
+  --wb-theme-accent-soft: color-mix(in srgb, var(--wb-theme-accent) 16%, transparent);
+  --wb-theme-accent-border: color-mix(in srgb, var(--wb-theme-accent) 34%, transparent);
+  --wb-theme-badge-color: color-mix(in srgb, var(--wb-theme-accent) 62%, #ffffff);
+  --wb-theme-tag-icon-color: color-mix(in srgb, var(--wb-theme-accent) 62%, #ffffff);
+}
+
+.dark .wb-badge-ai,
+[data-color-mode-resolved='dark'] .wb-badge-ai,
+[data-theme='dark'] .wb-badge-ai {
+  --wb-badge-bg: color-mix(in srgb, var(--color-blue-500, #3b82f6) 16%, transparent);
+  --wb-badge-color: var(--color-blue-300, #93c5fd);
+  --wb-badge-border: color-mix(in srgb, var(--color-blue-400, #60a5fa) 32%, transparent);
+}
+
+.dark .wb-badge-growth,
+[data-color-mode-resolved='dark'] .wb-badge-growth,
+[data-theme='dark'] .wb-badge-growth {
+  --wb-badge-bg: color-mix(in srgb, var(--color-emerald-500, #10b981) 16%, transparent);
+  --wb-badge-color: var(--color-emerald-300, #6ee7b7);
+  --wb-badge-border: color-mix(in srgb, var(--color-emerald-400, #34d399) 32%, transparent);
+}
+
+.dark .wb-badge-safety,
+[data-color-mode-resolved='dark'] .wb-badge-safety,
+[data-theme='dark'] .wb-badge-safety {
+  --wb-badge-bg: color-mix(in srgb, var(--color-red-500, #ef4444) 16%, transparent);
+  --wb-badge-color: var(--color-red-300, #fca5a5);
+  --wb-badge-border: color-mix(in srgb, var(--color-red-400, #f87171) 32%, transparent);
+}
+
+.dark .wb-badge-service,
+[data-color-mode-resolved='dark'] .wb-badge-service,
+[data-theme='dark'] .wb-badge-service {
+  --wb-badge-bg: color-mix(in srgb, var(--color-teal-500, #14b8a6) 16%, transparent);
+  --wb-badge-color: var(--color-teal-300, #5eead4);
+  --wb-badge-border: color-mix(in srgb, var(--color-teal-400, #2dd4bf) 32%, transparent);
+}
+
+.dark .wb-badge-supply,
+.dark .wb-badge-pro,
+[data-color-mode-resolved='dark'] .wb-badge-supply,
+[data-color-mode-resolved='dark'] .wb-badge-pro,
+[data-theme='dark'] .wb-badge-supply,
+[data-theme='dark'] .wb-badge-pro {
+  --wb-badge-bg: color-mix(in srgb, var(--color-amber-500, #f59e0b) 16%, transparent);
+  --wb-badge-color: var(--color-amber-300, #fcd34d);
+  --wb-badge-border: color-mix(in srgb, var(--color-amber-400, #fbbf24) 32%, transparent);
+}
+
+.dark .wb-badge-analytics,
+[data-color-mode-resolved='dark'] .wb-badge-analytics,
+[data-theme='dark'] .wb-badge-analytics {
+  --wb-badge-bg: color-mix(in srgb, var(--color-cyan-500, #06b6d4) 16%, transparent);
+  --wb-badge-color: var(--color-cyan-300, #67e8f9);
+  --wb-badge-border: color-mix(in srgb, var(--color-cyan-400, #22d3ee) 32%, transparent);
+}
+
+.dark .wb-badge-hub,
+[data-color-mode-resolved='dark'] .wb-badge-hub,
+[data-theme='dark'] .wb-badge-hub {
+  --wb-badge-bg: color-mix(in srgb, var(--color-slate-500, #64748b) 20%, transparent);
+  --wb-badge-color: var(--color-slate-300, #cbd5e1);
+  --wb-badge-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 32%, transparent);
+}
+
 /* 5.1 背景适配 */
 .dark .wb-container,
 .dark .wb-card,

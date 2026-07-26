@@ -484,3 +484,74 @@ body {
     transition: none !important;
   }
 }
+
+/*
+ * Critical dark chrome — mirrors header-main.css dark values so a dark /
+ * system→dark cold start never flashes a white header bar before the main
+ * bundle CSS arrives. Palette fallbacks only (generated tokens lack the
+ * semantic dark block on the critical path).
+ */
+.dark .header,
+[data-color-mode='dark'] .header,
+[data-color-mode-resolved='dark'] .header {
+  background: color-mix(in srgb, var(--color-slate-900, #0f172a) 88%, transparent);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .logo-text-main,
+[data-color-mode='dark'] .logo-text-main,
+[data-color-mode-resolved='dark'] .logo-text-main {
+  color: var(--color-slate-50, #f8fafc);
+}
+
+.dark .logo-subtitle,
+.dark .nav-trigger,
+[data-color-mode='dark'] .logo-subtitle,
+[data-color-mode='dark'] .nav-trigger,
+[data-color-mode-resolved='dark'] .logo-subtitle,
+[data-color-mode-resolved='dark'] .nav-trigger {
+  color: var(--color-slate-400, #94a3b8);
+}
+
+.dark .model-status,
+[data-color-mode='dark'] .model-status,
+[data-color-mode-resolved='dark'] .model-status {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-slate-300, #cbd5e1);
+}
+
+.dark .mega-menu-inner,
+[data-color-mode='dark'] .mega-menu-inner,
+[data-color-mode-resolved='dark'] .mega-menu-inner {
+  background: color-mix(
+    in srgb,
+    var(--color-slate-900, #0f172a) 96%,
+    var(--color-slate-800, #1e293b)
+  );
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .skeleton,
+[data-color-mode='dark'] .skeleton,
+[data-color-mode-resolved='dark'] .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-slate-800, #1e293b) 25%,
+    var(--color-slate-700, #334155) 37%,
+    var(--color-slate-800, #1e293b) 63%
+  );
+  background-size: 400% 100%;
+}
+
+.dark ::-webkit-scrollbar-thumb,
+[data-color-mode='dark'] ::-webkit-scrollbar-thumb,
+[data-color-mode-resolved='dark'] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+[data-color-mode='dark'] ::-webkit-scrollbar-thumb:hover,
+[data-color-mode-resolved='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}

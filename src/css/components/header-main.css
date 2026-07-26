@@ -877,6 +877,53 @@
   color: var(--color-slate-300, #cbd5e1);
 }
 
+/*
+ * T2 residual: mega glass cards render light-only Tailwind (bg-white/60 +
+ * slate text) from megaMenu.ts. Scoped dual-safe overrides (sidebar-shell
+ * precedent) keep ownership hue chips while the neutral glass follows Theme.
+ */
+.dark .mega-menu-inner .bg-white\/60,
+[data-color-mode-resolved='dark'] .mega-menu-inner .bg-white\/60,
+[data-theme='dark'] .mega-menu-inner .bg-white\/60 {
+  background-color: color-mix(in srgb, var(--surface-card, #1e293b) 78%, transparent) !important;
+  border-color: var(--color-border-light, rgba(255, 255, 255, 0.08)) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .mega-menu-inner a:hover .bg-white\/60,
+[data-color-mode-resolved='dark'] .mega-menu-inner a:hover .bg-white\/60,
+[data-theme='dark'] .mega-menu-inner a:hover .bg-white\/60 {
+  background-color: color-mix(
+    in srgb,
+    var(--surface-card-hover, #334155) 82%,
+    transparent
+  ) !important;
+}
+
+.dark .mega-menu-inner .text-slate-800,
+[data-color-mode-resolved='dark'] .mega-menu-inner .text-slate-800,
+[data-theme='dark'] .mega-menu-inner .text-slate-800 {
+  color: var(--color-text-primary, #f8fafc) !important;
+}
+
+.dark .mega-menu-inner .text-slate-600,
+[data-color-mode-resolved='dark'] .mega-menu-inner .text-slate-600,
+[data-theme='dark'] .mega-menu-inner .text-slate-600 {
+  color: var(--color-text-secondary, #cbd5e1) !important;
+}
+
+.dark .mega-menu-inner .text-slate-300,
+[data-color-mode-resolved='dark'] .mega-menu-inner .text-slate-300,
+[data-theme='dark'] .mega-menu-inner .text-slate-300 {
+  color: var(--color-text-tertiary, #94a3b8) !important;
+}
+
+.dark .mega-menu-inner .border-slate-200\/30,
+[data-color-mode-resolved='dark'] .mega-menu-inner .border-slate-200\/30,
+[data-theme='dark'] .mega-menu-inner .border-slate-200\/30 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* ========================================
    减少动画偏好
    ======================================== */
