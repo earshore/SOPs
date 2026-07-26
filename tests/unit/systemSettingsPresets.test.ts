@@ -209,7 +209,9 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(html).toContain('data-testid="settings-color-mode-light"');
     expect(html).toContain('data-testid="settings-color-mode-dark"');
     expect(html).toContain('data-testid="settings-color-mode-system"');
-    expect(html).toContain('颜色模式');
+    // Product: 主题 = light/dark/system; 色调 = accent presets (not 颜色模式)
+    expect(html).toContain('工作台明暗');
+    expect(html).toContain('色调');
     expect(html).toContain('浅色');
     expect(html).toContain('深色');
     expect(html).toContain('跟随系统');

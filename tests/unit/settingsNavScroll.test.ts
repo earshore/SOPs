@@ -81,6 +81,7 @@ describe('settingsNavScroll helpers (TD-SET-04)', () => {
       'settings-data-retention',
       'settings-data-danger',
       'settings-section-appearance',
+      'settings-appearance-color-mode',
       'settings-appearance-theme',
       'settings-appearance-animation',
       'settings-section-performance',

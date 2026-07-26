@@ -86,14 +86,14 @@ export const THEME_PRESETS: Record<string, ThemeConfig> = {
   default: {
     id: 'default',
     name: '默认',
-    description: '经典蓝色主色，适合通用商务工作台',
+    description: '经典蓝强调色，适合通用商务工作台（色调，非浅/深主题）',
     colorScheme: 'blue',
   },
   minimal: {
     id: 'minimal',
     name: '极简素色',
     description:
-      '工业中性主色，低刺激、高对比，适合长时间运营作业；仅调整全局主色 token，不改变模块归属与页面 banner',
+      '工业中性强调色，低刺激；仅调整全局 primary/focus，不改变模块归属与 banner',
     colorScheme: 'slate',
     customVars: {
       '--color-primary': 'var(--color-slate-700)',
@@ -106,31 +106,31 @@ export const THEME_PRESETS: Record<string, ThemeConfig> = {
   ocean: {
     id: 'ocean',
     name: '海洋',
-    description: '青色主色，偏清爽的全局强调',
+    description: '青色强调色',
     colorScheme: 'cyan',
   },
   forest: {
     id: 'forest',
     name: '森林',
-    description: '绿色主色，偏自然的全局强调',
+    description: '绿色强调色',
     colorScheme: 'green',
   },
   sunset: {
     id: 'sunset',
     name: '日落',
-    description: '橙色主色，偏暖的全局强调',
+    description: '橙色强调色',
     colorScheme: 'orange',
   },
   purple: {
     id: 'purple',
     name: '紫罗兰',
-    description: '紫色主色，偏沉稳的全局强调',
+    description: '紫色强调色',
     colorScheme: 'purple',
   },
   rose: {
     id: 'rose',
     name: '玫瑰',
-    description: '玫红主色，偏醒目的全局强调',
+    description: '玫红强调色',
     colorScheme: 'rose',
   },
 };
@@ -157,7 +157,7 @@ export class ThemeManager {
   static applyTheme(themeId: string, options: { animate?: boolean } = {}): void {
     const theme = this.getTheme(themeId);
     if (!theme) {
-      console.error(`主题不存在: ${themeId}`);
+      console.error(`色调预设不存在: ${themeId}`);
       return;
     }
 
@@ -222,7 +222,7 @@ export class ThemeManager {
    */
   static applyColorMode(mode: ColorMode): void {
     if (!isColorMode(mode)) {
-      console.error(`颜色模式不存在: ${String(mode)}`);
+      console.error(`主题选项无效: ${String(mode)}`);
       return;
     }
 

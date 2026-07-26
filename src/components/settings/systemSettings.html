@@ -329,10 +329,18 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-appearance-color-mode') }"
+                @click="navigateToNavTarget('settings-appearance-color-mode', 'appearance')"
+              >
+                主题
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
                 :class="{ 'is-current': isNavTargetCurrent('settings-appearance-theme') }"
                 @click="navigateToNavTarget('settings-appearance-theme', 'appearance')"
               >
-                主题
+                色调
               </button>
               <button
                 type="button"
@@ -2518,53 +2526,26 @@
                 data-settings-nav-id="settings-appearance-theme"
                 data-settings-nav-group="appearance"
               >
-                <!-- Theme row -->
-                <div class="settings-appearance-row">
-                  <div class="settings-appearance-row__meta">
-                    <span class="settings-appearance-row__icon" aria-hidden="true">
-                      <i class="fas fa-swatchbook"></i>
-                    </span>
-                    <div class="min-w-0">
-                      <h4 class="settings-appearance-row__title">主题</h4>
-                      <p class="settings-appearance-row__hint">切换即生效</p>
-                    </div>
-                  </div>
-                  <label class="settings-appearance-row__control">
-                    <span class="sr-only">当前主题</span>
-                    <select
-                      class="settings-control settings-control--sm"
-                      data-testid="settings-theme-select"
-                      :value="appearanceThemeId"
-                      @change="setAppearanceThemeFromEvent($event)"
-                    >
-                      <template x-for="theme in appearanceThemeOptions" :key="theme.id">
-                        <option
-                          :value="theme.id"
-                          :selected="theme.id === appearanceThemeId"
-                          x-text="theme.name"
-                        ></option>
-                      </template>
-                    </select>
-                  </label>
-                </div>
-
-                <div class="settings-appearance-divider" role="separator"></div>
-
-                <!-- Color mode (independent of Appearance theme) -->
-                <div class="settings-appearance-row" data-testid="settings-appearance-color-mode">
+                <!-- Theme = light / dark / system (primary enterprise control) -->
+                <div
+                  class="settings-appearance-row"
+                  data-testid="settings-appearance-color-mode"
+                  data-settings-nav-id="settings-appearance-color-mode"
+                  data-settings-nav-group="appearance"
+                >
                   <div class="settings-appearance-row__meta">
                     <span class="settings-appearance-row__icon" aria-hidden="true">
                       <i class="fas fa-circle-half-stroke"></i>
                     </span>
                     <div class="min-w-0">
-                      <h4 class="settings-appearance-row__title">颜色模式</h4>
-                      <p class="settings-appearance-row__hint">浅色 / 深色，独立于主题色</p>
+                      <h4 class="settings-appearance-row__title">主题</h4>
+                      <p class="settings-appearance-row__hint">工作台明暗：浅色 / 深色 / 跟随系统</p>
                     </div>
                   </div>
                   <div
                     class="settings-segmented settings-segmented--inline settings-segmented--color-mode"
                     role="group"
-                    aria-label="颜色模式"
+                    aria-label="主题"
                     data-testid="settings-color-mode"
                   >
                     <button
@@ -2598,6 +2579,38 @@
                       跟随系统
                     </button>
                   </div>
+                </div>
+
+                <div class="settings-appearance-divider" role="separator"></div>
+
+                <!-- Accent / tone (global primary only; not ownership) -->
+                <div class="settings-appearance-row" data-testid="settings-appearance-accent">
+                  <div class="settings-appearance-row__meta">
+                    <span class="settings-appearance-row__icon" aria-hidden="true">
+                      <i class="fas fa-swatchbook"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-appearance-row__title">色调</h4>
+                      <p class="settings-appearance-row__hint">全局强调色；不改变模块归属色</p>
+                    </div>
+                  </div>
+                  <label class="settings-appearance-row__control">
+                    <span class="sr-only">当前色调</span>
+                    <select
+                      class="settings-control settings-control--sm"
+                      data-testid="settings-theme-select"
+                      :value="appearanceThemeId"
+                      @change="setAppearanceThemeFromEvent($event)"
+                    >
+                      <template x-for="theme in appearanceThemeOptions" :key="theme.id">
+                        <option
+                          :value="theme.id"
+                          :selected="theme.id === appearanceThemeId"
+                          x-text="theme.name"
+                        ></option>
+                      </template>
+                    </select>
+                  </label>
                 </div>
 
                 <div class="settings-appearance-divider" role="separator"></div>

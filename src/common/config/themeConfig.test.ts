@@ -238,7 +238,7 @@ describe('ThemeManager', () => {
 
     ThemeManager.applyTheme('missing');
 
-    expect(errorSpy).toHaveBeenCalledWith('主题不存在: missing');
+    expect(errorSpy).toHaveBeenCalledWith('色调预设不存在: missing');
     expect(mocks.storageSet).not.toHaveBeenCalled();
   });
 

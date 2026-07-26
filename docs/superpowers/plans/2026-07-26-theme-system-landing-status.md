@@ -14,7 +14,8 @@
 [Workbench radius 决策](./2026-07-26-workbench-radius-decision.md) ·  
 [Ownership Role → Palette 映射](./2026-07-26-ownership-role-palette-map.md) ·  
 [Local token 前缀生命周期 (D9)](./2026-07-26-local-token-prefix-lifecycle.md) ·  
-[Ownership 深绑定面审查（mega/sidebar/banner）](./2026-07-26-theme-ownership-surfaces-deep-review.md)
+[Ownership 深绑定面审查（mega/sidebar/banner）](./2026-07-26-theme-ownership-surfaces-deep-review.md) ·  
+[**企业级主题重构蓝图：主题=浅/深/系统**](../specs/2026-07-26-enterprise-theme-system-redesign.md)
 
 ---
 

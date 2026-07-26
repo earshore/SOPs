@@ -1,9 +1,20 @@
 # 稳定主题系统规范
 
 **Status:** active · SSOT  
-**Updated:** 2026-07-25  
+**Updated:** 2026-07-26  
 **适用范围**: SOPs Web 端所有页面、模块样式、共享组件和视觉整改  
-**目标**: 把项目从多套局部视觉方案收敛为稳定、可审计、适合内部运营工作台的主题系统；支持用户 Appearance 切换全局 primary，**不**覆盖模块归属色。
+**目标**: 企业级 **浅色 / 深色 / 跟随系统** 主题轴 + 可选 **色调（强调色）** + 模块归属 wayfinding；三者正交、可审计。
+
+### 产品用语（用户可见 · 强制）
+
+| 中文 | 含义 | 存储 / 运行时 | **禁止** |
+| --- | --- | --- | --- |
+| **主题** | 浅色 · 深色 · 跟随系统 | `app-color-mode` · `applyColorMode` · resolved `.dark` | 用「主题」指默认/海洋等预设 |
+| **色调**（或风格 / 强调色） | 默认 · 极简素色 · 海洋 · 森林… | `app-theme` · `applyTheme` · `data-appearance` | 用「主题」指色调；用色调洗归属色 |
+| **模块归属色** | 导航 / banner 业务身份 | `menuConfig` / `wb-theme-*` / `sidebar-theme-*` | 被主题或色调整体改写 |
+
+工程内部可仍称 Color Mode / Appearance；**用户文案与设置 IA 必须以表为准**。  
+企业级重构蓝图（Theme 第一轴、FOUC、token 铁律、分阶段）：[enterprise-theme-system-redesign](./superpowers/specs/2026-07-26-enterprise-theme-system-redesign.md)。
 
 ---
 
