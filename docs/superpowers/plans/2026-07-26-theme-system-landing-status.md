@@ -1,7 +1,7 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ HEAD `a05b12c8` · residual MA/PPC D6#18–20 · D12×22 · D2 #4 · D8 soft expand）  
-**范围**: `main` ahead of `sops/main`； residual 主题波 **已合入** `a05b12c8`  
+**日期**: 2026-07-26（refresh @ HEAD `b85cd597` · residual #18–21 · D12×24 · D2 long-tail #5 · D8 soft · D9 F2 · shell focus）  
+**范围**: `main` ahead of `sops/main`； residual 主题波 + D12 NPI + PromptLab residual **已合入**（tip `b85cd597`）  
 **角色**: Tech Lead / Release docs  
 **诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称 visual Pass。
 
@@ -21,11 +21,11 @@
 
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Code / 契约**    | **Green**  | tip `a05b12c8`: D6 #18 Scraper · #19 AI · #20 PPC residual · D12×**22** PromptLab · D2 #4 settings/legacy-compat · D8 soft ppc/MA tests |
+| **Code / 契约**    | **Green**  | tip `b85cd597`: D6 #18–21 residual · D12×**24** · D2 long-tail #5 · D8 soft · D9 F2 · shell nav/settings focus |
 | **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**（**Human XO first**）；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: residual MA/Scraper/PPC chrome + D12×22 **已在** `a05b12c8`；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
+**一句话**: residual #18–21 + D12×24 + D2 #5 **已在** tip `b85cd597`；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -40,7 +40,7 @@
 | **2** Token 事实源             | 修 D1/D2 结构    | **Partial**                                   | 清点文档；192 条原子 identical 删除；allowlist **20**；`--workbench-radius` SSOT + 多批消费者（含 buttons glow / radius batch 3）；**未**完成 `variables.semantic.css` 全拆                                                                                                                                                                                                                                                                                                                                  |
 | **3** 壳层 Appearance 可见面   | 用户看得见换肤   | **Partial**                                   | Settings primary chrome + form tokens/focus；buttons primary glow 跟 Appearance；壳层部分 CTA；sidebar 去 marketing scale；**XO 未签「肉眼明确变化」**                                                                                                                                                                                                                                                                                                                                                       |
 | **4** Ownership / colorSchemes | 修 D4/D7/D8      | **Partial (D7 code Done + call-site audit; D4 long tail open)** | **Role → Palette 映射文档**（19 roles）+ smoke KH `wb-theme-rose`；**helpers**: `getWorkbenchCardClasses` / `getWorkbenchIconContainerClasses` + `colorSchemes.test.ts`；**sidebar** category icon 去 scale；**调用点**: AI/PromptLab/Scraper + KH report + AI JSON icons；**D7 @ f7268f93**: `setModuleColor` **@deprecated** + **ESLint hard-gate**（禁生产新调；allow test）+ `ColorContext.test.ts`（infer / legacy write / 解耦）；**D7 residual**: 全仓 grep — **0 production callers**（见 §5.3）； dual-channel API 保留 **optional retire** |
-| **5** D6 业务页分期            | 业务 `blue-*` 降 | **Partial (samples)**                         | 业务 ~900+ 仍 Informational 基线；**样本 through #16 + residual #18–20**: KH…#9 + **#10 SOPs** + **#11 NPI** + **#12 Restricted Words** + **#13 AMZ Hub nav**（ownership orange / `module-accent`）+ **#14 email_templates** + **#15 qa_maintenance** + **#16 PromptLab DNA/autoPopulate** + **#18 Scraper / #19 AI / #20 PPC residual** @ `a05b12c8`；PromptLab / Skills #6 / Deep Chat #7；phase/tab/step 多色与 SEO 卡 **保留**；壳层 megaMenu **13**                                                                |
+| **5** D6 业务页分期            | 业务 `blue-*` 降 | **Partial (samples)**                         | 业务 ~900+ 仍 Informational 基线；**样本 through #16 + residual #18–21**: KH…#9 + **#10 SOPs** + **#11 NPI** + **#12 Restricted Words** + **#13 AMZ Hub nav**（ownership orange / `module-accent`）+ **#14 email_templates** + **#15 qa_maintenance** + **#16 PromptLab DNA/autoPopulate** + **#18 Scraper / #19 AI / #20 PPC residual** @ `a05b12c8` + **#21 PromptLab residual focus** @ `f761e4e5`；Skills #6 / Deep Chat #7；phase/tab/step 多色与 SEO 卡 **保留**；壳层 megaMenu **13**                                                                |
 
 图例：Done (code) = 契约/门禁/实现；Visual open = 浏览器签收缺失；Partial (samples) = 个别业务面已动手，非全量 D6 清零。
 
@@ -228,7 +228,7 @@ Grep / call-site evidence:
   [`2026-07-26-theme-system-xo-signoff-status.md` §3](./2026-07-26-theme-system-xo-signoff-status.md#3-人类-xo-30-分钟手动浏览器脚本)
 - 矩阵: [`experience-acceptance-matrix.md`](./2026-07-26-theme-system-experience-acceptance-matrix.md)
 - 必测: X1 default↔minimal×3 · X2 ownership 抽检（**KH `wb-theme-rose` / PPC hero / MA indigo / Deep Chat terracotta**）· X5 dark×appearance · focus · 刷新持久化
-- **可选肉眼（XO §1.8）**: **Skills 试用 CTA** + **Deep Chat shell** chrome/focus（terracotta **不变**）+ **#10 SOPs overview focus** + **#11 NPI primary CTA** + **#13 AMZ Hub nav ownership orange** + **#14 email_templates CTA/focus** + **#15 qa_maintenance CTA/focus** + **#16 PromptLab DNA/autoPopulate** + dark×minimal 肉眼复核；另可选 KH/Scraper/AI/PPC/PromptLab/#8 input / #12 RW
+- **可选肉眼（XO §1.8）**: **Skills 试用 CTA** + **Deep Chat shell** chrome/focus（terracotta **不变**）+ **#10 SOPs overview focus** + **#11 NPI primary CTA** + **#13 AMZ Hub nav ownership orange** + **#14 email_templates CTA/focus** + **#15 qa_maintenance CTA/focus** + **#16 PromptLab DNA/autoPopulate** + **#18–21 residual MA/PPC/PromptLab chrome** + dark×minimal 肉眼复核；另可选 KH/#8 input / #12 RW
 - **可选截图**: [D12 §6 首 8 张](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow) — **截图 ≠ visual Pass**
 - **不测**: 全站 D6 仍蓝（允许 Informational）
 - 签收后: 填 XO 结论 `PASS / PASS with debt / FAIL`；Tech Lead 仅勾 code gates §4.1；**Visual 保持 Yellow 直至 XO 签字**（**Human XO first**）
@@ -239,9 +239,9 @@ Grep / call-site evidence:
 
 | #     | Wave                                              | 范围                                                                                                                         | 验证                                                                       |
 | ----- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **1** | **Human XO（始终优先 · 阻塞体验关闸）**           | 30 min 浏览器脚本 + 记录模板；X1/X2/X5 + 可选 Skills / Deep Chat shell / **#10 SOPs** / **#11 NPI** / **#13 Hub nav orange** / **#14 email_templates** / **#15 qa_maintenance** / **#16 PromptLab DNA**                           | 矩阵勾选 + XO status 结论；**仍不宣称 visual Pass**                        |
-| **2** | **D12 首 8 人工截图 + scaffold 对照（可并发）**   | 按 [D12 §6](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow) 归档 8 张；scaffold 已 **24** opt-in（+ Skills + NPI）；可选 `test:visual:theme` | 截图 + MANIFEST；**不** fail-closed CI；**不** visual Pass                 |
-| **3** | **D6 下一业务样本（可并发 · 低优先）**            | #10–#16 **已落**（含 **#13 Hub nav** @ `904f83d3` + #14–#15 @ `2f8d98ab` + **#16 PromptLab DNA** @ `f99b0fc8`）；下一页 primary/chrome 样本（非 900+ 清零）；**禁止**重写 terracotta / phase 语义蓝 / RW 教学 INFO 卡 / Hub 归属橙 | hardcode gate 不升；**仍不宣称 visual Pass**                               |
+| **1** | **Human XO（始终优先 · 阻塞体验关闸）**           | 30 min 浏览器脚本 + 记录模板；X1/X2/X5 + 可选 Skills / Deep Chat shell / **#10 SOPs** / **#11 NPI** / **#13 Hub nav orange** / **#14 email_templates** / **#15 qa_maintenance** / **#16 PromptLab DNA** / **#18–21 residual MA/PPC/PromptLab**                           | 矩阵勾选 + XO status 结论；**仍不宣称 visual Pass**                        |
+| **2** | **D12 首 8 人工截图 + scaffold 对照（可并发）**   | 按 [D12 §6](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow) 归档 8 张；scaffold 已 **24** opt-in（+ PromptLab + Skills + NPI）；可选 `test:visual:theme` | 截图 + MANIFEST；**不** fail-closed CI；**不** visual Pass                 |
+| **3** | **D6 下一业务样本（可并发 · 低优先）**            | #10–#16 + residual #18–21 **已落**（含 **#13 Hub nav** @ `904f83d3` + #14–#15 @ `2f8d98ab` + **#16** @ `f99b0fc8` + **#18–20** @ `a05b12c8` + **#21** @ `f761e4e5`）；下一页 primary/chrome 样本（非 900+ 清零）；**禁止**重写 terracotta / phase 语义蓝 / RW 教学 INFO 卡 / Hub 归属橙 | hardcode gate 不升；**仍不宣称 visual Pass**                               |
 
 **下一波优先（不变）**: **Human XO 30 min** 仍第一（唯一体验关闸）；可选 D12 首 8 张；D6 长尾仅在 XO 不阻塞时穿插。  
 **禁止本周扩 scope**: 一次清零 900+ blue、换字体、重写 Deep Chat terracotta、white-label 引擎、未走 map 扩表流程的新 `wb-theme-*`、把 megaMenu 强行 Appearance 化。
@@ -251,7 +251,13 @@ Grep / call-site evidence:
 ## 8. Commit list (`sops/main` → `HEAD`)
 
 ```
-HEAD     feat(theme): residual MA/PPC chrome, D12x22  ← pending this wave
+b85cd597 feat(theme): migrate D2 workbench radius long-tail #5  ← HEAD
+f761e4e5 feat(theme): PromptLab residual focus chrome sample
+3218a505 Migrate shell nav and settings focus to Appearance
+023b8952 test(theme): add NPI to D12 scaffold (12x2=24)
+ec2598aa docs(theme): record D9 F2 archive-candidate skim
+4c029537 test(theme): expand D8 soft ownership module coverage
+a05b12c8 feat(theme): residual MA/PPC chrome and D12x22
 f99b0fc8 feat(theme): PromptLab D6, drop ThemeColors, D12x20
 2f8d98ab feat(theme): service CTAs, radius long-tail, D12x18
 904f83d3 feat(theme): hub nav, foundation dual-safe, D12x16
@@ -280,13 +286,14 @@ d1a8c774 feat(theme): settings color mode, token audit, XO status
 f8f925a8 docs(theme): enterprise audit and convergence roadmap
 ```
 
-**本波要点（待 commit）**:
-- D6 #18 Scraper residual · #19 AI Analysis residual · #20 PPC residual
-- D12 scaffold **24**（+ PromptLab + NPI）
-- D2 #4: app-center-card / settings-radius-card
-- D8 soft: ppc_tools emerald · master_analysis indigo
+**HEAD residual chain 已合入**（从 `a05b12c8` 起）:
+- D6 #18 Scraper residual · #19 AI Analysis residual · #20 PPC residual @ `a05b12c8`
+- D6 #21 PromptLab residual focus @ `f761e4e5`
+- D12 scaffold **24**（+ PromptLab + Skills + NPI）@ `023b8952`
+- D2 workbench radius long-tail #5 @ `b85cd597`
+- D8 soft expand @ `4c029537`；D9 F2 skim @ `ec2598aa`；shell nav/settings focus @ `3218a505`
 - D4 card helper still **0** production callers
-- **Visual Yellow** · **Human XO first**
+- **Visual Yellow** · **Human XO first**（仍未签）
 
 **前主题 tip (`f99b0fc8`)**: D6 #16 PromptLab · D10 ThemeColors removed · D12×20。
 
