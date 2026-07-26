@@ -26,6 +26,14 @@ function readRepoFile(path: string): string {
   return readFileSync(resolve(process.cwd(), path), 'utf8');
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Current RC/GA under release — assertions track package.json instead of rotting literals. */
+const CURRENT_VERSION = (JSON.parse(readRepoFile('package.json')) as { version: string }).version;
+const CURRENT_VERSION_RE = escapeRegExp(CURRENT_VERSION);
+
 describe('extractChangelogSection', () => {
   const sample = `# Changelog
 
@@ -165,16 +173,14 @@ describe('release archive cleanup', () => {
 });
 
 describe('v3.0.11-rc.7 release metadata', () => {
-  it('locks package and lockfile root versions to 3.0.11-rc.7', () => {
-    const packageJson = JSON.parse(readRepoFile('package.json')) as { version: string };
+  it('locks package and lockfile root versions to the current release version', () => {
     const packageLock = JSON.parse(readRepoFile('package-lock.json')) as {
       version: string;
       packages: Record<string, { version?: string }>;
     };
 
-    expect(packageJson.version).toBe('3.0.11-rc.7');
-    expect(packageLock.version).toBe('3.0.11-rc.7');
-    expect(packageLock.packages['']?.version).toBe('3.0.11-rc.7');
+    expect(packageLock.version).toBe(CURRENT_VERSION);
+    expect(packageLock.packages['']?.version).toBe(CURRENT_VERSION);
   });
 
   it('places 3.0.11-rc.7 notes before the preserved 3.0.10 GA section', () => {
@@ -199,10 +205,14 @@ describe('v3.0.11-rc.7 release metadata', () => {
     const readme = readRepoFile('README.md');
 
     expect(readme).toMatch(/\|\s*\*\*GitHub Latest（稳定 GA）\*\*\s*\|\s*`v3\.0\.10`\s*\|/);
-    expect(readme).toMatch(/\|\s*\*\*当前 Pre-release 候选\*\*\s*\|\s*`v3\.0\.11-rc\.7`\s*\|/);
-    expect(readme).toMatch(/\|\s*package\.json\s*\|\s*`3\.0\.11-rc\.7`\s*\|/);
+    expect(readme).toMatch(
+      new RegExp(`\\|\\s*\\*\\*当前 Pre-release 候选\\*\\*\\s*\\|\\s*\`v${CURRENT_VERSION_RE}\`\\s*\\|`)
+    );
+    expect(readme).toMatch(
+      new RegExp(`\\|\\s*package\\.json\\s*\\|\\s*\`${CURRENT_VERSION_RE}\`\\s*\\|`)
+    );
     expect(readme).toMatch(/\|\s*上一 GA\s*\|\s*`v3\.0\.10`\s*\|/);
-    expect(readme).toContain('`0.1.0`…`3.0.11-rc.7`');
+    expect(readme).toContain(`\`0.1.0\`…\`${CURRENT_VERSION}\``);
     expect(readme).toContain('当前稳定版为 `v3.0.10`');
   });
 

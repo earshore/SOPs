@@ -208,9 +208,10 @@ vi.mock('@/services/monitoringService', () => ({
 
       handler.handle(error);
 
+      // showToast(title, options) — LLM actionable UX contract (rc.9)
       expect((window as any).showToast).toHaveBeenCalledWith(
         '用户可见错误',
-        'error'
+        { type: 'error' }
       );
     });
 
@@ -223,9 +224,9 @@ vi.mock('@/services/monitoringService', () => ({
       handler.handle(warningError);
       handler.handle(infoError);
 
-      expect((window as any).showToast).toHaveBeenCalledWith('错误', 'error');
-      expect((window as any).showToast).toHaveBeenCalledWith('警告', 'warning');
-      expect((window as any).showToast).toHaveBeenCalledWith('信息', 'info');
+      expect((window as any).showToast).toHaveBeenCalledWith('错误', { type: 'error' });
+      expect((window as any).showToast).toHaveBeenCalledWith('警告', { type: 'warning' });
+      expect((window as any).showToast).toHaveBeenCalledWith('信息', { type: 'info' });
     });
 
     it('应该使用自定义用户消息', () => {
@@ -235,7 +236,7 @@ vi.mock('@/services/monitoringService', () => ({
 
       expect((window as any).showToast).toHaveBeenCalledWith(
         '自定义用户消息',
-        'error'
+        { type: 'error' }
       );
     });
 

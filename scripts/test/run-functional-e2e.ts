@@ -60,7 +60,11 @@ export const FUNCTIONAL_E2E_GROUPS = [
   },
   {
     name: 'operations',
-    files: ['tests/e2e/npi-tracker.spec.ts', 'tests/e2e/restricted-words.spec.ts'],
+    files: [
+      'tests/e2e/npi-tracker.spec.ts',
+      'tests/e2e/restricted-words.spec.ts',
+      'tests/e2e/system-settings.spec.ts',
+    ],
   },
 ] as const;
 

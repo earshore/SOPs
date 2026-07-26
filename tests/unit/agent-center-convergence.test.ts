@@ -17,10 +17,12 @@ function extractRegistry(html: string): string {
 }
 
 function extractAgentArticle(registry: string, agentName: string): string {
-  const headingIndex = registry.indexOf(`<h3 class="font-bold text-slate-900 truncate">${agentName}</h3>`);
-  if (headingIndex < 0) {
+  // Anchor on the h3 text, not its class list — theme migrations restyle headings.
+  const headingMatch = new RegExp(`<h3\\b[^>]*>${agentName}</h3>`).exec(registry);
+  if (!headingMatch) {
     throw new Error(`${agentName} not found`);
   }
+  const headingIndex = headingMatch.index;
 
   const articleStart = registry.lastIndexOf('<article', headingIndex);
   const articleEnd = registry.indexOf('</article>', headingIndex);
