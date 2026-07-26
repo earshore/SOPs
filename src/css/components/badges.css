@@ -584,19 +584,25 @@
 /* ========================================
    暗色模式
    ======================================== */
-@media (prefers-color-scheme: dark) {
-  .badge-neutral,
-  .badge-secondary {
-    background: var(--color-slate-800);
-    color: var(--color-slate-300);
-  }
+.dark .badge-neutral,
+.dark .badge-secondary,
+[data-color-mode-resolved='dark'] .badge-neutral,
+[data-color-mode-resolved='dark'] .badge-secondary,
+[data-theme='dark'] .badge-neutral,
+[data-theme='dark'] .badge-secondary {
+  background: var(--color-slate-800);
+  color: var(--color-slate-300);
+}
 
-  .badge-version {
-    background: var(--color-slate-800);
-    color: var(--color-slate-400);
-  }
+.dark .badge-version,
+[data-color-mode-resolved='dark'] .badge-version,
+[data-theme='dark'] .badge-version {
+  background: var(--color-slate-800);
+  color: var(--color-slate-400);
+}
 
-  .badge-stack .badge {
-    border-color: var(--color-slate-900);
-  }
+.dark .badge-stack .badge,
+[data-color-mode-resolved='dark'] .badge-stack .badge,
+[data-theme='dark'] .badge-stack .badge {
+  border-color: var(--color-slate-900);
 }

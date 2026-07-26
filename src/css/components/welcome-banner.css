@@ -1037,31 +1037,35 @@
   --wb-tag-dot-border: color-mix(in srgb, var(--surface-panel, #ffffff) 78%, transparent);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* 暗色模式变量覆盖 */
-    --wb-text-primary: var(--color-text-primary, var(--color-slate-50, #f8fafc));
-    --wb-text-secondary: var(--color-text-secondary, var(--color-slate-300, #cbd5e1));
-    --wb-border-color: var(--border-muted, rgba(148, 163, 184, 0.22));
-    --wb-card-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 94%, transparent);
-    --wb-tag-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 78%, transparent);
-    --wb-tag-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 18%, transparent);
-    --wb-tag-hover-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 92%, transparent);
-    --wb-tag-hover-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 30%, transparent);
-    --wb-tag-dot-border: color-mix(in srgb, var(--surface-panel, #1e293b) 78%, transparent);
-  }
+.dark,
+[data-color-mode-resolved='dark'],
+[data-theme='dark'] {
+  /* 暗色模式变量覆盖 */
+  --wb-text-primary: var(--color-text-primary, var(--color-slate-50, #f8fafc));
+  --wb-text-secondary: var(--color-text-secondary, var(--color-slate-300, #cbd5e1));
+  --wb-border-color: var(--border-muted, rgba(148, 163, 184, 0.22));
+  --wb-card-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 94%, transparent);
+  --wb-tag-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 78%, transparent);
+  --wb-tag-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 18%, transparent);
+  --wb-tag-hover-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 92%, transparent);
+  --wb-tag-hover-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 30%, transparent);
+  --wb-tag-dot-border: color-mix(in srgb, var(--surface-panel, #1e293b) 78%, transparent);
+}
 
-  /* 5.1 背景适配 */
-  .wb-container,
-  .wb-card {
-    background: linear-gradient(
-      135deg,
-      rgba(15, 23, 42, 0.96) 0%,
-      rgba(30, 41, 59, 0.94) 50%,
-      rgba(15, 23, 42, 0.96) 100%
-    );
-    border-color: var(--wb-border-color);
-  }
+/* 5.1 背景适配 */
+.dark .wb-container,
+.dark .wb-card,
+[data-color-mode-resolved='dark'] .wb-container,
+[data-color-mode-resolved='dark'] .wb-card,
+[data-theme='dark'] .wb-container,
+[data-theme='dark'] .wb-card {
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.96) 0%,
+    rgba(30, 41, 59, 0.94) 50%,
+    rgba(15, 23, 42, 0.96) 100%
+  );
+  border-color: var(--wb-border-color);
 }
 
 /* ----------------------------------------------------------------------------
@@ -1652,26 +1656,30 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .wb-container--simple {
-    background: var(--wb-simple-bg, var(--surface-panel, rgba(15, 23, 42, 0.96)));
-    border-color: var(--wb-border-color);
-  }
+.dark .wb-container--simple,
+[data-color-mode-resolved='dark'] .wb-container--simple,
+[data-theme='dark'] .wb-container--simple {
+  background: var(--wb-simple-bg, var(--surface-panel, rgba(15, 23, 42, 0.96)));
+  border-color: var(--wb-border-color);
+}
 
-  .wb-container--decorative.wb-container--simple {
-    background: linear-gradient(
-      135deg,
-      rgba(15, 23, 42, 0.96) 0%,
-      rgba(30, 41, 59, 0.94) 50%,
-      rgba(15, 23, 42, 0.96) 100%
-    );
-  }
+.dark .wb-container--decorative.wb-container--simple,
+[data-color-mode-resolved='dark'] .wb-container--decorative.wb-container--simple,
+[data-theme='dark'] .wb-container--decorative.wb-container--simple {
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.96) 0%,
+    rgba(30, 41, 59, 0.94) 50%,
+    rgba(15, 23, 42, 0.96) 100%
+  );
+}
 
-  .wb-container--simple .wb-meta > span {
-    background: var(--wb-tag-bg);
-    border-color: var(--wb-tag-border);
-    color: var(--wb-text-secondary);
-  }
+.dark .wb-container--simple .wb-meta > span,
+[data-color-mode-resolved='dark'] .wb-container--simple .wb-meta > span,
+[data-theme='dark'] .wb-container--simple .wb-meta > span {
+  background: var(--wb-tag-bg);
+  border-color: var(--wb-tag-border);
+  color: var(--wb-text-secondary);
 }
 
 /* ===== 主题变体：Analytics 蓝色主题 ===== */
