@@ -39,10 +39,32 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
 
     expect(getOwnershipRoleForModule('more_core')).toBe('role-more-overview');
     expect(getPaletteForRole('role-more-overview')).toBe('green');
+
+    expect(getOwnershipRoleForModule('amz_hub')).toBe('role-hub-overview');
+    expect(getPaletteForRole('role-hub-overview')).toBe('orange');
+
+    expect(getOwnershipRoleForModule('app_center')).toBe('role-apps-overview');
+    expect(getPaletteForRole('role-apps-overview')).toBe('rose');
+
+    expect(getOwnershipRoleForModule('sops')).toBe('role-sops-overview');
+    expect(getPaletteForRole('role-sops-overview')).toBe('indigo');
+
+    expect(getOwnershipRoleForModule('home')).toBe('role-neutral');
+    expect(getPaletteForRole('role-neutral')).toBe('slate');
   });
 
   it('keeps module role palettes aligned with menuConfig.themeColor (pure, no DOM)', () => {
-    const moduleIds = ['keyword_hunter', 'ppc_tools', 'master_analysis', 'more_core'] as const;
+    const moduleIds = [
+      'keyword_hunter',
+      'ppc_tools',
+      'master_analysis',
+      'more_core',
+      'playground',
+      'amz_hub',
+      'app_center',
+      'sops',
+      'home',
+    ] as const;
 
     for (const moduleId of moduleIds) {
       const roleId = getOwnershipRoleForModule(moduleId);
@@ -91,6 +113,83 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
     expect(palette).toBe('indigo');
     expect(menuThemeColor).toBe('indigo');
     expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-indigo');
+  });
+
+  it('soft-cross-checks Sidebar theme class for playground with ownership orange (no production wire)', () => {
+    // Deep Chat is a playground child route; ownership resolves via playground module key.
+    const moduleId = 'playground';
+    const roleId = getOwnershipRoleForModule(moduleId);
+    const palette = getPaletteForRole(roleId!);
+    const menuThemeColor = MENU_CONFIG.modules[moduleId]?.themeColor;
+
+    expect(roleId).toBe('role-playground');
+    expect(palette).toBe('orange');
+    expect(menuThemeColor).toBe('orange');
+    expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-orange');
+  });
+
+  it('soft-cross-checks Sidebar theme class for amz_hub with ownership orange (no production wire)', () => {
+    // Hub overview only; hub child pages use role-hub-* categories.
+    const moduleId = 'amz_hub';
+    const roleId = getOwnershipRoleForModule(moduleId);
+    const palette = getPaletteForRole(roleId!);
+    const menuThemeColor = MENU_CONFIG.modules[moduleId]?.themeColor;
+
+    expect(roleId).toBe('role-hub-overview');
+    expect(palette).toBe('orange');
+    expect(menuThemeColor).toBe('orange');
+    expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-orange');
+  });
+
+  it('soft-cross-checks Sidebar theme class for app_center with ownership rose (no production wire)', () => {
+    const moduleId = 'app_center';
+    const roleId = getOwnershipRoleForModule(moduleId);
+    const palette = getPaletteForRole(roleId!);
+    const menuThemeColor = MENU_CONFIG.modules[moduleId]?.themeColor;
+
+    expect(roleId).toBe('role-apps-overview');
+    expect(palette).toBe('rose');
+    expect(menuThemeColor).toBe('rose');
+    expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-rose');
+  });
+
+  it('soft-cross-checks Sidebar theme class for sops with ownership indigo (no production wire)', () => {
+    // SOPs overview only; category pages use role-ops-*.
+    const moduleId = 'sops';
+    const roleId = getOwnershipRoleForModule(moduleId);
+    const palette = getPaletteForRole(roleId!);
+    const menuThemeColor = MENU_CONFIG.modules[moduleId]?.themeColor;
+
+    expect(roleId).toBe('role-sops-overview');
+    expect(palette).toBe('indigo');
+    expect(menuThemeColor).toBe('indigo');
+    expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-indigo');
+  });
+
+  it('soft-cross-checks hub/more category palettes with menuConfig colors (no production wire)', () => {
+    // Category-level soft map only — Skills/Scraper/PromptLab are routes, not module keys.
+    expect(getOwnershipRoleForCategory('hub', 'knowledge')).toBe('role-hub-knowledge');
+    expect(getPaletteForRole('role-hub-knowledge')).toBe(MENU_CONFIG.hubCategories.knowledge.color);
+    expect(getPaletteForRole('role-hub-knowledge')).toBe('indigo');
+    expect(`sidebar-theme-${getPaletteForRole('role-hub-knowledge')}`).toBe('sidebar-theme-indigo');
+
+    expect(getOwnershipRoleForCategory('hub', 'practice')).toBe('role-hub-practice');
+    expect(getPaletteForRole('role-hub-practice')).toBe(MENU_CONFIG.hubCategories.practice.color);
+    expect(getPaletteForRole('role-hub-practice')).toBe('green');
+    expect(`sidebar-theme-${getPaletteForRole('role-hub-practice')}`).toBe('sidebar-theme-green');
+
+    expect(getOwnershipRoleForCategory('more', 'business_scenarios')).toBe('role-more-business');
+    expect(getPaletteForRole('role-more-business')).toBe(
+      MENU_CONFIG.moreCategories.business_scenarios.color
+    );
+    expect(getPaletteForRole('role-more-business')).toBe('cyan');
+    expect(`sidebar-theme-${getPaletteForRole('role-more-business')}`).toBe('sidebar-theme-cyan');
+
+    // Skills catalog lives under more/explore → role-more-llm (violet), not a module id.
+    expect(getOwnershipRoleForCategory('more', 'explore')).toBe('role-more-llm');
+    expect(getPaletteForRole('role-more-llm')).toBe(MENU_CONFIG.moreCategories.explore.color);
+    expect(getPaletteForRole('role-more-llm')).toBe('violet');
+    expect(`sidebar-theme-${getPaletteForRole('role-more-llm')}`).toBe('sidebar-theme-violet');
   });
 
   it('returns null for unknown modules and roles (no fake defaults)', () => {

@@ -10,8 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - D8 Ownership Role 代码 SSOT scaffold：`src/common/config/ownershipRoles.ts`（`OwnershipRoleId` × 19、`OWNERSHIP_ROLES`、`getPaletteForRole` / `getOwnershipRoleForModule`；纯 helper，无 Appearance 写入、无全站 DOM 绑定）。
+- D8 soft ownership unit expand：`ownershipRoles.test.ts` 补 `playground` / `amz_hub` / `app_center` / `sops` sidebar soft-check + hub/more category palette 对齐（无生产 API / 无全站 `data-ownership-role`）。
 - D9 局部 token 前缀生命周期（库存 / elevate·keep local·archive / PR 清单 / 与 D1 边界）：`docs/superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md`（docs only，无批量 CSS rename）。
-- D12 Appearance 截图 scaffold（opt-in）：`tests/visual/theme-appearance-scaffold.test.ts` + `npm run test:visual:theme`（`THEME_VISUAL=1`；默认 skip，基线 gitignore，不进 blocking CI）；**11 屏 × default/minimal light = 22** 快照（R1–R9 light 主包 + **Skills** catalog：Settings / KH / Home / App Center / Scraper / **PromptLab** / PPC / SOPs / Amazon Hub / Deep Chat / **Skills**；PromptLab indigo / terracotta send / Skills violet ownership **不**当 primary）；计划见 `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`。
+- D12 Appearance 截图 scaffold（opt-in）：`tests/visual/theme-appearance-scaffold.test.ts` + `npm run test:visual:theme`（`THEME_VISUAL=1`；默认 skip，基线 gitignore，不进 blocking CI）；**12 屏 × default/minimal light = 24** 快照（R1–R9 light 主包 + **Skills** + **NPI Tracker**：Settings / KH / Home / App Center / Scraper / **PromptLab** / PPC / SOPs / Amazon Hub / Deep Chat / **Skills** / **NPI**；PromptLab indigo / terracotta send / Skills violet / NPI growth ownership **不**当 primary）；计划见 `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`。
 - Ownership Role → Palette / `wb-theme-*` 映射表（Phase 4 预备）：`docs/superpowers/plans/2026-07-26-ownership-role-palette-map.md`。
 - D1 token 覆盖清点：`npm run token:override-audit`（`scripts/quality/audit-token-overrides.ts`）+ 库存报告 `docs/superpowers/plans/2026-07-26-token-override-inventory.md`。
 - 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
