@@ -181,13 +181,15 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
 
     const hubKnowledge = hubCategories.knowledge;
     const hubPractice = hubCategories.practice;
+    const hubAdvanced = hubCategories.advanced;
     const moreBusiness = moreCategories.business_scenarios;
     const moreExplore = moreCategories.explore;
     expect(hubKnowledge).toBeDefined();
     expect(hubPractice).toBeDefined();
+    expect(hubAdvanced).toBeDefined();
     expect(moreBusiness).toBeDefined();
     expect(moreExplore).toBeDefined();
-    if (!hubKnowledge || !hubPractice || !moreBusiness || !moreExplore) {
+    if (!hubKnowledge || !hubPractice || !hubAdvanced || !moreBusiness || !moreExplore) {
       throw new Error('MENU_CONFIG hub/more category entries required for ownership soft checks');
     }
 
@@ -201,6 +203,15 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
     expect(getPaletteForRole('role-hub-practice')).toBe('green');
     expect(`sidebar-theme-${getPaletteForRole('role-hub-practice')}`).toBe('sidebar-theme-green');
 
+    // Hub advanced: menu rose is config authority; violet remains dual-track wb-theme alias.
+    expect(getOwnershipRoleForCategory('hub', 'advanced')).toBe('role-hub-advanced');
+    expect(getPaletteForRole('role-hub-advanced')).toBe(hubAdvanced.color);
+    expect(getPaletteForRole('role-hub-advanced')).toBe('rose');
+    expect(`sidebar-theme-${getPaletteForRole('role-hub-advanced')}`).toBe('sidebar-theme-rose');
+    const hubAdvancedClasses = getWbThemeClassesForRole('role-hub-advanced');
+    expect(hubAdvancedClasses).toContain('wb-theme-rose');
+    expect(hubAdvancedClasses).toContain('wb-theme-violet');
+
     expect(getOwnershipRoleForCategory('more', 'business_scenarios')).toBe('role-more-business');
     expect(getPaletteForRole('role-more-business')).toBe(moreBusiness.color);
     expect(getPaletteForRole('role-more-business')).toBe('cyan');
@@ -211,6 +222,54 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
     expect(getPaletteForRole('role-more-llm')).toBe(moreExplore.color);
     expect(getPaletteForRole('role-more-llm')).toBe('violet');
     expect(`sidebar-theme-${getPaletteForRole('role-more-llm')}`).toBe('sidebar-theme-violet');
+  });
+
+  it('soft-cross-checks sop category palettes with menuConfig colors (no production wire)', () => {
+    // SOP overview is module-level indigo; category pages use role-ops-* only.
+    // sopCategories may be optional on ambient MenuConfig; runtime MENU_CONFIG defines them.
+    const sopCategories = MENU_CONFIG.sopCategories;
+    expect(sopCategories).toBeDefined();
+    if (!sopCategories) {
+      throw new Error('MENU_CONFIG sopCategories required for ownership soft checks');
+    }
+
+    const growth = sopCategories.growth;
+    const backend = sopCategories.backend;
+    const safety = sopCategories.safety;
+    const service = sopCategories.service;
+    expect(growth).toBeDefined();
+    expect(backend).toBeDefined();
+    expect(safety).toBeDefined();
+    expect(service).toBeDefined();
+    if (!growth || !backend || !safety || !service) {
+      throw new Error('MENU_CONFIG sop category entries required for ownership soft checks');
+    }
+
+    expect(getOwnershipRoleForCategory('sop', 'growth')).toBe('role-ops-growth');
+    expect(getPaletteForRole('role-ops-growth')).toBe(growth.color);
+    expect(getPaletteForRole('role-ops-growth')).toBe('emerald');
+    expect(`sidebar-theme-${getPaletteForRole('role-ops-growth')}`).toBe('sidebar-theme-emerald');
+    expect(getWbThemeClassesForRole('role-ops-growth')).toContain('wb-theme-growth');
+
+    expect(getOwnershipRoleForCategory('sop', 'backend')).toBe('role-ops-supply');
+    expect(getPaletteForRole('role-ops-supply')).toBe(backend.color);
+    expect(getPaletteForRole('role-ops-supply')).toBe('amber');
+    expect(`sidebar-theme-${getPaletteForRole('role-ops-supply')}`).toBe('sidebar-theme-amber');
+    expect(getWbThemeClassesForRole('role-ops-supply')).toContain('wb-theme-supply');
+
+    expect(getOwnershipRoleForCategory('sop', 'safety')).toBe('role-ops-safety');
+    expect(getPaletteForRole('role-ops-safety')).toBe(safety.color);
+    expect(getPaletteForRole('role-ops-safety')).toBe('red');
+    expect(`sidebar-theme-${getPaletteForRole('role-ops-safety')}`).toBe('sidebar-theme-red');
+    expect(getWbThemeClassesForRole('role-ops-safety')).toContain('wb-theme-safety');
+
+    expect(getOwnershipRoleForCategory('sop', 'service')).toBe('role-ops-service');
+    expect(getPaletteForRole('role-ops-service')).toBe(service.color);
+    expect(getPaletteForRole('role-ops-service')).toBe('teal');
+    expect(`sidebar-theme-${getPaletteForRole('role-ops-service')}`).toBe('sidebar-theme-teal');
+    const serviceClasses = getWbThemeClassesForRole('role-ops-service');
+    expect(serviceClasses).toContain('wb-theme-service');
+    expect(serviceClasses).toContain('wb-theme-teal');
   });
 
   it('returns null for unknown modules and roles (no fake defaults)', () => {
