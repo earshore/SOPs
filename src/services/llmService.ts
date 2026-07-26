@@ -1230,6 +1230,9 @@ function logReasoningTransport(args: {
   capabilitySupports: boolean;
   globalEnabled: boolean;
   session: SessionReasoningOverride | undefined;
+  /** Pre-clamp intent; logged when demoted vs body/effective. */
+  requestedEffort?: string;
+  effectiveEffort?: string;
 }): void {
   const effort = extractOutboundReasoningMarker(args.body);
   // Production: silent. Dev: console for gateway field verification.
@@ -1240,8 +1243,14 @@ function logReasoningTransport(args: {
     return;
   }
   if (effort !== undefined) {
+    const demoted =
+      args.requestedEffort &&
+      args.effectiveEffort &&
+      args.requestedEffort !== 'off' &&
+      args.requestedEffort !== args.effectiveEffort;
+    const demoteSuffix = demoted ? ` requested=${args.requestedEffort}` : '';
     console.info(
-      `[LLM] 请求将发送推理参数 surface=${args.surface} model=${args.model} effort=${effort}`
+      `[LLM] 请求将发送推理参数 surface=${args.surface} model=${args.model} effort=${effort}${demoteSuffix}`
     );
     return;
   }
@@ -1360,6 +1369,8 @@ function createLLMTransport(args: {
     capabilitySupports: Boolean(capability.supportsReasoning && capability.mapRequest),
     globalEnabled: globalPrefs.enabled,
     session: args.options.reasoningSessionOverride,
+    requestedEffort: String(reasoning.requestedEffort),
+    effectiveEffort: String(reasoning.effort),
   });
 
   return {

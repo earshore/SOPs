@@ -138,7 +138,16 @@ export type SessionReasoningOverride = Partial<ReasoningUserPrefs>;
 
 export interface EffectiveReasoningPrefs {
   enabled: boolean;
+  /**
+   * Effort applied on the wire when enabled; `off` when reasoning is disabled
+   * or capability fail-closes.
+   */
   effort: ReasoningEffort;
+  /**
+   * Pre-clamp user/session intent (L1). When demoted to fit the model allowlist,
+   * this differs from `effort` (e.g. requested=max, effort=high on grok-4.5).
+   */
+  requestedEffort: ReasoningEffort;
 }
 
 /** Optional Responses multi-turn / tools / vision args (callLLM options). */

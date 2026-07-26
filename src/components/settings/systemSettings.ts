@@ -43,6 +43,7 @@ import {
   DEFAULT_REASONING_EFFORTS,
   DEFAULT_REASONING_PREFS,
   buildFullApiUrl,
+  clampEffort,
   isReasoningEffortLevel,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
@@ -314,7 +315,7 @@ interface SettingsPanelData {
   activeModelCapability: import('@/services/modelCapability').ResolvedModelCapability | null;
   showReasoningControls: boolean;
   reasoningEffortOptions: ReasoningEffortLevel[];
-  clampReasoningPrefsToActiveModel(): void;
+  clampReasoningPrefsToActiveModel(options?: { announce?: boolean }): void;
   apiPathOptions: readonly ApiPathOption[];
   fullApiUrlPreview: string;
   apiPathCapabilityHint: string;
@@ -1381,17 +1382,21 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   /**
    * When model changes or prefs load, keep effort inside active model allowlist
-   * (nearest high end of model tiers — e.g. stored max → high on grok-4.5).
+   * via nearest-tier clamp (e.g. stored max → high on grok-4.5). Announces demotion once.
    */
-  clampReasoningPrefsToActiveModel(): void {
+  clampReasoningPrefsToActiveModel(options?: { announce?: boolean }): void {
     const prefs = normalizeReasoningUserPrefs(this.llm.reasoningPrefs);
     const allowed = this.reasoningEffortOptions;
     if (allowed.length === 0) return;
-    const effort = allowed.includes(prefs.effort)
-      ? prefs.effort
-      : (allowed[allowed.length - 1] ?? prefs.effort);
-    if (effort !== prefs.effort) {
-      this.llm.reasoningPrefs = { ...prefs, effort };
+    const effort = clampEffort(prefs.effort, allowed);
+    if (effort === prefs.effort) return;
+    this.llm.reasoningPrefs = { ...prefs, effort };
+    if (options?.announce !== false) {
+      const model = (this.llm.model || '').trim() || '当前模型';
+      showToast(
+        `推理等级已从 ${prefs.effort} 调整为 ${effort}（${model} 支持：${allowed.join('/')}）`,
+        { type: 'info' }
+      );
     }
   },
 
@@ -2531,11 +2536,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   setReasoningEffortLevel(level: ReasoningEffortLevel | string): void {
     const raw = isReasoningEffortLevel(level) ? level : DEFAULT_REASONING_PREFS.effort;
-    // Only persist efforts the current model can actually send.
-    const effort = this.reasoningEffortOptions.includes(raw)
-      ? raw
-      : (this.reasoningEffortOptions[this.reasoningEffortOptions.length - 1] ??
-        DEFAULT_REASONING_PREFS.effort);
+    // Only persist efforts the current model can actually send (nearest-tier clamp).
+    const allowed = this.reasoningEffortOptions;
+    const effort =
+      allowed.length > 0
+        ? clampEffort(raw, allowed)
+        : DEFAULT_REASONING_PREFS.effort;
     this.llm.reasoningPrefs = {
       ...normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
       effort,

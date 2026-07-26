@@ -71,6 +71,14 @@ describe('multi-protocol flagship catalog', () => {
     expect(grok.reasoningEfforts).not.toContain('max');
     expect(grok.reasoningEfforts).not.toContain('xhigh');
 
+    const gpt = resolveModelCapability(
+      { provider: 'new_api', modelId: 'gpt-5.6' },
+      getModelCapabilityRules()
+    );
+    // OpenAI flagship: high + xhigh + max (Codex/API product scale)
+    expect(gpt.reasoningEfforts).toEqual(['low', 'medium', 'high', 'xhigh', 'max']);
+    expect(gpt.defaultEffort).toBe('medium');
+
     const multi = resolveModelCapability(
       { provider: 'new_api', modelId: 'grok-4.20-multi-agent' },
       getModelCapabilityRules()

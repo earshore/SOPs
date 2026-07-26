@@ -37,6 +37,7 @@ function nearestAllowedEffort(
  * Map a preferred effort onto what the model/surface allows.
  * - Exact match when allowed.
  * - Otherwise nearest lower-or-equal tier (max→high when high is top), then walk up.
+ * Never silently drops to medium unless medium is the nearest allowed tier (or list empty).
  */
 export function clampEffort(
   effort: ReasoningEffort | undefined,
@@ -52,6 +53,18 @@ export function clampEffort(
   return allowed[0] ?? 'medium';
 }
 
+/** True when intent was demoted to fit the model allowlist. */
+export function isEffortDemoted(
+  requested: ReasoningEffort,
+  effective: ReasoningEffort
+): boolean {
+  return (
+    requested !== 'off' &&
+    effective !== 'off' &&
+    requested !== effective
+  );
+}
+
 export function normalizeReasoningUserPrefs(
   prefs: Partial<ReasoningUserPrefs> | null | undefined
 ): ReasoningUserPrefs {
@@ -63,6 +76,7 @@ export function normalizeReasoningUserPrefs(
 
 /**
  * Session explicit fields beat global; capability fail-closes when unsupported.
+ * Always returns requestedEffort (pre-clamp) for observability.
  */
 export function resolveEffectiveReasoning(
   capability: Pick<
@@ -73,7 +87,7 @@ export function resolveEffectiveReasoning(
   session?: SessionReasoningOverride | null
 ): EffectiveReasoningPrefs {
   if (!capability.supportsReasoning || !capability.mapRequest) {
-    return { enabled: false, effort: 'off' };
+    return { enabled: false, effort: 'off', requestedEffort: 'off' };
   }
 
   const efforts =
@@ -84,16 +98,16 @@ export function resolveEffectiveReasoning(
   const enabled =
     session?.enabled !== undefined ? Boolean(session.enabled) : Boolean(global.enabled);
 
-  const rawEffort: ReasoningEffort | undefined =
+  const rawEffort: ReasoningEffort =
     session?.effort !== undefined
       ? session.effort
       : (global.effort ?? capability.defaultEffort ?? 'medium');
 
-  const effort = clampEffort(rawEffort, efforts);
+  const clamped = clampEffort(rawEffort, efforts);
 
   if (!enabled) {
-    return { enabled: false, effort: 'off' };
+    return { enabled: false, effort: 'off', requestedEffort: rawEffort };
   }
 
-  return { enabled: true, effort };
+  return { enabled: true, effort: clamped, requestedEffort: rawEffort };
 }

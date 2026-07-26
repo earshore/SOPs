@@ -60,13 +60,17 @@ Rules source: `src/services/modelCapability/registry.ts`
 
 ### control tier (UI + `reasoning_effort`)
 
-| Family          | Patterns (summary)                                  | Probe / basis                |
-| --------------- | --------------------------------------------------- | ---------------------------- |
-| OpenAI o-series | `o1*`, `o3*`, `o4-mini*` (tight)                    | OpenAI-compatible contract   |
-| OpenAI GPT-5    | `gpt-5`, `gpt-5.1`…`gpt-5.6`, `gpt-5-*`             | OpenAI-compatible contract   |
-| xAI Grok        | `grok-4*`, `grok-3*`                                | **Live** `grok-4.5`          |
-| DeepSeek        | `deepseek-v4*`, `deepseek-r1*`, `deepseek-reasoner` | **Live** `deepseek-v4-flash` |
-| Hy3             | `hy3-*`                                             | **Live** `hy3-preview`       |
+Enterprise closed-loop (product axis + per-model allowlist + nearest clamp + requested/effective):  
+→ **`docs/superpowers/specs/2026-07-26-reasoning-effort-closed-loop-design.md`**
+
+| Family          | Patterns (summary)                                  | Effort allowlist (summary) | Probe / basis                |
+| --------------- | --------------------------------------------------- | -------------------------- | ---------------------------- |
+| OpenAI o-series | `o1*`, `o3*`, `o4-mini*` (tight)                    | low…max (flagship)         | OpenAI Reasoning docs        |
+| OpenAI GPT-5    | `gpt-5`, `gpt-5.1`…`gpt-5.6`, `gpt-5-*`             | low…max (flagship)         | OpenAI Reasoning docs        |
+| xAI Grok-4.5    | `grok-4.5*`                                         | low\|medium\|high          | xAI docs + live gateway      |
+| xAI Grok other  | `grok-4*`, `grok-3*`                                | triad / multi-agent xhigh  | **Live** `grok-4.5`          |
+| DeepSeek        | `deepseek-v4*`, `deepseek-r1*`, `deepseek-reasoner` | triad                      | **Live** `deepseek-v4-flash` |
+| Hy3             | `hy3-*`                                             | triad                      | **Live** `hy3-preview`       |
 
 ### Real mappers (UI on) vs channel risk
 

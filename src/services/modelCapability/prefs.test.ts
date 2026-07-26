@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { clampEffort, normalizeReasoningUserPrefs, resolveEffectiveReasoning } from './prefs';
+import {
+  clampEffort,
+  isEffortDemoted,
+  normalizeReasoningUserPrefs,
+  resolveEffectiveReasoning,
+} from './prefs';
 import type { ResolvedModelCapability } from './types';
 
 function capable(
@@ -46,7 +51,12 @@ describe('resolveEffectiveReasoning clamp with global max', () => {
       { enabled: true, effort: 'max' },
       null
     );
-    expect(r).toEqual({ enabled: true, effort: 'high' });
+    expect(r).toEqual({
+      enabled: true,
+      effort: 'high',
+      requestedEffort: 'max',
+    });
+    expect(isEffortDemoted(r.requestedEffort, r.effort)).toBe(true);
   });
 
   it('sends max when model allowlist includes max', () => {
@@ -55,7 +65,12 @@ describe('resolveEffectiveReasoning clamp with global max', () => {
       { enabled: true, effort: 'max' },
       null
     );
-    expect(r).toEqual({ enabled: true, effort: 'max' });
+    expect(r).toEqual({
+      enabled: true,
+      effort: 'max',
+      requestedEffort: 'max',
+    });
+    expect(isEffortDemoted(r.requestedEffort, r.effort)).toBe(false);
   });
 });
 
@@ -87,7 +102,11 @@ describe('resolveEffectiveReasoning', () => {
       { enabled: true, effort: 'high' },
       { enabled: false }
     );
-    expect(r).toEqual({ enabled: false, effort: 'off' });
+    expect(r).toEqual({
+      enabled: false,
+      effort: 'off',
+      requestedEffort: 'high',
+    });
   });
 
   it('session effort beats global effort when enabled', () => {
@@ -96,7 +115,11 @@ describe('resolveEffectiveReasoning', () => {
       { enabled: true, effort: 'low' },
       { effort: 'high' }
     );
-    expect(r).toEqual({ enabled: true, effort: 'high' });
+    expect(r).toEqual({
+      enabled: true,
+      effort: 'high',
+      requestedEffort: 'high',
+    });
   });
 
   it('fail-closes when capability lacks mapRequest', () => {
@@ -105,7 +128,7 @@ describe('resolveEffectiveReasoning', () => {
       { enabled: true, effort: 'high' },
       null
     );
-    expect(r).toEqual({ enabled: false, effort: 'off' });
+    expect(r).toEqual({ enabled: false, effort: 'off', requestedEffort: 'off' });
   });
 
   it('fail-closes when supportsReasoning is false', () => {
@@ -114,6 +137,6 @@ describe('resolveEffectiveReasoning', () => {
       { enabled: true, effort: 'high' },
       { enabled: true, effort: 'high' }
     );
-    expect(r).toEqual({ enabled: false, effort: 'off' });
+    expect(r).toEqual({ enabled: false, effort: 'off', requestedEffort: 'off' });
   });
 });

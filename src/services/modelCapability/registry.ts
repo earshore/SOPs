@@ -39,8 +39,19 @@ const GROK_MULTI_AGENT_EFFORTS: readonly ReasoningEffortLevel[] = [
   'high',
   'xhigh',
 ];
-/** OpenAI-compatible effort triad (conservative default). */
+/** OpenAI-compatible effort triad (conservative default for non-flagship chat models). */
 const OPENAI_TRIAD_EFFORTS: readonly ReasoningEffortLevel[] = ['low', 'medium', 'high'];
+/**
+ * OpenAI flagship reasoning (GPT-5.x / o-series): docs allow high + xhigh + max
+ * (plus lower tiers). Product L1 still uses low…max without none/minimal this release.
+ */
+const OPENAI_FLAGSHIP_EFFORTS: readonly ReasoningEffortLevel[] = [
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+  'max',
+];
 
 function resolveEffortFields(opts?: EffortProfile): {
   reasoningEfforts: ReasoningEffortLevel[];
@@ -149,13 +160,18 @@ function entry(
 
 /** OpenAI o/gpt reasoning: prefer responses when available, completions as fallback. */
 function openaiReasoning(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+  const profile: EffortProfile = {
+    temperatureIgnored: true,
+    reasoningEfforts: OPENAI_FLAGSHIP_EFFORTS,
+    defaultEffort: 'medium',
+  };
   return entry(
     modelPattern,
     contextWindow,
     'responses',
     {
-      responses: surfaceResponses({ temperatureIgnored: true }),
-      chat_completions: surfaceOpenAiEffort({ temperatureIgnored: true }),
+      responses: surfaceResponses(profile),
+      chat_completions: surfaceOpenAiEffort(profile),
     },
     ['reasoning', 'max_completion_tokens']
   );

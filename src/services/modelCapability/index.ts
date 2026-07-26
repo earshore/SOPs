@@ -32,7 +32,12 @@ export {
 } from './registry';
 export { matchModelPattern, resolveModelCapability, shouldShowReasoningControls } from './resolve';
 export { normalizeModelIdForCapability, stripVendorPrefix } from './normalizeModelId';
-export { clampEffort, normalizeReasoningUserPrefs, resolveEffectiveReasoning } from './prefs';
+export {
+  clampEffort,
+  isEffortDemoted,
+  normalizeReasoningUserPrefs,
+  resolveEffectiveReasoning,
+} from './prefs';
 export {
   applyReasoningToRequestBody,
   buildChatCompletionsBody,
