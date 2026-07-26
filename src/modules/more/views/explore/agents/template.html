@@ -32,56 +32,56 @@
 
     <!-- Agent Center Metrics -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 mb-6">
-        <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="ui-card p-5">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center">
                     <i class="fa-solid fa-id-badge"></i>
                 </div>
                 <span class="text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-md px-2 py-1">ROLE</span>
             </div>
-            <div class="text-2xl font-bold text-slate-900">2</div>
-            <div class="text-sm text-slate-500 mt-1">落地样板</div>
+            <div class="ui-card__title text-2xl font-bold">2</div>
+            <div class="ui-card__muted text-sm mt-1">落地样板</div>
         </div>
-        <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="ui-card p-5">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
                     <i class="fa-solid fa-bullseye"></i>
                 </div>
                 <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-md px-2 py-1">GOAL</span>
             </div>
-            <div class="text-2xl font-bold text-slate-900">4</div>
-            <div class="text-sm text-slate-500 mt-1">人工确认点</div>
+            <div class="ui-card__title text-2xl font-bold">4</div>
+            <div class="ui-card__muted text-sm mt-1">人工确认点</div>
         </div>
-        <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="ui-card p-5">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-10 h-10 rounded-lg bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center">
                     <i class="fa-solid fa-plug-circle-bolt"></i>
                 </div>
                 <span class="text-xs font-semibold text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-100 rounded-md px-2 py-1">STACK</span>
             </div>
-            <div class="text-2xl font-bold text-slate-900">2</div>
-            <div class="text-sm text-slate-500 mt-1">设计草案</div>
+            <div class="ui-card__title text-2xl font-bold">2</div>
+            <div class="ui-card__muted text-sm mt-1">设计草案</div>
         </div>
-        <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="ui-card p-5">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
                     <i class="fa-solid fa-file-signature"></i>
                 </div>
                 <span class="text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-100 rounded-md px-2 py-1">OUTPUT</span>
             </div>
-            <div class="text-2xl font-bold text-slate-900">2</div>
-            <div class="text-sm text-slate-500 mt-1">固定输出</div>
+            <div class="ui-card__title text-2xl font-bold">2</div>
+            <div class="ui-card__muted text-sm mt-1">固定输出</div>
         </div>
     </div>
 
     <!-- Orchestration Blueprint -->
-    <section class="bg-white border border-slate-200 rounded-lg p-6 mb-6">
+    <section class="ui-card p-6 mb-6">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
             <div>
                 <p class="text-xs font-semibold text-violet-600 uppercase">Orchestration Blueprint</p>
-                <h2 class="text-xl font-bold text-slate-900 mt-1">Agent 编排主链路</h2>
+                <h2 class="ui-card__title text-xl font-bold mt-1">Agent 编排主链路</h2>
             </div>
-            <div class="text-sm text-slate-500">Role -> Goal -> Skill -> MCP -> Tool -> Report</div>
+            <div class="ui-card__muted text-sm">Role -> Goal -> Skill -> MCP -> Tool -> Report</div>
         </div>
 
         <div class="grid grid-cols-1 gap-3 lg:grid-cols-6">
@@ -89,43 +89,43 @@
                 <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 text-violet-600 flex items-center justify-center mb-3">
                     <i class="fa-solid fa-user-tie"></i>
                 </div>
-                <h3 class="font-semibold text-slate-900 mb-1">预设角色</h3>
-                <p class="text-sm text-slate-500">身份、职责边界、判断口径</p>
+                <h3 class="ui-card__title font-semibold mb-1">预设角色</h3>
+                <p class="ui-card__muted text-sm">身份、职责边界、判断口径</p>
             </div>
             <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
                 <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 text-indigo-600 flex items-center justify-center mb-3">
                     <i class="fa-solid fa-crosshairs"></i>
                 </div>
-                <h3 class="font-semibold text-slate-900 mb-1">目标设定</h3>
-                <p class="text-sm text-slate-500">业务问题、成功标准、限制条件</p>
+                <h3 class="ui-card__title font-semibold mb-1">目标设定</h3>
+                <p class="ui-card__muted text-sm">业务问题、成功标准、限制条件</p>
             </div>
             <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
                 <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 text-fuchsia-600 flex items-center justify-center mb-3">
                     <i class="fa-solid fa-layer-group"></i>
                 </div>
-                <h3 class="font-semibold text-slate-900 mb-1">Skill</h3>
-                <p class="text-sm text-slate-500">方法论、分析框架、专业技能</p>
+                <h3 class="ui-card__title font-semibold mb-1">Skill</h3>
+                <p class="ui-card__muted text-sm">方法论、分析框架、专业技能</p>
             </div>
             <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
                 <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 text-violet-600 flex items-center justify-center mb-3">
                     <i class="fa-solid fa-server"></i>
                 </div>
-                <h3 class="font-semibold text-slate-900 mb-1">MCP</h3>
-                <p class="text-sm text-slate-500">外部上下文、知识源、数据服务</p>
+                <h3 class="ui-card__title font-semibold mb-1">MCP</h3>
+                <p class="ui-card__muted text-sm">外部上下文、知识源、数据服务</p>
             </div>
             <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
                 <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 text-indigo-600 flex items-center justify-center mb-3">
                     <i class="fa-solid fa-screwdriver-wrench"></i>
                 </div>
-                <h3 class="font-semibold text-slate-900 mb-1">Tool</h3>
-                <p class="text-sm text-slate-500">采集、解析、校验、生成动作</p>
+                <h3 class="ui-card__title font-semibold mb-1">Tool</h3>
+                <p class="ui-card__muted text-sm">采集、解析、校验、生成动作</p>
             </div>
             <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
                 <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 text-fuchsia-600 flex items-center justify-center mb-3">
                     <i class="fa-solid fa-chart-simple"></i>
                 </div>
-                <h3 class="font-semibold text-slate-900 mb-1">分析输出</h3>
-                <p class="text-sm text-slate-500">报告、结论、行动清单</p>
+                <h3 class="ui-card__title font-semibold mb-1">分析输出</h3>
+                <p class="ui-card__muted text-sm">报告、结论、行动清单</p>
             </div>
         </div>
     </section>
@@ -135,21 +135,21 @@
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
             <div>
                 <p class="text-xs font-semibold text-slate-500 uppercase">Application Registry</p>
-                <h2 class="text-xl font-bold text-slate-900 mt-1">落地样板与设计草案</h2>
+                <h2 class="ui-card__title text-xl font-bold mt-1">落地样板与设计草案</h2>
             </div>
-            <div class="text-sm text-slate-500">近期只推进 PPC 和日报两个闭环样板</div>
+            <div class="ui-card__muted text-sm">近期只推进 PPC 和日报两个闭环样板</div>
         </div>
 
         <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <article class="bg-white border border-slate-200 rounded-lg p-5">
+            <article class="ui-card p-5">
                 <div class="flex items-start justify-between gap-4 mb-4">
                     <div class="flex items-start gap-3 min-w-0">
                         <div class="w-11 h-11 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0">
                             <i class="fa-solid fa-magnifying-glass-dollar"></i>
                         </div>
                         <div class="min-w-0">
-                            <h3 class="font-bold text-slate-900 truncate">PPC Search Terms Agent</h3>
-                            <p class="text-sm text-slate-500 mt-1">广告优化分析师</p>
+                            <h3 class="ui-card__title font-bold truncate">PPC Search Terms Agent</h3>
+                            <p class="ui-card__muted text-sm mt-1">广告优化分析师</p>
                         </div>
                     </div>
                     <span class="text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-md px-2 py-1 flex-shrink-0">样板优先</span>
@@ -172,15 +172,15 @@
                 </div>
             </article>
 
-            <article class="bg-white border border-slate-200 rounded-lg p-5">
+            <article class="ui-card p-5">
                 <div class="flex items-start justify-between gap-4 mb-4">
                     <div class="flex items-start gap-3 min-w-0">
                         <div class="w-11 h-11 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
                             <i class="fa-solid fa-chart-line"></i>
                         </div>
                         <div class="min-w-0">
-                            <h3 class="font-bold text-slate-900 truncate">Amazon Daily Report Agent</h3>
-                            <p class="text-sm text-slate-500 mt-1">晨会日报分析师</p>
+                            <h3 class="ui-card__title font-bold truncate">Amazon Daily Report Agent</h3>
+                            <p class="ui-card__muted text-sm mt-1">晨会日报分析师</p>
                         </div>
                     </div>
                     <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-md px-2 py-1 flex-shrink-0">样板优先</span>
@@ -203,15 +203,15 @@
                 </div>
             </article>
 
-            <article class="bg-white border border-slate-200 rounded-lg p-5">
+            <article class="ui-card p-5">
                 <div class="flex items-start justify-between gap-4 mb-4">
                     <div class="flex items-start gap-3 min-w-0">
                         <div class="w-11 h-11 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
                             <i class="fa-solid fa-shield-halved"></i>
                         </div>
                         <div class="min-w-0">
-                            <h3 class="font-bold text-slate-900 truncate">Compliance Risk Agent</h3>
-                            <p class="text-sm text-slate-500 mt-1">账号安全与风控审查员</p>
+                            <h3 class="ui-card__title font-bold truncate">Compliance Risk Agent</h3>
+                            <p class="ui-card__muted text-sm mt-1">账号安全与风控审查员</p>
                         </div>
                     </div>
                     <span class="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 rounded-md px-2 py-1 flex-shrink-0">设计草案</span>
@@ -233,15 +233,15 @@
                 </div>
             </article>
 
-            <article class="bg-white border border-slate-200 rounded-lg p-5">
+            <article class="ui-card p-5">
                 <div class="flex items-start justify-between gap-4 mb-4">
                     <div class="flex items-start gap-3 min-w-0">
                         <div class="w-11 h-11 rounded-lg bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center flex-shrink-0">
                             <i class="fa-solid fa-comments"></i>
                         </div>
                         <div class="min-w-0">
-                            <h3 class="font-bold text-slate-900 truncate">Customer Voice Agent</h3>
-                            <p class="text-sm text-slate-500 mt-1">客户体验分析师</p>
+                            <h3 class="ui-card__title font-bold truncate">Customer Voice Agent</h3>
+                            <p class="ui-card__muted text-sm mt-1">客户体验分析师</p>
                         </div>
                     </div>
                     <span class="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 rounded-md px-2 py-1 flex-shrink-0">设计草案</span>
@@ -267,14 +267,14 @@
 
     <!-- Capability Resources -->
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="ui-card p-5">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-lg bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center">
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
                 <div>
-                    <h2 class="font-bold text-slate-900">Skill Library</h2>
-                    <p class="text-sm text-slate-500">分析框架与专业能力</p>
+                    <h2 class="ui-card__title font-bold">Skill Library</h2>
+                    <p class="ui-card__muted text-sm">分析框架与专业能力</p>
                 </div>
             </div>
             <div class="space-y-3">
@@ -298,14 +298,14 @@
             </button>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="ui-card p-5">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center">
                     <i class="fa-solid fa-database"></i>
                 </div>
                 <div>
-                    <h2 class="font-bold text-slate-900">MCP Context</h2>
-                    <p class="text-sm text-slate-500">上下文与数据连接</p>
+                    <h2 class="ui-card__title font-bold">MCP Context</h2>
+                    <p class="ui-card__muted text-sm">上下文与数据连接</p>
                 </div>
             </div>
             <div class="space-y-3">
@@ -324,14 +324,14 @@
             </div>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="ui-card p-5">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
                     <i class="fa-solid fa-toolbox"></i>
                 </div>
                 <div>
-                    <h2 class="font-bold text-slate-900">Tool Registry</h2>
-                    <p class="text-sm text-slate-500">可调用工具与输出组件</p>
+                    <h2 class="ui-card__title font-bold">Tool Registry</h2>
+                    <p class="ui-card__muted text-sm">可调用工具与输出组件</p>
                 </div>
             </div>
             <div class="space-y-3">
