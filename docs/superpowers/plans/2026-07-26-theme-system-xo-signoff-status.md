@@ -1,6 +1,6 @@
 # 主题系统 XO 签字状态（Phase 1 code-aware review）
 
-**日期**: 2026-07-26（refresh @ HEAD `b85cd597` · residual #18–21 · D12×24 · D2 #5 · Human XO first / Visual Yellow）  
+**日期**: 2026-07-26（refresh @ HEAD `cbad435b` · residual #18–23 · D12×24 · D2 #5 · Human XO first / Visual Yellow）  
 **角色**: Experience Officer + QA（静态核验；**非**浏览器视觉签收）  
 **范围**: `docs/superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md`  
 **对照实现**: `src/common/config/themeConfig.ts` · `themeConfig.test.ts` · `tests/e2e/release-smoke.spec.ts` · Settings Appearance  
@@ -124,7 +124,7 @@
 | X5 | minimal+dark / default+dark | **Pass (automated)** dark×minimal 双轴 smoke + **Needs manual browser** 视觉 |
 | X6 | 设置面板自洽吃 token | **Needs manual browser** / debt | 颜色模式 UI 已有；accent 等仍可能硬编码 blue（D6 Informational） |
 
-### 1.7 状态计数（本签收文档 · refresh `b85cd597`）
+### 1.7 状态计数（本签收文档 · refresh `cbad435b`）
 
 | 状态 | 约计（场景行，含路由检查 / A11y / 长时 / XO / Env） |
 | --- | --- |
@@ -151,9 +151,11 @@
 | ☐ | **qa_maintenance primary CTA / focus**（D6 #15 · `/#/sops/service/qa-maintenance`） | 主 CTA `action-btn-primary` + owner focus 跟 primary / focus-ring | CTA/focus 仍死锁旧蓝且已迁 token 却无差；或误改教学蓝/内容卡归属 |
 | ☐ | **PromptLab DNA / autoPopulate**（D6 #16 · PromptLab） | DNA 启用态 / autoPopulate + report 勾选 focus·checked 跟 `--color-primary*` / `--color-focus-ring`（minimal 偏 slate） | DNA 置信多色被冲成一套灰；或已迁 token 却无差；误改 extract 次要 chrome | 
 | ☐ | **residual MA/PPC/PromptLab chrome**（D6 #18–21） | Scraper/AI/PPC residual + PromptLab residual focus 跟 primary / focus-ring；ownership / series 色保留 | 归属 indigo/emerald/growth 被冲成一套灰；或已迁 token 却无差 |
+| ☐ | **SafeModuleLoader primary CTA**（D6 #22） | 模块加载 error/actions 主 CTA 跟 `--color-primary*`（minimal 偏 slate） | CTA 仍死锁旧蓝且已迁 token 却无差；或次要 gray / spinner 被误改 |
+| ☐ | **Home splash / floating CTA**（D6 #23 · `/#/`） | 主 CTA `.home-primary-action--main` + floating workbench 图标/hover/focus 跟 primary / focus-ring | slogan 蓝绿渐变或 cyan 状态点被冲成一套灰；或已迁 token 却无差 |
 | ☐ | **dark × minimal 烟测复核**（自动化已有） | 设置切 deep + 极简后打开 KH：`<html data-appearance=minimal data-color-mode=dark class~dark>`；rose banner/sidebar 类仍在 | 轴互擦；ownership 类消失（契约回归） |
 
-> dark×minimal **文档根 + KH ownership class 已在 smoke 自动化**；上表 dark×minimal 行仅 optional 肉眼复核，**不**等于 visual 签收。SOPs/NPI/Hub nav/#14/#15/#16/#18–21 为 D6 样本抽检，**不**阻塞 30 min 主脚本，**不**声称 visual Pass。
+> dark×minimal **文档根 + KH ownership class 已在 smoke 自动化**；上表 dark×minimal 行仅 optional 肉眼复核，**不**等于 visual 签收。SOPs/NPI/Hub nav/#14/#15/#16/#18–23 为 D6 样本抽检，**不**阻塞 30 min 主脚本，**不**声称 visual Pass。
 
 ---
 
@@ -171,7 +173,7 @@
 
 ### 2.2 Appearance default↔minimal — **已补契约 vs 仍缺视觉**
 
-| 项 | 现状 @ HEAD `b85cd597` |
+| 项 | 现状 @ HEAD `cbad435b` |
 | --- | --- |
 | 切换 Appearance（Settings select） | smoke **有** `settings-theme-select` → `minimal` / `default` |
 | `data-appearance` / `data-theme` / `data-color-mode` | smoke **有** `expectDocumentThemeState` |
@@ -366,7 +368,7 @@ Sign-off visual: Yes / No   ← default No until XO fills
 | 指标 | 值 |
 | --- | --- |
 | 文档路径 | `docs/superpowers/plans/2026-07-26-theme-system-xo-signoff-status.md` |
-| HEAD 对照 | `b85cd597`（residual #18–21 · D12×24 · D2 #5 · Visual Yellow · Human XO first） |
+| HEAD 对照 | `cbad435b`（residual #18–23 · D12×24 · D2 #5 · Visual Yellow · Human XO first） |
 | Pass (automated) | **~16** |
 | Pass (code contract) | **~20** |
 | Needs manual browser | **~34** |
