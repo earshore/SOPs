@@ -35,12 +35,13 @@ describe('theme-bootstrap (T1-2 FOUC)', () => {
     vi.unstubAllGlobals();
   });
 
-  it('defaults to light and sets colorScheme style without indigo', () => {
+  it('defaults to system (resolved via prefers-color-scheme) without indigo', () => {
     runBootstrap();
 
     const root = document.documentElement;
     expect(root.getAttribute('data-theme-ready')).toBe('0');
-    expect(root.getAttribute('data-color-mode')).toBe('light');
+    expect(root.getAttribute('data-color-mode')).toBe('system');
+    // jsdom matchMedia matches:false → resolves light
     expect(root.getAttribute('data-color-mode-resolved')).toBe('light');
     expect(root.classList.contains('dark')).toBe(false);
     expect(root.style.colorScheme).toBe('light');

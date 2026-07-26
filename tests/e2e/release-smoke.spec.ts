@@ -1189,7 +1189,8 @@ test.describe('release candidate smoke', () => {
 
     await page.addInitScript(() => {
       window.localStorage.removeItem('app-theme');
-      window.localStorage.removeItem('app-color-mode');
+      // Deterministic light starting point (new-user default is now `system`).
+      window.localStorage.setItem('app-color-mode', JSON.stringify('light'));
     });
 
     await openGlobalSettings(page);
@@ -1265,7 +1266,8 @@ test.describe('release candidate smoke', () => {
 
     await page.addInitScript(() => {
       window.localStorage.removeItem('app-theme');
-      window.localStorage.removeItem('app-color-mode');
+      // Deterministic light starting point (new-user default is now `system`).
+      window.localStorage.setItem('app-color-mode', JSON.stringify('light'));
     });
 
     await openGlobalSettings(page);
@@ -1317,7 +1319,8 @@ test.describe('release candidate smoke', () => {
 
     await page.addInitScript(() => {
       window.localStorage.removeItem('app-theme');
-      window.localStorage.removeItem('app-color-mode');
+      // Deterministic light starting point (new-user default is now `system`).
+      window.localStorage.setItem('app-color-mode', JSON.stringify('light'));
     });
 
     await openGlobalSettings(page);
