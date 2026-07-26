@@ -182,8 +182,7 @@ export class PerformanceService {
       const observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
         const lastEntry = entries[entries.length - 1] as
-          | LargestContentfulPaintPerformanceEntry
-          | undefined;
+          LargestContentfulPaintPerformanceEntry | undefined;
         if (!lastEntry) return;
 
         const value = Math.round(lastEntry.renderTime || lastEntry.loadTime || lastEntry.startTime);

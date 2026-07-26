@@ -4,20 +4,10 @@
 // ================================================================
 
 export type PromptCategoryId =
-  | 'framework'
-  | 'listing'
-  | 'review'
-  | 'ppc'
-  | 'competitor'
-  | 'customer'
-  | 'compliance';
+  'framework' | 'listing' | 'review' | 'ppc' | 'competitor' | 'customer' | 'compliance';
 
 export type RecommendedModelKey =
-  | 'FLAGSHIP_REASONING'
-  | 'BALANCED_WORKHORSE'
-  | 'FAST_DRAFT'
-  | 'LONG_CONTEXT'
-  | 'DATA_REVIEW';
+  'FLAGSHIP_REASONING' | 'BALANCED_WORKHORSE' | 'FAST_DRAFT' | 'LONG_CONTEXT' | 'DATA_REVIEW';
 
 export interface PromptCategory {
   id: PromptCategoryId;

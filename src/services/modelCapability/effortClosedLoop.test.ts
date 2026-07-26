@@ -168,8 +168,7 @@ describe('reasoning effort closed loop (registry → resolve → mapRequest)', (
 
       if (c.expectGeminiBudget) {
         const extra = fragment.extra_body as
-          | { google?: { thinking_config?: { thinking_budget?: number } } }
-          | undefined;
+          { google?: { thinking_config?: { thinking_budget?: number } } } | undefined;
         expect(typeof extra?.google?.thinking_config?.thinking_budget).toBe('number');
       }
     });
