@@ -24,18 +24,18 @@
    1. CSS 变量
    ======================================== */
 :root {
-  /* ---- PC 字段基线 ---- */
+  /* ---- PC 字段基线（语义 surface/边框：global dark 令牌翻转，T3 dual-theme） ---- */
   --field-height: 40px;
   --field-height-compact: 30px;
   --field-padding-x: 12px;
   --field-padding-y: 8px;
   --field-radius: 8px;
-  --field-border: var(--color-slate-300, #cbd5e1);
-  --field-border-hover: var(--color-slate-400, #94a3b8);
-  --field-bg: #ffffff;
-  --field-bg-muted: var(--color-slate-50, #f8fafc);
-  --field-text: var(--color-slate-700, #334155);
-  --field-placeholder: var(--color-slate-400, #94a3b8);
+  --field-border: var(--color-border-default, var(--color-slate-300, #cbd5e1));
+  --field-border-hover: var(--color-border-strong, var(--color-slate-400, #94a3b8));
+  --field-bg: var(--color-bg-elevated, var(--surface-panel, #ffffff));
+  --field-bg-muted: var(--color-bg-secondary, var(--color-slate-50, #f8fafc));
+  --field-text: var(--color-text-primary, var(--color-slate-700, #334155));
+  --field-placeholder: var(--color-text-placeholder, var(--color-slate-400, #94a3b8));
   /* Brand chrome: track Appearance primary / focus ring (not raw blue palette). */
   --field-focus: var(--color-focus-ring, var(--color-primary, #3b82f6));
   --field-focus-ring: color-mix(
@@ -49,9 +49,9 @@
   --check-size-sm: 14px;
   --check-size-lg: 22px;
   --check-radius: 4px;
-  --check-border: var(--color-slate-300, #cbd5e1);
-  --check-border-hover: var(--color-slate-400, #94a3b8);
-  --check-bg: #ffffff;
+  --check-border: var(--color-border-default, var(--color-slate-300, #cbd5e1));
+  --check-border-hover: var(--color-border-strong, var(--color-slate-400, #94a3b8));
+  --check-bg: var(--color-bg-elevated, var(--surface-panel, #ffffff));
   --check-color-active: var(--color-primary, #3b82f6);
   --check-ring-focus: color-mix(
     in srgb,
@@ -103,8 +103,8 @@
 
 .form-input:disabled,
 .editor-input-modern:disabled {
-  background: var(--color-slate-50);
-  color: var(--color-slate-400);
+  background: var(--color-bg-disabled, var(--field-bg-muted));
+  color: var(--color-text-disabled, var(--color-slate-400));
   cursor: not-allowed;
 }
 
@@ -165,7 +165,7 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-slate-700);
+  color: var(--color-text-primary, var(--color-slate-700));
   margin-bottom: 0.5rem;
 }
 
@@ -182,7 +182,7 @@
   top: 0.5rem;
   font-size: 0.875rem;
   font-weight: 400;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   pointer-events: none;
   /* Requirements 6.5: Label动画在250ms内完成 */
   transition:
@@ -219,7 +219,7 @@
    ======================================== */
 .form-help {
   font-size: 0.8125rem;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   margin-top: 0.375rem;
 }
 
@@ -707,13 +707,13 @@ input[type='checkbox']:active:not(:disabled) {
 input[type='checkbox']:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background-color: var(--color-slate-100, #f1f5f9);
+  background-color: var(--color-bg-disabled, var(--color-slate-100, #f1f5f9));
 }
 
 .form-checkbox:disabled:checked,
 input[type='checkbox']:disabled:checked {
-  background-color: var(--color-slate-400, #94a3b8);
-  border-color: var(--color-slate-400, #94a3b8);
+  background-color: var(--color-text-disabled, var(--color-slate-400, #94a3b8));
+  border-color: var(--color-text-disabled, var(--color-slate-400, #94a3b8));
 }
 
 /* -----------------------------------------
@@ -845,7 +845,7 @@ input[type='checkbox']:disabled:checked {
   gap: var(--spacing-xs, 8px);
   cursor: pointer;
   font-size: 0.875rem;
-  color: var(--color-slate-700, #334155);
+  color: var(--color-text-primary, var(--color-slate-700, #334155));
   line-height: 1.4;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -868,7 +868,7 @@ input[type='checkbox']:disabled:checked {
   display: block;
   font-size: 0.8125rem;
   font-weight: 400;
-  color: var(--color-slate-500, #64748b);
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
   margin-top: 2px;
   line-height: 1.4;
 }
@@ -932,9 +932,9 @@ input[type='checkbox']:disabled:checked {
   align-items: flex-start;
   gap: var(--spacing-sm, 12px);
   padding: var(--spacing-md, 16px);
-  border: 1.5px solid var(--color-slate-200, #e2e8f0);
+  border: 1.5px solid var(--color-border-default, var(--color-slate-200, #e2e8f0));
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  background: white;
+  background: var(--surface-panel, var(--color-bg-elevated, #ffffff));
   cursor: pointer;
   position: relative;
   transition:
@@ -944,8 +944,8 @@ input[type='checkbox']:disabled:checked {
 }
 
 .form-checkbox-card:hover {
-  border-color: var(--color-slate-300, #cbd5e1);
-  background: var(--color-slate-50, #f8fafc);
+  border-color: var(--color-border-strong, var(--color-slate-300, #cbd5e1));
+  background: var(--surface-card-hover, var(--color-bg-secondary, #f8fafc));
 }
 
 /* 选中状态 */
@@ -973,12 +973,12 @@ input[type='checkbox']:disabled:checked {
 .form-checkbox-card:has(:disabled) {
   opacity: 0.6;
   cursor: not-allowed;
-  background: var(--color-slate-50, #f8fafc);
+  background: var(--color-bg-disabled, var(--color-bg-secondary, #f8fafc));
 }
 
 .form-checkbox-card:has(:disabled):hover {
-  border-color: var(--color-slate-200, #e2e8f0);
-  background: var(--color-slate-50, #f8fafc);
+  border-color: var(--color-border-default, var(--color-slate-200, #e2e8f0));
+  background: var(--color-bg-disabled, var(--color-bg-secondary, #f8fafc));
 }
 
 /* 卡片内容 */
@@ -990,14 +990,14 @@ input[type='checkbox']:disabled:checked {
 .form-checkbox-card-title {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-slate-700, #334155);
+  color: var(--color-text-primary, var(--color-slate-700, #334155));
   line-height: 1.4;
   margin: 0;
 }
 
 .form-checkbox-card-description {
   font-size: 0.8125rem;
-  color: var(--color-slate-500, #64748b);
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
   line-height: 1.4;
   margin-top: 2px;
 }
@@ -1010,7 +1010,7 @@ input[type='checkbox']:disabled:checked {
   gap: var(--spacing-xs, 8px);
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-slate-700, #334155);
+  color: var(--color-text-primary, var(--color-slate-700, #334155));
 }
 
 /* 选中时的勾选角标 */
@@ -1059,9 +1059,9 @@ input[type='checkbox']:disabled:checked {
   align-items: center;
   justify-content: center;
   border-radius: var(--rounded-lg, 12px);
-  background: var(--color-slate-100, #f1f5f9);
+  background: var(--color-bg-tertiary, var(--color-slate-100, #f1f5f9));
   font-size: 1.25rem;
-  color: var(--color-slate-500, #64748b);
+  color: var(--color-text-tertiary, var(--color-slate-500, #64748b));
   transition:
     background-color var(--duration-fast, 200ms) var(--ease-smooth),
     color var(--duration-fast, 200ms) var(--ease-smooth);
@@ -1101,7 +1101,7 @@ input[type='checkbox']:disabled:checked {
   width: 44px;
   height: 24px;
   border-radius: 9999px;
-  background: var(--color-slate-300, #cbd5e1);
+  background: var(--color-border-strong, var(--color-slate-300, #cbd5e1));
   flex-shrink: 0;
   transition: background-color var(--duration-fast, 200ms) var(--ease-smooth);
 }
@@ -1144,7 +1144,7 @@ input[type='checkbox']:disabled:checked {
 
 /* 悬停 */
 .form-checkbox-switch:hover input:not(:disabled) + .form-checkbox-switch-track {
-  background: var(--color-slate-400, #94a3b8);
+  background: var(--color-text-tertiary, var(--color-slate-400, #94a3b8));
 }
 
 .form-checkbox-switch:hover input:checked:not(:disabled) + .form-checkbox-switch-track {
@@ -1154,7 +1154,7 @@ input[type='checkbox']:disabled:checked {
 /* 开关标签文字 */
 .form-checkbox-switch-text {
   font-size: 0.875rem;
-  color: var(--color-slate-700, #334155);
+  color: var(--color-text-primary, var(--color-slate-700, #334155));
   line-height: 1.4;
 }
 
@@ -1203,7 +1203,7 @@ input[type='checkbox']:disabled:checked {
 .form-checkbox-select-all-text {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-slate-600, #475569);
+  color: var(--color-text-secondary, var(--color-slate-600, #475569));
 }
 
 /* 已选计数 */
@@ -1342,9 +1342,11 @@ input[type='radio']:disabled {
 
 /* ========================================
    13. 暗色模式
+   字段/checkbox 主色路径依赖 :root 语义 token（global dark 翻转）；
+   仅保留无法由 surface 自动消化的细节补丁。
    ======================================== */
 
-/* --- Checkbox & Radio 暗色 --- */
+/* Checkbox/Radio：暗色下 unchecked 面更软（不是 hard white elevated） */
 .dark .form-checkbox,
 .dark input[type='checkbox'],
 .dark .form-radio,
@@ -1357,24 +1359,12 @@ input[type='radio']:disabled {
 [data-theme='dark'] input[type='checkbox'],
 [data-theme='dark'] .form-radio,
 [data-theme='dark'] input[type='radio'] {
-  --check-border: rgba(255, 255, 255, 0.15);
-  --check-border-hover: rgba(255, 255, 255, 0.25);
-  --check-bg: rgba(255, 255, 255, 0.04);
-  --check-color-active: var(--color-primary, #818cf8);
+  --check-bg: var(--color-bg-tertiary, rgba(255, 255, 255, 0.04));
   --check-ring-focus: color-mix(
     in srgb,
-    var(--color-focus-ring, var(--color-primary, #818cf8)) 15%,
+    var(--color-focus-ring, var(--color-primary)) 15%,
     transparent
   );
-}
-
-.dark .form-checkbox:disabled,
-.dark input[type='checkbox']:disabled,
-[data-color-mode-resolved='dark'] .form-checkbox:disabled,
-[data-color-mode-resolved='dark'] input[type='checkbox']:disabled,
-[data-theme='dark'] .form-checkbox:disabled,
-[data-theme='dark'] input[type='checkbox']:disabled {
-  background-color: rgba(255, 255, 255, 0.04);
 }
 
 .dark .form-checkbox:disabled:checked,
@@ -1383,237 +1373,11 @@ input[type='radio']:disabled {
 [data-color-mode-resolved='dark'] input[type='checkbox']:disabled:checked,
 [data-theme='dark'] .form-checkbox:disabled:checked,
 [data-theme='dark'] input[type='checkbox']:disabled:checked {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--color-bg-active, rgba(255, 255, 255, 0.15));
+  border-color: var(--color-border-strong, rgba(255, 255, 255, 0.15));
 }
 
-.dark .form-checkbox:hover:checked:not(:disabled),
-[data-color-mode-resolved='dark'] .form-checkbox:hover:checked:not(:disabled),
-[data-theme='dark'] .form-checkbox:hover:checked:not(:disabled) {
-  background-color: var(--color-indigo-400, #818cf8);
-  border-color: var(--color-indigo-400, #818cf8);
-}
-
-/* --- 标签暗色 --- */
-.dark .form-checkbox-label,
-[data-color-mode-resolved='dark'] .form-checkbox-label,
-[data-theme='dark'] .form-checkbox-label {
-  color: var(--color-text-primary, #f9fafb);
-}
-
-.dark .form-checkbox-label-description,
-[data-color-mode-resolved='dark'] .form-checkbox-label-description,
-[data-theme='dark'] .form-checkbox-label-description {
-  color: var(--color-text-secondary, #d1d5db);
-}
-
-/* --- 卡片暗色 --- */
-.dark .form-checkbox-card,
-[data-color-mode-resolved='dark'] .form-checkbox-card,
-[data-theme='dark'] .form-checkbox-card {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.dark .form-checkbox-card:hover,
-[data-color-mode-resolved='dark'] .form-checkbox-card:hover,
-[data-theme='dark'] .form-checkbox-card:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.dark .form-checkbox-card:has(.form-checkbox:checked),
-.dark .form-checkbox-card:has(input[type='checkbox']:checked),
-.dark .form-checkbox-card.is-checked,
-[data-color-mode-resolved='dark'] .form-checkbox-card:has(.form-checkbox:checked),
-[data-color-mode-resolved='dark'] .form-checkbox-card:has(input[type='checkbox']:checked),
-[data-color-mode-resolved='dark'] .form-checkbox-card.is-checked,
-[data-theme='dark'] .form-checkbox-card:has(.form-checkbox:checked),
-[data-theme='dark'] .form-checkbox-card:has(input[type='checkbox']:checked),
-[data-theme='dark'] .form-checkbox-card.is-checked {
-  border-color: var(--color-primary, #818cf8);
-  background: rgba(129, 140, 248, 0.06);
-}
-
-.dark .form-checkbox-card:has(:disabled),
-[data-color-mode-resolved='dark'] .form-checkbox-card:has(:disabled),
-[data-theme='dark'] .form-checkbox-card:has(:disabled) {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.dark .form-checkbox-card-title,
-[data-color-mode-resolved='dark'] .form-checkbox-card-title,
-[data-theme='dark'] .form-checkbox-card-title {
-  color: var(--color-text-primary, #f9fafb);
-}
-
-.dark .form-checkbox-card-description,
-[data-color-mode-resolved='dark'] .form-checkbox-card-description,
-[data-theme='dark'] .form-checkbox-card-description {
-  color: var(--color-text-secondary, #d1d5db);
-}
-
-/* 卡片图标暗色 */
-.dark .form-checkbox-card-icon,
-[data-color-mode-resolved='dark'] .form-checkbox-card-icon,
-[data-theme='dark'] .form-checkbox-card-icon {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--color-text-tertiary, #9ca3af);
-}
-
-.dark .form-checkbox-card--icon:has(:checked) .form-checkbox-card-icon,
-[data-color-mode-resolved='dark'] .form-checkbox-card--icon:has(:checked) .form-checkbox-card-icon,
-[data-theme='dark'] .form-checkbox-card--icon:has(:checked) .form-checkbox-card-icon {
-  background: rgba(129, 140, 248, 0.12);
-  color: var(--color-primary, #818cf8);
-}
-
-/* --- 开关暗色 --- */
-.dark .form-checkbox-switch-track,
-[data-color-mode-resolved='dark'] .form-checkbox-switch-track,
-[data-theme='dark'] .form-checkbox-switch-track {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.dark .form-checkbox-switch:hover input:not(:disabled) + .form-checkbox-switch-track,
-[data-color-mode-resolved='dark']
-  .form-checkbox-switch:hover
-  input:not(:disabled)
-  + .form-checkbox-switch-track,
-[data-theme='dark'] .form-checkbox-switch:hover input:not(:disabled) + .form-checkbox-switch-track {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.dark .form-checkbox-switch input:checked + .form-checkbox-switch-track,
-[data-color-mode-resolved='dark'] .form-checkbox-switch input:checked + .form-checkbox-switch-track,
-[data-theme='dark'] .form-checkbox-switch input:checked + .form-checkbox-switch-track {
-  background: var(--color-primary, #818cf8);
-}
-
-.dark .form-checkbox-switch:hover input:checked:not(:disabled) + .form-checkbox-switch-track,
-[data-color-mode-resolved='dark']
-  .form-checkbox-switch:hover
-  input:checked:not(:disabled)
-  + .form-checkbox-switch-track,
-[data-theme='dark']
-  .form-checkbox-switch:hover
-  input:checked:not(:disabled)
-  + .form-checkbox-switch-track {
-  background: var(--color-indigo-400, #818cf8);
-}
-
-.dark .form-checkbox-switch-text,
-[data-color-mode-resolved='dark'] .form-checkbox-switch-text,
-[data-theme='dark'] .form-checkbox-switch-text {
-  color: var(--color-text-primary, #f9fafb);
-}
-
-/* --- 组暗色 --- */
-.dark .form-checkbox-group--bordered,
-[data-color-mode-resolved='dark'] .form-checkbox-group--bordered,
-[data-theme='dark'] .form-checkbox-group--bordered {
-  border-color: rgba(255, 255, 255, 0.06);
-}
-
-.dark .form-checkbox-group--divided > .form-checkbox-label + .form-checkbox-label,
-[data-color-mode-resolved='dark']
-  .form-checkbox-group--divided
-  > .form-checkbox-label
-  + .form-checkbox-label,
-[data-theme='dark'] .form-checkbox-group--divided > .form-checkbox-label + .form-checkbox-label {
-  border-top-color: rgba(255, 255, 255, 0.06);
-}
-
-/* --- 全选栏暗色 --- */
-.dark .form-checkbox-select-all,
-[data-color-mode-resolved='dark'] .form-checkbox-select-all,
-[data-theme='dark'] .form-checkbox-select-all {
-  border-bottom-color: rgba(255, 255, 255, 0.06);
-}
-
-.dark .form-checkbox-select-all-text,
-[data-color-mode-resolved='dark'] .form-checkbox-select-all-text,
-[data-theme='dark'] .form-checkbox-select-all-text {
-  color: var(--color-text-secondary, #d1d5db);
-}
-
-/* --- 批量操作栏暗色 --- */
-.dark .form-checkbox-bulk-bar,
-[data-color-mode-resolved='dark'] .form-checkbox-bulk-bar,
-[data-theme='dark'] .form-checkbox-bulk-bar {
-  background: rgba(129, 140, 248, 0.08);
-  border-color: rgba(129, 140, 248, 0.15);
-  color: var(--color-primary, #818cf8);
-}
-
-/* --- 其他表单元素暗色 (保留原有) --- */
-.dark .form-input,
-.dark .editor-input-modern,
-.dark .form-textarea,
-.dark .form-select,
-[data-color-mode-resolved='dark'] .form-input,
-[data-color-mode-resolved='dark'] .editor-input-modern,
-[data-color-mode-resolved='dark'] .form-textarea,
-[data-color-mode-resolved='dark'] .form-select,
-[data-theme='dark'] .form-input,
-[data-theme='dark'] .editor-input-modern,
-[data-theme='dark'] .form-textarea,
-[data-theme='dark'] .form-select {
-  background: var(--color-bg-secondary, #1e293b);
-  color: var(--color-text-primary, #f9fafb);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.dark .form-input:hover,
-.dark .form-textarea:hover,
-.dark .form-select:hover,
-[data-color-mode-resolved='dark'] .form-input:hover,
-[data-color-mode-resolved='dark'] .form-textarea:hover,
-[data-color-mode-resolved='dark'] .form-select:hover,
-[data-theme='dark'] .form-input:hover,
-[data-theme='dark'] .form-textarea:hover,
-[data-theme='dark'] .form-select:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-}
-
-.dark .form-input:focus,
-.dark .form-textarea:focus,
-.dark .form-select:focus,
-[data-color-mode-resolved='dark'] .form-input:focus,
-[data-color-mode-resolved='dark'] .form-textarea:focus,
-[data-color-mode-resolved='dark'] .form-select:focus,
-[data-theme='dark'] .form-input:focus,
-[data-theme='dark'] .form-textarea:focus,
-[data-theme='dark'] .form-select:focus {
-  border-color: var(--field-focus, var(--color-focus-ring, var(--color-primary)));
-  box-shadow: 0 0 0 3px var(--field-focus-ring);
-}
-
-.dark .form-input:disabled,
-.dark .form-textarea:disabled,
-.dark .form-select:disabled,
-[data-color-mode-resolved='dark'] .form-input:disabled,
-[data-color-mode-resolved='dark'] .form-textarea:disabled,
-[data-color-mode-resolved='dark'] .form-select:disabled,
-[data-theme='dark'] .form-input:disabled,
-[data-theme='dark'] .form-textarea:disabled,
-[data-theme='dark'] .form-select:disabled {
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--color-text-tertiary, #6b7280);
-}
-
-.dark .form-label,
-[data-color-mode-resolved='dark'] .form-label,
-[data-theme='dark'] .form-label {
-  color: var(--color-text-primary, #f9fafb);
-}
-
-.dark .form-help,
-[data-color-mode-resolved='dark'] .form-help,
-[data-theme='dark'] .form-help {
-  color: var(--color-text-secondary, #d1d5db);
-}
-
+/* Select chevron 在暗色下需更亮的 stroke（data-uri 无法跟 token） */
 .dark .form-select,
 [data-color-mode-resolved='dark'] .form-select,
 [data-theme='dark'] .form-select {
