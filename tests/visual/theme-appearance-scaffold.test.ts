@@ -49,9 +49,9 @@ interface ThemeScreen {
 }
 
 /**
- * Scaffold slice (11 screens × 2 appearances = 22 snapshots).
- * Ownership multi-color pages (App Center / Scraper / PromptLab / PPC / SOPs / Amazon Hub / Deep Chat / Skills) must NOT force primary.
- * Full light main pack (R1–R9 × 2) is covered; Skills catalog is an extra D6 sample. Visual Pass still requires human XO.
+ * Scaffold slice (12 screens × 2 appearances = 24 snapshots).
+ * Ownership multi-color pages (App Center / Scraper / PromptLab / PPC / SOPs / Amazon Hub / Deep Chat / Skills / NPI growth banner) must NOT force primary.
+ * Full light main pack (R1–R9 × 2) is covered; Skills + NPI are extra D6 samples. Visual Pass still requires human XO.
  */
 const THEME_SCREENS: ThemeScreen[] = [
   {
@@ -193,6 +193,26 @@ const THEME_SCREENS: ThemeScreen[] = [
     maskSelectors: ['.timestamp', '[data-dynamic="true"]', '.toast', '[class*="animate-"]'],
     beforeScreenshot: async (page: Page) => {
       await page.waitForSelector('.skills-page', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    },
+  },
+  {
+    // D6 #11 sample — NPI growth banner (wb-theme-growth) NOT forced to primary
+    // Path/selector already D6-sampled + visual.test / release-smoke stable
+    slug: 'npi-tracker',
+    path: '/#/sops/growth/npi-tracker',
+    pageType: PageType.LIST,
+    waitForSelector: '.npi-tracker-page',
+    maskSelectors: [
+      '.timestamp',
+      '#npi-results',
+      '#npi-table-body',
+      '[data-dynamic="true"]',
+      '.toast',
+      '[class*="animate-"]',
+    ],
+    beforeScreenshot: async (page: Page) => {
+      await page.waitForSelector('.npi-tracker-page', { timeout: 15000 });
       await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
     },
   },

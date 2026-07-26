@@ -479,7 +479,7 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 [ ] 可选：Skills CTA + Deep Chat shell 样本
 [ ] 可选：#14 email_templates + #15 qa_maintenance CTA/focus
 [ ] 可选：#16 PromptLab DNA/autoPopulate focus
-[ ] 可选：D12 首 8 张截图（scaffold 已 20；见 theme-visual-baseline-d12 §6）
+[ ] 可选：D12 首 8 张截图（scaffold 已 24；见 theme-visual-baseline-d12 §6）
 [ ] 三方签字 §8 — Visual 默认未签
 ```
 

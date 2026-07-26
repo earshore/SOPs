@@ -27,7 +27,7 @@
 | --- | --- |
 | Code gates | 可预签；**不等于**视觉 Pass |
 | release-smoke | 路由可达；**无** Appearance 切换/色差 |
-| `tests/visual` | 已有通用页面截图骨架；**已有** opt-in theme-axis scaffold（`THEME_VISUAL=1`，10 屏 = **20** 快照，默认 skip）；**仍无** visual Pass / CI fail-closed |
+| `tests/visual` | 已有通用页面截图骨架；**已有** opt-in theme-axis scaffold（`THEME_VISUAL=1`，12 屏 = **24** 快照，默认 skip）；**仍无** visual Pass / CI fail-closed |
 | 全站视觉签收 | **未签**；本文补基线 **计划**，非签收本身 |
 
 ---
@@ -299,8 +299,8 @@ theme appearance: skills minimal light desktop
 | 文件 | `tests/visual/theme-appearance-scaffold.test.ts` |
 | 开关 | `THEME_VISUAL=1`（缺省 / 非 1 → **整套 skip**） |
 | 命令 | `npm run test:visual:theme` · `npm run test:visual:theme:update` |
-| 屏 | Settings Appearance、Keyword Hunter、Home、**App Center**、**Scraper**、**PromptLab**、**PPC Search Terms**、**SOPs overview**、**Amazon Hub overview**、**Deep Chat**、**Skills** × default/minimal × light = **22**（11×2；Skills 为 R1–R9 主包外的 D6 样本） |
-| Ownership 注意 | App Center 多色总览 / Scraper indigo / PromptLab indigo / PPC emerald / SOPs overview / Amazon Hub orange / Deep Chat terracotta send / Skills violet catalog **不得**被 Appearance primary 吞掉；terracotta / Skills violet **不**当 primary 断言 |
+| 屏 | Settings Appearance、Keyword Hunter、Home、**App Center**、**Scraper**、**PromptLab**、**PPC Search Terms**、**SOPs overview**、**Amazon Hub overview**、**Deep Chat**、**Skills**、**NPI Tracker** × default/minimal × light = **24**（12×2；Skills + NPI 为 R1–R9 主包外的 D6 样本） |
+| Ownership 注意 | App Center 多色总览 / Scraper indigo / PromptLab indigo / PPC emerald / SOPs overview / Amazon Hub orange / Deep Chat terracotta send / Skills violet catalog / NPI growth banner **不得**被 Appearance primary 吞掉；terracotta / Skills violet / NPI growth **不**当 primary 断言 |
 | 基线仓库 | **不提交**（`tests/visual/.gitignore` 忽略 `theme-appearance-scaffold.test.ts-snapshots/`） |
 | CI | **不挂**；**不** fail-closed；**不**塞 release-smoke |
 | 等价签收？ | **否** — 仅骨架；人工首 8 张 XO 仍 required |
@@ -409,7 +409,7 @@ theme appearance: skills minimal light desktop
 - [x] 命名约定  
 - [x] 明日 8 张清单  
 - [x] Pass / Fail 标准  
-- [x] **Opt-in scaffold**（11 屏 × 2 appearance = **22**；含 PromptLab + Deep Chat + Skills catalog；`THEME_VISUAL=1`；基线 gitignore）  
+- [x] **Opt-in scaffold**（12 屏 × 2 appearance = **24**；含 PromptLab + Deep Chat + Skills catalog + NPI Tracker；`THEME_VISUAL=1`；基线 gitignore）
 
 **仍不在 D12 范围**: 提交 binary baseline、挂 CI fail-closed、宣称 visual Pass、塞 release-smoke。
 
@@ -424,8 +424,8 @@ theme appearance: skills minimal light desktop
 | Dark 可选 | **+18** |
 | **明日首批** | **8** |
 | 工具 | 人工 XO 定真相 → Playwright `test:visual:theme` 固化；smoke 不塞截图 |
-| Scaffold | **22** 张 opt-in（Settings / KH / Home / App Center / Scraper / PromptLab / PPC / SOPs / Amazon Hub / Deep Chat / Skills × default/minimal light） |
+| Scaffold | **24** 张 opt-in（Settings / KH / Home / App Center / Scraper / PromptLab / PPC / SOPs / Amazon Hub / Deep Chat / Skills / NPI × default/minimal light） |
 | CI | 先 local/artifact；**未**挂 job；稳定后独立 non-blocking → path-filter blocking |
 | 当前视觉签收 | 仍依赖人类；D12 = 计划 + scaffold，**非** Pass |
 
-**一句话**: 用 **18** 张 light 主包 + scaffold 扩样（现 **20**，含 Skills）、**8** 张人工 XO；永不让 visual flaky 绑架 release-smoke。
+**一句话**: 用 **18** 张 light 主包 + scaffold 扩样（现 **24**，含 Skills + NPI）、**8** 张人工 XO；永不让 visual flaky 绑架 release-smoke。
