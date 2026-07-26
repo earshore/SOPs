@@ -338,8 +338,8 @@ function mapText(used: UsedClass): BridgeRule[] {
 
 function mapBorder(used: UsedClass): BridgeRule[] {
   const parsed = parseColorBody(used.body);
-  if (!parsed || parsed.shade === null || parsed.alpha !== undefined) return [];
-  const { palette, shade } = parsed;
+  if (!parsed || parsed.shade === null) return [];
+  const { palette, shade, alpha } = parsed;
 
   if (NEUTRALS.has(palette)) {
     const table = isHover(used.variant)
@@ -347,12 +347,13 @@ function mapBorder(used: UsedClass): BridgeRule[] {
       : NEUTRAL_BORDER;
     const value = table[shade];
     if (!value) return [];
-    return [{ selector: selectorFor(used), decls: { 'border-color': value } }];
+    return [{ selector: selectorFor(used), decls: { 'border-color': withAlpha(value, alpha) } }];
   }
   if (HUES.has(palette)) {
     const pct = HUE_BORDER_TINT[shade];
     if (pct === undefined) return [];
-    return [{ selector: selectorFor(used), decls: { 'border-color': tint(palette, pct) } }];
+    const scaled = alpha === undefined ? pct : Math.max(6, Math.round((pct * alpha) / 100));
+    return [{ selector: selectorFor(used), decls: { 'border-color': tint(palette, scaled) } }];
   }
   return [];
 }
