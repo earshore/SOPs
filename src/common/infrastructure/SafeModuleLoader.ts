@@ -1160,7 +1160,7 @@ export class SafeModuleLoader {
       .map(action => {
         const baseClass = 'px-4 py-2 rounded transition-colors';
         const colorClass = action.primary
-          ? 'bg-blue-500 text-white hover:bg-blue-600'
+          ? 'bg-[var(--color-primary,#3b82f6)] text-white hover:bg-[var(--color-primary-dark,#2563eb)]'
           : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
 
         return `
