@@ -398,8 +398,8 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   getAsinOptionClass(asin: string): string {
     return this.selectedAsins.includes(asin)
-      ? 'bg-indigo-50 border-indigo-300'
-      : 'bg-slate-50 border-slate-200 hover:border-indigo-200';
+      ? 'bg-[var(--color-primary-light)] border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)]'
+      : 'bg-slate-50 border-slate-200 hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]';
   },
 
   getAsinTextClass(asin: string): string {
@@ -442,7 +442,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   getTargetCheckClass(targetId: string): string {
     return this.isTargetSelected(targetId)
-      ? 'border-indigo-500 bg-indigo-500'
+      ? 'border-[var(--color-primary)] bg-[var(--color-primary)]'
       : 'border-slate-300 group-hover:border-slate-400';
   },
 

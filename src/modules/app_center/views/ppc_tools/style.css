@@ -24,13 +24,13 @@
     var(--ppc-search-terms-accent) 18%,
     transparent
   );
-  --ppc-search-terms-info-soft: var(--color-blue-50, #eff6ff);
+  --ppc-search-terms-info-soft: var(--color-info-light, var(--color-blue-50, #eff6ff));
   --ppc-search-terms-info-border: color-mix(
     in srgb,
-    var(--color-blue-600, #2563eb) 22%,
+    var(--color-info, var(--color-blue-500, #3b82f6)) 22%,
     transparent
   );
-  --ppc-search-terms-info-text: var(--color-blue-700, #1d4ed8);
+  --ppc-search-terms-info-text: var(--color-info-dark, var(--color-blue-700, #1d4ed8));
   --ppc-search-terms-danger-soft: var(--color-red-100, #fee2e2);
   --ppc-search-terms-danger-text: var(--color-red-800, #991b1b);
   --ppc-search-terms-warning-soft: var(--color-amber-100, #fef3c7);

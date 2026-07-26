@@ -101,10 +101,12 @@ D2 的根因不是「缺 8px」，而是 **缺少工作台专用语义 SSOT**，
 | `.amz_card-hover` | **已迁** `var(--workbench-radius…)` | — | long-tail #3 |
 | `.zn-notice-card` | **已迁** `var(--workbench-radius…)` | — | long-tail #3 |
 | `.route-loading-skeleton__card` | **已迁** `var(--workbench-radius…)` | — | long-tail #3 |
+| `.app-center-card` | **已迁** `var(--workbench-radius…)` | — | long-tail #4（legacy → card 映射） |
+| Settings `--settings-radius-card` / `.settings-card` | **已迁** `var(--workbench-radius…)` | — | long-tail #4 |
 | `.app-overview-card` | `--rounded-xl` | **允许**（entry） | 保持 entry 映射 |
 | 各模块 scraper / PPC / keyword hunter 内联 panel | 混用 lg/xl / hardcode（部分已覆盖） | M2 审计热点 | 按 `workbench-ui:audit` 逐模块 |
 
-**Long-tail 记（2026-07-26）:** 高流量 CSS 主面板以 `--workbench-radius` / panel|card 别名为主；**#3** 再收 `.amz_card-hover` / `.zn-notice-card` / route loading shell；剩余偏差多为 Tailwind utility 类名、按钮/icon well、entry/overview、modal chrome、Settings 局部 radius token——**不**在同一 PR 批量压到 8px。
+**Long-tail 记（2026-07-26）:** 高流量 CSS 主面板以 `--workbench-radius` / panel|card 别名为主；**#3** 再收 `.amz_card-hover` / `.zn-notice-card` / route loading shell；**#4** shared `.app-center-card` + Settings card radius token/shell；剩余偏差多为 Tailwind utility 类名、按钮/icon well、entry/overview、modal chrome、Settings 控件级 radius——**不**在同一 PR 批量压到 8px。
 
 ## 迁移顺序（低风险优先）
 

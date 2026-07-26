@@ -1,6 +1,6 @@
 # 主题系统 XO 签字状态（Phase 1 code-aware review）
 
-**日期**: 2026-07-26（refresh @ HEAD `2f8d98ab` · D6 #14 email_templates + #15 qa_maintenance · D12×18 · Human XO first / Visual Yellow）  
+**日期**: 2026-07-26（refresh @ HEAD `f99b0fc8` · D6 samples through #16 · D10 ThemeColors removed · D12×20 · Human XO first / Visual Yellow）  
 **角色**: Experience Officer + QA（静态核验；**非**浏览器视觉签收）  
 **范围**: `docs/superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md`  
 **对照实现**: `src/common/config/themeConfig.ts` · `themeConfig.test.ts` · `tests/e2e/release-smoke.spec.ts` · Settings Appearance  
@@ -124,7 +124,7 @@
 | X5 | minimal+dark / default+dark | **Pass (automated)** dark×minimal 双轴 smoke + **Needs manual browser** 视觉 |
 | X6 | 设置面板自洽吃 token | **Needs manual browser** / debt | 颜色模式 UI 已有；accent 等仍可能硬编码 blue（D6 Informational） |
 
-### 1.7 状态计数（本签收文档 · refresh `2f8d98ab`）
+### 1.7 状态计数（本签收文档 · refresh `f99b0fc8`）
 
 | 状态 | 约计（场景行，含路由检查 / A11y / 长时 / XO / Env） |
 | --- | --- |
@@ -149,9 +149,10 @@
 | ☐ | **AMZ Hub nav ownership orange**（D6 #13 · `/#/amz-hub` shell `.amz_nav-btn`） | hover / active·tab-active 跟 hub ownership `module-accent` + orange fallback；总览 orange 归属不变 | nav 被 Appearance 冲成一套 slate/工业灰；或回退 hard blue 且已迁 ownership 却无差 |
 | ☐ | **email_templates primary CTA / focus**（D6 #14 · `/#/sops/service/email-templates`） | 主 CTA `action-btn-primary` + owner focus 跟 `--color-primary*` / `--color-focus-ring`（minimal 偏 slate） | CTA/focus 仍死锁旧蓝且已迁 token 却无差；或误改内容卡/指标多色 |
 | ☐ | **qa_maintenance primary CTA / focus**（D6 #15 · `/#/sops/service/qa-maintenance`） | 主 CTA `action-btn-primary` + owner focus 跟 primary / focus-ring | CTA/focus 仍死锁旧蓝且已迁 token 却无差；或误改教学蓝/内容卡归属 |
+| ☐ | **PromptLab DNA / autoPopulate**（D6 #16 · PromptLab） | DNA 启用态 / autoPopulate + report 勾选 focus·checked 跟 `--color-primary*` / `--color-focus-ring`（minimal 偏 slate） | DNA 置信多色被冲成一套灰；或已迁 token 却无差；误改 extract 次要 chrome | 
 | ☐ | **dark × minimal 烟测复核**（自动化已有） | 设置切 deep + 极简后打开 KH：`<html data-appearance=minimal data-color-mode=dark class~dark>`；rose banner/sidebar 类仍在 | 轴互擦；ownership 类消失（契约回归） |
 
-> dark×minimal **文档根 + KH ownership class 已在 smoke 自动化**；上表 dark×minimal 行仅 optional 肉眼复核，**不**等于 visual 签收。SOPs/NPI/Hub nav/#14/#15 为 D6 样本抽检，**不**阻塞 30 min 主脚本，**不**声称 visual Pass。
+> dark×minimal **文档根 + KH ownership class 已在 smoke 自动化**；上表 dark×minimal 行仅 optional 肉眼复核，**不**等于 visual 签收。SOPs/NPI/Hub nav/#14/#15/#16 为 D6 样本抽检，**不**阻塞 30 min 主脚本，**不**声称 visual Pass。
 
 ---
 
@@ -169,7 +170,7 @@
 
 ### 2.2 Appearance default↔minimal — **已补契约 vs 仍缺视觉**
 
-| 项 | 现状 @ HEAD `904f83d3` |
+| 项 | 现状 @ HEAD `f99b0fc8` |
 | --- | --- |
 | 切换 Appearance（Settings select） | smoke **有** `settings-theme-select` → `minimal` / `default` |
 | `data-appearance` / `data-theme` / `data-color-mode` | smoke **有** `expectDocumentThemeState` |
@@ -190,7 +191,7 @@
 | `themeConfig.test.ts` | applyTheme / minimal vars / 不触 ColorContext / applyColorMode / 轴独立 / legacy dark 迁移 / preview | 浏览器渲染、业务 DOM |
 | `system-settings.spec.ts` E2E-P1-04 | Appearance section 可见、theme select 存在 | 选 minimal 后色值、刷新 |
 | `UT-P1-06` | `setAppearanceTheme` → `ThemeManager.applyTheme`；appearance 不进 dirty runtime | 视觉 |
-| `tests/visual/theme-appearance-scaffold.test.ts` | opt-in 8 屏 × default/minimal light = 16（含 App Center / Scraper / PPC / SOPs / Amazon Hub overview） | 默认 skip；**非** visual Pass / **非** CI |
+| `tests/visual/theme-appearance-scaffold.test.ts` | opt-in **10 屏 × default/minimal light = 20**（含 App Center / Scraper / PPC / SOPs / Amazon Hub / Deep Chat / **Skills**） | 默认 skip；**非** visual Pass / **非** CI |
 
 ---
 
@@ -338,9 +339,10 @@ Sign-off visual: Yes / No   ← default No until XO fills
 
 | 项 | 备注 |
 | --- | --- |
-| D6 业务 `blue-*` | 仍 Informational 长尾；样本含 Skills CTA + Deep Chat shell + **#10 SOPs** + **#11 NPI** + **#12 RW** + **#13 AMZ Hub nav ownership orange** + **#14 email_templates** + **#15 qa_maintenance** @ `2f8d98ab` |
+| D6 业务 `blue-*` | 仍 Informational 长尾；样本 through **#16**：Skills CTA + Deep Chat shell + **#10 SOPs** + **#11 NPI** + **#12 RW** + **#13 AMZ Hub nav ownership orange** + **#14 email_templates** + **#15 qa_maintenance** + **#16 PromptLab DNA** @ `f99b0fc8` |
 | D5 focus soft | 部分壳层已迁；全站未清 |
-| D12 scaffold | opt-in **9×2=18**（+ Deep Chat；terracotta send **不**当 primary）；**非** visual Pass / **非** CI |
+| D10 ThemeColors | **removed**（AppearanceThemeColors only） |
+| D12 scaffold | opt-in **10×2=20**（+ Skills；terracotta send / Skills violet **不**当 primary）；**非** visual Pass / **非** CI |
 | smoke Appearance | **文档根 + KH ownership + dark×minimal 已有**；**仍无**色差/截图/terracotta 色值 |
 | full prebuild | **Green 再次**（llm `requestedEffort` 测试 fixtures 解阻 type-check:tests） |
 | system 模式 | API + matchMedia 单测有；设置「跟随系统」UI 存在，跨 OS 体感仍人工 |
@@ -363,7 +365,7 @@ Sign-off visual: Yes / No   ← default No until XO fills
 | 指标 | 值 |
 | --- | --- |
 | 文档路径 | `docs/superpowers/plans/2026-07-26-theme-system-xo-signoff-status.md` |
-| HEAD 对照 | `2f8d98ab`（D6 #14–15 service CTAs · D12×18 · radius long-tail） |
+| HEAD 对照 | `f99b0fc8`（D6 samples through #16 · D10 ThemeColors removed · D12×20 · Visual Yellow · Human XO first） |
 | Pass (automated) | **~16** |
 | Pass (code contract) | **~20** |
 | Needs manual browser | **~34** |

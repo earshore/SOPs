@@ -10,7 +10,7 @@
   --settings-accent-soft: var(--color-primary-light, #dbeafe);
   --settings-accent-strong: var(--color-primary-dark, #1d4ed8);
   --settings-danger: var(--color-red-600, #dc2626);
-  --settings-radius-card: var(--rounded-xl, 0.875rem);
+  --settings-radius-card: var(--workbench-radius, var(--panel-radius, 8px));
   --settings-radius-control: var(--rounded-lg, 0.75rem);
   --settings-focus-color: var(--color-focus-ring, var(--color-primary, #3b82f6));
   --settings-focus-ring: 0 0 0 3px color-mix(in srgb, var(--settings-focus-color) 25%, transparent);
@@ -305,7 +305,7 @@
 /* Inner white cards (runtime blocks, app groups, etc.) */
 .settings-card {
   border: 1px solid rgba(226, 232, 240, 0.95);
-  border-radius: 0.875rem;
+  border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   padding: 0.75rem;

@@ -6,9 +6,9 @@
 
 /* ==================== 卡片兼容 ==================== */
 .app-center-card {
-  /* 映射到 .card 样式 */
+  /* 映射到 .card 样式（工作台壳层 → workbench radius SSOT） */
   background: white;
-  border-radius: var(--rounded-xl, 16px);
+  border-radius: var(--workbench-radius, var(--card-radius, 8px));
   padding: var(--spacing-lg, 1.5rem);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition-property: box-shadow, transform;

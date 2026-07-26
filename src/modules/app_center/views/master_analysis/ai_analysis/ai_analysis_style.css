@@ -175,8 +175,9 @@ pre code {
 }
 
 /* ========== Focus 样式 ========== */
+/* Workbench focus chrome follows Appearance (D6 sample #19); ownership banner stays indigo. */
 .ai-analysis-wrapper :focus-visible {
-  outline: 2px solid var(--ma-accent, #6257f5);
+  outline: 2px solid var(--color-focus-ring, var(--color-primary));
   outline-offset: 2px;
 }
 

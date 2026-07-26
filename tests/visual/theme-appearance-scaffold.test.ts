@@ -49,8 +49,8 @@ interface ThemeScreen {
 }
 
 /**
- * Scaffold slice (10 screens × 2 appearances = 20 snapshots).
- * Ownership multi-color pages (App Center / Scraper / PPC / SOPs / Amazon Hub / Deep Chat / Skills) must NOT force primary.
+ * Scaffold slice (11 screens × 2 appearances = 22 snapshots).
+ * Ownership multi-color pages (App Center / Scraper / PromptLab / PPC / SOPs / Amazon Hub / Deep Chat / Skills) must NOT force primary.
  * Full light main pack (R1–R9 × 2) is covered; Skills catalog is an extra D6 sample. Visual Pass still requires human XO.
  */
 const THEME_SCREENS: ThemeScreen[] = [
@@ -109,6 +109,24 @@ const THEME_SCREENS: ThemeScreen[] = [
     ],
     beforeScreenshot: async (page: Page) => {
       await page.waitForSelector('[x-data="scraperPanel"]', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    },
+  },
+  {
+    // R3 sample — PromptLab ownership (wb-theme-indigo) NOT forced to primary
+    slug: 'promptlab',
+    path: '/#/app-center/master-analysis/promptlab',
+    pageType: PageType.FORM,
+    waitForSelector: '[x-data="promptlabPanel"]',
+    maskSelectors: [
+      '.timestamp',
+      '#final-prompt-output',
+      '[data-dynamic="true"]',
+      '.toast',
+      '[class*="animate-"]',
+    ],
+    beforeScreenshot: async (page: Page) => {
+      await page.waitForSelector('[x-data="promptlabPanel"]', { timeout: 15000 });
       await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
     },
   },

@@ -257,7 +257,7 @@ function renderReviewSection(viewModel: ProductCardViewModel): string {
 function renderOriginalPageLink({ product, siteKey }: ProductCardViewModel): string {
   return `
                 <div class="pt-3 flex justify-end">
-                    <a href="https://${getSiteDomain(siteKey)}/dp/${product.asin}" target="_blank" class="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg transition-colors">
+                    <a href="https://${getSiteDomain(siteKey)}/dp/${product.asin}" target="_blank" class="text-xs font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-primary-light)] rounded-lg transition-colors">
                         <span>查看原始页面</span> <i class="fas fa-external-link-alt"></i>
                     </a>
                 </div>`;
@@ -275,8 +275,8 @@ function renderProductCardBody(viewModel: ProductCardViewModel): string {
 export function renderProductCard(options: ProductCardOptions): string {
   const viewModel = createProductCardViewModel(options);
   const expandedClass = viewModel.isExpanded
-    ? 'border-blue-500 bg-blue-50/30 ring-1 ring-blue-500'
-    : 'bg-white border-slate-200 hover:border-blue-300';
+    ? 'border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary-light)_30%,transparent)] ring-1 ring-[var(--color-primary)]'
+    : 'bg-white border-slate-200 hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)]';
 
   return `
         <div id="card-${viewModel.product.asin}" 

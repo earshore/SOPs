@@ -67,6 +67,32 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
     expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-rose');
   });
 
+  it('soft-cross-checks Sidebar theme class for ppc_tools with ownership emerald (no production wire)', () => {
+    // D8 light wire: same convention as keyword_hunter; no production coupling.
+    const moduleId = 'ppc_tools';
+    const roleId = getOwnershipRoleForModule(moduleId);
+    const palette = getPaletteForRole(roleId!);
+    const menuThemeColor = MENU_CONFIG.modules[moduleId]?.themeColor;
+
+    expect(roleId).toBe('role-ppc');
+    expect(palette).toBe('emerald');
+    expect(menuThemeColor).toBe('emerald');
+    expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-emerald');
+  });
+
+  it('soft-cross-checks Sidebar theme class for master_analysis with ownership indigo (no production wire)', () => {
+    // D8 light wire: same convention as keyword_hunter; no production coupling.
+    const moduleId = 'master_analysis';
+    const roleId = getOwnershipRoleForModule(moduleId);
+    const palette = getPaletteForRole(roleId!);
+    const menuThemeColor = MENU_CONFIG.modules[moduleId]?.themeColor;
+
+    expect(roleId).toBe('role-analysis');
+    expect(palette).toBe('indigo');
+    expect(menuThemeColor).toBe('indigo');
+    expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-indigo');
+  });
+
   it('returns null for unknown modules and roles (no fake defaults)', () => {
     expect(getOwnershipRoleForModule('not_a_module')).toBeNull();
     expect(getOwnershipRole('role-does-not-exist')).toBeNull();

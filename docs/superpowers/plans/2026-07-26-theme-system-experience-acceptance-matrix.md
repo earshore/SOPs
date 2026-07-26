@@ -1,6 +1,6 @@
 # 主题系统体验验收矩阵（Appearance / Ownership / Dark）
 
-**日期**: 2026-07-26（automation refresh @ HEAD `2f8d98ab` · D6 #14–15 · D12×18 · Visual Yellow）  
+**日期**: 2026-07-26（automation refresh @ HEAD `f99b0fc8` · D6 samples through #16 · D10 ThemeColors removed · D12×20 · Visual Yellow · Human XO first）  
 **角色**: Experience Officer（体验官）+ Visual QA  
 **状态**: 可执行验收基线（Phase 0–3 主用；Dark **产品路径已解锁**；**视觉签收仍 Open / 未 Pass**）  
 **权威文档链**:
@@ -220,6 +220,13 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | R13-C1 | 主 CTA `action-btn-primary` + owner focus 跟 primary / focus-ring | Change* | 可选肉眼 | `2f8d98ab` service 样本；**非** e2e 色差；**非** visual Pass |
 | R13-I1 | 教学蓝 / 内容卡 / 其余 `blue-*` | Info | D6 | 勿把未迁蓝控件当 Blocker |
 
+#### R14 PromptLab DNA（可选 · D6 #16 样本）
+
+| ID | 检查项 | Must | E0/E1 | 备注 |
+| --- | --- | --- | --- | --- |
+| R14-C1 | DNA/autoPopulate 启用态 + report 勾选 focus·checked 跟 primary / focus-ring | Change* | 可选肉眼 | `f99b0fc8` PromptLab DNA 样本；**非** e2e 色差；**非** visual Pass |
+| R14-I1 | DNA 置信多色 / extract 次要 chrome / 其余 `blue-*` | Info | D6 | 勿把未迁蓝控件或置信色当 Blocker |
+
 ### 4.2 场景计数（执行包）
 
 | 包 | 计算 | 场景数 |
@@ -228,7 +235,7 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | 设置深测 | R7 专项行 × 2 env（含预览/持久化） | 计入 R7，不另加路由 |
 | 可选 E2 | 1 preset × 2 面（Settings + 1 工具页） | **+2** |
 | Dark E3/E4 | 9 routes × 2 | **+18**（产品路径 **已解锁**；视觉 **Open**） |
-| 可选 R10 Skills / R8-O1 SOPs / R11 NPI / R9-O1 Hub nav / R12 #14 / R13 #15 | 样本 × E0/E1 抽检 | **+1～7** 可选 |
+| 可选 R10 Skills / R8-O1 SOPs / R11 NPI / R9-O1 Hub nav / R12 #14 / R13 #15 / R14 #16 | 样本 × E0/E1 抽检 | **+1～8** 可选 |
 | A11y / 长时 | 见 §5–§6，跨路由抽检 | **+8** 检查项（非全路由笛卡尔） |
 
 **当前可执行**: light 主包 **18** + 横切 **~8** + dark 产品路径抽检；  
@@ -372,6 +379,7 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | NPI primary CTA sample | R11-C1 | **未做** e2e | 可选 | 可选肉眼（#11） |
 | email_templates CTA/focus sample | R12-C1 | **未做** e2e | 可选 | 可选肉眼（#14） |
 | qa_maintenance CTA/focus sample | R13-C1 | **未做** e2e | 可选 | 可选肉眼（#15） |
+| PromptLab DNA/autoPopulate sample | R14-C1 | **未做** e2e | 可选 | 可选肉眼（#16） |
 | 硬编码 blue 是否变色 | D6 Info | 低价值 | 度量脚本 | 可选 |
 | 对比度 4.5:1 | A1–A2 | 半自动 axe | Phase 1+ | 关键页手动 |
 | Focus visible | A3 | 未做色断言 | Phase 3 | 主测 |
@@ -470,7 +478,8 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 [ ] Dark：跑 E3/E4（设置颜色模式）；视觉记 Open 直至 XO 签
 [ ] 可选：Skills CTA + Deep Chat shell 样本
 [ ] 可选：#14 email_templates + #15 qa_maintenance CTA/focus
-[ ] 可选：D12 首 8 张截图（scaffold 已 18；见 theme-visual-baseline-d12 §6）
+[ ] 可选：#16 PromptLab DNA/autoPopulate focus
+[ ] 可选：D12 首 8 张截图（scaffold 已 20；见 theme-visual-baseline-d12 §6）
 [ ] 三方签字 §8 — Visual 默认未签
 ```
 
@@ -497,10 +506,10 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | --- | --- |
 | Personas | 3（运营专员 / 运营主管 / 开发自测） |
 | 主环境 | light `default` + light `minimal`；dark E3/E4 **产品路径已解锁** / **视觉 Open** |
-| Core routes | 9 + 可选 Skills (R10) + 可选 #14/#15 (R12/R13) |
+| Core routes | 9 + 可选 Skills (R10) + 可选 #14/#15/#16 (R12/R13/R14) |
 | 可执行场景 | **18** 路由×light + **8** 横切 + dark 抽检 |
 | 满配路由×环境 | **36** light+dark；含横切约 **44** 量级 |
 | Automated（契约） | 文档根双轴、KH ownership class、dark×minimal smoke |
 | Blocker 核心 | 归属/`wb-theme` 被改；状态色被改；Deep Chat terracotta 被改；预览≠apply；Phase 3 后壳层 primary/focus 不跟手；关键对比失败 |
-| 非 Blocker | **D6** 硬编码 blue 不变 → Informational；可选 Skills/Deep Chat shell / SOPs / NPI / **Hub nav #13** / **#14 email_templates** / **#15 qa_maintenance** 样本 |
-| 签字 | Experience Officer · QA · Tech Lead — **Visual 未签（Yellow）** |
+| 非 Blocker | **D6** 硬编码 blue 不变 → Informational；可选 Skills/Deep Chat shell / SOPs / NPI / **Hub nav #13** / **#14 email_templates** / **#15 qa_maintenance** / **#16 PromptLab DNA** 样本 |
+| 签字 | Experience Officer · QA · Tech Lead — **Visual 未签（Yellow）** · **Human XO first** |
