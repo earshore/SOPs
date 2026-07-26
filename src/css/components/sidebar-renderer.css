@@ -5,7 +5,7 @@
 
 .sidebar-scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: var(--scrollbar-thumb, #cbd5e1) transparent;
 }
 
 .sidebar-category-children {
@@ -343,6 +343,105 @@
   background-color: #e2e8f0;
 }
 
+/*
+ * T2 NEUTRAL shell — Theme owns surface / border / muted text.
+ * Ownership hue stays on --sidebar-primary|accent|active|text|focus|shadow.
+ */
+.sidebar-shell {
+  background: linear-gradient(
+    to bottom,
+    var(--surface-panel, #ffffff),
+    color-mix(in srgb, var(--surface-workbench, var(--color-bg-secondary, #f8fafc)) 55%, transparent)
+  ) !important;
+  color: var(--color-text-secondary, #64748b);
+  border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));
+}
+
+/* Muted chrome (overrides light-only Tailwind slate utilities in dual theme) */
+.sidebar-shell .text-slate-400 {
+  color: var(--color-text-tertiary, #94a3b8) !important;
+}
+
+.sidebar-shell .text-slate-500 {
+  color: var(--color-text-secondary, #64748b) !important;
+}
+
+.sidebar-shell .text-slate-600 {
+  color: var(--color-text-secondary, #475569) !important;
+}
+
+.sidebar-shell .text-slate-700 {
+  color: var(--color-text-primary, #334155) !important;
+}
+
+.sidebar-shell .border-t {
+  border-top-color: var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
+}
+
+.sidebar-shell .bg-slate-100 {
+  background-color: var(--color-bg-tertiary, var(--color-slate-100, #f1f5f9)) !important;
+}
+
+/* Category/label hover neutrals */
+.sidebar-shell .sidebar-category-btn:hover .text-slate-700,
+.sidebar-shell .sidebar-btn:hover .sidebar-label:not(.sidebar-label--active) {
+  color: var(--color-text-primary, #0f172a) !important;
+}
+
+.sidebar-shell .sidebar-btn:hover .sidebar-icon:not(.sidebar-icon--active),
+.sidebar-shell .sidebar-category-btn:hover .text-slate-400 {
+  color: var(--color-text-secondary, #64748b) !important;
+}
+
+.sidebar-shell .sidebar-btn:hover .sidebar-icon-container:not(.sidebar-icon-container--active),
+.sidebar-shell .sidebar-category-btn:hover .category-count {
+  background-color: var(--color-bg-hover, rgba(0, 0, 0, 0.04)) !important;
+}
+
+/* Header / section hairlines (replace light-only gradient utilities) */
+.sidebar-shell > .mx-4.h-px,
+.sidebar-shell .flex-1.h-px {
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--border-muted, rgba(203, 213, 225, 0.72)),
+    transparent
+  ) !important;
+}
+
+.sidebar-shell .sidebar-search-input {
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 82%, transparent) !important;
+  border-color: var(--border-muted, rgba(203, 213, 225, 0.72)) !important;
+  color: var(--color-text-primary, #0f172a) !important;
+}
+
+.sidebar-shell .sidebar-search-input::placeholder {
+  color: var(--color-text-placeholder, var(--color-text-tertiary, #94a3b8)) !important;
+}
+
+.sidebar-shell .sidebar-search-input:hover {
+  border-color: var(--color-border-default, rgba(0, 0, 0, 0.1)) !important;
+}
+
+.sidebar-shell .sidebar-search-prefix {
+  background: var(--color-bg-tertiary, var(--color-slate-100, #f1f5f9)) !important;
+}
+
+.sidebar-shell #sidebar-search-results {
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 95%, transparent) !important;
+  border-color: var(--border-muted, rgba(203, 213, 225, 0.72)) !important;
+  box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(15, 23, 42, 0.12)) !important;
+}
+
+.sidebar-shell .sidebar-btn:not(.sidebar-btn--active):hover {
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.04)) !important;
+  border-left-color: var(--border-muted, rgba(203, 213, 225, 0.72)) !important;
+}
+
+.sidebar-shell .sidebar-icon-container:not(.sidebar-icon-container--active) {
+  background: var(--color-bg-tertiary, var(--color-slate-100, #f1f5f9)) !important;
+}
+
 .sidebar-shell .sidebar-module-icon {
   background: linear-gradient(135deg, var(--sidebar-primary), var(--sidebar-accent)) !important;
   box-shadow: 0 10px 20px -14px var(--sidebar-shadow) !important;
@@ -392,4 +491,37 @@
 
 .sidebar-shell .sidebar-category-btn:hover {
   background: var(--sidebar-active-bg-start) !important;
+}
+
+/*
+ * Dark soft fills: desaturate pastel active/icon washes for dual-safe chrome.
+ * Keep --sidebar-primary|accent|active|text hue identity (Ownership).
+ */
+.dark .sidebar-shell,
+[data-color-mode-resolved='dark'] .sidebar-shell,
+[data-theme='dark'] .sidebar-shell {
+  --sidebar-active-bg-start: color-mix(
+    in srgb,
+    var(--sidebar-primary) 16%,
+    var(--surface-panel, #0f172a)
+  );
+  --sidebar-active-bg-end: color-mix(
+    in srgb,
+    var(--sidebar-primary) 10%,
+    var(--surface-panel, #0f172a)
+  );
+  --sidebar-icon-soft: color-mix(
+    in srgb,
+    var(--sidebar-primary) 20%,
+    var(--surface-panel, #0f172a)
+  );
+  --sidebar-icon-soft-end: color-mix(
+    in srgb,
+    var(--sidebar-primary) 12%,
+    var(--surface-panel, #0f172a)
+  );
+  /* Same hue as ownership primary; lightened for dark active labels */
+  --sidebar-text: color-mix(in srgb, var(--sidebar-primary) 72%, #ffffff);
+  --sidebar-border: color-mix(in srgb, var(--sidebar-primary) 38%, transparent);
+  --sidebar-focus: color-mix(in srgb, var(--sidebar-primary) 20%, transparent);
 }
