@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   buildSettingsNavScrollItems,
@@ -21,6 +23,18 @@ describe('settingsNavScroll helpers (TD-SET-04)', () => {
     expect(pickActiveSettingsNavId(items, 1500, 48)).toBe('settings-section-data');
   });
 
+  it('returns null when scan line is still above the first marker (no false mid-page hit)', () => {
+    // Only mid-page markers exist (e.g. tool secondaries without LLM section marker).
+    const midOnly = buildSettingsNavScrollItems([
+      { id: 'general-ai-runtime', groupId: 'tool', offsetTop: 400 },
+      { id: 'keyword-hunter', groupId: 'tool', offsetTop: 900 },
+    ]);
+    expect(pickActiveSettingsNavId(midOnly, 0, 48)).toBeNull();
+    expect(pickActiveSettingsNavId(midOnly, 100, 48)).toBeNull();
+    // Once past first marker, highlight it
+    expect(pickActiveSettingsNavId(midOnly, 360, 48)).toBe('general-ai-runtime');
+  });
+
   it('returns null for empty input', () => {
     expect(pickActiveSettingsNavId([], 0)).toBeNull();
   });
@@ -42,8 +56,40 @@ describe('settingsNavScroll helpers (TD-SET-04)', () => {
       scroller,
       scroller.querySelectorAll('[data-settings-nav-id]')
     );
-    expect(measured.map((m) => m.id)).toEqual(['a', 'b']);
-    expect(measured.map((m) => m.groupId)).toEqual(['g1', 'g2']);
-    expect(measured.every((m) => Number.isFinite(m.offsetTop))).toBe(true);
+    expect(measured.map(m => m.id)).toEqual(['a', 'b']);
+    expect(measured.map(m => m.groupId)).toEqual(['g1', 'g2']);
+    expect(measured.every(m => Number.isFinite(m.offsetTop))).toBe(true);
+  });
+
+  it('shipped settings HTML wires is-current + markers for every nav target group', () => {
+    const html = readFileSync(
+      resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
+      'utf8'
+    );
+    const targets = [
+      'settings-section-llm',
+      'llm-step-1-title',
+      'llm-step-2-title',
+      'llm-step-3-title',
+      'llm-step-4-title',
+      'settings-section-tool-strategy',
+      'general-ai-runtime',
+      'keyword-hunter',
+      'ppc-analysis-flags',
+      'settings-section-data',
+      'settings-export-buckets',
+      'settings-data-retention',
+      'settings-data-danger',
+      'settings-section-appearance',
+      'settings-appearance-theme',
+      'settings-appearance-animation',
+      'settings-section-performance',
+    ];
+    for (const id of targets) {
+      expect(html, `missing is-current for ${id}`).toContain(`isNavTargetCurrent('${id}')`);
+      expect(html, `missing data-settings-nav-id for ${id}`).toContain(
+        `data-settings-nav-id="${id}"`
+      );
+    }
   });
 });

@@ -146,6 +146,7 @@
             <button
               type="button"
               class="settings-panel-nav-link settings-panel-nav-link--primary"
+              :class="{ 'is-current': isNavTargetCurrent('settings-section-llm') }"
               aria-controls="settings-section-llm"
               :aria-expanded="isNavGroupOpen('llm').toString()"
               @click="toggleNavGroup('llm', 'settings-section-llm')"
@@ -158,6 +159,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('llm-step-1-title') }"
                 @click="navigateToNavTarget('llm-step-1-title', 'llm')"
               >
                 基本信息
@@ -165,6 +167,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('llm-step-2-title') }"
                 @click="navigateToNavTarget('llm-step-2-title', 'llm')"
               >
                 凭证
@@ -172,6 +175,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('llm-step-3-title') }"
                 @click="navigateToNavTarget('llm-step-3-title', 'llm')"
               >
                 模型与能力
@@ -179,6 +183,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('llm-step-4-title') }"
                 @click="navigateToNavTarget('llm-step-4-title', 'llm')"
               >
                 高级选项
@@ -191,6 +196,7 @@
             <button
               type="button"
               class="settings-panel-nav-link settings-panel-nav-link--primary"
+              :class="{ 'is-current': isNavTargetCurrent('settings-section-tool-strategy') }"
               aria-controls="settings-section-tool-strategy"
               :aria-expanded="isNavGroupOpen('tool').toString()"
               @click="toggleNavGroup('tool', 'settings-section-tool-strategy')"
@@ -265,6 +271,7 @@
             <button
               type="button"
               class="settings-panel-nav-link settings-panel-nav-link--primary"
+              :class="{ 'is-current': isNavTargetCurrent('settings-section-data') }"
               aria-controls="settings-section-data"
               :aria-expanded="isNavGroupOpen('data').toString()"
               @click="toggleNavGroup('data', 'settings-section-data')"
@@ -277,6 +284,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-export-buckets') }"
                 @click="navigateToNavTarget('settings-export-buckets', 'data')"
               >
                 数据导入与导出
@@ -284,6 +292,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-data-retention') }"
                 @click="navigateToNavTarget('settings-data-retention', 'data')"
               >
                 数据保留策略
@@ -291,6 +300,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-data-danger') }"
                 @click="navigateToNavTarget('settings-data-danger', 'data')"
               >
                 危险操作
@@ -306,6 +316,7 @@
             <button
               type="button"
               class="settings-panel-nav-link settings-panel-nav-link--primary"
+              :class="{ 'is-current': isNavTargetCurrent('settings-section-appearance') }"
               aria-controls="settings-section-appearance"
               :aria-expanded="isNavGroupOpen('appearance').toString()"
               @click="toggleNavGroup('appearance', 'settings-section-appearance')"
@@ -318,6 +329,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-appearance-theme') }"
                 @click="navigateToNavTarget('settings-appearance-theme', 'appearance')"
               >
                 主题
@@ -325,6 +337,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-appearance-animation') }"
                 @click="navigateToNavTarget('settings-appearance-animation', 'appearance')"
               >
                 动画与动效
@@ -341,6 +354,7 @@
             <button
               type="button"
               class="settings-panel-nav-link settings-panel-nav-link--primary"
+              :class="{ 'is-current': isNavTargetCurrent('settings-section-performance') }"
               aria-controls="settings-section-performance"
               :aria-expanded="isNavGroupOpen('dev').toString()"
               @click="toggleNavGroup('dev', 'settings-section-performance')"
@@ -353,6 +367,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-section-performance') }"
                 @click="navigateToNavTarget('settings-section-performance', 'dev')"
               >
                 监控与调试
@@ -362,7 +377,12 @@
         </nav>
         <div class="settings-panel-sections space-y-7">
           <!-- Section 1: AI Model Connection -->
-          <section id="settings-section-llm" class="settings-panel-section space-y-4">
+          <section
+            id="settings-section-llm"
+            class="settings-panel-section space-y-4"
+            data-settings-nav-id="settings-section-llm"
+            data-settings-nav-group="llm"
+          >
             <div class="settings-section-head">
               <div
                 class="settings-section-head__icon settings-section-head__icon--violet"
@@ -435,7 +455,14 @@
                 <details class="settings-llm-step" aria-labelledby="llm-step-1-title">
                   <summary class="settings-llm-step__header">
                     <div class="min-w-0">
-                      <h4 id="llm-step-1-title" class="settings-llm-step__title">基本信息</h4>
+                      <h4
+                        id="llm-step-1-title"
+                        class="settings-llm-step__title"
+                        data-settings-nav-id="llm-step-1-title"
+                        data-settings-nav-group="llm"
+                      >
+                        基本信息
+                      </h4>
                       <p class="settings-llm-step__desc">厂商配置档、Endpoint 与协议路径</p>
                     </div>
                     <i
@@ -579,7 +606,14 @@
                 <details class="settings-llm-step" aria-labelledby="llm-step-2-title">
                   <summary class="settings-llm-step__header">
                     <div class="min-w-0">
-                      <h4 id="llm-step-2-title" class="settings-llm-step__title">凭证</h4>
+                      <h4
+                        id="llm-step-2-title"
+                        class="settings-llm-step__title"
+                        data-settings-nav-id="llm-step-2-title"
+                        data-settings-nav-group="llm"
+                      >
+                        凭证
+                      </h4>
                     </div>
                     <i
                       class="settings-llm-step__chevron fas fa-chevron-down text-[10px] text-slate-400"
@@ -630,7 +664,14 @@
                 <details class="settings-llm-step" aria-labelledby="llm-step-3-title">
                   <summary class="settings-llm-step__header">
                     <div class="min-w-0">
-                      <h4 id="llm-step-3-title" class="settings-llm-step__title">模型与能力</h4>
+                      <h4
+                        id="llm-step-3-title"
+                        class="settings-llm-step__title"
+                        data-settings-nav-id="llm-step-3-title"
+                        data-settings-nav-group="llm"
+                      >
+                        模型与能力
+                      </h4>
                       <p class="settings-llm-step__desc">默认模型与推理</p>
                     </div>
                     <i
@@ -780,7 +821,14 @@
                 <details class="settings-llm-step" aria-labelledby="llm-step-4-title">
                   <summary class="settings-llm-step__header">
                     <div class="min-w-0">
-                      <h4 id="llm-step-4-title" class="settings-llm-step__title">高级选项</h4>
+                      <h4
+                        id="llm-step-4-title"
+                        class="settings-llm-step__title"
+                        data-settings-nav-id="llm-step-4-title"
+                        data-settings-nav-group="llm"
+                      >
+                        高级选项
+                      </h4>
                       <p class="settings-llm-step__desc">service_tier（可选）</p>
                     </div>
                     <i
@@ -859,7 +907,12 @@
           </div>
 
           <!-- Section 2: Tool Strategy -->
-          <section id="settings-section-tool-strategy" class="settings-panel-section space-y-4">
+          <section
+            id="settings-section-tool-strategy"
+            class="settings-panel-section space-y-4"
+            data-settings-nav-id="settings-section-tool-strategy"
+            data-settings-nav-group="tool"
+          >
             <div class="settings-section-head">
               <div
                 class="settings-section-head__icon settings-section-head__icon--indigo"
@@ -2110,7 +2163,12 @@
           </div>
 
           <!-- Section 4: Data and Backup -->
-          <section id="settings-section-data" class="settings-panel-section space-y-4">
+          <section
+            id="settings-section-data"
+            class="settings-panel-section space-y-4"
+            data-settings-nav-id="settings-section-data"
+            data-settings-nav-group="data"
+          >
             <div class="settings-section-head">
               <div
                 class="settings-section-head__icon settings-section-head__icon--blue"
@@ -2152,6 +2210,8 @@
                 id="settings-export-buckets"
                 class="settings-collapsible-card"
                 data-testid="settings-export-buckets"
+                data-settings-nav-id="settings-export-buckets"
+                data-settings-nav-group="data"
               >
                 <summary
                   class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
@@ -2384,6 +2444,8 @@
               <div
                 id="settings-data-danger"
                 class="rounded-2xl border border-red-100 bg-red-50/75 p-3.5 shadow-sm"
+                data-settings-nav-id="settings-data-danger"
+                data-settings-nav-group="data"
               >
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div class="min-w-0">
@@ -2427,7 +2489,12 @@
 
           <!-- Section 5: Appearance & Experience -->
 
-          <section id="settings-section-appearance" class="settings-panel-section space-y-4">
+          <section
+            id="settings-section-appearance"
+            class="settings-panel-section space-y-4"
+            data-settings-nav-id="settings-section-appearance"
+            data-settings-nav-group="appearance"
+          >
             <div class="settings-section-head">
               <div
                 class="settings-section-head__icon settings-section-head__icon--slate"
@@ -2444,7 +2511,13 @@
             </div>
 
             <div class="settings-section-frame settings-section-frame--appearance">
-              <div class="settings-appearance-grid" data-testid="settings-appearance-theme">
+              <div
+                id="settings-appearance-theme"
+                class="settings-appearance-grid"
+                data-testid="settings-appearance-theme"
+                data-settings-nav-id="settings-appearance-theme"
+                data-settings-nav-group="appearance"
+              >
                 <!-- Theme row -->
                 <div class="settings-appearance-row">
                   <div class="settings-appearance-row__meta">
@@ -2530,7 +2603,13 @@
                 <div class="settings-appearance-divider" role="separator"></div>
 
                 <!-- Motion toggles -->
-                <div class="settings-appearance-row" data-testid="settings-appearance-animation">
+                <div
+                  id="settings-appearance-animation"
+                  class="settings-appearance-row"
+                  data-testid="settings-appearance-animation"
+                  data-settings-nav-id="settings-appearance-animation"
+                  data-settings-nav-group="appearance"
+                >
                   <div class="settings-appearance-row__meta">
                     <span class="settings-appearance-row__icon" aria-hidden="true">
                       <i class="fas fa-film"></i>
@@ -2640,6 +2719,8 @@
           <section
             id="settings-section-performance"
             class="settings-panel-section space-y-4"
+            data-settings-nav-id="settings-section-performance"
+            data-settings-nav-group="dev"
             :hidden="!showDeveloperDiagnostics"
           >
             <div class="settings-section-head">

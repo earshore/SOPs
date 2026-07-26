@@ -9,6 +9,8 @@ export interface SettingsNavScrollItem {
 
 /**
  * Last item whose offsetTop is at or above the sticky scan line wins.
+ * If the scan line is still above every marker (viewing content before the
+ * first marker), returns null so a mid-page marker is not painted as current.
  */
 export function pickActiveSettingsNavId(
   items: readonly SettingsNavScrollItem[],
@@ -17,10 +19,8 @@ export function pickActiveSettingsNavId(
 ): string | null {
   if (!items.length) return null;
   const sorted = [...items].sort((a, b) => a.offsetTop - b.offsetTop);
-  const first = sorted[0];
-  if (!first) return null;
   const line = scrollTop + stickyOffset;
-  let active = first.id;
+  let active: string | null = null;
   for (const item of sorted) {
     if (item.offsetTop <= line) {
       active = item.id;

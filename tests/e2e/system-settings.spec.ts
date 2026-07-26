@@ -188,10 +188,16 @@ test.describe('system settings', () => {
     }
     await expect(nav.getByRole('button', { name: '采集代理与网络', exact: true })).toHaveCount(0);
 
-    // Secondary hidden until primary expanded
-    await expect(nav.getByRole('button', { name: '基本信息', exact: true })).toBeHidden();
-    await nav.getByRole('button', { name: 'AI 模型与连接', exact: true }).click();
-    await expect(nav.getByRole('button', { name: '基本信息', exact: true })).toBeVisible();
+    // Scroll-spy may already expand the in-view group (LLM) on open.
+    // Prove collapse: re-click primary when that section is current.
+    const llmPrimary = nav.getByRole('button', { name: 'AI 模型与连接', exact: true });
+    const llmSecondary = nav.getByRole('button', { name: '基本信息', exact: true });
+    if (await llmSecondary.isVisible()) {
+      await llmPrimary.click();
+    }
+    await expect(llmSecondary).toBeHidden();
+    await llmPrimary.click();
+    await expect(llmSecondary).toBeVisible();
     await expect(nav.getByRole('button', { name: '模型与能力', exact: true })).toBeVisible();
 
     await nav.getByRole('button', { name: '工具策略', exact: true }).click();

@@ -2088,7 +2088,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
     if (Date.now() < this._navScrollPauseUntil) {
       return;
     }
-    const root = document.querySelector('.settings-panel-root');
+    const root =
+      document.querySelector('.settings-panel-root') ??
+      document.querySelector('[data-testid="settings-panel"]');
     const scroller = root?.querySelector('.settings-panel-scroll');
     if (!(scroller instanceof HTMLElement)) {
       return;
@@ -2102,15 +2104,20 @@ const settingsPanelBehavior: SettingsPanelPart = {
     }
     const activeId = pickActiveSettingsNavId(items, scroller.scrollTop, 48);
     this.activeNavTargetId = activeId;
-    const groupId = pickActiveSettingsNavGroup(items, activeId);
-    if (groupId) {
-      this.navOpenGroup = groupId;
+    // Only expand group when we have a real hit — never force tool open from null.
+    if (activeId) {
+      const groupId = pickActiveSettingsNavGroup(items, activeId);
+      if (groupId) {
+        this.navOpenGroup = groupId;
+      }
     }
   },
 
   bindSettingsNavScrollSpy(): void {
     this.unbindSettingsNavScrollSpy();
-    const root = document.querySelector('.settings-panel-root');
+    const root =
+      document.querySelector('.settings-panel-root') ??
+      document.querySelector('[data-testid="settings-panel"]');
     const scroller = root?.querySelector('.settings-panel-scroll');
     if (!(scroller instanceof HTMLElement)) {
       return;
@@ -2128,7 +2135,14 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   toggleNavGroup(groupId: string, sectionId: string): void {
-    this.navOpenGroup = this.navOpenGroup === groupId ? null : groupId;
+    // Scroll-spy may already open this group. Collapse only on re-click of same section.
+    if (this.navOpenGroup === groupId && this.activeNavTargetId === sectionId) {
+      this.navOpenGroup = null;
+      return;
+    }
+    this.navOpenGroup = groupId;
+    this.activeNavTargetId = sectionId;
+    this._navScrollPauseUntil = Date.now() + 600;
     this.scrollToSection(sectionId);
   },
 
