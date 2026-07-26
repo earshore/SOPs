@@ -39,6 +39,18 @@
 
 ---
 
+## 主题债交叉索引（D1–D12 · 仍属 Open）
+
+> 本节**不是** Closed。ID 必须同时出现在上方 **Open** 表中；关闭后从 Open 删除并写入下方 Closed。
+
+详见主题企业审计 Spec。本板只跟踪「仍 open 的工程影响」：
+
+- D1 token 覆盖 → **TD-THM-01**  
+- D6 blue 硬编码 → **TD-THM-02**  
+- 其余 D* 以主题 playbook / landing-status 为准  
+
+---
+
 ## Closed（近期，摘要）
 
 | ID | 关闭日期 | 说明 |
@@ -52,16 +64,6 @@
 | TD-SET-SEARCH-PAD | 2026-07-25 | 搜索框 icon/placeholder 重叠 |
 
 更早大批量清理见 `TECH_DEBT_AUDIT.md`（**勿**把其「0 issue」当作 2026-07-26 现状）。
-
----
-
-## 主题债交叉索引（D1–D12）
-
-详见主题企业审计 Spec。本板只跟踪「仍 open 的工程影响」：
-
-- D1 token 覆盖 → **TD-THM-01**  
-- D6 blue 硬编码 → **TD-THM-02**  
-- 其余 D* 以主题 playbook / landing-status 为准  
 
 ---
 

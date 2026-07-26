@@ -30,7 +30,7 @@
 | 历史审计/旧计划 | `docs/archive/`、`.kiro/`（**只读**） |
 
 **冲突裁决顺序（高 → 低）：**  
-PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / TESTING / RELEASE）→ 功能 Spec → 实现代码注释。
+PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTENT / A11Y / TESTING / SECURITY_PLAYBOOK / OPS / RELEASE）→ 功能 Spec → 实现代码注释。
 
 ---
 

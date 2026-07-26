@@ -1,7 +1,10 @@
 # SOPs 发布策略
 
+**Status:** active · SSOT  
+**Updated:** 2026-07-26  
+
 本文档定义 GitHub Releases、版本号、变更说明与发版门禁的企业级约定。  
-与 [变更日志](./CHANGELOG.md)、[部署指南](./DEPLOYMENT.md)、[CI 质量门禁](./CI-QUALITY-GATES.md) 配套使用。
+与 [变更日志](./CHANGELOG.md)、[部署指南](./DEPLOYMENT.md)、[CI 质量门禁](./CI-QUALITY-GATES.md)、[OPS_RUNBOOK.md](./OPS_RUNBOOK.md)、[ACCESSIBILITY.md](./ACCESSIBILITY.md) 配套使用。
 
 ## 1. 目标
 
