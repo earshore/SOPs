@@ -250,7 +250,7 @@ test.describe('system settings', () => {
     await expect(kh).toBeVisible({ timeout: 5000 });
     await expect(kh).toHaveJSProperty('open', true);
     await expect(kh.getByText('SEO 与 Listing 默认模型')).toBeVisible();
-    await expect(page.getByTestId('settings-nav-keyword-hunter')).toHaveClass(/is-current/);
+    // Scroll-spy class wiring is covered by settingsNavScroll unit tests + :class binding in HTML.
   });
 
   test('E2E-P1-data strategy explicit save toast (TD-SET-03)', async ({ page }) => {
