@@ -38,6 +38,18 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
     ],
   },
   {
+    id: 'keyword-hunter',
+    sectionId: 'settings-section-tool-strategy',
+    labels: [
+      'Keyword Hunter',
+      'keyword-hunter',
+      'SEO 处理',
+      'Listing 评审',
+      '词干匹配',
+      '复数匹配',
+    ],
+  },
+  {
     id: 'ppc-analysis-flags',
     sectionId: 'settings-section-tool-strategy',
     labels: ['PPC Tools', 'ppc-analysis-flags', 'PPC 搜索词', '并发批次', 'Agent'],

@@ -35,7 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- TD-SET-03：数据区「保存数据策略」Toast → `数据策略已保存`；矩阵写明与工具区同 runtime API 族（非第二引擎）。
+- D2 workbench radius long-tail **#6 deferred — diminishing returns**：已无高 ROI 模块 CSS 工具主面板仍绑 `var(--rounded-xl)` / hard 16px；存档 inventory（clamp 已覆盖 / entry / icon well / modal / settings control / AMZ practice story / chat brand）于 `workbench-radius-decision.md`；**无**产 CSS 迁移。
+- TD-SET-03：数据区「保存数据策略」 Toast → `数据策略已保存`；矩阵写明与工具区同 runtime API 族（非第二引擎）。
 - TD-DOC-01：`CI-QUALITY-GATES` 与现行 `ci:quality`/`ci:security` 脚本对齐；`development/best-practices` 标注 Zustand 现行、StateManager 历史。
 - D5 residual audit：`src/css/components` + `src/components` re-grep hard blue/indigo `focus-visible` — **0** clear shared-shell migrate left（settings WIP skip；megaMenu / sidebar-theme / wb / chat purple / ErrorBoundary / dead `#3b82f6` fallback / D6 业务长尾保留；docs inventory only）。
 - D5 续：shell `.nav-trigger:focus-visible` 从 hard indigo `rgba(99,102,241,.35)` 迁到 `color-mix(--color-focus-ring)`；Settings runtime checkbox 从 `focus:ring-indigo-500` 迁到 shared `settings-checkbox`（跟 Appearance focus；megaMenu / sidebar-theme / wb / chat purple / ErrorBoundary 保留）。

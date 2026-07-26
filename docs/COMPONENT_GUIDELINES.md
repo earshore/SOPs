@@ -184,7 +184,7 @@
 | 运行策略预设按钮 | `persistRuntimeStrategySettings({ toast })` | **即时** | 已写盘 | 不关 |
 | Master Analysis 调度偏好 | `persistRuntimeStrategySettings` | **即时** | 已写盘 | 不关 |
 | 采集代理 Key/类型 + 保存 | `saveProxyConfig()` | **显式** | 网络分区 | 不关 |
-| 数据保留等「保存策略」 | `saveRuntimeStrategy()` | **显式** | 见数据区 | 不关 |
+| 数据区「保存数据策略」（`runtime.storage.*`） | `saveRuntimeStrategy()` → 同 `saveRuntimeStrategySettings` | **显式**（有意分区按钮；与工具区同 runtime API 族，非第二引擎） | runtime | **不**自动关；Toast：`数据策略已保存` |
 | Appearance 主题 / 颜色模式 / 动效 | `ThemeManager` / `animationSettingsStore` | **即时**（独立 store） | 不走 LLM/工具脏分区 | 不关 |
 
 **开发者规则：**

@@ -2191,6 +2191,17 @@ details.settings-submodule[open] .settings-collapsible-chevron {
     color: var(--settings-accent);
   }
 
+  .settings-panel-nav-link.is-current {
+    background: var(--settings-accent-soft);
+    color: var(--settings-accent-strong);
+  }
+
+  .settings-panel-nav-link--secondary.is-current {
+    background: color-mix(in srgb, var(--settings-accent-soft) 85%, #fff);
+    color: var(--settings-accent);
+    font-weight: 600;
+  }
+
   .settings-panel-nav-link i:not(.settings-panel-nav-caret) {
     width: 0.875rem;
     flex-shrink: 0;

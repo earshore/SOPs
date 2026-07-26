@@ -203,6 +203,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('general-ai-runtime') }"
                 @click="navigateToNavTarget('general-ai-runtime', 'tool')"
               >
                 通用 AI 策略
@@ -210,6 +211,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('master-analysis') }"
                 @click="navigateToNavTarget('master-analysis', 'tool')"
               >
                 Master Analysis
@@ -217,6 +219,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('master-analysis-scrape') }"
                 @click="navigateToNavTarget('master-analysis-scrape', 'tool')"
               >
                 数据采集
@@ -224,6 +227,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('master-analysis-ai') }"
                 @click="navigateToNavTarget('master-analysis-ai', 'tool')"
               >
                 AI 智能分析
@@ -231,6 +235,7 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('deep-chat-business-tools-title') }"
                 @click="navigateToNavTarget('deep-chat-business-tools-title', 'tool')"
               >
                 Deep Chat
@@ -238,6 +243,16 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('keyword-hunter') }"
+                data-testid="settings-nav-keyword-hunter"
+                @click="navigateToNavTarget('keyword-hunter', 'tool')"
+              >
+                Keyword Hunter
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('ppc-analysis-flags') }"
                 @click="navigateToNavTarget('ppc-analysis-flags', 'tool')"
               >
                 PPC Tools
@@ -1623,7 +1638,14 @@
                 </div>
               </details>
 
-              <details class="settings-tool-app" data-settings-tool-app>
+              <details
+                class="settings-tool-app"
+                data-settings-focus="keyword-hunter"
+                data-settings-nav-id="keyword-hunter"
+                data-settings-nav-group="tool"
+                data-settings-tool-app
+                data-testid="settings-keyword-hunter"
+              >
                 <summary
                   class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
                 >
@@ -2171,12 +2193,21 @@
                 </div>
               </details>
 
-              <details id="settings-data-retention" class="settings-collapsible-card">
+              <details
+                id="settings-data-retention"
+                class="settings-collapsible-card"
+                data-settings-focus="settings-data-retention"
+                data-settings-nav-id="settings-data-retention"
+                data-settings-nav-group="data"
+              >
                 <summary
                   class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
                 >
                   <div class="min-w-0">
                     <h4 class="settings-card__title">数据保留策略</h4>
+                    <p class="settings-card__desc">
+                      显式保存 runtime.storage；与工具区共用 runtime API，不是第二套引擎
+                    </p>
                   </div>
                   <i
                     class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
@@ -2192,6 +2223,7 @@
                         min="10"
                         max="500"
                         step="10"
+                        data-testid="settings-storage-history-max"
                         :value="runtimeStrategy.settings.storage.historyMaxItems"
                         @input="setRuntimeNumber('storage.historyMaxItems', $event)"
                         class="settings-control settings-control--sm w-full px-3 py-2 text-xs"
@@ -2225,6 +2257,7 @@
                   <div class="mt-3 flex justify-end">
                     <button
                       type="button"
+                      data-testid="settings-save-data-strategy"
                       @click="saveRuntimeStrategy()"
                       :disabled="runtimeStrategy.isSaving"
                       class="settings-btn-primary settings-btn-primary--sm"

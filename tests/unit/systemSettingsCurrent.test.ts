@@ -549,7 +549,7 @@ it('saves editable runtime strategy settings', async () => {
       }),
     })
   );
-  expect(showToast).toHaveBeenCalledWith('策略已保存', { type: 'success' });
+  expect(showToast).toHaveBeenCalledWith('数据策略已保存', { type: 'success' });
 });
 
 it('exposes deepChat business tools toggle binding in settings template', () => {

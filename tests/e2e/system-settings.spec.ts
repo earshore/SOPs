@@ -236,4 +236,41 @@ test.describe('system settings', () => {
       timeout: 3000,
     });
   });
+
+  test('E2E-P1-nav secondary jump Keyword Hunter (TD-SET-05)', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+
+    const nav = page.locator('nav.settings-panel-nav');
+    await nav.getByRole('button', { name: '工具策略', exact: true }).click();
+    await expect(page.getByTestId('settings-nav-keyword-hunter')).toBeVisible();
+    await page.getByTestId('settings-nav-keyword-hunter').click();
+
+    const kh = page.getByTestId('settings-keyword-hunter');
+    await expect(kh).toBeVisible({ timeout: 5000 });
+    await expect(kh).toHaveJSProperty('open', true);
+    await expect(kh.getByText('SEO 与 Listing 默认模型')).toBeVisible();
+    await expect(page.getByTestId('settings-nav-keyword-hunter')).toHaveClass(/is-current/);
+  });
+
+  test('E2E-P1-data strategy explicit save toast (TD-SET-03)', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+    await settings.goToSection('数据与备份');
+
+    const retention = page.locator('#settings-data-retention');
+    await retention.locator('summary').click();
+    const history = page.getByTestId('settings-storage-history-max');
+    await history.waitFor({ state: 'visible' });
+    await history.fill('120');
+    await page.getByTestId('settings-save-data-strategy').click();
+    await expect(page.getByText('数据策略已保存', { exact: true })).toBeVisible({
+      timeout: 5000,
+    });
+
+    await settings.closeButton().click();
+    await expect(page.getByRole('heading', { name: '放弃未保存的更改？' })).toHaveCount(0, {
+      timeout: 2000,
+    });
+  });
 });

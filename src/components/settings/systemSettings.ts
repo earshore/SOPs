@@ -116,6 +116,11 @@ import {
 } from '@/components/settings/domain/settingsDeepLink';
 import { findFirstSettingsSearchMatch } from '@/components/settings/domain/settingsSearch';
 import {
+  measureSettingsNavMarkers,
+  pickActiveSettingsNavGroup,
+  pickActiveSettingsNavId,
+} from '@/components/settings/domain/settingsNavScroll';
+import {
   applyRuntimePreset,
   isRuntimePresetId,
   type RuntimePresetId,
@@ -482,7 +487,14 @@ interface SettingsPanelData {
   scrollToSection(sectionId: string): void;
   scrollToElementInPanel(el: HTMLElement): void;
   navOpenGroup: string | null;
+  activeNavTargetId: string | null;
+  _navScrollUnbind: (() => void) | null;
+  _navScrollPauseUntil: number;
   isNavGroupOpen(groupId: string): boolean;
+  isNavTargetCurrent(targetId: string): boolean;
+  bindSettingsNavScrollSpy(): void;
+  unbindSettingsNavScrollSpy(): void;
+  updateActiveNavFromScroll(): void;
   toggleNavGroup(groupId: string, sectionId: string): void;
   navigateToNavTarget(targetId: string, groupId?: string): void;
   onSettingsSearch(event?: Event): void;
@@ -1255,6 +1267,9 @@ function createSettingsState(): Pick<
   | 'llmApiPathMenuOpen'
   | 'schedulePreferenceMenuOpen'
   | 'navOpenGroup'
+  | 'activeNavTargetId'
+  | '_navScrollUnbind'
+  | '_navScrollPauseUntil'
 > {
   return {
     isOpen: false,
@@ -1262,6 +1277,9 @@ function createSettingsState(): Pick<
     searchQuery: '',
     searchHitId: '',
     navOpenGroup: null as string | null,
+    activeNavTargetId: null as string | null,
+    _navScrollUnbind: null as (() => void) | null,
+    _navScrollPauseUntil: 0,
 
     appearanceThemeId: ThemeManager.getCurrentTheme(),
     appearanceColorMode: ThemeManager.getCurrentColorMode(),
@@ -2421,7 +2439,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   async saveRuntimeStrategy(): Promise<void> {
     // Explicit form save (e.g. data retention) — panel stays open
-    await this.persistRuntimeStrategySettings({ toast: '策略已保存' });
+    await this.persistRuntimeStrategySettings({ toast: '数据策略已保存' });
   },
 
   resetRuntimeStrategy(): void {

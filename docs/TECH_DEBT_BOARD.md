@@ -24,9 +24,6 @@
 | ID | 领域 | 描述 | 影响 | 建议 | 优先级 |
 | --- | --- | --- | --- | --- | --- |
 | **TD-SET-01** | 架构 | `systemSettings.ts/html/css` 巨型单体（~2.5k+ 行级） | 评审难、冲突多、回归面大 | 按 section 拆分 + Domain 门面（Spec P3） | P1 |
-| **TD-SET-03** | 配置 | 数据区仍有独立「保存数据策略」 | 与归一化保存叙事不完全一致 | 评估并入策略保存或即时保存 storage 子集 | P2 |
-| **TD-SET-04** | UX | 侧栏二级无滚动联动高亮 | 长页迷失 | IntersectionObserver 可选 | P2 |
-| **TD-SET-05** | UX | 侧栏缺 Keyword Hunter 二级入口 | 发现性 | 补 nav children | P2 |
 | **TD-THM-01** | 主题 | generated token 被手写 variables 覆盖（D1） | Appearance 漂移 | 见主题路线图 Phase token 收口 | P1 |
 | **TD-THM-02** | 主题 | 大量 Tailwind `blue-*` 硬编码（D6） | 换肤面窄 | 分期迁语义 token + 门禁 | P1 |
 | **TD-CMP-01** | 组件 | 业务页仍可自由拼按钮/表单 | 视觉孤岛 | 执行 COMPONENT_GUIDELINES；后续加 lint/示例 | P1 |
@@ -52,6 +49,9 @@
 
 | ID | 关闭日期 | 说明 |
 | --- | --- | --- |
+| TD-SET-05 | 2026-07-26 | 工具策略侧栏二级 Keyword Hunter + deep-link `keyword-hunter` + e2e |
+| TD-SET-03 | 2026-07-26 | 数据区「保存数据策略」明确为 runtime.storage 显式保存（同 saveRuntimeStrategySettings）；Toast/矩阵对齐 |
+| TD-SET-04 | 2026-07-26 | 设置侧栏滚动联动高亮（settingsNavScroll + is-current）；点击导航不回归 |
 | TD-DOC-01 | 2026-07-26 | CI-QUALITY-GATES 与 package.json `ci:quality` 对齐；best-practices 降级 StateManager、标 Status |
 | TD-SET-02 | 2026-07-26 | COMPONENT_GUIDELINES §10 即时 vs 显式保存矩阵 + TESTING_STRATEGY 交叉引用 |
 | TD-TEST-02 | 2026-07-26 | system-settings e2e：二级 nav「数据采集」跳转 + 运行策略预设即时保存不脏关 |
