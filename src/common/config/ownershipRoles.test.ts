@@ -174,7 +174,9 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
     expect(hubCategories).toBeDefined();
     expect(moreCategories).toBeDefined();
     if (!hubCategories || !moreCategories) {
-      throw new Error('MENU_CONFIG hubCategories/moreCategories required for ownership soft checks');
+      throw new Error(
+        'MENU_CONFIG hubCategories/moreCategories required for ownership soft checks'
+      );
     }
 
     const hubKnowledge = hubCategories.knowledge;
