@@ -22,10 +22,10 @@
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Code / 契约**    | **Green**  | tip `903dbf3e`: D6 #18–**27** 样本波 **FREEZE** · phase review re-green（hardcode 13 · token 20/0 · css 100% · theme unit · type-check:tests · **full build** · **smoke 29/29** @ 4173）· D12×**24** · D1 **0 closable** · D2 #6 deferred · D7/D10 Done · D8 soft · settings scroll-spy complete |
-| **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**（**Human XO first**）；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
-| **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
+| **Visual / XO**    | **Yellow** | **Agent-contract XO** @ preview 4173：**PASS with debt**（17 PASS / 0 FAIL / 1 DEBT=X6 美学）；**人类肉眼 30 min 仍未签**；**不得宣称 visual Pass** |
+| **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 agent-contract 关体验 RC |
 
-**一句话**: 主题 **code 收敛完成度高、共享 D6 边际递减**；tip `903dbf3e` **sample wave FREEZE**；gates **build+smoke 29 green**（本轮复验）；体验关闸 **只靠人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
+**一句话**: 主题 **code 收敛 + sample FREEZE**；agent 已按 §3.1 跑 **契约 XO**（报告 `docs/superpowers/plans/xo-agent-run/`）→ **PASS with debt**；**Visual 仍 Yellow** 直至人类签字。smoke 用 `npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -236,7 +236,7 @@ Grep / call-site evidence (re-skim @ `147aa90c`):
 
 ## 6. Human XO — next action
 
-**阻塞体验关闸的唯一最短路径**: 人类按 **30 分钟浏览器脚本**跑完并贴记录。**本 refresh 后仍 required**（文档根双轴 / KH ownership / dark×minimal smoke / D7 ESLint / 样本 primary **不**替代 XO）。
+**阻塞体验关闸的唯一最短路径**: 人类按 **30 分钟浏览器脚本**跑完并贴记录。**Agent 契约跑**（`scripts/dev/xo-agent-theme-run.mjs` + `xo-agent-run/XO-AGENT-RUN-REPORT.md`）**不**替代人类签字。
 
 - 脚本与记录模板:  
   [`2026-07-26-theme-system-xo-signoff-status.md` §3](./2026-07-26-theme-system-xo-signoff-status.md#3-人类-xo-30-分钟手动浏览器脚本)
