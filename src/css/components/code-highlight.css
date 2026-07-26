@@ -1585,46 +1585,54 @@
 
 /* --- JSON (正文内嵌) --- */
 .dark .json-key,
+[data-color-mode-resolved='dark'] .json-key,
 [data-theme='dark'] .json-key {
   --json-key: #34d399;
   color: var(--json-key);
 }
 
 .dark .json-string,
+[data-color-mode-resolved='dark'] .json-string,
 [data-theme='dark'] .json-string {
   --json-string: #60a5fa;
   color: var(--json-string);
 }
 
 .dark .json-number,
+[data-color-mode-resolved='dark'] .json-number,
 [data-theme='dark'] .json-number {
   --json-number: #fbbf24;
   color: var(--json-number);
 }
 
 .dark .json-boolean,
+[data-color-mode-resolved='dark'] .json-boolean,
 [data-theme='dark'] .json-boolean {
   --json-boolean: #a78bfa;
   color: var(--json-boolean);
 }
 
 .dark .json-null,
+[data-color-mode-resolved='dark'] .json-null,
 [data-theme='dark'] .json-null {
   --json-null: #6b7280;
   color: var(--json-null);
 }
 
 .dark .json-bracket,
+[data-color-mode-resolved='dark'] .json-bracket,
 [data-theme='dark'] .json-bracket {
   color: #6b7280;
 }
 
 .dark .json-node-toggle:hover,
+[data-color-mode-resolved='dark'] .json-node-toggle:hover,
 [data-theme='dark'] .json-node-toggle:hover {
   background: rgba(255, 255, 255, 0.06);
 }
 
 .dark .json-value-copyable:hover,
+[data-color-mode-resolved='dark'] .json-value-copyable:hover,
 [data-theme='dark'] .json-value-copyable:hover {
   background: rgba(255, 255, 255, 0.06);
 }
@@ -1632,6 +1640,8 @@
 /* --- 内联代码 --- */
 .dark .code-inline,
 .dark :not(pre) > code,
+[data-color-mode-resolved='dark'] .code-inline,
+[data-color-mode-resolved='dark'] :not(pre) > code,
 [data-theme='dark'] .code-inline,
 [data-theme='dark'] :not(pre) > code {
   --code-inline-bg: rgba(255, 255, 255, 0.08);
@@ -1640,6 +1650,7 @@
 }
 
 .dark .code-inline--blue,
+[data-color-mode-resolved='dark'] .code-inline--blue,
 [data-theme='dark'] .code-inline--blue {
   --code-inline-text: var(--color-blue-400, #60a5fa);
   --code-inline-bg: rgba(96, 165, 250, 0.1);
@@ -1647,6 +1658,7 @@
 }
 
 .dark .code-inline--green,
+[data-color-mode-resolved='dark'] .code-inline--green,
 [data-theme='dark'] .code-inline--green {
   --code-inline-text: var(--color-green-400, #4ade80);
   --code-inline-bg: rgba(74, 222, 128, 0.1);
@@ -1654,6 +1666,7 @@
 }
 
 .dark .code-inline--purple,
+[data-color-mode-resolved='dark'] .code-inline--purple,
 [data-theme='dark'] .code-inline--purple {
   --code-inline-text: var(--color-purple-400, #c084fc);
   --code-inline-bg: rgba(192, 132, 252, 0.1);
@@ -1661,6 +1674,7 @@
 }
 
 .dark .code-inline--amber,
+[data-color-mode-resolved='dark'] .code-inline--amber,
 [data-theme='dark'] .code-inline--amber {
   --code-inline-text: var(--color-amber-400, #fbbf24);
   --code-inline-bg: rgba(251, 191, 36, 0.1);
@@ -1668,6 +1682,7 @@
 }
 
 .dark .code-inline--neutral,
+[data-color-mode-resolved='dark'] .code-inline--neutral,
 [data-theme='dark'] .code-inline--neutral {
   --code-inline-text: var(--color-text-primary, #f9fafb);
   --code-inline-bg: rgba(255, 255, 255, 0.06);
@@ -1676,6 +1691,7 @@
 
 /* --- 亮色代码块在暗色模式下恢复暗色主题 --- */
 .dark .code-block--light,
+[data-color-mode-resolved='dark'] .code-block--light,
 [data-theme='dark'] .code-block--light {
   --code-bg: #1e1e2e;
   --code-bg-header: #181825;
@@ -1689,57 +1705,68 @@
 }
 
 .dark .code-block--light .token.keyword,
+[data-color-mode-resolved='dark'] .code-block--light .token.keyword,
 [data-theme='dark'] .code-block--light .token.keyword {
   color: var(--syntax-keyword);
 }
 
 .dark .code-block--light .token.string,
+[data-color-mode-resolved='dark'] .code-block--light .token.string,
 [data-theme='dark'] .code-block--light .token.string {
   color: var(--syntax-string);
 }
 
 .dark .code-block--light .token.number,
+[data-color-mode-resolved='dark'] .code-block--light .token.number,
 [data-theme='dark'] .code-block--light .token.number {
   color: var(--syntax-number);
 }
 
 .dark .code-block--light .token.comment,
+[data-color-mode-resolved='dark'] .code-block--light .token.comment,
 [data-theme='dark'] .code-block--light .token.comment {
   color: var(--syntax-comment);
 }
 
 .dark .code-block--light .token.function,
+[data-color-mode-resolved='dark'] .code-block--light .token.function,
 [data-theme='dark'] .code-block--light .token.function {
   color: var(--syntax-function);
 }
 
 .dark .code-block--light .token.class-name,
+[data-color-mode-resolved='dark'] .code-block--light .token.class-name,
 [data-theme='dark'] .code-block--light .token.class-name {
   color: var(--syntax-class);
 }
 
 .dark .code-block--light .token.property,
+[data-color-mode-resolved='dark'] .code-block--light .token.property,
 [data-theme='dark'] .code-block--light .token.property {
   color: var(--syntax-property);
 }
 
 .dark .code-block--light .token.tag,
+[data-color-mode-resolved='dark'] .code-block--light .token.tag,
 [data-theme='dark'] .code-block--light .token.tag {
   color: var(--syntax-tag);
 }
 
 .dark .code-block--light .token.attr-name,
+[data-color-mode-resolved='dark'] .code-block--light .token.attr-name,
 [data-theme='dark'] .code-block--light .token.attr-name {
   color: var(--syntax-attr-name);
 }
 
 .dark .code-block--light .token.attr-value,
+[data-color-mode-resolved='dark'] .code-block--light .token.attr-value,
 [data-theme='dark'] .code-block--light .token.attr-value {
   color: var(--syntax-attr-value);
 }
 
 /* --- 代码块滚动条暗色 (已是暗色，此处确认一致性) --- */
 .dark .code-block-body::-webkit-scrollbar-thumb,
+[data-color-mode-resolved='dark'] .code-block-body::-webkit-scrollbar-thumb,
 [data-theme='dark'] .code-block-body::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
 }

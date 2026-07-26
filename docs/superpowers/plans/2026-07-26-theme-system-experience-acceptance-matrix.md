@@ -180,6 +180,7 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | R8-C1 | 壳层 primary/focus | Change* | * | |
 | R8-C2 | 总览 blue 或子页 growth/supply 等 | NOT | 不变 | 选 1 子页抽检即可 |
 | R8-C3 | 风控页 red 安全归属 | NOT | 若测到 | 不随 Appearance 变粉/变灰 |
+| R8-O1 | （可选）总览 focus/hover chrome（D6 #10） | Change* | 可选肉眼 | module-accent + focus-ring 回退；**非** e2e 色差；**非** visual Pass |
 
 #### R9 Hub sample
 
@@ -193,9 +194,16 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 
 | ID | 检查项 | Must | E0/E1 | 备注 |
 | --- | --- | --- | --- | --- |
-| R10-C1 | 试用 CTA / 搜索·卡 focus 跟 primary | Change* | 可选肉眼 | HEAD Skills 样本；**非** e2e 色差 |
+| R10-C1 | 试用 CTA / 搜索·卡 focus 跟 primary | Change* | 可选肉眼 | Skills 样本；**非** e2e 色差 |
 | R10-C2 | 分类紫 / 多色徽章归属 | NOT | 不变 | 勿被 Appearance 冲成一套灰 |
 | R10-I1 | 页内其它 `blue-*` | Info | D6 | |
+
+#### R11 NPI Tracker（可选 · D6 #11 样本）
+
+| ID | 检查项 | Must | E0/E1 | 备注 |
+| --- | --- | --- | --- | --- |
+| R11-C1 | 主 CTA `action-btn-primary` 跟 primary | Change* | 可选肉眼 | `c5bd4080` NPI 样本；**非** e2e 色差；**非** visual Pass |
+| R11-I1 | 页内其它 `blue-*` / 归属色 | Info | D6 | 勿把未迁蓝控件当 Blocker |
 
 ### 4.2 场景计数（执行包）
 
@@ -205,7 +213,7 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | 设置深测 | R7 专项行 × 2 env（含预览/持久化） | 计入 R7，不另加路由 |
 | 可选 E2 | 1 preset × 2 面（Settings + 1 工具页） | **+2** |
 | Dark E3/E4 | 9 routes × 2 | **+18**（产品路径 **已解锁**；视觉 **Open**） |
-| 可选 R10 Skills | 1 route × E0/E1 抽检 | **+1～2** 可选 |
+| 可选 R10 Skills / R8-O1 SOPs / R11 NPI | 样本 × E0/E1 抽检 | **+1～4** 可选 |
 | A11y / 长时 | 见 §5–§6，跨路由抽检 | **+8** 检查项（非全路由笛卡尔） |
 
 **当前可执行**: light 主包 **18** + 横切 **~8** + dark 产品路径抽检；  
@@ -345,6 +353,8 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | Deep Chat accent token | R6-C2 | **未做** e2e | 可选 | **手动** terracotta |
 | Skills CTA sample | R10-C1 | **未做** e2e | 可选 | 可选肉眼 |
 | Deep Chat shell sample | R6-O1 | **未做** e2e | 可选 | 可选肉眼 |
+| SOPs overview focus sample | R8-O1 | **未做** e2e | 可选 | 可选肉眼（#10） |
+| NPI primary CTA sample | R11-C1 | **未做** e2e | 可选 | 可选肉眼（#11） |
 | 硬编码 blue 是否变色 | D6 Info | 低价值 | 度量脚本 | 可选 |
 | 对比度 4.5:1 | A1–A2 | 半自动 axe | Phase 1+ | 关键页手动 |
 | Focus visible | A3 | 未做色断言 | Phase 3 | 主测 |

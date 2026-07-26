@@ -816,34 +816,41 @@
    暗色模式
    ======================================== */
 .dark .header,
+[data-color-mode-resolved='dark'] .header,
 [data-theme='dark'] .header {
   background: rgba(15, 23, 42, 0.85);
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .logo-text-main,
+[data-color-mode-resolved='dark'] .logo-text-main,
 [data-theme='dark'] .logo-text-main {
   color: var(--color-slate-50, #f8fafc);
 }
 
 .dark .nav-trigger,
+[data-color-mode-resolved='dark'] .nav-trigger,
 [data-theme='dark'] .nav-trigger {
   color: var(--color-slate-400, #94a3b8);
 }
 
 .dark .nav-group:hover .nav-trigger,
 .dark .nav-trigger:hover,
+[data-color-mode-resolved='dark'] .nav-group:hover .nav-trigger,
+[data-color-mode-resolved='dark'] .nav-trigger:hover,
 [data-theme='dark'] .nav-group:hover .nav-trigger,
 [data-theme='dark'] .nav-trigger:hover {
   color: var(--color-primary, #818cf8);
 }
 
 .dark .nav-trigger[aria-current='page'],
+[data-color-mode-resolved='dark'] .nav-trigger[aria-current='page'],
 [data-theme='dark'] .nav-trigger[aria-current='page'] {
   color: var(--color-primary, #818cf8);
 }
 
 .dark .mega-menu-inner,
+[data-color-mode-resolved='dark'] .mega-menu-inner,
 [data-theme='dark'] .mega-menu-inner {
   background: rgba(15, 23, 42, 0.92);
   border-color: rgba(255, 255, 255, 0.08);
@@ -853,6 +860,7 @@
 }
 
 .dark .model-status,
+[data-color-mode-resolved='dark'] .model-status,
 [data-theme='dark'] .model-status {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.1);

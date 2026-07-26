@@ -49,8 +49,8 @@ interface ThemeScreen {
 }
 
 /**
- * Scaffold slice (6 screens × 2 appearances = 12 snapshots).
- * Ownership multi-color pages (App Center / Scraper / PPC) must NOT force primary.
+ * Scaffold slice (7 screens × 2 appearances = 14 snapshots).
+ * Ownership multi-color pages (App Center / Scraper / PPC / SOPs) must NOT force primary.
  * Full light main pack (R1–R9 × 2) remains plan-only until XO + baselines stabilize.
  */
 const THEME_SCREENS: ThemeScreen[] = [
@@ -121,6 +121,18 @@ const THEME_SCREENS: ThemeScreen[] = [
     maskSelectors: ['.timestamp', '[class*="animate-"]', '[data-dynamic="true"]'],
     beforeScreenshot: async (page: Page) => {
       await page.waitForSelector('.ppc-search-terms-app', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    },
+  },
+  {
+    // R8 — SOPs overview ownership accents must NOT collapse to primary
+    slug: 'sops-overview',
+    path: '/#/sops',
+    pageType: PageType.LIST,
+    waitForSelector: '.sops-overview',
+    maskSelectors: ['.timestamp', '[data-dynamic="true"]', '.toast'],
+    beforeScreenshot: async (page: Page) => {
+      await page.waitForSelector('.sops-overview', { timeout: 15000 });
       await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
     },
   },

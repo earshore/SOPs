@@ -410,32 +410,38 @@
    ======================================== */
 
 .dark .icon-container--secondary,
+[data-color-mode-resolved='dark'] .icon-container--secondary,
 [data-theme='dark'] .icon-container--secondary {
   --icon-bg: rgba(255, 255, 255, 0.06);
   --icon-color: var(--color-slate-300, #cbd5e1);
 }
 
 .dark .icon-container--bordered,
+[data-color-mode-resolved='dark'] .icon-container--bordered,
 [data-theme='dark'] .icon-container--bordered {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
 .dark .icon-container--with-status::after,
+[data-color-mode-resolved='dark'] .icon-container--with-status::after,
 [data-theme='dark'] .icon-container--with-status::after {
   border-color: var(--color-bg-secondary, #1e293b);
 }
 
 .dark .icon-text-title,
+[data-color-mode-resolved='dark'] .icon-text-title,
 [data-theme='dark'] .icon-text-title {
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .icon-text-description,
+[data-color-mode-resolved='dark'] .icon-text-description,
 [data-theme='dark'] .icon-text-description {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 .dark .icon-grid-label,
+[data-color-mode-resolved='dark'] .icon-grid-label,
 [data-theme='dark'] .icon-grid-label {
   color: var(--color-text-secondary, #d1d5db);
 }

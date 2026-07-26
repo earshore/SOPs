@@ -375,27 +375,32 @@
    ======================================== */
 
 .dark .timeline-dot,
+[data-color-mode-resolved='dark'] .timeline-dot,
 [data-theme='dark'] .timeline-dot {
   border-color: var(--color-bg-secondary, #1e293b);
 }
 
 .dark .timeline-dot--pending,
+[data-color-mode-resolved='dark'] .timeline-dot--pending,
 [data-theme='dark'] .timeline-dot--pending {
   background: var(--color-bg-secondary, #1e293b);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
 .dark .timeline-title,
+[data-color-mode-resolved='dark'] .timeline-title,
 [data-theme='dark'] .timeline-title {
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .timeline-description,
+[data-color-mode-resolved='dark'] .timeline-description,
 [data-theme='dark'] .timeline-description {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 .dark .timeline-time,
+[data-color-mode-resolved='dark'] .timeline-time,
 [data-theme='dark'] .timeline-time {
   color: var(--color-text-tertiary, #9ca3af);
 }

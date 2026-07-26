@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - D8 Ownership Role 代码 SSOT scaffold：`src/common/config/ownershipRoles.ts`（`OwnershipRoleId` × 19、`OWNERSHIP_ROLES`、`getPaletteForRole` / `getOwnershipRoleForModule`；纯 helper，无 Appearance 写入、无全站 DOM 绑定）。
 - D9 局部 token 前缀生命周期（库存 / elevate·keep local·archive / PR 清单 / 与 D1 边界）：`docs/superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md`（docs only，无批量 CSS rename）。
-- D12 Appearance 截图 scaffold（opt-in）：`tests/visual/theme-appearance-scaffold.test.ts` + `npm run test:visual:theme`（`THEME_VISUAL=1`；默认 skip，基线 gitignore，不进 blocking CI）；首批 **6 屏 × default/minimal light = 12** 快照（含 App Center / Scraper / PPC）；计划见 `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`。
+- D12 Appearance 截图 scaffold（opt-in）：`tests/visual/theme-appearance-scaffold.test.ts` + `npm run test:visual:theme`（`THEME_VISUAL=1`；默认 skip，基线 gitignore，不进 blocking CI）；首批 **7 屏 × default/minimal light = 14** 快照（含 App Center / Scraper / PPC / SOPs overview）；计划见 `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`。
 - Ownership Role → Palette / `wb-theme-*` 映射表（Phase 4 预备）：`docs/superpowers/plans/2026-07-26-ownership-role-palette-map.md`。
 - D1 token 覆盖清点：`npm run token:override-audit`（`scripts/quality/audit-token-overrides.ts`）+ 库存报告 `docs/superpowers/plans/2026-07-26-token-override-inventory.md`。
 - 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
@@ -34,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D11：`interactive.css` 暗色覆盖 **24** 规则扩为 `.dark, [data-color-mode-resolved='dark'], [data-theme='dark']` tri-selector（保留 legacy）。
 - D11：`loading.css` 剩余 4 规则（route-loading-skeleton ×2 + loading-skeleton ×2）同上 tri-selector；overlay 已先迁（文件内暗色 **5** 规则全量 done）。
 - D11：`cards.css` 暗色覆盖 19 规则扩为 `.dark, [data-color-mode-resolved='dark'], [data-theme='dark']` tri-selector（保留 legacy）。
+- D11：`header-main.css` **7** / `icon-container.css` **6** / `scrollbar.css` **11** / `timeline.css` **5** 规则同上 tri-selector（保留 legacy；`toast`/`status`/`progress`/`modals` 无 dual dark 对）。
+- D11：`code-highlight.css` 暗色覆盖 **26** 规则同上 tri-selector（保留 legacy）。
 - D6/D5 hybrid：App Center overview focus 从 `var(--module-accent, var(--color-blue-500))` 迁到 `var(--module-accent, var(--color-focus-ring, #3b82f6))`（保留 module-accent；**不**在模块 CSS 覆盖/直引 `--color-primary`）。
 - D7：ESLint hard-gate 禁止生产代码调用 `ColorContext.setModuleColor`（`no-restricted-properties` error；优先 `inferColorFromModule`）。
 - D7：`ColorContext.setModuleColor` 标记 `@deprecated`（优先 `inferColorFromModule`；Appearance 绝不得调用）。
@@ -48,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D6 业务样例 #9（Keyword Hunter process/filter）：筛选 focus / 快照选中 chrome 从 hard blue 迁到 `--color-primary*` / `--color-focus-ring`；draft `current/saving/loading` 用 `--color-info*`（保留 coverage 多色梯度与 rose ownership）。
 - D6 业务样例 #10（SOPs overview）：collapsible / table-scroll focus、search focus-within 边框、process step hover 边框/标题/箭头与 step-number 默认背景 fallback 从 hard `blue-*` 迁到 `module-accent` + `--color-focus-ring`（**不**在模块 CSS 引 `--color-primary`；保留 phase-blue / category tab / multi-color step palette / SEO 教学卡）。
 - D6 业务样例 #11（NPI Tracker）：`copyNpiReviewTemplate` / `saveNextSteps` 主 CTA 从 hard `bg-blue-500` 迁到 shared `action-btn action-btn-primary`（Appearance `--color-primary*`）。
+- D6 业务样例 #12（Restricted Words）：检索主 CTA `#rw-search-btn` 从 hard `bg-blue-600` 迁到 shared `action-btn action-btn-primary`；搜索/站点/筛选 focus 与详情钮 `focus-visible` 环从 hard `blue-500` 迁到 `--color-focus-ring`（保留 INFO 风险卡、步骤教学蓝、REACH 化学徽章与知识卡）。
 - D5 续：`--shadow-primary-*` 改 `color-mix` 跟随 `--color-primary`（light/dark），不再写死蓝/indigo。
 - D5 续：root `--focus-ring-soft` + header search / forms dark / Overview search / nav-focus 从 hard blue 迁到 `--color-focus-ring`（megaMenu / sidebar-theme / wb ownership 保留）。
 - D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标；Keyword Hunter 报告 section 与 AI Analysis JSON 面板图标）；entry/overview / megaMenu 营销 lift 保留。

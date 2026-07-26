@@ -1,9 +1,9 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ post-`b2560d98` · D11 forms/header/interactive/loading · D6#10 SOPs · D6#11 NPI · D7 call-site audit）
-**范围**: `main` ahead of `sops/main` 主题收敛链（Phase 0 起 → HEAD）  
+**日期**: 2026-07-26（refresh @ post-`c5bd4080` · D6#12 RW · D11 code-highlight/shell residual · D12×14 · D10 audit · XO docs）  
+**范围**: `main` ahead of `sops/main`（含非主题 commit 如 llm）；主题链 Phase 0 → 本波待合入  
 **角色**: Tech Lead / Release docs  
-**诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称「主题体验 RC 已过」。
+**诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称 visual Pass。
 
 权威链：  
 [企业审查路线图](../specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md) ·  
@@ -21,11 +21,11 @@
 
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Code / 契约**    | **Green**  | HEAD `b2560d98` + **本波**: D11 forms×31 / header×25 / interactive×24 / loading 全量 · D6 #10 SOPs · D6 #11 NPI CTA · D7 **0** prod callers |
+| **Code / 契约**    | **Green**  | 前 tip `c5bd4080` + **本波**: D6 #12 Restricted Words · D11 code-highlight×26 + header-main/icon/scrollbar/timeline · D12 scaffold **14** · D10 call-site audit · XO 文档 |
 | **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: 工程债继续收敛；体验关闸仍只靠 **人工 XO**。
+**一句话**: 本波再收 #12 RW + D11 residual + D12×14；体验关闸仍只靠 **人工 XO**。smoke 用 **`npm run test:e2e:smoke`**（preview **4173**）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -40,7 +40,7 @@
 | **2** Token 事实源             | 修 D1/D2 结构    | **Partial**                                   | 清点文档；192 条原子 identical 删除；allowlist **20**；`--workbench-radius` SSOT + 多批消费者（含 buttons glow / radius batch 3）；**未**完成 `variables.semantic.css` 全拆                                                                                                                                                                                                                                                                                                                                  |
 | **3** 壳层 Appearance 可见面   | 用户看得见换肤   | **Partial**                                   | Settings primary chrome + form tokens/focus；buttons primary glow 跟 Appearance；壳层部分 CTA；sidebar 去 marketing scale；**XO 未签「肉眼明确变化」**                                                                                                                                                                                                                                                                                                                                                       |
 | **4** Ownership / colorSchemes | 修 D4/D7/D8      | **Partial (D7 code Done + call-site audit; D4 long tail open)** | **Role → Palette 映射文档**（19 roles）+ smoke KH `wb-theme-rose`；**helpers**: `getWorkbenchCardClasses` / `getWorkbenchIconContainerClasses` + `colorSchemes.test.ts`；**sidebar** category icon 去 scale；**调用点**: AI/PromptLab/Scraper + KH report + AI JSON icons；**D7 @ f7268f93**: `setModuleColor` **@deprecated** + **ESLint hard-gate**（禁生产新调；allow test）+ `ColorContext.test.ts`（infer / legacy write / 解耦）；**D7 residual**: 全仓 grep — **0 production callers**（见 §5.3）； dual-channel API 保留 **optional retire** |
-| **5** D6 业务页分期            | 业务 `blue-*` 降 | **Partial (samples)**                         | 业务 ~900+ 仍 Informational 基线；**样本**: KH…#9 + **#10 SOPs overview** + **#11 NPI** `action-btn-primary`；Scraper / AI / PPC / PromptLab / Skills #6 / Deep Chat #7；phase/tab/step 多色与 SEO 卡 **保留**；壳层 megaMenu **13**                                                                |
+| **5** D6 业务页分期            | 业务 `blue-*` 降 | **Partial (samples)**                         | 业务 ~900+ 仍 Informational 基线；**样本**: KH…#9 + **#10 SOPs overview** + **#11 NPI** `action-btn-primary` + **#12 Restricted Words** search CTA/focus；Scraper / AI / PPC / PromptLab / Skills #6 / Deep Chat #7；phase/tab/step 多色与 SEO 卡 **保留**；壳层 megaMenu **13**                                                                |
 
 图例：Done (code) = 契约/门禁/实现；Visual open = 浏览器签收缺失；Partial (samples) = 个别业务面已动手，非全量 D6 清零。
 
@@ -62,7 +62,7 @@
 | UI 结构                           | `npm run ui:audit`（含 `workbench-ui:audit`）              | card/callout/workbench                                                                                   |
 | Token 生成                        | `npm run generate:tokens`                                  | Phase 2+ 无手工污染 generated                                                                            |
 | 类型 / 全量                       | `npm run type-check` · `npm run ci:all`                    | merge / 发版                                                                                             |
-| 发布烟雾                          | `npm run test:e2e:smoke`                                   | 路由 + **Appearance / color-mode** 文档根 + **KH ownership** + **dark×minimal** 契约（**无**色差） |
+| 发布烟雾                          | `npm run test:e2e:smoke`                                   | 路由 + **Appearance / color-mode** 文档根 + **KH ownership** + **dark×minimal** 契约（**无**色差）；**必须**本 script（preview **4173**）；勿对 5173 raw Playwright |
 | 报告（不阻断）                    | `theme:hardcode-baseline` · `token:override-audit`         | 本地 diff 诊断                                                                                           |
 
 顺序（quality 内主题相关）: `css:audit` → `theme:hardcode-baseline:gate` → `token:override-audit:gate` → …
@@ -99,7 +99,7 @@
 | **Atomic override allowlist**    | **20**                                                             | radius 6 + shadow 6 + z-index 7 + easing 1；unallowlisted **0**                                                                                                                                     |
 | Handwritten `:root`（D1 首刀后） | ~267                                                               | 去 192 identical 后；语义 + intentional 冲突保留                                                                                                                                                    |
 | XO 场景（签收文档）              | ~**16** automated / ~**20** code / ~**34** manual / visual **0 full Pass** | 见 XO status refresh；**人类 30 min 仍 required**；**Visual Yellow**                                                                                                                          |
-| 业务 `blue-*`（D6）              | ~900+ 行级基线                                                     | Phase 5；**样本**: KH…#9 + **#10 SOPs overview** chrome + Scraper / AI / PPC / PromptLab / Skills #6 / Deep Chat #7；`--shadow-primary*` 跟 primary；**非**全量清零；不阻塞 code Green |
+| 业务 `blue-*`（D6）              | ~900+ 行级基线                                                     | Phase 5；**样本**: KH…#9 + **#10 SOPs** + **#11 NPI** + **#12 Restricted Words** chrome + Scraper / AI / PPC / PromptLab / Skills #6 / Deep Chat #7；`--shadow-primary*` 跟 primary；**非**全量清零；不阻塞 code Green |
 | Ownership Role 表                | **19 roles 文档**                                                  | `2026-07-26-ownership-role-palette-map.md`；实现未绑 `data-ownership-role` 全站                                                                                                                     |
 | Workbench colorSchemes helpers   | **API + unit + 首批调用点 + misuse audit clean**                   | helpers 已导出；**AI / PromptLab / Scraper / KH report / AI JSON icons** 已迁；**§5.2**: 0 production entry-helper 误用 / 0 非 entry `scale-110`；`getWorkbenchCardClasses` 仍无生产调用（optional）                                                    |
 | D7 `setModuleColor`              | **Deprecated + ESLint + 0 prod callers**                            | JSDoc `@deprecated` + unit + **ESLint hard-gate**（禁生产新调）；**residual audit**: **0** production call sites（§5.3）；API 仍保留（test/legacy）； dual-channel 彻底下线 **optional**                                                                  |
@@ -115,13 +115,13 @@
 | **D3**  | P0 运行时 | **Code fixed**                      | 双轴已拆；e2e dark×minimal **已进 smoke**；兼容 `data-theme` 读路径仍在；**视觉签 Open**                                                                                                                                         |
 | **D4**  | P1 体验   | **Partial (helpers + MA/KH icons; misuse audit clean)** | Role 表 + workbench helpers + unit + sidebar scale 修 + **AI/PromptLab/Scraper/KH report/AI JSON icon 调用点** + **#2 residual** + **§5.2 调用点审计 (HEAD `5ad7b1c1`)**: **0** production `getCardClasses`/`getIconContainerClasses` 误用；**0** 非 entry `scale-110` chrome；**长尾 optional**: `getWorkbenchCardClasses` 尚未有生产调用点 / 其余模块 icon 渐进迁 |
 | **D5**  | P2        | **Partial**                         | root `--focus-ring-soft` → `color-mix(focus-ring)`；header search / forms dark / Overview search / nav-focus 已跟 focus-ring；**剩余 intentional 例外见 §5.1**；业务页蓝 focus 仍 D6 长尾                                        |
-| **D6**  | P1 可见面 | **Shell locked / biz samples**      | 壳层 megaMenu **13** = **有意 Ownership**；**样本**: KH…#9 + **#10 SOPs** + **#11 NPI primary CTA** + Skills/DeepChat…；其余 Informational 长尾 |
+| **D6**  | P1 可见面 | **Shell locked / biz samples**      | 壳层 megaMenu **13** = **有意 Ownership**；**样本**: KH…#9 + **#10 SOPs** + **#11 NPI primary CTA** + **#12 Restricted Words** search CTA/focus + Skills/DeepChat…；其余 Informational 长尾 |
 | **D7**  | P1        | **Done（deprecate + ESLint + call-site audit）** | `setModuleColor` **@deprecated** + unit + ESLint hard-gate；**0** production callers（§5.3）；dual-channel API 彻底下线 **optional**                                                                      |
 | **D8**  | P1        | **Partial (doc + code scaffold)**   | Role 表 + **`ownershipRoles.ts`**；**未**全站 `data-ownership-role` 绑定                                                                                                                                                   |
 | **D9**  | P2        | **Partial (Doc done)**              | 生命周期文档已落地；代码侧 F 波次 optional |
-| **D10** | P1        | **Partial**                         | 类型已收窄 primary 族；调用方误用状态色文档/审计可再紧                                                                                                                                                                           |
-| **D11** | P2        | **Code fixed / CSS residual**       | **`forms`×31 + `header`×25 + `cards`×19 + `interactive`×24 + `loading` 全量** tri-selector；其余 code-highlight 等见 §10                                                                                                                                          |
-| **D12** | P2 | **Open（scaffold opt-in）** | `theme-appearance-scaffold`：**6 屏 × 2 = 12**（settings/KH/home + App Center/Scraper/PPC）；`test:visual:theme` opt-in；**不** visual Pass；人工首 8 张 XO 仍 required |
+| **D10** | P1        | **Done（type narrow + call-site audit）** | `AppearanceThemeColors` 仅 primary 族 + focus；`ThemeColors` deprecated 别名；**0** prod 误用状态色字段（§5.4）；删除 deprecated 别名 **optional** |
+| **D11** | P2        | **Code fixed / CSS residual**       | **`forms`×31 + `header`×25 + `cards`×19 + `interactive`×24 + `loading` 全量 + `code-highlight`×26** tri-selector；其余见 §10                                                                                                                                          |
+| **D12** | P2 | **Open（scaffold opt-in）** | `theme-appearance-scaffold`：**7 屏 × 2 = 14**（settings/KH/home + App Center/Scraper/PPC + SOPs overview）；`test:visual:theme` opt-in；**不** visual Pass；人工首 8 张 XO 仍 required |
 
 ### 5.1 D5 — remaining intentional blue / non-Appearance focus
 
@@ -169,6 +169,25 @@ Leave alone unless product reclassifies ownership:
 
 **Code fix this residual**: **none** (docs + JSDoc audit note only; no CHANGELOG).
 
+### 5.4 D10 — `ThemeColors` / Appearance status-color misuse audit
+
+**Scope**: `AppearanceThemeColors` / `ThemeColors` shape + production theme apply/preview paths. **No** mass removal of semantic CSS tokens (`--color-success` etc. remain Layer-status, not Appearance-writable).
+
+| Bucket | Sites | Verdict |
+| --- | --- | --- |
+| **Type SSOT** | `AppearanceThemeColors`: `primary` / `primaryLight` / `primaryDark` / `primaryDarker` / `focusRing` only | **Correct** — no secondary/accent/status fields |
+| **Deprecated alias** | `export type ThemeColors = AppearanceThemeColors` | **Keep** optional retire later; historical over-broad name only |
+| **Write path** | `ThemeManager.getColorVars` → primary* only; `applyTheme` merges `customVars` (primary/focus-safe); never status | **Correct** |
+| **Preview path** | `previewTheme` → `AppearanceThemeColors`; unit asserts no `secondary`/`success`/`error` keys | **Correct** |
+| **Production callers of type** | imports of `ThemeColors` / `AppearanceThemeColors` under `src/` outside `themeConfig*` | **None** |
+| **Production apply callers** | `systemSettings.setAppearanceTheme` → `applyTheme(id)`; `main.switchTheme` → `applyTheme(id)` | **OK** — id only, no color bag / status fields |
+| **Production `previewTheme`** | `src/` consumers | **None** (tests only) |
+| **Assumes Appearance sets status** | grepped `ThemeColors` + `.secondary`/`.accent`/`.success` on theme objects | **None found** |
+
+**Verdict**: Callers **do not** assume Appearance can set status colors. D10 original type-lie is fixed; residual is optional delete of the `ThemeColors` alias name.
+
+**Code fix this residual**: **none** (docs-only audit; no CHANGELOG).
+
 ---
 
 ## 6. Human XO — next action
@@ -179,7 +198,7 @@ Leave alone unless product reclassifies ownership:
   [`2026-07-26-theme-system-xo-signoff-status.md` §3](./2026-07-26-theme-system-xo-signoff-status.md#3-人类-xo-30-分钟手动浏览器脚本)
 - 矩阵: [`experience-acceptance-matrix.md`](./2026-07-26-theme-system-experience-acceptance-matrix.md)
 - 必测: X1 default↔minimal×3 · X2 ownership 抽检（**KH `wb-theme-rose` / PPC hero / MA indigo / Deep Chat terracotta**）· X5 dark×appearance · focus · 刷新持久化
-- **可选肉眼（XO §1.8）**: **Skills 试用 CTA** + **Deep Chat shell** chrome/focus 跟 Appearance（terracotta **不变**）+ dark×minimal 肉眼复核；另可选 KH/Scraper/AI/PPC/PromptLab/#8 input
+- **可选肉眼（XO §1.8）**: **Skills 试用 CTA** + **Deep Chat shell** chrome/focus（terracotta **不变**）+ **#10 SOPs overview focus** + **#11 NPI primary CTA** + dark×minimal 肉眼复核；另可选 KH/Scraper/AI/PPC/PromptLab/#8 input / #12 RW
 - **可选截图**: [D12 §6 首 8 张](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow) — **截图 ≠ visual Pass**
 - **不测**: 全站 D6 仍蓝（允许 Informational）
 - 签收后: 填 XO 结论 `PASS / PASS with debt / FAIL`；Tech Lead 仅勾 code gates §4.1；**Visual 保持 Yellow 直至 XO 签字**
@@ -190,11 +209,11 @@ Leave alone unless product reclassifies ownership:
 
 | #     | Wave                                              | 范围                                                                                                                         | 验证                                                                       |
 | ----- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **1** | **Human XO（始终优先 · 阻塞体验关闸）**           | 30 min 浏览器脚本 + 记录模板；X1/X2/X5 + 可选 Skills CTA / Deep Chat shell                                                   | 矩阵勾选 + XO status 结论；**仍不宣称 visual Pass**                        |
+| **1** | **Human XO（始终优先 · 阻塞体验关闸）**           | 30 min 浏览器脚本 + 记录模板；X1/X2/X5 + 可选 Skills / Deep Chat shell / **#10 SOPs** / **#11 NPI**                           | 矩阵勾选 + XO status 结论；**仍不宣称 visual Pass**                        |
 | **2** | **D12 首 8 人工截图 + scaffold 对照（可并发）**   | 按 [D12 §6](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow) 归档 8 张；可选 `test:visual:theme` | 截图 + MANIFEST；**不** fail-closed CI；**不** visual Pass                 |
-| **3** | **D6 下一业务样本（可并发 · 低优先）**            | #10 SOPs overview chrome **本波**；下一页 primary/chrome 样本（非 900+ 清零）；**禁止**重写 terracotta / phase 语义蓝                         | hardcode gate 不升；**仍不宣称 visual Pass**                               |
+| **3** | **D6 下一业务样本（可并发 · 低优先）**            | #10 SOPs / #11 NPI **已合入 `c5bd4080`**；#12 Restricted Words chrome 等可穿插；下一页 primary/chrome 样本（非 900+ 清零）；**禁止**重写 terracotta / phase 语义蓝 / RW 教学 INFO 卡 | hardcode gate 不升；**仍不宣称 visual Pass**                               |
 
-**下一波优先**: **Human XO 30 min**（唯一体验关闸）；可选 D12 首 8 张；D6 长尾仅在 XO 不阻塞时穿插。  
+**下一波优先（不变）**: **Human XO 30 min** 仍第一（唯一体验关闸）；可选 D12 首 8 张；D6 长尾仅在 XO 不阻塞时穿插。  
 **禁止本周扩 scope**: 一次清零 900+ blue、换字体、重写 Deep Chat terracotta、white-label 引擎、未走 map 扩表流程的新 `wb-theme-*`、把 megaMenu 强行 Appearance 化。
 
 ---
@@ -202,7 +221,8 @@ Leave alone unless product reclassifies ownership:
 ## 8. Commit list (`sops/main` → `HEAD`)
 
 ```
-HEAD     feat(theme): D6 SOPs/NPI samples and D11 shell dual-safe
+HEAD     feat(theme): D6 RW chrome, D11 residual dual-safe, D12x14
+c5bd4080 feat(theme): D6 SOPs/NPI samples and D11 shell dual-safe
 b2560d98 feat(theme): D6 process chrome, cards dual-safe, D12x12
 5ad7b1c1 feat(theme): D6 input focus, D8 roles, D5/D11 polish
 90914af1 feat(theme): land nav ownership and D6/D12 batch
@@ -220,19 +240,22 @@ d1a8c774 feat(theme): settings color mode, token audit, XO status
 26623ec8 feat(theme): team playbook, UX matrix, and Phase 0 gates
 ```
 
+> main 在主题 tip 之上另有非主题提交（如 llm）；**本波主题变更**见 pending HEAD 行。
+
 前置（`sops/main` tip，主题审查起点）:
 
 ```
 f8f925a8 docs(theme): enterprise audit and convergence roadmap
 ```
 
-**HEAD 要点 (`feat(theme): D6 SOPs/NPI samples and D11 shell dual-safe`)**:
-- D11 forms×31 / header×25 / interactive×24 / loading 全量 tri-selector
-- D6 #10 SOPs overview · #11 NPI `action-btn-primary`
-- D7 residual：**0** production `setModuleColor` callers（§5.3）
-- **Code Green / Visual Yellow**；smoke 用 `npm run test:e2e:smoke`（preview 4173；勿直接打 5173）
+**HEAD 要点 (`feat(theme): D6 RW chrome, D11 residual dual-safe, D12x14`)**:
+- D6 #12 Restricted Words search CTA/focus
+- D11 code-highlight + header-main / icon / scrollbar / timeline tri-selector
+- D12 scaffold **14**（+ SOPs overview）；D10 ThemeColors misuse audit clean
+- XO / 矩阵可选 #10/#11；**Visual Yellow**
+- smoke **必须** `npm run test:e2e:smoke`（preview **4173**）
 
-**前 HEAD (`b2560d98`)**: D6 #9 process · cards dual-safe · D12×12。
+**前主题 tip (`c5bd4080`)**: D6 #10 SOPs · #11 NPI · D11 forms/header/interactive/loading。
 
 ---
 
@@ -283,6 +306,12 @@ f8f925a8 docs(theme): enterprise audit and convergence roadmap
 - **`src/css/utilities/interactive.css` batch done** — 暗色覆盖 **24** 规则全部扩为 tri-selector  
 - **`src/css/components/forms.css` batch done** — 暗色覆盖 **31** 规则全部扩为 tri-selector  
 - **`src/css/components/header.css` batch done** — 暗色覆盖 **25** 规则全部扩为 tri-selector  
+- **`src/css/components/code-highlight.css` already tri** — **27** 规则  
+- **`src/css/components/header-main.css` batch done** — **7** 规则  
+- **`src/css/components/icon-container.css` batch done** — **6** 规则  
+- **`src/css/components/scrollbar.css` batch done** — **11** 规则  
+- **`src/css/components/timeline.css` batch done** — **5** 规则  
+- 跳过（无 dual dark 对）: `toast.css` / `status.css` / `progress.css` / `modals.css`  
 
 模式: `.dark …, [data-color-mode-resolved='dark'] …, [data-theme='dark'] …`
 
