@@ -295,6 +295,8 @@ interface SettingsPanelData {
   appearanceThemeId: string;
   /** Appearance: color mode preference light|dark|system (instant; not dirty) */
   appearanceColorMode: ColorMode;
+  /** Appearance: bumped on color-mode-changed so system hint re-resolves */
+  appearanceColorModeRev: number;
   /** Appearance: animations master switch */
   appearanceAnimationsEnabled: boolean;
   /** Appearance: animation speed */
@@ -511,6 +513,10 @@ interface SettingsPanelData {
   getProxyDisplayName(type: string): string;
   isDangerousEndpoint(endpoint: string): boolean;
   appearanceThemeOptions: Array<{ id: string; name: string; description?: string }>;
+  /** True when color-mode preference is `system` (drives resolved hint visibility). */
+  appearanceColorModeIsSystem: boolean;
+  /** e.g. （当前为深色）; empty unless preference is system. */
+  appearanceColorModeSystemHint: string;
 }
 
 interface AlpineWatchContext {
@@ -1247,6 +1253,7 @@ function createSettingsState(): Pick<
   | 'searchHitId'
   | 'appearanceThemeId'
   | 'appearanceColorMode'
+  | 'appearanceColorModeRev'
   | 'appearanceAnimationsEnabled'
   | 'appearanceAnimationSpeed'
   | 'appearanceRespectSystemPreference'
@@ -1283,6 +1290,7 @@ function createSettingsState(): Pick<
 
     appearanceThemeId: ThemeManager.getCurrentTheme(),
     appearanceColorMode: ThemeManager.getCurrentColorMode(),
+    appearanceColorModeRev: 0,
     appearanceAnimationsEnabled: true,
     appearanceAnimationSpeed: 'normal',
     appearanceRespectSystemPreference: true,
@@ -1866,9 +1874,16 @@ const settingsPanelBehavior: SettingsPanelPart = {
     };
     window.addEventListener('storage', onStorage);
 
+    // Keep the "跟随系统（当前为…）" hint live when the OS scheme flips.
+    const unsubColorMode = eventBus.on('color-mode-changed', () => {
+      this.appearanceColorMode = ThemeManager.getCurrentColorMode();
+      this.appearanceColorModeRev += 1;
+    });
+
     this._unsubscribers = [
       unsubOpen,
       unsubClose,
+      unsubColorMode,
       () => window.removeEventListener('storage', onStorage),
     ];
 
@@ -2180,6 +2195,17 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.appearanceAnimationsEnabled = anim.enabled;
     this.appearanceAnimationSpeed = anim.speed;
     this.appearanceRespectSystemPreference = anim.respectSystemPreference;
+  },
+
+  get appearanceColorModeIsSystem(): boolean {
+    return this.appearanceColorMode === 'system';
+  },
+
+  /** e.g. "（当前为深色）" — re-resolves on appearanceColorModeRev bumps. */
+  get appearanceColorModeSystemHint(): string {
+    void this.appearanceColorModeRev;
+    if (this.appearanceColorMode !== 'system') return '';
+    return ThemeManager.getResolvedColorMode() === 'dark' ? '（当前为深色）' : '（当前为浅色）';
   },
 
   setAppearanceTheme(themeId: string): void {

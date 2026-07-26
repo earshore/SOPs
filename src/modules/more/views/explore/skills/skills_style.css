@@ -172,14 +172,14 @@
 .category-btn:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 2px white,
+    0 0 0 2px var(--surface-card, white),
     0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 
 .skill-card {
-  background-color: white;
+  background-color: var(--surface-card, white);
   border-radius: var(--workbench-radius, var(--card-radius, 8px));
-  border: 1px solid var(--color-slate-200);
+  border: 1px solid var(--color-border-default, var(--color-slate-200));
   padding: 1.25rem;
   transition:
     border-color var(--duration-fast),
@@ -199,21 +199,21 @@
 .skill-card:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 2px white,
+    0 0 0 2px var(--surface-card, white),
     0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 
 .skill-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-slate-800);
+  color: var(--color-text-primary, var(--color-slate-800));
   margin-bottom: 0.5rem;
   transition: color var(--duration-fast);
 }
 
 .skill-description {
   font-size: 0.875rem;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500));
   line-height: 1.625;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -250,10 +250,10 @@
   gap: 0.4rem;
   min-height: 2.5rem;
   padding: 0.5rem 0.9rem;
-  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border: 1px solid var(--color-border-default, #e2e8f0);
   border-radius: var(--rounded-lg, 0.5rem);
-  background: #fff;
-  color: var(--color-slate-700, #334155);
+  background: var(--surface-card, #fff);
+  color: var(--color-text-primary, #334155);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -355,7 +355,7 @@
 .btn-icon:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 2px white,
+    0 0 0 2px var(--surface-card, white),
     0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 

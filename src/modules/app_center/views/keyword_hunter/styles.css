@@ -337,10 +337,10 @@
   align-items: center;
   justify-content: center;
   margin: 0.875rem 1rem;
-  border: 1px dashed var(--color-slate-200, #e2e8f0);
+  border: 1px dashed var(--color-border-default, #e2e8f0);
   border-radius: var(--workbench-radius, var(--card-radius, 8px));
-  background: linear-gradient(180deg, var(--color-slate-50, #f8fafc), white);
-  color: var(--color-slate-400, #94a3b8);
+  background: linear-gradient(180deg, var(--surface-panel, #f8fafc), var(--surface-card, #fff));
+  color: var(--color-text-tertiary, #94a3b8);
   text-align: center;
 }
 
@@ -371,9 +371,9 @@
   display: grid;
   gap: 0.55rem;
   padding: 0.75rem;
-  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border: 1px solid var(--color-border-default, #e2e8f0);
   border-radius: var(--workbench-radius, var(--card-radius, 8px));
-  background: white;
+  background: var(--surface-card, white);
   cursor: pointer;
   transition:
     background-color var(--duration-fast) ease,
@@ -2097,7 +2097,7 @@
   height: 0.625rem;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--color-slate-100);
+  background: var(--color-bg-tertiary, var(--color-slate-100));
 }
 
 .keyword-hunter-coverage-fill {
@@ -2163,9 +2163,9 @@
 }
 
 .keyword-hunter-keyword-overflow {
-  color: var(--color-slate-600);
-  background: var(--color-slate-100);
-  border-color: var(--color-slate-200);
+  color: var(--color-text-secondary, var(--color-slate-600));
+  background: var(--color-bg-tertiary, var(--color-slate-100));
+  border-color: var(--color-border-light, var(--color-slate-200));
 }
 
 .keyword-hunter-report-preview p,

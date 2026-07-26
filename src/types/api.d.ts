@@ -109,13 +109,7 @@ export interface LLMChatCompletionResponse {
     message: LLMMessage;
     /** 结束原因 */
     finish_reason?:
-      | 'stop'
-      | 'length'
-      | 'tool_calls'
-      | 'function_call'
-      | 'content_filter'
-      | string
-      | null;
+      'stop' | 'length' | 'tool_calls' | 'function_call' | 'content_filter' | string | null;
     logprobs?: unknown;
   }>;
   /** 使用情况 */
@@ -162,13 +156,7 @@ export interface LLMStreamChunk {
     };
     /** 结束原因 */
     finish_reason?:
-      | 'stop'
-      | 'length'
-      | 'tool_calls'
-      | 'function_call'
-      | 'content_filter'
-      | string
-      | null;
+      'stop' | 'length' | 'tool_calls' | 'function_call' | 'content_filter' | string | null;
   }>;
 }
 

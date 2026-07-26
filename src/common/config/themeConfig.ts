@@ -145,6 +145,7 @@ export class ThemeManager {
   private static customThemes: Map<string, ThemeConfig> = new Map();
   private static systemColorSchemeMql: MediaQueryList | null = null;
   private static systemColorSchemeListener: ((event: MediaQueryListEvent) => void) | null = null;
+  private static modeSwitchTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Apply an Appearance preset.
@@ -226,14 +227,39 @@ export class ThemeManager {
       return;
     }
 
+    const previousResolved = this.getResolvedColorMode();
     this.currentColorMode = mode;
     StorageService.set(COLOR_MODE_STORAGE_KEY, mode);
+
+    // 整屋调光: 仅当有效表面真的翻转时挂短过渡 (首屏 restore 不走此路径)
+    if (previousResolved !== this.getResolvedColorMode()) {
+      this.beginModeSwitchTransition();
+    }
     this.syncColorModeToDocument(mode);
 
     eventBus.emit('color-mode-changed', {
       mode,
       resolved: this.getResolvedColorMode(),
     });
+  }
+
+  /** Attach a ~260ms whole-page color transition class around a mode flip. */
+  private static beginModeSwitchTransition(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const root = document.documentElement;
+    if (root.getAttribute('data-theme-ready') !== '1') {
+      return; // 启动阶段不做过渡
+    }
+    root.classList.add('color-mode-switching');
+    if (this.modeSwitchTimer) {
+      clearTimeout(this.modeSwitchTimer);
+    }
+    this.modeSwitchTimer = setTimeout(() => {
+      root.classList.remove('color-mode-switching');
+      this.modeSwitchTimer = null;
+    }, 280);
   }
 
   /**
@@ -423,6 +449,7 @@ export class ThemeManager {
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
     const listener = () => {
       if (this.currentColorMode === 'system') {
+        this.beginModeSwitchTransition();
         this.syncColorModeToDocument('system');
         eventBus.emit('color-mode-changed', {
           mode: 'system',

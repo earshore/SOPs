@@ -47,14 +47,14 @@
 }
 
 [contenteditable='true']:hover {
-  background: rgba(241, 245, 249, 0.8);
+  background: var(--color-bg-hover, rgba(241, 245, 249, 0.8));
   border-bottom-color: var(--color-slate-400);
 }
 
 /* 聚焦时的呼吸光环 */
 [contenteditable='true']:focus {
   outline: none;
-  background: white;
+  background: var(--surface-card, white);
   border-bottom: 1px solid transparent;
   box-shadow: 0 0 0 3px var(--color-primary-light);
   /* 柔和的蓝色扩散 */
@@ -62,8 +62,8 @@
 
 /* 编辑模式下的父容器高亮 */
 .editing-mode .editable-item {
-  background: var(--color-amber-50);
-  /* 极淡的黄色背景提示 */
+  background: color-mix(in srgb, var(--color-amber-400) 12%, var(--surface-card, #fff));
+  /* 极淡的黄色背景提示（双主题可用） */
   animation: pulse var(--duration-2s, 2s) infinite;
 }
 
@@ -418,4 +418,102 @@
   .amz-hub-overview .sop-card-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ----------------------------------------
+   智库 Hero 暗色主题（Theme 面收口）
+   浅色米白渐变 → 深色 surface + 品牌 hue tint；badge/tag 同步。
+   ---------------------------------------- */
+.dark .amz-hub-overview,
+[data-color-mode-resolved='dark'] .amz-hub-overview {
+  color: var(--color-text-primary);
+}
+
+.dark .amz-hub-overview .amz-hub-hero,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero {
+  border-color: var(--border-subtle) !important;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(220, 38, 38, 0.12), transparent 32%),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-orange-400) 10%, var(--surface-card)),
+      var(--surface-card) 54%,
+      color-mix(in srgb, var(--color-red-400) 8%, var(--surface-card))
+    ) !important;
+  box-shadow: var(--shadow-panel, 0 18px 42px -34px rgba(0, 0, 0, 0.6));
+  --wb-text-primary: var(--color-text-primary) !important;
+  --wb-text-secondary: var(--color-text-secondary) !important;
+  --wb-tag-bg: rgba(255, 255, 255, 0.06) !important;
+  --wb-tag-border: rgba(248, 113, 113, 0.28) !important;
+  --wb-tag-hover-border: rgba(248, 113, 113, 0.42) !important;
+}
+
+.dark .amz-hub-overview .amz-hub-hero .wb-title,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-title {
+  color: var(--color-text-primary) !important;
+}
+
+.dark .amz-hub-overview .amz-hub-hero .wb-description,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-description,
+.dark .amz-hub-overview .hub-module-section p,
+[data-color-mode-resolved='dark'] .amz-hub-overview .hub-module-section p {
+  color: var(--color-text-secondary) !important;
+}
+
+.dark .amz-hub-overview .amz-hub-hero .wb-badge,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-badge {
+  border-color: rgba(248, 113, 113, 0.32);
+  background: color-mix(in srgb, var(--color-orange-400) 16%, var(--surface-card)) !important;
+  color: var(--color-orange-300) !important;
+}
+
+.dark .amz-hub-overview .amz-hub-hero .wb-tag,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-tag {
+  border-color: rgba(148, 163, 184, 0.24) !important;
+  box-shadow: none;
+}
+
+/* ==================== 智库总览深色主题（Theme dual-safe） ==================== */
+/* Ownership orange/red 保持色相；hero/badge 洗底转低明度 color-mix，文字走语义 token */
+.dark .amz-hub-overview,
+[data-color-mode-resolved='dark'] .amz-hub-overview,
+[data-theme='dark'] .amz-hub-overview {
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark .amz-hub-overview .amz-hub-hero,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero,
+[data-theme='dark'] .amz-hub-overview .amz-hub-hero {
+  background:
+    radial-gradient(
+      circle at 82% 18%,
+      color-mix(in srgb, var(--color-red-600, #dc2626) 16%, transparent),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-orange-500, #f97316) 12%, var(--surface-panel, #0f172a)),
+      var(--surface-panel, #0f172a) 54%,
+      color-mix(in srgb, var(--color-red-600, #dc2626) 10%, var(--surface-panel, #0f172a))
+    ) !important;
+  --wb-text-primary: var(--color-text-primary, #f8fafc) !important;
+  --wb-text-secondary: var(--color-text-secondary, #cbd5e1) !important;
+  --wb-tag-bg: color-mix(in srgb, var(--surface-card, #1e293b) 78%, transparent) !important;
+}
+
+.dark .amz-hub-overview .amz-hub-hero .wb-title,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-title,
+[data-theme='dark'] .amz-hub-overview .amz-hub-hero .wb-title {
+  color: var(--color-text-primary, #f8fafc) !important;
+}
+
+.dark .amz-hub-overview .amz-hub-hero .wb-badge,
+[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-badge,
+[data-theme='dark'] .amz-hub-overview .amz-hub-hero .wb-badge {
+  background: color-mix(
+    in srgb,
+    var(--color-orange-500, #f97316) 16%,
+    var(--surface-card, #1e293b)
+  ) !important;
+  color: var(--color-orange-300, #fdba74) !important;
 }

@@ -53,3 +53,49 @@
   );
   color: var(--color-primary-dark, var(--color-blue-700, #1d4ed8));
 }
+
+/* ==================== 暗色模式适配 ==================== */
+.dark .ppc-search-terms-filter-btn,
+[data-color-mode-resolved='dark'] .ppc-search-terms-filter-btn {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  background: var(--surface-card, #1e293b);
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .ppc-search-terms-filter-btn:hover,
+[data-color-mode-resolved='dark'] .ppc-search-terms-filter-btn:hover {
+  background: var(--surface-card-hover, #334155);
+}
+
+.dark .ppc-search-terms-filter-btn.active,
+[data-color-mode-resolved='dark'] .ppc-search-terms-filter-btn.active {
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary, var(--color-blue-400, #60a5fa)) 55%,
+    transparent
+  );
+  background: color-mix(
+    in srgb,
+    var(--color-primary, var(--color-blue-400, #60a5fa)) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .ppc-search-terms-filter-count,
+[data-color-mode-resolved='dark'] .ppc-search-terms-filter-count {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .ppc-search-terms-filter-btn.active .ppc-search-terms-filter-count,
+[data-color-mode-resolved='dark']
+  .ppc-search-terms-filter-btn.active
+  .ppc-search-terms-filter-count {
+  background: color-mix(
+    in srgb,
+    var(--color-primary, var(--color-blue-400, #60a5fa)) 24%,
+    transparent
+  );
+  color: var(--color-blue-200, #bfdbfe);
+}

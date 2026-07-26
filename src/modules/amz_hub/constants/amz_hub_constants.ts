@@ -18,17 +18,7 @@ export interface CountryData {
  * 注意：英国使用 GB（非 uk），与营销日历保持一致
  */
 export type CountryCode =
-  | 'DE'
-  | 'GB'
-  | 'FR'
-  | 'IT'
-  | 'ES'
-  | 'NL'
-  | 'SE'
-  | 'PL'
-  | 'BE'
-  | 'TR'
-  | 'IE';
+  'DE' | 'GB' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'TR' | 'IE';
 
 /**
  * 欧洲国家画像数据
@@ -136,7 +126,8 @@ export const A10_CHART_DATA: ChartData = {
   datasets: [
     {
       data: [35, 25, 20, 10, 5, 5],
-      backgroundColor: ['#1E293B', '#F59E0B', '#10B981', '#6366F1', '#3B82F6', '#94A3B8'],
+      // slate-500: readable on light card and dark card (was #1E293B, invisible in dark theme)
+      backgroundColor: ['#64748B', '#F59E0B', '#10B981', '#6366F1', '#3B82F6', '#94A3B8'],
       borderWidth: 0,
       hoverOffset: 4,
     },

@@ -995,17 +995,17 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 
   #sops_content_area .module-container > * + *:where([class*='from-blue-50']),
   #sops_content_area .module-container > * + * :where([class*='from-blue-50']) {
-    background-color: var(--color-blue-50, #eff6ff) !important;
+    background-color: var(--wash-blue, #eff6ff) !important;
   }
 
   #sops_content_area .module-container > * + *:where([class*='from-indigo-50']),
   #sops_content_area .module-container > * + * :where([class*='from-indigo-50']) {
-    background-color: var(--color-indigo-50, #eef2ff) !important;
+    background-color: var(--wash-indigo, #eef2ff) !important;
   }
 
   #sops_content_area .module-container > * + *:where([class*='from-emerald-50']),
   #sops_content_area .module-container > * + * :where([class*='from-emerald-50']) {
-    background-color: var(--color-emerald-50, #ecfdf5) !important;
+    background-color: var(--wash-emerald, #ecfdf5) !important;
   }
 
   #sops_content_area
@@ -1017,7 +1017,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where([class*='from-amber-50'], [class*='from-orange-50'], [class*='from-yellow-50']) {
-    background-color: var(--color-amber-50, #fffbeb) !important;
+    background-color: var(--wash-amber, #fffbeb) !important;
   }
 
   #sops_content_area
@@ -1029,7 +1029,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where([class*='from-red-50'], [class*='from-rose-50']) {
-    background-color: var(--color-red-50, #fef2f2) !important;
+    background-color: var(--wash-red, #fef2f2) !important;
   }
 
   #sops_content_area
@@ -1041,7 +1041,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where([class*='from-purple-50'], [class*='from-pink-50']) {
-    background-color: var(--color-purple-50, #faf5ff) !important;
+    background-color: var(--wash-purple, #faf5ff) !important;
   }
 
   #sops_content_area
@@ -1053,7 +1053,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where([class*='from-teal-50'], [class*='from-cyan-50']) {
-    background-color: var(--color-teal-50, #f0fdfa) !important;
+    background-color: var(--wash-teal, #f0fdfa) !important;
   }
 
   #sops_content_area
@@ -1065,7 +1065,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where([class*='from-slate-50'], [class*='from-gray-']) {
-    background-color: var(--color-slate-50, #f8fafc) !important;
+    background-color: var(--wash-neutral, #f8fafc) !important;
   }
 
   #sops_content_area .module-container > * + *:where([class*='bg-gradient-to-'].text-white),
@@ -1170,4 +1170,130 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   #sops_content_area .sop-process-arrow {
     width: 1rem;
   }
+}
+
+/* ==================== 暗色主题收口 ====================
+   overview hero / scope note 浅紫岛 -> surface + violet tint；
+   qwen 软 token 深色重定义（badge / hover 面自动跟随）。
+   色相保持 qwen violet 归属，仅明度切换。
+   内容区渐变壳的深色对照由 --wash-* token 完成（variables.css）。 */
+.dark .sops-overview,
+[data-color-mode-resolved='dark'] .sops-overview {
+  --sops-qwen-soft: color-mix(in srgb, var(--sops-qwen-violet) 16%, var(--surface-card));
+  --sops-qwen-surface: color-mix(in srgb, var(--sops-qwen-violet) 10%, var(--surface-panel));
+  --sops-qwen-border: color-mix(in srgb, var(--sops-qwen-violet) 34%, transparent);
+}
+
+.dark .sops-overview .wb-container--simple,
+[data-color-mode-resolved='dark'] .sops-overview .wb-container--simple {
+  background:
+    radial-gradient(circle at 82% 18%, rgba(98, 87, 245, 0.2), transparent 32%),
+    radial-gradient(circle at 18% 8%, rgba(6, 182, 212, 0.1), transparent 28%),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--sops-qwen-violet) 14%, var(--surface-card)),
+      var(--surface-card) 54%,
+      color-mix(in srgb, var(--sops-qwen-blue) 10%, var(--surface-card))
+    ) !important;
+  box-shadow: var(--shadow-panel, 0 18px 40px -32px rgba(0, 0, 0, 0.6)) !important;
+  --wb-tag-bg: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .sops-overview-scope-note,
+[data-color-mode-resolved='dark'] .sops-overview-scope-note {
+  background: color-mix(in srgb, var(--sops-qwen-violet) 12%, var(--surface-card)) !important;
+}
+
+.dark .sops-overview-scope-note h3,
+[data-color-mode-resolved='dark'] .sops-overview-scope-note h3 {
+  color: var(--color-indigo-200) !important;
+}
+
+/* ==================== 深色主题（Theme dual-safe） ==================== */
+/* Ownership violet 保持色相，soft/surface 改为低明度 color-mix；文字走语义 token */
+.dark .sops-overview,
+[data-color-mode-resolved='dark'] .sops-overview,
+[data-theme='dark'] .sops-overview {
+  --sops-qwen-soft: color-mix(in srgb, var(--sops-qwen-violet) 16%, var(--surface-panel, #0f172a));
+  --sops-qwen-surface: color-mix(
+    in srgb,
+    var(--sops-qwen-violet) 10%,
+    var(--surface-panel, #0f172a)
+  );
+}
+
+.dark .sops-overview-scope-note,
+[data-color-mode-resolved='dark'] .sops-overview-scope-note,
+[data-theme='dark'] .sops-overview-scope-note {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--sops-qwen-violet) 14%, var(--surface-card, #1e293b)),
+    color-mix(in srgb, var(--sops-qwen-blue) 10%, var(--surface-card, #1e293b))
+  ) !important;
+}
+
+.dark .sops-overview-scope-note h3,
+[data-color-mode-resolved='dark'] .sops-overview-scope-note h3,
+[data-theme='dark'] .sops-overview-scope-note h3 {
+  color: var(--color-text-primary, #f8fafc) !important;
+}
+
+.dark .sops-overview-scope-note p,
+[data-color-mode-resolved='dark'] .sops-overview-scope-note p,
+[data-theme='dark'] .sops-overview-scope-note p {
+  color: var(--color-text-secondary, #cbd5e1) !important;
+}
+
+.dark .sops-overview-scope-note i,
+[data-color-mode-resolved='dark'] .sops-overview-scope-note i,
+[data-theme='dark'] .sops-overview-scope-note i {
+  color: color-mix(in srgb, var(--sops-qwen-violet) 65%, #ffffff) !important;
+}
+
+.dark .sops-overview-topic-badge,
+[data-color-mode-resolved='dark'] .sops-overview-topic-badge,
+[data-theme='dark'] .sops-overview-topic-badge {
+  color: color-mix(in srgb, var(--sops-qwen-violet) 62%, #ffffff) !important;
+}
+
+.dark .sops-collapsible-action,
+[data-color-mode-resolved='dark'] .sops-collapsible-action,
+[data-theme='dark'] .sops-collapsible-action {
+  background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.06));
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .sops-overview .wb-container--simple,
+[data-color-mode-resolved='dark'] .sops-overview .wb-container--simple,
+[data-theme='dark'] .sops-overview .wb-container--simple {
+  background:
+    radial-gradient(
+      circle at 82% 18%,
+      color-mix(in srgb, var(--sops-qwen-violet) 18%, transparent),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 18% 8%,
+      color-mix(in srgb, var(--sops-qwen-cyan) 12%, transparent),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--sops-qwen-violet) 14%, var(--surface-panel, #0f172a)),
+      var(--surface-panel, #0f172a) 54%,
+      color-mix(in srgb, var(--sops-qwen-blue) 10%, var(--surface-panel, #0f172a))
+    ) !important;
+  box-shadow: 0 18px 40px -32px rgba(0, 0, 0, 0.8) !important;
+  --wb-tag-bg: color-mix(in srgb, var(--surface-card, #1e293b) 78%, transparent) !important;
+}
+
+.dark .sops-overview .wb-badge,
+[data-color-mode-resolved='dark'] .sops-overview .wb-badge,
+[data-theme='dark'] .sops-overview .wb-badge {
+  background: color-mix(
+    in srgb,
+    var(--sops-qwen-violet) 16%,
+    var(--surface-card, #1e293b)
+  ) !important;
+  color: color-mix(in srgb, var(--sops-qwen-violet) 62%, #ffffff) !important;
 }

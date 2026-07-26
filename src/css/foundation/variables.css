@@ -469,6 +469,16 @@
   --button-primary-active-bg: var(--color-primary-darker);
   --button-primary-fg: var(--color-primary-contrast);
 
+  /* ---- 软色 wash（浅色=色阶50，暗色主题重定义为 tint on surface） ---- */
+  --wash-blue: var(--color-blue-50);
+  --wash-indigo: var(--color-indigo-50);
+  --wash-emerald: var(--color-emerald-50);
+  --wash-amber: var(--color-amber-50);
+  --wash-red: var(--color-red-50);
+  --wash-purple: var(--color-purple-50);
+  --wash-teal: var(--color-teal-50);
+  --wash-neutral: var(--color-slate-50);
+
   /* ---- 模块强调色 ---- */
   --module-accent: var(--color-accent);
   --module-accent-soft: var(--color-accent-light);
@@ -583,6 +593,16 @@
 
   --shadow-up-sm: 0 -1px 3px rgba(0, 0, 0, 0.3), 0 -1px 2px rgba(0, 0, 0, 0.2);
   --shadow-up-md: 0 -4px 6px -1px rgba(0, 0, 0, 0.35), 0 -2px 4px -1px rgba(0, 0, 0, 0.2);
+
+  /* ---- 软色 wash ---- */
+  --wash-blue: color-mix(in srgb, var(--color-blue-400) 12%, var(--surface-card));
+  --wash-indigo: color-mix(in srgb, var(--color-indigo-400) 12%, var(--surface-card));
+  --wash-emerald: color-mix(in srgb, var(--color-emerald-400) 12%, var(--surface-card));
+  --wash-amber: color-mix(in srgb, var(--color-amber-400) 12%, var(--surface-card));
+  --wash-red: color-mix(in srgb, var(--color-red-400) 12%, var(--surface-card));
+  --wash-purple: color-mix(in srgb, var(--color-purple-400) 12%, var(--surface-card));
+  --wash-teal: color-mix(in srgb, var(--color-teal-400) 12%, var(--surface-card));
+  --wash-neutral: var(--surface-panel);
 
   /* ---- 滚动条 ---- */
   --scrollbar-thumb: rgba(255, 255, 255, 0.15);

@@ -1,0 +1,299 @@
+{
+  "version": 1,
+  "scope": "modules",
+  "bgWhite": 196,
+  "textSlate": 2391,
+  "filesScanned": 374,
+  "filesWithHits": 72,
+  "updatedAt": "2026-07-26T13:37:30.922Z",
+  "files": {
+    "src/modules/sops/views/growth/ppc_advertising/template.html": {
+      "bgWhite": 0,
+      "textSlate": 123
+    },
+    "src/modules/amz_hub/views/practice/quality_listing/template.html": {
+      "bgWhite": 0,
+      "textSlate": 116
+    },
+    "src/modules/sops/views/growth/npi_tracker/template.html": {
+      "bgWhite": 13,
+      "textSlate": 99
+    },
+    "src/modules/sops/views/service/negative_review/template.html": {
+      "bgWhite": 2,
+      "textSlate": 106
+    },
+    "src/modules/sops/views/growth/restricted_words/template.html": {
+      "bgWhite": 5,
+      "textSlate": 99
+    },
+    "src/modules/sops/views/service/email_templates/template.html": {
+      "bgWhite": 0,
+      "textSlate": 102
+    },
+    "src/modules/app_center/views/master_analysis/ai_analysis/template.html": {
+      "bgWhite": 7,
+      "textSlate": 88
+    },
+    "src/modules/sops/views/service/qa_maintenance/template.html": {
+      "bgWhite": 0,
+      "textSlate": 94
+    },
+    "src/modules/amz_hub/views/advanced/conversion_optimization/template.html": {
+      "bgWhite": 9,
+      "textSlate": 81
+    },
+    "src/modules/more/views/business_scenarios/bad_review_response/template.html": {
+      "bgWhite": 3,
+      "textSlate": 87
+    },
+    "src/modules/sops/views/growth/promotion_submission/template.html": {
+      "bgWhite": 3,
+      "textSlate": 83
+    },
+    "src/modules/more/views/business_scenarios/amazon_daily_report/template.html": {
+      "bgWhite": 3,
+      "textSlate": 80
+    },
+    "src/modules/sops/views/growth/listing_seo/template.html": {
+      "bgWhite": 5,
+      "textSlate": 70
+    },
+    "src/modules/app_center/views/master_analysis/promptlab/template.html": {
+      "bgWhite": 5,
+      "textSlate": 66
+    },
+    "src/modules/app_center/views/master_analysis/scraper/template.html": {
+      "bgWhite": 11,
+      "textSlate": 60
+    },
+    "src/modules/amz_hub/views/advanced/mature_phase/template.html": {
+      "bgWhite": 12,
+      "textSlate": 56
+    },
+    "src/modules/more/views/business_scenarios/review_monitor/template.html": {
+      "bgWhite": 3,
+      "textSlate": 63
+    },
+    "src/modules/more/views/business_scenarios/ad_acos_diagnosis/template.html": {
+      "bgWhite": 3,
+      "textSlate": 61
+    },
+    "src/modules/sops/views/growth/competitor_monitoring/template.html": {
+      "bgWhite": 5,
+      "textSlate": 55
+    },
+    "src/modules/sops/views/safety/eu_gpsr_compliance/template.html": {
+      "bgWhite": 0,
+      "textSlate": 56
+    },
+    "src/modules/more/views/explore/agents/template.html": {
+      "bgWhite": 6,
+      "textSlate": 47
+    },
+    "src/modules/sops/views/safety/brand_infringement/template.html": {
+      "bgWhite": 2,
+      "textSlate": 50
+    },
+    "src/modules/amz_hub/views/knowledge/seo_strategy/template.html": {
+      "bgWhite": 0,
+      "textSlate": 50
+    },
+    "src/modules/amz_hub/views/knowledge/eu_insights/template.html": {
+      "bgWhite": 1,
+      "textSlate": 48
+    },
+    "src/modules/sops/views/backend/fba_shipping/template.html": {
+      "bgWhite": 5,
+      "textSlate": 41
+    },
+    "src/modules/sops/views/safety/product_compliance/template.html": {
+      "bgWhite": 1,
+      "textSlate": 40
+    },
+    "src/modules/app_center/views/keyword_hunter/process/template.html": {
+      "bgWhite": 5,
+      "textSlate": 27
+    },
+    "src/modules/sops/views/backend/inventory_replenishment/template.html": {
+      "bgWhite": 1,
+      "textSlate": 31
+    },
+    "src/modules/more/views/explore/prompts/template.html": {
+      "bgWhite": 1,
+      "textSlate": 30
+    },
+    "src/modules/sops/views/safety/permission_management/template.html": {
+      "bgWhite": 1,
+      "textSlate": 30
+    },
+    "src/modules/amz_hub/views/practice/promo_activities/template.html": {
+      "bgWhite": 10,
+      "textSlate": 17
+    },
+    "src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts": {
+      "bgWhite": 8,
+      "textSlate": 19
+    },
+    "src/modules/sops/views/safety/account_security/template.html": {
+      "bgWhite": 1,
+      "textSlate": 25
+    },
+    "src/modules/sops/views/safety/performance_notification/template.html": {
+      "bgWhite": 1,
+      "textSlate": 24
+    },
+    "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": {
+      "bgWhite": 1,
+      "textSlate": 23
+    },
+    "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts": {
+      "bgWhite": 2,
+      "textSlate": 21
+    },
+    "src/modules/sops/views/backend/procurement_qc/template.html": {
+      "bgWhite": 1,
+      "textSlate": 22
+    },
+    "src/modules/more/views/business_scenarios/usage_notice/template.html": {
+      "bgWhite": 0,
+      "textSlate": 22
+    },
+    "src/modules/more/views/explore/skills/template.html": {
+      "bgWhite": 2,
+      "textSlate": 20
+    },
+    "src/modules/app_center/views/ppc_tools/ppc_search_terms/template.html": {
+      "bgWhite": 0,
+      "textSlate": 21
+    },
+    "src/modules/amz_hub/views/advanced/new_product_30days/template.html": {
+      "bgWhite": 3,
+      "textSlate": 15
+    },
+    "src/modules/amz_hub/views/knowledge/ecosystem/template.html": {
+      "bgWhite": 5,
+      "textSlate": 12
+    },
+    "src/modules/amz_hub/views/practice/marketing_calendar/template.html": {
+      "bgWhite": 5,
+      "textSlate": 10
+    },
+    "src/modules/amz_hub/views/practice/promo_tools/template.html": {
+      "bgWhite": 5,
+      "textSlate": 10
+    },
+    "src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanel.ts": {
+      "bgWhite": 6,
+      "textSlate": 9
+    },
+    "src/modules/app_center/views/keyword_hunter/analysis/template.html": {
+      "bgWhite": 1,
+      "textSlate": 10
+    },
+    "src/modules/app_center/views/keyword_hunter/process/index.ts": {
+      "bgWhite": 0,
+      "textSlate": 11
+    },
+    "src/modules/app_center/views/keyword_hunter/input/template.html": {
+      "bgWhite": 4,
+      "textSlate": 6
+    },
+    "src/modules/app_center/views/master_analysis/scraper/components/ScraperPanel.ts": {
+      "bgWhite": 1,
+      "textSlate": 9
+    },
+    "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts": {
+      "bgWhite": 2,
+      "textSlate": 6
+    },
+    "src/modules/amz_hub/views/practice/quality_listing/styles.css": {
+      "bgWhite": 7,
+      "textSlate": 0
+    },
+    "src/modules/app_center/views/keyword_hunter/analysis/index.ts": {
+      "bgWhite": 2,
+      "textSlate": 4
+    },
+    "src/modules/app_center/views/master_analysis/promptlab/components/uiHelpers.ts": {
+      "bgWhite": 2,
+      "textSlate": 4
+    },
+    "src/modules/more/views/explore/prompts/index.ts": {
+      "bgWhite": 0,
+      "textSlate": 6
+    },
+    "src/modules/more/views/explore/skills/index.ts": {
+      "bgWhite": 1,
+      "textSlate": 5
+    },
+    "src/modules/amz_hub/views/knowledge/eu_insights/index.ts": {
+      "bgWhite": 0,
+      "textSlate": 5
+    },
+    "src/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel.ts": {
+      "bgWhite": 0,
+      "textSlate": 5
+    },
+    "src/modules/app_center/views/master_analysis/ai_analysis/components/PerformanceSettings.ts": {
+      "bgWhite": 2,
+      "textSlate": 2
+    },
+    "src/modules/sops/views/growth/npi_tracker/index.ts": {
+      "bgWhite": 1,
+      "textSlate": 2
+    },
+    "src/modules/amz_hub/views/advanced/conversion_optimization/styles.css": {
+      "bgWhite": 2,
+      "textSlate": 0
+    },
+    "src/modules/amz_hub/views/advanced/mature_phase/styles.css": {
+      "bgWhite": 2,
+      "textSlate": 0
+    },
+    "src/modules/amz_hub/views/advanced/new_product_30days/styles.css": {
+      "bgWhite": 2,
+      "textSlate": 0
+    },
+    "src/modules/app_center/views/ppc_tools/ppc_search_terms/results/resultsRow.ts": {
+      "bgWhite": 0,
+      "textSlate": 2
+    },
+    "src/modules/more/more_style.css": {
+      "bgWhite": 2,
+      "textSlate": 0
+    },
+    "src/modules/amz_hub/views/knowledge/ecosystem/styles.css": {
+      "bgWhite": 1,
+      "textSlate": 0
+    },
+    "src/modules/amz_hub/views/knowledge/eu_insights/styles.css": {
+      "bgWhite": 1,
+      "textSlate": 0
+    },
+    "src/modules/amz_hub/views/knowledge/seo_strategy/styles.css": {
+      "bgWhite": 1,
+      "textSlate": 0
+    },
+    "src/modules/app_center/views/master_analysis/ai_analysis/services/reportGenerator.ts": {
+      "bgWhite": 0,
+      "textSlate": 1
+    },
+    "src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts": {
+      "bgWhite": 0,
+      "textSlate": 1
+    },
+    "src/modules/app_center/views/playground/deep-chat/integrations/handoffs.ts": {
+      "bgWhite": 0,
+      "textSlate": 1
+    },
+    "src/modules/app_center/views/playground/deep-chat/template.html": {
+      "bgWhite": 0,
+      "textSlate": 1
+    },
+    "src/modules/app_center/views/ppc_tools/ppc_search_terms/settings/thresholdFieldsRenderer.ts": {
+      "bgWhite": 0,
+      "textSlate": 1
+    }
+  }
+}

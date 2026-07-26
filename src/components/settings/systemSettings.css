@@ -17,6 +17,16 @@
   --settings-focus-ring: 0 0 0 3px color-mix(in srgb, var(--settings-focus-color) 25%, transparent);
 }
 
+/* Dark theme: accent soft/strong re-derived from the Accent hue itself —
+ * primary-light/dark tokens are light-mode ladders (minimal → slate-100)
+ * and would render near-white chips / too-dark text on dark surfaces. */
+.dark .settings-panel-root,
+[data-color-mode-resolved='dark'] .settings-panel-root,
+[data-theme='dark'] .settings-panel-root {
+  --settings-accent-soft: color-mix(in srgb, var(--settings-accent) 22%, transparent);
+  --settings-accent-strong: color-mix(in srgb, var(--settings-accent) 60%, #ffffff);
+}
+
 /* Drawer shell: panel elevation + soft footer gradient (not hard white). */
 .settings-panel-shell {
   background: linear-gradient(
@@ -443,7 +453,7 @@
 
 .settings-badge--scrape {
   background: color-mix(in srgb, #06b6d4 14%, var(--settings-surface));
-  color: #0891b2;
+  color: color-mix(in srgb, #06b6d4 70%, var(--settings-text));
 }
 
 .settings-badge--destructive {
@@ -458,12 +468,12 @@
 
 .settings-badge--instant {
   background: color-mix(in srgb, #8b5cf6 12%, var(--settings-surface));
-  color: #7c3aed;
+  color: color-mix(in srgb, #7c3aed 72%, var(--settings-text));
 }
 
 .settings-badge--global {
   background: color-mix(in srgb, #6366f1 12%, var(--settings-surface));
-  color: #4f46e5;
+  color: color-mix(in srgb, #6366f1 70%, var(--settings-text));
 }
 
 /* Runtime strategy preset buttons (P1-6) — full width equal columns */
@@ -850,7 +860,7 @@ select.settings-control {
   margin-top: 0.375rem;
   font-size: 0.625rem;
   line-height: 1.5;
-  color: #64748b;
+  color: var(--settings-text-muted);
 }
 
 .settings-field-help--mono {
@@ -858,11 +868,11 @@ select.settings-control {
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
     monospace;
   word-break: break-all;
-  color: #64748b;
+  color: var(--settings-text-muted);
 }
 
 .settings-field-help--hint {
-  color: #b45309;
+  color: var(--color-warning-dark, #b45309);
 }
 
 /* Appearance section — dense ops panel (ui-ux-pro-max: minimal + high density) */
@@ -912,7 +922,7 @@ select.settings-control {
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--settings-text);
   line-height: 1.3;
 }
 
@@ -920,7 +930,7 @@ select.settings-control {
   margin: 0.15rem 0 0;
   font-size: 0.6875rem;
   font-weight: 400;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
   line-height: 1.4;
 }
 
@@ -957,7 +967,7 @@ select.settings-control {
   width: 2.5rem;
   height: 1.375rem;
   border-radius: 9999px;
-  background: #e2e8f0;
+  background: color-mix(in srgb, var(--settings-text-muted) 24%, var(--settings-surface));
   transition: background 150ms ease;
   position: relative;
 }
@@ -970,13 +980,13 @@ select.settings-control {
   width: 1.125rem;
   height: 1.125rem;
   border-radius: 9999px;
-  background: #fff;
+  background: var(--settings-surface);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
   transition: transform 150ms ease;
 }
 
 .settings-switch input:checked + .settings-switch__track {
-  background: #334155;
+  background: var(--settings-text);
 }
 
 .settings-switch input:checked + .settings-switch__track::after {
@@ -1015,9 +1025,9 @@ select.settings-control {
 }
 
 .settings-submodule {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--settings-border);
   border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.9);
+  background: color-mix(in srgb, var(--settings-surface) 90%, transparent);
   padding: 0;
   overflow: visible;
 }
@@ -1035,7 +1045,7 @@ details.settings-submodule > summary.settings-submodule__head::-webkit-details-m
 }
 
 details.settings-submodule[open] > summary.settings-submodule__head {
-  border-bottom-color: #f1f5f9;
+  border-bottom-color: var(--color-border-light, #f1f5f9);
 }
 
 .settings-submodule__body {
@@ -1046,18 +1056,18 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   margin: 0;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--settings-text);
 }
 
 .settings-submodule__desc {
   margin: 0.15rem 0 0;
   font-size: 0.625rem;
   font-weight: 400;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
 }
 
 .settings-preset-panel {
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--color-border-light, #f1f5f9);
   padding-top: 0.75rem;
 }
 
@@ -1098,14 +1108,14 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 .settings-schedule-select__label {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #334155;
+  color: var(--settings-text);
   line-height: 1.25;
 }
 
 .settings-schedule-select__hint {
   font-size: 0.625rem;
   font-weight: 400;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
   line-height: 1.3;
 }
 
@@ -1120,7 +1130,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   list-style: none;
   border: 1px solid var(--settings-border, #e2e8f0);
   border-radius: var(--settings-radius-control, 0.75rem);
-  background: #fff;
+  background: var(--settings-surface);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
   max-height: 16rem;
   overflow: auto;
@@ -1142,7 +1152,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 
 .settings-schedule-select__option:hover,
 .settings-schedule-select__option:focus-visible {
-  background: #f8fafc;
+  background: var(--settings-surface-muted);
   outline: none;
 }
 
@@ -1156,9 +1166,9 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 
 /* ---- LLM setup: numbered steps 1–4 (collapsible, default closed) ---- */
 .settings-llm-step {
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border: 1px solid color-mix(in srgb, var(--settings-border) 90%, transparent);
   border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  background: rgba(255, 255, 255, 0.78);
+  background: color-mix(in srgb, var(--settings-surface) 78%, transparent);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   /* visible so API-path dropdown is not clipped */
   overflow: visible;
@@ -1176,7 +1186,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 }
 
 .settings-llm-step[open] > summary.settings-llm-step__header {
-  border-bottom-color: rgba(241, 245, 249, 0.95);
+  border-bottom-color: color-mix(in srgb, var(--color-border-light, #f1f5f9) 95%, transparent);
   border-radius: var(--settings-radius-card, var(--workbench-radius, 8px))
     var(--settings-radius-card, var(--workbench-radius, 8px)) 0 0;
 }
@@ -1186,7 +1196,11 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   align-items: center;
   gap: 0.625rem;
   padding: 0.75rem 0.875rem;
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.4));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--settings-surface-muted) 90%, transparent),
+    color-mix(in srgb, var(--settings-surface) 40%, transparent)
+  );
 }
 
 /* Real FA icon — more reliable than CSS content \f078 */
@@ -1203,7 +1217,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 .settings-llm-step__title {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--settings-text);
   line-height: 1.25;
 }
 
@@ -1211,7 +1225,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   margin-top: 0.125rem;
   font-size: 0.625rem;
   line-height: 1.45;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
 }
 
 .settings-llm-step__body {
@@ -1283,9 +1297,9 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   width: 100%;
   min-height: 2.625rem;
   box-sizing: border-box;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--settings-border);
   border-radius: 0.75rem;
-  background: #fff;
+  background: var(--settings-surface);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition:
     border-color 200ms ease,
@@ -1293,7 +1307,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 }
 
 .settings-api-path-trigger:hover {
-  border-color: #cbd5e1;
+  border-color: var(--color-border-strong, #cbd5e1);
 }
 
 .settings-api-path-trigger:focus,
@@ -1311,7 +1325,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 .settings-api-path-trigger__path {
   flex: 1 1 auto;
   min-width: 0;
-  color: #475569;
+  color: var(--settings-text);
   font-size: 0.75rem;
   line-height: 1.3;
   white-space: nowrap;
@@ -1320,7 +1334,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 }
 
 .settings-api-path-chevron {
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
 }
 
 .settings-api-path-menu {
@@ -1331,11 +1345,11 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   min-width: 100%;
   max-width: min(26rem, 88vw);
   z-index: 40;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--settings-border);
   border-radius: 0.75rem;
-  background: #fff;
+  background: var(--settings-surface);
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: var(--scrollbar-thumb, #cbd5e1) transparent;
   box-shadow:
     0 10px 28px rgba(15, 23, 42, 0.1),
     0 2px 6px rgba(15, 23, 42, 0.06);
@@ -1360,7 +1374,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 
 .settings-api-path-option:hover,
 .settings-api-path-option:focus-visible {
-  background: #f8fafc;
+  background: var(--settings-surface-muted);
   outline: none;
 }
 
@@ -1369,7 +1383,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   display: block;
   width: 100%;
   min-width: 0;
-  color: #334155;
+  color: var(--settings-text);
   font-size: 0.8125rem;
   line-height: 1.35;
   word-break: break-all;
@@ -1379,7 +1393,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 .settings-api-path-option__desc {
   display: block;
   width: 100%;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
   font-size: 0.625rem;
   font-weight: 400;
   line-height: 1.35;
@@ -1389,27 +1403,31 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 }
 
 .settings-api-path-option.is-selected {
-  background: rgba(245, 243, 255, 0.95);
+  background: color-mix(in srgb, #8b5cf6 10%, var(--settings-surface));
 }
 
 .settings-api-path-option.is-selected:hover,
 .settings-api-path-option.is-selected:focus-visible {
-  background: rgba(237, 233, 254, 0.95);
+  background: color-mix(in srgb, #8b5cf6 16%, var(--settings-surface));
 }
 
 .settings-api-path-option.is-selected .settings-api-path-option__path {
-  color: #5b21b6;
+  color: color-mix(in srgb, #7c3aed 72%, var(--settings-text));
 }
 
 .settings-api-path-option.is-selected .settings-api-path-option__desc {
-  color: #a78bfa;
+  color: color-mix(in srgb, #8b5cf6 55%, var(--settings-text-muted));
 }
 
 /* Reasoning card redesign */
 .settings-reasoning-card {
-  border: 1px solid rgba(221, 214, 254, 0.85);
+  border: 1px solid color-mix(in srgb, #8b5cf6 24%, var(--settings-border));
   border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  background: linear-gradient(145deg, rgba(245, 243, 255, 0.72), rgba(255, 255, 255, 0.95));
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, #8b5cf6 7%, var(--settings-surface)),
+    color-mix(in srgb, var(--settings-surface) 95%, transparent)
+  );
   padding: 0.875rem;
   box-shadow: 0 1px 2px rgba(91, 33, 182, 0.04);
 }
@@ -1430,7 +1448,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   flex-shrink: 0;
   border-radius: 0.5rem;
   background: rgba(139, 92, 246, 0.1);
-  color: #7c3aed;
+  color: color-mix(in srgb, #7c3aed 72%, var(--settings-text));
   font-size: 0.6875rem;
 }
 
@@ -1447,7 +1465,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   width: 2.5rem;
   height: 1.375rem;
   border-radius: 9999px;
-  background: #e2e8f0;
+  background: color-mix(in srgb, var(--settings-text-muted) 24%, var(--settings-surface));
   transition: background-color 160ms ease;
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
 }
@@ -1463,7 +1481,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   width: 1.125rem;
   height: 1.125rem;
   border-radius: 9999px;
-  background: #fff;
+  background: var(--settings-surface);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.14);
   transition: transform 160ms ease;
 }
@@ -1475,7 +1493,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 .settings-reasoning-card__effort {
   margin-top: 0.875rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(221, 214, 254, 0.65);
+  border-top: 1px solid color-mix(in srgb, #8b5cf6 18%, var(--settings-border));
 }
 
 /* Label + effort segmented side-by-side (like appearance animation speed) */
@@ -1516,8 +1534,8 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   gap: 0.3125rem;
   padding: 0.3125rem;
   border-radius: 0.75rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--color-bg-tertiary, #f1f5f9);
+  border: 1px solid var(--settings-border);
 }
 
 .settings-reasoning-effort__btn {
@@ -1531,7 +1549,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   border: 1px solid transparent;
   border-radius: 0.55rem;
   background: transparent;
-  color: #64748b;
+  color: var(--settings-text-muted);
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
     monospace;
@@ -1549,15 +1567,15 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 }
 
 .settings-reasoning-effort__btn:hover {
-  color: #334155;
-  background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(226, 232, 240, 0.9);
+  color: var(--settings-text);
+  background: color-mix(in srgb, var(--settings-surface) 72%, transparent);
+  border-color: color-mix(in srgb, var(--settings-border) 90%, transparent);
 }
 
 .settings-reasoning-effort__btn.is-active {
-  background: #ffffff;
-  color: #5b21b6;
-  border-color: #c4b5fd;
+  background: var(--settings-surface);
+  color: color-mix(in srgb, #7c3aed 72%, var(--settings-text));
+  border-color: color-mix(in srgb, #8b5cf6 45%, var(--settings-border));
   box-shadow:
     0 1px 2px rgba(91, 33, 182, 0.08),
     0 0 0 1px rgba(167, 139, 250, 0.35);
@@ -1587,9 +1605,9 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 /* Collapsible app / data cards — match llm-step cards */
 .settings-tool-app,
 .settings-collapsible-card {
-  border: 1px solid rgba(226, 232, 240, 0.95);
+  border: 1px solid color-mix(in srgb, var(--settings-border) 95%, transparent);
   border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  background: rgba(255, 255, 255, 0.9);
+  background: color-mix(in srgb, var(--settings-surface) 90%, transparent);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   overflow: hidden;
 }
@@ -1617,7 +1635,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 .settings-tool-app-summary:focus-visible,
 .settings-collapsible-summary:hover,
 .settings-collapsible-summary:focus-visible {
-  background: rgba(248, 250, 252, 0.95);
+  background: color-mix(in srgb, var(--settings-surface-muted) 95%, transparent);
   outline: none;
 }
 
@@ -1630,7 +1648,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
   transition: transform 160ms ease;
 }
 
@@ -1645,7 +1663,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 .settings-scrape-runtime {
   margin-top: 0.25rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--color-border-light, #f1f5f9);
 }
 
 .settings-scrape-runtime__head {
@@ -1660,7 +1678,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   margin: 0;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--settings-text);
 }
 
 /* ---- 数据采集：连接方式 | 密钥 + 测试 | 保存（dense dual-column form） ---- */
@@ -1736,8 +1754,8 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 0.375rem;
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: var(--color-bg-tertiary, #f1f5f9);
+  color: var(--color-text-tertiary, #94a3b8);
   font-size: 0.5625rem;
 }
 
@@ -1754,13 +1772,13 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   border: 0;
   border-radius: 0.5rem;
   background: transparent;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
   cursor: pointer;
 }
 
 .settings-proxy-form__eye:hover {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--color-bg-tertiary, #f1f5f9);
+  color: var(--settings-text-muted);
 }
 
 .settings-proxy-form__eye:focus-visible {
@@ -1795,14 +1813,14 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 }
 
 .settings-proxy-form__btn--test {
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  color: #334155;
+  border: 1px solid var(--settings-border);
+  background: var(--settings-surface);
+  color: var(--settings-text);
 }
 
 .settings-proxy-form__btn--test:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--settings-surface-muted);
+  border-color: var(--color-border-strong, #cbd5e1);
 }
 
 .settings-proxy-form__btn--test:disabled {
@@ -1812,12 +1830,16 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 
 .settings-proxy-form__btn--save {
   border: 1px solid transparent;
-  background: #0f172a;
-  color: #fff;
+  background: var(--color-text-primary, #0f172a);
+  color: var(--color-bg-elevated, #ffffff);
 }
 
 .settings-proxy-form__btn--save:hover {
-  background: #1e293b;
+  background: color-mix(
+    in srgb,
+    var(--color-text-primary, #0f172a) 88%,
+    var(--color-bg-elevated, #ffffff)
+  );
 }
 
 .settings-proxy-form__btn:focus-visible {
@@ -1832,11 +1854,11 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 }
 
 .settings-proxy-form__status.is-ok {
-  color: #059669;
+  color: var(--color-success-dark, #059669);
 }
 
 .settings-proxy-form__status.is-err {
-  color: #e11d48;
+  color: var(--color-error, #e11d48);
 }
 
 /* Narrow panel: stack fields, keep actions dual-column */
@@ -1857,7 +1879,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   gap: 0.5rem;
   margin-top: 0.25rem;
   padding-top: 0.875rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--settings-border);
 }
 
 .settings-strategy-footer__row {
@@ -1902,16 +1924,16 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   flex: 1 1 0;
   min-width: 5.5rem;
   max-width: 9rem;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  color: #475569;
+  border: 1px solid var(--settings-border);
+  background: var(--settings-surface);
+  color: var(--settings-text);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .settings-strategy-footer__btn--secondary:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #1e293b;
+  background: var(--settings-surface-muted);
+  border-color: var(--color-border-strong, #cbd5e1);
+  color: var(--settings-text);
 }
 
 /* Primary: takes remaining space (same weight as AI 连接「保存配置」flex-[2]) */
@@ -1920,7 +1942,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   min-width: 10rem;
   border: 1px solid transparent;
   background: linear-gradient(90deg, var(--settings-accent-strong), var(--settings-accent));
-  color: #fff;
+  color: var(--color-primary-contrast, #fff);
   box-shadow: 0 8px 18px color-mix(in srgb, var(--settings-accent) 22%, transparent);
 }
 
@@ -1943,7 +1965,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   margin: 0;
   font-size: 0.6875rem;
   line-height: 1.45;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
 }
 
 /* Narrow: stack primary full width under secondaries */
@@ -1966,7 +1988,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 }
 
 .settings-collapsible-card > .settings-collapsible-body {
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--color-border-light, #f1f5f9);
 }
 
 /* Import / export actions at bottom of 数据导入与导出 */
@@ -1975,7 +1997,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--color-border-light, #f1f5f9);
 }
 
 .settings-data-io-actions__btn {
@@ -1985,10 +2007,10 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   gap: 0.375rem;
   min-height: 2.5rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--settings-border);
   border-radius: 0.75rem;
-  background: #fff;
-  color: #334155;
+  background: var(--settings-surface);
+  color: var(--settings-text);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -1998,8 +2020,8 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 }
 
 .settings-data-io-actions__btn:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--settings-surface-muted);
+  border-color: var(--color-border-strong, #cbd5e1);
 }
 
 .settings-data-io-actions__btn:disabled {
@@ -2015,8 +2037,8 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 .settings-stat-tile {
   padding: 0.75rem;
   border-radius: 0.75rem;
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid color-mix(in srgb, var(--settings-border) 95%, transparent);
+  background: color-mix(in srgb, var(--settings-surface) 88%, transparent);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
@@ -2026,7 +2048,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
 }
 
 .settings-stat-tile__value {
@@ -2034,7 +2056,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   margin-top: 0.25rem;
   font-size: 0.875rem;
   font-weight: 700;
-  color: #334155;
+  color: var(--settings-text);
   line-height: 1.3;
 }
 
@@ -2042,7 +2064,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
   display: block;
   margin-top: 0.125rem;
   font-size: 0.625rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary, #94a3b8);
 }
 
 .settings-panel-body {
@@ -2133,7 +2155,7 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 }
 
 .settings-local-data-progress[data-bucket='cache'] {
-  --settings-local-data-progress-color: #64748b;
+  --settings-local-data-progress-color: var(--settings-text-muted, #64748b);
 }
 
 .settings-local-data-progress[data-bucket='other'] {

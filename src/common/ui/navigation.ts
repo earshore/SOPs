@@ -169,7 +169,7 @@ function renderDefaultSidebar(
                 const isActive = currentTab === route.id;
                 const activeClasses = isActive
                   ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)] font-semibold'
-                  : 'text-[var(--color-text-secondary,#475569)] hover:bg-[var(--color-bg-hover,rgba(0,0,0,0.04))] hover:text-[var(--color-text-primary,#0f172a)]';
+                  : 'text-[color:var(--color-text-secondary,#475569)] hover:bg-[var(--color-bg-hover,rgba(0,0,0,0.04))] hover:text-[color:var(--color-text-primary,#0f172a)]';
 
                 return `
                 <button type="button" data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"

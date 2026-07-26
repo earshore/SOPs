@@ -10,6 +10,10 @@ coverage
 .lighthouseci
 
 # Generated files
+utility-bridge.generated.css
+design-tokens.generated.ts
+tailwind.config.generated.js
+variables.generated.css
 *.min.js
 *.min.css
 

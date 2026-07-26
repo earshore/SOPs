@@ -49,3 +49,14 @@
   --ppc-search-terms-motion-duration: var(--micro-duration-quick, 150ms);
   --ppc-search-terms-motion-ease: var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
+
+/* 暗色模式：局部 token 提亮（品牌色相不变，仅调明度/透明度） */
+.dark :where(.ppc-search-terms-app),
+[data-color-mode-resolved='dark'] :where(.ppc-search-terms-app) {
+  --ppc-search-terms-info-text: var(--color-blue-300, #93c5fd);
+  --ppc-search-terms-accent-border: color-mix(
+    in srgb,
+    var(--color-emerald-400, #34d399) 28%,
+    transparent
+  );
+}

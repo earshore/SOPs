@@ -98,3 +98,32 @@
   font-size: 0.75rem;
   font-weight: 800;
 }
+
+/* ==================== 暗色模式适配 ==================== */
+.dark .ppc-search-terms-hero,
+[data-color-mode-resolved='dark'] .ppc-search-terms-hero {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-emerald-400, #34d399) 12%, var(--surface-card, #1e293b)) 0%,
+      color-mix(in srgb, var(--color-teal-400, #2dd4bf) 10%, var(--surface-card, #1e293b)) 46%,
+      var(--surface-panel, #0f172a) 100%
+    );
+  background-size:
+    28px 28px,
+    28px 28px,
+    auto;
+}
+
+.dark .ppc-search-terms-hero-icon-badge,
+[data-color-mode-resolved='dark'] .ppc-search-terms-hero-icon-badge {
+  border-color: var(--surface-card, #1e293b);
+}
+
+.dark .ppc-search-terms-hero-eyebrow,
+[data-color-mode-resolved='dark'] .ppc-search-terms-hero-eyebrow {
+  background: color-mix(in srgb, var(--surface-card, #1e293b) 68%, transparent);
+  color: var(--color-emerald-300, #6ee7b7);
+}

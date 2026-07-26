@@ -24,6 +24,7 @@
    ---------------------------------------- */
 @import './foundation/variables.generated.css'; /* 自动生成的设计令牌 */
 @import './foundation/variables.css'; /* 手动维护的变量（逐步迁移） */
+@import './foundation/utility-bridge.generated.css'; /* 自动生成: 存量浅色工具类的深色语义桥 */
 @import './foundation/reset.css';
 
 /* ----------------------------------------

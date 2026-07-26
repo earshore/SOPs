@@ -75,7 +75,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     padding: 0 !important;
     border: none !important;
     background: transparent !important;
-    color: #94a3b8 !important;
+    color: var(--deep-chat-ink-faint, #94a3b8) !important;
     font-family: inherit !important;
     font-size: 12px !important;
     font-weight: 400 !important;
@@ -116,18 +116,18 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .deep-chat-dt-activity-meta {
     margin-left: auto !important;
     padding-left: 0.35rem !important;
-    color: #94a3b8 !important;
+    color: var(--deep-chat-ink-faint, #94a3b8) !important;
     font-size: 11px !important;
     font-weight: 400 !important;
     white-space: nowrap !important;
   }
 
   .deep-chat-dt-activity[data-status='running'] .deep-chat-dt-activity-meta {
-    color: #a85f3f !important;
+    color: var(--deep-chat-accent, #a85f3f) !important;
   }
 
   .deep-chat-dt-activity[data-status='error'] .deep-chat-dt-activity-meta {
-    color: #b91c1c !important;
+    color: var(--deep-chat-danger-ink, #b91c1c) !important;
   }
 
   .deep-chat-dt-activity .deep-chat-dt-toggle.is-static {
@@ -156,7 +156,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     background: transparent !important;
     box-shadow: none !important;
     /* 默认比正文略淡；hover 与正文同色 */
-    color: #94a3b8 !important;
+    color: var(--deep-chat-ink-faint, #94a3b8) !important;
     font-family: inherit !important;
     font-size: 12px !important;
     font-weight: 400 !important;
@@ -177,7 +177,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
 
   .deep-chat-dt-toggle:hover,
   .deep-chat-dt-done-toggle:hover {
-    color: #64748b !important; /* 与 .deep-chat-dt-text 正文同色 */
+    color: var(--deep-chat-ink-muted, #64748b) !important; /* 与 .deep-chat-dt-text 正文同色 */
     background: transparent !important;
   }
 
@@ -202,7 +202,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     width: 14px !important;
     height: 14px !important;
     margin-left: 0.2rem !important;
-    color: #94a3b8 !important;
+    color: var(--deep-chat-ink-faint, #94a3b8) !important;
     opacity: 0.55 !important;
     transform: rotate(0deg) !important;
     transition: opacity 160ms ease, transform 200ms ease, color 160ms ease !important;
@@ -217,7 +217,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .deep-chat-dt-toggle:hover .deep-chat-dt-chevron,
   .deep-chat-dt-done-toggle:hover .deep-chat-dt-chevron {
     opacity: 1 !important;
-    color: #64748b !important;
+    color: var(--deep-chat-ink-muted, #64748b) !important;
   }
 
   .deep-chat-dt-toggle.is-expanded .deep-chat-dt-chevron,
@@ -226,7 +226,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .deep-chat-dt-done-toggle[aria-expanded='true'] .deep-chat-dt-chevron {
     opacity: 1 !important;
     transform: rotate(90deg) !important;
-    color: #64748b !important;
+    color: var(--deep-chat-ink-muted, #64748b) !important;
   }
 
   .deep-chat-dt-done-panel {
@@ -258,7 +258,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     margin: 0.2rem 0 0.15rem !important;
     padding: 0.1rem 0 0.1rem 0.7rem !important;
     border: none !important;
-    border-left: 2px solid rgba(148, 163, 184, 0.65) !important;
+    border-left: 2px solid var(--deep-chat-hairline-strong, rgba(148, 163, 184, 0.65)) !important;
     background: transparent !important;
     box-sizing: border-box !important;
     flex: 0 0 auto !important;
@@ -287,7 +287,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
     font-size: 11px !important;
     line-height: 1.5 !important;
-    color: #64748b !important;
+    color: var(--deep-chat-ink-muted, #64748b) !important;
     box-sizing: border-box !important;
   }
 
@@ -328,11 +328,11 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .message-bubble.user-message {
     max-width: 100% !important;
     padding: 10px 14px !important;
-    border: 1px solid rgba(168, 95, 63, 0.12) !important;
+    border: 1px solid rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.12) !important;
     border-radius: 18px !important;
-    background: linear-gradient(180deg, #fffdfb 0%, var(--deep-chat-accent-soft, #faf3ee) 100%) !important;
-    color: #0f172a !important;
-    box-shadow: 0 1px 2px rgba(168, 95, 63, 0.08) !important;
+    background: linear-gradient(180deg, var(--deep-chat-surface-tint, #fffdfb) 0%, var(--deep-chat-accent-soft, #faf3ee) 100%) !important;
+    color: var(--deep-chat-ink, #0f172a) !important;
+    box-shadow: 0 1px 2px rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.08) !important;
   }
 
   .message-bubble.ai-message {
@@ -344,7 +344,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
-    color: #1e293b !important;
+    color: var(--deep-chat-ink-strong, #1e293b) !important;
     box-shadow: none !important;
   }
 
@@ -402,7 +402,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .message-bubble.ai-message h2,
   .message-bubble.ai-message h3 {
     margin: 18px 0 8px !important;
-    color: #0f172a !important;
+    color: var(--deep-chat-ink, #0f172a) !important;
     font-size: 16px !important;
     line-height: 1.45 !important;
   }
@@ -423,10 +423,10 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .message-bubble.ai-message pre {
     overflow-x: auto !important;
     padding: 12px 14px !important;
-    border: 1px solid rgba(234, 214, 200, 0.9) !important;
+    border: 1px solid var(--deep-chat-border-strong, rgba(234, 214, 200, 0.9)) !important;
     border-radius: 12px !important;
-    background: #fffaf7 !important;
-    color: #334155 !important;
+    background: var(--deep-chat-code-bg, #fffaf7) !important;
+    color: var(--deep-chat-ink-secondary, #334155) !important;
     font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
     font-size: 12px !important;
     line-height: 1.65 !important;
@@ -434,8 +434,8 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
 
   .message-bubble.ai-message code {
     border-radius: 5px !important;
-    background: #faf3ee !important;
-    color: #6f3925 !important;
+    background: var(--deep-chat-accent-soft, #faf3ee) !important;
+    color: var(--deep-chat-accent-ink, #6f3925) !important;
     font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
     font-size: 0.92em !important;
     padding: 1px 5px !important;
@@ -456,14 +456,14 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
    */
   .input-button.inside-end {
     background: var(--deep-chat-accent, #a85f3f) !important;
-    box-shadow: 0 2px 8px rgba(168, 95, 63, 0.28) !important;
+    box-shadow: 0 2px 8px rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.28) !important;
     cursor: pointer !important;
     opacity: 1 !important;
     transition: background 150ms cubic-bezier(0, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0, 0, 0.2, 1) !important;
   }
 
   .input-button.inside-end.disabled-button {
-    background: #94a3b8 !important;
+    background: var(--deep-chat-ink-faint, #94a3b8) !important;
     opacity: 0.82 !important;
     box-shadow: none !important;
     cursor: not-allowed !important;
@@ -532,7 +532,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     align-items: center;
     gap: 10px;
     margin-top: 7px;
-    color: #64748b;
+    color: var(--deep-chat-ink-muted, #64748b);
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 12px;
     line-height: 1;
@@ -553,10 +553,10 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .deep-chat-tool-call {
     margin: 0.5rem 0 !important;
     padding: 0.35rem 0.6rem !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    border: 1px solid var(--deep-chat-hairline, rgba(148, 163, 184, 0.35)) !important;
     border-radius: 10px !important;
-    background: rgba(248, 250, 252, 0.9) !important;
-    color: #64748b !important;
+    background: var(--deep-chat-panel-soft, rgba(248, 250, 252, 0.9)) !important;
+    color: var(--deep-chat-ink-muted, #64748b) !important;
     font-size: 12px !important;
     line-height: 1.45 !important;
   }
@@ -565,7 +565,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     cursor: pointer !important;
     list-style: none !important;
     font-weight: 600 !important;
-    color: #475569 !important;
+    color: var(--deep-chat-ink-label, #475569) !important;
     user-select: none !important;
   }
 
@@ -578,7 +578,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     display: inline-block !important;
     margin-right: 0.35rem !important;
     transition: transform 0.12s ease !important;
-    color: #94a3b8 !important;
+    color: var(--deep-chat-ink-faint, #94a3b8) !important;
   }
 
   .deep-chat-tool-call[open] > summary::before {
@@ -593,22 +593,22 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .deep-chat-message-time {
-    color: #64748b;
+    color: var(--deep-chat-ink-muted, #64748b);
     font-variant-numeric: tabular-nums;
   }
 
   .deep-chat-message-status {
-    color: #b45309;
+    color: var(--deep-chat-warn-ink, #b45309);
     font-weight: 600;
   }
 
   /* Distinct incomplete vs user-stopped so status stays readable after switch/remount */
   .deep-chat-message-status[data-status='partial'] {
-    color: #b45309;
+    color: var(--deep-chat-warn-ink, #b45309);
   }
 
   .deep-chat-message-status[data-status='stopped'] {
-    color: #b91c1c;
+    color: var(--deep-chat-danger-ink, #b91c1c);
   }
 
   .deep-chat-message-tool {
@@ -620,15 +620,15 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border: 0;
     border-radius: 8px;
     background: transparent;
-    color: #64748b;
+    color: var(--deep-chat-ink-muted, #64748b);
     cursor: pointer;
     transition: background 150ms cubic-bezier(0, 0, 0.2, 1), color 150ms cubic-bezier(0, 0, 0.2, 1), border-color 150ms cubic-bezier(0, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
   }
 
   .deep-chat-message-tool:hover,
   .deep-chat-message-tool:focus-visible {
-    background: #faf3ee;
-    color: #8f4f33;
+    background: var(--deep-chat-accent-soft, #faf3ee);
+    color: var(--deep-chat-accent-hover, #8f4f33);
     outline: none;
   }
 
@@ -636,7 +636,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .deep-chat-message-tool.is-disabled {
     opacity: 0.4;
     cursor: not-allowed;
-    color: #94a3b8;
+    color: var(--deep-chat-ink-faint, #94a3b8);
   }
 
   .deep-chat-message-tool:disabled:hover,
@@ -644,7 +644,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .deep-chat-message-tool:disabled:focus-visible,
   .deep-chat-message-tool.is-disabled:focus-visible {
     background: transparent;
-    color: #94a3b8;
+    color: var(--deep-chat-ink-faint, #94a3b8);
   }
 
   /* Emphasize via icon color only — no fill/border so it stays aligned with sibling tools */
@@ -652,15 +652,15 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     background: transparent;
     border: 0;
     box-shadow: none;
-    color: #a85f3f;
+    color: var(--deep-chat-accent, #a85f3f);
   }
 
   .deep-chat-message-tool--emphasized:hover,
   .deep-chat-message-tool--emphasized:focus-visible {
-    background: #faf3ee;
+    background: var(--deep-chat-accent-soft, #faf3ee);
     border: 0;
     box-shadow: none;
-    color: #6f3925;
+    color: var(--deep-chat-accent-ink, #6f3925);
     outline: none;
   }
 
@@ -713,7 +713,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    color: #8f4f33 !important;
+    color: var(--deep-chat-accent-hover, #8f4f33) !important;
     font-size: 0.75rem !important;
     font-weight: 500 !important;
     line-height: 1.35 !important;
@@ -737,22 +737,22 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     min-height: 58px !important;
     max-height: min(42vh, 420px) !important;
     margin: 0 auto !important;
-    border: 1px solid rgba(234, 214, 200, 0.95) !important;
+    border: 1px solid var(--deep-chat-input-border, rgba(234, 214, 200, 0.95)) !important;
     border-radius: 29px !important;
-    background: linear-gradient(180deg, #ffffff 0%, #fffdfb 100%) !important;
+    background: linear-gradient(180deg, var(--deep-chat-surface, #ffffff) 0%, var(--deep-chat-surface-tint, #fffdfb) 100%) !important;
     box-shadow:
       0 1px 2px rgba(15, 23, 42, 0.04),
-      0 8px 20px -16px rgba(168, 95, 63, 0.18) !important;
+      0 8px 20px -16px rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.18) !important;
     /* 容器不滚：发送钮贴底固定；长文在 #text-input 内滚动 */
     overflow: hidden !important;
     transition: border-color 150ms cubic-bezier(0, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0, 0, 0.2, 1) !important;
   }
 
   #text-input-container:focus-within {
-    border-color: rgba(168, 95, 63, 0.42) !important;
+    border-color: rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.42) !important;
     box-shadow:
-      0 0 0 3px rgba(168, 95, 63, 0.14),
-      0 8px 20px -14px rgba(168, 95, 63, 0.2) !important;
+      0 0 0 3px rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.14),
+      0 8px 20px -14px rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.2) !important;
   }
 
   /* 发送后仍显示会话技能；Dock 是 text-input 的兄弟节点，不会被 Deep Chat 读进消息。 */
@@ -791,7 +791,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     /* 相对容器 max-height 留出上下 padding，避免长文被裁切且无法滚动 */
     max-height: min(calc(42vh - 20px), 400px) !important;
     padding: 18px 62px 16px 22px !important;
-    color: #0f172a !important;
+    color: var(--deep-chat-ink, #0f172a) !important;
     font-size: 15px !important;
     line-height: 1.55 !important;
     overflow-x: hidden !important;
@@ -816,9 +816,9 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     margin: 0 0.12em;
     padding: 0.1rem 0.45rem 0.1rem 0.28rem;
     border-radius: 9999px;
-    border: 1px solid rgba(168, 95, 63, 0.28);
-    background: #faf3ee;
-    color: #8f4f33;
+    border: 1px solid rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.28);
+    background: var(--deep-chat-accent-soft, #faf3ee);
+    color: var(--deep-chat-accent-hover, #8f4f33);
     font-size: 0.8125em;
     font-weight: 600;
     line-height: 1.25;
@@ -831,9 +831,9 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
 
   .deep-chat-context-chip--dismissible:hover,
   .deep-chat-context-chip--dismissible:focus-within {
-    border-color: rgba(168, 95, 63, 0.4);
-    background: #ffffff;
-    box-shadow: 0 1px 2px rgba(168, 95, 63, 0.14);
+    border-color: rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.4);
+    background: var(--deep-chat-surface, #ffffff);
+    box-shadow: 0 1px 2px rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.14);
   }
 
   .deep-chat-context-chip__leading {
@@ -852,7 +852,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     justify-content: center;
     width: 100%;
     height: 100%;
-    color: #a85f3f;
+    color: var(--deep-chat-accent, #a85f3f);
     transition: opacity 120ms cubic-bezier(0, 0, 0.2, 1);
   }
 
@@ -876,7 +876,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border: 0;
     border-radius: 9999px;
     background: transparent;
-    color: #8f4f33;
+    color: var(--deep-chat-accent-hover, #8f4f33);
     line-height: 1;
     cursor: pointer;
     opacity: 0;
@@ -900,7 +900,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
 
   .deep-chat-context-chip--dismissible .deep-chat-context-chip__dismiss:hover,
   .deep-chat-context-chip--dismissible .deep-chat-context-chip__dismiss:focus-visible {
-    background: rgba(168, 95, 63, 0.14);
+    background: rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.14);
     outline: none;
   }
 
@@ -917,16 +917,16 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .message-bubble.user-message .deep-chat-context-chip,
   .message-bubble.user-message-text .deep-chat-context-chip,
   .user-message .deep-chat-context-chip {
-    border: 1px solid rgba(168, 95, 63, 0.45);
-    background: #ffffff;
-    color: #6f3925;
+    border: 1px solid rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.45);
+    background: var(--deep-chat-surface, #ffffff);
+    color: var(--deep-chat-accent-ink, #6f3925);
     box-shadow: 0 1px 2px rgba(111, 57, 37, 0.1);
   }
 
   .message-bubble.user-message .deep-chat-context-chip__icon,
   .message-bubble.user-message-text .deep-chat-context-chip__icon,
   .user-message .deep-chat-context-chip__icon {
-    color: #a85f3f;
+    color: var(--deep-chat-accent, #a85f3f);
   }
 
   /*
@@ -947,7 +947,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   #text-input[contenteditable]:empty:before {
-    color: #64748b !important;
+    color: var(--deep-chat-ink-muted, #64748b) !important;
   }
 
   #microphone-button,
@@ -1008,19 +1008,19 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .inside-end.input-button:not(.disabled-button):not(.loading-button):not(
       [data-deep-chat-stop-active]
     ):focus-visible {
-    outline: 2px solid rgba(168, 95, 63, 0.75) !important;
+    outline: 2px solid rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.75) !important;
     outline-offset: 2px !important;
   }
 
   .inside-end.input-button:not(.disabled-button):not(.loading-button):not(
       [data-deep-chat-stop-active]
     ):active {
-    background: #6f3925 !important;
+    background: var(--deep-chat-accent-active, #6f3925) !important;
   }
 
   .inside-end.disabled-button:hover,
   .inside-end.disabled-button:focus-visible {
-    background: #94a3b8 !important;
+    background: var(--deep-chat-ink-faint, #94a3b8) !important;
     opacity: 0.82 !important;
     cursor: not-allowed !important;
   }
