@@ -9,7 +9,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--color-bg-overlay, rgba(15, 23, 42, 0.5));
   backdrop-filter: blur(4px);
   z-index: var(--z-modal-backdrop);
   display: flex;
@@ -45,11 +45,11 @@
    ======================================== */
 .modal {
   position: relative;
-  background: white;
+  /* T2 modal surface — dual-theme panel, not light-only white glass */
+  background: var(--surface-panel, #ffffff);
+  border: 1px solid var(--border-subtle, transparent);
   border-radius: var(--rounded-2xl);
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-panel, 0 25px 50px -12px rgba(0, 0, 0, 0.25));
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -120,14 +120,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid var(--color-slate-200);
+  border-bottom: 1px solid var(--border-subtle, var(--color-slate-200));
   flex-shrink: 0;
 }
 
 .modal-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900));
   margin: 0;
 }
 
@@ -138,7 +138,7 @@
   width: 2rem;
   height: 2rem;
   border-radius: var(--rounded-md);
-  color: var(--color-slate-400);
+  color: var(--color-text-tertiary, var(--color-slate-400));
   background: transparent;
   border: none;
   cursor: pointer;
@@ -150,8 +150,8 @@
 }
 
 .modal-close:hover {
-  background: var(--color-slate-100);
-  color: var(--color-slate-600);
+  background: var(--color-bg-hover, var(--color-slate-100));
+  color: var(--color-text-secondary, var(--color-slate-600));
 }
 
 /* ========================================
@@ -174,12 +174,12 @@
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-  background: var(--color-slate-300);
+  background: var(--scrollbar-thumb, var(--color-slate-300));
   border-radius: 3px;
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover {
-  background: var(--color-slate-400);
+  background: var(--scrollbar-thumb-hover, var(--color-slate-400));
 }
 
 /* ========================================
@@ -191,8 +191,8 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 1.25rem 1.5rem;
-  border-top: 1px solid var(--color-slate-200);
-  background: var(--color-slate-50);
+  border-top: 1px solid var(--border-subtle, var(--color-slate-200));
+  background: var(--surface-card-hover, var(--color-bg-secondary, var(--color-slate-50)));
   border-radius: 0 0 var(--rounded-2xl) var(--rounded-2xl);
   flex-shrink: 0;
 }

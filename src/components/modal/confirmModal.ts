@@ -38,7 +38,7 @@ function createBackdrop(modalId: string): HTMLDivElement {
   const backdrop = document.createElement('div');
   backdrop.id = modalId;
   backdrop.className =
-    'app-confirm-modal-backdrop fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in';
+    'app-confirm-modal-backdrop fixed inset-0 backdrop-blur-sm z-[60] flex items-center justify-center fade-in';
   return backdrop;
 }
 
@@ -76,7 +76,7 @@ function buildDialogShell(options: {
   const actionsClass = options.actionsClass || 'flex justify-end gap-3';
 
   return `
-        <div class="app-confirm-modal ${variantClass} bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition"
+        <div class="app-confirm-modal ${variantClass} rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition"
             role="dialog"
             aria-modal="true"
             aria-labelledby="${titleId}"

@@ -5,8 +5,9 @@
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC',
     'Hiragino Sans GB', sans-serif;
-  background-color: var(--color-white);
-  color: var(--color-slate-900);
+  /* T2 home shell: surface tokens, not light-only white canvas */
+  background-color: var(--surface-workbench, var(--color-bg-primary, #ffffff));
+  color: var(--color-text-primary, var(--color-slate-900, #0f172a));
   width: 100%;
   height: 100%;
   position: relative;
@@ -57,7 +58,7 @@
 
 .time-display {
   font-family: monospace;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
   font-size: 0.9rem;
   font-weight: 600;
 }
@@ -73,12 +74,12 @@
   font-weight: 900;
   font-size: 1.4rem;
   letter-spacing: 0.1em;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900, #0f172a));
 }
 
 .logo-sub {
   font-size: 0.7rem;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
   letter-spacing: 0.25em;
   text-transform: uppercase;
   margin-top: 4px;
@@ -120,7 +121,7 @@
 
 .slogan-line.outline {
   color: transparent;
-  -webkit-text-stroke: 1.5px var(--color-slate-900);
+  -webkit-text-stroke: 1.5px var(--color-text-primary, var(--color-slate-900, #0f172a));
   opacity: 1;
   position: relative;
 }
@@ -132,13 +133,14 @@
   left: 4px;
   width: 100%;
   height: 100%;
-  -webkit-text-stroke: 1.5px rgba(15, 23, 42, 0.1);
+  -webkit-text-stroke: 1.5px
+    color-mix(in srgb, var(--color-text-primary, var(--color-slate-900, #0f172a)) 10%, transparent);
   z-index: -1;
 }
 
 .slogan-sub {
   font-size: clamp(1.1rem, 2vw, 1.4rem);
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
   line-height: 1.8;
   margin-bottom: 24px;
   opacity: 1;
@@ -164,11 +166,12 @@
   justify-content: center;
   gap: 10px;
   padding: 0 18px;
-  border: 1px solid rgba(203, 213, 225, 0.82);
+  border: 1px solid var(--border-muted, rgba(203, 213, 225, 0.82));
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
-  color: var(--color-slate-700);
-  box-shadow: 0 14px 34px -30px rgba(15, 23, 42, 0.48);
+  /* secondary chrome glass follows Theme surface, not light-only white */
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 78%, transparent);
+  color: var(--color-text-secondary, var(--color-slate-700, #334155));
+  box-shadow: 0 14px 34px -30px color-mix(in srgb, var(--color-slate-900, #0f172a) 48%, transparent);
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 800;
@@ -192,7 +195,7 @@
   border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
   background: var(--surface-panel, #ffffff);
   color: var(--color-primary-dark, #1d4ed8);
-  box-shadow: 0 18px 38px -28px rgba(15, 23, 42, 0.56);
+  box-shadow: 0 18px 38px -28px color-mix(in srgb, var(--color-slate-900, #0f172a) 56%, transparent);
 }
 
 .home-primary-action--main:hover {
@@ -208,7 +211,7 @@
         --focus-ring-soft,
         color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 16%, transparent)
       ),
-    0 18px 38px -28px rgba(15, 23, 42, 0.56);
+    0 18px 38px -28px color-mix(in srgb, var(--color-slate-900, #0f172a) 56%, transparent);
 }
 
 .ai-status {
@@ -248,7 +251,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.1em;
-  color: var(--color-slate-900);
+  color: var(--color-text-primary, var(--color-slate-900, #0f172a));
 }
 
 /* ----------------------------------------
@@ -265,10 +268,11 @@
   gap: 0;
   max-width: calc(100% - 68px);
   padding: 4px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
   border-radius: var(--rounded-full, 999px);
+  /* T2 home dock frost — dual-theme surface, not white-only glass */
   background: color-mix(in srgb, var(--surface-panel, #ffffff) 72%, transparent);
-  box-shadow: 0 14px 34px -28px rgba(15, 23, 42, 0.48);
+  box-shadow: 0 14px 34px -28px color-mix(in srgb, var(--color-slate-900, #0f172a) 48%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition:
@@ -280,7 +284,7 @@
 .floating-workbench.is-expanded {
   gap: 6px;
   border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 18%, transparent);
-  box-shadow: 0 18px 44px -30px rgba(15, 23, 42, 0.56);
+  box-shadow: 0 18px 44px -30px color-mix(in srgb, var(--color-slate-900, #0f172a) 56%, transparent);
 }
 
 .floating-workbench__trigger {
@@ -295,8 +299,8 @@
   padding: 0;
   border: 0;
   border-radius: var(--rounded-full, 999px);
-  background: rgba(255, 255, 255, 0.66);
-  color: var(--color-slate-700);
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 66%, transparent);
+  color: var(--color-text-secondary, var(--color-slate-700, #334155));
   cursor: pointer;
   font-size: 12px;
   font-weight: 900;
@@ -371,10 +375,10 @@
   min-width: 40px;
   min-height: 40px;
   padding: 0;
-  border: 1px solid rgba(203, 213, 225, 0.66);
+  border: 1px solid var(--border-muted, rgba(203, 213, 225, 0.66));
   border-radius: var(--rounded-full, 999px);
-  background: rgba(255, 255, 255, 0.58);
-  color: var(--color-slate-700);
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 58%, transparent);
+  color: var(--color-text-secondary, var(--color-slate-700, #334155));
   cursor: pointer;
   transition:
     background-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
@@ -387,7 +391,7 @@
   border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 22%, transparent);
   background: var(--surface-panel, #ffffff);
   color: var(--color-primary-dark, #1d4ed8);
-  box-shadow: 0 10px 24px -20px rgba(15, 23, 42, 0.42);
+  box-shadow: 0 10px 24px -20px color-mix(in srgb, var(--color-slate-900, #0f172a) 42%, transparent);
 }
 
 .floating-workbench__item:focus-visible {
@@ -426,14 +430,14 @@
 .brand-text {
   font-size: 0.7rem;
   letter-spacing: 0.2em;
-  color: var(--color-slate-500);
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
   font-weight: 500;
 }
 
 .brand-line {
   width: 30px;
   height: 1px;
-  background: var(--color-slate-300, #cbd5e1);
+  background: var(--border-muted, var(--color-slate-300, #cbd5e1));
 }
 
 .geometric-decor {

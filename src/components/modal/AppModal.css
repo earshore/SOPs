@@ -3,14 +3,16 @@
   display: block;
   z-index: 1000;
   position: relative;
+  /* T2 modal shell: surface/text/border tokens — dual-theme safe */
   --modal-bg: var(--surface-panel, #ffffff);
-  --modal-bg-muted: var(--color-slate-50, #fafbfc);
-  --modal-border: var(--color-slate-100, #f1f5f9);
-  --modal-text-primary: var(--color-slate-800, #1e293b);
-  --modal-text-muted: var(--color-slate-400, #94a3b8);
-  --modal-text-secondary: var(--color-slate-600, #475569);
-  --modal-control-hover-bg: var(--color-slate-100, #f1f5f9);
-  --modal-control-active-bg: var(--color-slate-200, #e2e8f0);
+  --modal-bg-muted: var(--surface-card-hover, var(--color-bg-secondary, #fafbfc));
+  --modal-border: var(--border-subtle, var(--color-border-light, #f1f5f9));
+  --modal-text-primary: var(--color-text-primary, var(--color-slate-800, #1e293b));
+  --modal-text-muted: var(--color-text-tertiary, var(--color-slate-400, #94a3b8));
+  --modal-text-secondary: var(--color-text-secondary, var(--color-slate-600, #475569));
+  --modal-control-hover-bg: var(--color-bg-hover, var(--color-slate-100, #f1f5f9));
+  --modal-control-active-bg: var(--color-bg-active, var(--color-slate-200, #e2e8f0));
+  /* Appearance primary chrome (keep CTA/accent on tone axis) */
   --modal-accent: var(--color-primary, #3b82f6);
   --modal-accent-soft: color-mix(in srgb, var(--color-primary, #3b82f6) 15%, transparent);
   --modal-title-icon-bg: linear-gradient(
@@ -18,19 +20,14 @@
     var(--color-primary-light, color-mix(in srgb, var(--color-primary, #3b82f6) 10%, transparent)),
     color-mix(in srgb, var(--color-primary, #3b82f6) 16%, transparent)
   );
-  --modal-floating-bg: rgba(255, 255, 255, 0.92);
-  --modal-scrollbar-thumb: var(--color-slate-300, #cbd5e1);
-  --modal-scrollbar-thumb-hover: var(--color-slate-400, #94a3b8);
+  /* floating white glass → surface frost */
+  --modal-floating-bg: color-mix(in srgb, var(--surface-panel, #ffffff) 92%, transparent);
+  --modal-scrollbar-thumb: var(--scrollbar-thumb, var(--color-slate-300, #cbd5e1));
+  --modal-scrollbar-thumb-hover: var(--scrollbar-thumb-hover, var(--color-slate-400, #94a3b8));
   --modal-focus-ring-offset: var(--modal-bg);
   --modal-focus-ring: var(--modal-accent);
-  --modal-backdrop-bg: linear-gradient(
-    135deg,
-    rgba(15, 23, 42, 0.45) 0%,
-    rgba(30, 41, 59, 0.55) 100%
-  );
-  --modal-panel-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.03), 0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 32px 64px -8px rgba(0, 0, 0, 0.12);
+  --modal-backdrop-bg: var(--color-bg-overlay, rgba(15, 23, 42, 0.5));
+  --modal-panel-shadow: var(--shadow-panel, 0 25px 50px -12px rgba(0, 0, 0, 0.25));
 }
 
 :host([open]) {
@@ -246,7 +243,7 @@
   right: 0.75rem;
   z-index: 20;
   background: var(--modal-floating-bg);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-slate-900, #0f172a) 14%, transparent);
 }
 
 .btn-close-floating:hover {

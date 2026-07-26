@@ -94,11 +94,13 @@ describe('AppModal regression visibility', () => {
     const styleText = readModalStyles();
 
     expect(styleText).toContain('--modal-bg: var(--surface-panel');
+    expect(styleText).toContain('--modal-floating-bg: color-mix(in srgb, var(--surface-panel');
     expect(styleText).toContain('background: var(--modal-bg)');
     expect(styleText).toContain('color: var(--modal-text-primary)');
     expect(styleText).toContain('box-shadow: var(--modal-panel-shadow)');
     expect(styleText).toContain('background-color 0.2s');
     expect(styleText).not.toContain('transition: all 0.2s');
+    expect(styleText).not.toContain('--modal-floating-bg: rgba(255, 255, 255');
   });
 
   it('tracks Appearance primary for accent soft chrome and title icon', () => {

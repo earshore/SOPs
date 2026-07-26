@@ -1,12 +1,29 @@
 .app-confirm-modal-backdrop {
-  background: rgba(15, 23, 42, 0.5) !important;
+  background: var(--color-bg-overlay, rgba(15, 23, 42, 0.5)) !important;
 }
 
 .app-confirm-modal {
+  /* T2 confirm shell: dual-theme panel surface (no light-only bg-white) */
+  background: var(--surface-panel, #ffffff) !important;
+  color: var(--color-text-primary, var(--color-slate-900, #0f172a));
   border: 1px solid color-mix(in srgb, var(--color-primary, #6257f5) 24%, transparent);
   box-shadow:
     0 24px 64px -32px color-mix(in srgb, var(--color-primary, #6257f5) 42%, transparent),
-    0 18px 48px -34px rgba(15, 23, 42, 0.5) !important;
+    0 18px 48px -34px color-mix(in srgb, var(--color-slate-900, #0f172a) 50%, transparent) !important;
+}
+
+.app-confirm-modal .text-slate-600,
+.app-confirm-modal .text-slate-500 {
+  color: var(--color-text-secondary, var(--color-slate-600, #475569));
+}
+
+.app-confirm-modal [id^='btn-cancel-'] {
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
+}
+
+.app-confirm-modal [id^='btn-cancel-']:hover {
+  color: var(--color-text-primary, var(--color-slate-700, #334155));
+  background: var(--color-bg-hover, var(--color-slate-100, #f1f5f9));
 }
 
 .app-confirm-modal--theme .app-confirm-modal-header {
@@ -32,7 +49,7 @@
 
 .app-confirm-modal--theme .app-confirm-modal-confirm:focus-visible {
   box-shadow:
-    0 0 0 2px var(--color-white, #ffffff),
+    0 0 0 2px var(--surface-panel, #ffffff),
     0 0 0 4px
       color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #6257f5)) 35%, transparent);
 }
@@ -48,7 +65,7 @@
 
 .app-confirm-modal--danger .app-confirm-modal-confirm:focus-visible {
   box-shadow:
-    0 0 0 2px var(--color-white, #ffffff),
+    0 0 0 2px var(--surface-panel, #ffffff),
     0 0 0 4px rgba(220, 38, 38, 0.35);
 }
 
