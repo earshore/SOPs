@@ -250,15 +250,12 @@ describe('AppModal regression accessibility', () => {
 
   it('tracks Appearance primary for shared import-conflict recommended chrome', () => {
     const template = readFileSync('src/components/modal/sharedModals.html', 'utf8');
-    const mergeButton =
-      template.match(/id="btn-resolve-merge"[\s\S]*?<\/button>/)?.[0] ?? '';
+    const mergeButton = template.match(/id="btn-resolve-merge"[\s\S]*?<\/button>/)?.[0] ?? '';
 
     expect(mergeButton).toContain('from-[var(--color-primary)]');
     expect(mergeButton).toContain('to-[var(--color-primary-dark)]');
     expect(mergeButton).toContain('from-[var(--color-primary-light)]');
-    expect(mergeButton).toContain(
-      'to-[color-mix(in_srgb,var(--color-primary)_16%,transparent)]'
-    );
+    expect(mergeButton).toContain('to-[color-mix(in_srgb,var(--color-primary)_16%,transparent)]');
     expect(mergeButton).not.toContain('to-indigo-500');
     expect(mergeButton).not.toContain('to-indigo-100');
     expect(mergeButton).not.toContain('group-hover:to-indigo-500');

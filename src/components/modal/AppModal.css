@@ -12,11 +12,7 @@
   --modal-control-hover-bg: var(--color-slate-100, #f1f5f9);
   --modal-control-active-bg: var(--color-slate-200, #e2e8f0);
   --modal-accent: var(--color-primary, #3b82f6);
-  --modal-accent-soft: color-mix(
-    in srgb,
-    var(--color-primary, #3b82f6) 15%,
-    transparent
-  );
+  --modal-accent-soft: color-mix(in srgb, var(--color-primary, #3b82f6) 15%, transparent);
   --modal-title-icon-bg: linear-gradient(
     135deg,
     var(--color-primary-light, color-mix(in srgb, var(--color-primary, #3b82f6) 10%, transparent)),
@@ -196,8 +192,7 @@
   border-radius: 0.5rem;
   background: var(--modal-title-icon-bg);
   flex-shrink: 0;
-  box-shadow: 0 1px 2px
-    color-mix(in srgb, var(--color-primary, #3b82f6) 8%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-primary, #3b82f6) 8%, transparent);
 }
 
 .title-icon-wrapper svg {
