@@ -13,7 +13,7 @@
 @tailwind base;
 
 /*
- * Critical surface tokens — light defaults with slate fallbacks.
+ * Critical-path surface tokens — light defaults with slate fallbacks.
  * Head theme-bootstrap sets .dark / data-color-mode-resolved before this sheet
  * applies; dark block flips tokens so body is not locked to slate-50 FOUC.
  */
@@ -22,16 +22,16 @@
   --z-header: var(--z-40, 40);
   --z-mega-menu: 60;
   --z-loading: 300;
-  --critical-surface: var(--color-bg-secondary, var(--bg-secondary, var(--color-slate-50)));
-  --critical-text: var(--color-text-primary, var(--text-primary, var(--color-slate-700)));
+  --color-critical-surface: var(--color-bg-secondary, var(--bg-secondary, var(--color-slate-50)));
+  --color-critical-text: var(--color-text-primary, var(--text-primary, var(--color-slate-700)));
   color-scheme: light;
 }
 
 .dark,
 [data-color-mode='dark'],
 [data-color-mode-resolved='dark'] {
-  --critical-surface: var(--color-bg-secondary, var(--color-slate-900));
-  --critical-text: var(--color-text-primary, var(--color-slate-50));
+  --color-critical-surface: var(--color-bg-secondary, var(--color-slate-900));
+  --color-critical-text: var(--color-text-primary, var(--color-slate-50));
   color-scheme: dark;
 }
 
@@ -47,7 +47,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
-  background: var(--critical-surface);
+  background: var(--color-critical-surface);
   color-scheme: inherit;
 }
 
@@ -55,8 +55,8 @@ body {
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.6;
-  color: var(--critical-text);
-  background: var(--critical-surface);
+  color: var(--color-critical-text);
+  background: var(--color-critical-surface);
   overflow: hidden;
   height: 100vh;
   display: flex;

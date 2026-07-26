@@ -41,6 +41,8 @@ const NAMING_PATTERNS = {
   colorSemantic:
     /^--color-(primary|secondary|accent|success|warning|danger|error|info)(-light|-dark|-darker|-contrast)?$/,
   colorFocus: /^--color-focus-ring$/,
+  // Critical-path FOUC surface/text (src/css/critical.css)
+  colorCritical: /^--color-critical-(surface|text)$/,
 
   // 文本颜色: --color-text-{variant}
   textColor:
