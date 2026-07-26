@@ -1,7 +1,7 @@
 # 企业级主题系统重构蓝图：主题 = 浅色/深色/系统
 
 **日期**: 2026-07-26  
-**状态**: T0 **Done** · T1 **Done**（全 6 项） · T2 **Done**（settings / header / sidebar / home / modal） · T3 **Partial**（forms / secondary / ui-card） · T4 **Partial**（skills/workflows · competitor_monitoring · amz knowledge 样本） · **非**全量业务 CSS 重写  
+**状态**: T0–T2 **Done** · T3 **主体 Done**（forms/secondary/ui-card）· T4 **高流量 Partial**（more/sops/amz/KH/PromptLab 多波 ui-card）· T5 Open · 默认 system follow-up · **非**全站模板 100% 清零
 **触发**: 产品纠正——当前将 Appearance 预设误称为「主题」，颜色模式（浅/深/系统）未达企业级一体化  
 **范围**: 运行时 · Token · 壳层 · 共享组件 · 业务模块 · 设置 IA · 命名  
 **关联**: `THEME_SYSTEM_GUIDELINES` · Ownership 深绑定审查 · D11/D3 债务  
