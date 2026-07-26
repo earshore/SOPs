@@ -1,6 +1,6 @@
 # 主题系统 XO 签字状态（Phase 1 code-aware review）
 
-**日期**: 2026-07-26（refresh @ HEAD `f761e4e5` · residual #18–21 · D12×24 · D2 #5 · Human XO first / Visual Yellow）  
+**日期**: 2026-07-26（refresh @ HEAD `b85cd597` · residual #18–21 · D12×24 · D2 #5 · Human XO first / Visual Yellow）  
 **角色**: Experience Officer + QA（静态核验；**非**浏览器视觉签收）  
 **范围**: `docs/superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md`  
 **对照实现**: `src/common/config/themeConfig.ts` · `themeConfig.test.ts` · `tests/e2e/release-smoke.spec.ts` · Settings Appearance  
@@ -366,7 +366,7 @@ Sign-off visual: Yes / No   ← default No until XO fills
 | 指标 | 值 |
 | --- | --- |
 | 文档路径 | `docs/superpowers/plans/2026-07-26-theme-system-xo-signoff-status.md` |
-| HEAD 对照 | `f761e4e5`（residual #18–21 · D12×24 · D2 #5 · Visual Yellow · Human XO first） |
+| HEAD 对照 | `b85cd597`（residual #18–21 · D12×24 · D2 #5 · Visual Yellow · Human XO first） |
 | Pass (automated) | **~16** |
 | Pass (code contract) | **~20** |
 | Needs manual browser | **~34** |
