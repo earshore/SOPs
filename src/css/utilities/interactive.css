@@ -1008,8 +1008,11 @@
 
 .nav-focus[data-focus='true'],
 .nav-focus.is-focused {
-  background: var(--color-primary-light, rgba(59, 130, 246, 0.08));
-  outline: 2px solid var(--color-primary, #3b82f6);
+  background: var(
+    --color-primary-light,
+    color-mix(in srgb, var(--color-primary, var(--color-focus-ring)) 8%, transparent)
+  );
+  outline: 2px solid var(--color-focus-ring, var(--color-primary));
   outline-offset: -2px;
 }
 

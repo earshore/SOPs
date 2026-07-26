@@ -106,12 +106,15 @@
   border-bottom: none;
 }
 
+/* D11 residual: dual-safe dark — never key dark off appearance id on data-theme */
 .dark .tabs-container--pill,
+[data-color-mode-resolved='dark'] .tabs-container--pill,
 [data-theme='dark'] .tabs-container--pill {
   background: rgba(255, 255, 255, 0.06);
 }
 
 .dark .tabs-container--pill .tab-item--active,
+[data-color-mode-resolved='dark'] .tabs-container--pill .tab-item--active,
 [data-theme='dark'] .tabs-container--pill .tab-item--active {
   background: rgba(255, 255, 255, 0.1);
   color: #f9fafb;

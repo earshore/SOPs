@@ -282,8 +282,12 @@
 
 .header-search-input:focus {
   outline: none;
-  border-color: var(--color-primary, #3b82f6);
-  box-shadow: 0 0 0 3px var(--focus-ring-soft, rgba(59, 130, 246, 0.1));
+  border-color: var(--color-primary, var(--color-focus-ring));
+  box-shadow: 0 0 0 3px
+    var(
+      --focus-ring-soft,
+      color-mix(in srgb, var(--color-focus-ring, var(--color-primary)) 16%, transparent)
+    );
   background: var(--color-bg-primary, #ffffff);
 }
 

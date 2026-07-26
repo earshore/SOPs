@@ -39,31 +39,49 @@ describe('PC design token CSS contract', () => {
     expect(css).toContain('--layout-wide-width: 1600px');
     expect(css).toContain('--page-gutter: var(--container-padding-x-lg, 24px)');
     expect(css).toContain('--page-gutter-wide: var(--spacing-xl, 32px)');
-    expect(css).toMatch(/@media\s*\(min-width:\s*1536px\)[\s\S]*--page-gutter:\s*var\(--page-gutter-wide,\s*32px\)/);
+    expect(css).toMatch(
+      /@media\s*\(min-width:\s*1536px\)[\s\S]*--page-gutter:\s*var\(--page-gutter-wide,\s*32px\)/
+    );
   });
 
   it('defines component and module semantic aliases instead of forcing raw colors in pages', () => {
     const css = readFileSync(variablesCssPath, 'utf8');
 
-    expect(css).toContain('--rounded-card: var(--rounded-md)');
-    expect(css).toContain('--rounded-panel: var(--rounded-md)');
+    // D2: card/panel aliases follow workbench radius SSOT (not bare rounded-md).
+    expect(css).toContain('--rounded-card: var(--workbench-radius)');
+    expect(css).toContain('--rounded-panel: var(--workbench-radius)');
     expect(css).toContain('--card-bg: var(--surface-card)');
     expect(css).toContain('--card-border: var(--border-subtle)');
     expect(css).toContain('--panel-bg: var(--surface-panel)');
     expect(css).toContain('--panel-border: var(--border-subtle)');
     expect(css).toContain('--module-accent: var(--color-accent)');
     expect(css).toContain('--module-accent-soft: var(--color-accent-light)');
-    expect(css).toContain('--module-accent-border: color-mix(in srgb, var(--module-accent) 24%, transparent)');
+    expect(css).toContain(
+      '--module-accent-border: color-mix(in srgb, var(--module-accent) 24%, transparent)'
+    );
     expect(css).toContain('--module-accent-focus: var(--focus-ring-soft)');
+  });
+
+  it('tracks soft focus halo through Appearance focus-ring (D5)', () => {
+    const css = readFileSync(variablesCssPath, 'utf8');
+
+    expect(css).toContain(
+      '--focus-ring-soft: color-mix(in srgb, var(--color-focus-ring) 16%, transparent)'
+    );
+    expect(css).not.toMatch(/--focus-ring-soft:\s*rgba\(37,\s*99,\s*235/);
   });
 
   it('routes primary action buttons through semantic button aliases', () => {
     const css = readFileSync(buttonsCssPath, 'utf8');
 
     expect(css).toContain('background: var(--button-primary-bg, var(--color-primary))');
-    expect(css).toContain('color: var(--button-primary-fg, var(--color-primary-contrast, #ffffff))');
+    expect(css).toContain(
+      'color: var(--button-primary-fg, var(--color-primary-contrast, #ffffff))'
+    );
     expect(css).toContain('background: var(--button-primary-hover-bg, var(--color-primary-dark))');
-    expect(css).toContain('background: var(--button-primary-active-bg, var(--color-primary-darker))');
+    expect(css).toContain(
+      'background: var(--button-primary-active-bg, var(--color-primary-darker))'
+    );
   });
 
   it('uses desktop layout aliases in shared PC containers and header chrome', () => {
@@ -86,7 +104,9 @@ describe('PC design token CSS contract', () => {
 
     expect(appCenterCss).toContain('--module-accent: var(--app-overview-accent)');
     expect(appCenterCss).toContain('--module-accent-focus: var(--app-overview-focus-ring)');
-    expect(appCenterCss).toContain('--button-filter-focus-color: var(--module-accent, var(--color-blue-500))');
+    expect(appCenterCss).toContain(
+      '--button-filter-focus-color: var(--module-accent, var(--color-blue-500))'
+    );
     expect(appCenterCss).not.toMatch(localPrimaryDefinition);
     expect(appCenterCss).not.toMatch(localPrimaryReference);
 

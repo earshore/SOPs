@@ -11,6 +11,7 @@
 | 主题宪法（§3 颜色归属） | `docs/THEME_SYSTEM_GUIDELINES.md` |
 | 菜单事实源 | `src/common/config/menuConfig.ts` |
 | Banner theme 实现 | `src/css/components/welcome-banner.css`（`.wb-theme-*`） |
+| **代码 SSOT（D8 scaffold）** | `src/common/config/ownershipRoles.ts`（`OWNERSHIP_ROLES` / helpers；非全站 DOM 绑定） |
 | 作战手册 | `docs/superpowers/plans/2026-07-26-theme-system-team-operating-playbook.md` |
 
 ---
@@ -170,7 +171,8 @@ Appearance **可以**动：`--color-primary*`、`--color-focus-ring`、token 化
 
 ### 5.4 wb-theme 命名收敛（D8）
 
-- [ ] 生成「role → 首选 class」常量表（TS 或文档生成；实现阶段再选）。  
+- [x] **代码 SSOT scaffold**：`src/common/config/ownershipRoles.ts`（`OwnershipRoleId` × 19、`OWNERSHIP_ROLES`、`getPaletteForRole` / `getOwnershipRoleForModule`；**无** Appearance 写入、**无** 全站 `data-ownership-role` 绑定）。  
+- [ ] 生成「role → 首选 class」常量表的全站消费 / DOM 双写（仍 Phase 4 任务）。  
 - [ ] Playground：维持配置 orange / 实现 terracotta+例外；**不**加 `wb-theme-orange`。  
 - [ ] Keywords：定收敛目标（rose 或 fuchsia 二选一产品拍板）→ 改 menu 或改 banner 的单向迁移 PR。  
 - [ ] Hub advanced / More llm：对齐 menu 与 banner 的单向迁移 PR。  
@@ -221,3 +223,4 @@ Appearance **可以**动：`--color-primary*`、`--color-focus-ring`、token 化
 | 日期 | 变更 |
 | --- | --- |
 | 2026-07-26 | 初版：19 roles 全表、例外清单、新页规则、Appearance 禁区、Phase 4 任务清单（docs only） |
+| 2026-07-26 | D8 light scaffold：链接 `src/common/config/ownershipRoles.ts` 代码 SSOT（表 + pure helpers，非全站绑定） |

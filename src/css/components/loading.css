@@ -87,7 +87,9 @@
   -webkit-backdrop-filter: blur(4px);
 }
 
+/* D11 residual: dual-safe dark — never key dark off appearance id on data-theme */
 .dark .loading-overlay,
+[data-color-mode-resolved='dark'] .loading-overlay,
 [data-theme='dark'] .loading-overlay {
   background: rgba(0, 0, 0, 0.6);
 }

@@ -299,13 +299,15 @@ theme appearance: keyword-hunter minimal light desktop
 
 ## 6. First 8 screenshots to capture tomorrow
 
+**交叉引用**: 人类 XO 30 min 脚本见 [`theme-system-xo-signoff-status.md` §3](./2026-07-26-theme-system-xo-signoff-status.md#3-人类-xo-30-分钟手动浏览器脚本)；本表为首 8 张**可选**归档清单（**截图 ≠ visual Pass**）。
+
 **目标**: 用最少张数覆盖 XO 脚本核心（切换、归属三剑客、Deep Chat、壳层/设置），为后续 18 张主包扩样。
 
 | # | 文件名（建议） | 路由 | Appearance | Color | 截什么 | 为何在首 8 |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `theme__r7__settings-appearance__default__light__desktop.png` | R7 Settings | default | light | Appearance 面板 + 主题 select | 切换起点；对照预览 |
 | 2 | `theme__r7__settings-appearance__minimal__light__desktop.png` | R7 | minimal | light | 同区域切到极简后 | Must change：预览/选中；X1 |
-| 3 | `theme__r4__keyword-hunter__default__light__desktop.png` | R4 KH | default | light | 含 banner + 侧栏 + 主工具区 | 归属基线 fuchsia |
+| 3 | `theme__r4__keyword-hunter__default__light__desktop.png` | R4 KH | default | light | 含 banner + 侧栏 + 主工具区 | 归属基线 **rose**（`wb-theme-rose`） |
 | 4 | `theme__r4__keyword-hunter__minimal__light__desktop.png` | R4 | minimal | light | 同构图 | banner NOT + 壳层可变 |
 | 5 | `theme__r5__ppc-search-terms__default__light__desktop.png` | R5 PPC | default | light | 含 `.ppc-hero` | emerald 基线 |
 | 6 | `theme__r5__ppc-search-terms__minimal__light__desktop.png` | R5 | minimal | light | 同构图 | hero 不得工业灰吞叙事 |

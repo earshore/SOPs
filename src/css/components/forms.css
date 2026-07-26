@@ -1535,8 +1535,8 @@ input[type='radio']:disabled {
 [data-theme='dark'] .form-input:focus,
 [data-theme='dark'] .form-textarea:focus,
 [data-theme='dark'] .form-select:focus {
-  border-color: var(--color-primary, #818cf8);
-  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+  border-color: var(--field-focus, var(--color-focus-ring, var(--color-primary)));
+  box-shadow: 0 0 0 3px var(--field-focus-ring);
 }
 
 .dark .form-input:disabled,

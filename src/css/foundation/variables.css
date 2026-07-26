@@ -121,7 +121,8 @@
 
   /* ---- 焦点环 ---- */
   --color-focus-ring: var(--color-primary);
-  --focus-ring-soft: rgba(37, 99, 235, 0.16);
+  /* Soft halo tracks Appearance focus ring (not hard blue/indigo). */
+  --focus-ring-soft: color-mix(in srgb, var(--color-focus-ring) 16%, transparent);
 
   /* ---- 状态色 ---- */
   --color-success: var(--color-green-500);
@@ -549,7 +550,7 @@
 
   /* ---- 焦点环 ---- */
   --color-focus-ring: var(--color-indigo-400);
-  --focus-ring-soft: rgba(129, 140, 248, 0.18);
+  --focus-ring-soft: color-mix(in srgb, var(--color-focus-ring) 18%, transparent);
 
   /* ---- 状态色 ---- */
   --color-success: var(--color-green-400);

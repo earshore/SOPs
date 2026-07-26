@@ -143,6 +143,8 @@ npm run generate:tokens
 
 **Ownership Role → Palette / `wb-theme-*` 全表（Phase 4 预备·可执行）**: […/plans/2026-07-26-ownership-role-palette-map.md](./superpowers/plans/2026-07-26-ownership-role-palette-map.md)。新页面只选 **role**，不发明色名；Appearance 不得改写该表。下表为简表（与 `menuConfig` 冲突时以代码 + Role 全表为准）。
 
+**代码 SSOT（D8 light scaffold）**: `src/common/config/ownershipRoles.ts` — `OwnershipRoleId` / `OWNERSHIP_ROLES` / `getPaletteForRole` / `getOwnershipRoleForModule`。纯表 + 纯 helper；**不**由 Appearance 写入，**不**强制全站 `data-ownership-role` 绑定。
+
 | 区域                | 当前主题来源                                         | 页面主视觉                                                                                                                                                             |
 | ------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 首页                | `themeColor: slate`                                  | 保留全屏 splash / 粒子 hero；工作台只作为极简浮动入口                                                                                                                  |
@@ -368,7 +370,7 @@ npm run generate:tokens
 | D5  | `--focus-ring-soft` 等可能残留蓝系硬编码                                                                                                                                  |
 | D6  | 大量 UI 硬编码 `blue-*`，Appearance 可见影响有限                                                                                                                          |
 | D7  | `ColorContext.setModuleColor` 全局写入与 DOM `wb-theme-*` 双通道；`setModuleColor` 已 `@deprecated`，权威通道为 `inferColorFromModule` / menu；Appearance 绝不得调用      |
-| D8  | `wb-theme-*` 混用角色名与色名，缺统一 Role→Palette 表                                                                                                                     |
+| D8  | `wb-theme-*` 混用角色名与色名；Role→Palette **代码 scaffold** 已落 `src/common/config/ownershipRoles.ts`（表 + pure helpers）；全站 DOM 绑定/命名收敛仍 Phase 4 |
 | D9  | 局部 token 前缀生命周期：**文档已落** [local-token-prefix-lifecycle](./superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md)；代码侧冗余/归档执行仍 optional |
 | D10 | `ThemeColors` 接口含状态色字段，但 Appearance 实际不切换                                                                                                                  |
 | D11 | 暗色覆盖依赖 `data-theme='dark'`，与 D3 同源                                                                                                                              |
@@ -434,7 +436,7 @@ npm run build
 - `docs/VISUAL_DESIGN_GUIDELINES.md` 是页面视觉和 welcome banner 的详细执行规范。
 - `src/css/README.md` 是 CSS 目录和组件使用说明。
 - `src/css/QUICK-REFERENCE.md` 是变量和组件类速查，不作为主题决策源。
-- Appearance 运行时实现以 `src/common/config/themeConfig.ts` 为准；模块归属以 `menuConfig.ts` 与 banner `wb-theme-*` 为准。
+- Appearance 运行时实现以 `src/common/config/themeConfig.ts` 为准；模块归属以 `menuConfig.ts`、banner `wb-theme-*` 与 Ownership Role 代码表 `src/common/config/ownershipRoles.ts` 为准。
 
 当文档冲突时，优先级为：
 

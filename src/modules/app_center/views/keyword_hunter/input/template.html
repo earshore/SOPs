@@ -70,12 +70,15 @@
                 id="keyword-hunter-keywords-input-label"
                 class="text-base font-bold text-slate-800 flex items-center gap-2.5"
               >
-                <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                <div
+                  class="keyword-hunter-keywords-icon w-8 h-8 rounded-lg flex items-center justify-center"
+                >
                   <svg
-                    class="w-4 h-4 text-blue-500"
+                    class="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                   >
                     <path
                       stroke-linecap="round"
@@ -115,7 +118,7 @@
           <div class="p-5">
             <div class="relative keyword-hunter-textarea-container">
               <div
-                class="keyword-input-wrapper keyword-hunter-editor-shell rounded-xl overflow-hidden border-2 border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition duration-200"
+                class="keyword-input-wrapper keyword-hunter-editor-shell keyword-hunter-editor-shell--primary rounded-xl overflow-hidden border-2 border-slate-200 transition duration-200"
               >
                 <div
                   id="keyword-hunter-keyword-highlight-layer"
@@ -138,11 +141,14 @@
               <div class="keyword-hunter-editor-meta keyword-hunter-editor-meta--right">
                 <span
                   id="keyword-hunter-keyword-count-label"
-                  class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full font-semibold text-[11px] border border-blue-100"
+                  class="keyword-hunter-keyword-count-badge inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold text-[11px]"
                 >
-                  <i class="fas fa-hashtag text-[8px] text-blue-400"></i>
+                  <i
+                    class="fas fa-hashtag text-[8px] keyword-hunter-keyword-count-badge__muted"
+                    aria-hidden="true"
+                  ></i>
                   <span id="keyword-hunter-keyword-count">0</span>
-                  <span class="text-blue-400 font-normal">词</span>
+                  <span class="keyword-hunter-keyword-count-badge__muted font-normal">词</span>
                 </span>
                 <span
                   id="keyword-hunter-duplicate-badge"

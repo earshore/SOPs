@@ -716,13 +716,12 @@
 .section-header {
   position: relative;
 }
+/* Workbench chrome icons: color may change, no marketing scale/rotate (D4). */
 .section-header .header-icon {
-  transition:
-    color var(--duration-normal) var(--ease-smooth),
-    transform var(--duration-normal) var(--ease-smooth);
+  transition: color var(--duration-normal) var(--ease-smooth);
 }
 .section-header:hover .header-icon {
-  transform: rotate(-5deg) scale(1.05);
+  transform: none;
 }
 
 /* ---- Tab Buttons ---- */
