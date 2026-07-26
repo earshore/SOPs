@@ -109,7 +109,24 @@ D2 的根因不是「缺 8px」，而是 **缺少工作台专用语义 SSOT**，
 | `.app-overview-card` | `--rounded-xl` | **允许**（entry） | 保持 entry 映射 |
 | 各模块 scraper / PPC / keyword hunter 内联 panel | 混用 lg/xl / hardcode（部分已覆盖） | M2 审计热点 | 按 `workbench-ui:audit` 逐模块 |
 
-**Long-tail 记（2026-07-26）:** 高流量 CSS 主面板以 `--workbench-radius` / panel|card 别名为主；**#3** 再收 `.amz_card-hover` / `.zn-notice-card` / route loading shell；**#4** shared `.app-center-card` + Settings card radius token/shell；**#5** Settings 段壳 / insight·stat / forms bulk / PPC radius-lg 别名 / Skills·Prompts catalog 工具面；剩余偏差多为 Tailwind utility 类名、按钮/icon well、entry/overview、modal chrome、Settings 控件级 radius、Deep Chat brand——**不**在同一 PR 批量压到 8px。
+**Long-tail 记（2026-07-26）:** 高流量 CSS 主面板以 `--workbench-radius` / panel|card 别名为主；**#3** 再收 `.amz_card-hover` / `.zn-notice-card` / route loading shell；**#4** shared `.app-center-card` + Settings card radius token/shell；**#5** Settings 段壳 / insight·stat / forms bulk / PPC radius-lg 别名 / Skills·Prompts catalog 工具面；**#6 deferred — diminishing returns**（见下 inventory）；剩余偏差多为 Tailwind utility 类名、按钮/icon well、entry/overview、modal chrome、Settings 控件级 radius、Deep Chat brand——**不**在同一 PR 批量压到 8px。
+
+### D2 long-tail #6 deferred inventory（diminishing returns）
+
+**结论（#6）:** 不再批次改产 CSS 主面板 radius。R0–R3 + batch 3 + long-tail #2–#5 已覆盖共享工作台面与主流工具壳；剩余命中不符合「模块 CSS 工具工作台面仍绑 `var(--rounded-xl)` / hard 16px」的高 ROI 条件，或明确在 non-goal / 已有 clamp 覆盖下。
+
+| 剩余桶 | 例子 | 为何 #6 不迁 |
+| --- | --- | --- |
+| **已有 workbench clamp** | KH / PromptLab / Scraper `@media (min-width: 1024px)` 将 `.rounded-xl/2xl/3xl` 与 surface card 压到 `8px` / `var(--workbench-radius)` | 再改 HTML utility 类名 = R4 批量，视觉 ROI 低 |
+| **Entry / overview** | `.app-overview-card`、overview list row、hero、`more-overview` / `sops-overview` accent card 保留 16px | 决策明确允许 entry |
+| **Icon wells / controls** | `.insight-icon` / `.stat-icon` / `.form-checkbox-card-icon` / `.app-card-icon` / buttons `var(--rounded-lg)` | 非主面板；可用 `--workbench-radius-lg`，不在 #6 批量 |
+| **Modal / popover chrome** | `modals.css` `--rounded-2xl`、Deep Chat brand radius | non-goal / brand |
+| **Settings 控件级 rem** | `systemSettings.css` `0.5rem` / `0.75rem` controls | WIP tree；壳层已 #4–#5 |
+| **AMZ practice 叙事页** | marketing_calendar / promo_* hard 16–24px cards | content/story，非 tool workbench panel |
+| **Chat brand** | `chat.css` bubble / input `rounded-lg`；playground deep-chat local tokens | 产品 brand，留 |
+| **共享 scrollbar / tab underline** | scraper scrollbar、amz tab underline `rounded-lg` | 非 panel surface |
+
+**下步（非 #6）:** R4 仅在新代码 / 明确工作台面仍直写 atom 且无 clamp 时逐点改语义 token；**不**批量改 Tailwind `rounded-xl` 类名或 atom 数值。
 
 ## 迁移顺序（低风险优先）
 
