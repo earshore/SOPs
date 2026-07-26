@@ -56,3 +56,28 @@
     border-left: 0;
   }
 }
+
+/* ==================== 暗色模式适配 ==================== */
+.dark .ppc-search-terms-report-type-control,
+[data-color-mode-resolved='dark'] .ppc-search-terms-report-type-control {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .ppc-search-terms-report-type-control select,
+[data-color-mode-resolved='dark'] .ppc-search-terms-report-type-control select {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark .ppc-search-terms-report-type-control select option,
+[data-color-mode-resolved='dark'] .ppc-search-terms-report-type-control select option {
+  background: var(--surface-card, #1e293b);
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark .ppc-search-terms-report-type-control:focus-within,
+[data-color-mode-resolved='dark'] .ppc-search-terms-report-type-control:focus-within {
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 46%, transparent);
+  background: var(--surface-card, #1e293b);
+}
