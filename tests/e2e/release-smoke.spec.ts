@@ -1198,9 +1198,10 @@ test.describe('release candidate smoke', () => {
     const themeSelect = page.getByTestId('settings-theme-select');
     await themeSelect.selectOption('minimal');
     await expect(themeSelect).toHaveValue('minimal');
+    // Fresh user: preference defaults to system (T1-5); Playwright emulates light OS.
     await expectDocumentThemeState(page, {
       appearance: 'minimal',
-      colorMode: 'light',
+      colorMode: 'system',
       darkClass: false,
     });
 
@@ -1217,7 +1218,7 @@ test.describe('release candidate smoke', () => {
     await expectNoRouteErrorText(page);
     await expectDocumentThemeState(page, {
       appearance: 'minimal',
-      colorMode: 'light',
+      colorMode: 'system',
       darkClass: false,
     });
     await expectKeywordHunterOwnershipChrome(page);
@@ -1310,9 +1311,7 @@ test.describe('release candidate smoke', () => {
     ).toEqual([]);
   });
 
-  test('minimal appearance persists on Promptlab without console errors', async ({
-    page,
-  }) => {
+  test('minimal appearance persists on Promptlab without console errors', async ({ page }) => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await page.addInitScript(() => {
@@ -1326,9 +1325,10 @@ test.describe('release candidate smoke', () => {
     const themeSelect = page.getByTestId('settings-theme-select');
     await themeSelect.selectOption('minimal');
     await expect(themeSelect).toHaveValue('minimal');
+    // Fresh user: preference defaults to system (T1-5); Playwright emulates light OS.
     await expectDocumentThemeState(page, {
       appearance: 'minimal',
-      colorMode: 'light',
+      colorMode: 'system',
       darkClass: false,
     });
 
@@ -1344,7 +1344,7 @@ test.describe('release candidate smoke', () => {
     await expectNoRouteErrorText(page);
     await expectDocumentThemeState(page, {
       appearance: 'minimal',
-      colorMode: 'light',
+      colorMode: 'system',
       darkClass: false,
     });
 
