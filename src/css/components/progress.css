@@ -17,7 +17,7 @@
 .progress-card {
   background: var(--color-bg-primary);
   border: 1.5px solid var(--color-border-default);
-  border-radius: var(--rounded-xl);
+  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   padding: var(--spacing-3xl) var(--spacing-2xl);
   text-align: center;
   box-shadow: var(--shadow-md);

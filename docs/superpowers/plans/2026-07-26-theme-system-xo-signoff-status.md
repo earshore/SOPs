@@ -1,6 +1,6 @@
 # 主题系统 XO 签字状态（Phase 1 code-aware review）
 
-**日期**: 2026-07-26（refresh @ `c5bd4080` · D6 #10 SOPs / #11 NPI · D11 shell batches）  
+**日期**: 2026-07-26（refresh @ HEAD `904f83d3` · D6 #13 Hub nav · D12×16 · full prebuild green after llm test fix）  
 **角色**: Experience Officer + QA（静态核验；**非**浏览器视觉签收）  
 **范围**: `docs/superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md`  
 **对照实现**: `src/common/config/themeConfig.ts` · `themeConfig.test.ts` · `tests/e2e/release-smoke.spec.ts` · Settings Appearance  
@@ -124,7 +124,7 @@
 | X5 | minimal+dark / default+dark | **Pass (automated)** dark×minimal 双轴 smoke + **Needs manual browser** 视觉 |
 | X6 | 设置面板自洽吃 token | **Needs manual browser** / debt | 颜色模式 UI 已有；accent 等仍可能硬编码 blue（D6 Informational） |
 
-### 1.7 状态计数（本签收文档 · refresh `c5bd4080`）
+### 1.7 状态计数（本签收文档 · refresh `904f83d3`）
 
 | 状态 | 约计（场景行，含路由检查 / A11y / 长时 / XO / Env） |
 | --- | --- |
@@ -146,9 +146,10 @@
 | ☐ | **Deep Chat shell**（Appearance 层 · 非引擎） | top chrome / 模型·设置·重命名 focus 跟 primary | **terracotta 发送/accent 被 primary 顶替** → Blocker（与 R6 主测重复时记一处即可） |
 | ☐ | **SOPs overview focus**（D6 #10 · `/#/sops`） | 总览 focus/hover chrome 跟 module-accent + focus-ring 回退（minimal 下环更偏工业） | 总览 blue 归属被 Appearance 冲成一套灰；或 focus 仍死锁旧蓝且已迁 token 却无差 |
 | ☐ | **NPI primary CTA**（D6 #11 · NPI Tracker `action-btn-primary`） | 主 CTA 跟 `--color-primary*`（Appearance） | 主 CTA 仍死锁旧蓝且已迁 token 却无差；或误改归属/语义状态色 |
+| ☐ | **AMZ Hub nav ownership orange**（D6 #13 · `/#/amz-hub` shell `.amz_nav-btn`） | hover / active·tab-active 跟 hub ownership `module-accent` + orange fallback；总览 orange 归属不变 | nav 被 Appearance 冲成一套 slate/工业灰；或回退 hard blue 且已迁 ownership 却无差 |
 | ☐ | **dark × minimal 烟测复核**（自动化已有） | 设置切 deep + 极简后打开 KH：`<html data-appearance=minimal data-color-mode=dark class~dark>`；rose banner/sidebar 类仍在 | 轴互擦；ownership 类消失（契约回归） |
 
-> dark×minimal **文档根 + KH ownership class 已在 smoke 自动化**；上表 dark×minimal 行仅 optional 肉眼复核，**不**等于 visual 签收。SOPs/NPI 行为 D6 样本抽检，**不**阻塞 30 min 主脚本，**不**声称 visual Pass。
+> dark×minimal **文档根 + KH ownership class 已在 smoke 自动化**；上表 dark×minimal 行仅 optional 肉眼复核，**不**等于 visual 签收。SOPs/NPI/Hub nav 为 D6 样本抽检，**不**阻塞 30 min 主脚本，**不**声称 visual Pass。
 
 ---
 
@@ -166,7 +167,7 @@
 
 ### 2.2 Appearance default↔minimal — **已补契约 vs 仍缺视觉**
 
-| 项 | 现状 @ `c5bd4080` |
+| 项 | 现状 @ HEAD `904f83d3` |
 | --- | --- |
 | 切换 Appearance（Settings select） | smoke **有** `settings-theme-select` → `minimal` / `default` |
 | `data-appearance` / `data-theme` / `data-color-mode` | smoke **有** `expectDocumentThemeState` |
@@ -215,14 +216,14 @@
 
 **压缩版（15 min）**: 设置切换 3 次 → 刷新 → KH + Deep Chat + PPC 三页 ownership → Tab focus 一次。
 
-**可选 +5 min（样本，非主脚本 Blocker）**: Skills 试用 CTA → Deep Chat shell chrome/focus → **SOPs overview focus** → **NPI primary CTA** →（若时间够）dark×minimal 再开 KH 肉眼复核。见 §1.8。
+**可选 +5 min（样本，非主脚本 Blocker）**: Skills 试用 CTA → Deep Chat shell chrome/focus → **SOPs overview focus** → **NPI primary CTA** → **AMZ Hub nav ownership orange** →（若时间够）dark×minimal 再开 KH 肉眼复核。见 §1.8。
 
 **首 8 张人工截图（可选，与 30 min 并行或紧随）**: 见 [D12 §6](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow)（Settings default/minimal · KH 对 · PPC 对 · Deep Chat minimal · Home minimal）。**截图 ≠ visual Pass**，只加速 XO 归档。
 
 **记录模板**（贴 PR / RC）:
 
 ```text
-XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect c5bd4080+)
+XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect 904f83d3+)
 Browser: ________  Viewport: ________
 X1 switch×3: Pass/Fail
 X2 ownership (KH rose / PPC / MA / DeepChat terracotta): Pass/Fail
@@ -234,6 +235,7 @@ Optional Skills CTA: Pass/Fail / Skipped
 Optional Deep Chat shell (not terracotta): Pass/Fail / Skipped
 Optional SOPs overview focus (#10): Pass/Fail / Skipped
 Optional NPI primary CTA (#11): Pass/Fail / Skipped
+Optional AMZ Hub nav ownership orange (#13): Pass/Fail / Skipped
 D6 still-blue samples: (list, Informational)
 First-8 screenshots: Yes/No (path: ________)
 Sign-off visual: Yes / No   ← default No until XO fills
@@ -332,9 +334,11 @@ Sign-off visual: Yes / No   ← default No until XO fills
 
 | 项 | 备注 |
 | --- | --- |
-| D6 业务 `blue-*` | 仍 Informational 长尾；样本含 Skills CTA + Deep Chat shell + **#10 SOPs overview focus** + **#11 NPI primary CTA** @ `c5bd4080` |
+| D6 业务 `blue-*` | 仍 Informational 长尾；样本含 Skills CTA + Deep Chat shell + **#10 SOPs** + **#11 NPI** + **#12 RW** + **#13 AMZ Hub nav ownership orange** @ `904f83d3` |
 | D5 focus soft | 部分壳层已迁；全站未清 |
+| D12 scaffold | opt-in **8×2=16**（含 Amazon Hub overview）；**非** visual Pass / **非** CI |
 | smoke Appearance | **文档根 + KH ownership + dark×minimal 已有**；**仍无**色差/截图/terracotta 色值 |
+| full prebuild | **Green 再次**（llm `requestedEffort` 测试 fixtures 解阻 type-check:tests） |
 | system 模式 | API + matchMedia 单测有；设置「跟随系统」UI 存在，跨 OS 体感仍人工 |
 
 ---
@@ -355,12 +359,13 @@ Sign-off visual: Yes / No   ← default No until XO fills
 | 指标 | 值 |
 | --- | --- |
 | 文档路径 | `docs/superpowers/plans/2026-07-26-theme-system-xo-signoff-status.md` |
-| HEAD 对照 | 主题 tip `c5bd4080`（main 可更新） |
+| HEAD 对照 | `904f83d3`（D6 #13 hub · D12×16 · prebuild green after llm test fix） |
 | Pass (automated) | **~16** |
 | Pass (code contract) | **~20** |
 | Needs manual browser | **~34** |
 | Blocked（产品路径） | **0**；visual / RC 体验 **Open** |
 | 视觉全站 Pass | **否（明确未签 · Yellow）** |
+| full prebuild | **Green 再次**（llm 测试解阻后） |
 | Tech Lead code 预签 | **允许** |
 | XO 体验签 | **仍要求** |
 | 最大体验阻断 | **人类 30 分钟脚本未跑**；Settings 局部 blue 债；**无**全站色差/截图 Pass |

@@ -49,9 +49,9 @@ interface ThemeScreen {
 }
 
 /**
- * Scaffold slice (8 screens × 2 appearances = 16 snapshots).
- * Ownership multi-color pages (App Center / Scraper / PPC / SOPs / Amazon Hub) must NOT force primary.
- * Full light main pack (R1–R9 × 2) remains plan-only until XO + baselines stabilize.
+ * Scaffold slice (9 screens × 2 appearances = 18 snapshots).
+ * Ownership multi-color pages (App Center / Scraper / PPC / SOPs / Amazon Hub / Deep Chat) must NOT force primary.
+ * Full light main pack (R1–R9 × 2) is now covered by this opt-in scaffold; visual Pass still requires human XO.
  */
 const THEME_SCREENS: ThemeScreen[] = [
   {
@@ -145,6 +145,24 @@ const THEME_SCREENS: ThemeScreen[] = [
     maskSelectors: ['.timestamp', '[data-dynamic="true"]', '.toast'],
     beforeScreenshot: async (page: Page) => {
       await page.waitForSelector('.amz-hub-overview', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    },
+  },
+  {
+    // R6 — Deep Chat terracotta send/accent must NOT be asserted as primary
+    slug: 'deep-chat',
+    path: '/#/app-center/playground/deep-chat',
+    pageType: PageType.FORM,
+    waitForSelector: '#deep-chat-view',
+    maskSelectors: [
+      '.timestamp',
+      '.deep-chat-thread-meta',
+      '[data-dynamic="true"]',
+      '.toast',
+      '[class*="animate-"]',
+    ],
+    beforeScreenshot: async (page: Page) => {
+      await page.waitForSelector('#deep-chat-view', { timeout: 15000 });
       await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
     },
   },

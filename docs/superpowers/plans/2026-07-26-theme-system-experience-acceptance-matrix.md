@@ -1,6 +1,6 @@
 # 主题系统体验验收矩阵（Appearance / Ownership / Dark）
 
-**日期**: 2026-07-26（automation refresh @ `90914af1`）  
+**日期**: 2026-07-26（automation refresh @ HEAD `904f83d3`）  
 **角色**: Experience Officer（体验官）+ Visual QA  
 **状态**: 可执行验收基线（Phase 0–3 主用；Dark **产品路径已解锁**；**视觉签收仍 Open / 未 Pass**）  
 **权威文档链**:
@@ -189,6 +189,7 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | R9-C1 | 壳层 primary/focus | Change* | * | |
 | R9-C2 | 总览 orange 归属 | NOT | 不变 | |
 | R9-C3 | 子页 indigo/growth/violet | NOT | 抽 1 |
+| R9-O1 | （可选）shell nav hover/active chrome（D6 #13） | NOT* | 可选肉眼 | `.amz_nav-btn` 跟 hub ownership `module-accent` + orange；**非** Appearance 全控；**非** e2e 色差；**非** visual Pass |
 
 #### R10 Skills（可选 · D6 样本）
 
@@ -213,7 +214,7 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | 设置深测 | R7 专项行 × 2 env（含预览/持久化） | 计入 R7，不另加路由 |
 | 可选 E2 | 1 preset × 2 面（Settings + 1 工具页） | **+2** |
 | Dark E3/E4 | 9 routes × 2 | **+18**（产品路径 **已解锁**；视觉 **Open**） |
-| 可选 R10 Skills / R8-O1 SOPs / R11 NPI | 样本 × E0/E1 抽检 | **+1～4** 可选 |
+| 可选 R10 Skills / R8-O1 SOPs / R11 NPI / R9-O1 Hub nav | 样本 × E0/E1 抽检 | **+1～5** 可选 |
 | A11y / 长时 | 见 §5–§6，跨路由抽检 | **+8** 检查项（非全路由笛卡尔） |
 
 **当前可执行**: light 主包 **18** + 横切 **~8** + dark 产品路径抽检；  
@@ -484,5 +485,5 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | 满配路由×环境 | **36** light+dark；含横切约 **44** 量级 |
 | Automated（契约） | 文档根双轴、KH ownership class、dark×minimal smoke |
 | Blocker 核心 | 归属/`wb-theme` 被改；状态色被改；Deep Chat terracotta 被改；预览≠apply；Phase 3 后壳层 primary/focus 不跟手；关键对比失败 |
-| 非 Blocker | **D6** 硬编码 blue 不变 → Informational；可选 Skills/Deep Chat shell 样本 |
+| 非 Blocker | **D6** 硬编码 blue 不变 → Informational；可选 Skills/Deep Chat shell / SOPs / NPI / **Hub nav #13** 样本 |
 | 签字 | Experience Officer · QA · Tech Lead — **Visual 未签** |

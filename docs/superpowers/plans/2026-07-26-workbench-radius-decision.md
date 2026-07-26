@@ -95,11 +95,15 @@ D2 的根因不是「缺 8px」，而是 **缺少工作台专用语义 SSOT**，
 
 | 位置 | 现状 | 风险 | 建议 |
 | --- | --- | --- | --- |
-| `.analysis-widget-card` | `--rounded-xl` (16px) | 工作区 widget 超 8px | → `--workbench-radius` |
+| `.analysis-widget-card` | **已迁** `var(--workbench-radius…)` | — | R2 done |
+| `.progress-card` | **已迁** `var(--workbench-radius…)` | — | long-tail #2 |
+| `.sops-overview-collapsible` | **已迁** `var(--workbench-radius…)` | — | 对齐 app-center collapsible |
 | `.amz_card-hover` | `--rounded-lg` (12px) | 工具卡偏软 | 若在工具页 → workbench；若入口保留 12–16 |
 | `.zn-notice-card` | hardcode `14px` | 无 token | → workbench 或 entry 明确选型 |
 | `.app-overview-card` | `--rounded-xl` | **允许**（entry） | 保持 entry 映射 |
-| 各模块 scraper / PPC / keyword hunter 内联 panel | 混用 lg/xl / hardcode | M2 审计热点 | 按 `workbench-ui:audit` 逐模块 |
+| 各模块 scraper / PPC / keyword hunter 内联 panel | 混用 lg/xl / hardcode（部分已覆盖） | M2 审计热点 | 按 `workbench-ui:audit` 逐模块 |
+
+**Long-tail 记（2026-07-26）:** 高流量 CSS 主面板以 `--workbench-radius` / panel|card 别名为主；剩余偏差多为 Tailwind utility 类名、按钮/icon well、entry/overview、modal chrome、Settings 局部 radius token——**不**在同一 PR 批量压到 8px。
 
 ## 迁移顺序（低风险优先）
 

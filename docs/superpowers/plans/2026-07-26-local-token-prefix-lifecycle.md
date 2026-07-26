@@ -83,11 +83,17 @@ Related:
 
 ### 2.4 疑似 archive 候选（本 PR **只登记不删**）
 
-| 候选 | 条件 | 动作（未来 PR） |
-| --- | --- | --- |
-| 文档-only 名（`--ppc-hero-*`、空 `--kh-*`） | 0 声明 + 0 消费 | 更新文档指向实名；勿再教新代码使用 |
-| 模块内重复 surface/radius/focus 别名 | 已 100% 等于 `--surface-*` / `--workbench-radius` / `--color-focus-ring` 且无覆写点 | 可就地删别名或改为注释映射；**分模块小 PR** |
-| 废弃交互残留 | 功能下线后 0 引用 | 删声明 + 从本节 inventory 移入「Archived」附录 |
+**Inventory skim（`src/`，2026-07-26）**: 对几个已登记 / 漂移前缀做了 0-consumer 抽样；**不删 CSS**。
+
+| 候选 | `src/` 状态 | 条件 | 动作（未来 PR） |
+| --- | --- | --- | --- |
+| `--ppc-hero-*` | **0** 声明 / **0** 消费（仅 docs 示例） | 文档-only | 定义文档改指 `--ppc-search-terms-*`；勿再教新代码使用 |
+| `--kh-*` / `--kh-status-*` | **0** 声明 / **0** 消费（仅 docs + audit regex） | 文档-only；实网为 `--keyword-hunter-*` / `--keyword-status-*` | 更新定义示例；勿并行引入；整前缀死亡后可从 `NAMING_PATTERNS` 去掉 `kh` 分支 |
+| `--playground-*` | **0** 声明 / **0** 消费（audit 允许；现网 `--deep-chat-*`） | 空允许名 + docs 示例 | 优先写 `--deep-chat-*`；若无独立预览层需求，可 archive docs 示例并考虑收紧 audit pattern |
+| 模块内重复 surface/radius/focus 别名 | 未本波次全量核对 | 已 100% 等于 `--surface-*` / `--workbench-radius` / `--color-focus-ring` 且无覆写点 | 可就地删别名或改为注释映射；**分模块小 PR** |
+| 废弃交互残留 | 未发现 | 功能下线后 0 引用 | 删声明 + 从本节 inventory 移入「Archived」附录 |
+
+**本次 skim 仍有消费（非 archive）**: `--ppc-search-terms-*`、`--keyword-hunter-*`、`--keyword-status-*`、`--deep-chat-*`、`--scraper-*`、`--module-*`、`--brand-risk-*` 等在 `src/` 仍有引用。
 
 ---
 
