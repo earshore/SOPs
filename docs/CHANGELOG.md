@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - D8 Ownership Role 代码 SSOT scaffold：`src/common/config/ownershipRoles.ts`（`OwnershipRoleId` × 19、`OWNERSHIP_ROLES`、`getPaletteForRole` / `getOwnershipRoleForModule`；纯 helper，无 Appearance 写入、无全站 DOM 绑定）。
 - D9 局部 token 前缀生命周期（库存 / elevate·keep local·archive / PR 清单 / 与 D1 边界）：`docs/superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md`（docs only，无批量 CSS rename）。
-- D12 Appearance 截图 scaffold（opt-in）：`tests/visual/theme-appearance-scaffold.test.ts` + `npm run test:visual:theme`（`THEME_VISUAL=1`；默认 skip，基线 gitignore，不进 blocking CI）；计划见 `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`。
+- D12 Appearance 截图 scaffold（opt-in）：`tests/visual/theme-appearance-scaffold.test.ts` + `npm run test:visual:theme`（`THEME_VISUAL=1`；默认 skip，基线 gitignore，不进 blocking CI）；首批 **6 屏 × default/minimal light = 12** 快照（含 App Center / Scraper / PPC）；计划见 `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`。
 - Ownership Role → Palette / `wb-theme-*` 映射表（Phase 4 预备）：`docs/superpowers/plans/2026-07-26-ownership-role-palette-map.md`。
 - D1 token 覆盖清点：`npm run token:override-audit`（`scripts/quality/audit-token-overrides.ts`）+ 库存报告 `docs/superpowers/plans/2026-07-26-token-override-inventory.md`。
 - 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- D11：`cards.css` 暗色覆盖 19 规则扩为 `.dark, [data-color-mode-resolved='dark'], [data-theme='dark']` tri-selector（保留 legacy）。
+- D6/D5 hybrid：App Center overview focus 从 `var(--module-accent, var(--color-blue-500))` 迁到 `var(--module-accent, var(--color-focus-ring, #3b82f6))`（保留 module-accent；**不**在模块 CSS 覆盖/直引 `--color-primary`）。
 - D7：ESLint hard-gate 禁止生产代码调用 `ColorContext.setModuleColor`（`no-restricted-properties` error；优先 `inferColorFromModule`）。
 - D7：`ColorContext.setModuleColor` 标记 `@deprecated`（优先 `inferColorFromModule`；Appearance 绝不得调用）。
 - D6 业务样例（Keyword Hunter）：主 CTA / 最小化 chrome 从 hard `blue-600` 迁到 `--color-primary*` / `--color-focus-ring`（不改 wb-theme / 模块归属色）。
@@ -39,10 +41,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D6 业务样例 #6（Skills catalog）：试用主 CTA「在 Deep Chat 试用」/ 搜索与卡片 focus 从 hard violet 迁到 `--color-primary*` / `--color-focus-ring`（保留分类筛选紫、状态/路径多色徽章）。
 - D6 业务样例 #7（Deep Chat shell）：top chrome / 模型选择 / 设置区 / 会话重命名 focus 从 hard blue·terracotta ring 迁到 `--color-primary*` / `--color-focus-ring`（保留发送钮与业务 terracotta 品牌色）。
 - D6 业务样例 #8（Keyword Hunter input）：关键词输入壳 focus / 词数徽章 / 区段图标从 hard `blue-*` 迁到 `--color-primary*` / `--color-focus-ring`（保留 Listing emerald 区与 amber 重复状态徽章）。
+- D6 业务样例 #9（Keyword Hunter process/filter）：筛选 focus / 快照选中 chrome 从 hard blue 迁到 `--color-primary*` / `--color-focus-ring`；draft `current/saving/loading` 用 `--color-info*`（保留 coverage 多色梯度与 rose ownership）。
 - D5 续：`--shadow-primary-*` 改 `color-mix` 跟随 `--color-primary`（light/dark），不再写死蓝/indigo。
 - D5 续：root `--focus-ring-soft` + header search / forms dark / Overview search / nav-focus 从 hard blue 迁到 `--color-focus-ring`（megaMenu / sidebar-theme / wb ownership 保留）。
 - D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标；Keyword Hunter 报告 section 与 AI Analysis JSON 面板图标）；entry/overview / megaMenu 营销 lift 保留。
 - D4 续 #2：Scraper 工作台 `.section-header .header-icon` 去掉 marketing `scale/rotate`；KH 报告 section 图标 shadow 对齐 rose workbench helper。
+- D4 调用点审计（docs）：`src/modules` / shell 无 production `getCardClasses`/`getIconContainerClasses` 工作台误用；无非 entry `scale-110` chrome；megaMenu/entry lift 保留（见 theme landing status §5.2）。
 - Shared buttons：glow/筛选 active·focus 从 brand-blue 改为 `--color-primary*` / `--color-focus-ring` / `color-mix`（保留 `--button-filter-accent` 模块归属覆写）。
 - E2E smoke：`dark × minimal` 在 Keyword Hunter 共存（双轴文档根 + rose ownership）；PromptLab 路由后 `minimal` 持久化。
 - 主题宪法：明确 **导航 = Ownership**（megaMenu / sidebar 不归 Appearance 全控）。

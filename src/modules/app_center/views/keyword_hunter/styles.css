@@ -193,11 +193,11 @@
 }
 
 .keyword-hunter-input-draft-status.current {
-  --keyword-hunter-status-bg: var(--color-blue-50, #eff6ff);
-  --keyword-hunter-status-border: var(--color-blue-100, #dbeafe);
-  --keyword-hunter-status-dot: var(--color-blue-500, #3b82f6);
-  --keyword-hunter-status-label: var(--color-blue-700, #1d4ed8);
-  --keyword-hunter-status-detail: var(--color-blue-900, #1e3a8a);
+  --keyword-hunter-status-bg: var(--color-info-light, rgba(59, 130, 246, 0.1));
+  --keyword-hunter-status-border: color-mix(in srgb, var(--color-info, #3b82f6) 22%, transparent);
+  --keyword-hunter-status-dot: var(--color-info, #3b82f6);
+  --keyword-hunter-status-label: var(--color-info-dark, #2563eb);
+  --keyword-hunter-status-detail: var(--color-info-dark, #2563eb);
 }
 
 .keyword-hunter-input-draft-status.draft {
@@ -218,11 +218,11 @@
 
 .keyword-hunter-input-draft-status.saving,
 .keyword-hunter-input-draft-status.loading {
-  --keyword-hunter-status-bg: var(--color-blue-50, #eff6ff);
-  --keyword-hunter-status-border: var(--color-blue-100, #dbeafe);
-  --keyword-hunter-status-dot: var(--color-blue-500, #3b82f6);
-  --keyword-hunter-status-label: var(--color-blue-700, #1d4ed8);
-  --keyword-hunter-status-detail: var(--color-blue-800, #1e40af);
+  --keyword-hunter-status-bg: var(--color-info-light, rgba(59, 130, 246, 0.1));
+  --keyword-hunter-status-border: color-mix(in srgb, var(--color-info, #3b82f6) 22%, transparent);
+  --keyword-hunter-status-dot: var(--color-info, #3b82f6);
+  --keyword-hunter-status-label: var(--color-info-dark, #2563eb);
+  --keyword-hunter-status-detail: var(--color-info-dark, #2563eb);
 }
 
 .keyword-hunter-input-draft-dot {
@@ -383,20 +383,20 @@
 
 .keyword-hunter-input-snapshot-item:hover,
 .keyword-hunter-input-snapshot-item:focus-within {
-  border-color: var(--color-blue-200, #bfdbfe);
-  background: var(--color-blue-50, #eff6ff);
-  box-shadow: 0 12px 24px -24px rgba(30, 64, 175, 0.42);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
+  background: var(--color-primary-light, #eff6ff);
+  box-shadow: 0 12px 24px -24px color-mix(in srgb, var(--color-primary, #3b82f6) 42%, transparent);
 }
 
 .keyword-hunter-input-snapshot-item:focus-visible {
-  outline: 2px solid var(--color-blue-500, #3b82f6);
+  outline: 2px solid var(--color-focus-ring, var(--color-primary, #3b82f6));
   outline-offset: 2px;
 }
 
 .keyword-hunter-input-snapshot-item.current {
-  border-color: var(--color-blue-300, #93c5fd);
-  background: var(--color-blue-50, #eff6ff);
-  box-shadow: inset 2px 0 0 var(--color-blue-500, #3b82f6);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 40%, transparent);
+  background: var(--color-primary-light, #eff6ff);
+  box-shadow: inset 2px 0 0 var(--color-primary, #3b82f6);
 }
 
 .keyword-hunter-input-snapshot-item-head {
@@ -1857,8 +1857,9 @@
 .keyword-hunter-filter-field input:focus,
 .keyword-hunter-filter-field select:focus {
   outline: none;
-  border-color: var(--color-blue-500);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 16%, transparent);
 }
 
 .keyword-hunter-history-toolbar-meta {
@@ -1954,14 +1955,14 @@
 
 .keyword-hunter-snapshot-item:hover,
 .keyword-hunter-snapshot-item:focus {
-  border-color: var(--color-blue-200);
-  background: var(--color-blue-50);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
+  background: var(--color-primary-light, #eff6ff);
   outline: none;
 }
 
 .keyword-hunter-snapshot-item.active {
-  border-color: var(--color-blue-500);
-  box-shadow: inset 3px 0 0 var(--color-blue-600);
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: inset 3px 0 0 var(--color-primary-dark, #1d4ed8);
 }
 
 .keyword-hunter-snapshot-item-head,

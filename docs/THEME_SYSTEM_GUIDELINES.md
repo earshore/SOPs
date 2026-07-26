@@ -143,7 +143,7 @@ npm run generate:tokens
 
 **Ownership Role → Palette / `wb-theme-*` 全表（Phase 4 预备·可执行）**: […/plans/2026-07-26-ownership-role-palette-map.md](./superpowers/plans/2026-07-26-ownership-role-palette-map.md)。新页面只选 **role**，不发明色名；Appearance 不得改写该表。下表为简表（与 `menuConfig` 冲突时以代码 + Role 全表为准）。
 
-**代码 SSOT（D8 light scaffold）**: `src/common/config/ownershipRoles.ts` — `OwnershipRoleId` / `OWNERSHIP_ROLES` / `getPaletteForRole` / `getOwnershipRoleForModule`。纯表 + 纯 helper；**不**由 Appearance 写入，**不**强制全站 `data-ownership-role` 绑定。
+**代码 SSOT（D8 light scaffold）**: `src/common/config/ownershipRoles.ts` — `OwnershipRoleId` / `OWNERSHIP_ROLES` / `getPaletteForRole` / `getOwnershipRoleForModule`。纯表 + 纯 helper；**不**由 Appearance 写入，**不**强制全站 `data-ownership-role` 绑定。新页面增加 banner class 时，应优先从 `ownershipRoles` 取 role id 及其 `wbThemeClasses` / palette，不要发明新色名。
 
 | 区域                | 当前主题来源                                         | 页面主视觉                                                                                                                                                             |
 | ------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

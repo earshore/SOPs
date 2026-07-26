@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { MENU_CONFIG } from './menuConfig';
 import {
   OWNERSHIP_ROLE_IDS,
   OWNERSHIP_ROLES,
@@ -35,6 +36,19 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
 
     expect(getOwnershipRoleForModule('playground')).toBe('role-playground');
     expect(getPaletteForRole('role-playground')).toBe('orange');
+
+    expect(getOwnershipRoleForModule('more_core')).toBe('role-more-overview');
+    expect(getPaletteForRole('role-more-overview')).toBe('green');
+  });
+
+  it('keeps module role palettes aligned with menuConfig.themeColor (pure, no DOM)', () => {
+    const moduleIds = ['keyword_hunter', 'ppc_tools', 'master_analysis', 'more_core'] as const;
+
+    for (const moduleId of moduleIds) {
+      const roleId = getOwnershipRoleForModule(moduleId);
+      expect(roleId).not.toBeNull();
+      expect(getPaletteForRole(roleId!)).toBe(MENU_CONFIG.modules[moduleId]?.themeColor);
+    }
   });
 
   it('returns null for unknown modules and roles (no fake defaults)', () => {

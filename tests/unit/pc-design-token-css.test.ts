@@ -105,7 +105,7 @@ describe('PC design token CSS contract', () => {
     expect(appCenterCss).toContain('--module-accent: var(--app-overview-accent)');
     expect(appCenterCss).toContain('--module-accent-focus: var(--app-overview-focus-ring)');
     expect(appCenterCss).toContain(
-      '--button-filter-focus-color: var(--module-accent, var(--color-blue-500))'
+      '--button-filter-focus-color: var(--module-accent, var(--color-focus-ring, #3b82f6))'
     );
     expect(appCenterCss).not.toMatch(localPrimaryDefinition);
     expect(appCenterCss).not.toMatch(localPrimaryReference);

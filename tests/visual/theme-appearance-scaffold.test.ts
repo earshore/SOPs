@@ -49,7 +49,8 @@ interface ThemeScreen {
 }
 
 /**
- * First scaffold slice only (3 screens × 2 appearances = 6 snapshots).
+ * Scaffold slice (6 screens × 2 appearances = 12 snapshots).
+ * Ownership multi-color pages (App Center / Scraper / PPC) must NOT force primary.
  * Full light main pack (R1–R9 × 2) remains plan-only until XO + baselines stabilize.
  */
 const THEME_SCREENS: ThemeScreen[] = [
@@ -77,6 +78,51 @@ const THEME_SCREENS: ThemeScreen[] = [
     pageType: PageType.STATIC,
     waitForSelector: 'body',
     maskSelectors: ['.timestamp', '.current-time', '#time-display', '[data-dynamic="true"]'],
+  },
+  {
+    // R2 — multi-color overview; ownership accents must NOT collapse to primary
+    slug: 'app-center',
+    path: '/#/app-center',
+    pageType: PageType.LIST,
+    waitForSelector: '.app-overview-container',
+    maskSelectors: ['.timestamp', '[data-dynamic="true"]', '.toast'],
+    beforeScreenshot: async (page: Page) => {
+      await page.waitForSelector('.app-overview-container', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    },
+  },
+  {
+    // R3 sample — scraper ownership (wb-theme-indigo) NOT forced to primary
+    slug: 'scraper',
+    path: '/#/app-center/master-analysis/scraper',
+    pageType: PageType.DATA_DISPLAY,
+    waitForSelector: '[x-data="scraperPanel"]',
+    maskSelectors: [
+      '.timestamp',
+      '#scraper-results',
+      '.history-item',
+      '#data-cards',
+      '#json-display',
+      '.task-card',
+      '.progress-bar-fill',
+      '[data-dynamic="true"]',
+    ],
+    beforeScreenshot: async (page: Page) => {
+      await page.waitForSelector('[x-data="scraperPanel"]', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    },
+  },
+  {
+    // R5 sample — .ppc-hero emerald ownership NOT forced to primary
+    slug: 'ppc-search-terms',
+    path: '/#/app-center/ppc-tools/ppc-search-terms',
+    pageType: PageType.FORM,
+    waitForSelector: '.ppc-search-terms-app',
+    maskSelectors: ['.timestamp', '[class*="animate-"]', '[data-dynamic="true"]'],
+    beforeScreenshot: async (page: Page) => {
+      await page.waitForSelector('.ppc-search-terms-app', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    },
   },
 ];
 

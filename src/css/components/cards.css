@@ -1478,6 +1478,7 @@
    16. 暗色模式
    ======================================== */
 .dark .card,
+[data-color-mode-resolved='dark'] .card,
 [data-theme='dark'] .card {
   --card-bg: var(--color-bg-secondary, #1e293b);
   --card-border: var(--color-border-light, rgba(255, 255, 255, 0.06));
@@ -1486,22 +1487,27 @@
 }
 
 .dark .card:hover,
+[data-color-mode-resolved='dark'] .card:hover,
 [data-theme='dark'] .card:hover {
   --card-border: rgba(129, 140, 248, 0.2);
 }
 
 .dark .card-title,
+[data-color-mode-resolved='dark'] .card-title,
 [data-theme='dark'] .card-title {
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .card-subtitle,
+[data-color-mode-resolved='dark'] .card-subtitle,
 [data-theme='dark'] .card-subtitle {
   color: var(--color-text-tertiary, #9ca3af);
 }
 
 .dark .card-body,
 .dark .card-description,
+[data-color-mode-resolved='dark'] .card-body,
+[data-color-mode-resolved='dark'] .card-description,
 [data-theme='dark'] .card-body,
 [data-theme='dark'] .card-description {
   color: var(--color-text-secondary, #d1d5db);
@@ -1510,6 +1516,9 @@
 .dark .card-footer,
 .dark .card-header--bordered,
 .dark .card-divider,
+[data-color-mode-resolved='dark'] .card-footer,
+[data-color-mode-resolved='dark'] .card-header--bordered,
+[data-color-mode-resolved='dark'] .card-divider,
 [data-theme='dark'] .card-footer,
 [data-theme='dark'] .card-header--bordered,
 [data-theme='dark'] .card-divider {
@@ -1518,6 +1527,7 @@
 
 /* 暗色 - 玻璃卡片 */
 .dark .card-glass,
+[data-color-mode-resolved='dark'] .card-glass,
 [data-theme='dark'] .card-glass {
   --card-bg: rgba(30, 41, 59, 0.7);
   --card-border: rgba(255, 255, 255, 0.08);
@@ -1525,17 +1535,20 @@
 
 /* 暗色 - 扁平卡片 */
 .dark .card-flat,
+[data-color-mode-resolved='dark'] .card-flat,
 [data-theme='dark'] .card-flat {
   --card-bg: rgba(255, 255, 255, 0.04);
 }
 
 .dark .card-flat:hover,
+[data-color-mode-resolved='dark'] .card-flat:hover,
 [data-theme='dark'] .card-flat:hover {
   --card-bg: rgba(255, 255, 255, 0.06);
 }
 
 /* 暗色 - 嵌套卡片 */
 .dark .card-inset,
+[data-color-mode-resolved='dark'] .card-inset,
 [data-theme='dark'] .card-inset {
   --card-bg: rgba(0, 0, 0, 0.15);
   --card-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -1543,11 +1556,13 @@
 
 /* 暗色 - 虚线卡片 */
 .dark .card-dashed,
+[data-color-mode-resolved='dark'] .card-dashed,
 [data-theme='dark'] .card-dashed {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
 .dark .card-dashed:hover,
+[data-color-mode-resolved='dark'] .card-dashed:hover,
 [data-theme='dark'] .card-dashed:hover {
   border-color: var(--color-primary, #818cf8);
   background: rgba(129, 140, 248, 0.04);
@@ -1555,12 +1570,14 @@
 
 /* 暗色 - 加载遮罩 */
 .dark .card-loading::after,
+[data-color-mode-resolved='dark'] .card-loading::after,
 [data-theme='dark'] .card-loading::after {
   background: rgba(15, 23, 42, 0.6);
 }
 
 /* 暗色 - 统计值 */
 .dark .card-stat-value,
+[data-color-mode-resolved='dark'] .card-stat-value,
 [data-theme='dark'] .card-stat-value {
   color: var(--color-text-primary, #f9fafb);
 }
@@ -1569,6 +1586,9 @@
 .dark .card-skeleton-line,
 .dark .card-skeleton-circle,
 .dark .card-skeleton-rect,
+[data-color-mode-resolved='dark'] .card-skeleton-line,
+[data-color-mode-resolved='dark'] .card-skeleton-circle,
+[data-color-mode-resolved='dark'] .card-skeleton-rect,
 [data-theme='dark'] .card-skeleton-line,
 [data-theme='dark'] .card-skeleton-circle,
 [data-theme='dark'] .card-skeleton-rect {
@@ -1578,6 +1598,9 @@
 .dark .card-skeleton-line::after,
 .dark .card-skeleton-circle::after,
 .dark .card-skeleton-rect::after,
+[data-color-mode-resolved='dark'] .card-skeleton-line::after,
+[data-color-mode-resolved='dark'] .card-skeleton-circle::after,
+[data-color-mode-resolved='dark'] .card-skeleton-rect::after,
 [data-theme='dark'] .card-skeleton-line::after,
 [data-theme='dark'] .card-skeleton-circle::after,
 [data-theme='dark'] .card-skeleton-rect::after {
@@ -1592,11 +1615,13 @@
 
 /* 暗色 - 空状态 */
 .dark .card-empty-icon,
+[data-color-mode-resolved='dark'] .card-empty-icon,
 [data-theme='dark'] .card-empty-icon {
   color: rgba(255, 255, 255, 0.2);
 }
 
 .dark .card-empty-title,
+[data-color-mode-resolved='dark'] .card-empty-title,
 [data-theme='dark'] .card-empty-title {
   color: var(--color-text-secondary, #d1d5db);
 }
@@ -1604,6 +1629,8 @@
 /* 暗色 - 堆叠 */
 .dark .card-stack::before,
 .dark .card-stack::after,
+[data-color-mode-resolved='dark'] .card-stack::before,
+[data-color-mode-resolved='dark'] .card-stack::after,
 [data-theme='dark'] .card-stack::before,
 [data-theme='dark'] .card-stack::after {
   background: var(--color-bg-secondary, #1e293b);

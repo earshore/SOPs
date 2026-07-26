@@ -288,7 +288,7 @@
   --button-filter-active-bg: var(--app-overview-accent);
   --button-filter-active-border: var(--app-overview-accent);
   --button-filter-active-color: var(--app-overview-text-inverse);
-  --button-filter-focus-color: var(--module-accent, var(--color-blue-500));
+  --button-filter-focus-color: var(--module-accent, var(--color-focus-ring, #3b82f6));
   --button-filter-focus-ring: var(--app-overview-focus-ring);
 }
 
@@ -369,7 +369,7 @@
 }
 
 .app-overview-collapsible-summary:focus-visible {
-  outline: 2px solid var(--module-accent, var(--color-blue-500));
+  outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
   outline-offset: 3px;
 }
 
@@ -877,7 +877,7 @@
 }
 
 .app-overview-recent-columns-btn:focus-visible {
-  outline: 2px solid var(--module-accent, var(--color-blue-500));
+  outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
   outline-offset: 2px;
 }
 
@@ -1731,7 +1731,7 @@
 .app-overview-view-btn:focus-visible,
 .app-card-primary-link:focus-visible,
 .app-child-link:focus-visible {
-  outline: 2px solid var(--module-accent, var(--color-blue-500));
+  outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
   outline-offset: 2px;
 }
 

@@ -136,8 +136,9 @@ npm run test:e2e:report
 
 - 深色模式（如果支持）
 - **D12 Appearance 轴 scaffold（默认跳过）**: `tests/visual/theme-appearance-scaffold.test.ts`
-  - 覆盖首批 3 屏：Settings Appearance、Keyword Hunter、Home × `default`/`minimal` × light
-  - 命名: `theme-default-light-*` / `theme-minimal-light-*`
+  - 覆盖 6 屏：Settings Appearance、Keyword Hunter、Home、**App Center**、**Scraper**、**PPC Search Terms** × `default`/`minimal` × light = **12** 快照
+  - 命名: `theme-default-light-*` / `theme-minimal-light-*`（slugs: `settings-appearance` · `keyword-hunter` · `home` · `app-center` · `scraper` · `ppc-search-terms`）
+  - Ownership 多色页（App Center / Scraper / PPC）**不得**被 Appearance primary 吞掉
   - **不进 blocking CI**；未设 `THEME_VISUAL=1` 时整套 skip
   - 手动跑：
     ```bash
