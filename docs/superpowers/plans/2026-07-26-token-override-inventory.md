@@ -177,6 +177,8 @@ Skim of simplest candidates only. **No allowlist entries removed** (not 100% sur
 | **Candidate to close soon** | **0** | No entry meets “100% sure + consumers updated + gate green” |
 | **Future research only** | `shadow-2xl` / `shadow-inner` | Lowest direct `var()` traffic; still blocked by dark ladder + product elevation intent |
 
+**Re-audit 2026-07-26 (D1 skim #2):** still **0 closable**. Re-checked allowlist + live `src/` consumers; no consumer migration / value alignment since first skim. Gate: `npm run token:override-audit:gate` → 20 allowlisted, 0 unallowlisted. Do not remove entries without proof consumers migrated.
+
 ## Script
 
 ```bash
