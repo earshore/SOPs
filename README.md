@@ -25,17 +25,24 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-| 通道                         | 版本           | 说明                                               |
-| ---------------------------- | -------------- | -------------------------------------------------- |
-| **GitHub Latest（稳定 GA）** | `v3.0.10`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.11-rc.10` | 推理档企业闭环 + 主题 Phase 1–2 + 设置 TD；**勿**默认当生产 |
-| package.json                 | `3.0.11-rc.10`  | 与 RC tag / Release 一致（GA 前）                  |
-| 上一 GA                      | `v3.0.10`      | 回滚参考                                           |
+| 通道                         | 版本            | 说明                                                                    |
+| ---------------------------- | --------------- | ----------------------------------------------------------------------- |
+| **GitHub Latest（稳定 GA）** | `v3.0.10`       | 生产推荐版本                                                            |
+| **当前 Pre-release 候选**    | `v3.0.11-rc.11` | 企业主题 v2 双色轴 + Claude/Gemini API 对齐 + CI 恢复；**勿**默认当生产 |
+| package.json                 | `3.0.11-rc.11`  | 与 RC tag / Release 一致（GA 前）                                       |
+| 上一 GA                      | `v3.0.10`       | 回滚参考                                                                |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.10` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.11` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.10`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.11`。
+
+`v3.0.11-rc.11`（2026-07-27，Pre-release）收口 rc.10 之后的企业主题 v2、厂商 API 修复与 CI 恢复：
+
+- **主题 v2**：light/dark/system × Appearance 正交双轴、`ui-card` 语义面全量迁移、utility bridge 暗色语义、暗色高程阶梯；新用户默认跟随系统。
+- **LLM**：Claude 官方连字符 ID 归一（4.7/4.8 不再误走 budget_tokens 拿 400）、分代 effort 档位表、fable-5/mythos-5 收录、`thinking.display` summarized、Gemini `generationConfig.thinkingConfig` 官方形状。
+- **CI**：workflow 迁 ubuntu（1x 计费，修复配额耗尽致 07-14 起全红）；单测 3188/3188 全绿；deep-chat 工具栏 rAF 竞态与设置面板 x-show 策略修复。
+- GitHub Latest **仍指向** `v3.0.10`；回滚基线为 `v3.0.10`。
 
 `v3.0.11-rc.10`（2026-07-26，Pre-release）收口 rc.9 之后的推理闭环与主题收敛：
 
@@ -471,18 +478,18 @@ npm run quality:track    # 质量趋势跟踪
 多数业务子页面使用 `BaseModule` + `template.html?raw`：
 
 ```typescript
-import BaseModule from "@/common/BaseModule";
-import templateHTML from "./template.html?raw";
+import BaseModule from '@/common/BaseModule';
+import templateHTML from './template.html?raw';
 
 class MyPageModule extends BaseModule {
   constructor() {
-    super("route_id");
+    super('route_id');
   }
 
   async render(): Promise<void> {
     // 仅用于已审计的静态模板；动态内容使用 SafeRenderer 或 SecurityUtils。
     this.container!.innerHTML = templateHTML;
-    this.container!.classList.add("fade-in");
+    this.container!.classList.add('fade-in');
   }
 }
 
