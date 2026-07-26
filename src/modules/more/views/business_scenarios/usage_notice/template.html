@@ -1,6 +1,6 @@
 <div class="module-container py-6">
     <section class="mb-8">
-        <div class="bg-white border border-slate-200 rounded-lg p-6">
+        <div class="ui-card p-6">
             <div class="flex flex-wrap items-center gap-2 mb-4">
                 <span class="px-2.5 py-1 rounded-md bg-cyan-50 text-cyan-700 text-xs font-semibold">紫鸟开放平台</span>
                 <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">使用须知</span>
@@ -9,9 +9,9 @@
             </div>
             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900">使用 OpenClaw 前必读 · 两条关键须知</h2>
-                    <p class="text-sm text-slate-600 mt-3 max-w-4xl">独立页把“模型能力差异”和“不要复制粘贴提示词”放在最前面。它提醒用户：OpenClaw 是大模型与工具链的调度器，效果取决于模型能力、任务拆解方式、工具调用稳定性和每一步是否经过人工验证。</p>
-                    <p class="text-sm text-slate-500 mt-2 max-w-4xl">本页正文按该独立页复刻为普通说明页，作为后续四个业务场景的前置安全说明。</p>
+                    <h2 class="ui-card__title text-2xl font-bold">使用 OpenClaw 前必读 · 两条关键须知</h2>
+                    <p class="ui-card__muted text-sm mt-3 max-w-4xl">独立页把“模型能力差异”和“不要复制粘贴提示词”放在最前面。它提醒用户：OpenClaw 是大模型与工具链的调度器，效果取决于模型能力、任务拆解方式、工具调用稳定性和每一步是否经过人工验证。</p>
+                    <p class="ui-card__muted text-sm mt-2 max-w-4xl">本页正文按该独立页复刻为普通说明页，作为后续四个业务场景的前置安全说明。</p>
                 </div>
                 <a href="https://open.ziniao.com/ziniao-cases/usage-notice" target="_blank" rel="noopener noreferrer"
                     class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-cyan-50 border border-cyan-100 text-sm font-medium text-cyan-700 hover:bg-cyan-100 flex-shrink-0">
@@ -64,14 +64,14 @@
             </a>
         </div>
         <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <article class="bg-white border border-slate-200 rounded-lg p-6">
+            <article class="ui-card p-6">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
                         <i class="fa-solid fa-code-branch"></i>
                     </div>
-                    <h3 class="font-bold text-slate-900">不同模型会跑出不同质量</h3>
+                    <h3 class="ui-card__title font-bold">不同模型会跑出不同质量</h3>
                 </div>
-                <p class="text-sm text-slate-600 mb-4">OpenClaw 本质上是在调度大模型与工具链。底层模型不同，同一套 SOP 在任务规划、等待页面渲染、识别 DOM、生成话术、保留多轮约束上都会出现差距。</p>
+                <p class="ui-card__muted text-sm mb-4">OpenClaw 本质上是在调度大模型与工具链。底层模型不同，同一套 SOP 在任务规划、等待页面渲染、识别 DOM、生成话术、保留多轮约束上都会出现差距。</p>
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div class="rounded-lg bg-slate-50 border border-slate-100 p-3">
                         <div class="text-sm font-semibold text-slate-800">计划能力</div>
@@ -92,14 +92,14 @@
                 </div>
             </article>
 
-            <article class="bg-white border border-slate-200 rounded-lg p-6">
+            <article class="ui-card p-6">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
                         <i class="fa-solid fa-copy"></i>
                     </div>
-                    <h3 class="font-bold text-slate-900">这不是复制粘贴提示词</h3>
+                    <h3 class="ui-card__title font-bold">这不是复制粘贴提示词</h3>
                 </div>
-                <p class="text-sm text-slate-600 mb-4">示例对话的价值在于演示如何“教”OpenClaw，而不是提供一段万能指令。直接复制长段需求，常见结果是漏等 SPA、漏抓入口、分类口径跑偏或高风险动作过早自动化。</p>
+                <p class="ui-card__muted text-sm mb-4">示例对话的价值在于演示如何“教”OpenClaw，而不是提供一段万能指令。直接复制长段需求，常见结果是漏等 SPA、漏抓入口、分类口径跑偏或高风险动作过早自动化。</p>
                 <ol class="space-y-3">
                     <li class="flex gap-3">
                         <span class="w-6 h-6 rounded-lg bg-cyan-50 text-cyan-700 text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
@@ -145,25 +145,25 @@
             </div>
         </div>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <div class="bg-white border border-slate-200 rounded-lg p-5">
-                <h3 class="font-bold text-slate-900 mb-2">环境与凭证</h3>
-                <ul class="space-y-2 text-sm text-slate-600">
+            <div class="ui-card p-5">
+                <h3 class="ui-card__title font-bold mb-2">环境与凭证</h3>
+                <ul class="ui-card__muted space-y-2 text-sm">
                     <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>紫鸟浏览器客户端支持 OpenClaw 桥接</li>
                     <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>店铺登录态有效，二次验证已处理</li>
                     <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>紫鸟助理 API Key 已配置</li>
                 </ul>
             </div>
-            <div class="bg-white border border-slate-200 rounded-lg p-5">
-                <h3 class="font-bold text-slate-900 mb-2">任务边界</h3>
-                <ul class="space-y-2 text-sm text-slate-600">
+            <div class="ui-card p-5">
+                <h3 class="ui-card__title font-bold mb-2">任务边界</h3>
+                <ul class="ui-card__muted space-y-2 text-sm">
                     <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>先定义店铺、市场、时区和数据窗口</li>
                     <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>高风险动作只生成草稿或手册</li>
                     <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>每步要有可核对的数量或样本</li>
                 </ul>
             </div>
-            <div class="bg-white border border-slate-200 rounded-lg p-5">
-                <h3 class="font-bold text-slate-900 mb-2">沉淀标准</h3>
-                <ul class="space-y-2 text-sm text-slate-600">
+            <div class="ui-card p-5">
+                <h3 class="ui-card__title font-bold mb-2">沉淀标准</h3>
+                <ul class="ui-card__muted space-y-2 text-sm">
                     <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>会话中改过的规则写进 SOP</li>
                     <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>失败重试、缺失数据、告警方式明确</li>
                     <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>换模型或 UI 改版后重新回归</li>
