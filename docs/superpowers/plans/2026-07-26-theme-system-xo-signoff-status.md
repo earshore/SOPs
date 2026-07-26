@@ -1,7 +1,7 @@
 # 主题系统 XO 签字状态（Phase 1 code-aware review）
 
-**日期**: 2026-07-26（refresh @ agent-contract XO · **sample wave FREEZE** · agent run **PASS with debt** · report `xo-agent-run/XO-AGENT-RUN-REPORT.md` · Human visual **未签** / Yellow）
-**角色**: Experience Officer + QA（静态核验 + **agent 契约跑**；**非**人类视觉签收）  
+**日期**: 2026-07-26（refresh @ user-local agent-contract re-run · **FREEZE** · **PASS with debt** 可复现 · report `xo-agent-run/` · Human visual **未签** / Yellow）
+**角色**: Experience Officer + QA（静态核验 + **agent 契约跑 + 用户本机复跑**；**非**人类视觉签收）  
 **范围**: `docs/superpowers/plans/2026-07-26-theme-system-experience-acceptance-matrix.md`  
 **对照实现**: `src/common/config/themeConfig.ts` · `themeConfig.test.ts` · `tests/e2e/release-smoke.spec.ts` · Settings Appearance  
 **诚实声明**: 本文**不**声称「全站视觉已 Pass」。凡肉眼对比、对比度体感、长时作业刺激、归属「一眼扫读」，一律 **Needs manual browser** 或由人类 XO 补签。**Visual / XO = Yellow / 未签**。

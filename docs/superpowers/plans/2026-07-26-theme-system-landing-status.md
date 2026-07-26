@@ -22,10 +22,10 @@
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Code / 契约**    | **Green**  | tip `903dbf3e`: D6 #18–**27** 样本波 **FREEZE** · phase review re-green（hardcode 13 · token 20/0 · css 100% · theme unit · type-check:tests · **full build** · **smoke 29/29** @ 4173）· D12×**24** · D1 **0 closable** · D2 #6 deferred · D7/D10 Done · D8 soft · settings scroll-spy complete |
-| **Visual / XO**    | **Yellow** | **Agent-contract XO** @ 4173：**PASS with debt**（0 FAIL；DEBT=X6 美学 + Deep Chat send RGB 探针）；证据见 `xo-agent-run/` + `XO-AGENT-VISUAL-REVIEW.md`；**人类肉眼仍未签**；**不得宣称 visual Pass** |
-| **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 agent-contract 关体验 RC |
+| **Visual / XO**    | **Yellow** | **Agent-contract XO**：**PASS with debt**（0 FAIL；主债 **X6**）；**用户本机复跑一致**；证据 `xo-agent-run/`；**人类肉眼 / 签字仍缺**；**不得宣称 visual Pass** |
+| **主题 RC 体验门** | **Open**   | Tech Lead 可预签 **code + agent-contract**；**不可**仅凭脚本关体验 RC |
 
-**一句话**: 主题 **code 收敛 + sample FREEZE**；agent 已按 §3.1 跑 **契约 XO**（报告 `docs/superpowers/plans/xo-agent-run/`）→ **PASS with debt**；**Visual 仍 Yellow** 直至人类签字。smoke 用 `npm run test:e2e:smoke`（4173）。
+**一句话**: code FREEZE + agent-contract **本机可复现 PASS with debt**；下一步只剩 **人类 10–30 min 签字**（或点名债务）。smoke：`npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -264,7 +264,7 @@ Grep / call-site evidence (re-skim @ `147aa90c`):
 
 | #     | Wave                                              | 范围                                                                                                                         | 验证                                                                       |
 | ----- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **1** | **Human XO（P0 · 阻塞体验关闸）**           | 30 min 脚本 §3 / §3.1；X1/X2/X5 + 可选 residual **#18–27** + D12 首 8 并行可 | 矩阵勾选 + XO 结论 `PASS` / `PASS with debt` / `FAIL`；**仍不宣称 visual Pass until signed** |
+| **1** | **Human XO（P0 · 阻塞体验关闸）**           | agent-contract 已 PASS with debt（含用户复跑）；人类可跑 **全量 30 min** 或 **10 min 收口**（见 `XO-AGENT-VISUAL-REVIEW.md`）：minimal 刷新 · KH rose · PPC emerald · Deep Chat send terracotta · dark×minimal · 签模板 | 矩阵勾选 + **人名** + `PASS` / `PASS with debt` / `FAIL`；**脚本复跑 ≠ 签字** |
 | **2** | **D12 首 8 人工截图（P1 · 可与 XO 并行）**   | [D12 §6](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow)；scaffold **24** opt-in | 截图 + MANIFEST；**不** fail-closed CI；**截图 ≠ Pass**                 |
 | **3** | **按 XO 债务清单修（P2 · 有条件）**            | 仅 FAIL / PASS-with-debt 点名项；**非**新开 D6 样本波 | 相关 smoke + 门禁；必要时二次 XO 抽检 |
 

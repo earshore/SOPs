@@ -6,6 +6,26 @@
 **Runner**: Playwright headless agent script `scripts/dev/xo-agent-theme-run.mjs`  
 **Honesty**: **NOT human visual Pass.** Pixel aesthetics / long-session comfort / “一眼扫读” **still Yellow** until human XO signs.
 
+### User local re-run (confirmed)
+
+Operator re-ran on the same machine:
+
+```text
+PS> node scripts/dev/xo-agent-theme-run.mjs
+…
+=== OVERALL PASS with debt (agent-contract) ===
+```
+
+| Check | Local result |
+| --- | --- |
+| X0–X5 contract set | **PASS** (home, settings, switch×3, refresh minimal, KH rose, PPC hero, Deep Chat view, MA indigo, overviews, focus token, dark×minimal, restore) |
+| X6 settings aesthetics | **DEBT** (unchanged — agent cannot judge) |
+| FAIL | **0** |
+| Overall | **PASS with debt (agent-contract)** |
+| Human visual | **Still unsigned / Yellow** |
+
+This confirms the agent-contract path is **reproducible outside CI**. It still does **not** close theme experience RC.
+
 ## Summary
 
 | Metric | Value |
@@ -55,10 +75,14 @@ Enhanced re-run notes:
 
 ## Human still required
 
-1. Open same routes and **eyeball** default↔minimal contrast  
-2. Confirm terracotta / emerald hero **feel** (not just class presence)  
-3. Fill template in `theme-system-xo-signoff-status.md` §3 with human name  
-4. Only then may Visual leave Yellow  
+Agent-contract is green enough to stop sample churn. **Human still needed for:**
+
+1. Eyeball default↔minimal shell contrast (settings + home chrome)  
+2. Confirm Deep Chat **send** terracotta **feel** (class/view PASS ≠ brand Pass)  
+3. Optional: X6 whether settings panel “old blue” is acceptable debt  
+4. Sign `theme-system-xo-signoff-status.md` §3 template: `PASS` / `PASS with debt` / `FAIL` + name  
+
+Only step 4 moves Visual off Yellow.  
 
 ## Gate cross-check (same tip)
 
