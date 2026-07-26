@@ -26,9 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- D7：`ColorContext.setModuleColor` 标记 `@deprecated`（优先 `inferColorFromModule`；Appearance 绝不得调用）。
 - D6 业务样例（Keyword Hunter）：主 CTA / 最小化 chrome 从 hard `blue-600` 迁到 `--color-primary*` / `--color-focus-ring`（不改 wb-theme / 模块归属色）。
 - D6 业务样例 #2（Scraper）：导入/load 主 chrome focus、站点选中、数据 tab 从 hard blue/indigo 迁到 `--color-primary*` / `--color-focus-ring`（保留 ma-accent 归属与状态色）。
 - D6 业务样例 #3（AI Analysis）：运行分析主 CTA、Listing 目标选中/图标、ASIN 勾选 focus 从 hard indigo/blue 迁到 Appearance primary（保留 wb-theme-indigo 与结果系列色）。
+- D6 业务样例 #4（PPC Search Terms）：结果筛选 active / 续审 pressed CTA / 搜索 focus 从 hard blue 迁到 `--color-primary*` / `--color-focus-ring`（保留 emerald hero 与系列/info 状态色）。
+- D7：`ColorContext.setModuleColor` 标记 `@deprecated`；权威通道为 `inferColorFromModule`；Appearance 禁止调用。
+- D6 业务样例 #4（PPC Search Terms）：结果筛选 active / 绪审 pressed CTA / 搜索 focus 从 hard blue 迁到 `--color-primary*` / `--color-focus-ring`（保留 emerald hero 与系列/info 状态色）。
 - D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标）；entry/overview / megaMenu 营销 lift 保留。
 - Shared buttons：glow/筛选 active·focus 从 brand-blue 改为 `--color-primary*` / `--color-focus-ring` / `color-mix`（保留 `--button-filter-accent` 模块归属覆写）。
 - D1 治理门禁：`token:override-audit:gate`（`--fail-on-unallowlisted-atomic`）并入 `ci:quality`（css:audit → hardcode → token gate）。

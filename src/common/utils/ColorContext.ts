@@ -2,10 +2,13 @@
  * ColorContext.ts - 配色上下文管理器
  *
  * 职责:
- * - 管理当前模块的主题配色
+ * - 从 menuConfig 推断模块归属色（Layer B / A2）
  * - 提供配色推断逻辑（模块 → 分类 → 默认）
- * - 确保通用组件能够自适应上下文配色
- * - 支持运行时主题切换（阶段4新增）
+ * - 确保通用组件（如 SidebarRenderer）能够自适应模块归属色
+ *
+ * 注意:
+ * - 模块色权威通道是 `inferColorFromModule`，不是全局 setModuleColor。
+ * - Appearance / ThemeManager 绝不得写模块归属色（见 THEME_SYSTEM_GUIDELINES A2）。
  */
 
 import {
@@ -36,7 +39,13 @@ export class ColorContext {
   private static themeChangeListeners: Array<(color: ColorSchemeName) => void> = [];
 
   /**
-   * 设置当前模块颜色
+   * 设置当前模块颜色（全局写入）。
+   *
+   * @deprecated Prefer {@link ColorContext.inferColorFromModule} for module ownership.
+   * Appearance / ThemeManager must **never** call this (A2: Layer A must not rewrite Layer B).
+   * Sidebar and ownership UI should infer from menuConfig; keep this only for legacy
+   * `getModuleColor` / `onThemeChange` compatibility until dual-channel D7 is fully retired.
+   *
    * @param color - 颜色方案名称
    */
   static setModuleColor(color: ColorSchemeName): void {
@@ -45,8 +54,11 @@ export class ColorContext {
   }
 
   /**
-   * 获取当前模块颜色
-   * @returns 当前模块的颜色方案名称
+   * 获取当前全局模块颜色状态（与 menu 推断无关）。
+   *
+   * Prefer {@link ColorContext.inferColorFromModule} when you need ownership color for a module.
+   *
+   * @returns 当前全局模块颜色方案名称
    */
   static getModuleColor(): ColorSchemeName {
     return this.currentModuleColor;

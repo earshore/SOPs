@@ -59,9 +59,9 @@
 }
 
 .ppc-search-terms-resume-review-action[aria-pressed='true'] {
-  border-color: var(--color-blue-600, #2563eb);
-  background: var(--color-blue-600, #2563eb);
-  color: var(--color-white, #ffffff);
+  border-color: var(--color-primary, var(--color-blue-600, #2563eb));
+  background: var(--color-primary, var(--color-blue-600, #2563eb));
+  color: var(--color-primary-contrast, var(--color-white, #ffffff));
 }
 
 .ppc-search-terms-action-toolbar {
@@ -90,9 +90,10 @@
 }
 
 .ppc-search-terms-action-search:focus-within {
-  border-color: var(--color-blue-600);
+  border-color: var(--color-primary, var(--color-blue-600, #2563eb));
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 16%, transparent);
 }
 
 .ppc-search-terms-action-search input {

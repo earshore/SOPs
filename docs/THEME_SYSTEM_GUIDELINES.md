@@ -31,15 +31,15 @@ SOPs 是内部亚马逊运营作业系统，不是营销官网。主题系统优
 
 主题系统按以下顺序决策，低层负责基础事实，高层只能表达业务语义。
 
-| 层级 | 位置 | 责任 | 允许内容 | 禁止内容 |
-| --- | --- | --- | --- | --- |
-| 1. 基础 token | `src/common/config/design-tokens.ts` | 颜色阶梯、间距、字号、圆角、阴影、断点 | 原子设计值 | 业务模块含义 |
-| 2. 生成 token | `src/css/foundation/variables.generated.css` | 从基础 token 生成 CSS 变量 | 自动生成值 | 手工编辑 |
-| 3. 手写语义 token | `src/css/foundation/variables.css` | 语义表面、文本、边框、暗色覆盖、迁移期补充 | `--surface-*`、`--border-*`、`--shadow-card` 等语义变量 | 覆盖基础 token 的同名尺寸和色阶 |
-| 4. 归属配置 | `src/common/config/menuConfig.ts` | 模块和一级目录主题归属 | `themeColor`、`category.color` | 页面级随机颜色 |
-| 5. 共享组件主题 | `src/css/components/*.css` | card、button、badge、welcome banner、状态组件 | 可复用组件变量和变体 | 单页业务布局 |
-| 6. 模块样式 | `src/modules/**/style.css` | 模块独有布局和少量语义扩展 | 带模块前缀的局部 token | 重新定义通用 card/button/badge/hero 系统 |
-| 7. 模板内动态样式 | `template.html`、渲染器 | 真实动态值 | 宽度百分比、动画延迟、数据驱动位置 | 裸色值、圆角、阴影、字体系统 |
+| 层级              | 位置                                         | 责任                                          | 允许内容                                                | 禁止内容                                 |
+| ----------------- | -------------------------------------------- | --------------------------------------------- | ------------------------------------------------------- | ---------------------------------------- |
+| 1. 基础 token     | `src/common/config/design-tokens.ts`         | 颜色阶梯、间距、字号、圆角、阴影、断点        | 原子设计值                                              | 业务模块含义                             |
+| 2. 生成 token     | `src/css/foundation/variables.generated.css` | 从基础 token 生成 CSS 变量                    | 自动生成值                                              | 手工编辑                                 |
+| 3. 手写语义 token | `src/css/foundation/variables.css`           | 语义表面、文本、边框、暗色覆盖、迁移期补充    | `--surface-*`、`--border-*`、`--shadow-card` 等语义变量 | 覆盖基础 token 的同名尺寸和色阶          |
+| 4. 归属配置       | `src/common/config/menuConfig.ts`            | 模块和一级目录主题归属                        | `themeColor`、`category.color`                          | 页面级随机颜色                           |
+| 5. 共享组件主题   | `src/css/components/*.css`                   | card、button、badge、welcome banner、状态组件 | 可复用组件变量和变体                                    | 单页业务布局                             |
+| 6. 模块样式       | `src/modules/**/style.css`                   | 模块独有布局和少量语义扩展                    | 带模块前缀的局部 token                                  | 重新定义通用 card/button/badge/hero 系统 |
+| 7. 模板内动态样式 | `template.html`、渲染器                      | 真实动态值                                    | 宽度百分比、动画延迟、数据驱动位置                      | 裸色值、圆角、阴影、字体系统             |
 
 ### 2.1 单一事实源
 
@@ -62,15 +62,15 @@ npm run generate:tokens
 
 运行时颜色决策按以下**优先级**（高 → 低）理解，避免 Appearance 与业务归属互相踩踏：
 
-1. 语义状态色  
-2. 模块归属色  
-3. 外观主色（Appearance）  
-4. 中性 surface / text / border  
+1. 语义状态色
+2. 模块归属色
+3. 外观主色（Appearance）
+4. 中性 surface / text / border
 
-| 层 | 数据源 | 可写 | 不可改 |
-| --- | --- | --- | --- |
-| A Appearance | `themeConfig.ts` / `ThemeManager` | `--color-primary*`、`--color-focus-ring` | `wb-theme-*`、menu 归属、状态色 |
-| B Module Ownership | `menuConfig` + banner/colorSchemes | 导航/banner/入口归属 | 不被 Appearance 覆盖 |
+| 层                 | 数据源                             | 可写                                     | 不可改                          |
+| ------------------ | ---------------------------------- | ---------------------------------------- | ------------------------------- |
+| A Appearance       | `themeConfig.ts` / `ThemeManager`  | `--color-primary*`、`--color-focus-ring` | `wb-theme-*`、menu 归属、状态色 |
+| B Module Ownership | `menuConfig` + banner/colorSchemes | 导航/banner/入口归属                     | 不被 Appearance 覆盖            |
 
 **运行时 SSOT：**
 
@@ -79,31 +79,32 @@ npm run generate:tokens
 - DOM：`data-appearance` + 兼容 `data-theme`=appearance id；Color Mode 用 `data-color-mode`（及 resolved / `.dark`），**禁止**再把 `data-theme` 当作 dark 槽位。
 - **已删除** `src/common/config/themes.ts`；不得再引入平行主题配置文件。
 - `applyTheme` 只写 Appearance（primary / focus + appearance 标记）；**不得**改 color mode，**不得**调用 `ColorContext.setModuleColor` 或改写模块归属。
+- 模块归属色（Layer B）权威通道：`ColorContext.inferColorFromModule` / `menuConfig`；`setModuleColor` 已废弃为兼容写 API（D7）。
 - `applyColorMode` / `restoreColorMode` 与 Appearance 独立；启动时先 restore color mode 再 restore appearance。
 
 ### 2.3 Appearance Presets
 
 用户可选的全局外观预设（id → 名称 / colorScheme）：
 
-| id | 名称 | colorScheme | 备注 |
-| --- | --- | --- | --- |
-| default | 默认 | blue | 商务默认 |
-| minimal | 极简素色 | slate | primary/focus → slate-700 工业档（`customVars`） |
-| ocean | 海洋 | cyan | |
-| forest | 森林 | green | |
-| sunset | 日落 | orange | |
-| purple | 紫罗兰 | purple | |
-| rose | 玫瑰 | rose | |
+| id      | 名称     | colorScheme | 备注                                             |
+| ------- | -------- | ----------- | ------------------------------------------------ |
+| default | 默认     | blue        | 商务默认                                         |
+| minimal | 极简素色 | slate       | primary/focus → slate-700 工业档（`customVars`） |
+| ocean   | 海洋     | cyan        |                                                  |
+| forest  | 森林     | green       |                                                  |
+| sunset  | 日落     | orange      |                                                  |
+| purple  | 紫罗兰   | purple      |                                                  |
+| rose    | 玫瑰     | rose        |                                                  |
 
 `minimal` 的 `customVars`（工业档主色，覆盖默认 scheme 的 500 档映射）：
 
-| 变量 | 值 |
-| --- | --- |
-| `--color-primary` | `var(--color-slate-700)` |
-| `--color-primary-light` | `var(--color-slate-100)` |
-| `--color-primary-dark` | `var(--color-slate-800)` |
+| 变量                     | 值                       |
+| ------------------------ | ------------------------ |
+| `--color-primary`        | `var(--color-slate-700)` |
+| `--color-primary-light`  | `var(--color-slate-100)` |
+| `--color-primary-dark`   | `var(--color-slate-800)` |
 | `--color-primary-darker` | `var(--color-slate-900)` |
-| `--color-focus-ring` | `var(--color-slate-700)` |
+| `--color-focus-ring`     | `var(--color-slate-700)` |
 
 **契约：**
 
@@ -127,26 +128,26 @@ npm run generate:tokens
 
 **Ownership Role → Palette / `wb-theme-*` 全表（Phase 4 预备·可执行）**: […/plans/2026-07-26-ownership-role-palette-map.md](./superpowers/plans/2026-07-26-ownership-role-palette-map.md)。新页面只选 **role**，不发明色名；Appearance 不得改写该表。下表为简表（与 `menuConfig` 冲突时以代码 + Role 全表为准）。
 
-| 区域 | 当前主题来源 | 页面主视觉 |
-| --- | --- | --- |
-| 首页 | `themeColor: slate` | 保留全屏 splash / 粒子 hero；工作台只作为极简浮动入口 |
-| SOPs 总览 | `themeColor: blue` | blue / indigo，仅用于总览入口 |
-| SOPs 运营与推广 | `category.color: emerald` | `wb-theme-growth` |
-| SOPs 供应链与物流 | `category.color: amber` | `wb-theme-supply` |
-| SOPs 账号安全与风控 | `category.color: red` | `wb-theme-safety` |
-| SOPs 客服与体验 | `category.color: teal` | `wb-theme-service` / `wb-theme-teal` |
-| 应用中心总览 | `themeColor: purple` | purple / fuchsia，仅用于总览入口 |
-| Master Analysis | `category.color: indigo` | `wb-theme-indigo` |
-| Playground | **配置**：`category.color` / `themeColor` = `orange` | **实现例外**：Deep Chat 可为 terracotta / `wb-theme-supply` / 隐藏 banner；**不**将 `wb-theme-orange` 写为本轮唯一 banner class。Playground 归属**不是** indigo / cyan |
-| Keyword Hunter | `category.color: fuchsia` | `wb-theme-fuchsia` |
-| PPC Tools | `category.color: emerald` | emerald / teal；自定义 hero 需受控 |
-| Amazon 智库总览 | `themeColor: orange` | orange / red，仅用于总览入口 |
-| Amazon 知识 | `category.color: indigo` | `wb-theme-indigo` |
-| Amazon 入门实操 | `category.color: green` | `wb-theme-growth` |
-| Amazon 运营提升 | `category.color: violet` | `wb-theme-violet` |
-| 更多总览 | `themeColor: green` | green / emerald，仅用于总览入口 |
-| 更多大模型探索 | `category.color: teal` | `wb-theme-teal` |
-| 更多业务场景 | `category.color: cyan` | cyan / blue；紫鸟场景可局部使用案例色 |
+| 区域                | 当前主题来源                                         | 页面主视觉                                                                                                                                                             |
+| ------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 首页                | `themeColor: slate`                                  | 保留全屏 splash / 粒子 hero；工作台只作为极简浮动入口                                                                                                                  |
+| SOPs 总览           | `themeColor: blue`                                   | blue / indigo，仅用于总览入口                                                                                                                                          |
+| SOPs 运营与推广     | `category.color: emerald`                            | `wb-theme-growth`                                                                                                                                                      |
+| SOPs 供应链与物流   | `category.color: amber`                              | `wb-theme-supply`                                                                                                                                                      |
+| SOPs 账号安全与风控 | `category.color: red`                                | `wb-theme-safety`                                                                                                                                                      |
+| SOPs 客服与体验     | `category.color: teal`                               | `wb-theme-service` / `wb-theme-teal`                                                                                                                                   |
+| 应用中心总览        | `themeColor: purple`                                 | purple / fuchsia，仅用于总览入口                                                                                                                                       |
+| Master Analysis     | `category.color: indigo`                             | `wb-theme-indigo`                                                                                                                                                      |
+| Playground          | **配置**：`category.color` / `themeColor` = `orange` | **实现例外**：Deep Chat 可为 terracotta / `wb-theme-supply` / 隐藏 banner；**不**将 `wb-theme-orange` 写为本轮唯一 banner class。Playground 归属**不是** indigo / cyan |
+| Keyword Hunter      | `category.color: fuchsia`                            | `wb-theme-fuchsia`                                                                                                                                                     |
+| PPC Tools           | `category.color: emerald`                            | emerald / teal；自定义 hero 需受控                                                                                                                                     |
+| Amazon 智库总览     | `themeColor: orange`                                 | orange / red，仅用于总览入口                                                                                                                                           |
+| Amazon 知识         | `category.color: indigo`                             | `wb-theme-indigo`                                                                                                                                                      |
+| Amazon 入门实操     | `category.color: green`                              | `wb-theme-growth`                                                                                                                                                      |
+| Amazon 运营提升     | `category.color: violet`                             | `wb-theme-violet`                                                                                                                                                      |
+| 更多总览            | `themeColor: green`                                  | green / emerald，仅用于总览入口                                                                                                                                        |
+| 更多大模型探索      | `category.color: teal`                               | `wb-theme-teal`                                                                                                                                                        |
+| 更多业务场景        | `category.color: cyan`                               | cyan / blue；紫鸟场景可局部使用案例色                                                                                                                                  |
 
 ---
 
@@ -156,14 +157,14 @@ npm run generate:tokens
 
 用于表单、表格、分析结果、配置区和数据工作区的面板必须稳定。
 
-| 项 | 标准 |
-| --- | --- |
-| 圆角 | 默认 `8px`，最大不超过 `8px`；SSOT：`var(--workbench-radius)`（或 `var(--panel-radius)` / `var(--card-radius)`） |
-| 背景 | `var(--surface-card)` 或 `var(--surface-panel)` |
-| 边框 | `var(--border-subtle)` 或 `var(--border-muted)` |
-| 阴影 | `var(--shadow-card)`，不使用强彩色阴影 |
-| Hover | 可调整边框、背景或阴影，不得 `translateY`、缩放或改变布局 |
-| 动效 | 150-250ms，仅用于状态反馈 |
+| 项    | 标准                                                                                                             |
+| ----- | ---------------------------------------------------------------------------------------------------------------- |
+| 圆角  | 默认 `8px`，最大不超过 `8px`；SSOT：`var(--workbench-radius)`（或 `var(--panel-radius)` / `var(--card-radius)`） |
+| 背景  | `var(--surface-card)` 或 `var(--surface-panel)`                                                                  |
+| 边框  | `var(--border-subtle)` 或 `var(--border-muted)`                                                                  |
+| 阴影  | `var(--shadow-card)`，不使用强彩色阴影                                                                           |
+| Hover | 可调整边框、背景或阴影，不得 `translateY`、缩放或改变布局                                                        |
+| 动效  | 150-250ms，仅用于状态反馈                                                                                        |
 
 大圆角、彩色阴影、hover 上浮只允许出现在模块总览入口卡片或营销式介绍卡片，不进入工作台面板。
 
@@ -171,11 +172,11 @@ npm run generate:tokens
 
 ### 4.2 卡片
 
-| 类型 | 使用场景 | 标准 |
-| --- | --- | --- |
-| Workbench card | 工具页主操作、数据分析、配置 | `8px`、轻边框、无位移 |
-| Entry card | 模块总览入口 | `8-16px`、可有轻微主题强调 |
-| Marketing / story card | 紫鸟案例等叙事页 | 可更强，但不得影响工具页 |
+| 类型                   | 使用场景                     | 标准                       |
+| ---------------------- | ---------------------------- | -------------------------- |
+| Workbench card         | 工具页主操作、数据分析、配置 | `8px`、轻边框、无位移      |
+| Entry card             | 模块总览入口                 | `8-16px`、可有轻微主题强调 |
+| Marketing / story card | 紫鸟案例等叙事页             | 可更强，但不得影响工具页   |
 
 同一个页面不得混用多个卡片视觉语言。需要新增卡片样式时，先检查 `src/css/components/cards.css`。
 
@@ -254,12 +255,12 @@ npm run generate:tokens
 
 允许的局部 token 命名：
 
-| 场景 | 前缀示例 |
-| --- | --- |
-| PPC 独立 hero | `--ppc-hero-*` |
-| Keyword Hunter 业务状态 | `--kh-status-*` |
-| Scraper 独有工作区 | `--scraper-*` |
-| Playground 独有预览层 | `--playground-*` |
+| 场景                    | 前缀示例         |
+| ----------------------- | ---------------- |
+| PPC 独立 hero           | `--ppc-hero-*`   |
+| Keyword Hunter 业务状态 | `--kh-status-*`  |
+| Scraper 独有工作区      | `--scraper-*`    |
+| Playground 独有预览层   | `--playground-*` |
 
 局部 token 必须映射到全局 token 或明确记录原因：
 
@@ -275,19 +276,19 @@ npm run generate:tokens
 
 以下登记覆盖当前 UI 整改范围内的高扩散来源。新增或调整这些前缀时，必须同步更新本节或在对应 CSS 定义旁写明原因。
 
-| 来源 | 局部 token | 全局来源 / 记录原因 |
-| --- | --- | --- |
-| App Center overview | `--app-overview-accent*` | 映射到 `--color-cyan-*`，仅表达应用中心总览主色。 |
-| App Center overview | `--app-overview-surface*`、`--app-overview-border*`、`--app-overview-shadow` | 映射到 `--surface-*`、`--border-*`、`--shadow-panel`。 |
-| App Center overview | `--app-overview-text-*`、`--app-overview-radius`、`--app-overview-pill-radius`、`--app-overview-focus-ring` | 映射到 `--color-text-*`、`--rounded-*`、`--focus-ring-soft` 派生值。 |
-| Shared buttons | `--button-filter-*` | 筛选按钮组件 token，默认映射到全局 surface / border / text / focus token，模块仅覆写主题色。 |
-| PPC tools | `--ppc-surface*`、`--ppc-border*`、`--ppc-text-*` | 映射到 `--surface-*`、`--border-*`、`--color-text-*`。 |
-| PPC tools | `--ppc-primary*`、`--ppc-accent*`、`--ppc-*-soft/text` | 映射到全局主色、emerald 业务强调色和状态色阶；边框通过 `color-mix()` 从全局色派生。 |
-| PPC tools | `--ppc-radius*`、`--ppc-shadow*`、`--ppc-focus-ring`、`--ppc-motion-*` | 映射到 `--rounded-*`、`--shadow-*`、`--focus-ring-soft`、全局 motion token。 |
-| Welcome Banner | `--wb-theme-*`、`--wb-text-*`、`--wb-border-color` | 映射到全局色阶、`--color-text-*`、`--border-subtle`。 |
-| Welcome Banner | `--wb-card-*`、`--wb-tag-*`、`--wb-badge-*` | 映射到 `--surface-*`、`--shadow-panel`、`--rounded-full`、字号和状态色派生值。 |
-| Welcome Banner | `--wb-icon-*`、`--wb-icon-badge-*` | 颜色映射到全局色阶；尺寸和偏移是组件几何规格，保留在 `wb` 命名空间并由 `VISUAL_DESIGN_GUIDELINES.md` 约束。 |
-| Welcome Banner | `--wb-gradient-*`、`--wb-orb-*`、`--wb-particle-color` | 仅用于 `.wb-container--decorative` 或 legacy banner 装饰层，必须从 `--wb-theme-*` 或全局色阶派生；工具页默认不应新增。 |
+| 来源                | 局部 token                                                                                                  | 全局来源 / 记录原因                                                                                                    |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| App Center overview | `--app-overview-accent*`                                                                                    | 映射到 `--color-cyan-*`，仅表达应用中心总览主色。                                                                      |
+| App Center overview | `--app-overview-surface*`、`--app-overview-border*`、`--app-overview-shadow`                                | 映射到 `--surface-*`、`--border-*`、`--shadow-panel`。                                                                 |
+| App Center overview | `--app-overview-text-*`、`--app-overview-radius`、`--app-overview-pill-radius`、`--app-overview-focus-ring` | 映射到 `--color-text-*`、`--rounded-*`、`--focus-ring-soft` 派生值。                                                   |
+| Shared buttons      | `--button-filter-*`                                                                                         | 筛选按钮组件 token，默认映射到全局 surface / border / text / focus token，模块仅覆写主题色。                           |
+| PPC tools           | `--ppc-surface*`、`--ppc-border*`、`--ppc-text-*`                                                           | 映射到 `--surface-*`、`--border-*`、`--color-text-*`。                                                                 |
+| PPC tools           | `--ppc-primary*`、`--ppc-accent*`、`--ppc-*-soft/text`                                                      | 映射到全局主色、emerald 业务强调色和状态色阶；边框通过 `color-mix()` 从全局色派生。                                    |
+| PPC tools           | `--ppc-radius*`、`--ppc-shadow*`、`--ppc-focus-ring`、`--ppc-motion-*`                                      | 映射到 `--rounded-*`、`--shadow-*`、`--focus-ring-soft`、全局 motion token。                                           |
+| Welcome Banner      | `--wb-theme-*`、`--wb-text-*`、`--wb-border-color`                                                          | 映射到全局色阶、`--color-text-*`、`--border-subtle`。                                                                  |
+| Welcome Banner      | `--wb-card-*`、`--wb-tag-*`、`--wb-badge-*`                                                                 | 映射到 `--surface-*`、`--shadow-panel`、`--rounded-full`、字号和状态色派生值。                                         |
+| Welcome Banner      | `--wb-icon-*`、`--wb-icon-badge-*`                                                                          | 颜色映射到全局色阶；尺寸和偏移是组件几何规格，保留在 `wb` 命名空间并由 `VISUAL_DESIGN_GUIDELINES.md` 约束。            |
+| Welcome Banner      | `--wb-gradient-*`、`--wb-orb-*`、`--wb-particle-color`                                                      | 仅用于 `.wb-container--decorative` 或 legacy banner 装饰层，必须从 `--wb-theme-*` 或全局色阶派生；工具页默认不应新增。 |
 
 不允许：
 
@@ -341,20 +342,20 @@ npm run generate:tokens
 深度审查、企业级目标架构与分期收敛见：
 [主题系统企业级审查与收敛路线图](./superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md)。
 
-| ID | 内容 |
-| --- | --- |
-| D1 | `variables.css` 重定义基础色阶 / 字号，覆盖 generated |
-| D2 | 圆角语义名与像素不一致；工作台行为写死 ≤8px。决策：`--workbench-radius` SSOT，见 [workbench-radius-decision](./superpowers/plans/2026-07-26-workbench-radius-decision.md) |
-| D3 | `[data-theme='dark']` 与 appearance id **互斥共用** `data-theme`；`applyTheme` 会覆盖 dark；后续应拆 `data-appearance` / `data-color-mode` |
-| D4 | colorSchemes 营销向 hover 与工作台底线冲突 |
-| D5 | `--focus-ring-soft` 等可能残留蓝系硬编码 |
-| D6 | 大量 UI 硬编码 `blue-*`，Appearance 可见影响有限 |
-| D7 | `ColorContext.setModuleColor` 全局写入与 DOM `wb-theme-*` 双通道 |
-| D8 | `wb-theme-*` 混用角色名与色名，缺统一 Role→Palette 表 |
-| D9 | 局部 token 前缀多，缺「升全局 / 归档」生命周期 |
-| D10 | `ThemeColors` 接口含状态色字段，但 Appearance 实际不切换 |
-| D11 | 暗色覆盖依赖 `data-theme='dark'`，与 D3 同源 |
-| D12 | 缺 Appearance preset 壳层视觉回归矩阵 |
+| ID  | 内容                                                                                                                                                                      |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | `variables.css` 重定义基础色阶 / 字号，覆盖 generated                                                                                                                     |
+| D2  | 圆角语义名与像素不一致；工作台行为写死 ≤8px。决策：`--workbench-radius` SSOT，见 [workbench-radius-decision](./superpowers/plans/2026-07-26-workbench-radius-decision.md) |
+| D3  | `[data-theme='dark']` 与 appearance id **互斥共用** `data-theme`；`applyTheme` 会覆盖 dark；后续应拆 `data-appearance` / `data-color-mode`                                |
+| D4  | colorSchemes 营销向 hover 与工作台底线冲突                                                                                                                                |
+| D5  | `--focus-ring-soft` 等可能残留蓝系硬编码                                                                                                                                  |
+| D6  | 大量 UI 硬编码 `blue-*`，Appearance 可见影响有限                                                                                                                          |
+| D7  | `ColorContext.setModuleColor` 全局写入与 DOM `wb-theme-*` 双通道；`setModuleColor` 已 `@deprecated`，权威通道为 `inferColorFromModule` / menu；Appearance 绝不得调用      |
+| D8  | `wb-theme-*` 混用角色名与色名，缺统一 Role→Palette 表                                                                                                                     |
+| D9  | 局部 token 前缀多，缺「升全局 / 归档」生命周期                                                                                                                            |
+| D10 | `ThemeColors` 接口含状态色字段，但 Appearance 实际不切换                                                                                                                  |
+| D11 | 暗色覆盖依赖 `data-theme='dark'`，与 D3 同源                                                                                                                              |
+| D12 | 缺 Appearance preset 壳层视觉回归矩阵                                                                                                                                     |
 
 ---
 

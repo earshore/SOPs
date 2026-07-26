@@ -21,9 +21,9 @@
 }
 
 .ppc-search-terms-filter-btn.active {
-  border-color: var(--color-blue-600);
-  background: var(--color-blue-50);
-  color: #1d4ed8;
+  border-color: var(--color-primary, var(--color-blue-600, #2563eb));
+  background: var(--color-primary-light, var(--color-blue-50, #eff6ff));
+  color: var(--color-primary-dark, var(--color-blue-700, #1d4ed8));
 }
 
 .ppc-search-terms-filter-btn i {
@@ -46,6 +46,10 @@
 }
 
 .ppc-search-terms-filter-btn.active .ppc-search-terms-filter-count {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: color-mix(
+    in srgb,
+    var(--color-primary, var(--color-blue-600, #2563eb)) 16%,
+    transparent
+  );
+  color: var(--color-primary-dark, var(--color-blue-700, #1d4ed8));
 }
