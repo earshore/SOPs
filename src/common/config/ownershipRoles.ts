@@ -10,6 +10,9 @@
  * - Appearance (Layer A) must never rewrite this table or call paths that mutate it.
  * - Does NOT bind templates with data-ownership-role (Phase 4 optional, not this file).
  * - menuConfig remains the live menu color source; this table is the role naming SSOT.
+ * - Next wire (optional / Phase 4): SidebarRenderer — soft-align sidebar-theme-*
+ *   with getOwnershipRoleForModule + getPaletteForRole when available; do not mass-bind
+ *   data-ownership-role. Soft cross-check lives in ownershipRoles.test.ts only for now.
  */
 
 import type { ColorSchemeName } from '../constants/colorSchemes';

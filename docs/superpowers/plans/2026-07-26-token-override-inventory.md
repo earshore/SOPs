@@ -148,6 +148,35 @@ Count: **9** (semantic name collisions that happen to match).
 4. **Semantic keep**: surfaces, status, layout aliases, micro-interaction, dark mode block stay handwritten until Phase 2 split to `variables.semantic.css`.
 5. **Gate later**: enable `--fail-on-unallowlisted-atomic` in CI (prefer over full `--fail-on-atomic-override`) once allowlist is the source of intentional exceptions. Default remains off.
 
+## D1 allowlist skim (2026-07-26) — can any of 20 close?
+
+Skim of simplest candidates only. **No allowlist entries removed** (not 100% sure + no consumer/generated alignment done). Gate stays green with all 20 intentional.
+
+**WorkBench peer note:** D2 introduced `--workbench-radius` / `--workbench-radius-lg`. There is **no** `--workbench-shadow` or `--workbench-ease` SSOT. Workbench elevation already prefers handwritten-only semantic tokens (`--shadow-card`, `--shadow-card-hover`, `--shadow-panel`, `--shadow-primary-*`) — those are not atomic conflicts. Atomic `--shadow-*` / `--ease-smooth` remain the product defaults for remaining call sites and any Tailwind theme mapping onto the same names.
+
+| Candidate | Verdict | Why |
+| --- | --- | --- |
+| `--ease-smooth` | **KEEP** | Product curve `cubic-bezier(0.22, 1, 0.36, 1)` vs generated `cubic-bezier(0.25, 0.1, 0.25, 1)`. ~**510** `var(--ease-smooth)` sites under `src/` (keyframes, micro-interactions, header, cards, modules). Also redeclared in `animations/keyframes.css` `:root` with the product curve — cascade insurance, not a migration. Closing would need either generated/source token change **or** deliberate motion regression accept + keyframes cleanup. No workbench ease peer. |
+| `--shadow-2xl`, `--shadow-inner` | **KEEP** (lowest-traffic; still not closable) | Direct `var(--shadow-2xl\|--shadow-inner)` hits in `src/` today: **0**. Values still differ (2xl opacity 0.15 vs 0.25; inner 0.04 vs 0.05). Root + **dark** blocks re-assert the soft ladder. Zero direct `var()` ≠ safe remove: ladder completeness, dark overrides, possible Tailwind `shadow-*` → CSS var path, and sibling sm/md/lg/xl still product-tuned. Close only after explicit product accept of Tailwind defaults **and** dark/light alignment + allowlist/gate update. |
+| `--shadow-sm` / `--shadow-md` / `--shadow-lg` / `--shadow-xl` | **KEEP** | Soft multi-layer product elevation vs Tailwind defaults. Live consumers (approx): sm **2**, md **7**, lg **4**, xl **2** (`header*`, `cards`, `toast`, `icon-container`, `stat/insight/progress`, welcome-banner). Fallbacks often hardcode product values. Workbench path uses `--shadow-card*`, not these atoms — does **not** make the atomic overrides redundant. |
+
+### Category-level keep (not skimmed in depth; already D2 / compact scale)
+
+| Category | Tokens | Verdict |
+| --- | --- | --- |
+| radius | `--rounded-sm` … `--rounded-3xl` (6) | **KEEP** — D2 px ladder until remaining consumers use workbench radius |
+| z-index | `--z-dropdown` … `--z-tooltip` (7) | **KEEP** — compact 30–90 ladder vs Bootstrap 1000+; live consumers (dropdown/sticky/modal/toast) |
+| easing | `--ease-smooth` (1) | **KEEP** — table above |
+| shadow | `--shadow-sm` … `--shadow-inner` (6) | **KEEP** — table above |
+
+### Closable now?
+
+| Bucket | Count | Notes |
+| --- | --- | --- |
+| **KEEP (all 20)** | 20 | Removable only after value alignment or consumer migration |
+| **Candidate to close soon** | **0** | No entry meets “100% sure + consumers updated + gate green” |
+| **Future research only** | `shadow-2xl` / `shadow-inner` | Lowest direct `var()` traffic; still blocked by dark ladder + product elevation intent |
+
 ## Script
 
 ```bash

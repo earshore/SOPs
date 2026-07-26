@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - D8 Ownership Role 代码 SSOT scaffold：`src/common/config/ownershipRoles.ts`（`OwnershipRoleId` × 19、`OWNERSHIP_ROLES`、`getPaletteForRole` / `getOwnershipRoleForModule`；纯 helper，无 Appearance 写入、无全站 DOM 绑定）。
 - D9 局部 token 前缀生命周期（库存 / elevate·keep local·archive / PR 清单 / 与 D1 边界）：`docs/superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md`（docs only，无批量 CSS rename）。
-- D12 Appearance 截图 scaffold（opt-in）：`tests/visual/theme-appearance-scaffold.test.ts` + `npm run test:visual:theme`（`THEME_VISUAL=1`；默认 skip，基线 gitignore，不进 blocking CI）；**9 屏 × default/minimal light = 18** 快照（R1–R9 light 主包：Settings / KH / Home / App Center / Scraper / PPC / SOPs / Amazon Hub / **Deep Chat**；terracotta send **不**当 primary）；计划见 `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`。
+- D12 Appearance 截图 scaffold（opt-in）：`tests/visual/theme-appearance-scaffold.test.ts` + `npm run test:visual:theme`（`THEME_VISUAL=1`；默认 skip，基线 gitignore，不进 blocking CI）；**10 屏 × default/minimal light = 20** 快照（R1–R9 light 主包 + **Skills** catalog：Settings / KH / Home / App Center / Scraper / PPC / SOPs / Amazon Hub / Deep Chat / **Skills**；terracotta send / Skills violet ownership **不**当 primary）；计划见 `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`。
 - Ownership Role → Palette / `wb-theme-*` 映射表（Phase 4 预备）：`docs/superpowers/plans/2026-07-26-ownership-role-palette-map.md`。
 - D1 token 覆盖清点：`npm run token:override-audit`（`scripts/quality/audit-token-overrides.ts`）+ 库存报告 `docs/superpowers/plans/2026-07-26-token-override-inventory.md`。
 - 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- D10：删除 deprecated 类型别名 `ThemeColors`；Appearance 预览/写入类型 SSOT 仅 `AppearanceThemeColors`（primary 族 + focus）。
 - D11：`variables.css` root 暗色语义 token 块扩为 dual-safe：补 `[data-color-mode-resolved='dark']`（保留 `.dark` / legacy `data-theme` / `data-color-mode='dark'`）。
 - D11：`reset.css` 暗色 foundation **12** 规则（selection/placeholder/autofill/scrollbar/hr/mark/dialog 等）扩为 tri-selector。
 - D11：`forms.css` 暗色覆盖 31 规则扩为 `.dark, [data-color-mode-resolved='dark'], [data-theme='dark']` tri-selector（保留 legacy）。
@@ -57,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D6 业务样例 #13（AMZ Hub shell）：`.amz_nav-btn:hover` / `.active`·`.tab-active` 从 hard blue 迁到 hub ownership `module-accent` + orange fallback（保留 underline 橙、contenteditable `primary-light`、progress 数据条与知识教学蓝卡；不改 megaMenu）。
 - D6 业务样例 #14（SOPs email_templates）：`sops_copyEmailTemplatesReviewTemplate` 主 CTA 从 hard `bg-blue-600` 迁到 shared `action-btn action-btn-primary`；`#email-templates-owner` focus 从 hard `blue-500` 迁到 `--color-focus-ring`（保留内容卡与指标多色）。
 - D6 业务样例 #15（SOPs qa_maintenance）：`sops_copyQaMaintenanceTemplate` 主 CTA 从 hard `bg-blue-600` 迁到 shared `action-btn action-btn-primary`；`#qa-maintenance-owner` focus 从 hard `blue-500` 迁到 `--color-focus-ring`（保留内容卡与教学蓝）。
+- D6 业务样例 #16（PromptLab DNA/autoPopulate）：`autoPopulateButtonClass` 启用态与 DNA 按钮 focus 从 hard `blue-600/700/500` 迁到 `--color-primary*` / `--color-focus-ring`；`reportRenderer` 维度/子项/内容勾选 focus·checked 跟 primary/focus-ring（保留 DNA 置信多色与 extract 次要 chrome）。
 - D5 续：`--shadow-primary-*` 改 `color-mix` 跟随 `--color-primary`（light/dark），不再写死蓝/indigo。
 - D5 续：root `--focus-ring-soft` + header search / forms dark / Overview search / nav-focus 从 hard blue 迁到 `--color-focus-ring`（megaMenu / sidebar-theme / wb ownership 保留）。
 - D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标；Keyword Hunter 报告 section 与 AI Analysis JSON 面板图标）；entry/overview / megaMenu 营销 lift 保留。
@@ -70,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - D2 R3 续：Scraper 上传/策略面板覆盖、PPC filter/table/settings 壳、forms checkbox 工作台面 → `var(--workbench-radius, var(--panel-radius, 8px))`。
 - D2 R3 第三批：Keyword Hunter 输入/报告/对比面板、Master Analysis workflow strip、PPC panel/stat tile/report-type、App Center workbench shells → `var(--workbench-radius)` / panel|card 别名。
 - D2 long-tail：`.sops-overview-collapsible`、shared `.progress-card` → `var(--workbench-radius, var(--panel-radius, 8px))`（未改 entry/overview 卡）。
+- D2 long-tail #3：shared `.amz_card-hover`、`.zn-notice-card`、`.route-loading-skeleton__card` → `var(--workbench-radius…)`（未改 entry/overview / pill / modal）。
 - Settings 壳层 chrome：`--settings-accent` / focus / 分段 active / 主 CTA 映射 Appearance primary token（X6 partial）。
 - Settings X6 收尾：`systemSettings` 主保存 CTA、通用输入 focus、brand accent 标签/勾选改 `--settings-*` / `settings-btn-primary`（保留 section indigo 与进度桶色）。
 - D1 Phase 2 prep：从 `variables.css` 移除与 generated 值完全相同的原子重复（色板 / 字号字重 / leading / tracking / 数字 spacing），语义与 intentional 冲突尺度保留。

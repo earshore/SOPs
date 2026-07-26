@@ -430,7 +430,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
   get autoPopulateButtonClass(): string {
     return !this.dnaActionDisabled
-      ? 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 shadow-sm shadow-blue-200 cursor-pointer'
+      ? 'bg-[var(--color-primary,#3b82f6)] hover:bg-[var(--color-primary-dark,#1d4ed8)] text-white border border-[var(--color-primary,#3b82f6)] shadow-sm cursor-pointer'
       : 'bg-slate-100 text-slate-500 border border-slate-200 cursor-not-allowed';
   },
 

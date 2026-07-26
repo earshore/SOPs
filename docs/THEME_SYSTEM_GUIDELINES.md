@@ -372,7 +372,7 @@ npm run generate:tokens
 | D7  | `ColorContext.setModuleColor` 全局写入与 DOM `wb-theme-*` 双通道；`setModuleColor` 已 `@deprecated`，权威通道为 `inferColorFromModule` / menu；Appearance 绝不得调用      |
 | D8  | `wb-theme-*` 混用角色名与色名；Role→Palette **代码 scaffold** 已落 `src/common/config/ownershipRoles.ts`（表 + pure helpers）；全站 DOM 绑定/命名收敛仍 Phase 4 |
 | D9  | 局部 token 前缀生命周期：**文档已落** [local-token-prefix-lifecycle](./superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md)；代码侧冗余/归档执行仍 optional |
-| D10 | **类型 + 调用点审计 clean**：`AppearanceThemeColors` 仅 primary 族 + focus；`ThemeColors` 为 deprecated 同形别名；`getColorVars` / `previewTheme` / `applyTheme` **从不**写 secondary/accent/status；生产 **0** 调用方读取状态色字段（见 landing §5.4） |
+| D10 | **Done**：`AppearanceThemeColors` 仅 primary 族 + focus；已删除 deprecated 别名 `ThemeColors`；`getColorVars` / `previewTheme` / `applyTheme` **从不**写 secondary/accent/status；生产 **0** 调用方读取状态色字段（见 landing §5.4） |
 | D11 | 暗色覆盖依赖 `data-theme='dark'`，与 D3 同源                                                                                                                              |
 | D12 | 缺 Appearance preset 壳层视觉回归矩阵                                                                                                                                     |
 

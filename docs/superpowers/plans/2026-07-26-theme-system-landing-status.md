@@ -1,6 +1,6 @@
 # Theme System Landing Status Board
 
-**日期**: 2026-07-26（refresh @ post-`904f83d3` · D6#14–15 · D2 radius · D12×18 · D11 inventory 100% · D9 archive skim）  
+**日期**: 2026-07-26（refresh @ post-`2f8d98ab` · D6#16 · D10 ThemeColors removed · D12×20 · D2 #3 · D8 soft test）  
 **范围**: `main` ahead of `sops/main`；本波主题待合入  
 **角色**: Tech Lead / Release docs  
 **诚实声明**: **Code gates 可运营；Visual / XO 未签收（Yellow）。** 不得宣称 visual Pass。
@@ -21,11 +21,11 @@
 
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Code / 契约**    | **Green**  | 前 tip `904f83d3` + **本波**: D6 #14–15 · D2 radius long-tail · D12×**18** Deep Chat · D11 inventory **0 dual-only** · D9 archive candidates · D4 card helper still 0 callers |
+| **Code / 契约**    | **Green**  | 前 tip `2f8d98ab` + **本波**: D6 #16 PromptLab DNA · D10 remove ThemeColors · D12×**20** Skills · D2 #3 cards/loading · D8 soft KH test · D1 allowlist skim 0 closable |
 | **Visual / XO**    | **Yellow** | 人类 30 min **仍未跑**；D12 opt-in 非 Pass / 非 CI gate；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 code 关体验 RC |
 
-**一句话**: 工程样本/门禁继续收敛；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
+**一句话**: 本波再收 #16 + D10 收口 + D12×20；体验关闸仍只靠 **人工 XO**。smoke 用 `npm run test:e2e:smoke`（4173）。
 
 **Nav ownership（产品决策）**: megaMenu + left sidebar = **Layer B Module Ownership**，**非** Appearance 全控。多色 wayfinding 来自 `menuConfig` / `inferColorFromModule`；壳层 hardcode 基线 megaMenu **13** 是 **有意 Ownership**，不是未清 D6。详见 [THEME_SYSTEM_GUIDELINES §2.2 导航 = Ownership](../../THEME_SYSTEM_GUIDELINES.md)。
 
@@ -190,22 +190,20 @@ Grep evidence:
 
 ### 5.4 D10 — `ThemeColors` / Appearance status-color misuse audit
 
-**Scope**: `AppearanceThemeColors` / `ThemeColors` shape + production theme apply/preview paths. **No** mass removal of semantic CSS tokens (`--color-success` etc. remain Layer-status, not Appearance-writable).
+**Scope**: `AppearanceThemeColors` shape + production theme apply/preview paths. **No** mass removal of semantic CSS tokens (`--color-success` etc. remain Layer-status, not Appearance-writable).
 
 | Bucket | Sites | Verdict |
 | --- | --- | --- |
 | **Type SSOT** | `AppearanceThemeColors`: `primary` / `primaryLight` / `primaryDark` / `primaryDarker` / `focusRing` only | **Correct** — no secondary/accent/status fields |
-| **Deprecated alias** | `export type ThemeColors = AppearanceThemeColors` | **Keep** optional retire later; historical over-broad name only |
+| **Deprecated alias** | `ThemeColors` | **Removed** — no remaining imports under `src/` |
 | **Write path** | `ThemeManager.getColorVars` → primary* only; `applyTheme` merges `customVars` (primary/focus-safe); never status | **Correct** |
 | **Preview path** | `previewTheme` → `AppearanceThemeColors`; unit asserts no `secondary`/`success`/`error` keys | **Correct** |
-| **Production callers of type** | imports of `ThemeColors` / `AppearanceThemeColors` under `src/` outside `themeConfig*` | **None** |
+| **Production callers of type** | imports of `AppearanceThemeColors` under `src/` outside `themeConfig*` | **None** |
 | **Production apply callers** | `systemSettings.setAppearanceTheme` → `applyTheme(id)`; `main.switchTheme` → `applyTheme(id)` | **OK** — id only, no color bag / status fields |
 | **Production `previewTheme`** | `src/` consumers | **None** (tests only) |
-| **Assumes Appearance sets status** | grepped `ThemeColors` + `.secondary`/`.accent`/`.success` on theme objects | **None found** |
+| **Assumes Appearance sets status** | grepped status fields on theme objects | **None found** |
 
-**Verdict**: Callers **do not** assume Appearance can set status colors. D10 original type-lie is fixed; residual is optional delete of the `ThemeColors` alias name.
-
-**Code fix this residual**: **none** (docs-only audit; no CHANGELOG).
+**Verdict**: Callers **do not** assume Appearance can set status colors. D10 original type-lie is fixed; deprecated `ThemeColors` alias **removed**.
 
 ---
 
@@ -217,7 +215,7 @@ Grep evidence:
   [`2026-07-26-theme-system-xo-signoff-status.md` §3](./2026-07-26-theme-system-xo-signoff-status.md#3-人类-xo-30-分钟手动浏览器脚本)
 - 矩阵: [`experience-acceptance-matrix.md`](./2026-07-26-theme-system-experience-acceptance-matrix.md)
 - 必测: X1 default↔minimal×3 · X2 ownership 抽检（**KH `wb-theme-rose` / PPC hero / MA indigo / Deep Chat terracotta**）· X5 dark×appearance · focus · 刷新持久化
-- **可选肉眼（XO §1.8）**: **Skills 试用 CTA** + **Deep Chat shell** chrome/focus（terracotta **不变**）+ **#10 SOPs overview focus** + **#11 NPI primary CTA** + **#13 AMZ Hub nav ownership orange** + dark×minimal 肉眼复核；另可选 KH/Scraper/AI/PPC/PromptLab/#8 input / #12 RW / #14–#15
+- **可选肉眼（XO §1.8）**: **Skills 试用 CTA** + **Deep Chat shell** chrome/focus（terracotta **不变**）+ **#10 SOPs overview focus** + **#11 NPI primary CTA** + **#13 AMZ Hub nav ownership orange** + **#14 email_templates CTA/focus** + **#15 qa_maintenance CTA/focus** + dark×minimal 肉眼复核；另可选 KH/Scraper/AI/PPC/PromptLab/#8 input / #12 RW
 - **可选截图**: [D12 §6 首 8 张](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow) — **截图 ≠ visual Pass**
 - **不测**: 全站 D6 仍蓝（允许 Informational）
 - 签收后: 填 XO 结论 `PASS / PASS with debt / FAIL`；Tech Lead 仅勾 code gates §4.1；**Visual 保持 Yellow 直至 XO 签字**
@@ -228,9 +226,9 @@ Grep evidence:
 
 | #     | Wave                                              | 范围                                                                                                                         | 验证                                                                       |
 | ----- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **1** | **Human XO（始终优先 · 阻塞体验关闸）**           | 30 min 浏览器脚本 + 记录模板；X1/X2/X5 + 可选 Skills / Deep Chat shell / **#10 SOPs** / **#11 NPI** / **#13 Hub nav orange**                           | 矩阵勾选 + XO status 结论；**仍不宣称 visual Pass**                        |
+| **1** | **Human XO（始终优先 · 阻塞体验关闸）**           | 30 min 浏览器脚本 + 记录模板；X1/X2/X5 + 可选 Skills / Deep Chat shell / **#10 SOPs** / **#11 NPI** / **#13 Hub nav orange** / **#14 email_templates** / **#15 qa_maintenance**                           | 矩阵勾选 + XO status 结论；**仍不宣称 visual Pass**                        |
 | **2** | **D12 首 8 人工截图 + scaffold 对照（可并发）**   | 按 [D12 §6](./2026-07-26-theme-visual-baseline-d12.md#6-first-8-screenshots-to-capture-tomorrow) 归档 8 张；scaffold 已 **18** opt-in（+ Deep Chat）；可选 `test:visual:theme` | 截图 + MANIFEST；**不** fail-closed CI；**不** visual Pass                 |
-| **3** | **D6 下一业务样本（可并发 · 低优先）**            | #10–#15 **已落**（含 **#13 Hub nav** @ `904f83d3` + #14 email_templates + #15 qa_maintenance）；下一页 primary/chrome 样本（非 900+ 清零）；**禁止**重写 terracotta / phase 语义蓝 / RW 教学 INFO 卡 / Hub 归属橙 | hardcode gate 不升；**仍不宣称 visual Pass**                               |
+| **3** | **D6 下一业务样本（可并发 · 低优先）**            | #10–#15 **已落**（含 **#13 Hub nav** @ `904f83d3` + #14 email_templates + #15 qa_maintenance @ `2f8d98ab`）；下一页 primary/chrome 样本（非 900+ 清零）；**禁止**重写 terracotta / phase 语义蓝 / RW 教学 INFO 卡 / Hub 归属橙 | hardcode gate 不升；**仍不宣称 visual Pass**                               |
 
 **下一波优先（不变）**: **Human XO 30 min** 仍第一（唯一体验关闸）；可选 D12 首 8 张；D6 长尾仅在 XO 不阻塞时穿插。  
 **禁止本周扩 scope**: 一次清零 900+ blue、换字体、重写 Deep Chat terracotta、white-label 引擎、未走 map 扩表流程的新 `wb-theme-*`、把 megaMenu 强行 Appearance 化。
@@ -240,7 +238,8 @@ Grep evidence:
 ## 8. Commit list (`sops/main` → `HEAD`)
 
 ```
-HEAD     feat(theme): service CTAs, radius long-tail, D12x18
+HEAD     feat(theme): PromptLab D6, drop ThemeColors, D12x20
+2f8d98ab feat(theme): service CTAs, radius long-tail, D12x18
 904f83d3 feat(theme): hub nav, foundation dual-safe, D12x16
 35ebb671 feat(theme): D6 RW chrome, D11 residual dual-safe, D12x14
 c5bd4080 feat(theme): D6 SOPs/NPI samples and D11 shell dual-safe
@@ -267,15 +266,16 @@ d1a8c774 feat(theme): settings color mode, token audit, XO status
 f8f925a8 docs(theme): enterprise audit and convergence roadmap
 ```
 
-**HEAD 要点 (`feat(theme): service CTAs, radius long-tail, D12x18`)**:
-- D6 #14 email_templates · #15 qa_maintenance CTAs/focus
-- D2 long-tail: sops-overview-collapsible + progress-card → workbench-radius
-- D12 scaffold **18**（+ Deep Chat；terracotta 不当事 primary）
-- D11 inventory: **0** dual-only dark rules in `src/css`
-- D9 archive candidates docs; D4 card helper still **0** callers
+**HEAD 要点 (`feat(theme): PromptLab D6, drop ThemeColors, D12x20`)**:
+- D6 #16 PromptLab DNA autoPopulate + report checkboxes
+- D10: remove deprecated `ThemeColors` alias (AppearanceThemeColors only)
+- D12 scaffold **20**（+ Skills catalog）
+- D2 #3: amz_card-hover / zn-notice-card / route-loading-skeleton__card
+- D8 soft test: KH palette ↔ sidebar-theme-rose
+- D1 skim: allowlist **0** closable; product_compliance step blue **leave**
 - **Visual Yellow**
 
-**前主题 tip (`904f83d3`)**: D6 #13 hub · foundation dual-safe · D12×16 · full prebuild green。
+**前主题 tip (`2f8d98ab`)**: D6 #14–15 · D2 radius · D12×18。
 
 ---
 

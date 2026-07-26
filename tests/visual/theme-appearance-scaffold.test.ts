@@ -49,9 +49,9 @@ interface ThemeScreen {
 }
 
 /**
- * Scaffold slice (9 screens × 2 appearances = 18 snapshots).
- * Ownership multi-color pages (App Center / Scraper / PPC / SOPs / Amazon Hub / Deep Chat) must NOT force primary.
- * Full light main pack (R1–R9 × 2) is now covered by this opt-in scaffold; visual Pass still requires human XO.
+ * Scaffold slice (10 screens × 2 appearances = 20 snapshots).
+ * Ownership multi-color pages (App Center / Scraper / PPC / SOPs / Amazon Hub / Deep Chat / Skills) must NOT force primary.
+ * Full light main pack (R1–R9 × 2) is covered; Skills catalog is an extra D6 sample. Visual Pass still requires human XO.
  */
 const THEME_SCREENS: ThemeScreen[] = [
   {
@@ -163,6 +163,18 @@ const THEME_SCREENS: ThemeScreen[] = [
     ],
     beforeScreenshot: async (page: Page) => {
       await page.waitForSelector('#deep-chat-view', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    },
+  },
+  {
+    // D6 #6 sample — Skills violet banner / multi-color badges NOT forced to primary
+    slug: 'skills',
+    path: '/#/more/explore/skills',
+    pageType: PageType.LIST,
+    waitForSelector: '.skills-page',
+    maskSelectors: ['.timestamp', '[data-dynamic="true"]', '.toast', '[class*="animate-"]'],
+    beforeScreenshot: async (page: Page) => {
+      await page.waitForSelector('.skills-page', { timeout: 15000 });
       await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
     },
   },

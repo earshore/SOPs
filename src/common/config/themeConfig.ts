@@ -69,15 +69,6 @@ export interface AppearanceThemeColors {
   focusRing: string;
 }
 
-/**
- * @deprecated Use `AppearanceThemeColors`. Alias kept so existing imports keep
- * compiling while callers migrate off the old over-broad name.
- *
- * Historical `ThemeColors` listed secondary/accent/success/warning/error/info, but
- * Appearance never applied them. Prefer `AppearanceThemeColors` for new code.
- */
-export type ThemeColors = AppearanceThemeColors;
-
 export interface ThemeConfig {
   id: string;
   name: string;

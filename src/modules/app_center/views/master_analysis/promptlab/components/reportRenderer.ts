@@ -387,7 +387,7 @@ function renderModuleHeader(targetId: string, safeTargetId: string, config: Targ
          @click="toggleExpansion('${safeTargetId}')">
       <div class="flex items-center gap-3">
         <input type="checkbox"
-               class="dimension-checkbox h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+               class="dimension-checkbox h-4 w-4 rounded border-slate-300 text-[var(--color-primary,#3b82f6)] focus:ring-[var(--color-focus-ring,#3b82f6)] cursor-pointer"
                aria-label="启用 ${escapeHtml(config.title)} 维度"
                :checked="isDimensionEnabled('${safeTargetId}')"
                :indeterminate.prop="isPartiallySelected('${safeTargetId}')"
@@ -468,7 +468,7 @@ function renderSubItem(data: unknown, targetId: string, key: string): string {
       <div class="sub-item flex items-center gap-2 py-2 hover:bg-slate-50 rounded px-2 transition-colors"
            ${hasContent ? `@click="toggleSubItemExpansion('${safeTargetId}', '${safeKey}')"` : ''}>
         <input type="checkbox"
-               class="sub-item-checkbox h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+               class="sub-item-checkbox h-3.5 w-3.5 rounded border-slate-300 text-[var(--color-primary,#3b82f6)] focus:ring-[var(--color-focus-ring,#3b82f6)] cursor-pointer"
                aria-label="选择 ${escapeHtml(label)} 子项"
                :checked="isSubItemSelected('${safeTargetId}', '${safeKey}')"
                :indeterminate.prop="isSubItemPartiallySelected('${safeTargetId}', '${safeKey}')"
@@ -581,7 +581,7 @@ function renderSelectableContentItem(
   return `
     <div class="content-item flex items-start gap-2 py-1.5 px-2 hover:bg-slate-50 rounded text-xs">
       <input type="checkbox"
-             class="content-item-checkbox h-3 w-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer mt-0.5 shrink-0"
+             class="content-item-checkbox h-3 w-3 rounded border-slate-300 text-[var(--color-primary,#3b82f6)] focus:ring-[var(--color-focus-ring,#3b82f6)] cursor-pointer mt-0.5 shrink-0"
              aria-label="选择内容项：${escapeHtml(displayText)}"
              :checked="isContentItemSelected('${safeDimensionId}', '${safeSubItemKey}', '${safeIndex}')"
              @change="onContentItemToggle('${safeDimensionId}', '${safeSubItemKey}', '${safeIndex}')">
@@ -752,7 +752,7 @@ export function renderLegacyFormatModules(
                name="report-section"
                value="${escapeHtml(key)}"
                id="sect-${escapeHtml(key)}"
-               class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+               class="h-4 w-4 rounded border-slate-300 text-[var(--color-primary,#3b82f6)] focus:ring-[var(--color-focus-ring,#3b82f6)] cursor-pointer"
                ${isChecked ? 'checked' : ''}
                @change="onReportSectionChange">
       </div>

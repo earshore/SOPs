@@ -136,9 +136,9 @@ npm run test:e2e:report
 
 - 深色模式（如果支持）
 - **D12 Appearance 轴 scaffold（默认跳过）**: `tests/visual/theme-appearance-scaffold.test.ts`
-  - 覆盖 9 屏：Settings Appearance、Keyword Hunter、Home、**App Center**、**Scraper**、**PPC Search Terms**、**SOPs overview**、**Amazon Hub overview**、**Deep Chat** × `default`/`minimal` × light = **18** 快照（9×2）
-  - 命名: `theme-default-light-*` / `theme-minimal-light-*`（slugs: `settings-appearance` · `keyword-hunter` · `home` · `app-center` · `scraper` · `ppc-search-terms` · `sops-overview` · `amz-hub-overview` · `deep-chat`）
-  - Ownership 多色页（App Center / Scraper / PPC / SOPs / Amazon Hub / Deep Chat terracotta send）**不得**被 Appearance primary 吞掉；**不得**将 terracotta send 断言为 primary
+  - 覆盖 10 屏：Settings Appearance、Keyword Hunter、Home、**App Center**、**Scraper**、**PPC Search Terms**、**SOPs overview**、**Amazon Hub overview**、**Deep Chat**、**Skills** × `default`/`minimal` × light = **20** 快照（10×2）
+  - 命名: `theme-default-light-*` / `theme-minimal-light-*`（slugs: `settings-appearance` · `keyword-hunter` · `home` · `app-center` · `scraper` · `ppc-search-terms` · `sops-overview` · `amz-hub-overview` · `deep-chat` · `skills`）
+  - Ownership 多色页（App Center / Scraper / PPC / SOPs / Amazon Hub / Deep Chat terracotta send / Skills violet catalog）**不得**被 Appearance primary 吞掉；**不得**将 terracotta send 断言为 primary
   - **不进 blocking CI**；未设 `THEME_VISUAL=1` 时整套 skip
   - 手动跑：
     ```bash

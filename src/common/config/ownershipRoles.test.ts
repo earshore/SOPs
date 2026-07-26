@@ -51,6 +51,22 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
     }
   });
 
+  it('soft-cross-checks Sidebar theme class for keyword_hunter with ownership rose (no production wire)', () => {
+    // D8 light wire: assert the convention SidebarRenderer uses
+    // (`sidebar-theme-${ColorSchemeName}`) matches ownershipRoles palette when
+    // menu themeColor and role palette agree. Does not import SidebarRenderer /
+    // ColorContext to avoid production coupling; next optional wire: SidebarRenderer.
+    const moduleId = 'keyword_hunter';
+    const roleId = getOwnershipRoleForModule(moduleId);
+    const palette = getPaletteForRole(roleId!);
+    const menuThemeColor = MENU_CONFIG.modules[moduleId]?.themeColor;
+
+    expect(roleId).toBe('role-keywords');
+    expect(palette).toBe('rose');
+    expect(menuThemeColor).toBe('rose');
+    expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-rose');
+  });
+
   it('returns null for unknown modules and roles (no fake defaults)', () => {
     expect(getOwnershipRoleForModule('not_a_module')).toBeNull();
     expect(getOwnershipRole('role-does-not-exist')).toBeNull();
