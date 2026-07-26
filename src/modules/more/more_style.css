@@ -874,4 +874,44 @@
   border-color: color-mix(in srgb, var(--color-cyan-400) 30%, transparent);
   background: color-mix(in srgb, var(--color-cyan-400) 12%, var(--surface-card)) !important;
   color: var(--color-cyan-200) !important;
+/* ==================== 更多总览深色主题（Theme dual-safe） ==================== */
+/* Ownership emerald 保持色相；hero 洗底转低明度 color-mix，文字走语义 token */
+.dark .more-overview .wb-container--simple,
+[data-color-mode-resolved='dark'] .more-overview .wb-container--simple,
+[data-theme='dark'] .more-overview .wb-container--simple {
+  background:
+    radial-gradient(
+      circle at 82% 18%,
+      color-mix(in srgb, var(--color-emerald-600, #059669) 16%, transparent),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-green-500, #22c55e) 10%, var(--surface-panel, #0f172a)),
+      var(--surface-panel, #0f172a) 54%,
+      color-mix(in srgb, var(--color-emerald-600, #059669) 10%, var(--surface-panel, #0f172a))
+    ) !important;
+  --wb-tag-bg: color-mix(in srgb, var(--surface-card, #1e293b) 78%, transparent) !important;
+}
+
+.dark .more-overview .wb-badge,
+[data-color-mode-resolved='dark'] .more-overview .wb-badge,
+[data-theme='dark'] .more-overview .wb-badge {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 16%,
+    var(--surface-card, #1e293b)
+  ) !important;
+  color: var(--color-emerald-300, #6ee7b7) !important;
+}
+
+.dark .more-overview,
+[data-color-mode-resolved='dark'] .more-overview,
+[data-theme='dark'] .more-overview {
+  --button-filter-hover-bg: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 14%,
+    var(--surface-card, #1e293b)
+  );
+  --button-filter-hover-color: var(--color-emerald-300, #6ee7b7);
 }

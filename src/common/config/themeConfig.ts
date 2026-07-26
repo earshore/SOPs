@@ -47,7 +47,7 @@ export type ResolvedColorMode = 'light' | 'dark';
 
 const APPEARANCE_STORAGE_KEY = 'app-theme';
 const COLOR_MODE_STORAGE_KEY = 'app-color-mode';
-/** New users follow the OS (enterprise convention: Linear/GitHub/Slack). */
+/** Enterprise default: new users follow the OS (spec T1-5); stored prefs win. */
 const DEFAULT_COLOR_MODE: ColorMode = 'system';
 const COLOR_MODES: readonly ColorMode[] = ['light', 'dark', 'system'];
 
@@ -333,7 +333,7 @@ export class ThemeManager {
   }
 
   /**
-   * Restore color mode from `app-color-mode` (default light).
+   * Restore color mode from `app-color-mode` (default system).
    * Independent of restoreTheme / app-theme.
    * Also migrates legacy `data-theme="dark"` once when storage is empty.
    */

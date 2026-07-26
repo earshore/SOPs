@@ -2,10 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const bootstrapSource = readFileSync(
-  resolve(process.cwd(), 'public/theme-bootstrap.js'),
-  'utf8'
-);
+const bootstrapSource = readFileSync(resolve(process.cwd(), 'public/theme-bootstrap.js'), 'utf8');
 
 function runBootstrap(): void {
   // Evaluate the blocking pre-paint IIFE in the current jsdom context.
@@ -35,17 +32,29 @@ describe('theme-bootstrap (T1-2 FOUC)', () => {
     vi.unstubAllGlobals();
   });
 
-  it('defaults to system (resolved via prefers-color-scheme) without indigo', () => {
+  it('defaults new users to system preference and resolves without indigo', () => {
     runBootstrap();
 
     const root = document.documentElement;
     expect(root.getAttribute('data-theme-ready')).toBe('0');
     expect(root.getAttribute('data-color-mode')).toBe('system');
-    // jsdom matchMedia matches:false → resolves light
+    // jsdom has no dark preference → system resolves light
     expect(root.getAttribute('data-color-mode-resolved')).toBe('light');
     expect(root.classList.contains('dark')).toBe(false);
     expect(root.style.colorScheme).toBe('light');
     expect(root.getAttribute('style') ?? '').not.toMatch(/indigo/i);
+  });
+
+  it('keeps an explicit light preference locked to light', () => {
+    localStorage.setItem('app-color-mode', JSON.stringify('light'));
+
+    runBootstrap();
+
+    const root = document.documentElement;
+    expect(root.getAttribute('data-color-mode')).toBe('light');
+    expect(root.getAttribute('data-color-mode-resolved')).toBe('light');
+    expect(root.classList.contains('dark')).toBe(false);
+    expect(root.style.colorScheme).toBe('light');
   });
 
   it('applies JSON-stringified dark preference with colorScheme dark', () => {

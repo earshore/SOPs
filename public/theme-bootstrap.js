@@ -2,6 +2,7 @@
  * Pre-paint color-mode bootstrap (T1-2 FOUC).
  * Blocking sync script in <head> — must stay free of imports / async.
  * Reads StorageService-compatible values: JSON-stringified or plain.
+ * New users default to `system` (T1-5); stored preferences always win.
  */
 (function () {
   var KEY = 'app-color-mode';

@@ -15,38 +15,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.11-rc.10] - 2026-07-26
 
-> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA \3.0.10\。
-> 收口 \3.0.11-rc.9\ 之后的**推理档企业闭环 / 厂商 API 对齐**、**主题系统 Phase 1–2 收敛**（颜色模式 + Appearance primary 迁样）、设置 TD 与企业指南 SSOT。
-> 生产回滚目标为 \3.0.10\ 对应的上一条 Pages 部署。
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.9` 之后的**推理档企业闭环 / 厂商 API 对齐**、**主题系统 Phase 1–2 收敛**（颜色模式 + Appearance primary 迁样）、设置 TD 与企业指南 SSOT。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
 > 部署目标：https://sops.hongecb.store
 
 ### Added
 
-- 推理档企业闭环 Spec：\docs/superpowers/specs/2026-07-26-reasoning-effort-closed-loop-design.md\（L1 意图 / L2 allowlist / L3 clamp + requested·effective）。
-- 厂商推理 API 对齐 Spec：\docs/superpowers/specs/2026-07-26-vendor-effort-api-alignment-design.md\（\EffortControlKind\ 长期演进）。
-- \EffortControlKind\ + registry 分模型挂载；Claude 现代路径 \	hinking.adaptive\ + \output_config.effort\；legacy \	hinking.budget_tokens\。
-- 表驱动契约：\effortClosedLoop.test.ts\（GPT / Grok / Claude 双路径 / Gemini）。
-- 设置 AC3：拉模型换 id / 加载配置时钳制并静默落盘，降档 toast 一次性。
-- Color Mode API：\ThemeManager.applyColorMode\ / estoreColorMode\；设置外观浅色 / 深色 / 跟随系统。
-- 主题企业审查与作战手册 / D1–D12 计划与门禁（hardcode baseline、token override audit、D12 视觉 scaffold）。
+- 推理档企业闭环 Spec：`docs/superpowers/specs/2026-07-26-reasoning-effort-closed-loop-design.md`（L1 意图 / L2 allowlist / L3 clamp + requested·effective 请求日志）。
+- 厂商推理 API 对齐 Spec：`docs/superpowers/specs/2026-07-26-vendor-effort-api-alignment-design.md`（`EffortControlKind` 长期演进）。
+- `EffortControlKind` + registry 分模型挂载；Claude 现代路径 `thinking.adaptive` + `output_config.effort` 正交配对；legacy 路径 `thinking.budget_tokens`。
+- 表驱动契约测试：`effortClosedLoop.test.ts`（GPT / Grok / Claude 双路径 / Gemini）。
+- 设置 AC3：拉模型换 id / 加载配置时按 allowlist 钳制并静默落盘，降档 toast 一次性。
+- Color Mode API：`ThemeManager.applyColorMode` / `restoreColorMode`；设置外观支持浅色 / 深色 / 跟随系统；颜色模式偏好键 `app-color-mode` 纳入本地数据配置键清单。
+- 双主题壳层中性色：侧栏 / 顶栏 / mega panel 提供 light·dark 双份 shell neutrals。
+- 主题企业审查与作战手册 / D1–D12 计划与门禁（hardcode baseline、token override audit、D12 视觉 scaffold）；agent-contract XO 运行与视觉审查证据留档，XO 残余 #24–26 可执行化。
 - Ownership Role SSOT scaffold + soft ownership 单测；企业设计规范 SSOT 栈与结构门禁。
-- 设置 TD：Keyword Hunter 二级导航深链、数据策略保存契约、侧栏 scroll-spy；相关 e2e / 矩阵文档。
+- 设置 TD：Keyword Hunter 二级导航深链、数据策略保存契约、侧栏 scroll-spy；TD-DOC-01 / TD-SET-02 / TD-TEST-02 收口；相关 e2e / 矩阵文档。
 
 ### Changed
 
-- 产品推理轴保持 \low…max\；UI 仅展示当前模型 allowlist；GPT 旗舰含 xhigh/max，Grok-4.5 仅三档默认 high。
+- 产品推理轴保持 `low…max`；UI 仅展示当前模型 allowlist；GPT 旗舰含 xhigh/max，Grok-4.5 仅三档默认 high。
 - Appearance primary / focus 批量迁入共享壳与业务样例 CTA（KH / Scraper / Analysis / PPC / PromptLab / Deep Chat / Home / Modal 等 residual 波次）。
-- 暗色 foundation 多文件 dual/tri-selector（\.dark\ + \data-color-mode-resolved\ + legacy）。
+- 暗色 foundation 多文件 dual/tri-selector（`.dark` + `data-color-mode-resolved` + legacy）。
 - 主题语义：颜色模式 light/dark/system 与 accent-as-tone 分轨（见主题 XO / landing 板）。
-- \ColorContext.setModuleColor\ deprecated + ESLint 禁生产调用；workbench radius 语义 token 与长尾 defer 记录。
+- `ColorContext.setModuleColor` deprecated + ESLint 禁生产调用；workbench radius 语义 token 与长尾 defer 记录。
 
 ### Fixed
 
 - Claude：effort 与 thinking 正交；现代路径同时发送 adaptive thinking + effort（不再只发 effort）。
 - Grok 等非法档不再静默掉成 medium；就近 clamp（如 max→high）。
 - 设置 fetchModels 自动切模型后未钳制 effort / 加载降档重复 toast 的 AC3 缺口。
+- 颜色模式 pre-paint bootstrap：首屏按已存偏好预绘制，避免暗色偏好下的 FOUC 闪烁。
+- 暗色模式不再覆盖 Appearance primary；常暗「暗色孤岛」改绑 `data-color-mode-resolved`，与颜色模式解析结果对齐。
 - 多处模块 focus / 主 CTA hard blue·indigo 迁 Appearance，避免与颜色模式冲突。
-
 ## [3.0.11-rc.9] - 2026-07-26
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。

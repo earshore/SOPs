@@ -158,7 +158,7 @@ function renderDefaultSidebar(
     const currentTab = appStore.getState().ui.currentTab || '';
 
     const html = `
-      <div class="flex flex-col h-full bg-white">
+      <div class="flex flex-col h-full bg-[var(--surface-panel,#ffffff)]">
         <div class="p-6 pb-2">
           <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
             ${moduleConfig.title}
@@ -169,7 +169,7 @@ function renderDefaultSidebar(
                 const isActive = currentTab === route.id;
                 const activeClasses = isActive
                   ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)] font-semibold'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900';
+                  : 'text-[color:var(--color-text-secondary,#475569)] hover:bg-[var(--color-bg-hover,rgba(0,0,0,0.04))] hover:text-[color:var(--color-text-primary,#0f172a)]';
 
                 return `
                 <button type="button" data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
@@ -183,7 +183,7 @@ function renderDefaultSidebar(
               .join('')}
           </nav>
         </div>
-        <div class="mt-auto p-6 border-t border-slate-100 bg-slate-50/50">
+        <div class="mt-auto p-6 border-t border-[color:var(--border-subtle,rgba(148,163,184,0.24))] bg-[var(--color-bg-secondary,#f8fafc)]">
           <div class="flex items-center gap-3 text-slate-400 text-xs">
             <i class="${moduleConfig.icon}"></i>
             <span>${moduleConfig.version}</span>

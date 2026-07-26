@@ -63,13 +63,13 @@ describe('release accessibility contract', () => {
     [
       'hover',
       headerCss.match(
-        /\.dark \.nav-group:hover \.nav-trigger,\s*\.dark \.nav-trigger:hover,\s*\[data-theme='dark'\] \.nav-group:hover \.nav-trigger,\s*\[data-theme='dark'\] \.nav-trigger:hover\s*{[^}]*}/
+        /\.dark \.nav-group:hover \.nav-trigger,\s*\.dark \.nav-trigger:hover,\s*\[data-color-mode-resolved='dark'\] \.nav-group:hover \.nav-trigger,\s*\[data-color-mode-resolved='dark'\] \.nav-trigger:hover,\s*\[data-theme='dark'\] \.nav-group:hover \.nav-trigger,\s*\[data-theme='dark'\] \.nav-trigger:hover\s*{[^}]*}/
       )?.[0],
     ],
     [
       'active',
       headerCss.match(
-        /\.dark \.nav-trigger\[aria-current='page'\],\s*\[data-theme='dark'\] \.nav-trigger\[aria-current='page'\]\s*{[^}]*}/
+        /\.dark \.nav-trigger\[aria-current='page'\],\s*\[data-color-mode-resolved='dark'\] \.nav-trigger\[aria-current='page'\],\s*\[data-theme='dark'\] \.nav-trigger\[aria-current='page'\]\s*{[^}]*}/
       )?.[0],
     ],
   ])('uses a foreground primary token for dark navigation %s', (_state, rule) => {

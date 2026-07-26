@@ -2354,3 +2354,37 @@
     border-radius: var(--rounded-xl, 16px) !important;
   }
 }
+
+/* ==================== 应用总览深色主题（Theme dual-safe） ==================== */
+/* Ownership minimax 玫红保持色相；soft/surface 局部 token 在深色下翻转为低明度 */
+.dark .app-overview-container,
+[data-color-mode-resolved='dark'] .app-overview-container,
+[data-theme='dark'] .app-overview-container {
+  --app-overview-minimax-ink: #f5f2f4;
+  --app-overview-minimax-charcoal: #d9d2da;
+  --app-overview-minimax-coral-soft: color-mix(
+    in srgb,
+    var(--app-overview-minimax-coral) 16%,
+    var(--surface-card, #1e293b)
+  );
+  --app-overview-minimax-neutral-soft: var(--color-bg-tertiary, rgba(255, 255, 255, 0.06));
+  --app-overview-minimax-fire: #ff8f89;
+  --app-overview-accent-soft: color-mix(
+    in srgb,
+    var(--app-overview-accent) 20%,
+    var(--surface-card, #1e293b)
+  );
+  --app-overview-accent-surface: color-mix(
+    in srgb,
+    var(--app-overview-accent) 12%,
+    var(--surface-panel, #0f172a)
+  );
+  --app-overview-shadow: 0 12px 30px -28px rgba(0, 0, 0, 0.85);
+  --module-accent-text: color-mix(in srgb, var(--app-overview-accent) 55%, #ffffff);
+}
+
+.dark .app-overview-hero .wb-badge,
+[data-color-mode-resolved='dark'] .app-overview-hero .wb-badge,
+[data-theme='dark'] .app-overview-hero .wb-badge {
+  color: color-mix(in srgb, var(--app-overview-accent) 55%, #ffffff) !important;
+}

@@ -172,9 +172,9 @@
 
 .route-loading-skeleton__table {
   padding: 18px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border: 1px solid var(--border-muted, rgba(226, 232, 240, 0.9));
   border-radius: 10px;
-  background: rgba(248, 250, 252, 0.8);
+  background: color-mix(in srgb, var(--color-bg-secondary, #f8fafc) 80%, transparent);
 }
 
 .route-loading-skeleton__table .route-loading-skeleton__line {
@@ -333,7 +333,7 @@
 
 .skeleton.skeleton-card {
   padding: 16px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--color-border-default, #e0e0e0);
   border-radius: 8px;
 }
 
