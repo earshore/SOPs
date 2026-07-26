@@ -13,7 +13,9 @@ import { fileURLToPath } from 'node:url';
 const BASE = process.env.XO_BASE_URL || 'http://127.0.0.1:4173';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, '../../docs/superpowers/plans/xo-agent-run');
-const SHA = process.env.XO_SHA || 'a7a09ff7';
+const SHA = process.env.XO_SHA || 'c966688d';
+/** @type {Record<string, unknown>} */
+const evidence = {};
 
 mkdirSync(OUT_DIR, { recursive: true });
 
@@ -196,20 +198,29 @@ async function main() {
     });
     await page.waitForTimeout(2000);
     const kh = await page.evaluate(() => {
-      const banner = document.querySelector('#keyword-hunter-module-input .wb-container.wb-theme-rose');
-      const sidebar = document.querySelector('.sidebar-shell.sidebar-theme-rose, .sidebar-theme-rose');
+      const banner = document.querySelector(
+        '#keyword-hunter-module-input .wb-container.wb-theme-rose'
+      );
+      const sidebar = document.querySelector(
+        '.sidebar-shell.sidebar-theme-rose, .sidebar-theme-rose'
+      );
+      const h = document.documentElement;
+      const primary = getComputedStyle(h).getPropertyValue('--color-primary').trim();
+      let bannerBg = null;
+      if (banner) {
+        bannerBg = getComputedStyle(banner).backgroundColor;
+      }
       return {
         banner: !!(banner && banner.classList.contains('wb-theme-rose')),
-        sidebar: !!(sidebar && sidebar.className.includes('sidebar-theme-rose')),
-        appearance: document.documentElement.getAttribute('data-appearance'),
+        sidebar: !!(sidebar && String(sidebar.className).includes('sidebar-theme-rose')),
+        appearance: h.getAttribute('data-appearance'),
+        primaryToken: primary,
+        bannerBg,
       };
     });
+    evidence.kh = kh;
     await page.screenshot({ path: join(OUT_DIR, '05-kh-minimal.png'), fullPage: false });
-    record(
-      'X2-kh-rose',
-      kh.banner || kh.sidebar ? 'PASS' : 'FAIL',
-      JSON.stringify(kh)
-    );
+    record('X2-kh-rose', kh.banner || kh.sidebar ? 'PASS' : 'FAIL', JSON.stringify(kh));
 
     // --- 6 PPC hero ---
     await page.goto(`${BASE}/#/app-center/ppc-tools/ppc-search-terms`, {
@@ -250,27 +261,86 @@ async function main() {
     });
     await page.waitForTimeout(2000);
     const deep = await page.evaluate(() => {
-      const root = document.querySelector('#deep-chat-view') || document.body;
       const styles = getComputedStyle(document.documentElement);
-      const terracotta =
-        styles.getPropertyValue('--deep-chat-accent') ||
-        styles.getPropertyValue('--deep-chat-send') ||
-        styles.getPropertyValue('--color-deep-chat-accent') ||
-        '';
-      const send =
-        document.querySelector('[data-testid*="send"], button[aria-label*="发送"], .deep-chat-send, button.send');
+      const primary = styles.getPropertyValue('--color-primary').trim();
+      const tokenCandidates = [
+        '--deep-chat-accent',
+        '--deep-chat-send',
+        '--deep-chat-brand',
+        '--color-deep-chat-accent',
+        '--playground-accent',
+      ].map(k => [k, styles.getPropertyValue(k).trim()]);
+
+      /** @type {{ bg: string, color: string, tag: string } | null} */
+      let sendStyle = null;
+      const lightScan = document.querySelector(
+        'button[aria-label*="发送"], button[aria-label*="Send"], [data-testid*="send"]'
+      );
+      if (lightScan instanceof HTMLElement) {
+        const cs = getComputedStyle(lightScan);
+        sendStyle = {
+          bg: cs.backgroundColor,
+          color: cs.color,
+          tag: lightScan.tagName + '.' + (lightScan.className || '').toString().slice(0, 60),
+        };
+      }
+      // deep-chat submit often lives in shadow root
+      if (!sendStyle) {
+        const hosts = document.querySelectorAll('#deep-chat-view deep-chat, #deep-chat-view *');
+        for (const host of hosts) {
+          if (!(host instanceof HTMLElement) || !host.shadowRoot) continue;
+          const btn =
+            host.shadowRoot.querySelector('#submit-button') ||
+            host.shadowRoot.querySelector('button#submit') ||
+            host.shadowRoot.querySelector('[id*="submit"]') ||
+            host.shadowRoot.querySelector('button[class*="submit"]');
+          if (btn instanceof HTMLElement) {
+            const cs = getComputedStyle(btn);
+            sendStyle = {
+              bg: cs.backgroundColor,
+              color: cs.color,
+              tag: 'shadow:' + (btn.id || btn.className || 'button').toString().slice(0, 60),
+            };
+            break;
+          }
+        }
+      }
+
+      // Heuristic: terracotta/orange family vs pure primary blue/slate
+      const bg = sendStyle?.bg || '';
+      const rgb = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      let family = 'unknown';
+      if (rgb) {
+        const r = Number(rgb[1]);
+        const g = Number(rgb[2]);
+        const b = Number(rgb[3]);
+        if (r > 140 && g < 120 && b < 100) family = 'warm-terracotta-ish';
+        else if (b > r && b > g) family = 'blue-primary-ish';
+        else if (Math.abs(r - g) < 20 && Math.abs(g - b) < 20) family = 'neutral-slate-ish';
+        else if (r > 100 && g > 80 && b < 90) family = 'warm-amber-ish';
+        else family = `rgb(${r},${g},${b})`;
+      }
+
       return {
         hasView: !!document.querySelector('#deep-chat-view'),
-        terracottaVar: terracotta.trim().slice(0, 40),
-        sendClass: send ? send.className.slice(0, 100) : null,
+        primaryToken: primary,
+        tokens: Object.fromEntries(tokenCandidates.filter(([, v]) => v)),
+        sendStyle,
+        sendFamily: family,
+        appearance: document.documentElement.getAttribute('data-appearance'),
       };
     });
+    evidence.deepChat = deep;
     await page.screenshot({ path: join(OUT_DIR, '07-deep-chat.png'), fullPage: false });
-    record(
-      'X2-deep-chat',
-      deep.hasView ? 'PASS' : 'FAIL',
-      `view=${deep.hasView}; accentVar=${deep.terracottaVar || '(inspect screenshot)'}`
-    );
+    // Contract: view mounts. Brand feel of send is evidence-only (DEBT if unknown).
+    const deepStatus = !deep.hasView
+      ? 'FAIL'
+      : deep.sendFamily === 'blue-primary-ish'
+        ? 'FAIL'
+        : deep.sendFamily === 'unknown'
+          ? 'DEBT'
+          : 'PASS';
+    record('X2-deep-chat', deepStatus, JSON.stringify(deep));
 
     // --- 8 Master Analysis scraper indigo ---
     await page.goto(`${BASE}/#/app-center/master-analysis/scraper`, {
@@ -456,7 +526,10 @@ Saved under \`docs/superpowers/plans/xo-agent-run/\` (\`01-home.png\` …).
 `;
 
   writeFileSync(join(OUT_DIR, 'XO-AGENT-RUN-REPORT.md'), md, 'utf8');
-  writeFileSync(join(OUT_DIR, 'results.json'), JSON.stringify({ SHA, BASE, overall, results }, null, 2));
+  writeFileSync(
+    join(OUT_DIR, 'results.json'),
+    JSON.stringify({ SHA, BASE, overall, results, evidence }, null, 2)
+  );
   console.log('\n=== OVERALL', overall, '===');
   console.log('Report:', join(OUT_DIR, 'XO-AGENT-RUN-REPORT.md'));
   process.exit(fail > 0 ? 1 : 0);

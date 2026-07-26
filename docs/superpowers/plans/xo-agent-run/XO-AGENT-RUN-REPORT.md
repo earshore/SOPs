@@ -1,7 +1,7 @@
 # Agent-assisted XO run (contract only)
 
 **Date**: 2026-07-26  
-**Build/SHA**: `a7a09ff7`  
+**Build/SHA**: `c966688d`  
 **Base**: http://127.0.0.1:4173  
 **Runner**: Playwright headless agent script `scripts/dev/xo-agent-theme-run.mjs`  
 **Honesty**: **NOT human visual Pass.** Pixel aesthetics / long-session comfort / “一眼扫读” **still Yellow** until human XO signs.
@@ -10,9 +10,9 @@
 
 | Metric | Value |
 | --- | --- |
-| PASS | 17 |
+| PASS | 16 |
 | FAIL | 0 |
-| DEBT/SKIP | 1 |
+| DEBT/SKIP | 2 |
 | **Overall (agent-contract)** | **PASS with debt (agent-contract)** |
 | **Visual / Human XO** | **Yellow / unsigned** |
 
@@ -24,10 +24,10 @@
 | X1-settings-open | **PASS** | settings panel open via #nav-more → 全局设置 |
 | X1-appearance-controls | **PASS** | theme=true colorMode=true |
 | X1-switch-x3 | **PASS** | {"appearance":"minimal","theme":"minimal","colorMode":"light","colorModeResolved":"light","darkClass":false,"appTheme":"\"minimal\"","appColorMode":null} |
-| X1-refresh-minimal | **PASS** | {"appearance":"minimal","theme":"minimal","colorMode":"light","colorModeResolved":"light","darkClass":false,"appTheme":"\"minimal\"","appColorMode":null,"storedThemeParsed":"minimal","refreshOk":true} |
-| X2-kh-rose | **PASS** | {"banner":true,"sidebar":true,"appearance":"minimal"} |
+| X1-refresh-minimal | **PASS** | {"appearance":"minimal","theme":"minimal","colorMode":"light","colorModeResolved":"light","darkClass":false,"appTheme":"\"minimal\"","appColorMode":null,"storedThemeParsed":"minimal"} |
+| X2-kh-rose | **PASS** | {"banner":true,"sidebar":true,"appearance":"minimal","primaryToken":"#334155","bannerBg":"rgba(0, 0, 0, 0)"} |
 | X2-ppc-hero | **PASS** | {"found":true,"className":"ppc-search-terms-hero p-5 mb-6","brandToken":"#10b981"} |
-| X2-deep-chat | **PASS** | view=true; accentVar=(inspect screenshot) |
+| X2-deep-chat | **DEBT** | {"hasView":true,"primaryToken":"#334155","tokens":{},"sendStyle":null,"sendFamily":"unknown","appearance":"minimal"} |
 | X2-ma-indigo | **PASS** | {"indigo":true,"sidebar":true} |
 | X2-overview-app-center | **PASS** | /#/app-center |
 | X2-overview-sops | **PASS** | /#/sops |
@@ -42,6 +42,16 @@
 ## Screenshots
 
 Saved under `docs/superpowers/plans/xo-agent-run/` (`01-home.png` …).
+
+## Follow-up: evidence pass + visual review notes
+
+See **`XO-AGENT-VISUAL-REVIEW.md`** (agent observation, still not human Pass).
+
+Enhanced re-run notes:
+- KH under minimal: `primaryToken=#334155` with `wb-theme-rose` + `sidebar-theme-rose` still true
+- PPC hero: `.ppc-search-terms-hero` + accent `#10b981`
+- Deep Chat: view OK; submit button RGB **unresolved** (shadow DOM) → **DEBT**, not FAIL
+- Focus ring under minimal: `#334155`
 
 ## Human still required
 

@@ -1,5 +1,5 @@
 {
-  "SHA": "a7a09ff7",
+  "SHA": "c966688d",
   "BASE": "http://127.0.0.1:4173",
   "overall": "PASS with debt (agent-contract)",
   "results": [
@@ -26,12 +26,12 @@
     {
       "id": "X1-refresh-minimal",
       "status": "PASS",
-      "note": "{\"appearance\":\"minimal\",\"theme\":\"minimal\",\"colorMode\":\"light\",\"colorModeResolved\":\"light\",\"darkClass\":false,\"appTheme\":\"\\\"minimal\\\"\",\"appColorMode\":null,\"storedThemeParsed\":\"minimal\",\"refreshOk\":true}"
+      "note": "{\"appearance\":\"minimal\",\"theme\":\"minimal\",\"colorMode\":\"light\",\"colorModeResolved\":\"light\",\"darkClass\":false,\"appTheme\":\"\\\"minimal\\\"\",\"appColorMode\":null,\"storedThemeParsed\":\"minimal\"}"
     },
     {
       "id": "X2-kh-rose",
       "status": "PASS",
-      "note": "{\"banner\":true,\"sidebar\":true,\"appearance\":\"minimal\"}"
+      "note": "{\"banner\":true,\"sidebar\":true,\"appearance\":\"minimal\",\"primaryToken\":\"#334155\",\"bannerBg\":\"rgba(0, 0, 0, 0)\"}"
     },
     {
       "id": "X2-ppc-hero",
@@ -40,8 +40,8 @@
     },
     {
       "id": "X2-deep-chat",
-      "status": "PASS",
-      "note": "view=true; accentVar=(inspect screenshot)"
+      "status": "DEBT",
+      "note": "{\"hasView\":true,\"primaryToken\":\"#334155\",\"tokens\":{},\"sendStyle\":null,\"sendFamily\":\"unknown\",\"appearance\":\"minimal\"}"
     },
     {
       "id": "X2-ma-indigo",
@@ -93,5 +93,22 @@
       "status": "PASS",
       "note": "no severe pageerrors"
     }
-  ]
+  ],
+  "evidence": {
+    "kh": {
+      "banner": true,
+      "sidebar": true,
+      "appearance": "minimal",
+      "primaryToken": "#334155",
+      "bannerBg": "rgba(0, 0, 0, 0)"
+    },
+    "deepChat": {
+      "hasView": true,
+      "primaryToken": "#334155",
+      "tokens": {},
+      "sendStyle": null,
+      "sendFamily": "unknown",
+      "appearance": "minimal"
+    }
+  }
 }

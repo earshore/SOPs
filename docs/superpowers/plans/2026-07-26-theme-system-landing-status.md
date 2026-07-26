@@ -22,7 +22,7 @@
 | 层                 | 灯         | 一句话                                                                                                                                                                                                                                           |
 | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Code / 契约**    | **Green**  | tip `903dbf3e`: D6 #18–**27** 样本波 **FREEZE** · phase review re-green（hardcode 13 · token 20/0 · css 100% · theme unit · type-check:tests · **full build** · **smoke 29/29** @ 4173）· D12×**24** · D1 **0 closable** · D2 #6 deferred · D7/D10 Done · D8 soft · settings scroll-spy complete |
-| **Visual / XO**    | **Yellow** | **Agent-contract XO** @ preview 4173：**PASS with debt**（17 PASS / 0 FAIL / 1 DEBT=X6 美学）；**人类肉眼 30 min 仍未签**；**不得宣称 visual Pass** |
+| **Visual / XO**    | **Yellow** | **Agent-contract XO** @ 4173：**PASS with debt**（0 FAIL；DEBT=X6 美学 + Deep Chat send RGB 探针）；证据见 `xo-agent-run/` + `XO-AGENT-VISUAL-REVIEW.md`；**人类肉眼仍未签**；**不得宣称 visual Pass** |
 | **主题 RC 体验门** | **Open**   | Tech Lead 可预签 code only；**不可**仅凭 agent-contract 关体验 RC |
 
 **一句话**: 主题 **code 收敛 + sample FREEZE**；agent 已按 §3.1 跑 **契约 XO**（报告 `docs/superpowers/plans/xo-agent-run/`）→ **PASS with debt**；**Visual 仍 Yellow** 直至人类签字。smoke 用 `npm run test:e2e:smoke`（4173）。
