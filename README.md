@@ -28,14 +28,21 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本           | 说明                                               |
 | ---------------------------- | -------------- | -------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.0.10`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.11-rc.9` | 主题架构收口 + 可行动 LLM 失败体验 + 文档权威；**勿**默认当生产 |
-| package.json                 | `3.0.11-rc.9`  | 与 RC tag / Release 一致（GA 前）                  |
+| **当前 Pre-release 候选**    | `v3.0.11-rc.10` | 推理档企业闭环 + 主题 Phase 1–2 + 设置 TD；**勿**默认当生产 |
+| package.json                 | `3.0.11-rc.10`  | 与 RC tag / Release 一致（GA 前）                  |
 | 上一 GA                      | `v3.0.10`      | 回滚参考                                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.9` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.10` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.9`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.10`。
+
+`v3.0.11-rc.10`（2026-07-26，Pre-release）收口 rc.9 之后的推理闭环与主题收敛：
+
+- **LLM**：推理档 L1/L2/L3 闭环、`EffortControlKind` 厂商对齐；Claude adaptive thinking + `output_config.effort` 正交；Grok/GPT allowlist clamp。
+- **主题**：颜色模式 light/dark/system、Appearance primary 迁样、D1–D12 / Ownership / 企业指南 SSOT。
+- **设置**：TD-SET KH 导航 / 数据策略 / scroll-spy；AC3 换模钳制落盘。
+- GitHub Latest **仍指向** `v3.0.10`；回滚基线为 `v3.0.10`。
 
 `v3.0.11-rc.9`（2026-07-26，Pre-release）收口 rc.8 之后的主题、失败体验与文档权威：
 

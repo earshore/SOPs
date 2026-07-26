@@ -9,108 +9,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- 设置侧栏 Keyword Hunter 二级入口 + 深链（TD-SET-05）；滚动联动高亮 `settingsNavScroll` / `is-current`（TD-SET-04）。
-- 设置 e2e：KH 二级跳转、数据策略显式保存 Toast、二级 nav/即时预设（`tests/e2e/system-settings.spec.ts`）。
-- 设置 e2e 补强（TD-TEST-02）：二级 nav「数据采集」深链展开 + 运行策略预设即时保存后无脏关确认（`tests/e2e/system-settings.spec.ts`）。
-- COMPONENT 保存语义矩阵（TD-SET-02）：即时 vs 显式 / Dirty / 面板不关规则表（`docs/COMPONENT_GUIDELINES.md` §10）。
-- 企业设计规范 SSOT 栈落地：`docs/SECURITY_PLAYBOOK.md`（BYOK 威胁模型 + PR/RC 清单）；INDEX 30 秒决策树 / README 唯一入口 / SECURITY·PRODUCT 接线；活债务板 `TECH_DEBT_BOARD`（TD-OPS-01 / TD-DOC-STACK Closed，无 Open∩Closed 双真）；Release 模板 + `RELEASE_POLICY` 嵌入 OPS 冒烟与 a11y 抽检必勾项；`docs/superpowers` constitution-touch checklist；结构门禁 `tests/unit/enterpriseGuidelinesStack.test.ts`（14 项，防双真/断链/降级回退）。
-- D8 Ownership Role 代码 SSOT scaffold：`src/common/config/ownershipRoles.ts`（`OwnershipRoleId` × 19、`OWNERSHIP_ROLES`、`getPaletteForRole` / `getOwnershipRoleForModule`；纯 helper，无 Appearance 写入、无全站 DOM 绑定）。
-- D8 soft ownership unit expand：`ownershipRoles.test.ts` 补 `playground` / `amz_hub` / `app_center` / `sops` sidebar soft-check + hub/more category palette 对齐（无生产 API / 无全站 `data-ownership-role`）。
-- D9 局部 token 前缀生命周期（库存 / elevate·keep local·archive / PR 清单 / 与 D1 边界）：`docs/superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md`（docs only，无批量 CSS rename）。
-- D12 Appearance 截图 scaffold（opt-in）：`tests/visual/theme-appearance-scaffold.test.ts` + `npm run test:visual:theme`（`THEME_VISUAL=1`；默认 skip，基线 gitignore，不进 blocking CI）；**12 屏 × default/minimal light = 24** 快照（R1–R9 light 主包 + **Skills** + **NPI Tracker**：Settings / KH / Home / App Center / Scraper / **PromptLab** / PPC / SOPs / Amazon Hub / Deep Chat / **Skills** / **NPI**；PromptLab indigo / terracotta send / Skills violet / NPI growth ownership **不**当 primary）；计划见 `docs/superpowers/plans/2026-07-26-theme-visual-baseline-d12.md`。
-- Ownership Role → Palette / `wb-theme-*` 映射表（Phase 4 预备）：`docs/superpowers/plans/2026-07-26-ownership-role-palette-map.md`。
-- D1 token 覆盖清点：`npm run token:override-audit`（`scripts/quality/audit-token-overrides.ts`）+ 库存报告 `docs/superpowers/plans/2026-07-26-token-override-inventory.md`。
-- 主题系统企业级审查与收敛路线图：`docs/superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md`（As-Is/To-Be、D1–D12、Phase 0–5）。
-- 主题落地团队作战手册 + 体验验收矩阵（`docs/superpowers/plans/2026-07-26-theme-system-*`）。
-- D6 壳层 `blue-*` 硬编码基线门禁：`npm run theme:hardcode-baseline`（已并入 `ci:quality`；当前 shell 基线 13）。
-- Appearance 预览类型收窄为 `AppearanceThemeColors`（primary 族 + focus；D10）。
-- Color Mode API：`ThemeManager.applyColorMode` / `restoreColorMode`（存储 `app-color-mode`；`data-color-mode` + resolved / `.dark`）。
-- 系统设置外观：**颜色模式** 分段控件（浅色 / 深色 / 跟随系统）。
-- D1 审计：`npm run token:override-audit` + 清单文档；移除 variables.css 中 **192** 条与 generated 值相等的原子重复声明。
-- D2：引入语义 `--workbench-radius` / `--workbench-radius-lg`（工作台 8px SSOT）；决策文档入档。
-- D1/D2 治理：`config/token-atomic-override-allowlist.json` + `token:override-audit` 报告 unallowlisted 原子冲突；可选 `--fail-on-unallowlisted-atomic`。
-- 系统设置壳层 accent/focus/主 CTA 绑 Appearance primary token（X6 部分）。
-- E2E smoke：Appearance `minimal` + 颜色模式 dark 文档根属性独立断言。
-- Settings Appearance：颜色模式（浅色 / 深色 / 跟随系统）UI，即时调用 `ThemeManager.applyColorMode`，与主题色选择独立。
-
 ### Changed
-
-- D2 workbench radius long-tail **#6 deferred — diminishing returns**：已无高 ROI 模块 CSS 工具主面板仍绑 `var(--rounded-xl)` / hard 16px；存档 inventory（clamp 已覆盖 / entry / icon well / modal / settings control / AMZ practice story / chat brand）于 `workbench-radius-decision.md`；**无**产 CSS 迁移。
-- TD-SET-03：数据区「保存数据策略」 Toast → `数据策略已保存`；矩阵写明与工具区同 runtime API 族（非第二引擎）。
-- TD-DOC-01：`CI-QUALITY-GATES` 与现行 `ci:quality`/`ci:security` 脚本对齐；`development/best-practices` 标注 Zustand 现行、StateManager 历史。
-- D5 residual audit：`src/css/components` + `src/components` re-grep hard blue/indigo `focus-visible` — **0** clear shared-shell migrate left（settings WIP skip；megaMenu / sidebar-theme / wb / chat purple / ErrorBoundary / dead `#3b82f6` fallback / D6 业务长尾保留；docs inventory only）。
-- D5 续：shell `.nav-trigger:focus-visible` 从 hard indigo `rgba(99,102,241,.35)` 迁到 `color-mix(--color-focus-ring)`；Settings runtime checkbox 从 `focus:ring-indigo-500` 迁到 shared `settings-checkbox`（跟 Appearance focus；megaMenu / sidebar-theme / wb / chat purple / ErrorBoundary 保留）。
-- D10：删除 deprecated 类型别名 `ThemeColors`；Appearance 预览/写入类型 SSOT 仅 `AppearanceThemeColors`（primary 族 + focus）。
-- D11：`variables.css` root 暗色语义 token 块扩为 dual-safe：补 `[data-color-mode-resolved='dark']`（保留 `.dark` / legacy `data-theme` / `data-color-mode='dark'`）。
-- D11：`reset.css` 暗色 foundation **12** 规则（selection/placeholder/autofill/scrollbar/hr/mark/dialog 等）扩为 tri-selector。
-- D11：`forms.css` 暗色覆盖 31 规则扩为 `.dark, [data-color-mode-resolved='dark'], [data-theme='dark']` tri-selector（保留 legacy）。
-- D11：`header.css` 暗色覆盖 **25** 规则同上 tri-selector（保留 legacy）。
-- D11：`interactive.css` 暗色覆盖 **24** 规则扩为 `.dark, [data-color-mode-resolved='dark'], [data-theme='dark']` tri-selector（保留 legacy）。
-- D11：`loading.css` 剩余 4 规则（route-loading-skeleton ×2 + loading-skeleton ×2）同上 tri-selector；overlay 已先迁（文件内暗色 **5** 规则全量 done）。
-- D11：`cards.css` 暗色覆盖 19 规则扩为 `.dark, [data-color-mode-resolved='dark'], [data-theme='dark']` tri-selector（保留 legacy）。
-- D11：`header-main.css` **7** / `icon-container.css` **6** / `scrollbar.css` **11** / `timeline.css` **5** 规则同上 tri-selector（保留 legacy；`toast`/`status`/`progress`/`modals` 无 dual dark 对）。
-- D11：`code-highlight.css` 暗色覆盖 **26** 规则同上 tri-selector（保留 legacy）。
-- D11：`container.css` layout/sidebar 暗色覆盖 **10** 规则同上 tri-selector（保留 legacy）。
-- D6/D5 hybrid：App Center overview focus 从 `var(--module-accent, var(--color-blue-500))` 迁到 `var(--module-accent, var(--color-focus-ring, #3b82f6))`（保留 module-accent；**不**在模块 CSS 覆盖/直引 `--color-primary`）。
-- D7：ESLint hard-gate 禁止生产代码调用 `ColorContext.setModuleColor`（`no-restricted-properties` error；优先 `inferColorFromModule`）。
-- D7：`ColorContext.setModuleColor` 标记 `@deprecated`（优先 `inferColorFromModule`；Appearance 绝不得调用）。
-- D6 业务样例（Keyword Hunter）：主 CTA / 最小化 chrome 从 hard `blue-600` 迁到 `--color-primary*` / `--color-focus-ring`（不改 wb-theme / 模块归属色）。
-- D6 业务样例 #2（Scraper）：导入/load 主 chrome focus、站点选中、数据 tab 从 hard blue/indigo 迁到 `--color-primary*` / `--color-focus-ring`（保留 ma-accent 归属与状态色）。
-- D6 业务样例 #3（AI Analysis）：运行分析主 CTA、Listing 目标选中/图标、ASIN 勾选 focus 从 hard indigo/blue 迁到 Appearance primary（保留 wb-theme-indigo 与结果系列色）。
-- D6 业务样例 #4（PPC Search Terms）：结果筛选 active / 续审 pressed CTA / 搜索 focus 从 hard blue 迁到 `--color-primary*` / `--color-focus-ring`（保留 emerald hero 与系列/info 状态色）。
-- D6 业务样例 #5（PromptLab）：Listing 生成主 CTA / focus 从 hard blue/indigo 迁到 `--color-primary*` / `--color-focus-ring`（保留 Visual pink、DNA 置信多色与 section 图标）。
-- D6 业务样例 #6（Skills catalog）：试用主 CTA「在 Deep Chat 试用」/ 搜索与卡片 focus 从 hard violet 迁到 `--color-primary*` / `--color-focus-ring`（保留分类筛选紫、状态/路径多色徽章）。
-- D6 业务样例 #7（Deep Chat shell）：top chrome / 模型选择 / 设置区 / 会话重命名 focus 从 hard blue·terracotta ring 迁到 `--color-primary*` / `--color-focus-ring`（保留发送钮与业务 terracotta 品牌色）。
-- D6 业务样例 #8（Keyword Hunter input）：关键词输入壳 focus / 词数徽章 / 区段图标从 hard `blue-*` 迁到 `--color-primary*` / `--color-focus-ring`（保留 Listing emerald 区与 amber 重复状态徽章）。
-- D6 业务样例 #9（Keyword Hunter process/filter）：筛选 focus / 快照选中 chrome 从 hard blue 迁到 `--color-primary*` / `--color-focus-ring`；draft `current/saving/loading` 用 `--color-info*`（保留 coverage 多色梯度与 rose ownership）。
-- D6 业务样例 #10（SOPs overview）：collapsible / table-scroll focus、search focus-within 边框、process step hover 边框/标题/箭头与 step-number 默认背景 fallback 从 hard `blue-*` 迁到 `module-accent` + `--color-focus-ring`（**不**在模块 CSS 引 `--color-primary`；保留 phase-blue / category tab / multi-color step palette / SEO 教学卡）。
-- D6 业务样例 #11（NPI Tracker）：`copyNpiReviewTemplate` / `saveNextSteps` 主 CTA 从 hard `bg-blue-500` 迁到 shared `action-btn action-btn-primary`（Appearance `--color-primary*`）。
-- D6 业务样例 #12（Restricted Words）：检索主 CTA `#rw-search-btn` 从 hard `bg-blue-600` 迁到 shared `action-btn action-btn-primary`；搜索/站点/筛选 focus 与详情钮 `focus-visible` 环从 hard `blue-500` 迁到 `--color-focus-ring`（保留 INFO 风险卡、步骤教学蓝、REACH 化学徽章与知识卡）。
-- D6 业务样例 #13（AMZ Hub shell）：`.amz_nav-btn:hover` / `.active`·`.tab-active` 从 hard blue 迁到 hub ownership `module-accent` + orange fallback（保留 underline 橙、contenteditable `primary-light`、progress 数据条与知识教学蓝卡；不改 megaMenu）。
-- D6 业务样例 #14（SOPs email_templates）：`sops_copyEmailTemplatesReviewTemplate` 主 CTA 从 hard `bg-blue-600` 迁到 shared `action-btn action-btn-primary`；`#email-templates-owner` focus 从 hard `blue-500` 迁到 `--color-focus-ring`（保留内容卡与指标多色）。
-- D6 业务样例 #15（SOPs qa_maintenance）：`sops_copyQaMaintenanceTemplate` 主 CTA 从 hard `bg-blue-600` 迁到 shared `action-btn action-btn-primary`；`#qa-maintenance-owner` focus 从 hard `blue-500` 迁到 `--color-focus-ring`（保留内容卡与教学蓝）。
-- D6 业务样例 #16（PromptLab DNA/autoPopulate）：`autoPopulateButtonClass` 启用态与 DNA 按钮 focus 从 hard `blue-600/700/500` 迁到 `--color-primary*` / `--color-focus-ring`；`reportRenderer` 维度/子项/内容勾选 focus·checked 跟 primary/focus-ring（保留 DNA 置信多色与 extract 次要 chrome）。
-- D6 业务样例 #18（Scraper residual）：站点选中 check badge、ASIN 卡 expanded/hover、原始页链接 CTA 从 hard `blue-*` 迁到 `--color-primary*`（保留 scraping 状态蓝、进度 indigo 梯度、Rufus/策略教学多色与导入 hover 装饰）。
-- D6 业务样例 #19（AI Analysis residual）：模块 `:focus-visible`、ASIN 选项选中/hover、目标勾选、任务预览 toggle 从 hard blue/ma-accent focus 迁到 `--color-primary*` / `--color-focus-ring`（保留 wb-theme-indigo 与结果系列多色）。
-- D6 业务样例 #20（PPC Search Terms residual）：导入 status-line / 续审 resume-review 信息壳 hard blue 迁到 `--ppc-search-terms-info-*` / `--color-info*`（保留 emerald hero 归属与系列蓝 stats/tags）。
-- D6 业务样例 #21（PromptLab residual focus chrome）：展开/市场选择/DNA extract 字段按钮与复制 Prompt 工具钮 `focus-visible:ring-blue-500` 迁到 `--color-focus-ring`；复制钮 hover 迁到 `--color-primary*`（保留 extract 次要蓝 chrome、Listing/Visual mode 蓝/粉与 DNA 置信多色）。
-- D6 业务样例 #22（SafeModuleLoader）：error/actions 主 CTA 从 hard `bg-blue-500/600` 迁到 `--color-primary*`（次要 gray 与 loading spinner 保留）。
-- D6 业务样例 #23（Home splash/floating）：主 CTA `.home-primary-action--main` 与 floating workbench 图标/hover/focus 从 hard `--color-blue-*` / `rgba(37,99,235,*)` 迁到 `--color-primary*` / `--color-focus-ring`（保留 slogan 蓝绿渐变与 cyan 状态点）。
-- D6 业务样例 #24（shared confirmModal）：theme 主 CTA/头部/边框/checkbox 从 hard `#6257f5` 紫 迁到 `--color-primary*` / `--color-focus-ring`（保留 danger 红→橙）。
-- D6 业务样例 #25（shared AppModal）：title icon / accent soft chrome 从 hard `blue-50/indigo-100` 与 `rgba(59,130,246,*)` 迁到 `--color-primary*` / `color-mix`（保留 panel surface 与 close control neutrals）。
-- D6 业务样例 #26（shared import-conflict modal）：推荐 badge / 智能合并图标 soft chrome 从 hard `to-indigo-500` / `to-indigo-100` 迁到 `--color-primary*` / `color-mix`（保留 amber 冲突横幅与 danger overwrite）。
-- D6 业务样例 #27（shared legacy-compat）：`.app-center-btn-primary` 从 hard `--color-blue-600/700` 迁到 `--button-primary-*` / `--color-primary*`；`.app-center-search-box` / `.sop-search-box` focus-within 从 hard blue 迁到 `--color-focus-ring` / `color-mix`（保留 badge-info 状态色与模块级 `.sop-search-box` override）。
-- D5 续：`--shadow-primary-*` 改 `color-mix` 跟随 `--color-primary`（light/dark），不再写死蓝/indigo。
-- D5 续：root `--focus-ring-soft` + header search / forms dark / Overview search / nav-focus 从 hard blue 迁到 `--color-focus-ring`（megaMenu / sidebar-theme / wb ownership 保留）。
-- D4 续：workbench 调用点接 `getWorkbenchIconContainerClasses`（Sidebar 去掉 active `scale-105`；AI Analysis / PromptLab / Scraper 工作台 section 图标；Keyword Hunter 报告 section 与 AI Analysis JSON 面板图标）；entry/overview / megaMenu 营销 lift 保留。
-- D4 续 #2：Scraper 工作台 `.section-header .header-icon` 去掉 marketing `scale/rotate`；KH 报告 section 图标 shadow 对齐 rose workbench helper。
-- D4 调用点审计（docs）：`src/modules` / shell 无 production `getCardClasses`/`getIconContainerClasses` 工作台误用；无非 entry `scale-110` chrome；megaMenu/entry lift 保留（见 theme landing status §5.2）。
-- Shared buttons：glow/筛选 active·focus 从 brand-blue 改为 `--color-primary*` / `--color-focus-ring` / `color-mix`（保留 `--button-filter-accent` 模块归属覆写）。
-- E2E smoke：`dark × minimal` 在 Keyword Hunter 共存（双轴文档根 + rose ownership）；PromptLab 路由后 `minimal` 持久化。
-- 主题宪法：明确 **导航 = Ownership**（megaMenu / sidebar 不归 Appearance 全控）。
-- D1 治理门禁：`token:override-audit:gate`（`--fail-on-unallowlisted-atomic`）并入 `ci:quality`（css:audit → hardcode → token gate）。
-- D2 R2/R3：高流量工作台面板圆角收敛到 `var(--workbench-radius)` / panel|card 别名（`analysis-widget-card`、PromptLab/AI Analysis 覆盖、Keyword Hunter textarea、PPC import 面板）；未改 entry/overview 卡。
-- D2 R3 续：Scraper 上传/策略面板覆盖、PPC filter/table/settings 壳、forms checkbox 工作台面 → `var(--workbench-radius, var(--panel-radius, 8px))`。
-- D2 R3 第三批：Keyword Hunter 输入/报告/对比面板、Master Analysis workflow strip、PPC panel/stat tile/report-type、App Center workbench shells → `var(--workbench-radius)` / panel|card 别名。
-- D2 long-tail：`.sops-overview-collapsible`、shared `.progress-card` → `var(--workbench-radius, var(--panel-radius, 8px))`（未改 entry/overview 卡）。
-- D2 long-tail #3：shared `.amz_card-hover`、`.zn-notice-card`、`.route-loading-skeleton__card` → `var(--workbench-radius…)`（未改 entry/overview / pill / modal）。
-- D2 long-tail #4：shared `.app-center-card`、Settings `--settings-radius-card` / `.settings-card` → `var(--workbench-radius…)`（未改 entry/overview / pill / modal / icon well）。
-- D2 long-tail #5：Settings section/LLM/collapsible/nav shells、shared insight/stat cards、forms bulk bar、PPC radius-lg 别名、Skills/Prompts catalog 工具卡/search → `var(--workbench-radius…)`（未改 entry/overview / pill / modal / Deep Chat brand / icon well）。
-- Settings 壳层 chrome：`--settings-accent` / focus / 分段 active / 主 CTA 映射 Appearance primary token（X6 partial）。
-- Settings X6 收尾：`systemSettings` 主保存 CTA、通用输入 focus、brand accent 标签/勾选改 `--settings-*` / `settings-btn-primary`（保留 section indigo 与进度桶色）。
-- D1 Phase 2 prep：从 `variables.css` 移除与 generated 值完全相同的原子重复（色板 / 字号字重 / leading / tracking / 数字 spacing），语义与 intentional 冲突尺度保留。
-- Phase 1：Appearance 写 `data-appearance`（兼容 `data-theme`=appearance id），**不再**用 Appearance 覆盖 dark；legacy `data-theme=dark` 一次性迁移到 color mode。
-- 壳层 chrome（modal/navigation/search）primary/focus 改语义 token；megaMenu 模块色板保留（归属层，13 处）。
-- 主题宪法债务表扩展 D7–D12，并链到上述路线图。
-- PPC 搜索词：模型失败路径接入 `formatLlmFailureUx`（配置/鉴权可点「打开设置」；本地降级仍提示规则回退）。
-- Keyword Hunter Process：翻译模型同步/缺配置走可行动 LLM Toast。
-- Deep Chat：缺模型配置与调用失败补充可行动 Toast（会话内错误文案仍保留）。
 
 ### Fixed
 
-- Home 粒子：ResizeObserver 调度的 rAF 在 unmount 时取消，并清空 particles/canvas 引用。
-- EventBus `emit`：监听器快照分发，避免回调内 on/off 导致漏调或乱序副作用。
-- PromptlabPanel：EventBus / appStore 订阅 init-once，避免重复 init 堆监听。
+## [3.0.11-rc.10] - 2026-07-26
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA \3.0.10\。
+> 收口 \3.0.11-rc.9\ 之后的**推理档企业闭环 / 厂商 API 对齐**、**主题系统 Phase 1–2 收敛**（颜色模式 + Appearance primary 迁样）、设置 TD 与企业指南 SSOT。
+> 生产回滚目标为 \3.0.10\ 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- 推理档企业闭环 Spec：\docs/superpowers/specs/2026-07-26-reasoning-effort-closed-loop-design.md\（L1 意图 / L2 allowlist / L3 clamp + requested·effective）。
+- 厂商推理 API 对齐 Spec：\docs/superpowers/specs/2026-07-26-vendor-effort-api-alignment-design.md\（\EffortControlKind\ 长期演进）。
+- \EffortControlKind\ + registry 分模型挂载；Claude 现代路径 \	hinking.adaptive\ + \output_config.effort\；legacy \	hinking.budget_tokens\。
+- 表驱动契约：\effortClosedLoop.test.ts\（GPT / Grok / Claude 双路径 / Gemini）。
+- 设置 AC3：拉模型换 id / 加载配置时钳制并静默落盘，降档 toast 一次性。
+- Color Mode API：\ThemeManager.applyColorMode\ / estoreColorMode\；设置外观浅色 / 深色 / 跟随系统。
+- 主题企业审查与作战手册 / D1–D12 计划与门禁（hardcode baseline、token override audit、D12 视觉 scaffold）。
+- Ownership Role SSOT scaffold + soft ownership 单测；企业设计规范 SSOT 栈与结构门禁。
+- 设置 TD：Keyword Hunter 二级导航深链、数据策略保存契约、侧栏 scroll-spy；相关 e2e / 矩阵文档。
+
+### Changed
+
+- 产品推理轴保持 \low…max\；UI 仅展示当前模型 allowlist；GPT 旗舰含 xhigh/max，Grok-4.5 仅三档默认 high。
+- Appearance primary / focus 批量迁入共享壳与业务样例 CTA（KH / Scraper / Analysis / PPC / PromptLab / Deep Chat / Home / Modal 等 residual 波次）。
+- 暗色 foundation 多文件 dual/tri-selector（\.dark\ + \data-color-mode-resolved\ + legacy）。
+- 主题语义：颜色模式 light/dark/system 与 accent-as-tone 分轨（见主题 XO / landing 板）。
+- \ColorContext.setModuleColor\ deprecated + ESLint 禁生产调用；workbench radius 语义 token 与长尾 defer 记录。
+
+### Fixed
+
+- Claude：effort 与 thinking 正交；现代路径同时发送 adaptive thinking + effort（不再只发 effort）。
+- Grok 等非法档不再静默掉成 medium；就近 clamp（如 max→high）。
+- 设置 fetchModels 自动切模型后未钳制 effort / 加载降档重复 toast 的 AC3 缺口。
+- 多处模块 focus / 主 CTA hard blue·indigo 迁 Appearance，避免与颜色模式冲突。
 
 ## [3.0.11-rc.9] - 2026-07-26
 
