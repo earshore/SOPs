@@ -500,32 +500,68 @@
 /*
  * Dark soft fills: desaturate pastel active/icon washes for dual-safe chrome.
  * Keep --sidebar-primary|accent|active|text hue identity (Ownership).
+ *
+ * CRITICAL: child route buttons also carry .sidebar-theme-* which re-declare
+ * light pastel --sidebar-active-bg-* on the element itself. Without re-tuning
+ * those on the themed node, L2 active rows look neon on dark chrome while L1
+ * (overview, no per-item theme class) stays OK.
  */
 .dark .sidebar-shell,
+.dark .sidebar-shell [class*='sidebar-theme-'],
 [data-color-mode-resolved='dark'] .sidebar-shell,
-[data-theme='dark'] .sidebar-shell {
+[data-color-mode-resolved='dark'] .sidebar-shell [class*='sidebar-theme-'],
+[data-theme='dark'] .sidebar-shell,
+[data-theme='dark'] .sidebar-shell [class*='sidebar-theme-'] {
   --sidebar-active-bg-start: color-mix(
     in srgb,
-    var(--sidebar-primary) 16%,
+    var(--sidebar-primary) 14%,
     var(--surface-panel, #0f172a)
   );
   --sidebar-active-bg-end: color-mix(
     in srgb,
-    var(--sidebar-primary) 10%,
+    var(--sidebar-primary) 8%,
     var(--surface-panel, #0f172a)
   );
   --sidebar-icon-soft: color-mix(
     in srgb,
-    var(--sidebar-primary) 20%,
+    var(--sidebar-primary) 18%,
     var(--surface-panel, #0f172a)
   );
   --sidebar-icon-soft-end: color-mix(
     in srgb,
-    var(--sidebar-primary) 12%,
+    var(--sidebar-primary) 10%,
     var(--surface-panel, #0f172a)
   );
   /* Same hue as ownership primary; lightened for dark active labels */
   --sidebar-text: color-mix(in srgb, var(--sidebar-primary) 72%, #ffffff);
   --sidebar-border: color-mix(in srgb, var(--sidebar-primary) 38%, transparent);
   --sidebar-focus: color-mix(in srgb, var(--sidebar-primary) 20%, transparent);
+}
+
+/*
+ * Nested (L2) active rows: quieter than top-level overview.
+ * Nested items sit on an already-tinted category stack; full L1 wash feels loud.
+ */
+.dark .sidebar-shell .sidebar-category-children .sidebar-btn--active,
+[data-color-mode-resolved='dark'] .sidebar-shell .sidebar-category-children .sidebar-btn--active,
+[data-theme='dark'] .sidebar-shell .sidebar-category-children .sidebar-btn--active {
+  background: color-mix(
+    in srgb,
+    var(--sidebar-primary) 10%,
+    var(--surface-panel, #0f172a)
+  ) !important;
+  box-shadow: none !important;
+}
+
+.dark .sidebar-shell .sidebar-category-children .sidebar-icon-container--active,
+[data-color-mode-resolved='dark']
+  .sidebar-shell
+  .sidebar-category-children
+  .sidebar-icon-container--active,
+[data-theme='dark'] .sidebar-shell .sidebar-category-children .sidebar-icon-container--active {
+  background: color-mix(
+    in srgb,
+    var(--sidebar-primary) 14%,
+    var(--surface-panel, #0f172a)
+  ) !important;
 }
