@@ -127,9 +127,7 @@ const HIGHLIGHT_SURFACE_SELECTOR = [
  * `.settings-tool-l3` (title strip + body), never body-only.
  */
 export function resolveSettingsHighlightTarget(el: HTMLElement): HTMLElement {
-  const l3 = el.matches('.settings-tool-l3')
-    ? el
-    : el.closest<HTMLElement>('.settings-tool-l3');
+  const l3 = el.matches('.settings-tool-l3') ? el : el.closest<HTMLElement>('.settings-tool-l3');
   if (l3) {
     return l3;
   }
