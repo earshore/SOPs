@@ -118,14 +118,32 @@ export function registerHandoffUiHooks(hooks: Partial<typeof uiHooks>): void {
   Object.assign(uiHooks, hooks);
 }
 
+/** Strip data-URL / long base64 blobs so logs never hold vision payloads. */
+function redactString(value: string): string {
+  if (/data:image\//i.test(value)) {
+    return '[REDACTED_IMAGE_DATA]';
+  }
+  // long base64-ish blobs without data: prefix
+  if (value.length > 512 && /^[A-Za-z0-9+/=\s]+$/.test(value.slice(0, 80))) {
+    return '[REDACTED_BASE64]';
+  }
+  return value.replace(
+    /data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+/gi,
+    '[REDACTED_IMAGE_DATA]'
+  );
+}
+
 /** Pure: no domain imports — safe for any layer. */
 export function redactSensitiveError(error: unknown): unknown {
   if (error instanceof Error) {
     return {
       name: error.name,
-      message: error.message,
-      stack: error.stack,
+      message: redactString(error.message),
+      stack: error.stack ? redactString(error.stack) : error.stack,
     };
+  }
+  if (typeof error === 'string') {
+    return redactString(error);
   }
   if (!error || typeof error !== 'object') {
     return error;
@@ -136,11 +154,14 @@ export function redactSensitiveError(error: unknown): unknown {
         if (/api[_-]?key|authorization|password|secret|token|bearer/i.test(key)) {
           return '[REDACTED]';
         }
+        if (typeof value === 'string') {
+          return redactString(value);
+        }
         return value;
       })
     );
   } catch {
-    return String(error);
+    return redactString(String(error));
   }
 }
 

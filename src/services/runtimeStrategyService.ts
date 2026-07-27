@@ -47,6 +47,12 @@ export interface RuntimeStrategySettings {
      * Default **true**. User toggle: 系统设置 → 工具策略 → Playground · Deep Chat.
      */
     enableBusinessTools: boolean;
+    /**
+     * Show Deep Chat vision upload entry (host composer).
+     * Default **false** — capability kept for expansion; opt-in via settings.
+     * User toggle: 系统设置 → 工具策略 → Playground · Deep Chat → 启用 Vision.
+     */
+    enableVision: boolean;
   };
   ppcSearchTerms: {
     batchSize: number;
@@ -135,6 +141,8 @@ export const DEFAULT_RUNTIME_STRATEGY_SETTINGS: RuntimeStrategySettings = {
     maxPromptDraftCount: 12,
     // Default on so Deep Chat can complete search/tool loops instead of dumping raw tool text.
     enableBusinessTools: true,
+    // Vision upload UI opt-in; request pipeline remains available when enabled.
+    enableVision: false,
   },
   ppcSearchTerms: {
     batchSize: 80,
@@ -348,6 +356,13 @@ function normalizeDeepChatSettings(
         : raw.enableBusinessTools === true
           ? true
           : defaults.deepChat.enableBusinessTools,
+    // Explicit true enables; missing/undefined keeps product default (false).
+    enableVision:
+      raw.enableVision === true
+        ? true
+        : raw.enableVision === false
+          ? false
+          : defaults.deepChat.enableVision,
   };
 }
 
@@ -564,6 +579,11 @@ export function getRuntimeDeepChatOptions(): Pick<RuntimeLlmRequestOptions, 'tim
   return {
     timeout: getRuntimeStrategySettings().deepChat.requestTimeoutMs,
   };
+}
+
+/** Deep Chat vision upload UI — product opt-in (default off). */
+export function isDeepChatVisionFeatureEnabled(): boolean {
+  return getRuntimeStrategySettings().deepChat.enableVision === true;
 }
 
 export function getRuntimePpcSearchTermsOptions(): RuntimeStrategySettings['ppcSearchTerms'] {

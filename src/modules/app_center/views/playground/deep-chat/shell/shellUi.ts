@@ -75,6 +75,7 @@ import {
 } from '../infra/deepChatConfig';
 
 import { refreshMessageToolbarStatuses, setupMessageToolbars } from '../composer/messageToolbar';
+import { unmountVisionComposer } from '../composer/visionComposer';
 
 import { setupPromptPreview } from './promptPreview';
 import { renderPromptDraftList, renderThreadList } from './renderers';
@@ -196,15 +197,19 @@ export function bindModelControls(refs: ModelControlRefs): void {
         lastResponseModel: undefined,
       });
     }
+    const chat = getChat(container);
     sessionState.selectedModel = nextModel;
     // Capability-gated controls must re-evaluate when the model changes.
+    // Vision composer shows modelSwitch toast when staged files + vision lost.
     syncDeepChatReasoningControlsFromThread(container);
-    applyDeepChatVisionUploadConfig(getChat(container));
+    applyDeepChatVisionUploadConfig(chat);
   };
   modelSelect?.addEventListener('change', onModelChange);
   sessionState.cleanupCallbacks.push(() =>
     modelSelect?.removeEventListener('change', onModelChange)
   );
+
+  // Image paste is handled by host visionComposer (stage when vision; toast when not).
 
   const onRefresh = async (): Promise<void> => {
     await refreshLLMConfig(container);
@@ -1091,6 +1096,13 @@ export function initDeepChat(container: HTMLElement): void {
   }
   setupDraftInputHeightSync(container, chat);
   setupSubmitStopButtonSync(container, chat);
+  // Shadow #input / upload button may appear after configure; re-sync helper + aria.
+  applyDeepChatVisionUploadConfig(chat);
+  window.setTimeout(() => {
+    if (getChat(container) === chat) {
+      applyDeepChatVisionUploadConfig(chat);
+    }
+  }, 120);
   // 恢复所有在飞/待输出会话（切出页面再回来时「生成中」不丢）
   sessionState.pendingRequests.forEach((_request, threadId) => {
     schedulePendingAssistantDisplay(threadId);
@@ -1110,6 +1122,8 @@ export function replaceChat(container: HTMLElement): void {
   // Detached bubble DOM must not keep receiving typewriter ticks.
   stopReasoningTypewriter();
   disconnectChromeMutationObserver();
+  // Turn-local staged images never cross thread remounts.
+  unmountVisionComposer();
 
   if (typeof chat.clearMessages === 'function') {
     chat.clearMessages(true);

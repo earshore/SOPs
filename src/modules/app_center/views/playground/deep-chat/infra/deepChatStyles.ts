@@ -453,8 +453,9 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
    * - loading-button 或 [data-deep-chat-stop-active]：生成中，红底方块停止
    * deep-chat 在 stream onOpen 后会去掉 loading-button，只剩 input-button + stop 图标，
    * 因此颜色/图标必须以 data-deep-chat-stop-active 为准，不能只依赖 loading-button。
+   * Dual-primary ban: exclude #upload-images-button from all solid/stop paint rules.
    */
-  .input-button.inside-end {
+  .input-button.inside-end:not(#upload-images-button) {
     background: var(--deep-chat-accent, #a85f3f) !important;
     box-shadow: 0 2px 8px rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.28) !important;
     cursor: pointer !important;
@@ -462,56 +463,56 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     transition: background 150ms cubic-bezier(0, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0, 0, 0.2, 1) !important;
   }
 
-  .input-button.inside-end.disabled-button {
+  .input-button.inside-end:not(#upload-images-button).disabled-button {
     background: var(--deep-chat-ink-faint, #94a3b8) !important;
     opacity: 0.82 !important;
     box-shadow: none !important;
     cursor: not-allowed !important;
   }
 
-  .input-button.inside-end.loading-button:not([data-deep-chat-stop-active]) {
+  .input-button.inside-end:not(#upload-images-button).loading-button:not([data-deep-chat-stop-active]) {
     background: var(--deep-chat-accent, #a85f3f) !important;
     cursor: progress !important;
     opacity: 0.84 !important;
   }
 
-  .input-button.inside-end.loading-button[data-deep-chat-stop-active],
-  .input-button.inside-end[data-deep-chat-stop-active] {
+  .input-button.inside-end:not(#upload-images-button).loading-button[data-deep-chat-stop-active],
+  .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active] {
     background: #dc2626 !important;
     cursor: pointer !important;
     opacity: 1 !important;
   }
 
-  .input-button.inside-end.loading-button[data-deep-chat-stop-active]:hover,
-  .input-button.inside-end.loading-button[data-deep-chat-stop-active]:focus-visible,
-  .input-button.inside-end[data-deep-chat-stop-active]:hover,
-  .input-button.inside-end[data-deep-chat-stop-active]:focus-visible {
+  .input-button.inside-end:not(#upload-images-button).loading-button[data-deep-chat-stop-active]:hover,
+  .input-button.inside-end:not(#upload-images-button).loading-button[data-deep-chat-stop-active]:focus-visible,
+  .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active]:hover,
+  .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active]:focus-visible {
     background: #b91c1c !important;
   }
 
-  .input-button.inside-end[data-deep-chat-stop-active]:focus-visible {
+  .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active]:focus-visible {
     outline: 2px solid rgba(220, 38, 38, 0.75) !important;
     outline-offset: 2px !important;
   }
 
-  .input-button.inside-end[data-deep-chat-stop-active]:active {
+  .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active]:active {
     background: #991b1b !important;
   }
 
   /* 请求预检保留原生 loading 指示；仅可中止的生成态改用白色方块停止标。 */
-  .input-button.inside-end.loading-button:not([data-deep-chat-stop-active]) #submit-icon,
-  .input-button.inside-end.loading-button:not([data-deep-chat-stop-active]) #stop-icon,
-  .input-button.inside-end.loading-button[data-deep-chat-stop-active] #submit-icon,
-  .input-button.inside-end.loading-button[data-deep-chat-stop-active] .loading-submit-button,
-  .input-button.inside-end.loading-button[data-deep-chat-stop-active] #stop-icon,
-  .input-button.inside-end[data-deep-chat-stop-active] #submit-icon,
-  .input-button.inside-end[data-deep-chat-stop-active] .loading-submit-button,
-  .input-button.inside-end[data-deep-chat-stop-active] #stop-icon {
+  .input-button.inside-end:not(#upload-images-button).loading-button:not([data-deep-chat-stop-active]) #submit-icon,
+  .input-button.inside-end:not(#upload-images-button).loading-button:not([data-deep-chat-stop-active]) #stop-icon,
+  .input-button.inside-end:not(#upload-images-button).loading-button[data-deep-chat-stop-active] #submit-icon,
+  .input-button.inside-end:not(#upload-images-button).loading-button[data-deep-chat-stop-active] .loading-submit-button,
+  .input-button.inside-end:not(#upload-images-button).loading-button[data-deep-chat-stop-active] #stop-icon,
+  .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active] #submit-icon,
+  .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active] .loading-submit-button,
+  .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active] #stop-icon {
     display: none !important;
   }
 
-  .input-button.inside-end.loading-button[data-deep-chat-stop-active]::before,
-  .input-button.inside-end[data-deep-chat-stop-active]::before {
+  .input-button.inside-end:not(#upload-images-button).loading-button[data-deep-chat-stop-active]::before,
+  .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active]::before {
     content: '' !important;
     width: 12px !important;
     height: 12px !important;
@@ -773,7 +774,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
       align-items: center !important;
       gap: 0.28rem !important;
       min-width: 0 !important;
-      padding: 10px 58px 0 14px !important;
+      padding: 10px 108px 0 14px !important;
     }
 
     #text-input-container.has-session-skill-chip-dock > #text-input {
@@ -790,7 +791,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     min-height: 24px !important;
     /* 相对容器 max-height 留出上下 padding，避免长文被裁切且无法滚动 */
     max-height: min(calc(42vh - 20px), 400px) !important;
-    padding: 18px 62px 16px 22px !important;
+    padding: 18px 108px 16px 22px !important;
     color: var(--deep-chat-ink, #0f172a) !important;
     font-size: 15px !important;
     line-height: 1.55 !important;
@@ -801,6 +802,163 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     overflow-wrap: anywhere !important;
     word-break: break-word !important;
     white-space: pre-wrap !important;
+  }
+
+  /*
+   * Host vision：发送框正上方一行文字入口（简单粗暴）。
+   * 结构：#deep-chat-vision-composer-root > row(上传图片 · 计数 · helper) + strip
+   */
+  #deep-chat-vision-composer-root {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+    width: min(100%, 768px) !important;
+    max-width: 100% !important;
+    margin: 0 auto 8px !important;
+    padding: 0 4px !important;
+  }
+
+  #deep-chat-vision-composer-root.is-vision-dragover {
+    outline: 2px dashed rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.45) !important;
+    outline-offset: 4px !important;
+    border-radius: 8px !important;
+  }
+
+  .deep-chat-vision-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px 12px !important;
+    min-width: 0 !important;
+  }
+
+  .deep-chat-vision-upload {
+    display: inline !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--deep-chat-accent, #a85f3f) !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+    cursor: pointer !important;
+  }
+
+  .deep-chat-vision-upload.is-vision-ready:hover,
+  .deep-chat-vision-upload.is-vision-ready:focus-visible {
+    color: var(--deep-chat-accent-hover, #8f4f33) !important;
+  }
+
+  .deep-chat-vision-upload.is-vision-ready:focus-visible {
+    outline: 2px solid rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.75) !important;
+    outline-offset: 2px !important;
+  }
+
+  .deep-chat-vision-upload.is-disabled,
+  .deep-chat-vision-upload:disabled,
+  .deep-chat-vision-upload.is-vision-blocked {
+    color: var(--deep-chat-ink-muted, #64748b) !important;
+    text-decoration: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.85 !important;
+  }
+
+  .deep-chat-vision-count {
+    color: var(--deep-chat-accent-ink, #6f3925) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums !important;
+    line-height: 1.4 !important;
+  }
+
+  .deep-chat-vision-helper {
+    color: var(--deep-chat-ink-muted, #64748b) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+  }
+
+  .deep-chat-vision-helper[hidden],
+  .deep-chat-vision-count[hidden] {
+    display: none !important;
+  }
+
+  .deep-chat-vision-file-input {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .deep-chat-vision-strip {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .deep-chat-vision-strip[hidden] {
+    display: none !important;
+  }
+
+  .deep-chat-vision-thumb {
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--deep-chat-hairline, #e2e8f0) !important;
+    background: var(--deep-chat-surface, #ffffff) !important;
+    overflow: hidden !important;
+  }
+
+  .deep-chat-vision-thumb img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .deep-chat-vision-thumb__remove {
+    position: absolute !important;
+    top: 2px !important;
+    right: 2px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(15, 23, 42, 0.72) !important;
+    color: #fff !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+  }
+
+  .deep-chat-vision-thumb__remove:hover,
+  .deep-chat-vision-thumb__remove:focus-visible {
+    background: rgba(15, 23, 42, 0.9) !important;
+    outline: none !important;
+  }
+
+  .deep-chat-vision-thumb__remove svg {
+    width: 11px !important;
+    height: 11px !important;
   }
 
   /*
@@ -950,32 +1108,28 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     color: var(--deep-chat-ink-muted, #64748b) !important;
   }
 
-  /* 非图片附件入口始终隐藏；图片按钮由 :host(.is-vision-enabled) 条件放开 */
+  /* 库多媒体 / 原生图片上传入口全部隐藏（host visionComposer 接管） */
   #microphone-button,
   #upload-gifs-button,
   #upload-audio-button,
   #upload-mixed-files-button,
-  #camera-button {
+  #camera-button,
+  #dropup-button,
+  #upload-images-button,
+  #file-input,
+  #dropup-menu,
+  #file-attachment-container {
     display: none !important;
-  }
-
-  :host(:not(.is-vision-enabled)) #dropup-button,
-  :host(:not(.is-vision-enabled)) #upload-images-button,
-  :host(:not(.is-vision-enabled)) #file-input,
-  :host(:not(.is-vision-enabled)) #dropup-menu {
-    display: none !important;
-  }
-
-  :host(.is-vision-enabled) #upload-images-button {
-    display: flex !important;
   }
 
   /*
    * 位置与尺寸：覆盖 deep-chat 默认 inside-end（约 10%+0.35em 贴右下）。
    * 选择器必须包含裸 .input-button.inside-end：stream stop 态会去掉
    * submit/disabled/loading class，只剩 input-button + inside-end。
+   * Dual-primary ban: exclude leftover #upload-images-button if vendor remounts.
    */
-  .inside-end.input-button,
+  .input-button.inside-end:not(#upload-images-button),
+  .inside-end.input-button:not(#upload-images-button),
   .inside-end.submit-button,
   .inside-end.disabled-button,
   .inside-end.loading-button {
@@ -998,10 +1152,10 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   /* 可发送：旗袍色 hover；禁用/生成中不走此规则 */
-  .inside-end.input-button:not(.disabled-button):not(.loading-button):not(
+  .inside-end.input-button:not(#upload-images-button):not(.disabled-button):not(.loading-button):not(
       [data-deep-chat-stop-active]
     ):hover,
-  .inside-end.input-button:not(.disabled-button):not(.loading-button):not(
+  .inside-end.input-button:not(#upload-images-button):not(.disabled-button):not(.loading-button):not(
       [data-deep-chat-stop-active]
     ):focus-visible,
   .inside-end.submit-button:not(.disabled-button):not(.loading-button):not(
@@ -1013,21 +1167,21 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     background: var(--deep-chat-accent-hover, #8f4f33) !important;
   }
 
-  .inside-end.input-button:not(.disabled-button):not(.loading-button):not(
+  .inside-end.input-button:not(#upload-images-button):not(.disabled-button):not(.loading-button):not(
       [data-deep-chat-stop-active]
     ):focus-visible {
     outline: 2px solid rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.75) !important;
     outline-offset: 2px !important;
   }
 
-  .inside-end.input-button:not(.disabled-button):not(.loading-button):not(
+  .inside-end.input-button:not(#upload-images-button):not(.disabled-button):not(.loading-button):not(
       [data-deep-chat-stop-active]
     ):active {
     background: var(--deep-chat-accent-active, #6f3925) !important;
   }
 
-  .inside-end.disabled-button:hover,
-  .inside-end.disabled-button:focus-visible {
+  .inside-end.disabled-button:not(#upload-images-button):hover,
+  .inside-end.disabled-button:not(#upload-images-button):focus-visible {
     background: var(--deep-chat-ink-faint, #94a3b8) !important;
     opacity: 0.82 !important;
     cursor: not-allowed !important;
@@ -1058,12 +1212,17 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
 
     #text-input {
       max-height: min(calc(46vh - 18px), 320px) !important;
-      padding: 17px 60px 15px 18px !important;
+      padding: 17px 100px 15px 18px !important;
       font-size: 14px !important;
       overflow-y: auto !important;
     }
 
-    .inside-end.input-button,
+    #text-input-container.has-session-skill-chip-dock > #deep-chat-session-skill-chip-dock {
+      padding: 10px 100px 0 14px !important;
+    }
+
+    .input-button.inside-end:not(#upload-images-button),
+    .inside-end.input-button:not(#upload-images-button),
     .inside-end.submit-button,
     .inside-end.disabled-button,
     .inside-end.loading-button {
@@ -1078,7 +1237,10 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     .input-button.inside-end,
     .deep-chat-message-tool,
     .deep-chat-context-chip,
-    #text-input-container {
+    #text-input-container,
+    .deep-chat-vision-upload,
+    .deep-chat-vision-strip,
+    .deep-chat-vision-helper {
       transition-duration: 0.01ms !important;
     }
 

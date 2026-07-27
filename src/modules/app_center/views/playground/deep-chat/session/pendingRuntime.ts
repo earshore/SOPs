@@ -9,7 +9,10 @@ import {
 } from './threadStore';
 import type { ChatMessage } from '@/services/llmService';
 
-import { buildStoredThreadMessages } from './conversationContext';
+import {
+  buildStoredThreadMessages,
+  withVisionAttachmentMetaDisplay,
+} from './conversationContext';
 import {
   abortPendingDeepChatRequest,
   appendPendingDeepChatAssistantText,
@@ -49,7 +52,8 @@ import {
 export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessage[] {
   const pendingRequest = sessionState.pendingRequests.get(thread.id);
   if (!pendingRequest) {
-    return thread.messages;
+    // Display-only honesty line for vision turns; LLM path uses raw stored text.
+    return withVisionAttachmentMetaDisplay(thread.messages);
   }
 
   const displayMessages = buildStoredThreadMessages(
@@ -68,7 +72,9 @@ export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessag
 
   // Live request: strip 「未完成」 only on the live trailing AI (chrome owns progress).
   // Historical partial/stopped badges must remain stable across switch/remount.
-  const withoutLivePartial = stripLiveTrailingPartialStatus(displayMessages);
+  const withoutLivePartial = withVisionAttachmentMetaDisplay(
+    stripLiveTrailingPartialStatus(displayMessages)
+  );
 
   if (pendingRequest.displayedAssistantText.trim()) {
     return withoutLivePartial;
@@ -81,7 +87,7 @@ export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessag
   const durationSec = pendingRequest.isSettled
     ? getPendingReasoningDurationSec(pendingRequest)
     : undefined;
-  return [
+  return withVisionAttachmentMetaDisplay([
     ...withoutLivePartial,
     {
       role: 'ai',
@@ -90,7 +96,7 @@ export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessag
       ...(pendingRequest.reasoningText.trim() ? { reasoning: pendingRequest.reasoningText } : {}),
       ...(typeof durationSec === 'number' ? { reasoningDurationSec: durationSec } : {}),
     },
-  ];
+  ]);
 }
 
 /**

@@ -38,6 +38,24 @@ type SubmitButtonPinState = {
   rightGap: number;
 };
 
+type DualButtonGeometry = {
+  bottomDelta: number | null;
+  gap: number | null;
+  helperVisible: boolean;
+  sendBg: string;
+  sendRightGap: number;
+  uploadBg: string | null;
+  uploadDisabled: boolean | null;
+  uploadLeftOfSend: boolean;
+  uploadReady: boolean;
+  uploadText: string;
+  uploadVisible: boolean;
+  visionAboveCard: boolean;
+};
+
+/** Send/stop only — never the vision #upload-images-button (also inside-end). */
+const SEND_INSIDE_END_SELECTOR = '.input-button.inside-end:not(#upload-images-button)';
+
 type SubmitButtonVisualState = {
   ariaBusy: string | null;
   ariaDisabled: string | null;
@@ -288,9 +306,9 @@ async function openDeepChatAndRefreshMockConfig(page: Page): Promise<void> {
 }
 
 async function getSubmitButtonPinState(page: Page): Promise<SubmitButtonPinState | null> {
-  return page.evaluate(() => {
+  return page.evaluate(sendSelector => {
     const root = document.querySelector('#deep-chat-view')?.shadowRoot;
-    const button = root?.querySelector<HTMLElement>('.input-button.inside-end');
+    const button = root?.querySelector<HTMLElement>(sendSelector);
     const textInputContainer = root?.querySelector<HTMLElement>('#text-input-container');
     if (!button || !textInputContainer) {
       return null;
@@ -320,18 +338,66 @@ async function getSubmitButtonPinState(page: Page): Promise<SubmitButtonPinState
       pointerEvents: style.pointerEvents,
       rightGap,
     };
-  });
+  }, SEND_INSIDE_END_SELECTOR);
 }
 
+async function getDualButtonGeometry(page: Page): Promise<DualButtonGeometry | null> {
+  return page.evaluate(sendSelector => {
+    const root = document.querySelector('#deep-chat-view')?.shadowRoot;
+    const send = root?.querySelector<HTMLElement>(sendSelector);
+    // Host vision text entry above the composer card.
+    const upload = root?.querySelector<HTMLElement>('#deep-chat-vision-upload');
+    const helper = root?.querySelector<HTMLElement>('#deep-chat-vision-helper');
+    const visionRoot = root?.querySelector<HTMLElement>('#deep-chat-vision-composer-root');
+    const textInputContainer = root?.querySelector<HTMLElement>('#text-input-container');
+    if (!send || !textInputContainer) {
+      return null;
+    }
+
+    const sendRect = send.getBoundingClientRect();
+    const textRect = textInputContainer.getBoundingClientRect();
+    const uploadStyle = upload ? getComputedStyle(upload) : null;
+    const uploadRect =
+      upload && uploadStyle && uploadStyle.display !== 'none' && uploadStyle.visibility !== 'hidden'
+        ? upload.getBoundingClientRect()
+        : null;
+    const uploadVisible = Boolean(uploadRect && uploadRect.width > 0 && uploadRect.height > 0);
+    const helperVisible = Boolean(
+      helper && getComputedStyle(helper).display !== 'none' && !helper.hasAttribute('hidden')
+    );
+    const visionAboveCard =
+      uploadVisible &&
+      uploadRect &&
+      visionRoot &&
+      uploadRect.bottom <= textRect.top + 2;
+
+    return {
+      bottomDelta: null,
+      gap: null,
+      sendBg: getComputedStyle(send).backgroundColor,
+      sendRightGap: Math.round((textRect.right - sendRect.right) * 100) / 100,
+      uploadBg: upload ? getComputedStyle(upload).backgroundColor : null,
+      uploadDisabled: upload
+        ? upload.hasAttribute('disabled') || upload.getAttribute('aria-disabled') === 'true'
+        : null,
+      uploadReady: upload?.classList.contains('is-vision-ready') ?? false,
+      uploadVisible,
+      helperVisible,
+      uploadLeftOfSend: false,
+      visionAboveCard: Boolean(visionAboveCard),
+      uploadText: upload?.textContent?.trim() || '',
+    };
+  }, SEND_INSIDE_END_SELECTOR);
+}
 async function isSubmitButtonPinnedToTextInput(page: Page): Promise<boolean> {
   return (await getSubmitButtonPinState(page))?.pinned ?? false;
 }
 
 async function getSubmitButtonVisualState(page: Page): Promise<SubmitButtonVisualState | null> {
-  return page.evaluate(() => {
+  return page.evaluate(sendSelector => {
     const button = document
       .querySelector('#deep-chat-view')
-      ?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+      ?.shadowRoot?.querySelector<HTMLElement>(sendSelector);
     if (!button) {
       return null;
     }
@@ -350,7 +416,7 @@ async function getSubmitButtonVisualState(page: Page): Promise<SubmitButtonVisua
       submit: button.classList.contains('submit-button'),
       title: button.getAttribute('title'),
     };
-  });
+  }, SEND_INSIDE_END_SELECTOR);
 }
 
 async function getSkillChipVisualState(
@@ -561,7 +627,7 @@ test('renders precise empty and sendable states, then sends with the phone-width
   });
 
   const requestPromise = page.waitForRequest('**/mock-llm/chat/completions');
-  const submitButton = page.locator('#deep-chat-view .input-button.inside-end');
+  const submitButton = page.locator('#deep-chat-view .input-button.inside-end:not(#upload-images-button)');
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
@@ -589,7 +655,7 @@ test('keeps unavailable submit controls out of Tab order and sends with Space', 
   await openDeepChatAndRefreshMockConfig(page);
 
   const chatInput = page.locator('#deep-chat-view #text-input');
-  const submitButton = page.locator('#deep-chat-view .input-button.inside-end');
+  const submitButton = page.locator('#deep-chat-view .input-button.inside-end:not(#upload-images-button)');
   await expect(chatInput).toBeVisible();
   await expect
     .poll(() =>
@@ -705,7 +771,7 @@ test('preserves a decorated Skill Chip through send, reload, edit refill, and a 
     });
 
   const requestPromise = page.waitForRequest('**/mock-llm/chat/completions');
-  await page.locator('#deep-chat-view .input-button.inside-end').click();
+  await page.locator('#deep-chat-view .input-button.inside-end:not(#upload-images-button)').click();
   const request = await requestPromise;
   const payload = request.postDataJSON() as {
     messages?: Array<{ content?: string; role?: string }>;
@@ -899,7 +965,7 @@ test('keeps the desktop send button inside the text input throughout rail-width 
       new Promise<Array<{ bottomGap: number; rightGap: number; withinInput: boolean }>>(resolve => {
         const root = document.querySelector('#deep-chat-view')?.shadowRoot;
         const toggle = document.querySelector<HTMLButtonElement>('#deep-chat-toggle-rail');
-        const button = root?.querySelector<HTMLElement>('.input-button.inside-end');
+        const button = root?.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
         const textInput = root?.querySelector<HTMLElement>('#text-input-container');
         if (!toggle || !button || !textInput) {
           throw new Error('Deep Chat desktop rail or composer is missing');
@@ -956,7 +1022,7 @@ test('keeps the desktop send button inside a non-empty Skill composer after Deep
   await page.locator(`[data-skill-library-apply="${DECORATED_SKILL_ID}"]`).click();
   await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
 
-  await page.locator('#deep-chat-view .input-button.inside-end').click();
+  await page.locator('#deep-chat-view .input-button.inside-end:not(#upload-images-button)').click();
   await expect(page.locator('#deep-chat-view')).toContainText('技能会话重绘后仍可继续对话。', {
     timeout: 10000,
   });
@@ -992,7 +1058,7 @@ test('keeps the desktop send button inside a non-empty Skill composer after Deep
         }> = [];
         let frame = 0;
         const capture = (): void => {
-          const button = root.querySelector<HTMLElement>('.input-button.inside-end');
+          const button = root.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
           const textInput = root.querySelector<HTMLElement>('#text-input-container');
           if (!button || !textInput) {
             samples.push({
@@ -1105,7 +1171,7 @@ test('keeps the phone-height composer and send button inside the viewport', asyn
       page.evaluate(() => {
         const root = document.querySelector('#deep-chat-view')?.shadowRoot;
         const textInputContainer = root?.querySelector<HTMLElement>('#text-input-container');
-        const button = root?.querySelector<HTMLElement>('.input-button.inside-end');
+        const button = root?.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
         if (!textInputContainer || !button) {
           return false;
         }
@@ -1131,7 +1197,7 @@ test('keeps preflight loading distinct from an active stop control', async ({ pa
   await page.evaluate(() => {
     const button = document
       .querySelector('#deep-chat-view')
-      ?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+      ?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
     if (!button) {
       throw new Error('Deep Chat submit button is missing');
     }
@@ -1144,7 +1210,7 @@ test('keeps preflight loading distinct from an active stop control', async ({ pa
       page.evaluate(() => {
         const button = document
           .querySelector('#deep-chat-view')
-          ?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+          ?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
         if (!button) {
           return null;
         }
@@ -1291,8 +1357,9 @@ test('renders a visible error when the model stream returns no content', async (
   await chatInput.fill('请触发空响应回显测试');
   await chatInput.press('Enter');
 
+  // Empty SSE is rejected in llmService (throwIfChatEmptyBody) before deep-chat assert.
   await expect(page.locator('#deep-chat-view')).toContainText(
-    '请求失败：模型没有返回任何内容，请稍后重试或检查模型/上下文配置。',
+    '请求失败：模型返回了空正文。请重试、增大 maxTokens，或检查网关 channel。',
     { timeout: 10000 }
   );
 });
@@ -1312,7 +1379,7 @@ test('turns the send button into a stop button and aborts the active response', 
 
   await page.waitForFunction(() => {
     const root = document.querySelector('#deep-chat-view')?.shadowRoot;
-    const submitButton = root?.querySelector('.input-button.inside-end');
+    const submitButton = root?.querySelector('.input-button.inside-end:not(#upload-images-button)');
     return (
       submitButton?.getAttribute('data-deep-chat-stop-active') === '' &&
       submitButton.getAttribute('aria-label') === '停止生成'
@@ -1325,7 +1392,7 @@ test('turns the send button into a stop button and aborts the active response', 
           const button = document
             .querySelector('#deep-chat-view')
             ?.shadowRoot?.querySelector<HTMLElement>(
-              '.input-button.inside-end[data-deep-chat-stop-active]'
+              '.input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active]'
             );
           return button ? getComputedStyle(button).backgroundColor : null;
         }),
@@ -1362,7 +1429,7 @@ test('turns the send button into a stop button and aborts the active response', 
     });
   const stopButtonVisualState = await page.evaluate(() => {
     const root = document.querySelector('#deep-chat-view')?.shadowRoot;
-    const submitButton = root?.querySelector<HTMLElement>('.input-button.inside-end');
+    const submitButton = root?.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
     if (!submitButton) {
       throw new Error('Deep Chat submit button is missing');
     }
@@ -1405,7 +1472,7 @@ test('turns the send button into a stop button and aborts the active response', 
   expect([null, 'none']).toContain(stopButtonVisualState.submitIconDisplay);
 
   const stopButton = page.locator(
-    '#deep-chat-view .input-button.inside-end[data-deep-chat-stop-active]'
+    '#deep-chat-view .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active]'
   );
   await expect(stopButton).toHaveAttribute('data-deep-chat-stop-thread-id', /.+/);
   await expect(stopButton).toBeVisible();
@@ -1458,7 +1525,7 @@ test('shows a pressed stop control and stops with Space', async ({ page }) => {
     await requestStarted;
 
     const stopButton = page.locator(
-      '#deep-chat-view .input-button.inside-end[data-deep-chat-stop-active]'
+      '#deep-chat-view .input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active]'
     );
     await expect(stopButton).toBeVisible();
     await stopButton.focus();
@@ -1498,4 +1565,154 @@ test('shows a pressed stop control and stops with Space', async ({ page }) => {
   } finally {
     releaseHeldRequest();
   }
+});
+
+/** Opt-in product flag: deepChat.enableVision (default false). */
+async function seedDeepChatVisionFeatureEnabled(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const key = 'runtime_strategy_settings';
+    let prev: Record<string, unknown> = {};
+    try {
+      prev = JSON.parse(window.localStorage.getItem(key) || '{}') as Record<string, unknown>;
+    } catch {
+      prev = {};
+    }
+    const deepChat =
+      prev.deepChat && typeof prev.deepChat === 'object'
+        ? (prev.deepChat as Record<string, unknown>)
+        : {};
+    window.localStorage.setItem(
+      key,
+      JSON.stringify({
+        ...prev,
+        deepChat: {
+          ...deepChat,
+          enableVision: true,
+        },
+      })
+    );
+  });
+}
+
+test('hides host vision entry by default when enableVision is off', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await seedMockProviderStorage(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
+  await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+  await expect
+    .poll(async () => {
+      const geometry = await getDualButtonGeometry(page);
+      return geometry && geometry.uploadVisible === false && Math.abs(geometry.sendRightGap - 11) <= 2;
+    })
+    .toBe(true);
+});
+
+test('shows host vision upload disabled for non-vision model when feature enabled', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await seedMockProviderStorage(page);
+  await seedDeepChatVisionFeatureEnabled(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
+  await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+  await expect
+    .poll(async () => {
+      const geometry = await getDualButtonGeometry(page);
+      return (
+        geometry &&
+        geometry.uploadVisible &&
+        geometry.helperVisible &&
+        geometry.uploadDisabled === true &&
+        geometry.uploadReady === false &&
+        Math.abs(geometry.sendRightGap - 11) <= 2
+      );
+    })
+    .toBe(true);
+});
+
+/**
+ * Hard gate: vision model seed must not break send pin; host upload stays discoverable when feature on.
+ */
+test('keeps send pin after vision model seed (hard gate)', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await seedMockProviderStorage(page, undefined, MOCK_ENDPOINT);
+  await seedDeepChatVisionFeatureEnabled(page);
+  await page.goto(DEEP_CHAT_ROUTE, { waitUntil: 'domcontentloaded' });
+  await page.evaluate(
+    ({ model, provider }) => {
+      const prev = JSON.parse(window.localStorage.getItem(`llm_${provider}`) || '{}') as {
+        endpoint?: string;
+      };
+      window.localStorage.setItem(
+        `llm_${provider}`,
+        JSON.stringify({
+          apiKey: '',
+          enabled: true,
+          endpoint: prev.endpoint,
+          model,
+          provider,
+        })
+      );
+    },
+    { model: 'gpt-5', provider: MOCK_PROVIDER }
+  );
+  await page.locator('#deep-chat-refresh-config').click();
+  await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
+  await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+  await expect
+    .poll(async () => {
+      const geometry = await getDualButtonGeometry(page);
+      return Boolean(geometry?.uploadVisible && geometry.helperVisible);
+    })
+    .toBe(true);
+});
+
+/**
+ * Host vision: plain text entry sits above the send box (not inside dual-primary band).
+ */
+test('keeps host vision text entry above the send box', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await seedMockProviderStorage(page, undefined, MOCK_ENDPOINT);
+  await seedDeepChatVisionFeatureEnabled(page);
+  await page.goto(DEEP_CHAT_ROUTE, { waitUntil: 'domcontentloaded' });
+  await page.evaluate(
+    ({ model, provider }) => {
+      const prev = JSON.parse(window.localStorage.getItem(`llm_${provider}`) || '{}') as {
+        endpoint?: string;
+      };
+      window.localStorage.setItem(
+        `llm_${provider}`,
+        JSON.stringify({
+          apiKey: '',
+          enabled: true,
+          endpoint: prev.endpoint,
+          model,
+          provider,
+        })
+      );
+    },
+    { model: 'gpt-5', provider: MOCK_PROVIDER }
+  );
+  await page.locator('#deep-chat-refresh-config').click();
+  await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
+
+  await expect
+    .poll(
+      async () => {
+        const geometry = await getDualButtonGeometry(page);
+        if (!geometry?.uploadVisible) return false;
+        return (
+          geometry.visionAboveCard === true &&
+          geometry.uploadText === '上传图片' &&
+          geometry.helperVisible === true &&
+          Math.abs(geometry.sendRightGap - 11) <= 2
+        );
+      },
+      { timeout: 5000 }
+    )
+    .toBe(true);
 });

@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Deep Chat vision upload: whitelist formats (no SVG), 12MB total cap, ghost upload control, helper limits line, count-only history honesty, safer error redaction.
+
 ### Fixed
 
 ## [3.0.11] - 2026-07-27

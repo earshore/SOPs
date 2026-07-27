@@ -568,6 +568,23 @@ it('exposes deepChat business tools toggle binding in settings template', () => 
   expect(template).not.toContain('切换后立即生效');
 });
 
+it('exposes deepChat enableVision toggle under Prompt draft count', () => {
+  const template = readFileSync(
+    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
+    'utf8'
+  );
+  expect(template).toContain('Prompt 草稿数');
+  expect(template).toContain("setRuntimeBoolean('deepChat.enableVision'");
+  expect(template).toContain('runtimeStrategy.settings.deepChat.enableVision');
+  expect(template).toContain('settings-pref-row__title">启用 Vision');
+  expect(template).toContain('data-testid="settings-dc-vision-pref-list"');
+  // Order: Prompt 草稿数 appears before enableVision binding
+  const draftIdx = template.indexOf('Prompt 草稿数');
+  const visionIdx = template.indexOf("setRuntimeBoolean('deepChat.enableVision'");
+  expect(draftIdx).toBeGreaterThan(-1);
+  expect(visionIdx).toBeGreaterThan(draftIdx);
+});
+
 it('setRuntimeBoolean instant-persists runtime strategy without footer save', async () => {
   const runtime = await import('@/services/runtimeStrategyService');
   const saveRuntime = vi.spyOn(runtime, 'saveRuntimeStrategySettings');

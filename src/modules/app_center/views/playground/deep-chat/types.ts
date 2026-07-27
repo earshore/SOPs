@@ -1,6 +1,7 @@
 import type { ChatMessage } from '@/services/llmService';
 import type { LLMProviderConfig } from '@/types/state';
 import type {
+  DeepChatAttachmentMeta,
   DeepChatMessage,
   DeepChatMessageStatus,
   DeepChatRole,
@@ -213,8 +214,13 @@ export interface SaveThreadMessagesOptions {
   assistantReasoningDurationSec?: number;
   /** Pre-reply tool/status timeline under 「已完成」 */
   assistantPreReplySteps?: import('./request/preReplyActivity').PreReplyActivityStep[];
+  /**
+   * Count-only vision honesty for the newest user turn.
+   * Never includes src/base64/names.
+   */
+  userAttachmentMeta?: import('./session/conversationContext').DeepChatAttachmentMeta;
   /** partial 落盘时跳过列表重绘，避免流式过程中 UI 抖动 */
   skipUiRefresh?: boolean;
 }
 
-export type { DeepChatMessage, DeepChatMessageStatus, DeepChatRole };
+export type { DeepChatMessage, DeepChatMessageStatus, DeepChatRole, DeepChatAttachmentMeta };

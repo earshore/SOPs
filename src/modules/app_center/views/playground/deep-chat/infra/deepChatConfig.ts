@@ -11,6 +11,13 @@ import { sessionState } from '../session/sessionState';
 import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
 import { StorageService } from '@/services/storageService';
 import { resolveDeepChatImagesConfig } from '../request/visionAttachments';
+import {
+  hasStagedVisionAttachments,
+  mountVisionComposer,
+  syncVisionComposerCapability,
+  unmountVisionComposer,
+} from '../composer/visionComposer';
+import { isDeepChatVisionFeatureEnabled } from '@/services/runtimeStrategyService';
 
 type DraftUpdater = (threadId: string, draftText: string) => void;
 type RequestHandler = (
@@ -38,21 +45,47 @@ export function configureDeepChatBase(
   chat.errorMessages = {
     displayServiceErrorMessages: true,
   };
-  // 其余多媒体入口始终关闭；图片按模型 vision 能力单独门控。
+  // 库多媒体入口全部关闭；图片由 host visionComposer 接管。
   chat.gifs = false;
   chat.camera = false;
   chat.audio = false;
   chat.mixedFiles = false;
   chat.microphone = false;
+  chat.images = false;
   applyDeepChatVisionUploadConfig(chat);
 }
 
-/** 按当前模型 supportsVision 开关图片上传入口（fail-closed）。 */
+/**
+ * Host vision composer：
+ * - 产品开关 `deepChat.enableVision`（默认关）控制入口是否挂载；
+ * - 开启后由模型 supportsVision 控制可点/灰态；
+ * - 原生 deep-chat images 按钮始终关闭。
+ */
 export function applyDeepChatVisionUploadConfig(chat: DeepChatElement | null | undefined): void {
   if (!chat) return;
+  // Force-off vendor upload UI (Approach B host surface).
+  chat.images = resolveDeepChatImagesConfig(false);
+
+  const featureOn = isDeepChatVisionFeatureEnabled();
+  if (!featureOn) {
+    chat.classList.remove('is-vision-enabled');
+    // Keep pipeline code; hide entry and drop any staged files while feature is off.
+    unmountVisionComposer({ keepStaged: false });
+    return;
+  }
+
   const supportsVision = resolveCurrentModelSupportsVision();
-  chat.images = resolveDeepChatImagesConfig(supportsVision);
   chat.classList.toggle('is-vision-enabled', supportsVision);
+  const pending = sessionState.pendingRequests.has(sessionState.threadStore.activeThreadId);
+  mountVisionComposer(chat, { supportsVision, pending });
+  syncVisionComposerCapability({ supportsVision, pending });
+}
+
+/** Host staged attachments (memory only). */
+export function deepChatHasStagedImageAttachments(
+  _chat?: DeepChatElement | null | undefined
+): boolean {
+  return hasStagedVisionAttachments();
 }
 
 function resolveCurrentModelSupportsVision(): boolean {
@@ -130,7 +163,7 @@ function configureDeepChatTextInputStyles(chat: DeepChatElement): void {
         color: 'var(--deep-chat-ink, #0f172a)',
         fontSize: '15px',
         lineHeight: '1.45',
-        padding: '18px 62px 16px 22px',
+        padding: '18px 108px 16px 22px',
         maxHeight: 'min(calc(42vh - 20px), 400px)',
         overflowY: 'auto',
       },
