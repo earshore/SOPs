@@ -1327,193 +1327,189 @@
                       ></i>
                     </summary>
                     <div class="settings-submodule__body space-y-3">
-                      <template
-                        x-for="item in toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])"
-                        :key="item.id"
-                      >
-                        <div class="mt-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3">
-                          <div
-                            class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
-                          >
-                            <div class="min-w-0 flex-1">
-                              <div class="flex flex-wrap items-center gap-2">
+                      <div class="settings-tool-page mt-3">
+                        <template
+                          x-for="item in toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])"
+                          :key="item.id"
+                        >
+                          <div>
+                            <div class="settings-tool-page__head">
+                              <div class="settings-tool-page__head-main">
                                 <h5 class="settings-card__title" x-text="item.label"></h5>
                                 <span
                                   class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
                                   x-text="item.modelHint"
                                 ></span>
                               </div>
-                              <p class="settings-card__desc" x-text="item.description"></p>
-                              <p class="settings-card__desc">
-                                当前执行模型：
-                                <span
-                                  class="font-mono text-slate-700"
-                                  x-text="item.resolvedModel"
-                                ></span>
-                              </p>
-                            </div>
-                            <div class="relative w-full sm:w-64">
-                              <label class="sr-only" :for="'tool-strategy-model-' + item.id"
-                                >默认模型</label
-                              >
-                              <select
-                                :id="'tool-strategy-model-' + item.id"
-                                :name="'tool-strategy-model-' + item.id"
-                                :value="item.model"
-                                @change="setToolTargetModel(item.id, $event)"
-                                :disabled="toolStrategyModelSelectDisabled"
-                                class="settings-control settings-control--sm"
-                              >
-                                <option value="">跟随全局模型</option>
-                                <template x-for="model in llm.models" :key="getModelValue(model)">
-                                  <option
-                                    :value="getModelValue(model)"
-                                    x-text="getModelLabel(model)"
-                                  ></option>
-                                </template>
-                              </select>
-                              <div
-                                class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100"
-                              >
-                                <i class="fas fa-chevron-down text-[9px] text-slate-400"></i>
+                              <div class="settings-tool-page__model">
+                                <label class="sr-only" :for="'tool-strategy-model-' + item.id"
+                                  >默认模型</label
+                                >
+                                <select
+                                  :id="'tool-strategy-model-' + item.id"
+                                  :name="'tool-strategy-model-' + item.id"
+                                  :value="item.model"
+                                  @change="setToolTargetModel(item.id, $event)"
+                                  :disabled="toolStrategyModelSelectDisabled"
+                                  class="settings-control settings-control--sm"
+                                >
+                                  <option value="">跟随全局模型</option>
+                                  <template x-for="model in llm.models" :key="getModelValue(model)">
+                                    <option
+                                      :value="getModelValue(model)"
+                                      x-text="getModelLabel(model)"
+                                    ></option>
+                                  </template>
+                                </select>
+                                <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                  <i class="fas fa-chevron-down"></i>
+                                </span>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                      </template>
-                      <div class="mt-3 grid gap-3 sm:grid-cols-3">
-                        <div class="block min-w-0">
-                          <span class="settings-label">调度偏好</span>
-                          <div
-                            class="settings-schedule-select relative"
-                            @keydown.escape.window="schedulePreferenceMenuOpen = false"
-                            @click.outside="schedulePreferenceMenuOpen = false"
-                          >
-                            <button
-                              type="button"
-                              class="settings-control settings-control--sm settings-schedule-select__trigger"
-                              data-testid="settings-schedule-preference"
-                              :aria-expanded="schedulePreferenceMenuOpen.toString()"
-                              aria-haspopup="listbox"
-                              @click="schedulePreferenceMenuOpen = !schedulePreferenceMenuOpen"
-                            >
+                            <p class="settings-tool-page__hint" x-text="item.description"></p>
+                            <p class="settings-tool-page__hint">
+                              当前执行模型：
                               <span
-                                class="settings-schedule-select__value min-w-0 flex-1 text-left"
-                              >
-                                <span
-                                  class="settings-schedule-select__label"
-                                  x-text="masterAnalysisScheduleSelectedLabel"
-                                ></span>
-                                <span
-                                  class="settings-schedule-select__hint"
-                                  x-text="masterAnalysisScheduleSelectedHint"
-                                ></span>
-                              </span>
-                              <i
-                                class="fas fa-chevron-down text-[9px] text-slate-400 shrink-0"
-                                aria-hidden="true"
-                              ></i>
-                            </button>
-                            <ul
-                              class="settings-schedule-select__menu"
-                              role="listbox"
-                              :hidden="!schedulePreferenceMenuOpen"
+                                class="settings-tool-page__hint-mono"
+                                x-text="item.resolvedModel"
+                              ></span>
+                            </p>
+                          </div>
+                        </template>
+                        <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                          <div class="block min-w-0">
+                            <span class="settings-label">调度偏好</span>
+                            <div
+                              class="settings-schedule-select relative"
+                              @keydown.escape.window="schedulePreferenceMenuOpen = false"
+                              @click.outside="schedulePreferenceMenuOpen = false"
                             >
-                              <template
-                                x-for="opt in masterAnalysisScheduleOptions"
-                                :key="opt.value"
+                              <button
+                                type="button"
+                                class="settings-control settings-control--sm settings-schedule-select__trigger"
+                                data-testid="settings-schedule-preference"
+                                :aria-expanded="schedulePreferenceMenuOpen.toString()"
+                                aria-haspopup="listbox"
+                                @click="schedulePreferenceMenuOpen = !schedulePreferenceMenuOpen"
                               >
-                                <li role="option">
-                                  <button
-                                    type="button"
-                                    class="settings-schedule-select__option"
-                                    :class="{
+                                <span
+                                  class="settings-schedule-select__value min-w-0 flex-1 text-left"
+                                >
+                                  <span
+                                    class="settings-schedule-select__label"
+                                    x-text="masterAnalysisScheduleSelectedLabel"
+                                  ></span>
+                                  <span
+                                    class="settings-schedule-select__hint"
+                                    x-text="masterAnalysisScheduleSelectedHint"
+                                  ></span>
+                                </span>
+                                <i
+                                  class="fas fa-chevron-down text-[9px] text-slate-400 shrink-0"
+                                  aria-hidden="true"
+                                ></i>
+                              </button>
+                              <ul
+                                class="settings-schedule-select__menu"
+                                role="listbox"
+                                :hidden="!schedulePreferenceMenuOpen"
+                              >
+                                <template
+                                  x-for="opt in masterAnalysisScheduleOptions"
+                                  :key="opt.value"
+                                >
+                                  <li role="option">
+                                    <button
+                                      type="button"
+                                      class="settings-schedule-select__option"
+                                      :class="{
                                       'is-active':
                                         runtimeStrategy.settings.masterAnalysis
                                           .schedulingPreference === opt.value,
                                     }"
-                                    :aria-selected="(
+                                      :aria-selected="(
                                       runtimeStrategy.settings.masterAnalysis
                                         .schedulingPreference === opt.value
                                     ).toString()"
-                                    @click="setMasterAnalysisSchedulePreference(opt.value)"
-                                  >
-                                    <span
-                                      class="settings-schedule-select__label"
-                                      x-text="opt.label"
-                                    ></span>
-                                    <span
-                                      class="settings-schedule-select__hint"
-                                      x-text="opt.hint"
-                                    ></span>
-                                  </button>
-                                </li>
-                              </template>
-                            </ul>
-                          </div>
-                        </div>
-                        <label class="block">
-                          <span class="settings-label">完整报告 Token</span>
-                          <input
-                            type="number"
-                            min="4096"
-                            max="64000"
-                            step="1024"
-                            :value="runtimeStrategy.settings.masterAnalysis.fullReportMaxTokens"
-                            @input="setRuntimeNumber('masterAnalysis.fullReportMaxTokens', $event)"
-                            class="settings-control settings-control--sm"
-                          />
-                        </label>
-                        <label class="block">
-                          <span class="settings-label">翻译报告 Token</span>
-                          <input
-                            type="number"
-                            min="4096"
-                            max="64000"
-                            step="1024"
-                            :value="runtimeStrategy.settings.masterAnalysis.translationMaxTokens"
-                            @input="setRuntimeNumber('masterAnalysis.translationMaxTokens', $event)"
-                            class="settings-control settings-control--sm"
-                          />
-                        </label>
-                      </div>
-                      <div
-                        class="settings-pref-list mt-3"
-                        data-testid="settings-ma-cache-pref-list"
-                      >
-                        <div class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <h4 class="settings-pref-row__title">启用分析缓存</h4>
-                              <p class="settings-pref-row__hint">主分析 LLM 结果缓存</p>
+                                      @click="setMasterAnalysisSchedulePreference(opt.value)"
+                                    >
+                                      <span
+                                        class="settings-schedule-select__label"
+                                        x-text="opt.label"
+                                      ></span>
+                                      <span
+                                        class="settings-schedule-select__hint"
+                                        x-text="opt.hint"
+                                      ></span>
+                                    </button>
+                                  </li>
+                                </template>
+                              </ul>
                             </div>
                           </div>
-                          <label class="settings-switch">
-                            <span class="sr-only">启用分析缓存</span>
-                            <input
-                              type="checkbox"
-                              :checked="runtimeStrategy.settings.masterAnalysis.enableCache"
-                              @change="setRuntimeBoolean('masterAnalysis.enableCache', $event)"
-                            />
-                            <span class="settings-switch__track" aria-hidden="true"></span>
-                          </label>
-                        </div>
-                      </div>
-                      <div class="mt-3 grid gap-3 sm:grid-cols-4">
-                        <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
                           <label class="block">
-                            <span class="settings-label" x-text="item.label"></span>
+                            <span class="settings-label">完整报告 Token</span>
                             <input
                               type="number"
-                              :min="item.min"
-                              :max="item.max"
-                              :step="item.step"
-                              :value="item.value"
-                              @input="setRuntimeNumber(item.path, $event)"
+                              min="4096"
+                              max="64000"
+                              step="1024"
+                              :value="runtimeStrategy.settings.masterAnalysis.fullReportMaxTokens"
+                              @input="setRuntimeNumber('masterAnalysis.fullReportMaxTokens', $event)"
                               class="settings-control settings-control--sm"
                             />
                           </label>
-                        </template>
+                          <label class="block">
+                            <span class="settings-label">翻译报告 Token</span>
+                            <input
+                              type="number"
+                              min="4096"
+                              max="64000"
+                              step="1024"
+                              :value="runtimeStrategy.settings.masterAnalysis.translationMaxTokens"
+                              @input="setRuntimeNumber('masterAnalysis.translationMaxTokens', $event)"
+                              class="settings-control settings-control--sm"
+                            />
+                          </label>
+                        </div>
+                        <div
+                          class="settings-pref-list mt-3"
+                          data-testid="settings-ma-cache-pref-list"
+                        >
+                          <div class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <h4 class="settings-pref-row__title">启用分析缓存</h4>
+                                <p class="settings-pref-row__hint">主分析 LLM 结果缓存</p>
+                              </div>
+                            </div>
+                            <label class="settings-switch">
+                              <span class="sr-only">启用分析缓存</span>
+                              <input
+                                type="checkbox"
+                                :checked="runtimeStrategy.settings.masterAnalysis.enableCache"
+                                @change="setRuntimeBoolean('masterAnalysis.enableCache', $event)"
+                              />
+                              <span class="settings-switch__track" aria-hidden="true"></span>
+                            </label>
+                          </div>
+                        </div>
+                        <div class="mt-3 grid gap-3 sm:grid-cols-4">
+                          <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
+                            <label class="block">
+                              <span class="settings-label" x-text="item.label"></span>
+                              <input
+                                type="number"
+                                :min="item.min"
+                                :max="item.max"
+                                :step="item.step"
+                                :value="item.value"
+                                @input="setRuntimeNumber(item.path, $event)"
+                                class="settings-control settings-control--sm"
+                              />
+                            </label>
+                          </template>
+                        </div>
                       </div>
                     </div>
                   </details>
@@ -1539,185 +1535,190 @@
                   ></i>
                 </summary>
                 <div class="settings-tool-app-body">
-                  <template
-                    x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
-                    :key="item.id"
-                  >
-                    <div class="mt-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3">
-                      <div
-                        class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+                  <div class="settings-tool-page-stack">
+                    <div class="settings-tool-page">
+                      <template
+                        x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
+                        :key="item.id"
                       >
-                        <div class="min-w-0 flex-1">
-                          <div class="flex flex-wrap items-center gap-2">
-                            <h5 class="settings-card__title" x-text="item.label"></h5>
-                            <span
-                              class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
-                              x-text="item.modelHint"
-                            ></span>
+                        <div>
+                          <div class="settings-tool-page__head">
+                            <div class="settings-tool-page__head-main">
+                              <h5 class="settings-card__title" x-text="item.label"></h5>
+                              <span
+                                class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
+                                x-text="item.modelHint"
+                              ></span>
+                            </div>
+                            <div class="settings-tool-page__model">
+                              <label class="sr-only" :for="'tool-strategy-model-' + item.id"
+                                >默认模型</label
+                              >
+                              <select
+                                :id="'tool-strategy-model-' + item.id"
+                                :name="'tool-strategy-model-' + item.id"
+                                :value="item.model"
+                                @change="setToolTargetModel(item.id, $event)"
+                                :disabled="toolStrategyModelSelectDisabled"
+                                class="settings-control settings-control--sm"
+                              >
+                                <option value="">跟随全局模型</option>
+                                <template x-for="model in llm.models" :key="getModelValue(model)">
+                                  <option
+                                    :value="getModelValue(model)"
+                                    x-text="getModelLabel(model)"
+                                  ></option>
+                                </template>
+                              </select>
+                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                <i class="fas fa-chevron-down"></i>
+                              </span>
+                            </div>
                           </div>
-                          <p class="settings-card__desc" x-text="item.description"></p>
-                          <p class="settings-card__desc">
+                          <p class="settings-tool-page__hint" x-text="item.description"></p>
+                          <p class="settings-tool-page__hint">
                             当前执行模型：
                             <span
-                              class="font-mono text-slate-700"
+                              class="settings-tool-page__hint-mono"
                               x-text="item.resolvedModel"
                             ></span>
                           </p>
                         </div>
-                        <div class="relative w-full sm:w-64">
-                          <label class="sr-only" :for="'tool-strategy-model-' + item.id"
-                            >默认模型</label
-                          >
-                          <select
-                            :id="'tool-strategy-model-' + item.id"
-                            :name="'tool-strategy-model-' + item.id"
-                            :value="item.model"
-                            @change="setToolTargetModel(item.id, $event)"
-                            :disabled="toolStrategyModelSelectDisabled"
+                      </template>
+                    </div>
+
+                    <div
+                      class="settings-tool-page"
+                      role="group"
+                      aria-labelledby="deep-chat-business-tools-title"
+                      data-settings-nav-id="deep-chat-business-tools-title"
+                      data-settings-nav-group="tool"
+                    >
+                      <h5 id="deep-chat-business-tools-title" class="settings-card__title">
+                        业务工具
+                      </h5>
+                      <p class="settings-tool-page__hint">注入搜索等工具；是否调用由模型决定。</p>
+                      <div
+                        class="settings-pref-list mt-3"
+                        data-testid="settings-dc-tools-pref-list"
+                      >
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">启用业务工具</h4>
+                              <p class="settings-pref-row__hint">
+                                网页搜索 / 搜索 X / 会话只读；修改后需保存
+                              </p>
+                            </div>
+                          </div>
+                          <label class="settings-switch">
+                            <span class="sr-only">启用业务工具</span>
+                            <input
+                              id="runtime-deep-chat-enable-business-tools"
+                              type="checkbox"
+                              :checked="runtimeStrategy.settings.deepChat.enableBusinessTools"
+                              @change="setRuntimeBoolean('deepChat.enableBusinessTools', $event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="settings-tool-page">
+                      <h5 class="settings-card__title">运行限额</h5>
+                      <p class="settings-tool-page__hint">超时、输出与会话存储上限</p>
+                      <div class="mt-3 grid gap-3 sm:grid-cols-4">
+                        <label class="block"
+                          ><span class="settings-label">请求超时（秒）</span
+                          ><input
+                            type="number"
+                            min="30"
+                            max="300"
+                            step="5"
+                            :value="runtimeDeepChatTimeoutSeconds"
+                            @input="setRuntimeNumber('deepChat.requestTimeoutMs', $event, 1000)"
                             class="settings-control settings-control--sm"
-                          >
-                            <option value="">跟随全局模型</option>
-                            <template x-for="model in llm.models" :key="getModelValue(model)">
-                              <option
-                                :value="getModelValue(model)"
-                                x-text="getModelLabel(model)"
-                              ></option>
-                            </template>
-                          </select>
-                          <div
-                            class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100"
-                          >
-                            <i class="fas fa-chevron-down text-[9px] text-slate-400"></i>
-                          </div>
-                        </div>
+                        /></label>
+                        <label class="block"
+                          ><span class="settings-label">输出 Token</span
+                          ><input
+                            type="number"
+                            min="256"
+                            max="16000"
+                            step="256"
+                            :value="runtimeStrategy.settings.deepChat.maxOutputTokens"
+                            @input="setRuntimeNumber('deepChat.maxOutputTokens', $event)"
+                            class="settings-control settings-control--sm"
+                        /></label>
+                        <label class="block"
+                          ><span class="settings-label">上下文字符</span
+                          ><input
+                            type="number"
+                            min="4000"
+                            max="512000"
+                            step="1000"
+                            :value="runtimeStrategy.settings.deepChat.maxContextChars"
+                            @input="setRuntimeNumber('deepChat.maxContextChars', $event)"
+                            class="settings-control settings-control--sm"
+                        /></label>
+                        <label class="block"
+                          ><span class="settings-label">会话保留数</span
+                          ><input
+                            type="number"
+                            min="1"
+                            max="200"
+                            step="1"
+                            :value="runtimeStrategy.settings.deepChat.maxThreadCount"
+                            @input="setRuntimeNumber('deepChat.maxThreadCount', $event)"
+                            class="settings-control settings-control--sm"
+                        /></label>
+                        <label class="block"
+                          ><span class="settings-label">单条消息字符</span
+                          ><input
+                            type="number"
+                            min="1000"
+                            max="512000"
+                            step="1000"
+                            :value="runtimeStrategy.settings.deepChat.maxMessageChars"
+                            @input="setRuntimeNumber('deepChat.maxMessageChars', $event)"
+                            class="settings-control settings-control--sm"
+                        /></label>
+                        <label class="block"
+                          ><span class="settings-label">系统提示词字符</span
+                          ><input
+                            type="number"
+                            min="1000"
+                            max="512000"
+                            step="1000"
+                            :value="runtimeStrategy.settings.deepChat.maxSystemPromptChars"
+                            @input="setRuntimeNumber('deepChat.maxSystemPromptChars', $event)"
+                            class="settings-control settings-control--sm"
+                        /></label>
+                        <label class="block"
+                          ><span class="settings-label">每会话消息数</span
+                          ><input
+                            type="number"
+                            min="10"
+                            max="500"
+                            step="10"
+                            :value="runtimeStrategy.settings.deepChat.maxThreadMessageCount"
+                            @input="setRuntimeNumber('deepChat.maxThreadMessageCount', $event)"
+                            class="settings-control settings-control--sm"
+                        /></label>
+                        <label class="block"
+                          ><span class="settings-label">Prompt 草稿数</span
+                          ><input
+                            type="number"
+                            min="1"
+                            max="100"
+                            step="1"
+                            :value="runtimeStrategy.settings.deepChat.maxPromptDraftCount"
+                            @input="setRuntimeNumber('deepChat.maxPromptDraftCount', $event)"
+                            class="settings-control settings-control--sm"
+                        /></label>
                       </div>
                     </div>
-                  </template>
-
-                  <div
-                    class="mt-3 rounded-lg border border-indigo-100 bg-indigo-50/40 p-3"
-                    role="group"
-                    aria-labelledby="deep-chat-business-tools-title"
-                    data-settings-nav-id="deep-chat-business-tools-title"
-                    data-settings-nav-group="tool"
-                  >
-                    <h5 id="deep-chat-business-tools-title" class="settings-card__title">
-                      业务工具
-                    </h5>
-                    <p class="settings-card__desc mt-1">注入搜索等工具；是否调用由模型决定。</p>
-                    <div class="settings-pref-list mt-3" data-testid="settings-dc-tools-pref-list">
-                      <div class="settings-pref-row">
-                        <div class="settings-pref-row__meta">
-                          <div class="min-w-0">
-                            <h4 class="settings-pref-row__title">启用业务工具</h4>
-                            <p class="settings-pref-row__hint">
-                              网页搜索 / 搜索 X / 会话只读；修改后需保存
-                            </p>
-                          </div>
-                        </div>
-                        <label class="settings-switch">
-                          <span class="sr-only">启用业务工具</span>
-                          <input
-                            id="runtime-deep-chat-enable-business-tools"
-                            type="checkbox"
-                            :checked="runtimeStrategy.settings.deepChat.enableBusinessTools"
-                            @change="setRuntimeBoolean('deepChat.enableBusinessTools', $event)"
-                          />
-                          <span class="settings-switch__track" aria-hidden="true"></span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="mt-3 grid gap-3 sm:grid-cols-4">
-                    <label class="block"
-                      ><span class="settings-label">请求超时（秒）</span
-                      ><input
-                        type="number"
-                        min="30"
-                        max="300"
-                        step="5"
-                        :value="runtimeDeepChatTimeoutSeconds"
-                        @input="setRuntimeNumber('deepChat.requestTimeoutMs', $event, 1000)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">输出 Token</span
-                      ><input
-                        type="number"
-                        min="256"
-                        max="16000"
-                        step="256"
-                        :value="runtimeStrategy.settings.deepChat.maxOutputTokens"
-                        @input="setRuntimeNumber('deepChat.maxOutputTokens', $event)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">上下文字符</span
-                      ><input
-                        type="number"
-                        min="4000"
-                        max="512000"
-                        step="1000"
-                        :value="runtimeStrategy.settings.deepChat.maxContextChars"
-                        @input="setRuntimeNumber('deepChat.maxContextChars', $event)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">会话保留数</span
-                      ><input
-                        type="number"
-                        min="1"
-                        max="200"
-                        step="1"
-                        :value="runtimeStrategy.settings.deepChat.maxThreadCount"
-                        @input="setRuntimeNumber('deepChat.maxThreadCount', $event)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">单条消息字符</span
-                      ><input
-                        type="number"
-                        min="1000"
-                        max="512000"
-                        step="1000"
-                        :value="runtimeStrategy.settings.deepChat.maxMessageChars"
-                        @input="setRuntimeNumber('deepChat.maxMessageChars', $event)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">系统提示词字符</span
-                      ><input
-                        type="number"
-                        min="1000"
-                        max="512000"
-                        step="1000"
-                        :value="runtimeStrategy.settings.deepChat.maxSystemPromptChars"
-                        @input="setRuntimeNumber('deepChat.maxSystemPromptChars', $event)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">每会话消息数</span
-                      ><input
-                        type="number"
-                        min="10"
-                        max="500"
-                        step="10"
-                        :value="runtimeStrategy.settings.deepChat.maxThreadMessageCount"
-                        @input="setRuntimeNumber('deepChat.maxThreadMessageCount', $event)"
-                        class="settings-control settings-control--sm"
-                    /></label>
-                    <label class="block"
-                      ><span class="settings-label">Prompt 草稿数</span
-                      ><input
-                        type="number"
-                        min="1"
-                        max="100"
-                        step="1"
-                        :value="runtimeStrategy.settings.deepChat.maxPromptDraftCount"
-                        @input="setRuntimeNumber('deepChat.maxPromptDraftCount', $event)"
-                        class="settings-control settings-control--sm"
-                    /></label>
                   </div>
                 </div>
               </details>
@@ -1744,24 +1745,22 @@
                   ></i>
                 </summary>
                 <div class="settings-tool-app-body">
-                  <div class="mt-3 space-y-3">
-                    <div class="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+                  <div class="settings-tool-page-stack">
+                    <div class="settings-tool-page">
                       <template
                         x-for="item in toolStrategyTargetItemsByIds(['keyword-hunter-seo-process'])"
                         :key="item.id"
                       >
                         <div>
-                          <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                            <div class="min-w-0 flex flex-wrap items-center gap-2">
+                          <div class="settings-tool-page__head">
+                            <div class="settings-tool-page__head-main">
                               <h5 class="settings-card__title" x-text="item.label"></h5>
                               <span
                                 class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
                                 x-text="item.modelHint"
                               ></span>
                             </div>
-                            <div
-                              class="relative w-full min-w-[10rem] max-w-full sm:w-56 sm:max-w-[16rem] sm:flex-shrink-0"
-                            >
+                            <div class="settings-tool-page__model">
                               <label class="sr-only" :for="'tool-strategy-model-' + item.id"
                                 >默认模型</label
                               >
@@ -1781,18 +1780,16 @@
                                   ></option>
                                 </template>
                               </select>
-                              <div
-                                class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100"
-                              >
-                                <i class="fas fa-chevron-down text-[9px] text-slate-400"></i>
-                              </div>
+                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                <i class="fas fa-chevron-down"></i>
+                              </span>
                             </div>
                           </div>
-                          <p class="settings-card__desc" x-text="item.description"></p>
-                          <p class="settings-card__desc">
+                          <p class="settings-tool-page__hint" x-text="item.description"></p>
+                          <p class="settings-tool-page__hint">
                             当前执行模型：
                             <span
-                              class="font-mono text-slate-700"
+                              class="settings-tool-page__hint-mono"
                               x-text="item.resolvedModel"
                             ></span>
                           </p>
@@ -1925,23 +1922,21 @@
                         </div>
                       </div>
                     </div>
-                    <div class="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+                    <div class="settings-tool-page">
                       <template
                         x-for="item in toolStrategyTargetItemsByIds(['keyword-hunter-listing-review'])"
                         :key="item.id"
                       >
                         <div>
-                          <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                            <div class="min-w-0 flex flex-wrap items-center gap-2">
+                          <div class="settings-tool-page__head">
+                            <div class="settings-tool-page__head-main">
                               <h5 class="settings-card__title" x-text="item.label"></h5>
                               <span
                                 class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
                                 x-text="item.modelHint"
                               ></span>
                             </div>
-                            <div
-                              class="relative w-full min-w-[10rem] max-w-full sm:w-56 sm:max-w-[16rem] sm:flex-shrink-0"
-                            >
+                            <div class="settings-tool-page__model">
                               <label class="sr-only" :for="'tool-strategy-model-' + item.id"
                                 >默认模型</label
                               >
@@ -1961,18 +1956,16 @@
                                   ></option>
                                 </template>
                               </select>
-                              <div
-                                class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100"
-                              >
-                                <i class="fas fa-chevron-down text-[9px] text-slate-400"></i>
-                              </div>
+                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                <i class="fas fa-chevron-down"></i>
+                              </span>
                             </div>
                           </div>
-                          <p class="settings-card__desc" x-text="item.description"></p>
-                          <p class="settings-card__desc">
+                          <p class="settings-tool-page__hint" x-text="item.description"></p>
+                          <p class="settings-tool-page__hint">
                             当前执行模型：
                             <span
-                              class="font-mono text-slate-700"
+                              class="settings-tool-page__hint-mono"
                               x-text="item.resolvedModel"
                             ></span>
                           </p>
