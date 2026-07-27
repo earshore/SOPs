@@ -4,7 +4,9 @@ import { resolve } from 'node:path';
 import {
   findFirstSettingsSearchMatch,
   findSettingsSearchMatches,
+  pickSettingsSearchHitTitle,
   SETTINGS_SEARCH_INDEX,
+  toSettingsSearchHitViews,
 } from '@/components/settings/domain/settingsSearch';
 import {
   applySettingsDeepLink,
@@ -40,6 +42,15 @@ describe('settingsSearch', () => {
     const hits = findSettingsSearchMatches('Deep Chat', SETTINGS_SEARCH_INDEX, 3);
     expect(hits.length).toBeGreaterThan(0);
     expect(hits[0]?.id).toBe('playground-deep-chat');
+  });
+
+  it('builds human hit views for multi-result UI', () => {
+    const views = toSettingsSearchHitViews(
+      findSettingsSearchMatches('Deep Chat', SETTINGS_SEARCH_INDEX, 3)
+    );
+    expect(views[0]?.title).toMatch(/Deep Chat|Playground/);
+    expect(views[0]?.sectionLabel).toBe('工具策略');
+    expect(pickSettingsSearchHitTitle(SETTINGS_SEARCH_INDEX[0]!)).toBeTruthy();
   });
 
   it('covers nav-aligned targets including presets and cleanup', () => {
@@ -93,12 +104,15 @@ describe('CT-P1-02 / CT-P1-03 template contracts', () => {
   it('CT-P1-02 has search toolbar without density mode', () => {
     expect(html).toContain('settings-search');
     expect(html).toContain('data-testid="settings-search"');
+    expect(html).toContain('data-testid="settings-search-results"');
+    expect(html).toContain('selectSettingsSearchHit(');
     expect(html).toContain('settings-toolbar--search-only');
     expect(html).not.toContain('settings-density-simple');
     expect(html).not.toContain('settings-density-advanced');
     expect(html).not.toContain('data-settings-density=');
     expect(html).not.toContain('settingsDensity');
     expect(css).toContain('.settings-search');
+    expect(css).toContain('.settings-search-results');
     expect(css).toContain('.settings-segmented');
   });
 

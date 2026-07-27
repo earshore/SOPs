@@ -75,14 +75,14 @@ test.describe('system settings', () => {
     await settings.openFromNav();
     await settings.goToSection('工具策略');
 
-    // Expand Master Analysis → 数据采集 (all closed by default)
+    // Expand Master Analysis; 数据采集 is a static L3 panel (no nested details)
     const master = page.locator(
       '#settings-section-tool-strategy details[data-settings-focus="master-analysis"]'
     );
     await master.locator(':scope > summary').click();
-    const scrape = page.locator('#settings-section-network');
+    const scrape = page.locator('#settings-section-network.settings-tool-l3--static');
+    await expect(scrape).toBeVisible();
     await scrape.scrollIntoViewIfNeeded();
-    await scrape.locator(':scope > summary').click();
     await expect(settings.proxyTestButton()).toBeVisible();
     await expect(settings.proxyTestButton()).toContainText(/测试连接/);
   });
@@ -117,6 +117,41 @@ test.describe('system settings', () => {
     await page.getByTestId('settings-search').fill('ACOS');
     const thresholds = page.locator('#ppc-thresholds');
     await expect(thresholds).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('settings-search-results')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="settings-search-results"] [data-search-hit-id="ppc-thresholds"]')
+    ).toBeVisible();
+  });
+
+  test('E2E-P1-search multi-hit list jumps secondary targets', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+
+    await page.getByTestId('settings-search').fill('清理');
+    const results = page.getByTestId('settings-search-results');
+    await expect(results).toBeVisible({ timeout: 5000 });
+    await results.locator('[data-search-hit-id="settings-data-cleanup-items"]').click();
+    await expect(page.locator('#settings-data-cleanup-items')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('#settings-data-cleanup-items')).toHaveJSProperty('open', true);
+  });
+
+  test('E2E-P1-nav jumps runtime presets and Deep Chat fold', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+
+    const nav = page.locator('nav.settings-panel-nav');
+    await nav.getByRole('button', { name: '工具策略', exact: true }).click();
+    await expect(nav.getByRole('button', { name: '应用策略预案', exact: true })).toBeVisible();
+    await expect(nav.getByRole('button', { name: '通用 AI 执行策略', exact: true })).toBeVisible();
+    await nav.getByRole('button', { name: '应用策略预案', exact: true }).click();
+    await expect(page.getByTestId('settings-runtime-presets')).toBeVisible({ timeout: 5000 });
+
+    await nav.getByRole('button', { name: 'Deep Chat', exact: true }).click();
+    const deepChat = page.locator(
+      '#settings-section-tool-strategy details[data-settings-focus="playground-deep-chat"]'
+    );
+    await expect(deepChat).toBeVisible({ timeout: 5000 });
+    await expect(deepChat).toHaveJSProperty('open', true);
   });
 
   test('E2E-P1-04 appearance section is reachable without runtime presets', async ({ page }) => {
@@ -210,8 +245,13 @@ test.describe('system settings', () => {
     await expect(nav.getByRole('button', { name: '模型与能力', exact: true })).toBeVisible();
 
     await nav.getByRole('button', { name: '工具策略', exact: true }).click();
+    await expect(nav.getByRole('button', { name: '应用策略预案', exact: true })).toBeVisible();
     await expect(nav.getByRole('button', { name: '数据采集', exact: true })).toBeVisible();
     await expect(nav.getByRole('button', { name: 'Master Analysis', exact: true })).toBeVisible();
+    await expect(nav.getByRole('button', { name: 'Deep Chat', exact: true })).toBeVisible();
+
+    await nav.getByRole('button', { name: '数据与备份', exact: true }).click();
+    await expect(nav.getByRole('button', { name: '清理项', exact: true })).toBeVisible();
   });
 
   test('E2E-P1-nav secondary jump opens target submodule (数据采集)', async ({ page }) => {

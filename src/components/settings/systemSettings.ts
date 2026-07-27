@@ -117,7 +117,10 @@ import {
 } from '@/components/settings/domain/settingsDeepLink';
 import {
   findFirstSettingsSearchMatch,
+  findSettingsSearchMatches,
   SETTINGS_SEARCH_INDEX,
+  toSettingsSearchHitViews,
+  type SettingsSearchHitView,
 } from '@/components/settings/domain/settingsSearch';
 import {
   measureSettingsNavMarkers,
@@ -325,6 +328,8 @@ interface SettingsPanelData {
   searchQuery: string;
   /** Last search hit id (section or focus target) */
   searchHitId: string;
+  /** Ranked multi-hit list for in-panel search dropdown */
+  searchHits: SettingsSearchHitView[];
   /** Appearance: current theme id (instant apply; not dirty) */
   appearanceThemeId: string;
   /** Appearance: color mode preference light|dark|system (instant; not dirty) */
@@ -546,6 +551,7 @@ interface SettingsPanelData {
   toggleNavGroup(groupId: string, sectionId: string): void;
   navigateToNavTarget(targetId: string, groupId?: string): void;
   onSettingsSearch(event?: Event): void;
+  selectSettingsSearchHit(hitId: string, sectionId?: string): void;
   scrollToSearchHit(hitId: string, sectionId?: string): void;
   loadAppearanceSettings(): void;
   setAppearanceTheme(themeId: string): void;
@@ -1302,6 +1308,7 @@ function createSettingsState(): Pick<
   | 'isOpen'
   | 'searchQuery'
   | 'searchHitId'
+  | 'searchHits'
   | 'appearanceThemeId'
   | 'appearanceColorMode'
   | 'appearanceColorModeRev'
@@ -1334,6 +1341,7 @@ function createSettingsState(): Pick<
 
     searchQuery: '',
     searchHitId: '',
+    searchHits: [] as SettingsSearchHitView[],
     navOpenGroup: null as string | null,
     activeNavTargetId: null as string | null,
     _navScrollUnbind: null as (() => void) | null,
@@ -1975,6 +1983,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.isOpen = true;
     this.searchQuery = '';
     this.searchHitId = '';
+    this.searchHits = [];
     const rawRuntime = StorageService.get(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS);
     this._runtimeHealthNormalized = isRuntimeRawInvalid(rawRuntime);
     this.loadRuntimeStrategy();
@@ -2374,7 +2383,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
   onSettingsSearch(event?: Event): void {
     const value = event?.target instanceof HTMLInputElement ? event.target.value : this.searchQuery;
     this.searchQuery = value;
-    const match = findFirstSettingsSearchMatch(value);
+    const matches = findSettingsSearchMatches(value, SETTINGS_SEARCH_INDEX, 6);
+    this.searchHits = toSettingsSearchHitViews(matches);
+    const match = matches[0] ?? null;
     this.searchHitId = match?.id ?? '';
     if (!match) {
       return;
@@ -2382,6 +2393,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
     queueMicrotask(() => {
       this.scrollToSearchHit(match.id, match.sectionId);
     });
+  },
+
+  selectSettingsSearchHit(hitId: string, sectionId?: string): void {
+    if (!hitId) return;
+    this.searchHitId = hitId;
+    this.scrollToSearchHit(hitId, sectionId);
   },
 
   scrollToSearchHit(hitId: string, sectionId?: string): void {

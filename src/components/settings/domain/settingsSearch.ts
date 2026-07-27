@@ -7,6 +7,14 @@ export interface SettingsSearchEntry {
   labels: string[];
 }
 
+/** UI row for the in-panel multi-hit search list. */
+export interface SettingsSearchHitView {
+  id: string;
+  sectionId: string;
+  title: string;
+  sectionLabel: string;
+}
+
 /**
  * Static search index. `id` is a DOM id or data-settings-focus value used to scroll/highlight.
  */
@@ -265,4 +273,36 @@ export function findFirstSettingsSearchMatch(
   index: readonly SettingsSearchEntry[] = SETTINGS_SEARCH_INDEX
 ): SettingsSearchEntry | null {
   return findSettingsSearchMatches(query, index, 1)[0] ?? null;
+}
+
+const SECTION_LABEL_BY_ID: Record<string, string> = {
+  'settings-section-llm': 'AI 模型与连接',
+  'settings-section-tool-strategy': '工具策略',
+  'settings-section-network': '工具策略',
+  'settings-section-data': '数据与备份',
+  'settings-section-appearance': '外观与体验',
+  'settings-section-performance': '开发者诊断',
+};
+
+/** Prefer the first intentional label (index authors put the product title first). */
+export function pickSettingsSearchHitTitle(entry: SettingsSearchEntry): string {
+  const preferred =
+    entry.labels.find(label => label.trim() && !/^[a-z0-9._-]+$/i.test(label.trim())) ||
+    entry.labels[0];
+  return (preferred || entry.id).trim();
+}
+
+export function resolveSettingsSearchSectionLabel(sectionId: string): string {
+  return SECTION_LABEL_BY_ID[sectionId] || sectionId;
+}
+
+export function toSettingsSearchHitViews(
+  entries: readonly SettingsSearchEntry[]
+): SettingsSearchHitView[] {
+  return entries.map(entry => ({
+    id: entry.id,
+    sectionId: entry.sectionId,
+    title: pickSettingsSearchHitTitle(entry),
+    sectionLabel: resolveSettingsSearchSectionLabel(entry.sectionId),
+  }));
 }

@@ -57,11 +57,38 @@
           data-testid="settings-search"
           placeholder="搜索设置…"
           aria-label="搜索设置"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-controls="settings-search-results"
+          :aria-expanded="(searchHits.length > 0).toString()"
           :value="searchQuery"
           @input="onSettingsSearch($event)"
         />
+        <div
+          id="settings-search-results"
+          class="settings-search-results"
+          data-testid="settings-search-results"
+          role="listbox"
+          aria-label="搜索结果"
+          :hidden="searchHits.length === 0"
+        >
+          <template x-for="hit in searchHits" :key="hit.id">
+            <button
+              type="button"
+              class="settings-search-results__item"
+              role="option"
+              :class="{ 'is-active': searchHitId === hit.id }"
+              :aria-selected="(searchHitId === hit.id).toString()"
+              :data-search-hit-id="hit.id"
+              @click="selectSettingsSearchHit(hit.id, hit.sectionId)"
+            >
+              <span class="settings-search-results__title" x-text="hit.title"></span>
+              <span class="settings-search-results__meta" x-text="hit.sectionLabel"></span>
+            </button>
+          </template>
+        </div>
       </div>
-      <p class="settings-search-empty" :hidden="!searchQuery || searchHitId" role="status">
+      <p class="settings-search-empty" :hidden="!searchQuery || searchHits.length > 0" role="status">
         无匹配设置项
       </p>
     </div>
