@@ -100,8 +100,35 @@
 
 1. **一个决策域 = 一个 list**：共享边框与表面，行之间用 divider 拼接，不用行级卡片
 2. **list 外 section head 负责分区叙事**；避免 list + 彩色 frame 双重「盒子感」
-3. **行内结构固定**：`meta`（icon + title + hint）| `control`
-4. **同一 list 内密度一致**；同组可共用弱化 icon，避免彩虹图标墙
+3. **行内结构固定**：`meta`（可选 icon + title + hint）| `control`
+4. **同一 list 内密度一致**
+5. **Icon 只服务顶层**（见 §3.1.1）；嵌套 list 禁止行级 icon
+
+### 3.1.1 设置面板层级与 Icon 规则（顶层设计）
+
+目标：用户一眼分清「我在哪一层」，而不是每行都贴纸。
+
+| 层级   | 名称         | 视觉身份                        | Icon                                     | 示例                                            |
+| ------ | ------------ | ------------------------------- | ---------------------------------------- | ----------------------------------------------- |
+| **L0** | 侧栏分类     | 导航                            | **要**（侧栏一级图标）                   | AI 模型 / 工具策略 / 外观                       |
+| **L1** | Section 头   | 分区叙事                        | **要**（`settings-section-head__icon`）  | 「外观与体验」「开发者诊断」                    |
+| **L2** | 顶层内容块   | 本分区主决策列表                | **行 icon 可选但统一：有则整 list 都有** | 外观 pref-list；诊断「调试配置」pref-list       |
+| **L3** | 容器分组     | 折叠 App / LLM Step / Submodule | **容器标题可弱标识**；**内行禁止 icon**  | `settings-tool-app`、`settings-llm-step`        |
+| **L4** | 嵌套字段列表 | 细节偏好                        | **禁止** `settings-pref-row__icon`       | tool-app 内 boolean pref-list；step 内推理 list |
+
+**判定「是否顶层 L2」：**  
+该 `settings-pref-list` 是否**直接**落在 section frame 下，且**祖先中没有** `settings-tool-app` / `settings-llm-step` / `settings-collapsible-card` / `settings-submodule`。
+
+- 是 → L2，行 icon 允许（与外观一致）
+- 否 → L3/L4，**必须去掉**行 icon，只留标题+hint+控件
+
+**原则摘要：**
+
+1. **最上层才示意**：导航 + section +（可选）顶层 pref 行
+2. **越深越安静**：嵌套只靠缩进、折叠标题、divider，不再叠小图标
+3. **同 list 一致**：同一 list 内不要「有的行有 icon、有的没有」（L2 全有或全无；L4 全无）
+4. **颜色不层级**：层级用结构与字重，不用彩虹 section 色带当主导航（Operational Quiet；彩色 frame 为遗留，择机中性化）
+5. **折叠 = 目录节点**：tool-app / llm-step 扮演「子目录」；其内部字段是叶子，叶子不戴 icon
 
 ### 3.2 Class 映射（历史 → 规范）
 

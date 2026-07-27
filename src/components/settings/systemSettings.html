@@ -764,9 +764,6 @@
                     >
                       <div class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__icon" aria-hidden="true"
-                            ><i class="fas fa-brain"></i
-                          ></span>
                           <div class="min-w-0">
                             <h5 id="llm-reasoning-heading" class="settings-pref-row__title">
                               推理
@@ -794,9 +791,6 @@
                       ></div>
                       <div class="settings-pref-row" :hidden="!llm.reasoningPrefs.enabled">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__icon" aria-hidden="true"
-                            ><i class="fas fa-gauge"></i
-                          ></span>
                           <div class="min-w-0">
                             <span class="settings-pref-row__title">推理等级</span>
                             <p class="settings-pref-row__hint">仅列出当前模型可用档位</p>
@@ -851,9 +845,6 @@
                     >
                       <div class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__icon" aria-hidden="true"
-                            ><i class="fas fa-layer-group"></i
-                          ></span>
                           <div class="min-w-0">
                             <label for="llm-service-tier" class="settings-pref-row__title"
                               >服务层级（service_tier）</label
@@ -1492,9 +1483,6 @@
                       >
                         <div class="settings-pref-row">
                           <div class="settings-pref-row__meta">
-                            <span class="settings-pref-row__icon" aria-hidden="true"
-                              ><i class="fas fa-database"></i
-                            ></span>
                             <div class="min-w-0">
                               <h4 class="settings-pref-row__title">启用分析缓存</h4>
                               <p class="settings-pref-row__hint">主分析 LLM 结果缓存</p>
@@ -1620,9 +1608,6 @@
                     <div class="settings-pref-list mt-3" data-testid="settings-dc-tools-pref-list">
                       <div class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__icon" aria-hidden="true"
-                            ><i class="fas fa-screwdriver-wrench"></i
-                          ></span>
                           <div class="min-w-0">
                             <h4 class="settings-pref-row__title">启用业务工具</h4>
                             <p class="settings-pref-row__hint">
@@ -1839,9 +1824,6 @@
                       >
                         <div class="settings-pref-row">
                           <div class="settings-pref-row__meta">
-                            <span class="settings-pref-row__icon" aria-hidden="true"
-                              ><i class="fas fa-database"></i
-                            ></span>
                             <div class="min-w-0">
                               <h4 class="settings-pref-row__title">SEO 处理缓存</h4>
                               <p class="settings-pref-row__hint">分析结果缓存</p>
@@ -1862,9 +1844,6 @@
 
                         <div class="settings-pref-row">
                           <div class="settings-pref-row__meta">
-                            <span class="settings-pref-row__icon" aria-hidden="true"
-                              ><i class="fas fa-filter"></i
-                            ></span>
                             <div class="min-w-0">
                               <h4 class="settings-pref-row__title">允许部分匹配</h4>
                               <p class="settings-pref-row__hint">匹配部分关键词</p>
@@ -1885,9 +1864,6 @@
 
                         <div class="settings-pref-row">
                           <div class="settings-pref-row__meta">
-                            <span class="settings-pref-row__icon" aria-hidden="true"
-                              ><i class="fas fa-code-branch"></i
-                            ></span>
                             <div class="min-w-0">
                               <h4 class="settings-pref-row__title">复数匹配</h4>
                               <p class="settings-pref-row__hint">单复数形式对齐</p>
@@ -1908,9 +1884,6 @@
 
                         <div class="settings-pref-row">
                           <div class="settings-pref-row__meta">
-                            <span class="settings-pref-row__icon" aria-hidden="true"
-                              ><i class="fas fa-code-branch"></i
-                            ></span>
                             <div class="min-w-0">
                               <h4 class="settings-pref-row__title">词干匹配</h4>
                               <p class="settings-pref-row__hint">词干归一后匹配</p>
@@ -1931,9 +1904,6 @@
 
                         <div class="settings-pref-row">
                           <div class="settings-pref-row__meta">
-                            <span class="settings-pref-row__icon" aria-hidden="true"
-                              ><i class="fas fa-font"></i
-                            ></span>
                             <div class="min-w-0">
                               <h4 class="settings-pref-row__title">区分大小写</h4>
                               <p class="settings-pref-row__hint">匹配时区分大小写</p>
@@ -2030,16 +2000,13 @@
                       >
                         <div class="settings-pref-row">
                           <div class="settings-pref-row__meta">
-                            <span class="settings-pref-row__icon" aria-hidden="true"
-                              ><i class="fas fa-box-archive"></i
-                            ></span>
                             <div class="min-w-0">
-                              <h4 class="settings-pref-row__title">Listing 评审缓存</h4>
-                              <p class="settings-pref-row__hint">Listing 评审 LLM 结果缓存</p>
+                              <h4 class="settings-pref-row__title">评审缓存</h4>
+                              <p class="settings-pref-row__hint">分析报告缓存</p>
                             </div>
                           </div>
                           <label class="settings-switch">
-                            <span class="sr-only">Listing 评审缓存</span>
+                            <span class="sr-only">评审缓存</span>
                             <input
                               type="checkbox"
                               :checked="runtimeStrategy.settings.keywordHunterListingReview.enableLlmCache"
@@ -2178,9 +2145,6 @@
                   <div class="settings-pref-list mt-3" data-testid="settings-ppc-bool-pref-list">
                     <div class="settings-pref-row">
                       <div class="settings-pref-row__meta">
-                        <span class="settings-pref-row__icon" aria-hidden="true"
-                          ><i class="fas fa-database"></i
-                        ></span>
                         <div class="min-w-0">
                           <h4 class="settings-pref-row__title">启用 LLM 缓存</h4>
                           <p class="settings-pref-row__hint">分析结果缓存</p>
@@ -2201,9 +2165,6 @@
 
                     <div class="settings-pref-row">
                       <div class="settings-pref-row__meta">
-                        <span class="settings-pref-row__icon" aria-hidden="true"
-                          ><i class="fas fa-robot"></i
-                        ></span>
                         <div class="min-w-0">
                           <h4 class="settings-pref-row__title">默认启用 Agent</h4>
                           <p class="settings-pref-row__hint">优先走 Agent 路径</p>
@@ -2224,9 +2185,6 @@
 
                     <div class="settings-pref-row">
                       <div class="settings-pref-row__meta">
-                        <span class="settings-pref-row__icon" aria-hidden="true"
-                          ><i class="fas fa-undo"></i
-                        ></span>
                         <div class="min-w-0">
                           <h4 class="settings-pref-row__title">允许本地回退</h4>
                           <p class="settings-pref-row__hint">模型失败时本地规则回退</p>
