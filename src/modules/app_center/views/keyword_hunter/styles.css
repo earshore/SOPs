@@ -81,50 +81,68 @@
   width: 2.25rem;
   height: 2.25rem;
   flex-basis: 2.25rem;
+  /* Fill + border + halo all share --color-primary (appearance accent) */
   border-color: var(--color-primary, #3b82f6);
   background: var(--color-primary, #3b82f6);
-  color: white;
+  color: #ffffff;
+  box-shadow: none;
 }
 
 .keyword-hunter-title-icon-btn--primary:hover,
 .keyword-hunter-title-icon-btn--primary:focus-visible {
-  border-color: var(--color-primary-dark, #1d4ed8);
-  background: var(--color-primary-dark, #1d4ed8);
-  color: white;
-  /* Use surface token — pure white ring reads as a broken double border on dark chrome */
-  box-shadow:
-    0 0 0 2px var(--surface-panel, #ffffff),
-    0 0 0 4px
-      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 40%, transparent);
+  border-color: var(--color-primary-dark, var(--color-primary, #1d4ed8));
+  background: var(--color-primary-dark, var(--color-primary, #1d4ed8));
+  color: #ffffff;
+  /* Mono halo — never a second hue or pure white ring */
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
+  outline: none;
+}
+
+#keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
+#keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
+#keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible,
+#keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:active {
+  border-color: var(--color-primary, #3b82f6);
+  background: var(--color-primary, #3b82f6);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+#keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
+#keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible {
+  border-color: var(--color-primary-dark, var(--color-primary, #1d4ed8));
+  background: var(--color-primary-dark, var(--color-primary, #1d4ed8));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
 }
 
 .dark .keyword-hunter-title-icon-btn--primary,
+.dark #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
 [data-color-mode-resolved='dark'] .keyword-hunter-title-icon-btn--primary,
-[data-theme='dark'] .keyword-hunter-title-icon-btn--primary {
-  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 75%, #fff);
+[data-color-mode-resolved='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
+[data-theme='dark'] .keyword-hunter-title-icon-btn--primary,
+[data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary {
+  border-color: var(--color-primary, #818cf8);
   background: var(--color-primary, #818cf8);
   color: #f8fafc;
+  box-shadow: none;
 }
 
 .dark .keyword-hunter-title-icon-btn--primary:hover,
 .dark .keyword-hunter-title-icon-btn--primary:focus-visible,
+.dark #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
+.dark #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible,
 [data-color-mode-resolved='dark'] .keyword-hunter-title-icon-btn--primary:hover,
 [data-color-mode-resolved='dark'] .keyword-hunter-title-icon-btn--primary:focus-visible,
+[data-color-mode-resolved='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
+[data-color-mode-resolved='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible,
 [data-theme='dark'] .keyword-hunter-title-icon-btn--primary:hover,
-[data-theme='dark'] .keyword-hunter-title-icon-btn--primary:focus-visible {
-  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 55%, #e0e7ff);
-  background: color-mix(in srgb, var(--color-primary, #818cf8) 82%, #0f172a);
-  color: #fff;
-  box-shadow:
-    0 0 0 2px var(--surface-panel, #0f172a),
-    0 0 0 4px color-mix(in srgb, var(--color-primary, #818cf8) 45%, transparent);
-}
-
-.dark #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
-[data-color-mode-resolved='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
-[data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary {
-  border-width: 1px;
-  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 70%, transparent);
+[data-theme='dark'] .keyword-hunter-title-icon-btn--primary:focus-visible,
+[data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
+[data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible {
+  border-color: var(--color-primary, #818cf8);
+  background: color-mix(in srgb, var(--color-primary, #818cf8) 88%, #fff);
+  color: #0f172a;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #818cf8) 32%, transparent);
 }
 
 
@@ -914,7 +932,7 @@
 #keyword-hunter-btn-start-analysis:hover,
 #keyword-hunter-translate-btn:hover:not(:disabled),
 #keyword-hunter-btn-start-analysis:active {
-  box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
   transform: none;
 }
 

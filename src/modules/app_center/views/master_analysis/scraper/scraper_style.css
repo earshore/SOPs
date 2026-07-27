@@ -1543,3 +1543,181 @@ textarea:focus-visible {
 [data-theme='dark'] .asin-card .border-slate-200\/60 {
   border-color: color-mix(in srgb, #fff 10%, transparent) !important;
 }
+
+/* ---- Dark mode: manual config + elevated shells ---- */
+.dark .card-elevated,
+[data-color-mode-resolved='dark'] .card-elevated,
+[data-theme='dark'] .card-elevated {
+  background: var(--surface-card, #1e293b) !important;
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1)) !important;
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(0, 0, 0, 0.26)) !important;
+}
+
+.dark .card-elevated:hover,
+[data-color-mode-resolved='dark'] .card-elevated:hover,
+[data-theme='dark'] .card-elevated:hover {
+  background: var(--surface-card-hover, #334155) !important;
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 40%, transparent) !important;
+  box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.7) !important;
+}
+
+.dark .config-header:hover,
+[data-color-mode-resolved='dark'] .config-header:hover,
+[data-theme='dark'] .config-header:hover {
+  background: color-mix(in srgb, var(--surface-card-hover, #334155) 88%, transparent);
+}
+
+.dark .config-header:hover .config-chevron-wrap,
+[data-color-mode-resolved='dark'] .config-header:hover .config-chevron-wrap,
+[data-theme='dark'] .config-header:hover .config-chevron-wrap {
+  background: color-mix(in srgb, var(--color-primary, #818cf8) 28%, #0f172a);
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 45%, transparent);
+}
+
+.dark .config-header:hover .config-chevron-wrap i,
+[data-color-mode-resolved='dark'] .config-header:hover .config-chevron-wrap i,
+[data-theme='dark'] .config-header:hover .config-chevron-wrap i {
+  color: #f8fafc;
+}
+
+.dark [x-data='scraperPanel'] .manual-config-panel,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel {
+  --scraper-border: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  --scraper-surface: var(--surface-card, #1e293b);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-panel, #0f172a) 92%, #000) 0%,
+    var(--surface-card, #1e293b) 48%
+  );
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark [x-data='scraperPanel'] .manual-config-section,
+.dark [x-data='scraperPanel'] .manual-input-card,
+.dark [x-data='scraperPanel'] .manual-option-card,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-section,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-input-card,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-option-card,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-section,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-input-card,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-option-card {
+  background: color-mix(in srgb, var(--surface-card, #1e293b) 94%, #000) !important;
+  border-color: var(--scraper-border, rgba(255, 255, 255, 0.1)) !important;
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark [x-data='scraperPanel'] .manual-option-card:hover,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-option-card:hover,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-option-card:hover {
+  background: var(--surface-card-hover, #334155) !important;
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 42%, transparent) !important;
+}
+
+.dark [x-data='scraperPanel'] .manual-site-btn,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-site-btn,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-site-btn {
+  background: var(--scraper-surface, #1e293b) !important;
+  border-color: var(--scraper-border, rgba(255, 255, 255, 0.1)) !important;
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark [x-data='scraperPanel'] .manual-site-btn:hover,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-site-btn:hover,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-site-btn:hover {
+  background: var(--surface-card-hover, #334155) !important;
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 45%, transparent) !important;
+}
+
+.dark [x-data='scraperPanel'] .manual-site-btn.selected,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-site-btn.selected,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-site-btn.selected {
+  background: color-mix(in srgb, var(--color-primary, #818cf8) 18%, var(--surface-card, #1e293b))
+    !important;
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 65%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #818cf8) 22%, transparent) !important;
+}
+
+.dark [x-data='scraperPanel'] .manual-site-btn .site-flag,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-site-btn .site-flag,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-site-btn .site-flag {
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, #000) !important;
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1)) !important;
+  color: var(--color-text-secondary, #cbd5e1) !important;
+}
+
+.dark [x-data='scraperPanel'] .manual-asin-textarea,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-asin-textarea,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-asin-textarea {
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 90%, #000) !important;
+  border-color: var(--scraper-border, rgba(255, 255, 255, 0.1)) !important;
+  color: var(--color-text-primary, #f8fafc) !important;
+}
+
+.dark [x-data='scraperPanel'] .manual-asin-textarea::placeholder,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-asin-textarea::placeholder,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-asin-textarea::placeholder {
+  color: var(--color-text-placeholder, #64748b) !important;
+}
+
+.dark [x-data='scraperPanel'] .manual-config-label,
+.dark [x-data='scraperPanel'] .manual-config-panel .text-slate-700,
+.dark [x-data='scraperPanel'] .manual-config-panel .text-slate-800,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-label,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-700,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-800,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-label,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-700,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-800 {
+  color: var(--color-text-primary, #f8fafc) !important;
+}
+
+.dark [x-data='scraperPanel'] .manual-config-panel .text-slate-400,
+.dark [x-data='scraperPanel'] .manual-config-panel .text-slate-500,
+.dark [x-data='scraperPanel'] .manual-config-panel .text-slate-600,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-400,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-500,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-600,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-400,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-500,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-600 {
+  color: var(--color-text-secondary, #cbd5e1) !important;
+}
+
+.dark [x-data='scraperPanel'] .manual-config-panel .bg-slate-50,
+.dark [x-data='scraperPanel'] .manual-config-panel .bg-white,
+.dark [x-data='scraperPanel'] .config-header .bg-slate-50,
+.dark [x-data='scraperPanel'] .config-header .bg-blue-50,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .bg-slate-50,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .bg-white,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .config-header .bg-slate-50,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .config-header .bg-blue-50,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .bg-slate-50,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .bg-white,
+[data-theme='dark'] [x-data='scraperPanel'] .config-header .bg-slate-50,
+[data-theme='dark'] [x-data='scraperPanel'] .config-header .bg-blue-50 {
+  background-color: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, #000) !important;
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1)) !important;
+}
+
+.dark [x-data='scraperPanel'] .manual-config-panel .border-slate-100,
+.dark [x-data='scraperPanel'] .manual-config-panel .border-slate-200,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .border-slate-100,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .border-slate-200,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .border-slate-100,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .border-slate-200 {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1)) !important;
+}
+
+.dark [x-data='scraperPanel'] .manual-config-panel .toggle-track,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .toggle-track,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .toggle-track {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.dark [x-data='scraperPanel'] .manual-config-panel .toggle-thumb,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .toggle-thumb,
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .toggle-thumb {
+  background: #f8fafc;
+}
