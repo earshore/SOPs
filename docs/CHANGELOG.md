@@ -13,6 +13,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [3.0.11] - 2026-07-27
+
+> 正式 GA。发布后 GitHub Latest 指向 `v3.0.11`；上一 GA 与生产回滚基线均为 `v3.0.10`。
+> 生产目标为 `https://sops.hongecb.store`。
+> 本版定稿 `v3.0.11-rc.1`…`rc.13` 的全部候选增量：系统设置 pref-list 收敛与层级 ≤L3、企业主题 v2 深色对比、Deep Chat 动态推理/vision 附件、四路径 LLM 传输对齐，以及上线前 build+smoke 门禁修复。
+
+### Added
+
+- 系统设置 Preference List 规范与统一视觉：`settings-pref-row` / fold / tool-page L3 壳层、搜索多命中与侧栏深链对齐。
+- Deep Chat 按模型能力动态渲染推理 effort（含 low…max clamp）；vision 模型支持当轮图片附件（≤4 张 / 5MB，base64 不落盘）。
+- AI 模型连接：厂商 API 类型（OpenAI / Anthropic / Gemini）驱动路径匹配；凭证/服务层级改为 L2 并列控制。
+- 工具策略即时 switch 保存、应用策略预案分段控件、默认模型「跟随全局 / 覆盖」文案。
+
+### Changed
+
+- 设置信息架构压到最多 L3；应用中心工具页（Master Analysis / Playground / Keyword Hunter / PPC）与外观区视觉对齐。
+- Token 上限收敛到「模型与能力」统一配置；运行策略预设更名为「应用策略预案」。
+- 深色模式：mega menu / 卡片 hover / 侧栏 L2 active / scraper 与 ASIN 目标可读性全面补齐；KH「开始分析」填充与描边跟随 Appearance primary。
+- 外观 color-mode 切换 snap 过渡，减弱文字滞后与卡顿；segmented 控件样式与 effort 档统一。
+
+### Fixed
+
+- content-surface 门禁：scraper 深色 utility 重写避免 `text-slate-*` 字面量抬升 baseline。
+- 发布冒烟：LLM 连接步骤适配 `settings-pref-fold` 折叠结构；utility-bridge / CSS audit / Prettier 预检闭环。
+- 若干设置与主题债务：默认模型下拉对比度、数字块密度、导出勾选框布局、panel footer 遮挡等。
+
 ## [3.0.11-rc.13] - 2026-07-27
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。

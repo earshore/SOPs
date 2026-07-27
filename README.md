@@ -25,23 +25,30 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-| 通道                         | 版本            | 说明                                                                      |
-| ---------------------------- | --------------- | ------------------------------------------------------------------------- |
-| **GitHub Latest（稳定 GA）** | `v3.0.10`       | 生产推荐版本                                                              |
-| **当前 Pre-release 候选**    | `v3.0.11-rc.13` | Deep Chat 推理档位按模型能力动态化 + vision 图片附件门控；**勿**默认当生产 |
-| package.json                 | `3.0.11-rc.13`  | 与 RC tag / Release 一致（GA 前）                                         |
-| 上一 GA                      | `v3.0.10`       | 回滚参考                                                                  |
+| 通道                         | 版本      | 说明                                                                 |
+| ---------------------------- | --------- | -------------------------------------------------------------------- |
+| **GitHub Latest（稳定 GA）** | `v3.0.11` | 生产推荐版本                                                         |
+| **当前 Pre-release 候选**    | —         | 无开放 RC；下一候选进入 `v3.0.12-rc.1` 或 `v3.1.0-rc.1`               |
+| package.json                 | `3.0.11`  | 与 GA tag / Release 一致                                             |
+| 上一 GA                      | `v3.0.10` | 回滚参考                                                             |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.13` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.13`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，上一 GA 为 `v3.0.10`。
 
-`v3.0.11-rc.13`（2026-07-27，Pre-release）收口 rc.12 之后的 Deep Chat 能力入口：
+`v3.0.11`（2026-07-27，稳定 GA）定稿 `v3.0.11-rc.1`…`rc.13`：
+
+- **系统设置**：pref-list 规范、层级 ≤L3、搜索多命中与深链、工具策略即时保存、外观/工具页视觉统一。
+- **Deep Chat / LLM**：动态推理档、vision 图片当轮附件、四路径 API 官方对齐、凭证/类型 L2 控制。
+- **主题 v2 与深色**：双色轴、mega/卡片/侧栏/scraper 对比补齐，KH CTA 跟 Appearance primary。
+- 发布后 GitHub Latest 指向 `v3.0.11`；上一 GA 与生产回滚基线为 `v3.0.10`，生产目标为 `https://sops.hongecb.store`。
+
+`v3.0.11-rc.13`（2026-07-27，Pre-release，已并入 GA）收口 rc.12 之后的 Deep Chat 能力入口：
 
 - **推理档位**：按 `cap.reasoningEfforts` 动态渲染 low…max，超纲档位 clamp 回写；与系统设置完整档位表对齐。
 - **图片附件**：`supportsVision` 门控上传；当轮 `visionUserParts` 透传；base64 不落盘；单轮 4 张 / 5MB。
-- GitHub Latest **仍指向** `v3.0.10`；回滚基线为 `v3.0.10`。
+- 已并入 `v3.0.11`；历史回滚基线参考仍为 `v3.0.10`。
 
 `v3.0.11-rc.12`（2026-07-27，Pre-release）收口 rc.11 之后的四路径 LLM API 官方对齐与上线前残留风险修复：
 
