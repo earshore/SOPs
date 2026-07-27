@@ -531,10 +531,11 @@
   display: inline-flex;
   align-items: center;
   gap: 0.125rem;
-  padding: 0.125rem;
-  border: 1px solid var(--settings-border, #e2e8f0);
+  padding: 0.1875rem;
+  border: 1px solid color-mix(in srgb, var(--settings-border, #e2e8f0) 88%, var(--settings-text-muted));
   border-radius: var(--settings-radius-control, 0.75rem);
-  background: var(--settings-surface-muted, #f8fafc);
+  background: color-mix(in srgb, var(--settings-surface-muted, #f8fafc) 88%, var(--settings-text-muted) 12%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 55%, transparent);
 }
 
 .settings-segmented__btn {
@@ -561,10 +562,14 @@
 }
 
 .settings-segmented__btn.is-active,
-.settings-segmented__btn[aria-pressed='true'] {
-  background: var(--settings-accent-soft);
-  color: var(--settings-accent);
-  font-weight: 600;
+.settings-segmented__btn[aria-pressed='true'],
+.settings-segmented__btn[aria-checked='true'] {
+  background: var(--settings-surface, #fff);
+  color: var(--settings-accent-strong, var(--settings-accent));
+  font-weight: 650;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 10%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--settings-accent) 28%, transparent);
 }
 
 .settings-segmented__btn:focus-visible {
@@ -1463,20 +1468,35 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   color: color-mix(in srgb, #8b5cf6 55%, var(--settings-text-muted));
 }
 
-/* Effort segmented: width rules only (layout shell is settings-pref-row) */
+/* Effort / preset segmented: slightly stronger pill in pref-rows */
 .settings-segmented--effort {
   flex: 1 1 14rem;
   min-width: 12rem;
   max-width: 22rem;
   margin-left: auto;
+  border-color: color-mix(in srgb, var(--settings-accent) 18%, var(--settings-border, #e2e8f0));
+  background: color-mix(
+    in srgb,
+    var(--settings-accent-soft) 42%,
+    var(--settings-surface-muted, #f8fafc)
+  );
 }
 
 .settings-segmented--effort .settings-segmented__btn {
   flex: 1 1 0;
   min-width: 0;
-  padding: 0.25rem 0.35rem;
-  font-size: 0.6875rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  padding: 0.28rem 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.settings-segmented--effort .settings-segmented__btn.is-active,
+.settings-segmented--effort .settings-segmented__btn[aria-pressed='true'],
+.settings-segmented--effort .settings-segmented__btn[aria-checked='true'] {
+  background: var(--settings-surface, #fff);
+  color: var(--settings-accent-strong, var(--settings-accent));
+  font-weight: 700;
 }
 
 /* L3 directory shells — visual peers of .settings-llm-step */

@@ -564,7 +564,8 @@ it('exposes deepChat business tools toggle binding in settings template', () => 
   // Peer pref-row title (flattened; no nested "启用业务工具" section)
   expect(template).toContain('settings-pref-row__title">业务工具');
   expect(template).toContain('settings-save-tool-strategy');
-  expect(template).toContain('切换后立即生效');
+  expect(template).toContain('是否调用由模型决定');
+  expect(template).not.toContain('切换后立即生效');
 });
 
 it('setRuntimeBoolean instant-persists runtime strategy without footer save', async () => {
