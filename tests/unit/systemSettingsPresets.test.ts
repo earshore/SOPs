@@ -278,4 +278,30 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(khChunk).not.toContain('grid gap-3 sm:grid-cols-2');
     expect(khChunk).not.toContain('settings-checkbox');
   });
+
+  it('isolated pure booleans use pref-list + setRuntimeBoolean paths', () => {
+    expect(html).toContain('data-testid="settings-ma-cache-pref-list"');
+    expect(html).toContain("setRuntimeBoolean('masterAnalysis.enableCache', $event)");
+
+    expect(html).toContain('data-testid="settings-dc-tools-pref-list"');
+    expect(html).toContain("setRuntimeBoolean('deepChat.enableBusinessTools', $event)");
+
+    expect(html).toContain('data-testid="settings-kh-listing-cache-pref-list"');
+    expect(html).toContain(
+      "setRuntimeBoolean('keywordHunterListingReview.enableLlmCache', $event)"
+    );
+
+    for (const testId of [
+      'settings-ma-cache-pref-list',
+      'settings-dc-tools-pref-list',
+      'settings-kh-listing-cache-pref-list',
+    ]) {
+      const start = html.indexOf(`data-testid="${testId}"`);
+      expect(start).toBeGreaterThan(-1);
+      const chunk = html.slice(start, start + 1200);
+      expect(chunk).toContain('settings-pref-row');
+      expect(chunk).toContain('settings-switch');
+      expect(chunk).not.toContain('settings-checkbox');
+    }
+  });
 });

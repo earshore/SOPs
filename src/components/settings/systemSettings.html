@@ -1485,17 +1485,28 @@
                           />
                         </label>
                       </div>
-                      <label
-                        class="mt-3 flex min-h-[36px] items-center gap-2 text-xs font-semibold text-slate-700"
+                      <div
+                        class="settings-pref-list mt-3"
+                        data-testid="settings-ma-cache-pref-list"
                       >
-                        <input
-                          type="checkbox"
-                          :checked="runtimeStrategy.settings.masterAnalysis.enableCache"
-                          @change="setRuntimeBoolean('masterAnalysis.enableCache', $event)"
-                          class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
-                        />
-                        启用分析缓存
-                      </label>
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">启用分析缓存</h4>
+                              <p class="settings-pref-row__hint">主分析 LLM 结果缓存</p>
+                            </div>
+                          </div>
+                          <label class="settings-switch">
+                            <span class="sr-only">启用分析缓存</span>
+                            <input
+                              type="checkbox"
+                              :checked="runtimeStrategy.settings.masterAnalysis.enableCache"
+                              @change="setRuntimeBoolean('masterAnalysis.enableCache', $event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                          </label>
+                        </div>
+                      </div>
                       <div class="mt-3 grid gap-3 sm:grid-cols-4">
                         <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
                           <label class="block">
@@ -1602,23 +1613,31 @@
                       业务工具
                     </h5>
                     <p class="settings-card__desc mt-1">注入搜索等工具；是否调用由模型决定。</p>
-                    <label
-                      class="mt-3 flex min-h-[40px] cursor-pointer items-start gap-2 text-xs font-semibold text-slate-700"
+                    <div
+                      class="settings-pref-list mt-3"
+                      data-testid="settings-dc-tools-pref-list"
                     >
-                      <input
-                        id="runtime-deep-chat-enable-business-tools"
-                        type="checkbox"
-                        class="settings-checkbox mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300"
-                        :checked="runtimeStrategy.settings.deepChat.enableBusinessTools"
-                        @change="setRuntimeBoolean('deepChat.enableBusinessTools', $event)"
-                      />
-                      <span class="min-w-0">
-                        <span class="block">启用业务工具（网页搜索 / 搜索 X / 会话只读工具）</span>
-                        <span class="mt-0.5 block font-normal text-slate-500">
-                          修改后需保存。
-                        </span>
-                      </span>
-                    </label>
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">启用业务工具</h4>
+                            <p class="settings-pref-row__hint">
+                              网页搜索 / 搜索 X / 会话只读；修改后需保存
+                            </p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">启用业务工具</span>
+                          <input
+                            id="runtime-deep-chat-enable-business-tools"
+                            type="checkbox"
+                            :checked="runtimeStrategy.settings.deepChat.enableBusinessTools"
+                            @change="setRuntimeBoolean('deepChat.enableBusinessTools', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="mt-3 grid gap-3 sm:grid-cols-4">
@@ -1986,15 +2005,28 @@
                             class="settings-control settings-control--sm"
                         /></label>
                       </div>
-                      <label
-                        class="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-700"
-                        ><input
-                          type="checkbox"
-                          :checked="runtimeStrategy.settings.keywordHunterListingReview.enableLlmCache"
-                          @change="setRuntimeBoolean('keywordHunterListingReview.enableLlmCache', $event)"
-                          class="settings-checkbox h-4 w-4 shrink-0 rounded border-slate-300"
-                        />Listing 评审缓存</label
+                      <div
+                        class="settings-pref-list mt-3"
+                        data-testid="settings-kh-listing-cache-pref-list"
                       >
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">Listing 评审缓存</h4>
+                              <p class="settings-pref-row__hint">Listing 评审 LLM 结果缓存</p>
+                            </div>
+                          </div>
+                          <label class="settings-switch">
+                            <span class="sr-only">Listing 评审缓存</span>
+                            <input
+                              type="checkbox"
+                              :checked="runtimeStrategy.settings.keywordHunterListingReview.enableLlmCache"
+                              @change="setRuntimeBoolean('keywordHunterListingReview.enableLlmCache', $event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                          </label>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
