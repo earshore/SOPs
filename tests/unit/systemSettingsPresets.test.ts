@@ -316,11 +316,47 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(deepChatChunk).toContain("toolStrategyTargetItemsByIds(['playground-deep-chat'])");
     expect(deepChatChunk).toContain('data-settings-nav-id="deep-chat-business-tools-title"');
     expect(deepChatChunk).toContain('data-testid="settings-dc-tools-pref-list"');
-    expect(deepChatChunk).toContain('运行限额');
+    expect(deepChatChunk).toContain("setRuntimeNumber('deepChat.requestTimeoutMs'");
+
+    // Tools is a peer pref row — not a nested section titled under the switch
+    expect(deepChatChunk).toContain('settings-pref-row__title">业务工具');
+    expect(deepChatChunk).not.toContain('业务工具</h5>');
+    expect(deepChatChunk).not.toContain('运行限额');
 
     // Must not re-split Deep Chat into stacked product pages
     expect(deepChatChunk).not.toContain('settings-tool-page-stack');
     expect((deepChatChunk.match(/class="settings-tool-page(?:\s|"|$)/g) || []).length).toBe(1);
+  });
+
+  it('Master Analysis uses two product tool-pages (scrape + AI) like Keyword Hunter', () => {
+    const maStart = html.indexOf('>Master Analysis<');
+    expect(maStart).toBeGreaterThan(-1);
+    const maChunk = html.slice(maStart, html.indexOf('Playground \u00b7 Deep Chat', maStart));
+
+    expect(maChunk).toContain('settings-tool-page-stack');
+    expect(maChunk).toContain('data-settings-nav-id="master-analysis-scrape"');
+    expect(maChunk).toContain('data-settings-nav-id="master-analysis-ai"');
+    expect(maChunk).toContain('id="settings-section-network"');
+    expect(maChunk).toContain("toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])");
+    expect((maChunk.match(/class="settings-tool-page(?:\s|"|$)/g) || []).length).toBe(2);
+
+    // No nested collapsible product cards under Master Analysis app body
+    expect(maChunk).not.toContain('settings-submodule');
+    expect(maChunk).not.toContain('settings-collapsible-card');
+  });
+
+  it('PPC Tools is one product tool-page (Deep Chat pattern), not ad-hoc slate card', () => {
+    const ppcStart = html.indexOf('>PPC Tools<');
+    expect(ppcStart).toBeGreaterThan(-1);
+    const ppcChunk = html.slice(ppcStart, html.indexOf('settings-strategy-footer', ppcStart));
+
+    expect(ppcChunk).toContain('settings-tool-page mt-3');
+    expect(ppcChunk).toContain("toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])");
+    expect(ppcChunk).toContain('data-testid="settings-ppc-bool-pref-list"');
+    expect(ppcChunk).toContain('settings-tool-page__model');
+    expect(ppcChunk).not.toContain('settings-tool-page-stack');
+    expect(ppcChunk).not.toContain('border-slate-100 bg-slate-50/70');
+    expect((ppcChunk.match(/class="settings-tool-page(?:\s|"|$)/g) || []).length).toBe(1);
   });
 
   it('P2 LLM reasoning uses pref-list + frozen effort contracts', () => {

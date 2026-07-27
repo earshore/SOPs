@@ -561,7 +561,8 @@ it('exposes deepChat business tools toggle binding in settings template', () => 
   );
   expect(template).toContain("setRuntimeBoolean('deepChat.enableBusinessTools'");
   expect(template).toContain('runtimeStrategy.settings.deepChat.enableBusinessTools');
-  expect(template).toContain('启用业务工具');
+  // Peer pref-row title (flattened; no nested "启用业务工具" section)
+  expect(template).toContain('settings-pref-row__title">业务工具');
   expect(template).toContain('settings-save-tool-strategy');
   expect(template).toContain('修改后需保存');
 });
