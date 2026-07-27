@@ -35,13 +35,17 @@ function makeSvgFile(): File {
 function createMockChat(): DeepChatElement {
   const host = document.createElement('div') as unknown as DeepChatElement;
   const shadow = host.attachShadow({ mode: 'open' });
-  shadow.innerHTML = `
-    <div id="input">
-      <div id="text-input-container">
-        <div id="text-input" contenteditable="true"></div>
-      </div>
-    </div>
-  `;
+  // Build fixture with DOM APIs (static structure only; no HTML string injection).
+  const input = document.createElement('div');
+  input.id = 'input';
+  const textInputContainer = document.createElement('div');
+  textInputContainer.id = 'text-input-container';
+  const textInput = document.createElement('div');
+  textInput.id = 'text-input';
+  textInput.contentEditable = 'true';
+  textInputContainer.append(textInput);
+  input.append(textInputContainer);
+  shadow.append(input);
   return host;
 }
 
