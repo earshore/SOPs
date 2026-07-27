@@ -39,7 +39,6 @@ import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorageBo
 import { fetchModelsFromApi, callLLM } from '@/services/llmService';
 import {
   API_PATH_OPTIONS,
-  DEFAULT_API_PATH_ID,
   DEFAULT_REASONING_EFFORTS,
   DEFAULT_REASONING_PREFS,
   buildFullApiUrl,
@@ -148,6 +147,35 @@ type CapabilityBadge = {
   active: boolean;
   title: string;
 };
+
+/** Protocol family shown next to provider; drives apiPath (not free-form path pick). */
+type LlmApiFamilyId = 'openai' | 'anthropic' | 'gemini';
+
+interface LlmApiFamilyOption {
+  id: LlmApiFamilyId;
+  label: string;
+}
+
+const LLM_API_FAMILY_OPTIONS: readonly LlmApiFamilyOption[] = [
+  { id: 'openai', label: 'OpenAI' },
+  { id: 'anthropic', label: 'Anthropic' },
+  { id: 'gemini', label: 'Gemini' },
+] as const;
+
+/** OpenAI family defaults to /responses; runtime falls back to chat/completions on 404. */
+function apiPathIdForFamily(family: LlmApiFamilyId): ApiPathId {
+  if (family === 'anthropic') return 'anthropic_messages';
+  if (family === 'gemini') return 'gemini_generate';
+  return 'responses';
+}
+
+function apiFamilyFromPathId(pathId: ApiPathId | unknown): LlmApiFamilyId {
+  const id = normalizeApiPathId(pathId);
+  if (id === 'anthropic_messages') return 'anthropic';
+  if (id === 'gemini_generate') return 'gemini';
+  // responses + chat_completions both map to OpenAI family
+  return 'openai';
+}
 
 function pathIdToBadgeLabel(pathId: ApiPathId): string {
   if (pathId === 'responses') return 'Responses';
@@ -328,6 +356,8 @@ interface SettingsPanelData {
     persist?: boolean;
   }): boolean;
   apiPathOptions: readonly ApiPathOption[];
+  llmApiFamilyOptions: readonly LlmApiFamilyOption[];
+  llmApiFamily: LlmApiFamilyId;
   fullApiUrlPreview: string;
   apiPathCapabilityHint: string;
   llmSetupReadinessText: string;
@@ -441,6 +471,7 @@ interface SettingsPanelData {
   testProxyConnection(): Promise<void>;
   setLlmProvider(event: Event): void;
   setLlmEndpoint(event: Event): void;
+  setLlmApiFamily(event: Event): void;
   setLlmApiPath(event: Event): void;
   setLlmApiPathId(id: string): void;
   setLlmApiKey(event: Event): void;
@@ -474,6 +505,8 @@ interface SettingsPanelData {
   toggleProxyKeyVisibility(): void;
   getModelValue(model: ModelOption): string;
   getModelLabel(model: ModelOption): string;
+  /** Tool-strategy select options: Provider:modelId */
+  getToolStrategyModelOptionLabel(model: ModelOption): string;
   isModelSelected(model: ModelOption): boolean;
   refreshLocalDataUsage(): Promise<void>;
   isPartialLocalDataExport: boolean;
@@ -553,9 +586,9 @@ interface ToolStrategyTargetView {
   modelHint: string;
   model: string;
   resolvedModel: string;
-  /** Native option text: plain 跟随全局 (no resolved model styling inside <option>). */
+  /** Native follow option: Provider:model(跟随全局). */
   followGlobalOptionLabel: string;
-  /** Quiet resolved target shown beside the select when following global. */
+  /** Hint when following global; kept for compatibility (UI uses fixed copy). */
   followGlobalResolvedLabel: string;
 }
 
@@ -1327,7 +1360,8 @@ function createSettingsState(): Pick<
       models: [],
       serviceTier: undefined,
       reasoningPrefs: { ...DEFAULT_REASONING_PREFS },
-      apiPath: DEFAULT_API_PATH_ID,
+      // OpenAI family default: /responses (runtime falls back to chat/completions).
+      apiPath: apiPathIdForFamily('openai'),
       showKey: false,
       isFetching: false,
       isTesting: false,
@@ -1456,6 +1490,14 @@ const settingsPanelBehavior: SettingsPanelPart = {
     return API_PATH_OPTIONS;
   },
 
+  get llmApiFamilyOptions(): readonly LlmApiFamilyOption[] {
+    return LLM_API_FAMILY_OPTIONS;
+  },
+
+  get llmApiFamily(): LlmApiFamilyId {
+    return apiFamilyFromPathId(this.llm.apiPath);
+  },
+
   get fullApiUrlPreview(): string {
     const { fullUrl } = buildFullApiUrl(
       this.llm.endpoint || this.defaultLlmEndpoint,
@@ -1505,11 +1547,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   get selectedApiPathPathLabel(): string {
-    return this.selectedApiPathOption?.pathLabel || '/chat/completions';
+    return this.selectedApiPathOption?.pathLabel || '/responses';
   },
 
   get selectedApiPathNameLabel(): string {
-    return this.selectedApiPathOption?.label || 'Chat Completions';
+    return this.selectedApiPathOption?.label || 'Responses';
   },
 
   get reasoningEffortLabel(): string {
@@ -1646,11 +1688,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
       const model = this.toolStrategy.targetModels[target.id] || '';
       const resolvedModel = model || this.llm.model || '未选择模型';
       const providerLabel = this.toolStrategyProviderLabel;
-      const followGlobalOptionLabel = '跟随全局';
-      const followGlobalResolvedLabel =
+      const followGlobalOptionLabel =
         resolvedModel && resolvedModel !== '未选择模型'
-          ? `${providerLabel}:${resolvedModel}`
-          : '未选择模型';
+          ? `${providerLabel}: ${resolvedModel}(跟随全局)`
+          : '未选择模型(跟随全局)';
+      const followGlobalResolvedLabel = '跟随全局模型';
       return {
         ...target,
         model,
@@ -2655,7 +2697,16 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.llm.endpoint = (event.target as HTMLInputElement).value;
   },
 
+  setLlmApiFamily(event: Event): void {
+    const raw = (event.target as HTMLSelectElement).value;
+    const family: LlmApiFamilyId =
+      raw === 'anthropic' || raw === 'gemini' || raw === 'openai' ? raw : 'openai';
+    this.llm.apiPath = apiPathIdForFamily(family);
+    this.llmApiPathMenuOpen = false;
+  },
+
   setLlmApiPath(event: Event): void {
+    // Legacy select hook: still normalize, but UI now drives path via family.
     this.llm.apiPath = normalizeApiPathId((event.target as HTMLSelectElement).value);
     this.llmApiPathMenuOpen = false;
   },
@@ -2824,6 +2875,13 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   getModelLabel(model: ModelOption): string {
     return this.getModelValue(model);
+  },
+
+  getToolStrategyModelOptionLabel(model: ModelOption): string {
+    const id = this.getModelValue(model);
+    const provider = (this.toolStrategyProviderLabel || '').trim();
+    // Native <option> is single-color; space after colon for scanability.
+    return provider ? `${provider}: ${id}` : id;
   },
 
   /**

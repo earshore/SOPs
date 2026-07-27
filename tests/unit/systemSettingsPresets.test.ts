@@ -291,9 +291,12 @@ describe('UT-P1-06 appearance theme contracts', () => {
 
     const khListStart = html.indexOf('data-testid="settings-kh-seo-bool-pref-list"');
     expect(khListStart).toBeGreaterThan(-1);
-    const khChunk = html.slice(khListStart, khListStart + 4500);
+    // Unified list: model + numeric rows + match switches share one pref-list.
+    const khChunk = html.slice(khListStart, khListStart + 12000);
     expect(khChunk).toContain('settings-pref-row');
     expect(khChunk).toContain('settings-switch');
+    expect(khChunk).toContain('kh-seo-cache-ttl');
+    expect(khChunk).toContain('settings-pref-row__control');
     expect(khChunk).not.toContain('grid gap-3 sm:grid-cols-2');
     expect(khChunk).not.toContain('settings-checkbox');
   });
@@ -317,7 +320,11 @@ describe('UT-P1-06 appearance theme contracts', () => {
     ]) {
       const start = html.indexOf(`data-testid="${testId}"`);
       expect(start).toBeGreaterThan(-1);
-      const chunk = html.slice(start, start + 1200);
+      // KH listing now co-locates model/TTL rows before the cache switch in one list.
+      const chunk = html.slice(
+              start,
+              start + (testId === 'settings-kh-listing-cache-pref-list' ? 7000 : 1200)
+            );
       expect(chunk).toContain('settings-pref-row');
       expect(chunk).toContain('settings-switch');
       expect(chunk).not.toContain('settings-checkbox');
@@ -401,7 +408,7 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(ppcChunk).toContain('settings-pref-row__control--model');
     expect(ppcChunk).toContain('settings-pref-row__title');
     expect(ppcChunk).toContain('followGlobalOptionLabel');
-    expect(ppcChunk).toContain('followGlobalResolvedLabel');
+    expect(ppcChunk).toContain("item.model ? '覆盖全局模型' : '跟随全局模型'");
     expect(ppcChunk).not.toContain('settings-tool-page__model-bar');
     expect(ppcChunk).not.toContain('settings-tool-page__model-face');
     expect(ppcChunk).not.toContain('settings-tool-page-stack');
@@ -451,7 +458,18 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(tierChunk).not.toContain('settings-field-help');
   });
 
-  it('LLM connection: 基本信息/模型与能力 folds; 凭证/服务层级 static L2 rows', () => {
+  it('LLM basic info uses api family type select and readonly path (no path menu)', () => {
+      expect(html).toContain('data-testid="settings-llm-api-family"');
+      expect(html).toContain('setLlmApiFamily($event)');
+      expect(html).toContain('llmApiFamilyOptions');
+      expect(html).toContain('settings-endpoint-path-row');
+      expect(html).toContain('settings-api-path-trigger--readonly');
+      expect(html).toContain('selectedApiPathPathLabel');
+      expect(html).not.toContain('settings-api-path-menu');
+      expect(html).not.toContain('setLlmApiPathId(opt.id)');
+    });
+
+    it('LLM connection: 基本信息/模型与能力 folds; 凭证/服务层级 static L2 rows', () => {
     expect(html).toContain('data-testid="settings-llm-pref-list"');
     const llmStart = html.indexOf('data-testid="settings-llm-pref-list"');
     const llmChunk = html.slice(llmStart, html.indexOf('settings-save-provider', llmStart));
