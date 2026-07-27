@@ -1230,7 +1230,7 @@ test.describe('release candidate smoke', () => {
 
     await page.getByTestId('settings-color-mode-dark').click();
     await expect(page.getByTestId('settings-color-mode-dark')).toHaveAttribute(
-      'aria-pressed',
+      'aria-checked',
       'true'
     );
     // Dark mode must not wipe Appearance (Layer A stays independent of Layer M).
@@ -1244,7 +1244,7 @@ test.describe('release candidate smoke', () => {
     await expect(themeSelect).toHaveValue('default');
     await page.getByTestId('settings-color-mode-light').click();
     await expect(page.getByTestId('settings-color-mode-light')).toHaveAttribute(
-      'aria-pressed',
+      'aria-checked',
       'true'
     );
     await expectDocumentThemeState(page, {
@@ -1281,7 +1281,7 @@ test.describe('release candidate smoke', () => {
 
     await page.getByTestId('settings-color-mode-dark').click();
     await expect(page.getByTestId('settings-color-mode-dark')).toHaveAttribute(
-      'aria-pressed',
+      'aria-checked',
       'true'
     );
 

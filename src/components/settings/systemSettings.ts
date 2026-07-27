@@ -2327,7 +2327,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   setAppearanceTheme(themeId: string): void {
-    ThemeManager.applyTheme(themeId);
+    // Instant accent swap: avoid CSS var transition that feels laggy vs segmented radios.
+    ThemeManager.applyTheme(themeId, { animate: false });
     this.appearanceThemeId = ThemeManager.getCurrentTheme();
   },
 

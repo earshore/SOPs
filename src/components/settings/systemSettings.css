@@ -1359,11 +1359,12 @@ select.settings-control {
   padding: 0.25rem 0.5rem;
 }
 
-/* Color mode: three labels including 跟随系统 need a bit more width */
+/* Color mode: three labels including 跟随系统 — same effort chrome, slightly wider */
 .settings-segmented--color-mode {
-  flex: 0 1 16rem;
+  flex: 1 1 15rem;
   min-width: 13.5rem;
-  max-width: 18rem;
+  max-width: 20rem;
+  margin-left: auto;
 }
 
 /* App group label under tool strategy (if used) */

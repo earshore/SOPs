@@ -248,6 +248,14 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(html).toContain("setAppearanceColorMode('light')");
     expect(html).toContain("setAppearanceColorMode('dark')");
     expect(html).toContain("setAppearanceColorMode('system')");
+    // Align with effort/runtime preset segmented chrome
+    expect(html).toContain(
+      'settings-segmented settings-segmented--inline settings-segmented--effort settings-segmented--color-mode'
+    );
+    expect(html).toContain('data-testid="settings-animation-speed"');
+    expect(html).toContain(
+      'settings-segmented settings-segmented--inline settings-segmented--effort"'
+    );
   });
 
   it('UT-P1-06 appearance layout uses pref-list primitive with frozen color-mode testid', () => {

@@ -3034,37 +3034,40 @@
                     </div>
                   </div>
                   <div
-                    class="settings-segmented settings-segmented--inline settings-segmented--color-mode"
-                    role="group"
+                    class="settings-segmented settings-segmented--inline settings-segmented--effort settings-segmented--color-mode"
+                    role="radiogroup"
                     aria-label="主题"
                     data-testid="settings-color-mode"
                   >
                     <button
                       type="button"
+                      role="radio"
                       class="settings-segmented__btn"
                       data-testid="settings-color-mode-light"
                       :class="{ 'is-active': appearanceColorMode === 'light' }"
-                      :aria-pressed="(appearanceColorMode === 'light').toString()"
+                      :aria-checked="(appearanceColorMode === 'light').toString()"
                       @click="setAppearanceColorMode('light')"
                     >
                       浅色
                     </button>
                     <button
                       type="button"
+                      role="radio"
                       class="settings-segmented__btn"
                       data-testid="settings-color-mode-dark"
                       :class="{ 'is-active': appearanceColorMode === 'dark' }"
-                      :aria-pressed="(appearanceColorMode === 'dark').toString()"
+                      :aria-checked="(appearanceColorMode === 'dark').toString()"
                       @click="setAppearanceColorMode('dark')"
                     >
                       深色
                     </button>
                     <button
                       type="button"
+                      role="radio"
                       class="settings-segmented__btn"
                       data-testid="settings-color-mode-system"
                       :class="{ 'is-active': appearanceColorMode === 'system' }"
-                      :aria-pressed="(appearanceColorMode === 'system').toString()"
+                      :aria-checked="(appearanceColorMode === 'system').toString()"
                       @click="setAppearanceColorMode('system')"
                     >
                       跟随系统
@@ -3171,33 +3174,37 @@
                     </div>
                   </div>
                   <div
-                    class="settings-segmented settings-segmented--inline"
-                    role="group"
+                    class="settings-segmented settings-segmented--inline settings-segmented--effort"
+                    role="radiogroup"
                     aria-label="动画速度"
+                    data-testid="settings-animation-speed"
                   >
                     <button
                       type="button"
+                      role="radio"
                       class="settings-segmented__btn"
                       :class="{ 'is-active': appearanceAnimationSpeed === 'fast' }"
-                      :aria-pressed="(appearanceAnimationSpeed === 'fast').toString()"
+                      :aria-checked="(appearanceAnimationSpeed === 'fast').toString()"
                       @click="setAppearanceAnimationSpeed('fast')"
                     >
                       快
                     </button>
                     <button
                       type="button"
+                      role="radio"
                       class="settings-segmented__btn"
                       :class="{ 'is-active': appearanceAnimationSpeed === 'normal' }"
-                      :aria-pressed="(appearanceAnimationSpeed === 'normal').toString()"
+                      :aria-checked="(appearanceAnimationSpeed === 'normal').toString()"
                       @click="setAppearanceAnimationSpeed('normal')"
                     >
                       标准
                     </button>
                     <button
                       type="button"
+                      role="radio"
                       class="settings-segmented__btn"
                       :class="{ 'is-active': appearanceAnimationSpeed === 'slow' }"
-                      :aria-pressed="(appearanceAnimationSpeed === 'slow').toString()"
+                      :aria-checked="(appearanceAnimationSpeed === 'slow').toString()"
                       @click="setAppearanceAnimationSpeed('slow')"
                     >
                       慢

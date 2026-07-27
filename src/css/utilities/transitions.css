@@ -80,21 +80,25 @@
 }
 
 /* ========================================
-   主题（浅色/深色）切换 — 整屋调光
-   applyColorMode 在切换瞬间挂上 .color-mode-switching,
-   ~260ms 后移除；首屏 (无该类) 与 reduced-motion 均不生效。
+   Color mode flip (light/dark)
+   applyColorMode toggles .color-mode-switching briefly.
+   CRITICAL: never target * / *::before / *::after — universal
+   transitions force style recalc on the whole tree and feel janky.
+   Only soft-fade a few shell surfaces; leaf widgets snap.
    ======================================== */
 @media (prefers-reduced-motion: no-preference) {
   html.color-mode-switching,
-  html.color-mode-switching *,
-  html.color-mode-switching *::before,
-  html.color-mode-switching *::after {
+  html.color-mode-switching body,
+  html.color-mode-switching #app,
+  html.color-mode-switching .settings-panel-root,
+  html.color-mode-switching .settings-panel-scroll,
+  html.color-mode-switching .app-shell,
+  html.color-mode-switching .main-content,
+  html.color-mode-switching .sidebar {
     transition:
-      background-color 220ms var(--ease-smooth, ease),
-      border-color 220ms var(--ease-smooth, ease),
-      color 220ms var(--ease-smooth, ease),
-      fill 220ms var(--ease-smooth, ease),
-      stroke 220ms var(--ease-smooth, ease),
-      box-shadow 220ms var(--ease-smooth, ease) !important;
+      background-color 140ms var(--ease-smooth, ease),
+      color 140ms var(--ease-smooth, ease),
+      border-color 140ms var(--ease-smooth, ease),
+      box-shadow 140ms var(--ease-smooth, ease);
   }
 }

@@ -243,7 +243,7 @@ export class ThemeManager {
     });
   }
 
-  /** Attach a ~260ms whole-page color transition class around a mode flip. */
+  /** Attach a short shell-only color transition class around a mode flip. */
   private static beginModeSwitchTransition(): void {
     if (typeof document === 'undefined') {
       return;
@@ -252,14 +252,16 @@ export class ThemeManager {
     if (root.getAttribute('data-theme-ready') !== '1') {
       return; // 启动阶段不做过渡
     }
+    // Shell-only CSS class window (see transitions.css). Avoid universal * thrash.
     root.classList.add('color-mode-switching');
     if (this.modeSwitchTimer) {
       clearTimeout(this.modeSwitchTimer);
     }
+    // Keep slightly longer than the 140ms shell CSS so the class covers the paint.
     this.modeSwitchTimer = setTimeout(() => {
       root.classList.remove('color-mode-switching');
       this.modeSwitchTimer = null;
-    }, 280);
+    }, 180);
   }
 
   /**

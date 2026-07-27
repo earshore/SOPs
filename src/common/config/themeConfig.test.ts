@@ -287,6 +287,14 @@ describe('ThemeManager', () => {
     expect(ThemeManager.getResolvedColorMode()).toBe('light');
   });
 
+  it('applyColorMode attaches a short non-universal switching class when theme is ready', () => {
+    document.documentElement.setAttribute('data-theme-ready', '1');
+    ThemeManager.applyColorMode('dark');
+    expect(document.documentElement.classList.contains('color-mode-switching')).toBe(true);
+    vi.advanceTimersByTime(180);
+    expect(document.documentElement.classList.contains('color-mode-switching')).toBe(false);
+  });
+
   it('applyColorMode dark preserves minimal appearance primary (no indigo rewrite)', () => {
     ThemeManager.applyTheme('minimal', { animate: false });
 
