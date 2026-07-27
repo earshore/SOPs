@@ -20,19 +20,9 @@ function oversizedDataUrl(): string {
 }
 
 describe('resolveDeepChatImagesConfig', () => {
-  it('returns false when vision is unsupported', () => {
+  it('always disables native deep-chat images (host composer owns UI)', () => {
     expect(resolveDeepChatImagesConfig(false)).toBe(false);
-  });
-
-  it('returns image-only upload config when vision is supported', () => {
-    const imagesConfig = resolveDeepChatImagesConfig(true);
-    expect(imagesConfig).not.toBe(false);
-    if (imagesConfig !== false) {
-      expect(imagesConfig.files).toEqual({
-        maxNumberOfFiles: DEEP_CHAT_VISION_MAX_FILES,
-        acceptedFormats: DEEP_CHAT_VISION_ACCEPTED_FORMATS,
-      });
-    }
+    expect(resolveDeepChatImagesConfig(true)).toBe(false);
   });
 });
 
@@ -42,18 +32,6 @@ describe('vision accept whitelist', () => {
       'image/png,image/jpeg,image/jpg,image/webp,image/gif,.png,.jpg,.jpeg,.webp,.gif'
     );
     expect(DEEP_CHAT_VISION_ACCEPTED_FORMATS.includes('image/*')).toBe(false);
-    const imagesConfig = resolveDeepChatImagesConfig(true);
-    expect(imagesConfig).not.toBe(false);
-    if (imagesConfig !== false) {
-      expect(imagesConfig.files).toEqual({
-        maxNumberOfFiles: 4,
-        acceptedFormats: DEEP_CHAT_VISION_ACCEPTED_FORMATS,
-      });
-      // button.tooltip optional if library types reject it — constant still exported
-      if (imagesConfig.button?.tooltip) {
-        expect(imagesConfig.button.tooltip).toBe('上传图片');
-      }
-    }
   });
 });
 
@@ -115,6 +93,21 @@ describe('resolveDeepChatVisionUserParts', () => {
     if (result.ok) {
       expect(result.parts).toHaveLength(1);
       expect(result.parts[0]?.type).toBe('input_image');
+      expect(result.parts[0]?.image_url.startsWith('data:image/png')).toBe(true);
+    }
+  });
+
+  it('prefers hostFiles over body.files', async () => {
+    const host = new File([new Uint8Array([9, 9, 9])], 'host.png', { type: 'image/png' });
+    const bodyFile = new File([new Uint8Array([1])], 'body.png', { type: 'image/png' });
+    const result = await resolveDeepChatVisionUserParts({
+      body: { text: 'x', files: [bodyFile] },
+      supportsVision: true,
+      hostFiles: [host],
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.parts).toHaveLength(1);
       expect(result.parts[0]?.image_url.startsWith('data:image/png')).toBe(true);
     }
   });

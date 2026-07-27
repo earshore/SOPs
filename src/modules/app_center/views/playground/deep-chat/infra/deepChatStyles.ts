@@ -805,6 +805,163 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   /*
+   * Host vision：发送框正上方一行文字入口（简单粗暴）。
+   * 结构：#deep-chat-vision-composer-root > row(上传图片 · 计数 · helper) + strip
+   */
+  #deep-chat-vision-composer-root {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+    width: min(100%, 768px) !important;
+    max-width: 100% !important;
+    margin: 0 auto 8px !important;
+    padding: 0 4px !important;
+  }
+
+  #deep-chat-vision-composer-root.is-vision-dragover {
+    outline: 2px dashed rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.45) !important;
+    outline-offset: 4px !important;
+    border-radius: 8px !important;
+  }
+
+  .deep-chat-vision-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px 12px !important;
+    min-width: 0 !important;
+  }
+
+  .deep-chat-vision-upload {
+    display: inline !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--deep-chat-accent, #a85f3f) !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+    cursor: pointer !important;
+  }
+
+  .deep-chat-vision-upload.is-vision-ready:hover,
+  .deep-chat-vision-upload.is-vision-ready:focus-visible {
+    color: var(--deep-chat-accent-hover, #8f4f33) !important;
+  }
+
+  .deep-chat-vision-upload.is-vision-ready:focus-visible {
+    outline: 2px solid rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.75) !important;
+    outline-offset: 2px !important;
+  }
+
+  .deep-chat-vision-upload.is-disabled,
+  .deep-chat-vision-upload:disabled,
+  .deep-chat-vision-upload.is-vision-blocked {
+    color: var(--deep-chat-ink-muted, #64748b) !important;
+    text-decoration: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.85 !important;
+  }
+
+  .deep-chat-vision-count {
+    color: var(--deep-chat-accent-ink, #6f3925) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums !important;
+    line-height: 1.4 !important;
+  }
+
+  .deep-chat-vision-helper {
+    color: var(--deep-chat-ink-muted, #64748b) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+  }
+
+  .deep-chat-vision-helper[hidden],
+  .deep-chat-vision-count[hidden] {
+    display: none !important;
+  }
+
+  .deep-chat-vision-file-input {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .deep-chat-vision-strip {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .deep-chat-vision-strip[hidden] {
+    display: none !important;
+  }
+
+  .deep-chat-vision-thumb {
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--deep-chat-hairline, #e2e8f0) !important;
+    background: var(--deep-chat-surface, #ffffff) !important;
+    overflow: hidden !important;
+  }
+
+  .deep-chat-vision-thumb img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .deep-chat-vision-thumb__remove {
+    position: absolute !important;
+    top: 2px !important;
+    right: 2px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(15, 23, 42, 0.72) !important;
+    color: #fff !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+  }
+
+  .deep-chat-vision-thumb__remove:hover,
+  .deep-chat-vision-thumb__remove:focus-visible {
+    background: rgba(15, 23, 42, 0.9) !important;
+    outline: none !important;
+  }
+
+  .deep-chat-vision-thumb__remove svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  /*
    * 全局技能上下文 Chip（输入框 / 消息气泡共用）
    * - --dismissible：输入框、编辑回填 — hover 时 × 覆盖左侧图标
    * - --static：已发送消息 — 仅展示，永不显示 ×
@@ -951,75 +1108,25 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     color: var(--deep-chat-ink-muted, #64748b) !important;
   }
 
-  /* 非图片附件入口始终隐藏；图片按钮由 :host(.is-vision-enabled) 条件放开 */
+  /* 库多媒体 / 原生图片上传入口全部隐藏（host visionComposer 接管） */
   #microphone-button,
   #upload-gifs-button,
   #upload-audio-button,
   #upload-mixed-files-button,
-  #camera-button {
+  #camera-button,
+  #dropup-button,
+  #upload-images-button,
+  #file-input,
+  #dropup-menu,
+  #file-attachment-container {
     display: none !important;
-  }
-
-  :host(:not(.is-vision-enabled)) #dropup-button,
-  :host(:not(.is-vision-enabled)) #upload-images-button,
-  :host(:not(.is-vision-enabled)) #file-input,
-  :host(:not(.is-vision-enabled)) #dropup-menu {
-    display: none !important;
-  }
-
-  /*
-   * Vision upload: secondary ghost 36px, left of send (end 55px desktop / 54 mobile).
-   * Must not inherit solid accent/stop paint from .inside-end send rules.
-   */
-  :host(.is-vision-enabled) #upload-images-button {
-    display: flex !important;
-    position: absolute !important;
-    width: 36px !important;
-    height: 36px !important;
-    inset-inline-end: max(55px, calc((100% - 768px) / 2 + 55px)) !important;
-    inset-block-end: 11px !important;
-    inset-block-start: auto !important;
-    margin: 0 !important;
-    transform: none !important;
-    border-radius: 50% !important;
-    border: 1px solid var(--deep-chat-accent-border, rgba(168, 95, 63, 0.35)) !important;
-    background: var(--deep-chat-surface, #ffffff) !important;
-    box-shadow: none !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    opacity: 1 !important;
-    transition: background 150ms cubic-bezier(0, 0, 0.2, 1), border-color 150ms cubic-bezier(0, 0, 0.2, 1) !important;
-  }
-
-  :host(.is-vision-enabled) #upload-images-button::after {
-    content: '' !important;
-    position: absolute !important;
-    inset: -4px !important; /* ~44 hit target */
-  }
-
-  :host(.is-vision-enabled) #upload-images-button:hover,
-  :host(.is-vision-enabled) #upload-images-button:focus-visible {
-    background: var(--deep-chat-accent-soft, #faf3ee) !important;
-    border-color: var(--deep-chat-accent-border-hover, rgba(168, 95, 63, 0.55)) !important;
-  }
-
-  :host(.is-vision-enabled) #upload-images-button:focus-visible {
-    outline: 2px solid rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.75) !important;
-    outline-offset: 2px !important;
-  }
-
-  :host(.is-pending-generation) #upload-images-button {
-    opacity: 0.5 !important;
-    pointer-events: none !important;
-    cursor: not-allowed !important;
   }
 
   /*
    * 位置与尺寸：覆盖 deep-chat 默认 inside-end（约 10%+0.35em 贴右下）。
    * 选择器必须包含裸 .input-button.inside-end：stream stop 态会去掉
    * submit/disabled/loading class，只剩 input-button + inside-end。
-   * Dual-primary ban: exclude #upload-images-button (ghost geometry above).
+   * Dual-primary ban: exclude leftover #upload-images-button if vendor remounts.
    */
   .input-button.inside-end:not(#upload-images-button),
   .inside-end.input-button:not(#upload-images-button),
@@ -1086,44 +1193,6 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     filter: brightness(0) invert(1) !important;
   }
 
-  /* Attachment strip token polish (vision staged previews) */
-  #file-attachment-container {
-    padding: 8px 12px 0 14px !important;
-    gap: 8px !important;
-    overflow-x: auto !important;
-  }
-
-  #file-attachment-container img,
-  #file-attachment-container .image-attachment,
-  #file-attachment-container [class*='attachment'] img {
-    width: 44px !important;
-    height: 44px !important;
-    object-fit: cover !important;
-    border-radius: 8px !important;
-    border: 1px solid var(--deep-chat-hairline, #e2e8f0) !important;
-  }
-
-  /*
-   * Vision helper microcopy. May live in light DOM (Task 5 host inject) or
-   * shadow #input — keep rule for shadow; shell CSS may mirror for light DOM.
-   */
-  .deep-chat-vision-helper {
-    display: none;
-    box-sizing: border-box;
-    width: min(100%, 768px);
-    margin: 8px auto 0;
-    padding: 0 12px;
-    color: var(--deep-chat-ink-muted, #64748b);
-    font-size: 12px;
-    line-height: 1.4;
-    font-weight: 400;
-    text-align: left;
-  }
-
-  :host(.is-vision-enabled) .deep-chat-vision-helper {
-    display: block;
-  }
-
   @media (max-width: 640px) {
     #messages {
       padding: 18px 16px;
@@ -1162,11 +1231,6 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
       inset-block-start: auto !important;
       transform: none !important;
     }
-
-    :host(.is-vision-enabled) #upload-images-button {
-      inset-inline-end: 54px !important;
-      inset-block-end: 10px !important;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1174,8 +1238,8 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     .deep-chat-message-tool,
     .deep-chat-context-chip,
     #text-input-container,
-    #upload-images-button,
-    #file-attachment-container,
+    .deep-chat-vision-upload,
+    .deep-chat-vision-strip,
     .deep-chat-vision-helper {
       transition-duration: 0.01ms !important;
     }

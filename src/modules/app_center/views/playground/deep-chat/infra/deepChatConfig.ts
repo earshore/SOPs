@@ -10,10 +10,12 @@ import { findConfigModelsEntry } from '../session/uiHooks';
 import { sessionState } from '../session/sessionState';
 import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
 import { StorageService } from '@/services/storageService';
+import { resolveDeepChatImagesConfig } from '../request/visionAttachments';
 import {
-  DEEP_CHAT_VISION_COPY,
-  resolveDeepChatImagesConfig,
-} from '../request/visionAttachments';
+  hasStagedVisionAttachments,
+  mountVisionComposer,
+  syncVisionComposerCapability,
+} from '../composer/visionComposer';
 
 type DraftUpdater = (threadId: string, draftText: string) => void;
 type RequestHandler = (
@@ -41,74 +43,36 @@ export function configureDeepChatBase(
   chat.errorMessages = {
     displayServiceErrorMessages: true,
   };
-  // 其余多媒体入口始终关闭；图片按模型 vision 能力单独门控。
+  // 库多媒体入口全部关闭；图片由 host visionComposer 接管。
   chat.gifs = false;
   chat.camera = false;
   chat.audio = false;
   chat.mixedFiles = false;
   chat.microphone = false;
+  chat.images = false;
   applyDeepChatVisionUploadConfig(chat);
 }
 
-/** 按当前模型 supportsVision 开关图片上传入口（fail-closed）。 */
+/**
+ * Host vision composer：入口始终挂载；supportsVision 控制可点/灰态。
+ * 原生 deep-chat images 按钮保持关闭。
+ */
 export function applyDeepChatVisionUploadConfig(chat: DeepChatElement | null | undefined): void {
   if (!chat) return;
   const supportsVision = resolveCurrentModelSupportsVision();
+  // Force-off vendor upload UI (Approach B host surface).
   chat.images = resolveDeepChatImagesConfig(supportsVision);
   chat.classList.toggle('is-vision-enabled', supportsVision);
-  syncDeepChatVisionHelper(chat, supportsVision);
-  // Best-effort: deep-chat may recreate the button later; re-apply when config re-runs.
-  const upload = chat.shadowRoot?.querySelector<HTMLElement>('#upload-images-button');
-  if (upload && supportsVision) {
-    upload.setAttribute('aria-label', DEEP_CHAT_VISION_COPY.uploadAria);
-    upload.setAttribute('title', DEEP_CHAT_VISION_COPY.uploadTooltip);
-  }
+  const pending = sessionState.pendingRequests.has(sessionState.threadStore.activeThreadId);
+  mountVisionComposer(chat, { supportsVision, pending });
+  syncVisionComposerCapability({ supportsVision, pending });
 }
 
-/** Best-effort: composer still has staged image attachments in shadow DOM. */
+/** Host staged attachments (memory only). */
 export function deepChatHasStagedImageAttachments(
-  chat: DeepChatElement | null | undefined
+  _chat?: DeepChatElement | null | undefined
 ): boolean {
-  const root = chat?.shadowRoot;
-  if (!root) return false;
-  const strip = root.querySelector('#file-attachment-container');
-  if (strip && strip.childElementCount > 0) return true;
-  const fileInput = root.querySelector<HTMLInputElement>('#file-input');
-  if (fileInput?.files && fileInput.files.length > 0) return true;
-  return false;
-}
-
-/**
- * Host chrome: microcopy outside #text-input-container (inside #input), vision only.
- * Exact Chinese string from DEEP_CHAT_VISION_COPY.helper.
- */
-export function syncDeepChatVisionHelper(
-  chat: DeepChatElement | null | undefined,
-  supportsVision: boolean
-): void {
-  if (!chat?.shadowRoot) return;
-  const input = chat.shadowRoot.querySelector('#input');
-  if (!input) return;
-  let helper = chat.shadowRoot.querySelector<HTMLElement>('.deep-chat-vision-helper');
-  if (!supportsVision) {
-    helper?.remove();
-    return;
-  }
-  if (!helper) {
-    helper = document.createElement('div');
-    helper.className = 'deep-chat-vision-helper';
-    helper.setAttribute('aria-hidden', 'true');
-    helper.textContent = DEEP_CHAT_VISION_COPY.helper;
-    // place after #text-input-container inside #input
-    const card = input.querySelector('#text-input-container');
-    if (card?.nextSibling) {
-      input.insertBefore(helper, card.nextSibling);
-    } else {
-      input.appendChild(helper);
-    }
-  } else {
-    helper.textContent = DEEP_CHAT_VISION_COPY.helper;
-  }
+  return hasStagedVisionAttachments();
 }
 
 function resolveCurrentModelSupportsVision(): boolean {

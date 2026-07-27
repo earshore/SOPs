@@ -49,6 +49,11 @@ import {
   DEEP_CHAT_VISION_PLACEHOLDER_TEXT,
   resolveDeepChatVisionUserParts,
 } from './visionAttachments';
+import {
+  clearStagedVisionAttachments,
+  getStagedVisionFiles,
+  setVisionComposerPending,
+} from '../composer/visionComposer';
 import { findConfigModelsEntry } from '../session/uiHooks';
 
 import { refreshMessageToolbarStatuses } from '../composer/messageToolbar';
@@ -143,6 +148,11 @@ export async function handleDeepChatRequest(
     lifecyclePendingRequest = pendingRequest;
     bindStopSignal(signals, pendingRequest);
     sessionState.pendingRequests.set(activeThread.id, pendingRequest);
+    // Host staged images consumed for this turn only — clear UI immediately after snapshot.
+    if (hadVisionParts) {
+      clearStagedVisionAttachments();
+    }
+    setVisionComposerPending(true);
     // conversationMessages 仅文本；vision base64 永不落盘；count-only meta 可落盘。
     saveThreadMessages(container, conversationMessages, '', {
       threadId: activeThread.id,
@@ -184,6 +194,7 @@ export async function handleDeepChatRequest(
     await reportDeepChatRequestFailure(error, pendingThreadId, hadVisionParts, signals);
   } finally {
     cleanupLifecyclePendingRequest(pendingThreadId, lifecyclePendingRequest);
+    setVisionComposerPending(false);
     signals.onClose?.();
   }
 }
@@ -216,9 +227,11 @@ export async function prepareDeepChatRequest(
   }
 
   const supportsVision = resolveRequestSupportsVision(config, model);
+  const hostFiles = getStagedVisionFiles();
   const visionResult = await resolveDeepChatVisionUserParts({
     body,
     supportsVision,
+    hostFiles,
   });
   if (!visionResult.ok) {
     showToast(visionResult.error, { type: 'warning' });

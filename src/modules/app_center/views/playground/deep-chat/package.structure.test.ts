@@ -33,6 +33,8 @@ const REQUIRED_DOMAIN_FILES = [
   'composer/messageToolbar.ts',
   'composer/skillContextChip.ts',
   'composer/promptDrafts.ts',
+  'composer/visionComposer.ts',
+  'request/visionAttachments.ts',
   'chrome/generationChrome.ts',
   'shell/shellUi.ts',
   'shell/renderers.ts',

@@ -2,7 +2,7 @@
 
 **Status:** DONE  
 **Branch:** `feature/deep-chat-vision-upload-ux`  
-**Commit:** `b2bbc8c7` — `feat(deep-chat): redact vision data URLs and stamp attachmentMeta count`
+**Commit:** `b4c8088c` — `feat(deep-chat): redact vision data URLs and stamp attachmentMeta count`
 
 ## Summary
 

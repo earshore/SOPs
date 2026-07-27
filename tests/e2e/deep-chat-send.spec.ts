@@ -41,10 +41,16 @@ type SubmitButtonPinState = {
 type DualButtonGeometry = {
   bottomDelta: number | null;
   gap: number | null;
+  helperVisible: boolean;
   sendBg: string;
   sendRightGap: number;
   uploadBg: string | null;
+  uploadDisabled: boolean | null;
+  uploadLeftOfSend: boolean;
+  uploadReady: boolean;
+  uploadText: string;
   uploadVisible: boolean;
+  visionAboveCard: boolean;
 };
 
 /** Send/stop only — never the vision #upload-images-button (also inside-end). */
@@ -339,7 +345,10 @@ async function getDualButtonGeometry(page: Page): Promise<DualButtonGeometry | n
   return page.evaluate(sendSelector => {
     const root = document.querySelector('#deep-chat-view')?.shadowRoot;
     const send = root?.querySelector<HTMLElement>(sendSelector);
-    const upload = root?.querySelector<HTMLElement>('#upload-images-button');
+    // Host vision text entry above the composer card.
+    const upload = root?.querySelector<HTMLElement>('#deep-chat-vision-upload');
+    const helper = root?.querySelector<HTMLElement>('#deep-chat-vision-helper');
+    const visionRoot = root?.querySelector<HTMLElement>('#deep-chat-vision-composer-root');
     const textInputContainer = root?.querySelector<HTMLElement>('#text-input-container');
     if (!send || !textInputContainer) {
       return null;
@@ -353,21 +362,33 @@ async function getDualButtonGeometry(page: Page): Promise<DualButtonGeometry | n
         ? upload.getBoundingClientRect()
         : null;
     const uploadVisible = Boolean(uploadRect && uploadRect.width > 0 && uploadRect.height > 0);
+    const helperVisible = Boolean(
+      helper && getComputedStyle(helper).display !== 'none' && !helper.hasAttribute('hidden')
+    );
+    const visionAboveCard =
+      uploadVisible &&
+      uploadRect &&
+      visionRoot &&
+      uploadRect.bottom <= textRect.top + 2;
 
     return {
-      bottomDelta:
-        uploadVisible && uploadRect
-          ? Math.abs(sendRect.bottom - uploadRect.bottom)
-          : null,
-      gap: uploadVisible && uploadRect ? sendRect.left - uploadRect.right : null,
+      bottomDelta: null,
+      gap: null,
       sendBg: getComputedStyle(send).backgroundColor,
       sendRightGap: Math.round((textRect.right - sendRect.right) * 100) / 100,
       uploadBg: upload ? getComputedStyle(upload).backgroundColor : null,
+      uploadDisabled: upload
+        ? upload.hasAttribute('disabled') || upload.getAttribute('aria-disabled') === 'true'
+        : null,
+      uploadReady: upload?.classList.contains('is-vision-ready') ?? false,
       uploadVisible,
+      helperVisible,
+      uploadLeftOfSend: false,
+      visionAboveCard: Boolean(visionAboveCard),
+      uploadText: upload?.textContent?.trim() || '',
     };
   }, SEND_INSIDE_END_SELECTOR);
 }
-
 async function isSubmitButtonPinnedToTextInput(page: Page): Promise<boolean> {
   return (await getSubmitButtonPinState(page))?.pinned ?? false;
 }
@@ -1546,7 +1567,7 @@ test('shows a pressed stop control and stops with Space', async ({ page }) => {
   }
 });
 
-test('hides vision upload for non-vision mock model and pins send only', async ({ page }) => {
+test('shows host vision upload disabled for non-vision model and pins send', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await seedMockProviderStorage(page);
   await openDeepChatAndRefreshMockConfig(page);
@@ -1556,14 +1577,20 @@ test('hides vision upload for non-vision mock model and pins send only', async (
   await expect
     .poll(async () => {
       const geometry = await getDualButtonGeometry(page);
-      return geometry && !geometry.uploadVisible && Math.abs(geometry.sendRightGap - 11) <= 2;
+      return (
+        geometry &&
+        geometry.uploadVisible &&
+        geometry.helperVisible &&
+        geometry.uploadDisabled === true &&
+        geometry.uploadReady === false &&
+        Math.abs(geometry.sendRightGap - 11) <= 2
+      );
     })
     .toBe(true);
 });
 
 /**
- * Hard gate: vision model seed must not break send pin (even when upload is absent).
- * Dual-button spacing is a separate test that skips honestly if upload never materializes.
+ * Hard gate: vision model seed must not break send pin; host upload stays discoverable.
  */
 test('keeps send pin after vision model seed (hard gate)', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
@@ -1590,16 +1617,18 @@ test('keeps send pin after vision model seed (hard gate)', async ({ page }) => {
   await page.locator('#deep-chat-refresh-config').click();
   await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
   await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+  await expect
+    .poll(async () => {
+      const geometry = await getDualButtonGeometry(page);
+      return Boolean(geometry?.uploadVisible && geometry.helperVisible);
+    })
+    .toBe(true);
 });
 
 /**
- * Dual-button geometry when deep-chat materializes #upload-images-button.
- * If the vendor button never appears under the mock vision seed, skip (manual E1/V1) —
- * do not soft-pass as if dual-button automation succeeded.
+ * Host vision: plain text entry sits above the send box (not inside dual-primary band).
  */
-test('keeps vision upload secondary and spaced from send when upload materializes', async ({
-  page,
-}) => {
+test('keeps host vision text entry above the send box', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await seedMockProviderStorage(page, undefined, MOCK_ENDPOINT);
   await page.goto(DEEP_CHAT_ROUTE, { waitUntil: 'domcontentloaded' });
@@ -1624,53 +1653,15 @@ test('keeps vision upload secondary and spaced from send when upload materialize
   await page.locator('#deep-chat-refresh-config').click();
   await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
 
-  // Best-effort: re-assert images config on the host so deep-chat can create the button.
-  await page.evaluate(() => {
-    const chat = document.querySelector('#deep-chat-view') as HTMLElement & {
-      images?: boolean | Record<string, unknown>;
-    };
-    if (!chat) return;
-    chat.classList.add('is-vision-enabled');
-    chat.images = {
-      files: {
-        maxNumberOfFiles: 4,
-        acceptedFormats:
-          'image/png,image/jpeg,image/jpg,image/webp,image/gif,.png,.jpg,.jpeg,.webp,.gif',
-      },
-      button: { tooltip: '上传图片' },
-    };
-  });
-
-  let uploadVisible = false;
-  try {
-    await expect
-      .poll(
-        async () => {
-          const geometry = await getDualButtonGeometry(page);
-          uploadVisible = Boolean(geometry?.uploadVisible);
-          return uploadVisible;
-        },
-        { timeout: 4000 }
-      )
-      .toBe(true);
-  } catch {
-    test.skip(
-      true,
-      'Vision #upload-images-button not materialised under mock seed — dual-button geometry is manual matrix E1/V1'
-    );
-    return;
-  }
-
   await expect
     .poll(
       async () => {
         const geometry = await getDualButtonGeometry(page);
         if (!geometry?.uploadVisible) return false;
         return (
-          geometry.gap !== null &&
-          Math.abs((geometry.gap as number) - 8) <= 2 &&
-          (geometry.bottomDelta as number) <= 2 &&
-          geometry.uploadBg !== geometry.sendBg &&
+          geometry.visionAboveCard === true &&
+          geometry.uploadText === '上传图片' &&
+          geometry.helperVisible === true &&
           Math.abs(geometry.sendRightGap - 11) <= 2
         );
       },

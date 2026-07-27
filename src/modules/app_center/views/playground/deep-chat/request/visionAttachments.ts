@@ -302,13 +302,16 @@ function gateVisionCandidates(
 }
 
 /**
- * 从 deep-chat 请求 body 提取 visionUserParts。
+ * 从 host 暂存 File 和/或 deep-chat 请求 body 提取 visionUserParts。
+ * - hostFiles（Approach B 生产路径）优先：有 host 暂存时不再读 body.files；
  * - supportsVision=false：有图则报错，无图返回空数组；
  * - 白名单 image 类型；超张数 / 超体积 / 远程 URL fail-closed。
  */
 export async function resolveDeepChatVisionUserParts(args: {
   body: unknown;
   supportsVision: boolean;
+  /** Host composer staged native files (preferred over deep-chat body.files). */
+  hostFiles?: File[];
   maxFiles?: number;
   maxFileBytes?: number;
   maxTotalBytes?: number;
@@ -316,7 +319,11 @@ export async function resolveDeepChatVisionUserParts(args: {
   const maxFiles = args.maxFiles ?? DEEP_CHAT_VISION_MAX_FILES;
   const maxFileBytes = args.maxFileBytes ?? DEEP_CHAT_VISION_MAX_FILE_BYTES;
   const maxTotalBytes = args.maxTotalBytes ?? DEEP_CHAT_VISION_MAX_TOTAL_BYTES;
-  const candidates = collectFileCandidates(args.body);
+  const hostFiles = args.hostFiles?.filter(f => f instanceof File) ?? [];
+  const candidates: FileCandidate[] =
+    hostFiles.length > 0
+      ? hostFiles.map(file => ({ file, name: file.name, type: file.type }))
+      : collectFileCandidates(args.body);
   const gated = gateVisionCandidates(candidates, args.supportsVision, maxFiles);
   if (gated) return gated;
 
@@ -346,26 +353,11 @@ export async function resolveDeepChatVisionUserParts(args: {
   return { ok: true, parts };
 }
 
-/** 当前模型是否应开启 deep-chat 图片上传入口。 */
-export function resolveDeepChatImagesConfig(supportsVision: boolean):
-  | false
-  | {
-      files: {
-        maxNumberOfFiles: number;
-        acceptedFormats: string;
-      };
-      button?: {
-        tooltip: string;
-      };
-    } {
-  if (!supportsVision) return false;
-  return {
-    files: {
-      maxNumberOfFiles: DEEP_CHAT_VISION_MAX_FILES,
-      acceptedFormats: DEEP_CHAT_VISION_ACCEPTED_FORMATS,
-    },
-    button: {
-      tooltip: DEEP_CHAT_VISION_COPY.uploadTooltip,
-    },
-  };
+/**
+ * deep-chat 原生 images 入口：Approach B 生产面已改 host composer，
+ * 始终返回 false（彻底关闭库自带 #upload-images-button）。
+ * 保留函数签名供旧测试 / 配置调用点兼容。
+ */
+export function resolveDeepChatImagesConfig(_supportsVision: boolean): false {
+  return false;
 }

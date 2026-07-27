@@ -52,6 +52,7 @@ import {
   clearSubmitStopButtonSync,
   saveActiveThreadDraft,
 } from './composer/composerUi';
+import { unmountVisionComposer } from './composer/visionComposer';
 import {
   bindSkillHandoffListeners,
   consumePendingSkillHandoff,
@@ -117,6 +118,7 @@ class DeepChatModule extends BaseModule {
     resetPromptPreviewState();
     clearDraftInputHeightSync();
     clearSubmitStopButtonSync();
+    unmountVisionComposer();
     cleanupMessageToolbars();
     clearPendingChromeObserver();
     setOpenThreadMenu(null);
