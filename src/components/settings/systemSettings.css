@@ -803,33 +803,42 @@ select.settings-control {
 }
 
 /*
- * Pref-row metrics grid (Form C dense):
- * Same language as settings-pref-row (meta title + control), laid out as a grid so
- * numeric clusters stay scannable without a 10-row left-title/right-input tower.
- * No per-cell chrome boxes — only hairline dividers inside one surface.
+ * Pref Metrics — Form A density lattice (Operational Quiet)
+ *
+ * Not a new primitive: same pref-row grammar, multi-column for short numbers.
+ *
+ *   settings-pref-metrics [ --cols-3 | --cols-4 ]
+ *     settings-pref-row settings-pref-row--metric
+ *       settings-pref-row__meta > __title   → left label rail
+ *       settings-pref-row__control         → right compact control
+ *
+ * Anti-patterns:
+ *   - stacked label-over-input mini forms (rejected as “加了个框”)
+ *   - full-width A rows for every numeric (list too long)
+ *   - per-cell fill / radius / shadow tiles
+ *   - outer metrics frame when already inside .settings-tool-page
  */
 .settings-pref-metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
-  margin: 0.75rem 0 0;
-  border: 1px solid color-mix(in srgb, var(--settings-border) 90%, transparent);
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--settings-surface) 94%, var(--settings-surface-muted));
-  overflow: hidden;
-}
-
-/* Nested under tool-page frame: drop second outer border, keep cell dividers */
-.settings-tool-page > .settings-pref-metrics,
-.settings-pref-fold__body .settings-tool-page > .settings-pref-metrics {
-  border: none;
-  border-radius: 0;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
   background: transparent;
-  margin-top: 0.65rem;
+  box-sizing: border-box;
 }
 
+/* Framed tool page: first cluster flush; later clusters keep gap */
 .settings-tool-page > .settings-pref-metrics:first-child {
   margin-top: 0;
+}
+
+/* Scrape runtime block: small gap under local head */
+.settings-scrape-runtime > .settings-pref-metrics {
+  margin-top: 0.5rem;
 }
 
 @media (min-width: 640px) {
@@ -842,72 +851,179 @@ select.settings-control {
   }
 }
 
-/* Mini pref-row: title (meta) above control — same tokens as full pref-row */
-.settings-pref-row--metric {
+/* Mini A-row: always horizontal meta | control on sm+ */
+.settings-pref-row.settings-pref-row--metric {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-  gap: 0.3rem;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 0.5rem;
   min-width: 0;
-  min-height: 0;
+  min-height: 2.375rem;
   margin: 0;
-  padding: 0.55rem 0.65rem 0.6rem;
-  border: none;
+  padding: 0.35rem 0.5rem;
+  border: 0;
   border-right: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
   border-radius: 0;
   background: transparent;
   box-sizing: border-box;
+  transition: background-color 160ms ease;
 }
 
-.settings-pref-row--metric:hover,
-.settings-pref-row--metric:focus-within {
-  background: color-mix(in srgb, var(--settings-surface-muted) 55%, transparent);
+.settings-pref-row.settings-pref-row--metric:hover,
+.settings-pref-row.settings-pref-row--metric:focus-within {
+  background: color-mix(in srgb, var(--settings-surface-muted) 78%, transparent);
 }
 
 .settings-pref-row--metric .settings-pref-row__meta {
-  flex: 0 0 auto;
-  width: 100%;
-  min-width: 0;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
   gap: 0;
-  align-items: flex-start;
+  min-width: 0;
+  max-width: none;
 }
 
 .settings-pref-row--metric .settings-pref-row__title,
 .settings-pref-row--metric .settings-label {
   margin: 0;
-  font-size: 0.6875rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
   color: var(--settings-text, #334155);
 }
 
 .settings-pref-row--metric .settings-pref-row__hint {
-  margin: 0.1rem 0 0;
-  font-size: 0.625rem;
-  line-height: 1.3;
+  display: none; /* density: single-line cells only */
 }
 
+/* Compact right rail — beats base .settings-pref-row__control widths */
 .settings-pref-row--metric .settings-pref-row__control {
   flex: 0 0 auto;
-  width: 100%;
-  min-width: 0;
-  max-width: none;
+  width: 5.5rem;
+  min-width: 4.75rem;
+  max-width: 7.25rem;
   margin: 0;
+  margin-left: auto;
+}
+
+/* Enum / schedule needs a wider rail */
+.settings-pref-row--metric:has(.settings-schedule-select) .settings-pref-row__control,
+.settings-pref-row--metric .settings-pref-row__control--wide {
+  width: min(100%, 9.25rem);
+  max-width: 10.5rem;
+  min-width: 7rem;
 }
 
 .settings-pref-row--metric .settings-control,
 .settings-pref-row--metric .settings-control--sm {
+  display: block;
   width: 100%;
   min-width: 0;
+  min-height: 1.875rem;
+  padding: 0.22rem 0.4rem;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.settings-pref-row--metric input[type='number'].settings-control {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.settings-pref-row--metric input[type='number'].settings-control::-webkit-outer-spin-button,
+.settings-pref-row--metric input[type='number'].settings-control::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
 }
 
 .settings-pref-row--metric .settings-schedule-select {
   width: 100%;
 }
 
+.settings-pref-row--metric .settings-schedule-select__trigger {
+  gap: 0.35rem;
+  min-height: 1.875rem;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.6875rem;
+}
 
+/* Collapse dual-line schedule value to one line inside metric cells */
+.settings-pref-row--metric .settings-schedule-select__value {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.settings-pref-row--metric .settings-schedule-select__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.settings-pref-row--metric .settings-schedule-select__hint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.625rem;
+}
+
+@media (max-width: 639px) {
+  .settings-pref-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .settings-pref-row.settings-pref-row--metric {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.28rem;
+    min-height: 0;
+    padding: 0.5rem 0.55rem;
+  }
+
+  .settings-pref-row--metric .settings-pref-row__meta {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .settings-pref-row--metric .settings-pref-row__control {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  .settings-pref-row--metric .settings-control,
+  .settings-pref-row--metric .settings-control--sm {
+    min-height: 2.25rem; /* ~36px denser mobile; still tappable with full-width */
+    text-align: left;
+  }
+
+  .settings-pref-row--metric .settings-schedule-select__value {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-pref-row.settings-pref-row--metric {
+    transition: none;
+  }
+}
 
 /* Quiet status / note cards (diagnostics, security notice) */
 .settings-note {
@@ -1070,10 +1186,15 @@ select.settings-control {
   min-height: 3.25rem;
 }
 
-/* Segmented / 宽 control 才允许换行；开关行强制左右并排 */
+/* Segmented / 宽 control 才允许换行；开关行强制左右并排
+ * Metric cells must stay nowrap — they re-assert via .settings-pref-row--metric */
 .settings-pref-row:has(.settings-segmented),
-.settings-pref-row:has(.settings-pref-row__control) {
+.settings-pref-row:has(.settings-pref-row__control):not(.settings-pref-row--metric) {
   flex-wrap: wrap;
+}
+
+.settings-pref-row.settings-pref-row--metric:has(.settings-pref-row__control) {
+  flex-wrap: nowrap;
 }
 
 .settings-pref-row__meta {

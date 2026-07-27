@@ -1,7 +1,7 @@
 # Settings Preference List 规范
 
 **Date:** 2026-07-27  
-**Status:** P0+P1 shipped · P2 LLM partial · appearance CSS hard-cut · data retention skipped（无纯 toggle）
+**Status:** P0+P1 shipped · P2 LLM partial · metrics grid Aᵐ shipped · appearance CSS hard-cut · data retention skipped（无纯 toggle）
 **Updated:** 2026-07-27  
 **Visual route:** A — Operational Quiet  
 **Scope note:** 只推广「单点偏好拼接列表」原语，**不是**全页 iOS 式设置列表。  
@@ -45,7 +45,7 @@
 | --------- | ----------------------------------------------------------------------------- |
 | **PL-O1** | 抽取中性原语 `settings-pref-list` / `settings-pref-row`，外观区作为样板可推广 |
 | **PL-O2** | 用形态三分明确：何时用拼接行、何时堆叠、何时卡片流程                          |
-| **PL-O3** | 密度与变体可测、可复用，不另起全局 token 体系                                 |
+| **PL-O3** | 密度与变体可测、可复用，不另起全局 token 体系；数字簇走 Aᵐ metrics 非全宽塔 |
 | **PL-O4** | 分阶段迁移：P0 原语化 → P1 高价值开关簇 → P2 LLM 局部吸收，不取消 step        |
 | **PL-O5** | a11y 基线（焦点环、sr-only、最小触控）与现有 switch/segmented 一致            |
 
@@ -64,6 +64,7 @@
 | 形态  | 名称                  | 适用                                 | 典型控件                                    | 布局                            |
 | ----- | --------------------- | ------------------------------------ | ------------------------------------------- | ------------------------------- |
 | **A** | Preference Row        | 单点即时偏好；1 行标题 + 可选短 hint | toggle、segmented、简单 select、短数字/enum | `settings-pref-list` 内左右拼接 |
+| **Aᵐ** | Preference Metrics Grid | **短数字/enum 簇**（≥3 个同类参数）  | number、短 enum、schedule 类 compact 控件   | `settings-pref-metrics` 多列 lattice；**每格仍是 A 行语法** |
 | **B** | Stacked Field         | 需要完整 label + 长说明 + 宽输入     | text、password、URL、textarea、多行 help    | 上 label/help，下全宽 control   |
 | **C** | Composite / Step Card | 多字段流程、可折叠高级项、成组验证   | LLM 四步、连接测试、危险分桶操作            | 卡片/步骤容器；内部可局部嵌 A   |
 
@@ -376,9 +377,47 @@
 | 变体     | Class                                  | 用途                       | 规则                                                                                  | 阶段                                |
 | -------- | -------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------- |
 | 默认     | （无）                                 | 桌面宽：左 meta 右 control | 复制现网 appearance-row：`align-items: center; flex-wrap: wrap`                       | **P0 必须**                         |
+| **Metrics** | `settings-pref-row--metric` + 容器 `settings-pref-metrics` | 超时/并发/Token 等参数簇 | 见 **§5.4**；不是新原语，是 A 的 dense lattice 变体 | **工具策略数字簇已落地** |
 | 堆叠     | `settings-pref-row--stack`             | 窄屏或宽控件挤不下         | control 换行全宽；padding 保持；**优先 CSS**（container/`max-width`），避免纯 JS 测宽 | P0 可预留 CSS；外观 HTML **可不挂** |
 | 危险提示 | `settings-pref-row--danger`            | 高风险偏好的轻提示         | **细左边框**（`--settings-danger` 等语义 token）+ 可选 hint 强调；**禁止**整行大红底  | P1 起实际使用；危险操作本身仍禁用 A |
 | 多行控件 | `settings-pref-row--multiline-control` | 右侧非单行控件             | 放宽 `__control` max-width；`align-items: flex-start`                                 | 按需                                |
+
+### 5.4 Preference Metrics Grid（Aᵐ / 数字块）
+
+**问题：** 工具策略里存在 4–8 个「短标题 + 数字」同构字段。若每条都用全宽 A 行，列表纵向爆炸；若做成上 label 下 input 的小卡片格子，则是「加了个框」而不是 pref-row。
+
+**解法：** 保留 A 的 `meta | control` 语法，用 **多列 lattice** 提高密度。
+
+```html
+<div class="settings-pref-metrics settings-pref-metrics--cols-4">
+  <label class="settings-pref-row settings-pref-row--metric">
+    <div class="settings-pref-row__meta">
+      <span class="settings-pref-row__title">请求超时（秒）</span>
+    </div>
+    <div class="settings-pref-row__control">
+      <input type="number" class="settings-control settings-control--sm" … />
+    </div>
+  </label>
+  <!-- more cells… -->
+</div>
+```
+
+| 规则 | 要求 |
+| ---- | ---- |
+| 何时用 | ≥3 个**短**数字/enum 参数；同一决策域；无长 hint |
+| 何时不用 | toggle 簇 → 普通 `settings-pref-list`；单字段 → 全宽 A；长 label/URL/key → B |
+| DOM 合同 | 必须有 `__meta` + `__title` + `__control`；禁止裸 input 格子 |
+| 布局 | sm+：**横向** title 左 / control 右；control 宽约 `5–7.25rem`（schedule 可 `--wide`） |
+| 格子表面 | **禁止** per-cell fill / radius / shadow；仅 hairline 十字分割 |
+| 外框 | 落在 `.settings-tool-page` 内时 **不**再套 metrics 外框；独立区可用顶+左 hairline 闭合 lattice |
+| 列数 | 默认 2；`sm+` 用 `--cols-3` / `--cols-4` |
+| Hint | metric 格内 `__hint` **隐藏**；需要说明写模块 head / 普通 A 行 |
+| Icon | **禁止** L3 metric 行 icon |
+| a11y | `label` 包裹 cell，或 `for`/`aria-label`；number 用 `type="number"` + min/max |
+| 触控 | 桌面 control ~30px 高可接受（扫读优先）；窄屏 control 全宽 + ≥36px |
+| CSS 红线 | 通用 `.settings-pref-row:has(.settings-pref-row__control){flex-wrap:wrap}` **不得**作用到 `--metric` |
+
+**产品放置提醒：** 全局「运行策略预设」是 tool 区顶层 A 行（`#settings-runtime-presets`），**不是**「通用 AI」专属，也不是「数据采集」专属。
 
 ### 5.2 a11y 基线
 
