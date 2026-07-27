@@ -1339,10 +1339,23 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   width: 100%;
 }
 
+.settings-llm-step__header-control--secret {
+  flex: 1 1 16rem;
+  min-width: 14rem;
+  max-width: min(36rem, 100%);
+}
+
 @media (min-width: 640px) {
   .settings-llm-step__header-control {
     width: 12rem;
     flex-shrink: 0;
+  }
+
+  .settings-llm-step__header-control--secret {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 18rem;
+    max-width: none;
   }
 }
 
