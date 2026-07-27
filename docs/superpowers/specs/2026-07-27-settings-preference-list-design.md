@@ -417,7 +417,7 @@
 | 触控 | 桌面 control ~30px 高可接受（扫读优先）；窄屏 control 全宽 + ≥36px |
 | CSS 红线 | 通用 `.settings-pref-row:has(.settings-pref-row__control){flex-wrap:wrap}` **不得**作用到 `--metric` |
 
-**产品放置提醒：** 全局「运行策略预设」是 tool 区顶层 A 行（`#settings-runtime-presets`），**不是**「通用 AI」专属，也不是「数据采集」专属。
+**产品放置提醒：** 全局「应用策略预案」是 tool 区顶层 A 行（`#settings-runtime-presets`），hint `LLM / 采集 / 分析 / Deep Chat / PPC`；**不是**「通用 AI」专属，也不是「数据采集」专属。
 
 ### 5.2 a11y 基线
 

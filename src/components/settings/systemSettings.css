@@ -805,18 +805,14 @@ select.settings-control {
 /*
  * Pref Metrics — Form A density lattice (Operational Quiet)
  *
- * Not a new primitive: same pref-row grammar, multi-column for short numbers.
+ * Same pref-row grammar, multi-column for short numbers.
+ * Visual rule: ONE quiet cluster surface + row hairlines only.
+ * No cell cages, no extra metric outer frame inside tool-page.
  *
  *   settings-pref-metrics [ --cols-3 | --cols-4 ]
  *     settings-pref-row settings-pref-row--metric
- *       settings-pref-row__meta > __title   → left label rail
- *       settings-pref-row__control         → right compact control
- *
- * Anti-patterns:
- *   - stacked label-over-input mini forms (rejected as “加了个框”)
- *   - full-width A rows for every numeric (list too long)
- *   - per-cell fill / radius / shadow tiles
- *   - outer metrics frame when already inside .settings-tool-page
+ *       settings-pref-row__meta > __title
+ *       settings-pref-row__control
  */
 .settings-pref-metrics {
   display: grid;
@@ -825,20 +821,25 @@ select.settings-control {
   margin: 0.65rem 0 0;
   padding: 0;
   border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
-  border-left: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
+  border-radius: 0;
   background: transparent;
   box-sizing: border-box;
 }
 
-/* Framed tool page: first cluster flush; later clusters keep gap */
 .settings-tool-page > .settings-pref-metrics:first-child {
   margin-top: 0;
 }
 
-/* Scrape runtime block: small gap under local head */
 .settings-scrape-runtime > .settings-pref-metrics {
   margin-top: 0.5rem;
+}
+
+/* Metrics-only tool-page: drop empty chrome box */
+.settings-tool-page:has(> .settings-pref-metrics:only-child) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
 }
 
 @media (min-width: 640px) {
@@ -851,21 +852,21 @@ select.settings-control {
   }
 }
 
-/* Mini A-row: always horizontal meta | control on sm+ */
+/* Mini A-row: horizontal meta | control.
+ * Only horizontal hairlines — no cell cages / vertical frames. */
 .settings-pref-row.settings-pref-row--metric {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.4rem 0.5rem;
+  gap: 0.5rem 0.65rem;
   min-width: 0;
-  min-height: 2.375rem;
+  min-height: 2.625rem;
   margin: 0;
-  padding: 0.35rem 0.5rem;
+  padding: 0.45rem 0.5rem;
   border: 0;
-  border-right: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--settings-border) 72%, transparent);
   border-radius: 0;
   background: transparent;
   box-sizing: border-box;
@@ -874,7 +875,7 @@ select.settings-control {
 
 .settings-pref-row.settings-pref-row--metric:hover,
 .settings-pref-row.settings-pref-row--metric:focus-within {
-  background: color-mix(in srgb, var(--settings-surface-muted) 78%, transparent);
+  background: color-mix(in srgb, var(--settings-surface-muted) 55%, transparent);
 }
 
 .settings-pref-row--metric .settings-pref-row__meta {
@@ -893,33 +894,31 @@ select.settings-control {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.75rem;
+  font-size: 0.8125rem; /* match standard pref-row title — readable */
   font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  color: var(--settings-text, #334155);
+  line-height: 1.25;
+  letter-spacing: 0;
+  color: var(--settings-text, #0f172a);
 }
 
 .settings-pref-row--metric .settings-pref-row__hint {
-  display: none; /* density: single-line cells only */
+  display: none;
 }
 
-/* Compact right rail — beats base .settings-pref-row__control widths */
 .settings-pref-row--metric .settings-pref-row__control {
   flex: 0 0 auto;
-  width: 5.5rem;
-  min-width: 4.75rem;
-  max-width: 7.25rem;
+  width: 5.75rem;
+  min-width: 5rem;
+  max-width: 7.5rem;
   margin: 0;
   margin-left: auto;
 }
 
-/* Enum / schedule needs a wider rail */
 .settings-pref-row--metric:has(.settings-schedule-select) .settings-pref-row__control,
 .settings-pref-row--metric .settings-pref-row__control--wide {
-  width: min(100%, 9.25rem);
-  max-width: 10.5rem;
-  min-width: 7rem;
+  width: min(100%, 9.5rem);
+  max-width: 11rem;
+  min-width: 7.25rem;
 }
 
 .settings-pref-row--metric .settings-control,
@@ -927,12 +926,23 @@ select.settings-control {
   display: block;
   width: 100%;
   min-width: 0;
-  min-height: 1.875rem;
-  padding: 0.22rem 0.4rem;
-  font-size: 0.75rem;
+  min-height: 2rem;
+  padding: 0.28rem 0.5rem;
+  border-color: color-mix(in srgb, var(--settings-border, #cbd5e1) 92%, #94a3b8);
+  background: var(--settings-surface, #fff);
+  font-size: 0.8125rem;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
-  line-height: 1.2;
+  line-height: 1.25;
+  color: var(--settings-text, #0f172a);
   text-align: right;
+}
+
+.settings-pref-row--metric .settings-control:focus-visible,
+.settings-pref-row--metric .settings-control--sm:focus-visible {
+  outline: none;
+  box-shadow: var(--settings-focus-ring);
+  border-color: color-mix(in srgb, var(--settings-accent, #0f766e) 55%, var(--settings-border));
 }
 
 .settings-pref-row--metric input[type='number'].settings-control {
@@ -952,12 +962,12 @@ select.settings-control {
 
 .settings-pref-row--metric .settings-schedule-select__trigger {
   gap: 0.35rem;
-  min-height: 1.875rem;
-  padding: 0.2rem 0.4rem;
-  font-size: 0.6875rem;
+  min-height: 2rem;
+  padding: 0.28rem 0.45rem;
+  font-size: 0.75rem;
+  color: var(--settings-text, #0f172a);
 }
 
-/* Collapse dual-line schedule value to one line inside metric cells */
 .settings-pref-row--metric .settings-schedule-select__value {
   flex-direction: row;
   align-items: baseline;
@@ -968,15 +978,17 @@ select.settings-control {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  color: var(--settings-text, #0f172a);
 }
 
 .settings-pref-row--metric .settings-schedule-select__hint {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
+  color: var(--settings-text-muted, #64748b);
 }
 
 @media (max-width: 639px) {
@@ -989,9 +1001,9 @@ select.settings-control {
     flex-wrap: nowrap;
     align-items: stretch;
     justify-content: flex-start;
-    gap: 0.28rem;
+    gap: 0.3rem;
     min-height: 0;
-    padding: 0.5rem 0.55rem;
+    padding: 0.55rem 0.6rem;
   }
 
   .settings-pref-row--metric .settings-pref-row__meta {
@@ -1008,7 +1020,7 @@ select.settings-control {
 
   .settings-pref-row--metric .settings-control,
   .settings-pref-row--metric .settings-control--sm {
-    min-height: 2.25rem; /* ~36px denser mobile; still tappable with full-width */
+    min-height: 2.25rem;
     text-align: left;
   }
 

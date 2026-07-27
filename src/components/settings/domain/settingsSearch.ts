@@ -25,8 +25,11 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
     id: 'settings-runtime-presets',
     sectionId: 'settings-section-tool-strategy',
     labels: [
+      '应用策略预案',
+      '策略预案',
       '运行策略预设',
       '运行策略一键预设',
+      'LLM / 采集 / 分析 / Deep Chat / PPC',
       '全局档位',
       '预设',
       '稳定',

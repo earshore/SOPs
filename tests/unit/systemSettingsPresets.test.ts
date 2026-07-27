@@ -410,7 +410,8 @@ describe('UT-P1-06 appearance theme contracts', () => {
       expect(presetAt).toBeGreaterThan(-1);
       expect(generalAt).toBeGreaterThan(-1);
       expect(presetAt).toBeLessThan(generalAt);
-      expect(toolChunk).toContain('全局档位');
+      expect(toolChunk).toContain('应用策略预案');
+      expect(toolChunk).toContain('LLM / 采集 / 分析 / Deep Chat / PPC');
     });
 
     it('PPC Tools is one product tool-page (Deep Chat pattern), not ad-hoc slate card', () => {

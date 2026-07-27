@@ -135,17 +135,14 @@ test.describe('system settings', () => {
     ).toHaveCount(0);
   });
 
-  test('E2E-P1-06 runtime presets live inside 通用 AI 执行策略', async ({ page }) => {
+  test('E2E-P1-06 runtime presets are tool-strategy top row (global plan)', async ({ page }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();
     await settings.goToSection('工具策略');
 
-    const general = page.locator(
-      '#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]'
-    );
-    await general.locator('summary').click();
     const presets = page.getByTestId('settings-runtime-presets');
     await expect(presets).toBeVisible();
+    await expect(presets.getByText('应用策略预案')).toBeVisible();
     await expect(page.getByTestId('settings-preset-reliability')).toBeVisible();
     await expect(page.getByTestId('settings-preset-cost')).toBeVisible();
     await page.getByTestId('settings-preset-cost').click();
@@ -224,12 +221,9 @@ test.describe('system settings', () => {
     await settings.openFromNav();
     await settings.goToSection('工具策略');
 
-    const general = page.locator(
-      '#settings-section-tool-strategy details[data-settings-focus="general-ai-runtime"]'
-    );
-    await general.locator('summary').click();
+    await expect(page.getByTestId('settings-runtime-presets')).toBeVisible();
     await page.getByTestId('settings-preset-cost').click();
-    await expect(page.getByText('已应用并保存运行策略预设', { exact: true })).toBeVisible({
+    await expect(page.getByText('已应用并保存策略预案', { exact: true })).toBeVisible({
       timeout: 5000,
     });
 

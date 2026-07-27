@@ -2313,7 +2313,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.runtimeStrategy.settings = applyRuntimePreset(this.runtimeStrategy.settings, id);
     this.activeRuntimePresetId = id;
     // Button control: auto-persist runtime strategy
-    void this.persistRuntimeStrategySettings({ toast: '已应用并保存运行策略预设' });
+    void this.persistRuntimeStrategySettings({ toast: '已应用并保存策略预案' });
   },
 
   onSettingsSearch(event?: Event): void {
