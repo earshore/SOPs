@@ -803,29 +803,10 @@ select.settings-control {
 }
 
 /*
- * Pref Metrics — Form A density lattice (Operational Quiet)
- *
- * Same pref-row grammar, multi-column for short numbers.
- * Visual rule: ONE quiet cluster surface + row hairlines only.
- * No cell cages, no extra metric outer frame inside tool-page.
- *
- *   settings-pref-metrics [ --cols-3 | --cols-4 ]
- *     settings-pref-row settings-pref-row--metric
- *       settings-pref-row__meta > __title
- *       settings-pref-row__control
+ * Tool strategy page body contract:
+ * each settings-tool-page / settings-tool-l3__body keeps ONE settings-pref-list.
+ * Numeric fields are standard settings-pref-row stacks (no metrics lattice).
  */
-.settings-pref-metrics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0;
-  margin: 0.65rem 0 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-sizing: border-box;
-}
-
 .settings-scrape-runtime > .settings-pref-list {
   margin-top: 0.5rem;
 }
@@ -836,202 +817,6 @@ select.settings-control {
   border-radius: 0;
   background: transparent;
   padding: 0;
-}
-
-@media (min-width: 640px) {
-  .settings-pref-metrics--cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .settings-pref-metrics--cols-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/*
- * Metric cell layout (readable dense):
- * Stack title ABOVE full-width control.
- * Why not horizontal meta|control in 3–4 cols?
- *   Long CN labels (e.g. “AI / 工具请求超时（秒）”) share a ~1/4 panel
- *   cell with a fixed ~5.75rem input → title ellipsizes and “looks unreadable”.
- * That is primarily compression, not contrast.
- * Keep pref-row grammar (__meta / __title / __control); only axis changes.
- */
-.settings-pref-row.settings-pref-row--metric {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  align-items: stretch;
-  justify-content: flex-start;
-  gap: 0.35rem;
-  min-width: 0;
-  min-height: 0;
-  margin: 0;
-  padding: 0.55rem 0.15rem 0.65rem;
-  border: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--settings-border) 72%, transparent);
-  border-radius: 0;
-  background: transparent;
-  box-sizing: border-box;
-  transition: background-color 160ms ease;
-}
-
-/* Soft column gutters without cell cages */
-@media (min-width: 640px) {
-  .settings-pref-metrics--cols-3 > .settings-pref-row--metric,
-  .settings-pref-metrics--cols-4 > .settings-pref-row--metric {
-    padding-left: 0.45rem;
-    padding-right: 0.45rem;
-  }
-
-  .settings-pref-metrics--cols-3 > .settings-pref-row--metric:nth-child(3n + 1),
-  .settings-pref-metrics--cols-4 > .settings-pref-row--metric:nth-child(4n + 1) {
-    padding-left: 0.1rem;
-  }
-
-  .settings-pref-metrics--cols-3 > .settings-pref-row--metric:nth-child(3n),
-  .settings-pref-metrics--cols-4 > .settings-pref-row--metric:nth-child(4n) {
-    padding-right: 0.1rem;
-  }
-}
-
-.settings-pref-row.settings-pref-row--metric:hover,
-.settings-pref-row.settings-pref-row--metric:focus-within {
-  background: color-mix(in srgb, var(--settings-surface-muted) 42%, transparent);
-}
-
-.settings-pref-row--metric .settings-pref-row__meta {
-  display: block;
-  flex: 0 0 auto;
-  width: 100%;
-  min-width: 0;
-  max-width: none;
-}
-
-.settings-pref-row--metric .settings-pref-row__title,
-.settings-pref-row--metric .settings-label {
-  display: block;
-  margin: 0;
-  min-width: 0;
-  /* Allow 2 lines — never force single-line ellipsis on CN metric labels */
-  overflow: visible;
-  text-overflow: unset;
-  white-space: normal;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.35;
-  letter-spacing: 0;
-  color: var(--color-text-primary, var(--settings-text, #0f172a));
-}
-
-.settings-pref-row--metric .settings-pref-row__hint {
-  display: none;
-}
-
-.settings-pref-row--metric .settings-pref-row__control {
-  flex: 0 0 auto;
-  width: 100%;
-  min-width: 0;
-  max-width: none;
-  margin: 0;
-}
-
-.settings-pref-row--metric:has(.settings-schedule-select) .settings-pref-row__control,
-.settings-pref-row--metric .settings-pref-row__control--wide {
-  width: 100%;
-  max-width: none;
-  min-width: 0;
-}
-
-.settings-pref-row--metric .settings-control,
-.settings-pref-row--metric .settings-control--sm {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  min-height: 2.125rem;
-  padding: 0.35rem 0.55rem;
-  border-color: color-mix(in srgb, var(--settings-border, #cbd5e1) 88%, #64748b);
-  background: var(--settings-surface, #fff);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.25;
-  color: var(--color-text-primary, var(--settings-text, #0f172a));
-  text-align: left;
-}
-
-.settings-pref-row--metric .settings-control:focus-visible,
-.settings-pref-row--metric .settings-control--sm:focus-visible {
-  outline: none;
-  box-shadow: var(--settings-focus-ring);
-  border-color: color-mix(in srgb, var(--settings-accent, #0f766e) 55%, var(--settings-border));
-}
-
-.settings-pref-row--metric input[type='number'].settings-control {
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.settings-pref-row--metric input[type='number'].settings-control::-webkit-outer-spin-button,
-.settings-pref-row--metric input[type='number'].settings-control::-webkit-inner-spin-button {
-  margin: 0;
-  -webkit-appearance: none;
-}
-
-.settings-pref-row--metric .settings-schedule-select {
-  width: 100%;
-}
-
-.settings-pref-row--metric .settings-schedule-select__trigger {
-  gap: 0.35rem;
-  min-height: 2.125rem;
-  padding: 0.3rem 0.5rem;
-  font-size: 0.75rem;
-  color: var(--color-text-primary, var(--settings-text, #0f172a));
-}
-
-.settings-pref-row--metric .settings-schedule-select__value {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.05rem;
-}
-
-.settings-pref-row--metric .settings-schedule-select__label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-primary, var(--settings-text, #0f172a));
-}
-
-.settings-pref-row--metric .settings-schedule-select__hint {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.6875rem;
-  color: var(--settings-text-muted, #64748b);
-}
-
-@media (max-width: 639px) {
-  .settings-pref-metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .settings-pref-row.settings-pref-row--metric {
-    padding: 0.55rem 0.35rem 0.65rem;
-  }
-
-  .settings-pref-row--metric .settings-control,
-  .settings-pref-row--metric .settings-control--sm {
-    min-height: 2.25rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .settings-pref-row.settings-pref-row--metric {
-    transition: none;
-  }
 }
 
 /* Quiet status / note cards (diagnostics, security notice) */
@@ -1195,15 +980,10 @@ select.settings-control {
   min-height: 3.25rem;
 }
 
-/* Segmented / 宽 control 才允许换行；开关行强制左右并排
- * Metric cells must stay nowrap — they re-assert via .settings-pref-row--metric */
+/* Segmented / 宽 control 才允许换行；开关行强制左右并排 */
 .settings-pref-row:has(.settings-segmented),
-.settings-pref-row:has(.settings-pref-row__control):not(.settings-pref-row--metric) {
+.settings-pref-row:has(.settings-pref-row__control) {
   flex-wrap: wrap;
-}
-
-.settings-pref-row.settings-pref-row--metric:has(.settings-pref-row__control) {
-  flex-wrap: nowrap;
 }
 
 .settings-pref-row__meta {
