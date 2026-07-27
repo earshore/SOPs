@@ -81,20 +81,25 @@
   width: 2.25rem;
   height: 2.25rem;
   flex-basis: 2.25rem;
-  /* Fill + border + halo all share --color-primary (appearance accent) */
-  border-color: var(--color-primary, #3b82f6);
-  background: var(--color-primary, #3b82f6);
-  color: #ffffff;
+  /*
+   * Appearance CTA: fill AND border both track ThemeManager --color-primary.
+   * Use background-color + background-image:none so no residual blue paint/
+   * gradient can stick while only the border ring follows accent.
+   */
+  border-color: var(--color-primary) !important;
+  background-color: var(--color-primary) !important;
+  background-image: none !important;
+  color: #ffffff !important;
   box-shadow: none;
 }
 
 .keyword-hunter-title-icon-btn--primary:hover,
 .keyword-hunter-title-icon-btn--primary:focus-visible {
-  border-color: var(--color-primary-dark, var(--color-primary, #1d4ed8));
-  background: var(--color-primary-dark, var(--color-primary, #1d4ed8));
-  color: #ffffff;
-  /* Mono halo — never a second hue or pure white ring */
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
+  border-color: var(--color-primary-dark, var(--color-primary)) !important;
+  background-color: var(--color-primary-dark, var(--color-primary)) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent);
   outline: none;
 }
 
@@ -102,17 +107,18 @@
 #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
 #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible,
 #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:active {
-  border-color: var(--color-primary, #3b82f6);
-  background: var(--color-primary, #3b82f6);
-  color: #ffffff;
-  box-shadow: none;
+  border-color: var(--color-primary) !important;
+  background-color: var(--color-primary) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
 }
 
 #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
 #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible {
-  border-color: var(--color-primary-dark, var(--color-primary, #1d4ed8));
-  background: var(--color-primary-dark, var(--color-primary, #1d4ed8));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
+  border-color: var(--color-primary-dark, var(--color-primary)) !important;
+  background-color: var(--color-primary-dark, var(--color-primary)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent) !important;
 }
 
 .dark .keyword-hunter-title-icon-btn--primary,
@@ -121,10 +127,12 @@
 [data-color-mode-resolved='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
 [data-theme='dark'] .keyword-hunter-title-icon-btn--primary,
 [data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary {
-  border-color: var(--color-primary, #818cf8);
-  background: var(--color-primary, #818cf8);
-  color: #f8fafc;
-  box-shadow: none;
+  /* Same token as light — do not freeze indigo/blue fallback fill */
+  border-color: var(--color-primary) !important;
+  background-color: var(--color-primary) !important;
+  background-image: none !important;
+  color: #f8fafc !important;
+  box-shadow: none !important;
 }
 
 .dark .keyword-hunter-title-icon-btn--primary:hover,
@@ -139,10 +147,11 @@
 [data-theme='dark'] .keyword-hunter-title-icon-btn--primary:focus-visible,
 [data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
 [data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible {
-  border-color: var(--color-primary, #818cf8);
-  background: color-mix(in srgb, var(--color-primary, #818cf8) 88%, #fff);
-  color: #0f172a;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #818cf8) 32%, transparent);
+  border-color: var(--color-primary-dark, var(--color-primary)) !important;
+  background-color: var(--color-primary-dark, var(--color-primary)) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 32%, transparent) !important;
 }
 
 
@@ -930,9 +939,14 @@
 }
 
 #keyword-hunter-btn-start-analysis:hover,
-#keyword-hunter-translate-btn:hover:not(:disabled),
 #keyword-hunter-btn-start-analysis:active {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
+  /* Mono primary halo only — fill already forced above */
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent) !important;
+  transform: none;
+}
+
+#keyword-hunter-translate-btn:hover:not(:disabled) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent);
   transform: none;
 }
 
@@ -2589,15 +2603,28 @@
     background-image: none !important;
   }
 
+  /*
+   * PC density override used to freeze start-analysis fill to blue-600 while
+   * borders followed Appearance --color-primary → multicolored “blue core +
+   * accent rim”. Progress bars keep blue-ish track via primary token too.
+   */
   #app_center_content_area
     :where(
       #keyword-hunter-btn-start-analysis,
       #keyword-hunter-translate-progress,
       #keyword-hunter-coverage-bar
     ) {
-    background: var(--color-blue-600, #2563eb) !important;
+    background: var(--color-primary) !important;
+    background-image: none !important;
+    border-color: var(--color-primary) !important;
     box-shadow: none !important;
     transform: none !important;
+  }
+
+  #app_center_content_area #keyword-hunter-btn-start-analysis:hover,
+  #app_center_content_area #keyword-hunter-btn-start-analysis:focus-visible {
+    background: var(--color-primary-dark, var(--color-primary)) !important;
+    border-color: var(--color-primary-dark, var(--color-primary)) !important;
   }
 
   #app_center_content_area

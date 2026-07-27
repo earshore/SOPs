@@ -1561,6 +1561,135 @@
   box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(0, 0, 0, 0.72));
 }
 
+/*
+ * SOPs / More overview cards combine .sop-card + .overview-accent-card.
+ * Hover uses !important light pastel --card-left-accent-bg (rgba white washes),
+ * which beats .sop-card:hover and looks “no hover” on dark surfaces.
+ * App Center / Hub work because they redefine accent surfaces for dark locally.
+ */
+.dark .overview-accent-card,
+.dark .app-flow-step.app-child-link,
+.dark .app-overview-card,
+[data-color-mode-resolved='dark'] .overview-accent-card,
+[data-color-mode-resolved='dark'] .app-flow-step.app-child-link,
+[data-color-mode-resolved='dark'] .app-overview-card,
+[data-theme='dark'] .overview-accent-card,
+[data-theme='dark'] .app-flow-step.app-child-link,
+[data-theme='dark'] .app-overview-card {
+  --overview-card-bg: var(--surface-card, #1e293b);
+  --overview-card-border: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  /* Soft dark wash from each card’s own accent (not global primary) */
+  --overview-card-accent-bg: color-mix(
+    in srgb,
+    var(--overview-card-accent, var(--card-left-accent, #818cf8)) 16%,
+    var(--surface-card, #1e293b)
+  );
+  --card-left-accent-bg: var(--overview-card-accent-bg);
+  background: var(--overview-card-bg);
+  border-color: var(--overview-card-border) !important;
+}
+
+.dark .overview-accent-card:hover,
+.dark .overview-accent-card:focus-visible,
+.dark .app-flow-step.app-child-link:hover,
+.dark .app-flow-step.app-child-link:focus-visible,
+.dark .app-overview-card:hover,
+.dark .app-overview-card:focus-visible,
+[data-color-mode-resolved='dark'] .overview-accent-card:hover,
+[data-color-mode-resolved='dark'] .overview-accent-card:focus-visible,
+[data-color-mode-resolved='dark'] .app-flow-step.app-child-link:hover,
+[data-color-mode-resolved='dark'] .app-flow-step.app-child-link:focus-visible,
+[data-color-mode-resolved='dark'] .app-overview-card:hover,
+[data-color-mode-resolved='dark'] .app-overview-card:focus-visible,
+[data-theme='dark'] .overview-accent-card:hover,
+[data-theme='dark'] .overview-accent-card:focus-visible,
+[data-theme='dark'] .app-flow-step.app-child-link:hover,
+[data-theme='dark'] .app-flow-step.app-child-link:focus-visible,
+[data-theme='dark'] .app-overview-card:hover,
+[data-theme='dark'] .app-overview-card:focus-visible {
+  border-color: var(--overview-card-accent) !important;
+  background: color-mix(
+    in srgb,
+    var(--overview-card-accent, var(--card-left-accent, #818cf8)) 22%,
+    var(--surface-card-hover, #334155)
+  ) !important;
+  box-shadow:
+    inset var(--overview-card-rail-width, 2px) 0 0 var(--overview-card-accent),
+    var(--shadow-card-hover, 0 8px 22px -20px rgba(0, 0, 0, 0.72));
+}
+
+/* Per-accent soft fills for dark (replace pure white pastels) */
+.dark .overview-accent-blue,
+[data-color-mode-resolved='dark'] .overview-accent-blue,
+[data-theme='dark'] .overview-accent-blue {
+  --card-left-accent-bg: color-mix(in srgb, #60a5fa 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-green,
+[data-color-mode-resolved='dark'] .overview-accent-green,
+[data-theme='dark'] .overview-accent-green {
+  --card-left-accent-bg: color-mix(in srgb, #4ade80 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-emerald,
+[data-color-mode-resolved='dark'] .overview-accent-emerald,
+[data-theme='dark'] .overview-accent-emerald {
+  --card-left-accent-bg: color-mix(in srgb, #34d399 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-red,
+[data-color-mode-resolved='dark'] .overview-accent-red,
+[data-theme='dark'] .overview-accent-red {
+  --card-left-accent-bg: color-mix(in srgb, #f87171 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-purple,
+[data-color-mode-resolved='dark'] .overview-accent-purple,
+[data-theme='dark'] .overview-accent-purple {
+  --card-left-accent-bg: color-mix(in srgb, #c084fc 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-violet,
+[data-color-mode-resolved='dark'] .overview-accent-violet,
+[data-theme='dark'] .overview-accent-violet {
+  --card-left-accent-bg: color-mix(in srgb, #a78bfa 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-fuchsia,
+[data-color-mode-resolved='dark'] .overview-accent-fuchsia,
+[data-theme='dark'] .overview-accent-fuchsia {
+  --card-left-accent-bg: color-mix(in srgb, #e879f9 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-amber,
+[data-color-mode-resolved='dark'] .overview-accent-amber,
+[data-theme='dark'] .overview-accent-amber {
+  --card-left-accent-bg: color-mix(in srgb, #fbbf24 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-cyan,
+[data-color-mode-resolved='dark'] .overview-accent-cyan,
+[data-theme='dark'] .overview-accent-cyan {
+  --card-left-accent-bg: color-mix(in srgb, #22d3ee 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-rose,
+[data-color-mode-resolved='dark'] .overview-accent-rose,
+[data-theme='dark'] .overview-accent-rose {
+  --card-left-accent-bg: color-mix(in srgb, #fb7185 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-teal,
+[data-color-mode-resolved='dark'] .overview-accent-teal,
+[data-theme='dark'] .overview-accent-teal {
+  --card-left-accent-bg: color-mix(in srgb, #2dd4bf 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-indigo,
+[data-color-mode-resolved='dark'] .overview-accent-indigo,
+[data-theme='dark'] .overview-accent-indigo {
+  --card-left-accent-bg: color-mix(in srgb, #818cf8 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-orange,
+[data-color-mode-resolved='dark'] .overview-accent-orange,
+[data-theme='dark'] .overview-accent-orange {
+  --card-left-accent-bg: color-mix(in srgb, #fb923c 16%, var(--surface-card, #1e293b));
+}
+.dark .overview-accent-slate,
+[data-color-mode-resolved='dark'] .overview-accent-slate,
+[data-theme='dark'] .overview-accent-slate {
+  --card-left-accent-bg: color-mix(in srgb, #94a3b8 14%, var(--surface-card, #1e293b));
+}
+
 .dark .amz_card-hover,
 [data-color-mode-resolved='dark'] .amz_card-hover,
 [data-theme='dark'] .amz_card-hover {
