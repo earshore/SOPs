@@ -244,4 +244,38 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(debugChunk).not.toContain('grid gap-3 sm:grid-cols-2');
     expect(debugChunk).not.toContain('text-emerald-600 focus:ring-emerald-500');
   });
+
+  it('P1-2 PPC Search Terms booleans use pref-list + setRuntimeBoolean paths', () => {
+    expect(html).toContain('data-testid="settings-ppc-bool-pref-list"');
+    expect(html).toContain("setRuntimeBoolean('ppcSearchTerms.enableLlmCache', $event)");
+    expect(html).toContain("setRuntimeBoolean('ppcSearchTerms.useAgent', $event)");
+    expect(html).toContain("setRuntimeBoolean('ppcSearchTerms.allowLocalFallback', $event)");
+
+    const ppcListStart = html.indexOf('data-testid="settings-ppc-bool-pref-list"');
+    expect(ppcListStart).toBeGreaterThan(-1);
+    const ppcChunk = html.slice(ppcListStart, ppcListStart + 2500);
+    expect(ppcChunk).toContain('settings-pref-row');
+    expect(ppcChunk).toContain('settings-switch');
+    expect(ppcChunk).not.toContain('grid gap-3 sm:grid-cols-3');
+    expect(ppcChunk).not.toContain('settings-checkbox');
+  });
+
+  it('P1-2 Keyword Hunter SEO match booleans use pref-list + setRuntimeBoolean paths', () => {
+    expect(html).toContain('data-testid="settings-kh-seo-bool-pref-list"');
+    expect(html).toContain(
+      "setRuntimeBoolean('keywordHunterSeoProcess.enableLlmCache', $event)"
+    );
+    expect(html).toContain("setRuntimeBoolean('keywordHunterSeoProcess.matchPartial', $event)");
+    expect(html).toContain("setRuntimeBoolean('keywordHunterSeoProcess.matchPlural', $event)");
+    expect(html).toContain("setRuntimeBoolean('keywordHunterSeoProcess.matchStem', $event)");
+    expect(html).toContain("setRuntimeBoolean('keywordHunterSeoProcess.matchCase', $event)");
+
+    const khListStart = html.indexOf('data-testid="settings-kh-seo-bool-pref-list"');
+    expect(khListStart).toBeGreaterThan(-1);
+    const khChunk = html.slice(khListStart, khListStart + 4500);
+    expect(khChunk).toContain('settings-pref-row');
+    expect(khChunk).toContain('settings-switch');
+    expect(khChunk).not.toContain('grid gap-3 sm:grid-cols-2');
+    expect(khChunk).not.toContain('settings-checkbox');
+  });
 });
