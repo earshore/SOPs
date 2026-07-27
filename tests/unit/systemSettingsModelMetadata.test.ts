@@ -106,20 +106,17 @@ function createSettingsPanel(): SettingsPanelForTest {
     expect(history?.isEmpty).toBe(false);
   });
 
-  it('toggles the full local data cleanup list from collapsed by default', async () => {
+  it('cleanup items use native pref-fold UI with summary counts', async () => {
     localStorage.setItem('cache:view:item', 'cached-view');
 
     const panel = createSettingsPanel();
     await panel.refreshLocalDataUsage();
 
-    expect(panel.localData.cleanupItemsExpanded).toBe(false);
     expect(panel.localDataCleanupSummaryText).toContain('8 类数据');
-
+    // Lightweight API retained for compatibility; expand/collapse is native <details>
+    expect(panel.localData.cleanupItemsExpanded).toBe(false);
     panel.toggleLocalDataCleanupItems();
     expect(panel.localData.cleanupItemsExpanded).toBe(true);
-
-    panel.toggleLocalDataCleanupItems();
-    expect(panel.localData.cleanupItemsExpanded).toBe(false);
   });
 
   it('clears a selected local data bucket and refreshes usage', async () => {

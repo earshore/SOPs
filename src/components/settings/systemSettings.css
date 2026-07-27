@@ -795,16 +795,24 @@ select.settings-control {
  /* Nested pref-list (L4 inside L3 shell): drop second chrome box.
  * Dividers alone separate rows; outer tool-app / step / card already frames the group.
  */
-.settings-tool-app .settings-pref-list,
-.settings-llm-step .settings-pref-list,
-.settings-collapsible-card .settings-pref-list,
-.settings-submodule .settings-pref-list,
 .settings-tool-page .settings-pref-list,
+.settings-pref-fold__body .settings-pref-list,
 .settings-pref-fold__body .settings-tool-page .settings-pref-list {
   border: none;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+/* LLM fold bodies reuse step body padding without outer step chrome */
+/* LLM / other folds: body content uses the same framed tool-page surface */
+.settings-pref-fold__body > .settings-tool-page {
+  margin-top: 0.15rem;
+}
+
+.settings-pref-fold__body > .settings-tool-page .settings-pref-row {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 /*
@@ -846,33 +854,44 @@ select.settings-control {
 .settings-tool-page__model {
   position: relative;
   width: 100%;
-  min-width: 10rem;
-  max-width: 100%;
+  min-width: 0;
 }
 
-@media (min-width: 640px) {
-  .settings-tool-page__model {
-    width: 14rem;
-    max-width: 16rem;
-    flex-shrink: 0;
-  }
+.settings-tool-page__model-select,
+.settings-tool-page__model .settings-control {
+  width: 100%;
+  min-height: 2.125rem;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  padding-right: 2rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--settings-text, #334155);
+  background-color: var(--settings-surface, #fff);
+}
+
+.settings-tool-page__model-select:disabled,
+.settings-tool-page__model .settings-control:disabled {
+  color: var(--settings-text-muted, #64748b);
+  opacity: 0.85;
 }
 
 .settings-tool-page__model-chevron {
   pointer-events: none;
   position: absolute;
-  right: 0.75rem;
+  right: 0.55rem;
   top: 50%;
   display: flex;
-  height: 1.25rem;
-  width: 1.25rem;
+  height: 1.15rem;
+  width: 1.15rem;
   transform: translateY(-50%);
   align-items: center;
   justify-content: center;
-  border-radius: 0.375rem;
-  background: color-mix(in srgb, var(--settings-surface-muted) 90%, var(--settings-surface));
+  border-radius: 0.3rem;
+  background: transparent;
   color: var(--color-text-tertiary, #94a3b8);
-  font-size: 0.5625rem;
+  font-size: 0.5rem;
 }
 
 .settings-tool-page__hint {
@@ -1226,152 +1245,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   color: var(--settings-accent-strong);
 }
 
-/* ---- LLM setup: numbered steps 1–4 (collapsible, default closed) ---- */
-/* L3 directory node shell — shared with tool-app / collapsible */
-.settings-llm-step {
-  border: 1px solid color-mix(in srgb, var(--settings-border) 95%, transparent);
-  border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  background: color-mix(in srgb, var(--settings-surface) 90%, transparent);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 3%, transparent);
-  /* visible so API-path dropdown is not clipped */
-  overflow: visible;
-}
-
-.settings-llm-step > summary.settings-llm-step__header {
-  list-style: none;
-  cursor: pointer;
-  border-bottom: 1px solid transparent;
-  border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-}
-
-.settings-llm-step > summary.settings-llm-step__header::-webkit-details-marker {
-  display: none;
-}
-
-.settings-llm-step[open] > summary.settings-llm-step__header {
-  border-bottom-color: color-mix(in srgb, var(--color-border-light, #f1f5f9) 95%, transparent);
-  border-radius: var(--settings-radius-card, var(--workbench-radius, 8px))
-    var(--settings-radius-card, var(--workbench-radius, 8px)) 0 0;
-}
-
-/* L3 header row: title cluster + trailing badge/chevron (same rhythm as tool-app) */
-.settings-llm-step__header,
-.settings-tool-app-summary,
-.settings-collapsible-summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 0.75rem;
-  padding: 0.75rem 0.875rem;
-  background: transparent;
-}
-
-.settings-llm-step__header:hover,
-.settings-tool-app-summary:hover,
-.settings-tool-app-summary:focus-visible,
-.settings-collapsible-summary:hover,
-.settings-collapsible-summary:focus-visible {
-  background: color-mix(in srgb, var(--settings-surface-muted) 92%, transparent);
-  outline: none;
-}
-
-/* Real FA icon — more reliable than CSS content \f078 */
-.settings-llm-step__chevron {
-  margin-left: auto;
-  flex-shrink: 0;
-  transition: transform 160ms ease;
-}
-
-.settings-llm-step[open] > summary .settings-llm-step__chevron {
-  transform: rotate(180deg);
-}
-
-.settings-llm-step__title,
-.settings-tool-app-summary .settings-card__title,
-.settings-collapsible-summary .settings-card__title {
-  margin: 0;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--settings-text);
-  line-height: 1.25;
-}
-
-.settings-llm-step__desc,
-.settings-tool-app-summary .settings-card__desc,
-.settings-collapsible-summary .settings-card__desc {
-  margin: 0.125rem 0 0;
-  font-size: 0.6875rem;
-  line-height: 1.4;
-  color: var(--color-text-tertiary, #94a3b8);
-}
-
-.settings-llm-step__body,
-.settings-tool-app-body,
-.settings-collapsible-body {
-  padding: 0.75rem 0.875rem 0.875rem;
-}
-
-/* L2 static blocks: same chrome as steps/apps, no chevron / no collapse */
-.settings-llm-step__header--static,
-.settings-tool-app-summary--static {
-  cursor: default;
-  list-style: none;
-}
-
-.settings-llm-step__header--static:hover,
-.settings-tool-app-summary--static:hover {
-  background: transparent;
-}
-
-/* Inline control on a static L2 header (e.g. service_tier select) */
-.settings-llm-step__header--static {
-  gap: 0.75rem 1rem;
-}
-
-.settings-llm-step__header-control {
-  flex: 0 1 12rem;
-  min-width: 10rem;
-  max-width: 16rem;
-  width: 100%;
-}
-
-.settings-llm-step__header-control .settings-control {
-  width: 100%;
-}
-
-.settings-llm-step__header-control--secret {
-  flex: 1 1 18rem;
-  min-width: 16rem;
-  max-width: none;
-}
-
-/* Credentials header: keep title compact so the secret field can grow */
-.settings-llm-step--static:has(#llm-api-key) > .settings-llm-step__header--static > div:first-child {
-  flex: 0 1 auto;
-  max-width: 11rem;
-}
-
-@media (min-width: 640px) {
-  .settings-llm-step__header-control {
-    width: 12rem;
-    flex-shrink: 0;
-  }
-
-  .settings-llm-step__header-control--secret {
-    width: auto;
-    flex: 1 1 auto;
-    min-width: 22rem;
-    max-width: none;
-  }
-
-  .settings-llm-step--static:has(#llm-api-key) > .settings-llm-step__header--static > div:first-child {
-    flex: 0 0 auto;
-    max-width: none;
-  }
-}
-
-/* L3 modules under app folds: always open; frame body only (not summary) */
+/* L3 modules under multi-module app folds: always open; frame body only */
 .settings-tool-l3-stack {
   display: flex;
   flex-direction: column;
@@ -1419,68 +1293,17 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   padding: 0.75rem;
 }
 
-/* Model picker mirrors settings-pref-row: title left, control right */
-.settings-tool-page__model-bar {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
-  margin: 0 0 0.75rem;
-  padding: 0;
-  border: none;
-  background: transparent;
-  min-height: 2rem;
-}
-
-.settings-tool-page__model-label {
-  margin: 0;
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--settings-text);
-}
-
-.settings-tool-page__model-bar .settings-tool-page__model {
-  position: relative;
-  flex: 0 0 auto;
+/* Tool default-model picker: true pref-row, wider select */
+.settings-pref-row__control--model {
+  flex: 1 1 16rem;
+  min-width: 14rem;
+  max-width: min(24rem, 100%);
   margin-left: auto;
-  width: 14rem;
-  min-width: 11rem;
-  max-width: 16rem;
 }
 
-.settings-tool-page__model-bar .settings-tool-page__model .settings-control {
-  min-height: 2rem;
-  width: 100%;
-  padding-top: 0.3rem;
-  padding-bottom: 0.3rem;
-  padding-right: 2rem;
-  font-size: 0.75rem;
-}
-
-.settings-tool-page__model-bar .settings-tool-page__model-chevron {
-  right: 0.45rem;
-  width: 1.1rem;
-  height: 1.1rem;
-  border-radius: 0.3rem;
-  background: transparent;
-  font-size: 0.5rem;
-  color: var(--color-text-tertiary, #94a3b8);
-}
-
-@media (max-width: 639px) {
-  .settings-tool-page__model-bar {
-    flex-wrap: wrap;
-  }
-
-  .settings-tool-page__model-bar .settings-tool-page__model {
-    width: 100%;
-    max-width: none;
-    margin-left: 0;
-  }
+.settings-tool-page > .settings-pref-list:first-child,
+.settings-tool-page .settings-pref-list:has(.settings-pref-row__control--model):first-child {
+  margin-top: 0;
 }
 
 /* Data section: pref-list folds (appearance family) */
@@ -1551,11 +1374,30 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
   background: color-mix(in srgb, var(--settings-surface-muted) 80%, var(--settings-surface));
 }
 
+/* Cleanup bucket list: divider lines only, no nested cards inside tool-page frame */
+.settings-data-bucket-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .settings-data-bucket-row {
-  border: 1px solid color-mix(in srgb, var(--settings-border) 90%, transparent);
-  border-radius: 0.65rem;
-  background: color-mix(in srgb, var(--settings-surface) 96%, transparent);
-  padding: 0.65rem 0.75rem;
+  margin: 0;
+  padding: 0.75rem 0;
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.settings-data-bucket-list > .settings-data-bucket-row:first-of-type {
+  border-top: none;
+  padding-top: 0.1rem;
+}
+
+.settings-data-bucket-list > .settings-data-bucket-row:last-of-type {
+  padding-bottom: 0.1rem;
 }
 
 .settings-data-bucket-row__main {
@@ -2292,11 +2134,50 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 }
 
 .settings-panel-footer {
+  display: flex;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
   position: relative;
   z-index: 2;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
   background: color-mix(in srgb, var(--settings-surface) 92%, transparent);
   border-top: 1px solid color-mix(in srgb, var(--settings-border) 70%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.settings-panel-footer__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.settings-panel-footer__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: #34d399;
+}
+
+.settings-panel-footer__label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--settings-text-muted, #94a3b8);
+}
+
+.settings-panel-footer__version {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  color: var(--color-text-tertiary, #cbd5e1);
 }
 
 .settings-panel-root[data-state='closed'] {

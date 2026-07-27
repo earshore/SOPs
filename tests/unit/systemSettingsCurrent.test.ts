@@ -1313,11 +1313,13 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   // Tool strategy uses pref-fold rows; collapsible chrome may remain elsewhere
   expect(template).toContain('settings-pref-row--fold');
   expect(template).toContain('settings-pref-fold__chevron');
-  expect(template).toContain('settings-llm-step');
-  // basic info / model steps still fold; credential + service_tier are static L2
-  expect(template).toMatch(/<details[\s\S]*?class="settings-llm-step"/);
-  expect(template).toContain('settings-llm-step--static');
-  expect(template).toContain('服务层级（service_tier）');
+  // LLM connection section uses the same pref-fold language as tool strategy
+  expect(template).toContain('data-testid="settings-llm-pref-list"');
+  expect(template).toContain('id="llm-step-1-title"');
+  expect(template).toContain('id="llm-step-2-title"');
+  expect(template).toContain('id="llm-step-3-title"');
+  expect(template).toContain('id="llm-step-4-title"');
+  expect(template).toContain('>服务层级<');
   expect(template).toContain('settings-data-pref-list');
   expect(template).toContain('settings-pref-fold');
   expect(template).toContain('data-testid="settings-export-buckets"');

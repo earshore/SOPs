@@ -332,9 +332,10 @@ describe('UT-P1-06 appearance theme contracts', () => {
       html.indexOf('Keyword Hunter', deepChatAppStart)
     );
 
-    // One product page surface inside the app body
-    expect(deepChatChunk).toContain('settings-tool-l3--static');
-    expect(deepChatChunk).toContain('settings-tool-page settings-tool-l3__body');
+    // Single-module product: fold body goes straight to tool-page (no L3 static shell)
+    expect(deepChatChunk).toContain('settings-tool-page mt-3');
+    expect(deepChatChunk).not.toContain('settings-tool-l3--static');
+    expect(deepChatChunk).not.toContain('settings-tool-l3__summary');
     expect(deepChatChunk).toContain("toolStrategyTargetItemsByIds(['playground-deep-chat'])");
     expect(deepChatChunk).toContain('data-settings-nav-id="deep-chat-business-tools-title"');
     expect(deepChatChunk).toContain('data-testid="settings-dc-tools-pref-list"');
@@ -391,12 +392,18 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(ppcStart).toBeGreaterThan(-1);
     const ppcChunk = html.slice(ppcStart, html.indexOf('settings-strategy-footer', ppcStart));
 
-    expect(ppcChunk).toContain('settings-tool-l3--static');
-    expect(ppcChunk).toContain('settings-tool-page settings-tool-l3__body');
+    expect(ppcChunk).toContain('settings-tool-page mt-3');
+    expect(ppcChunk).not.toContain('settings-tool-l3--static');
+    expect(ppcChunk).not.toContain('settings-tool-l3__summary');
     expect(ppcChunk).toContain("toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])");
     expect(ppcChunk).toContain('data-testid="settings-ppc-bool-pref-list"');
     expect(ppcChunk).toContain('settings-tool-page__model');
+    expect(ppcChunk).toContain('settings-pref-row__control--model');
+    expect(ppcChunk).toContain('settings-pref-row__title');
     expect(ppcChunk).toContain('followGlobalOptionLabel');
+    expect(ppcChunk).toContain('followGlobalResolvedLabel');
+    expect(ppcChunk).not.toContain('settings-tool-page__model-bar');
+    expect(ppcChunk).not.toContain('settings-tool-page__model-face');
     expect(ppcChunk).not.toContain('settings-tool-page-stack');
     expect(ppcChunk).not.toContain('border-slate-100 bg-slate-50/70');
     expect((ppcChunk.match(/class="settings-tool-page(?:\s|"|$)/g) || []).length).toBe(1);
@@ -422,7 +429,7 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(reasoningChunk).toContain('settings-pref-divider');
   });
 
-  it('P2 LLM service_tier uses static header-inline select + frozen contracts', () => {
+  it('P2 LLM service_tier uses static L2 pref-row + frozen contracts', () => {
     expect(html).toContain('data-testid="settings-llm-service-tier-pref-list"');
     expect(html).toContain('id="llm-service-tier"');
     expect(html).toContain('name="llm-service-tier"');
@@ -431,12 +438,33 @@ describe('UT-P1-06 appearance theme contracts', () => {
 
     const tierStart = html.indexOf('data-testid="settings-llm-service-tier-pref-list"');
     expect(tierStart).toBeGreaterThan(-1);
-    const tierChunk = html.slice(tierStart, tierStart + 1500);
-    expect(tierChunk).toContain('settings-llm-step__header--static');
-    expect(tierChunk).toContain('settings-llm-step__header-control');
-    expect(tierChunk).toContain('settings-control--sm');
+    // Static row: attributes + control only (no fold body / nested service_tier label)
+    const tierChunk = html.slice(tierStart, tierStart + 1400);
+    expect(tierChunk).toContain('settings-pref-row');
+    expect(tierChunk).toContain('settings-pref-row__control');
     expect(tierChunk).toContain('id="llm-service-tier"');
-    expect(tierChunk).not.toContain('settings-pref-row');
+    expect(tierChunk).toContain('id="llm-step-4-title"');
+    expect(tierChunk).not.toContain('settings-pref-row--fold');
+    expect(tierChunk).not.toContain('settings-pref-fold__body');
+    expect(tierChunk).not.toContain('settings-tool-page');
+    expect(tierChunk).not.toContain('settings-llm-step__header--static');
     expect(tierChunk).not.toContain('settings-field-help');
+  });
+
+  it('LLM connection: 基本信息/模型与能力 folds; 凭证/服务层级 static L2 rows', () => {
+    expect(html).toContain('data-testid="settings-llm-pref-list"');
+    const llmStart = html.indexOf('data-testid="settings-llm-pref-list"');
+    const llmChunk = html.slice(llmStart, html.indexOf('settings-save-provider', llmStart));
+    for (const title of ['基本信息', '凭证', '模型与能力', '服务层级']) {
+      expect(llmChunk).toContain(title);
+    }
+    // Two foldable steps remain (基本信息 + 模型与能力)
+    expect((llmChunk.match(/settings-pref-row--fold/g) || []).length).toBe(2);
+    expect(llmChunk).toContain('settings-pref-fold__chevron');
+    expect(llmChunk).toContain('settings-pref-row--secret');
+    expect(llmChunk).toContain('id="llm-api-key"');
+    expect(llmChunk).toContain('data-testid="settings-llm-service-tier-pref-list"');
+    expect(llmChunk).not.toContain('settings-llm-step--static');
+    expect(llmChunk).not.toMatch(/<details[^>]*class="settings-llm-step"/);
   });
 });

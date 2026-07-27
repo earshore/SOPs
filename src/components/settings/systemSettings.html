@@ -458,27 +458,38 @@
                 </div>
               </div>
 
-              <div class="settings-llm-steps space-y-3">
-                <!-- Step 1: 基本信息 -->
-                <details class="settings-llm-step" aria-labelledby="llm-step-1-title">
-                  <summary class="settings-llm-step__header">
-                    <div class="min-w-0">
-                      <h4
-                        id="llm-step-1-title"
-                        class="settings-llm-step__title"
-                        data-settings-nav-id="llm-step-1-title"
-                        data-settings-nav-group="llm"
-                      >
-                        基本信息
-                      </h4>
-                      <p class="settings-llm-step__desc">厂商配置档、Endpoint 与协议路径</p>
+                            <div class="settings-pref-list" data-testid="settings-llm-pref-list">
+                <!-- L2 基本信息 -->
+                <details
+                  class="settings-pref-fold"
+                  aria-labelledby="llm-step-1-title"
+                  data-settings-focus="llm-step-1-title"
+                >
+                  <summary class="settings-pref-row settings-pref-row--fold">
+                    <div class="settings-pref-row__meta">
+                      <span class="settings-pref-row__icon" aria-hidden="true">
+                        <i class="fas fa-plug"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <h4
+                          id="llm-step-1-title"
+                          class="settings-pref-row__title"
+                          data-settings-nav-id="llm-step-1-title"
+                          data-settings-nav-group="llm"
+                        >
+                          基本信息
+                        </h4>
+                        <p class="settings-pref-row__hint">厂商配置档、Endpoint 与协议路径</p>
+                      </div>
                     </div>
                     <i
-                      class="settings-llm-step__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
                       aria-hidden="true"
                     ></i>
                   </summary>
-                  <div class="settings-llm-step__body space-y-3.5">
+                  <div class="settings-pref-fold__body">
+                    <div class="settings-tool-page">
+
                     <div class="group">
                       <label
                         for="llm-provider"
@@ -607,77 +618,101 @@
                         x-text="apiPathCapabilityHint"
                       ></p>
                     </div>
+                  
+                    </div>
                   </div>
                 </details>
 
-                <!-- L2 凭证：标题行内联 API Key 输入（llmApiKeyInputType） -->
-                <div class="settings-llm-step settings-llm-step--static" aria-labelledby="llm-step-2-title">
-                  <div class="settings-llm-step__header settings-llm-step__header--static">
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <!-- L2 凭证（static row） -->
+                <div
+                  class="settings-pref-row settings-pref-row--secret"
+                  aria-labelledby="llm-step-2-title"
+                  data-settings-focus="llm-step-2-title"
+                >
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-key"></i>
+                    </span>
                     <div class="min-w-0">
                       <h4
                         id="llm-step-2-title"
-                        class="settings-llm-step__title"
+                        class="settings-pref-row__title"
                         data-settings-nav-id="llm-step-2-title"
                         data-settings-nav-group="llm"
                       >
-                        凭证 - API Key
+                        凭证
                       </h4>
-                      <p class="settings-llm-step__desc">仅存本机</p>
+                      <p class="settings-pref-row__hint">API Key · 仅存本机</p>
                     </div>
-                    <div class="settings-llm-step__header-control settings-llm-step__header-control--secret">
-                      <label class="sr-only" for="llm-api-key">API Key</label>
-                      <div class="relative">
-                        <div
-                          class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center"
-                          aria-hidden="true"
-                        >
-                          <i class="fas fa-key text-amber-500 text-[9px]"></i>
-                        </div>
-                        <input
-                          :type="llmApiKeyInputType"
-                          id="llm-api-key"
-                          name="llm-api-key"
-                          autocomplete="off"
-                          spellcheck="false"
-                          :value="llm.apiKey"
-                          @input="setLlmApiKey($event)"
-                          class="settings-control settings-secret-input w-full pl-11 pr-11 py-2 text-sm font-mono text-slate-600 transition duration-200 placeholder:text-slate-300"
-                          placeholder="sk-..."
-                        />
-                        <button
-                          type="button"
-                          @click="toggleLlmKeyVisibility()"
-                          :aria-label="llmApiKeyVisibilityLabel"
-                          :title="llmApiKeyVisibilityLabel"
-                          class="settings-focus-ring absolute right-2 top-1/2 -translate-y-1/2 min-h-[28px] min-w-[28px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 cursor-pointer"
-                        >
-                          <i class="fas text-xs" :class="llmApiKeyIconClass" aria-hidden="true"></i>
-                        </button>
+                  </div>
+                  <div class="settings-pref-row__control settings-pref-row__control--secret">
+                    <label class="sr-only" for="llm-api-key">API Key</label>
+                    <div class="relative">
+                      <div
+                        class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center"
+                        aria-hidden="true"
+                      >
+                        <i class="fas fa-key text-amber-500 text-[9px]"></i>
                       </div>
+                      <input
+                        :type="llmApiKeyInputType"
+                        id="llm-api-key"
+                        name="llm-api-key"
+                        autocomplete="off"
+                        spellcheck="false"
+                        :value="llm.apiKey"
+                        @input="setLlmApiKey($event)"
+                        class="settings-control settings-secret-input w-full pl-11 pr-11 py-2 text-sm font-mono text-slate-600 transition duration-200 placeholder:text-slate-300"
+                        placeholder="sk-..."
+                      />
+                      <button
+                        type="button"
+                        @click="toggleLlmKeyVisibility()"
+                        :aria-label="llmApiKeyVisibilityLabel"
+                        :title="llmApiKeyVisibilityLabel"
+                        class="settings-focus-ring absolute right-2 top-1/2 -translate-y-1/2 min-h-[28px] min-w-[28px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 cursor-pointer"
+                      >
+                        <i class="fas text-xs" :class="llmApiKeyIconClass" aria-hidden="true"></i>
+                      </button>
                     </div>
                   </div>
                 </div>
 
-                <!-- Step 3: 模型与能力 -->
-                <details class="settings-llm-step" aria-labelledby="llm-step-3-title">
-                  <summary class="settings-llm-step__header">
-                    <div class="min-w-0">
-                      <h4
-                        id="llm-step-3-title"
-                        class="settings-llm-step__title"
-                        data-settings-nav-id="llm-step-3-title"
-                        data-settings-nav-group="llm"
-                      >
-                        模型与能力
-                      </h4>
-                      <p class="settings-llm-step__desc">默认模型与推理</p>
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <!-- L2 模型与能力 -->
+                <details
+                  class="settings-pref-fold"
+                  aria-labelledby="llm-step-3-title"
+                  data-settings-focus="llm-step-3-title"
+                >
+                  <summary class="settings-pref-row settings-pref-row--fold">
+                    <div class="settings-pref-row__meta">
+                      <span class="settings-pref-row__icon" aria-hidden="true">
+                        <i class="fas fa-brain"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <h4
+                          id="llm-step-3-title"
+                          class="settings-pref-row__title"
+                          data-settings-nav-id="llm-step-3-title"
+                          data-settings-nav-group="llm"
+                        >
+                          模型与能力
+                        </h4>
+                        <p class="settings-pref-row__hint">默认模型与推理</p>
+                      </div>
                     </div>
                     <i
-                      class="settings-llm-step__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
                       aria-hidden="true"
                     ></i>
                   </summary>
-                  <div class="settings-llm-step__body space-y-3.5">
+                  <div class="settings-pref-fold__body">
+                    <div class="settings-tool-page">
+
                     <div class="group">
                       <label
                         for="llm-model"
@@ -806,47 +841,56 @@
                         </div>
                       </div>
                     </div>
+                  
+                    </div>
                   </div>
                 </details>
 
-                <!-- L2 服务层级：标题行内联下拉（无 body 假分层） -->
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <!-- L2 服务层级（static row） -->
                 <div
-                  class="settings-llm-step settings-llm-step--static"
+                  class="settings-pref-row"
                   aria-labelledby="llm-step-4-title"
+                  data-settings-focus="llm-step-4-title"
                   data-testid="settings-llm-service-tier-pref-list"
                 >
-                  <div class="settings-llm-step__header settings-llm-step__header--static">
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-layer-group"></i>
+                    </span>
                     <div class="min-w-0">
                       <h4
                         id="llm-step-4-title"
-                        class="settings-llm-step__title"
+                        class="settings-pref-row__title"
                         data-settings-nav-id="llm-step-4-title"
                         data-settings-nav-group="llm"
                       >
-                        服务层级（service_tier）
+                        服务层级
                       </h4>
-                      <p class="settings-llm-step__desc">多数保持「不发送」</p>
-                    </div>
-                    <div class="settings-llm-step__header-control">
-                      <label class="sr-only" for="llm-service-tier">服务层级</label>
-                      <select
-                        id="llm-service-tier"
-                        name="llm-service-tier"
-                        :value="llm.serviceTier || ''"
-                        @change="setLlmServiceTier($event)"
-                        class="settings-control settings-control--sm"
-                      >
-                        <option value="">不发送（默认）</option>
-                        <option value="auto">auto</option>
-                        <option value="default">default</option>
-                        <option value="flex">flex</option>
-                        <option value="priority">priority</option>
-                      </select>
+                      <p class="settings-pref-row__hint">service_tier · 多数保持不发送</p>
                     </div>
                   </div>
+                  <div class="settings-pref-row__control">
+                    <label class="sr-only" for="llm-service-tier">服务层级</label>
+                    <select
+                      id="llm-service-tier"
+                      name="llm-service-tier"
+                      :value="llm.serviceTier || ''"
+                      @change="setLlmServiceTier($event)"
+                      class="settings-control settings-control--sm"
+                    >
+                      <option value="">不发送（默认）</option>
+                      <option value="auto">auto</option>
+                      <option value="default">default</option>
+                      <option value="flex">flex</option>
+                      <option value="priority">priority</option>
+                    </select>
+                  </div>
                 </div>
+              </div>
 
-                <div class="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:gap-2.5">
+<div class="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:gap-2.5">
                   <button
                     type="button"
                     :aria-label="testConnectionText"
@@ -869,7 +913,6 @@
                 </div>
                 <p class="settings-field-help">测试不改配置；保存后生效。</p>
               </div>
-            </div>
           </section>
 
           <!-- Decorative Divider -->
@@ -1308,30 +1351,44 @@
                         :key="item.id"
                       >
                         <div>
-                          <div class="settings-tool-page__model-bar">
-                            <label class="settings-tool-page__model-label" :for="'tool-strategy-model-' + item.id"
-                              >模型</label
-                            >
-                            <div class="settings-tool-page__model">
-                              <select
-                                :id="'tool-strategy-model-' + item.id"
-                                :name="'tool-strategy-model-' + item.id"
-                                :value="item.model"
-                                @change="setToolTargetModel(item.id, $event)"
-                                :disabled="toolStrategyModelSelectDisabled"
-                                class="settings-control settings-control--sm"
-                              >
-                                <option value="" x-text="item.followGlobalOptionLabel"></option>
-                                <template x-for="model in llm.models" :key="getModelValue(model)">
-                                  <option
-                                    :value="getModelValue(model)"
-                                    x-text="getModelLabel(model)"
-                                  ></option>
-                                </template>
-                              </select>
-                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                                <i class="fas fa-chevron-down"></i>
-                              </span>
+                          <div class="settings-pref-list">
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <label
+                                    class="settings-pref-row__title"
+                                    :for="'tool-strategy-model-' + item.id"
+                                    >默认模型</label
+                                  >
+                                  <p
+                                    class="settings-pref-row__hint"
+                                    x-text="item.model ? '覆盖全局模型' : item.followGlobalResolvedLabel"
+                                  ></p>
+                                </div>
+                              </div>
+                              <div class="settings-pref-row__control settings-pref-row__control--model">
+                                <div class="settings-tool-page__model">
+                                  <select
+                                    :id="'tool-strategy-model-' + item.id"
+                                    :name="'tool-strategy-model-' + item.id"
+                                    :value="item.model"
+                                    @change="setToolTargetModel(item.id, $event)"
+                                    :disabled="toolStrategyModelSelectDisabled"
+                                    class="settings-control settings-control--sm settings-tool-page__model-select"
+                                  >
+                                    <option value="" x-text="item.followGlobalOptionLabel"></option>
+                                    <template x-for="model in llm.models" :key="getModelValue(model)">
+                                      <option
+                                        :value="getModelValue(model)"
+                                        x-text="getModelLabel(model)"
+                                      ></option>
+                                    </template>
+                                  </select>
+                                  <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                    <i class="fas fa-chevron-down"></i>
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1499,43 +1556,50 @@
                   ></i>
                 </summary>
                 <div class="settings-pref-fold__body">
-                  <div class="settings-tool-l3 settings-tool-l3--static">
-                    <div class="settings-tool-l3__summary">
-                      <div class="min-w-0">
-                        <h5 class="settings-card__title">Deep Chat</h5>
-                        <p class="settings-tool-page__hint">默认模型、业务工具与限额</p>
-                      </div>
-                    </div>
-                  <div class="settings-tool-page settings-tool-l3__body">
+                  <div class="settings-tool-page mt-3">
                     <template
                       x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
                       :key="item.id"
                     >
                       <div>
-                        <div class="settings-tool-page__model-bar">
-                            <label class="settings-tool-page__model-label" :for="'tool-strategy-model-' + item.id"
-                              >模型</label
-                            >
-                            <div class="settings-tool-page__model">
-                              <select
-                                :id="'tool-strategy-model-' + item.id"
-                                :name="'tool-strategy-model-' + item.id"
-                                :value="item.model"
-                                @change="setToolTargetModel(item.id, $event)"
-                                :disabled="toolStrategyModelSelectDisabled"
-                                class="settings-control settings-control--sm"
-                              >
-                                <option value="" x-text="item.followGlobalOptionLabel"></option>
-                                <template x-for="model in llm.models" :key="getModelValue(model)">
-                                  <option
-                                    :value="getModelValue(model)"
-                                    x-text="getModelLabel(model)"
-                                  ></option>
-                                </template>
-                              </select>
-                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                                <i class="fas fa-chevron-down"></i>
-                              </span>
+                        <div class="settings-pref-list">
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <label
+                                    class="settings-pref-row__title"
+                                    :for="'tool-strategy-model-' + item.id"
+                                    >默认模型</label
+                                  >
+                                  <p
+                                    class="settings-pref-row__hint"
+                                    x-text="item.model ? '覆盖全局模型' : item.followGlobalResolvedLabel"
+                                  ></p>
+                                </div>
+                              </div>
+                              <div class="settings-pref-row__control settings-pref-row__control--model">
+                                <div class="settings-tool-page__model">
+                                  <select
+                                    :id="'tool-strategy-model-' + item.id"
+                                    :name="'tool-strategy-model-' + item.id"
+                                    :value="item.model"
+                                    @change="setToolTargetModel(item.id, $event)"
+                                    :disabled="toolStrategyModelSelectDisabled"
+                                    class="settings-control settings-control--sm settings-tool-page__model-select"
+                                  >
+                                    <option value="" x-text="item.followGlobalOptionLabel"></option>
+                                    <template x-for="model in llm.models" :key="getModelValue(model)">
+                                      <option
+                                        :value="getModelValue(model)"
+                                        x-text="getModelLabel(model)"
+                                      ></option>
+                                    </template>
+                                  </select>
+                                  <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                    <i class="fas fa-chevron-down"></i>
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                       </div>
@@ -1662,7 +1726,6 @@
                         /></label>
                     </div>
                   </div>
-                  </div>
                 </div>
               </details>
 
@@ -1705,30 +1768,44 @@
                         :key="item.id"
                       >
                         <div>
-                          <div class="settings-tool-page__model-bar">
-                            <label class="settings-tool-page__model-label" :for="'tool-strategy-model-' + item.id"
-                              >模型</label
-                            >
-                            <div class="settings-tool-page__model">
-                              <select
-                                :id="'tool-strategy-model-' + item.id"
-                                :name="'tool-strategy-model-' + item.id"
-                                :value="item.model"
-                                @change="setToolTargetModel(item.id, $event)"
-                                :disabled="toolStrategyModelSelectDisabled"
-                                class="settings-control settings-control--sm"
-                              >
-                                <option value="" x-text="item.followGlobalOptionLabel"></option>
-                                <template x-for="model in llm.models" :key="getModelValue(model)">
-                                  <option
-                                    :value="getModelValue(model)"
-                                    x-text="getModelLabel(model)"
-                                  ></option>
-                                </template>
-                              </select>
-                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                                <i class="fas fa-chevron-down"></i>
-                              </span>
+                          <div class="settings-pref-list">
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <label
+                                    class="settings-pref-row__title"
+                                    :for="'tool-strategy-model-' + item.id"
+                                    >默认模型</label
+                                  >
+                                  <p
+                                    class="settings-pref-row__hint"
+                                    x-text="item.model ? '覆盖全局模型' : item.followGlobalResolvedLabel"
+                                  ></p>
+                                </div>
+                              </div>
+                              <div class="settings-pref-row__control settings-pref-row__control--model">
+                                <div class="settings-tool-page__model">
+                                  <select
+                                    :id="'tool-strategy-model-' + item.id"
+                                    :name="'tool-strategy-model-' + item.id"
+                                    :value="item.model"
+                                    @change="setToolTargetModel(item.id, $event)"
+                                    :disabled="toolStrategyModelSelectDisabled"
+                                    class="settings-control settings-control--sm settings-tool-page__model-select"
+                                  >
+                                    <option value="" x-text="item.followGlobalOptionLabel"></option>
+                                    <template x-for="model in llm.models" :key="getModelValue(model)">
+                                      <option
+                                        :value="getModelValue(model)"
+                                        x-text="getModelLabel(model)"
+                                      ></option>
+                                    </template>
+                                  </select>
+                                  <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                    <i class="fas fa-chevron-down"></i>
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1875,30 +1952,44 @@
                         :key="item.id"
                       >
                         <div>
-                          <div class="settings-tool-page__model-bar">
-                            <label class="settings-tool-page__model-label" :for="'tool-strategy-model-' + item.id"
-                              >模型</label
-                            >
-                            <div class="settings-tool-page__model">
-                              <select
-                                :id="'tool-strategy-model-' + item.id"
-                                :name="'tool-strategy-model-' + item.id"
-                                :value="item.model"
-                                @change="setToolTargetModel(item.id, $event)"
-                                :disabled="toolStrategyModelSelectDisabled"
-                                class="settings-control settings-control--sm"
-                              >
-                                <option value="" x-text="item.followGlobalOptionLabel"></option>
-                                <template x-for="model in llm.models" :key="getModelValue(model)">
-                                  <option
-                                    :value="getModelValue(model)"
-                                    x-text="getModelLabel(model)"
-                                  ></option>
-                                </template>
-                              </select>
-                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                                <i class="fas fa-chevron-down"></i>
-                              </span>
+                          <div class="settings-pref-list">
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <label
+                                    class="settings-pref-row__title"
+                                    :for="'tool-strategy-model-' + item.id"
+                                    >默认模型</label
+                                  >
+                                  <p
+                                    class="settings-pref-row__hint"
+                                    x-text="item.model ? '覆盖全局模型' : item.followGlobalResolvedLabel"
+                                  ></p>
+                                </div>
+                              </div>
+                              <div class="settings-pref-row__control settings-pref-row__control--model">
+                                <div class="settings-tool-page__model">
+                                  <select
+                                    :id="'tool-strategy-model-' + item.id"
+                                    :name="'tool-strategy-model-' + item.id"
+                                    :value="item.model"
+                                    @change="setToolTargetModel(item.id, $event)"
+                                    :disabled="toolStrategyModelSelectDisabled"
+                                    class="settings-control settings-control--sm settings-tool-page__model-select"
+                                  >
+                                    <option value="" x-text="item.followGlobalOptionLabel"></option>
+                                    <template x-for="model in llm.models" :key="getModelValue(model)">
+                                      <option
+                                        :value="getModelValue(model)"
+                                        x-text="getModelLabel(model)"
+                                      ></option>
+                                    </template>
+                                  </select>
+                                  <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                    <i class="fas fa-chevron-down"></i>
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1980,43 +2071,50 @@
                   ></i>
                 </summary>
                 <div class="settings-pref-fold__body">
-                  <div class="settings-tool-l3 settings-tool-l3--static">
-                    <div class="settings-tool-l3__summary">
-                      <div class="min-w-0">
-                        <h5 class="settings-card__title">PPC Search Terms</h5>
-                        <p class="settings-tool-page__hint">搜索词模型与策略</p>
-                      </div>
-                    </div>
-                  <div class="settings-tool-page settings-tool-l3__body">
+                  <div class="settings-tool-page mt-3">
                     <template
                       x-for="item in toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])"
                       :key="item.id"
                     >
                       <div>
-                        <div class="settings-tool-page__model-bar">
-                            <label class="settings-tool-page__model-label" :for="'tool-strategy-model-' + item.id"
-                              >模型</label
-                            >
-                            <div class="settings-tool-page__model">
-                              <select
-                                :id="'tool-strategy-model-' + item.id"
-                                :name="'tool-strategy-model-' + item.id"
-                                :value="item.model"
-                                @change="setToolTargetModel(item.id, $event)"
-                                :disabled="toolStrategyModelSelectDisabled"
-                                class="settings-control settings-control--sm"
-                              >
-                                <option value="" x-text="item.followGlobalOptionLabel"></option>
-                                <template x-for="model in llm.models" :key="getModelValue(model)">
-                                  <option
-                                    :value="getModelValue(model)"
-                                    x-text="getModelLabel(model)"
-                                  ></option>
-                                </template>
-                              </select>
-                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                                <i class="fas fa-chevron-down"></i>
-                              </span>
+                        <div class="settings-pref-list">
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <label
+                                    class="settings-pref-row__title"
+                                    :for="'tool-strategy-model-' + item.id"
+                                    >默认模型</label
+                                  >
+                                  <p
+                                    class="settings-pref-row__hint"
+                                    x-text="item.model ? '覆盖全局模型' : item.followGlobalResolvedLabel"
+                                  ></p>
+                                </div>
+                              </div>
+                              <div class="settings-pref-row__control settings-pref-row__control--model">
+                                <div class="settings-tool-page__model">
+                                  <select
+                                    :id="'tool-strategy-model-' + item.id"
+                                    :name="'tool-strategy-model-' + item.id"
+                                    :value="item.model"
+                                    @change="setToolTargetModel(item.id, $event)"
+                                    :disabled="toolStrategyModelSelectDisabled"
+                                    class="settings-control settings-control--sm settings-tool-page__model-select"
+                                  >
+                                    <option value="" x-text="item.followGlobalOptionLabel"></option>
+                                    <template x-for="model in llm.models" :key="getModelValue(model)">
+                                      <option
+                                        :value="getModelValue(model)"
+                                        x-text="getModelLabel(model)"
+                                      ></option>
+                                    </template>
+                                  </select>
+                                  <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                    <i class="fas fa-chevron-down"></i>
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                       </div>
@@ -2147,7 +2245,6 @@
                       </template>
                     </div>
                   </div>
-                  </div>
                 </div>
               </details>
 
@@ -2273,40 +2370,42 @@
                     ></i>
                   </summary>
                   <div class="settings-pref-fold__body">
-                    <div class="grid gap-1.5 sm:grid-cols-2">
-                      <template x-for="bucket in localDataBucketItems" :key="'export-' + bucket.id">
-                        <label class="settings-pref-check">
-                          <input
-                            type="checkbox"
-                            class="settings-checkbox h-3.5 w-3.5 rounded border-slate-300"
-                            :checked="isExportBucketSelected(bucket.id)"
-                            @change="toggleExportBucket(bucket.id)"
-                            :disabled="localData.isBusy"
-                            :data-export-bucket="bucket.id"
-                          />
-                          <span class="min-w-0 truncate" x-text="bucket.label"></span>
-                        </label>
-                      </template>
-                    </div>
-                    <div class="settings-data-io-actions mt-3">
-                      <button
-                        type="button"
-                        @click="exportLocalData()"
-                        :disabled="localData.isBusy"
-                        class="settings-data-io-actions__btn"
-                      >
-                        <i class="fas fa-file-export settings-text-accent" aria-hidden="true"></i>
-                        <span x-text="exportLocalDataButtonText"></span>
-                      </button>
-                      <button
-                        type="button"
-                        @click="importLocalData()"
-                        :disabled="localData.isBusy"
-                        class="settings-data-io-actions__btn"
-                      >
-                        <i class="fas fa-file-import text-emerald-500" aria-hidden="true"></i>
-                        <span>导入备份</span>
-                      </button>
+                    <div class="settings-tool-page">
+                      <div class="grid gap-1.5 sm:grid-cols-2">
+                        <template x-for="bucket in localDataBucketItems" :key="'export-' + bucket.id">
+                          <label class="settings-pref-check">
+                            <input
+                              type="checkbox"
+                              class="settings-checkbox h-3.5 w-3.5 rounded border-slate-300"
+                              :checked="isExportBucketSelected(bucket.id)"
+                              @change="toggleExportBucket(bucket.id)"
+                              :disabled="localData.isBusy"
+                              :data-export-bucket="bucket.id"
+                            />
+                            <span class="min-w-0 truncate" x-text="bucket.label"></span>
+                          </label>
+                        </template>
+                      </div>
+                      <div class="settings-data-io-actions mt-3">
+                        <button
+                          type="button"
+                          @click="exportLocalData()"
+                          :disabled="localData.isBusy"
+                          class="settings-data-io-actions__btn"
+                        >
+                          <i class="fas fa-file-export settings-text-accent" aria-hidden="true"></i>
+                          <span x-text="exportLocalDataButtonText"></span>
+                        </button>
+                        <button
+                          type="button"
+                          @click="importLocalData()"
+                          :disabled="localData.isBusy"
+                          class="settings-data-io-actions__btn"
+                        >
+                          <i class="fas fa-file-import text-emerald-500" aria-hidden="true"></i>
+                          <span>导入备份</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </details>
@@ -2336,160 +2435,150 @@
                     ></i>
                   </summary>
                   <div class="settings-pref-fold__body">
-                    <div class="grid gap-3 sm:grid-cols-3">
-                      <label class="block">
-                        <span class="settings-label">历史保留条数</span>
-                        <input
-                          type="number"
-                          min="10"
-                          max="500"
-                          step="10"
-                          data-testid="settings-storage-history-max"
-                          :value="runtimeStrategy.settings.storage.historyMaxItems"
-                          @input="setRuntimeNumber('storage.historyMaxItems', $event)"
-                          class="settings-control settings-control--sm w-full"
-                        />
-                      </label>
-                      <label class="block">
-                        <span class="settings-label">缓存清理阈值</span>
-                        <input
-                          type="number"
-                          min="0.5"
-                          max="0.95"
-                          step="0.05"
-                          :value="runtimeStrategy.settings.storage.lruWarningThreshold"
-                          @input="setRuntimeNumber('storage.lruWarningThreshold', $event)"
-                          class="settings-control settings-control--sm w-full"
-                        />
-                      </label>
-                      <label class="block">
-                        <span class="settings-label">缓存清理比例</span>
-                        <input
-                          type="number"
-                          min="0.05"
-                          max="0.8"
-                          step="0.05"
-                          :value="runtimeStrategy.settings.storage.lruCleanupRatio"
-                          @input="setRuntimeNumber('storage.lruCleanupRatio', $event)"
-                          class="settings-control settings-control--sm w-full"
-                        />
-                      </label>
-                    </div>
-                    <div class="mt-3 flex justify-end">
-                      <button
-                        type="button"
-                        data-testid="settings-save-data-strategy"
-                        @click="saveRuntimeStrategy()"
-                        :disabled="runtimeStrategy.isSaving"
-                        class="settings-btn-primary settings-btn-primary--sm"
-                      >
-                        保存数据策略
-                      </button>
+                    <div class="settings-tool-page">
+                      <div class="grid gap-3 sm:grid-cols-3">
+                        <label class="block">
+                          <span class="settings-label">历史保留条数</span>
+                          <input
+                            type="number"
+                            min="10"
+                            max="500"
+                            step="10"
+                            data-testid="settings-storage-history-max"
+                            :value="runtimeStrategy.settings.storage.historyMaxItems"
+                            @input="setRuntimeNumber('storage.historyMaxItems', $event)"
+                            class="settings-control settings-control--sm w-full"
+                          />
+                        </label>
+                        <label class="block">
+                          <span class="settings-label">缓存清理阈值</span>
+                          <input
+                            type="number"
+                            min="0.5"
+                            max="0.95"
+                            step="0.05"
+                            :value="runtimeStrategy.settings.storage.lruWarningThreshold"
+                            @input="setRuntimeNumber('storage.lruWarningThreshold', $event)"
+                            class="settings-control settings-control--sm w-full"
+                          />
+                        </label>
+                        <label class="block">
+                          <span class="settings-label">缓存清理比例</span>
+                          <input
+                            type="number"
+                            min="0.05"
+                            max="0.8"
+                            step="0.05"
+                            :value="runtimeStrategy.settings.storage.lruCleanupRatio"
+                            @input="setRuntimeNumber('storage.lruCleanupRatio', $event)"
+                            class="settings-control settings-control--sm w-full"
+                          />
+                        </label>
+                      </div>
+                      <div class="mt-3 flex justify-end">
+                        <button
+                          type="button"
+                          data-testid="settings-save-data-strategy"
+                          @click="saveRuntimeStrategy()"
+                          :disabled="runtimeStrategy.isSaving"
+                          class="settings-btn-primary settings-btn-primary--sm"
+                        >
+                          保存数据策略
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </details>
 
                 <div class="settings-pref-divider" role="separator"></div>
 
-                <div class="settings-pref-row settings-pref-row--fold-trigger">
-                  <div class="settings-pref-row__meta">
-                    <span class="settings-pref-row__icon" aria-hidden="true">
-                      <i class="fas fa-list-check"></i>
-                    </span>
-                    <div class="min-w-0">
-                      <h4 class="settings-pref-row__title">清理项</h4>
-                      <p class="settings-pref-row__hint" x-text="localDataCleanupSummaryText"></p>
+                <details
+                  class="settings-pref-fold"
+                  data-settings-focus="settings-data-cleanup-items"
+                  data-settings-nav-group="data"
+                >
+                  <summary class="settings-pref-row settings-pref-row--fold">
+                    <div class="settings-pref-row__meta">
+                      <span class="settings-pref-row__icon" aria-hidden="true">
+                        <i class="fas fa-list-check"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <h4 class="settings-pref-row__title">清理项</h4>
+                        <p class="settings-pref-row__hint" x-text="localDataCleanupSummaryText"></p>
+                      </div>
                     </div>
-                  </div>
-                  <button
-                    type="button"
-                    class="settings-pref-row__action"
-                    @click="toggleLocalDataCleanupItems()"
-                    :aria-expanded="localData.cleanupItemsExpanded.toString()"
-                  >
-                    <span x-text="localDataCleanupToggleText"></span>
                     <i
-                      class="fas text-[10px] ml-1"
-                      :class="localDataCleanupToggleIconClass"
+                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
                       aria-hidden="true"
                     ></i>
-                  </button>
-                </div>
-
-                <div
-                  class="settings-pref-fold__body settings-pref-fold__body--flush"
-                  :hidden="!localData.cleanupItemsExpanded"
-                >
-                  <div class="space-y-2">
-                    <template x-for="bucket in localDataBucketItems" :key="bucket.id">
-                      <div class="settings-data-bucket-row">
-                        <div class="settings-data-bucket-row__main">
-                          <span
-                            class="settings-pref-row__icon"
-                            :class="bucket.iconClass"
-                            aria-hidden="true"
-                          >
-                            <i class="fas text-[11px]" :class="bucket.icon"></i>
-                          </span>
-                          <div class="min-w-0 flex-1">
-                            <div class="flex flex-wrap items-center gap-2">
-                              <h4
-                                class="settings-pref-row__title truncate"
-                                x-text="bucket.label"
-                              ></h4>
+                  </summary>
+                  <div class="settings-pref-fold__body">
+                    <div class="settings-tool-page">
+                      <div class="settings-data-bucket-list">
+                      <template x-for="bucket in localDataBucketItems" :key="bucket.id">
+                        <div class="settings-data-bucket-row">
+                          <div class="settings-data-bucket-row__main">
+                            <div class="min-w-0 flex-1">
+                              <div class="flex flex-wrap items-center gap-2">
+                                <h4
+                                  class="settings-pref-row__title truncate"
+                                  x-text="bucket.label"
+                                ></h4>
+                                <span
+                                  class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500"
+                                  x-text="bucket.percentText"
+                                ></span>
+                              </div>
+                              <p
+                                class="settings-pref-row__hint"
+                                x-text="bucket.description"
+                              ></p>
+                            </div>
+                            <div class="shrink-0 text-right">
                               <span
-                                class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500"
-                                x-text="bucket.percentText"
+                                class="block text-xs font-medium text-slate-700"
+                                x-text="bucket.usedText"
+                              ></span>
+                              <span
+                                class="block text-[10px] text-slate-400"
+                                x-text="bucket.keysText"
                               ></span>
                             </div>
-                            <p
-                              class="settings-pref-row__hint"
-                              x-text="bucket.description"
-                            ></p>
                           </div>
-                          <div class="shrink-0 text-right">
-                            <span
-                              class="block text-xs font-medium text-slate-700"
-                              x-text="bucket.usedText"
-                            ></span>
-                            <span
-                              class="block text-[10px] text-slate-400"
-                              x-text="bucket.keysText"
-                            ></span>
-                          </div>
-                        </div>
-                        <div class="mt-2 flex items-center gap-2">
-                          <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                            <progress
-                              class="settings-local-data-progress h-full w-full"
-                              value="0"
-                              max="100"
-                              :value="bucket.percentValue"
-                              :data-bucket="bucket.id"
-                              :aria-label="bucket.label"
-                            ></progress>
-                          </div>
-                          <button
-                            type="button"
-                            @click="clearLocalDataBucket(bucket.id)"
-                            :disabled="localData.isBusy || bucket.isEmpty"
-                            class="settings-focus-ring min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-45"
-                            :class="bucket.buttonClass"
-                          >
-                            <span :hidden="bucket.isClearing" x-text="bucket.actionLabel"></span>
-                            <span
-                              :hidden="!bucket.isClearing"
-                              class="inline-flex items-center gap-1"
+                          <div class="mt-2 flex items-center gap-2">
+                            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                              <progress
+                                class="settings-local-data-progress h-full w-full"
+                                value="0"
+                                max="100"
+                                :value="bucket.percentValue"
+                                :data-bucket="bucket.id"
+                                :aria-label="bucket.label"
+                              ></progress>
+                            </div>
+                            <button
+                              type="button"
+                              @click="clearLocalDataBucket(bucket.id)"
+                              :disabled="localData.isBusy || bucket.isEmpty"
+                              class="settings-focus-ring min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-45"
+                              :class="bucket.buttonClass"
                             >
-                              <i class="fas fa-circle-notch fa-spin"></i>
-                              清理中
-                            </span>
-                          </button>
+                              <span :hidden="bucket.isClearing" x-text="bucket.actionLabel"></span>
+                              <span
+                                :hidden="!bucket.isClearing"
+                                class="inline-flex items-center gap-1"
+                              >
+                                <i class="fas fa-circle-notch fa-spin"></i>
+                                清理中
+                              </span>
+                            </button>
+                          </div>
                         </div>
+                      </template>
                       </div>
-                    </template>
+                    </div>
                   </div>
-                </div>
+                </details>
 
                 <div class="settings-pref-divider" role="separator"></div>
 
@@ -2797,215 +2886,254 @@
             </div>
 
             <div class="settings-section-frame settings-section-frame--performance space-y-4">
-              <!-- Top-level pref-list (same elevation as appearance theme list) -->
+              <!-- Grouped developer diagnostics (L2 folds + static log row) -->
               <div class="settings-pref-list" data-testid="settings-dev-debug-pref-list">
-                  <div class="settings-pref-row">
+                <details class="settings-pref-fold">
+                  <summary class="settings-pref-row settings-pref-row--fold">
                     <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true"
-                        ><i class="fas fa-gauge-high"></i
-                      ></span>
+                      <span class="settings-pref-row__icon" aria-hidden="true">
+                        <i class="fas fa-gauge-high"></i>
+                      </span>
                       <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">打开监控面板</h4>
-                        <p class="settings-pref-row__hint">性能 / 错误 / 行为</p>
+                        <h4 class="settings-pref-row__title">监控</h4>
+                        <p class="settings-pref-row__hint">性能面板与运行指标采集</p>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      class="settings-pref-row__action"
-                      @click="openPerformanceMonitor()"
+                    <i
+                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      aria-hidden="true"
+                    ></i>
+                  </summary>
+                  <div class="settings-pref-fold__body">
+                    <div class="settings-tool-page">
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">打开监控面板</h4>
+                            <p class="settings-pref-row__hint">性能 / 错误 / 行为</p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          class="settings-pref-row__action"
+                          @click="openPerformanceMonitor()"
+                        >
+                          打开
+                        </button>
+                      </div>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">性能监控</h4>
+                            <p class="settings-pref-row__hint">Web Vitals、加载耗时与运行指标采集</p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">启用性能监控</span>
+                          <input
+                            type="checkbox"
+                            :checked="developerDiagnostics.performanceEnableMonitoring"
+                            @change="setDeveloperDiagnosticBoolean('performanceEnableMonitoring', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <details class="settings-pref-fold">
+                  <summary class="settings-pref-row settings-pref-row--fold">
+                    <div class="settings-pref-row__meta">
+                      <span class="settings-pref-row__icon" aria-hidden="true">
+                        <i class="fas fa-bug"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <h4 class="settings-pref-row__title">调试采集</h4>
+                        <p class="settings-pref-row__hint">事件、错误与行为分析</p>
+                      </div>
+                    </div>
+                    <i
+                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      aria-hidden="true"
+                    ></i>
+                  </summary>
+                  <div class="settings-pref-fold__body">
+                    <div class="settings-tool-page">
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">事件调试</h4>
+                            <p class="settings-pref-row__hint">记录 app:* 自定义事件流</p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">启用事件调试</span>
+                          <input
+                            type="checkbox"
+                            :checked="developerDiagnostics.eventDebugEnabled"
+                            @change="setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">错误追踪</h4>
+                            <p class="settings-pref-row__hint">捕获运行异常与错误上下文</p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">启用错误追踪</span>
+                          <input
+                            type="checkbox"
+                            :checked="developerDiagnostics.errorTrackerEnabled"
+                            @change="setDeveloperDiagnosticBoolean('errorTrackerEnabled', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">行为分析</h4>
+                            <p class="settings-pref-row__hint">记录用户行为分析事件</p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">启用行为分析</span>
+                          <input
+                            type="checkbox"
+                            :checked="developerDiagnostics.analyticsEnabled"
+                            @change="setDeveloperDiagnosticBoolean('analyticsEnabled', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <details class="settings-pref-fold">
+                  <summary class="settings-pref-row settings-pref-row--fold">
+                    <div class="settings-pref-row__meta">
+                      <span class="settings-pref-row__icon" aria-hidden="true">
+                        <i class="fas fa-flask"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <h4 class="settings-pref-row__title">实验特性</h4>
+                        <p class="settings-pref-row__hint">实验 / Beta / Debug 开关</p>
+                      </div>
+                    </div>
+                    <i
+                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      aria-hidden="true"
+                    ></i>
+                  </summary>
+                  <div class="settings-pref-fold__body">
+                    <div class="settings-tool-page">
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">实验功能</h4>
+                            <p class="settings-pref-row__hint">启用 experimental feature flags</p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">启用实验功能</span>
+                          <input
+                            type="checkbox"
+                            :checked="developerDiagnostics.enableExperimentalFeatures"
+                            @change="setDeveloperDiagnosticBoolean('enableExperimentalFeatures', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">Beta 功能</h4>
+                            <p class="settings-pref-row__hint">启用 beta feature flags</p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">启用 Beta 功能</span>
+                          <input
+                            type="checkbox"
+                            :checked="developerDiagnostics.enableBetaFeatures"
+                            @change="setDeveloperDiagnosticBoolean('enableBetaFeatures', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">Debug 模式</h4>
+                            <p class="settings-pref-row__hint">启用调试模式相关运行分支</p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">启用 Debug 模式</span>
+                          <input
+                            type="checkbox"
+                            :checked="developerDiagnostics.enableDebugMode"
+                            @change="setDeveloperDiagnosticBoolean('enableDebugMode', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <div class="settings-pref-row">
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-list"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">日志级别</h4>
+                      <p class="settings-pref-row__hint">控制开发者日志输出最低级别</p>
+                    </div>
+                  </div>
+                  <label class="settings-pref-row__control">
+                    <span class="sr-only">日志级别</span>
+                    <select
+                      class="settings-control settings-control--sm"
+                      :value="developerDiagnostics.loggerMinLevel"
+                      @change="setDeveloperDiagnosticLogLevel($event)"
                     >
-                      打开
-                    </button>
-                  </div>
-
-                  <div class="settings-pref-divider" role="separator"></div>
-
-                  <div class="settings-pref-row">
-                    <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true"
-                        ><i class="fas fa-heart-pulse"></i
-                      ></span>
-                      <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">性能监控</h4>
-                        <p class="settings-pref-row__hint">Web Vitals、加载耗时与运行指标采集</p>
-                      </div>
-                    </div>
-                    <label class="settings-switch">
-                      <span class="sr-only">启用性能监控</span>
-                      <input
-                        type="checkbox"
-                        :checked="developerDiagnostics.performanceEnableMonitoring"
-                        @change="setDeveloperDiagnosticBoolean('performanceEnableMonitoring', $event)"
-                      />
-                      <span class="settings-switch__track" aria-hidden="true"></span>
-                    </label>
-                  </div>
-
-                  <div class="settings-pref-divider" role="separator"></div>
-
-                  <div class="settings-pref-row">
-                    <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true"
-                        ><i class="fas fa-bolt"></i
-                      ></span>
-                      <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">事件调试</h4>
-                        <p class="settings-pref-row__hint">记录 app:* 自定义事件流</p>
-                      </div>
-                    </div>
-                    <label class="settings-switch">
-                      <span class="sr-only">启用事件调试</span>
-                      <input
-                        type="checkbox"
-                        :checked="developerDiagnostics.eventDebugEnabled"
-                        @change="setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)"
-                      />
-                      <span class="settings-switch__track" aria-hidden="true"></span>
-                    </label>
-                  </div>
-
-                  <div class="settings-pref-divider" role="separator"></div>
-
-                  <div class="settings-pref-row">
-                    <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true"
-                        ><i class="fas fa-bug"></i
-                      ></span>
-                      <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">错误追踪</h4>
-                        <p class="settings-pref-row__hint">捕获运行异常与错误上下文</p>
-                      </div>
-                    </div>
-                    <label class="settings-switch">
-                      <span class="sr-only">启用错误追踪</span>
-                      <input
-                        type="checkbox"
-                        :checked="developerDiagnostics.errorTrackerEnabled"
-                        @change="setDeveloperDiagnosticBoolean('errorTrackerEnabled', $event)"
-                      />
-                      <span class="settings-switch__track" aria-hidden="true"></span>
-                    </label>
-                  </div>
-
-                  <div class="settings-pref-divider" role="separator"></div>
-
-                  <div class="settings-pref-row">
-                    <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true"
-                        ><i class="fas fa-chart-line"></i
-                      ></span>
-                      <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">行为分析</h4>
-                        <p class="settings-pref-row__hint">记录用户行为分析事件</p>
-                      </div>
-                    </div>
-                    <label class="settings-switch">
-                      <span class="sr-only">启用行为分析</span>
-                      <input
-                        type="checkbox"
-                        :checked="developerDiagnostics.analyticsEnabled"
-                        @change="setDeveloperDiagnosticBoolean('analyticsEnabled', $event)"
-                      />
-                      <span class="settings-switch__track" aria-hidden="true"></span>
-                    </label>
-                  </div>
-
-                  <div class="settings-pref-divider" role="separator"></div>
-
-                  <div class="settings-pref-row">
-                    <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true"
-                        ><i class="fas fa-flask"></i
-                      ></span>
-                      <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">实验功能</h4>
-                        <p class="settings-pref-row__hint">启用 experimental feature flags</p>
-                      </div>
-                    </div>
-                    <label class="settings-switch">
-                      <span class="sr-only">启用实验功能</span>
-                      <input
-                        type="checkbox"
-                        :checked="developerDiagnostics.enableExperimentalFeatures"
-                        @change="setDeveloperDiagnosticBoolean('enableExperimentalFeatures', $event)"
-                      />
-                      <span class="settings-switch__track" aria-hidden="true"></span>
-                    </label>
-                  </div>
-
-                  <div class="settings-pref-divider" role="separator"></div>
-
-                  <div class="settings-pref-row">
-                    <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true"
-                        ><i class="fas fa-vial"></i
-                      ></span>
-                      <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">Beta 功能</h4>
-                        <p class="settings-pref-row__hint">启用 beta feature flags</p>
-                      </div>
-                    </div>
-                    <label class="settings-switch">
-                      <span class="sr-only">启用 Beta 功能</span>
-                      <input
-                        type="checkbox"
-                        :checked="developerDiagnostics.enableBetaFeatures"
-                        @change="setDeveloperDiagnosticBoolean('enableBetaFeatures', $event)"
-                      />
-                      <span class="settings-switch__track" aria-hidden="true"></span>
-                    </label>
-                  </div>
-
-                  <div class="settings-pref-divider" role="separator"></div>
-
-                  <div class="settings-pref-row">
-                    <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true"
-                        ><i class="fas fa-bug"></i
-                      ></span>
-                      <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">Debug 模式</h4>
-                        <p class="settings-pref-row__hint">启用调试模式相关运行分支</p>
-                      </div>
-                    </div>
-                    <label class="settings-switch">
-                      <span class="sr-only">启用 Debug 模式</span>
-                      <input
-                        type="checkbox"
-                        :checked="developerDiagnostics.enableDebugMode"
-                        @change="setDeveloperDiagnosticBoolean('enableDebugMode', $event)"
-                      />
-                      <span class="settings-switch__track" aria-hidden="true"></span>
-                    </label>
-                  </div>
-
-                  <div class="settings-pref-divider" role="separator"></div>
-
-                  <div class="settings-pref-row">
-                    <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true"
-                        ><i class="fas fa-list"></i
-                      ></span>
-                      <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">日志级别</h4>
-                        <p class="settings-pref-row__hint">控制开发者日志输出最低级别</p>
-                      </div>
-                    </div>
-                    <label class="settings-pref-row__control">
-                      <span class="sr-only">日志级别</span>
-                      <select
-                        class="settings-control settings-control--sm"
-                        :value="developerDiagnostics.loggerMinLevel"
-                        @change="setDeveloperDiagnosticLogLevel($event)"
-                      >
-                        <option value="debug">debug</option>
-                        <option value="info">info</option>
-                        <option value="warn">warn</option>
-                        <option value="error">error</option>
-                        <option value="fatal">fatal</option>
-                      </select>
-                    </label>
-                  </div>
+                      <option value="debug">debug</option>
+                      <option value="info">info</option>
+                      <option value="warn">warn</option>
+                      <option value="error">error</option>
+                      <option value="fatal">fatal</option>
+                    </select>
+                  </label>
+                </div>
               </div>
 
               <div class="rounded-lg border border-amber-100 bg-amber-50/60 p-3">
@@ -3074,14 +3202,12 @@
     </div>
 
     <!-- Footer: flex-shrink-0 keeps it pinned; never scrolls with section nav -->
-    <div
-      class="settings-panel-footer shrink-0 px-5 py-3.5 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex items-center justify-between"
-    >
-      <div class="flex items-center gap-2">
-        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-        <span class="text-[11px] text-slate-400 font-medium">系统正常运行</span>
+    <div class="settings-panel-footer">
+      <div class="settings-panel-footer__status">
+        <div class="settings-panel-footer__dot" aria-hidden="true"></div>
+        <span class="settings-panel-footer__label">系统正常运行</span>
       </div>
-      <span class="text-[11px] text-slate-300 font-mono">AihangSOP v1.0.0</span>
+      <span class="settings-panel-footer__version">AihangSOP v1.0.0</span>
     </div>
   </div>
 </div>
