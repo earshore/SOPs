@@ -48,6 +48,7 @@ import {
   DEEP_CHAT_VISION_COPY,
   DEEP_CHAT_VISION_PLACEHOLDER_TEXT,
   resolveDeepChatVisionUserParts,
+  type DeepChatVisionUserPart,
 } from './visionAttachments';
 import {
   clearStagedVisionAttachments,
@@ -104,6 +105,81 @@ async function reportDeepChatRequestFailure(
   await emitDeepChatResponse(signals, { text: responseText });
 }
 
+async function runPreparedDeepChatRequest(
+  container: HTMLElement,
+  preparedRequest: PreparedDeepChatRequest,
+  signals: DeepChatSignals,
+  requestController: AbortController
+): Promise<{ pendingThreadId: string; lifecyclePendingRequest: PendingDeepChatRequest }> {
+  const {
+    config,
+    model,
+    activeThread,
+    conversationMessages,
+    messages,
+    droppedMessageCount,
+    visionUserParts,
+  } = preparedRequest;
+
+  const userAttachmentMeta =
+    visionUserParts && visionUserParts.length > 0 ? { count: visionUserParts.length } : undefined;
+  const hadVisionParts = Boolean(userAttachmentMeta);
+
+  uiHooks.setConversationActive(container, true);
+  signals.onOpen?.();
+
+  const pendingRequest = createPendingRequest(
+    activeThread.id,
+    conversationMessages,
+    requestController
+  );
+  bindStopSignal(signals, pendingRequest);
+  sessionState.pendingRequests.set(activeThread.id, pendingRequest);
+  // Host staged images consumed for this turn only — clear UI immediately after snapshot.
+  if (hadVisionParts) {
+    clearStagedVisionAttachments();
+  }
+  setVisionComposerPending(true);
+  // conversationMessages 仅文本；vision base64 永不落盘；count-only meta 可落盘。
+  saveThreadMessages(container, conversationMessages, '', {
+    threadId: activeThread.id,
+    ...(userAttachmentMeta ? { userAttachmentMeta } : {}),
+  });
+  uiHooks.consumeMountedSkillsAfterSend(container, activeThread.id);
+  syncPendingRequestView(activeThread.id);
+  renderMountedThreadList();
+  notifyContextBudgetApplied(droppedMessageCount);
+
+  const assistantText = await callDeepChatLLM({
+    messages,
+    config,
+    model,
+    signals,
+    sourceChat: getChat(container),
+    controller: requestController,
+    pendingRequest,
+    visionUserParts,
+  });
+  if (!pendingRequest.abortReason && threadExists(activeThread.id)) {
+    saveThreadMessages(getMountedRenderContainer(), conversationMessages, assistantText, {
+      threadId: activeThread.id,
+      assistantReasoning: pendingRequest.reasoningText,
+      assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
+      assistantPreReplySteps: pendingRequest.preReplySteps,
+      ...(userAttachmentMeta ? { userAttachmentMeta } : {}),
+    });
+    markPendingDeepChatRequestSettled(pendingRequest);
+    paintSettledGenerationChrome();
+    notifyBackgroundPendingSettled(activeThread.id);
+    schedulePendingAssistantDisplay(activeThread.id);
+  }
+
+  return {
+    pendingThreadId: activeThread.id,
+    lifecyclePendingRequest: pendingRequest,
+  };
+}
+
 export async function handleDeepChatRequest(
   container: HTMLElement,
   body: DeepChatRequestBody | DeepChatMessage[],
@@ -118,72 +194,18 @@ export async function handleDeepChatRequest(
     const preparedRequest = await prepareDeepChatRequest(body, signals);
     if (!preparedRequest) return;
 
-    const {
-      config,
-      model,
-      activeThread,
-      conversationMessages,
-      messages,
-      droppedMessageCount,
-      visionUserParts,
-    } = preparedRequest;
-
-    const userAttachmentMeta =
-      visionUserParts && visionUserParts.length > 0 ? { count: visionUserParts.length } : undefined;
-    hadVisionParts = Boolean(userAttachmentMeta);
-
-    uiHooks.setConversationActive(container, true);
-    signals.onOpen?.();
+    hadVisionParts = Boolean(
+      preparedRequest.visionUserParts && preparedRequest.visionUserParts.length > 0
+    );
     requestController = createRequestController();
-    pendingThreadId = activeThread.id;
-
-    const pendingRequest = createPendingRequest(
-      activeThread.id,
-      conversationMessages,
+    const running = await runPreparedDeepChatRequest(
+      container,
+      preparedRequest,
+      signals,
       requestController
     );
-    lifecyclePendingRequest = pendingRequest;
-    bindStopSignal(signals, pendingRequest);
-    sessionState.pendingRequests.set(activeThread.id, pendingRequest);
-    // Host staged images consumed for this turn only — clear UI immediately after snapshot.
-    if (hadVisionParts) {
-      clearStagedVisionAttachments();
-    }
-    setVisionComposerPending(true);
-    // conversationMessages 仅文本；vision base64 永不落盘；count-only meta 可落盘。
-    saveThreadMessages(container, conversationMessages, '', {
-      threadId: activeThread.id,
-      ...(userAttachmentMeta ? { userAttachmentMeta } : {}),
-    });
-    uiHooks.consumeMountedSkillsAfterSend(container, activeThread.id);
-    syncPendingRequestView(activeThread.id);
-    renderMountedThreadList();
-    notifyContextBudgetApplied(droppedMessageCount);
-
-    const assistantText = await callDeepChatLLM({
-      messages,
-      config,
-      model,
-      signals,
-      sourceChat: getChat(container),
-      controller: requestController,
-      pendingRequest,
-      visionUserParts,
-    });
-    if (pendingRequest.abortReason || !threadExists(activeThread.id)) {
-      return;
-    }
-    saveThreadMessages(getMountedRenderContainer(), conversationMessages, assistantText, {
-      threadId: activeThread.id,
-      assistantReasoning: pendingRequest.reasoningText,
-      assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
-      assistantPreReplySteps: pendingRequest.preReplySteps,
-      ...(userAttachmentMeta ? { userAttachmentMeta } : {}),
-    });
-    markPendingDeepChatRequestSettled(pendingRequest);
-    paintSettledGenerationChrome();
-    notifyBackgroundPendingSettled(activeThread.id);
-    schedulePendingAssistantDisplay(activeThread.id);
+    pendingThreadId = running.pendingThreadId;
+    lifecyclePendingRequest = running.lifecyclePendingRequest;
   } catch (error) {
     if (requestController?.signal.aborted) {
       return;
@@ -202,6 +224,30 @@ function looksLikePayloadTooLarge(error: unknown): boolean {
   return /413|payload|too large|content.?length|request entity|entity too large|context_length|maximum context/i.test(
     msg
   );
+}
+
+async function resolvePreparedVisionParts(
+  body: DeepChatRequestBody | DeepChatMessage[],
+  config: LLMProviderConfig,
+  model: string,
+  signals: DeepChatSignals
+): Promise<DeepChatVisionUserPart[] | null> {
+  // Product gate (default off) + model capability; UI is also hidden when feature off.
+  const visionFeatureOn = isDeepChatVisionFeatureEnabled();
+  const supportsVision = visionFeatureOn && resolveRequestSupportsVision(config, model);
+  // When feature is off: no host staged files; body.files (if any) fail closed via supportsVision=false.
+  const hostFiles = visionFeatureOn ? getStagedVisionFiles() : [];
+  const visionResult = await resolveDeepChatVisionUserParts({
+    body,
+    supportsVision,
+    hostFiles,
+  });
+  if (!visionResult.ok) {
+    showToast(visionResult.error, { type: 'warning' });
+    await rejectDeepChatRequest(signals, visionResult.error);
+    return null;
+  }
+  return visionResult.parts;
 }
 
 export async function prepareDeepChatRequest(
@@ -223,22 +269,10 @@ export async function prepareDeepChatRequest(
     return null;
   }
 
-  // Product gate (default off) + model capability; UI is also hidden when feature off.
-  const visionFeatureOn = isDeepChatVisionFeatureEnabled();
-  const supportsVision = visionFeatureOn && resolveRequestSupportsVision(config, model);
-  // When feature is off: no host staged files; body.files (if any) fail closed via supportsVision=false.
-  const hostFiles = visionFeatureOn ? getStagedVisionFiles() : [];
-  const visionResult = await resolveDeepChatVisionUserParts({
-    body,
-    supportsVision,
-    hostFiles,
-  });
-  if (!visionResult.ok) {
-    showToast(visionResult.error, { type: 'warning' });
-    await rejectDeepChatRequest(signals, visionResult.error);
+  const visionUserParts = await resolvePreparedVisionParts(body, config, model, signals);
+  if (!visionUserParts) {
     return null;
   }
-  const visionUserParts = visionResult.parts;
 
   const requestBudget = resolveDeepChatRequestBudget(config, model);
   const { requestMessages, conversationMessages, messages, droppedMessageCount } =

@@ -107,14 +107,12 @@ export function validateVisionFileForStaging(
   return null;
 }
 
-export function stageVisionFiles(files: FileList | File[] | null | undefined): {
-  added: number;
-  error?: string;
-} {
+function beginStageVisionFiles(
+  files: FileList | File[] | null | undefined
+): { list: File[] } | { added: number; error?: string } {
   if (!files || (files as FileList).length === 0) {
     return { added: 0 };
   }
-  const list = Array.from(files as ArrayLike<File>);
   if (!state.supportsVision) {
     showToast(DEEP_CHAT_VISION_COPY.nonVision, { type: 'warning' });
     return { added: 0, error: DEEP_CHAT_VISION_COPY.nonVision };
@@ -122,12 +120,23 @@ export function stageVisionFiles(files: FileList | File[] | null | undefined): {
   if (state.pending) {
     return { added: 0 };
   }
+  return { list: Array.from(files as ArrayLike<File>) };
+}
+
+export function stageVisionFiles(files: FileList | File[] | null | undefined): {
+  added: number;
+  error?: string;
+} {
+  const started = beginStageVisionFiles(files);
+  if (!('list' in started)) {
+    return started;
+  }
 
   let added = 0;
   let firstError: string | undefined;
   const working = state.staged.map(s => ({ name: s.name, size: s.size }));
 
-  for (const file of list) {
+  for (const file of started.list) {
     const error = validateVisionFileForStaging(file, working);
     if (error) {
       firstError ??= error;
@@ -308,6 +317,52 @@ function renderStrip(strip: HTMLElement): void {
   }
 }
 
+function updateVisionBadge(badge: HTMLElement | null): void {
+  if (!badge) return;
+  if (state.staged.length > 0) {
+    badge.hidden = false;
+    badge.textContent = `已选 ${state.staged.length}/${DEEP_CHAT_VISION_MAX_FILES}`;
+    return;
+  }
+  badge.hidden = true;
+  badge.textContent = '';
+}
+
+function updateVisionHelper(helper: HTMLElement | null): void {
+  if (!helper) return;
+  helper.textContent = state.supportsVision
+    ? DEEP_CHAT_VISION_COPY.helper
+    : DEEP_CHAT_VISION_COPY.nonVision;
+  helper.hidden = false;
+}
+
+function updateVisionUploadButton(btn: HTMLButtonElement | null): void {
+  if (!btn) return;
+  const atCap = state.staged.length >= DEEP_CHAT_VISION_MAX_FILES;
+  const disabled = !state.supportsVision || state.pending || atCap;
+  btn.disabled = disabled;
+  btn.setAttribute('aria-disabled', String(disabled));
+  btn.classList.toggle('is-disabled', disabled);
+  btn.classList.toggle('is-vision-ready', state.supportsVision && !state.pending);
+  btn.classList.toggle('is-vision-blocked', !state.supportsVision);
+  btn.textContent = '上传图片';
+
+  if (!state.supportsVision) {
+    btn.title = DEEP_CHAT_VISION_COPY.nonVision;
+    btn.setAttribute('aria-label', DEEP_CHAT_VISION_COPY.nonVision);
+  } else if (state.pending) {
+    btn.title = '生成中，暂不可上传';
+    btn.setAttribute('aria-label', '生成中，暂不可上传');
+  } else if (atCap) {
+    const msg = DEEP_CHAT_VISION_COPY.maxCount(DEEP_CHAT_VISION_MAX_FILES);
+    btn.title = msg;
+    btn.setAttribute('aria-label', msg);
+  } else {
+    btn.title = DEEP_CHAT_VISION_COPY.uploadTooltip;
+    btn.setAttribute('aria-label', DEEP_CHAT_VISION_COPY.uploadAria);
+  }
+}
+
 function renderVisionComposerDom(): void {
   const chat = state.chat;
   if (!chat?.shadowRoot) return;
@@ -321,59 +376,13 @@ function renderVisionComposerDom(): void {
   const badge = chat.shadowRoot.querySelector<HTMLElement>(`#${VISION_COUNT_ID}`);
   const fileInput = chat.shadowRoot.querySelector<HTMLInputElement>(`#${VISION_FILE_INPUT_ID}`);
 
-  if (card) {
-    card.classList.add(HAS_VISION_COMPOSER_CLASS);
-    card.classList.remove(HAS_VISION_STAGED_CLASS);
-  }
-  if (root) {
-    root.classList.toggle(HAS_VISION_STAGED_CLASS, state.staged.length > 0);
-  }
-
+  card?.classList.add(HAS_VISION_COMPOSER_CLASS);
+  card?.classList.remove(HAS_VISION_STAGED_CLASS);
+  root?.classList.toggle(HAS_VISION_STAGED_CLASS, state.staged.length > 0);
   if (strip) renderStrip(strip);
-
-  if (badge) {
-    if (state.staged.length > 0) {
-      badge.hidden = false;
-      badge.textContent = `已选 ${state.staged.length}/${DEEP_CHAT_VISION_MAX_FILES}`;
-    } else {
-      badge.hidden = true;
-      badge.textContent = '';
-    }
-  }
-
-  if (helper) {
-    helper.textContent = state.supportsVision
-      ? DEEP_CHAT_VISION_COPY.helper
-      : DEEP_CHAT_VISION_COPY.nonVision;
-    helper.hidden = false;
-  }
-
-  if (btn) {
-    const atCap = state.staged.length >= DEEP_CHAT_VISION_MAX_FILES;
-    const disabled = !state.supportsVision || state.pending || atCap;
-    btn.disabled = disabled;
-    btn.setAttribute('aria-disabled', String(disabled));
-    btn.classList.toggle('is-disabled', disabled);
-    btn.classList.toggle('is-vision-ready', state.supportsVision && !state.pending);
-    btn.classList.toggle('is-vision-blocked', !state.supportsVision);
-    btn.textContent = '上传图片';
-
-    if (!state.supportsVision) {
-      btn.title = DEEP_CHAT_VISION_COPY.nonVision;
-      btn.setAttribute('aria-label', DEEP_CHAT_VISION_COPY.nonVision);
-    } else if (state.pending) {
-      btn.title = '生成中，暂不可上传';
-      btn.setAttribute('aria-label', '生成中，暂不可上传');
-    } else if (atCap) {
-      const msg = DEEP_CHAT_VISION_COPY.maxCount(DEEP_CHAT_VISION_MAX_FILES);
-      btn.title = msg;
-      btn.setAttribute('aria-label', msg);
-    } else {
-      btn.title = DEEP_CHAT_VISION_COPY.uploadTooltip;
-      btn.setAttribute('aria-label', DEEP_CHAT_VISION_COPY.uploadAria);
-    }
-  }
-
+  updateVisionBadge(badge);
+  updateVisionHelper(helper);
+  updateVisionUploadButton(btn);
   if (fileInput) {
     fileInput.disabled = !state.supportsVision || state.pending;
   }

@@ -300,6 +300,28 @@ function gateVisionCandidates(
  * - supportsVision=false：有图则报错，无图返回空数组；
  * - 白名单 image 类型；超张数 / 超体积 / 远程 URL fail-closed。
  */
+async function appendVisionPartFromCandidate(
+  candidate: FileCandidate,
+  maxFileBytes: number,
+  totalBytes: number,
+  maxTotalBytes: number
+): Promise<
+  | { ok: true; parts: DeepChatVisionUserPart[]; totalBytes: number }
+  | { ok: false; error: string }
+> {
+  const typeError = validateVisionCandidateType(candidate);
+  if (typeError) {
+    return { ok: false, error: typeError };
+  }
+  const sizeCheck = checkVisionCandidateSize(candidate, maxFileBytes, totalBytes, maxTotalBytes);
+  if ('error' in sizeCheck) {
+    return { ok: false, error: sizeCheck.error };
+  }
+  const result = await partFromFileCandidate(candidate);
+  if (!result.ok) return result;
+  return { ok: true, parts: result.parts, totalBytes: sizeCheck.totalBytes };
+}
+
 export async function resolveDeepChatVisionUserParts(args: {
   body: unknown;
   supportsVision: boolean;
@@ -324,19 +346,15 @@ export async function resolveDeepChatVisionUserParts(args: {
   let totalBytes = 0;
 
   for (const candidate of candidates) {
-    const typeError = validateVisionCandidateType(candidate);
-    if (typeError) {
-      return { ok: false, error: typeError };
-    }
-    const sizeCheck = checkVisionCandidateSize(candidate, maxFileBytes, totalBytes, maxTotalBytes);
-    if ('error' in sizeCheck) {
-      return { ok: false, error: sizeCheck.error };
-    }
-    totalBytes = sizeCheck.totalBytes;
-
-    const result = await partFromFileCandidate(candidate);
-    if (!result.ok) return result;
-    parts.push(...result.parts);
+    const step = await appendVisionPartFromCandidate(
+      candidate,
+      maxFileBytes,
+      totalBytes,
+      maxTotalBytes
+    );
+    if (!step.ok) return step;
+    totalBytes = step.totalBytes;
+    parts.push(...step.parts);
   }
   return { ok: true, parts };
 }
