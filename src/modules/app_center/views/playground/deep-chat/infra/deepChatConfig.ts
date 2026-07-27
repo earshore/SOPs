@@ -6,6 +6,11 @@ import type {
   DeepChatThread,
 } from '../types';
 import type { DeepChatMessage } from '../session/conversationContext';
+import { findConfigModelsEntry } from '../session/uiHooks';
+import { sessionState } from '../session/sessionState';
+import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
+import { StorageService } from '@/services/storageService';
+import { resolveDeepChatImagesConfig } from '../request/visionAttachments';
 
 type DraftUpdater = (threadId: string, draftText: string) => void;
 type RequestHandler = (
@@ -33,6 +38,38 @@ export function configureDeepChatBase(
   chat.errorMessages = {
     displayServiceErrorMessages: true,
   };
+  // 其余多媒体入口始终关闭；图片按模型 vision 能力单独门控。
+  chat.gifs = false;
+  chat.camera = false;
+  chat.audio = false;
+  chat.mixedFiles = false;
+  chat.microphone = false;
+  applyDeepChatVisionUploadConfig(chat);
+}
+
+/** 按当前模型 supportsVision 开关图片上传入口（fail-closed）。 */
+export function applyDeepChatVisionUploadConfig(chat: DeepChatElement | null | undefined): void {
+  if (!chat) return;
+  const supportsVision = resolveCurrentModelSupportsVision();
+  chat.images = resolveDeepChatImagesConfig(supportsVision);
+  chat.classList.toggle('is-vision-enabled', supportsVision);
+}
+
+function resolveCurrentModelSupportsVision(): boolean {
+  const config = sessionState.currentConfig;
+  const model = sessionState.selectedModel || config?.model || '';
+  if (!config || !model) return false;
+  const apiPath = normalizeApiPathId(
+    (config as { apiPath?: unknown }).apiPath ??
+      StorageService.getLLMConfig(config.provider)?.apiPath
+  );
+  const cap = resolveModelCapability({
+    provider: config.provider,
+    modelId: model,
+    modelsEntry: findConfigModelsEntry(config, model),
+    preferredSurface: apiPath,
+  });
+  return Boolean(cap.supportsVision);
 }
 
 export function configureDeepChatStyles(chat: DeepChatElement): void {

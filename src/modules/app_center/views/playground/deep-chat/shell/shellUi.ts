@@ -2,6 +2,7 @@ import {
   findConfigModelsEntry,
   parseReasoningEffortValue,
   registerShellUiHooks,
+  type DeepChatReasoningSessionOverride,
 } from '../session/uiHooks';
 import {
   cancelThreadRename,
@@ -67,6 +68,7 @@ import { markPendingDeepChatAssistantTextDisplayed } from '../request/lifecycle'
 
 import { THREAD_RAIL_COLLAPSED_CLASS } from '../constants';
 import {
+  applyDeepChatVisionUploadConfig,
   configureDeepChatBase,
   configureDeepChatConnection,
   configureDeepChatStyles,
@@ -108,10 +110,6 @@ type ChatSearchRefs = {
 };
 type ChatSearchResult = {
   thread: import('../types').DeepChatThread;
-};
-type DeepChatReasoningSessionOverride = {
-  enabled: boolean;
-  effort?: 'low' | 'medium' | 'high';
 };
 
 export function bindControls(container: HTMLElement): void {
@@ -201,6 +199,7 @@ export function bindModelControls(refs: ModelControlRefs): void {
     sessionState.selectedModel = nextModel;
     // Capability-gated controls must re-evaluate when the model changes.
     syncDeepChatReasoningControlsFromThread(container);
+    applyDeepChatVisionUploadConfig(getChat(container));
   };
   modelSelect?.addEventListener('change', onModelChange);
   sessionState.cleanupCallbacks.push(() =>
@@ -995,11 +994,13 @@ export async function refreshLLMConfig(
 
   if (!modelSelect) {
     syncDeepChatReasoningControlsFromThread(container);
+    applyDeepChatVisionUploadConfig(getChat(container));
     return;
   }
 
   renderLLMConfigState(modelSelect);
   syncDeepChatReasoningControlsFromThread(container);
+  applyDeepChatVisionUploadConfig(getChat(container));
 }
 
 export function renderLLMConfigState(modelSelect: HTMLSelectElement): void {

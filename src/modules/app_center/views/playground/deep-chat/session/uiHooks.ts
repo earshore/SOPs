@@ -14,10 +14,11 @@ import type {
   ThreadMenuState,
 } from '../types';
 import type { PendingDeepChatRequest, DeepChatPendingAbortReason } from '../request/lifecycle';
+import { isReasoningEffortLevel, type ReasoningEffortLevel } from '@/services/modelCapability';
 
 export type DeepChatReasoningSessionOverride = {
   enabled: boolean;
-  effort?: 'low' | 'medium' | 'high';
+  effort?: ReasoningEffortLevel;
 };
 
 type StreamHandler = (update: { delta: string; reasoningDelta?: string }) => void;
@@ -159,6 +160,6 @@ export function findConfigModelsEntry(
   return found?.id ? { id: found.id } : undefined;
 }
 
-export function parseReasoningEffortValue(value: string | undefined): 'low' | 'medium' | 'high' {
-  return value === 'low' || value === 'medium' || value === 'high' ? value : 'medium';
+export function parseReasoningEffortValue(value: string | undefined): ReasoningEffortLevel {
+  return isReasoningEffortLevel(value) ? value : 'medium';
 }

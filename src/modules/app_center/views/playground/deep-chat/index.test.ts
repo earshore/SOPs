@@ -49,11 +49,7 @@ const deepChatTemplate = `
               </label>
               <label class="deep-chat-reasoning-effort-wrap" for="deep-chat-reasoning-effort">
                 <span>思考强度</span>
-                <select id="deep-chat-reasoning-effort" aria-label="思考强度">
-                  <option value="low">low</option>
-                  <option value="medium" selected>medium</option>
-                  <option value="high">high</option>
-                </select>
+                <select id="deep-chat-reasoning-effort" aria-label="思考强度"></select>
               </label>
             </div>
             <button id="deep-chat-reset-tuning" type="button"></button>
@@ -2035,6 +2031,105 @@ describe('deep-chat playground reasoning prefs', () => {
       enabled: true,
       effort: 'high',
     });
+
+    unmount();
+  });
+
+  it('renders only the effort tiers the active model supports', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    // grok-4.5 官方仅 low|medium|high
+    const { mount, unmount } = await importDeepChat({
+      config: {
+        provider: 'new_api',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'grok-4.5',
+        models: ['grok-4.5'],
+      },
+    });
+
+    await mount(container);
+    const effort = queryRequired<HTMLSelectElement>(container, '#deep-chat-reasoning-effort');
+    expect(Array.from(effort.options).map(option => option.value)).toEqual([
+      'low',
+      'medium',
+      'high',
+    ]);
+    expect(effort.options[0]?.textContent).toBe('低 (low)');
+
+    unmount();
+  });
+
+  it('renders the full five tiers for models that support xhigh/max', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount } = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'gpt-5.1',
+        models: ['gpt-5.1'],
+      },
+    });
+
+    await mount(container);
+    const effort = queryRequired<HTMLSelectElement>(container, '#deep-chat-reasoning-effort');
+    expect(Array.from(effort.options).map(option => option.value)).toEqual([
+      'low',
+      'medium',
+      'high',
+      'xhigh',
+      'max',
+    ]);
+
+    unmount();
+  });
+
+  it('clamps a stored effort above the model ceiling and writes it back to the thread', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    // grok-4.5 天花板为 high；已存的 max 应落到 high 并回写线程
+    const { mount, unmount, mocks } = await importDeepChat({
+      config: {
+        provider: 'new_api',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'grok-4.5',
+        models: ['grok-4.5'],
+        reasoningPrefs: { enabled: true, effort: 'max' },
+      },
+    });
+
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(400);
+    const effort = queryRequired<HTMLSelectElement>(container, '#deep-chat-reasoning-effort');
+    expect(effort.value).toBe('high');
+
+    const chat = getChat(container);
+    const onClose = vi.fn();
+    chat.connect?.handler(
+      { messages: [{ role: 'user', text: 'Reason within model limits' }] },
+      { onResponse: vi.fn(), onClose }
+    );
+
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    const options = mocks.callLLM.mock.calls[0]?.[5] as {
+      reasoningSessionOverride?: { enabled?: boolean; effort?: string };
+    };
+    expect(options.reasoningSessionOverride).toEqual({ enabled: true, effort: 'high' });
+
+    const persisted = mocks.localDataStore.set.mock.calls
+      .filter(([key]) => key === 'user:playground_deep_chat_threads_v1')
+      .at(-1)?.[1] as {
+      threads?: Array<{ id: string; reasoning?: { enabled?: boolean; effort?: string } }>;
+    };
+    expect(persisted?.threads?.[0]?.reasoning).toEqual({ enabled: true, effort: 'high' });
 
     unmount();
   });

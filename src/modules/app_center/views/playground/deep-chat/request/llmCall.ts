@@ -14,7 +14,11 @@ import {
 } from '../session/pendingRuntime';
 
 import { callLLM, type ChatMessage } from '@/services/llmService';
-import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
+import {
+  normalizeApiPathId,
+  resolveModelCapability,
+  type ReasoningEffortLevel,
+} from '@/services/modelCapability';
 import {
   createDeepChatBusinessToolExecutor,
   DEEP_CHAT_BUSINESS_TOOLS,
@@ -52,7 +56,7 @@ import { sessionState } from '../session/sessionState';
 type DeepChatStreamState = { streamedText: string };
 
 export function prepareDeepChatReasoningCallOptions(): {
-  reasoningPrefs?: { enabled: boolean; effort: 'low' | 'medium' | 'high' };
+  reasoningPrefs?: { enabled: boolean; effort: ReasoningEffortLevel };
   reasoningSessionOverride?: DeepChatReasoningSessionOverride;
 } {
   const mountContainer = getMountedRenderContainer();
@@ -289,7 +293,16 @@ export function createDeepChatStreamHandler(
 }
 
 export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string> {
-  const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
+  const {
+    messages,
+    config,
+    model,
+    signals,
+    sourceChat,
+    controller,
+    pendingRequest,
+    visionUserParts,
+  } = context;
   const streamState: DeepChatStreamState = { streamedText: '' };
   const reasoningOptions = prepareDeepChatReasoningCallOptions();
   let responsesChain = resolveDeepChatResponsesChainOptions(config, model);
@@ -305,6 +318,8 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
     getDeepChatRequestBudgetDefaults().maxOutputTokens,
     reasoningEnabled
   );
+  // 仅当轮透传；不进 thread 持久化。
+  const visionOptions = visionUserParts && visionUserParts.length > 0 ? { visionUserParts } : {};
 
   const run = (chain: typeof responsesChain) =>
     callLLM(messages, config.provider, config.endpoint, config.apiKey, model, {
@@ -313,6 +328,7 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
       ...(config.serviceTier && { serviceTier: config.serviceTier }),
       ...reasoningOptions,
       ...chain,
+      ...visionOptions,
       modelsEntry: findConfigModelsEntry(config, model),
       retries: 0,
       ...getRuntimeDeepChatOptions(),

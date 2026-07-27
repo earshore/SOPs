@@ -950,16 +950,24 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     color: var(--deep-chat-ink-muted, #64748b) !important;
   }
 
+  /* 非图片附件入口始终隐藏；图片按钮由 :host(.is-vision-enabled) 条件放开 */
   #microphone-button,
-  #dropup-button,
-  #upload-images-button,
   #upload-gifs-button,
   #upload-audio-button,
   #upload-mixed-files-button,
-  #camera-button,
-  #file-input,
-  #dropup-menu {
+  #camera-button {
     display: none !important;
+  }
+
+  :host(:not(.is-vision-enabled)) #dropup-button,
+  :host(:not(.is-vision-enabled)) #upload-images-button,
+  :host(:not(.is-vision-enabled)) #file-input,
+  :host(:not(.is-vision-enabled)) #dropup-menu {
+    display: none !important;
+  }
+
+  :host(.is-vision-enabled) #upload-images-button {
+    display: flex !important;
   }
 
   /*

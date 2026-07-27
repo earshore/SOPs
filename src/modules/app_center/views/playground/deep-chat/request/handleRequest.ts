@@ -22,10 +22,12 @@ import {
 } from '../session/pendingRuntime';
 import { callDeepChatLLM } from './llmCall';
 import type { ChatMessage } from '@/services/llmService';
+import type { LLMProviderConfig } from '@/types/state';
 
 import { StorageService } from '@/services/storageService';
 import { ValidationError } from '@/common/errors/AppError';
 import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
+import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
 
 import { normalizeSkillChipDraftText } from '@/modules/app_center/skillDeepChatHandoff';
 
@@ -42,6 +44,11 @@ import {
   resolveDeepChatRequestBudget,
   type DeepChatRequestBudget,
 } from './budget';
+import {
+  DEEP_CHAT_VISION_PLACEHOLDER_TEXT,
+  resolveDeepChatVisionUserParts,
+} from './visionAttachments';
+import { findConfigModelsEntry } from '../session/uiHooks';
 
 import { refreshMessageToolbarStatuses } from '../composer/messageToolbar';
 
@@ -73,8 +80,15 @@ export async function handleDeepChatRequest(
     const preparedRequest = await prepareDeepChatRequest(body, signals);
     if (!preparedRequest) return;
 
-    const { config, model, activeThread, conversationMessages, messages, droppedMessageCount } =
-      preparedRequest;
+    const {
+      config,
+      model,
+      activeThread,
+      conversationMessages,
+      messages,
+      droppedMessageCount,
+      visionUserParts,
+    } = preparedRequest;
 
     uiHooks.setConversationActive(container, true);
     signals.onOpen?.();
@@ -89,6 +103,7 @@ export async function handleDeepChatRequest(
     lifecyclePendingRequest = pendingRequest;
     bindStopSignal(signals, pendingRequest);
     sessionState.pendingRequests.set(activeThread.id, pendingRequest);
+    // conversationMessages 仅文本；vision base64 永不落盘。
     saveThreadMessages(container, conversationMessages, '', {
       threadId: activeThread.id,
     });
@@ -107,6 +122,7 @@ export async function handleDeepChatRequest(
       sourceChat: getChat(container),
       controller: requestController,
       pendingRequest,
+      visionUserParts,
     });
     if (pendingRequest.abortReason || !threadExists(activeThread.id)) {
       return;
@@ -172,9 +188,23 @@ export async function prepareDeepChatRequest(
     return null;
   }
 
+  const supportsVision = resolveRequestSupportsVision(config, model);
+  const visionResult = await resolveDeepChatVisionUserParts({
+    body,
+    supportsVision,
+  });
+  if (!visionResult.ok) {
+    showToast(visionResult.error, { type: 'warning' });
+    await rejectDeepChatRequest(signals, visionResult.error);
+    return null;
+  }
+  const visionUserParts = visionResult.parts;
+
   const requestBudget = resolveDeepChatRequestBudget(config, model);
   const { requestMessages, conversationMessages, messages, droppedMessageCount } =
-    createDeepChatRequestMessages(body, requestBudget);
+    createDeepChatRequestMessages(body, requestBudget, {
+      allowImageOnly: visionUserParts.length > 0,
+    });
   if (requestMessages.length === 0) {
     await rejectDeepChatRequest(signals, '请输入要发送的内容。');
     return null;
@@ -199,7 +229,23 @@ export async function prepareDeepChatRequest(
     conversationMessages,
     messages,
     droppedMessageCount,
+    // 仅当轮请求；thread 持久化路径不持有 base64。
+    ...(visionUserParts.length > 0 ? { visionUserParts } : {}),
   };
+}
+
+function resolveRequestSupportsVision(config: LLMProviderConfig, model: string): boolean {
+  const apiPath = normalizeApiPathId(
+    (config as { apiPath?: unknown }).apiPath ??
+      StorageService.getLLMConfig(config.provider)?.apiPath
+  );
+  const cap = resolveModelCapability({
+    provider: config.provider,
+    modelId: model,
+    modelsEntry: findConfigModelsEntry(config, model),
+    preferredSurface: apiPath,
+  });
+  return Boolean(cap.supportsVision);
 }
 
 export async function rejectDeepChatRequest(
@@ -223,9 +269,14 @@ export async function getDeepChatRequestModelConfig(): Promise<DeepChatRequestMo
 
 export function createDeepChatRequestMessages(
   body: DeepChatRequestBody | DeepChatMessage[],
-  budget: DeepChatRequestBudget
+  budget: DeepChatRequestBudget,
+  options: { allowImageOnly?: boolean } = {}
 ): DeepChatRequestMessages {
-  const requestMessages = normalizeRequestSkillChipMessages(normalizeChatMessages(body));
+  let requestMessages = normalizeRequestSkillChipMessages(normalizeChatMessages(body));
+  // 纯图片回合：normalize 会丢空文本，补占位以保留本轮用户消息（不落盘图片本身）。
+  if (requestMessages.length === 0 && options.allowImageOnly) {
+    requestMessages = [{ role: 'user', content: DEEP_CHAT_VISION_PLACEHOLDER_TEXT }];
+  }
   const conversationMessages = mergeThreadHistoryWithRequest(
     getActiveThread().messages,
     requestMessages

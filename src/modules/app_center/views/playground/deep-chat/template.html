@@ -194,16 +194,11 @@
                 </label>
                 <label class="deep-chat-reasoning-effort-wrap" for="deep-chat-reasoning-effort">
                   <span>思考强度</span>
-                  <select id="deep-chat-reasoning-effort" aria-label="思考强度">
-                    <option value="low">低 (low)</option>
-                    <option value="medium" selected>中 (medium)</option>
-                    <option value="high">高 (high)</option>
-                  </select>
+                  <!-- 档位由 JS 按当前模型能力动态渲染 -->
+                  <select id="deep-chat-reasoning-effort" aria-label="思考强度"></select>
                 </label>
                 <p class="deep-chat-reasoning-hint">
-                  勾选启用并把强度设为「高」后，浏览器控制台应出现
-                  <code>reasoning_effort=high</code
-                  >；网关日志请查<strong>请求体</strong>顶层字段（不是回复正文）。
+                  档位越高，模型思考越深入，但响应更慢、消耗更多。仅对支持推理的模型生效，可选档位随模型能力变化。
                 </p>
               </div>
               <button id="deep-chat-reset-tuning" class="deep-chat-reset-tuning" type="button">

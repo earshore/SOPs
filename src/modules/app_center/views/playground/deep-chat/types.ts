@@ -15,9 +15,23 @@ export type DeepChatSkillContext = Pick<
   'skillId' | 'skillTitle' | 'skillRaw'
 >;
 
+/** deep-chat MessageFile 形状（仅请求期使用；禁止把 base64 落盘到 thread）。 */
+export interface DeepChatRequestFile {
+  src?: string;
+  name?: string;
+  type?: string;
+  ref?: File;
+}
+
 export interface DeepChatRequestBody {
-  messages?: DeepChatMessage[];
+  messages?: Array<
+    DeepChatMessage & {
+      files?: DeepChatRequestFile[];
+    }
+  >;
   text?: string;
+  /** deep-chat 自定义 handler 可能把本轮 files 放在顶层 */
+  files?: Array<File | DeepChatRequestFile> | FileList;
 }
 
 export interface DeepChatSignals {
@@ -49,6 +63,13 @@ export interface DeepChatElement extends HTMLElement {
   names?: boolean;
   displayLoadingBubble?: boolean;
   errorMessages?: Record<string, unknown>;
+  /** deep-chat 官方属性：boolean 或 FilesServiceConfig */
+  images?: boolean | Record<string, unknown>;
+  gifs?: boolean | Record<string, unknown>;
+  camera?: boolean | Record<string, unknown>;
+  audio?: boolean | Record<string, unknown>;
+  mixedFiles?: boolean | Record<string, unknown>;
+  microphone?: boolean | Record<string, unknown>;
   submitUserMessage?: (content: { text: string }) => void;
   addMessage?: (
     message: DeepChatMessage & { error?: string; overwrite?: boolean },
@@ -83,7 +104,7 @@ export interface DeepChatThread {
    */
   reasoning?: {
     enabled?: boolean;
-    effort?: 'low' | 'medium' | 'high';
+    effort?: import('@/services/modelCapability').ReasoningEffortLevel;
   };
   /**
    * Last OpenAI Responses `response.id` for this thread (R3 multi-turn).
@@ -124,6 +145,8 @@ export interface PreparedDeepChatRequest {
   conversationMessages: ChatMessage[];
   messages: ChatMessage[];
   droppedMessageCount: number;
+  /** 仅当轮请求；禁止写进 thread 持久化 */
+  visionUserParts?: Array<Record<string, unknown>>;
 }
 
 export interface DeepChatLLMCallContext {
@@ -134,6 +157,8 @@ export interface DeepChatLLMCallContext {
   sourceChat: DeepChatElement | null;
   controller: AbortController;
   pendingRequest: PendingDeepChatRequest;
+  /** 仅当轮请求；禁止写进 thread 持久化 */
+  visionUserParts?: Array<Record<string, unknown>>;
 }
 
 export interface TuningControlRefs {

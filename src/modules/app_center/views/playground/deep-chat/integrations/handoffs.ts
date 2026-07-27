@@ -13,10 +13,13 @@ import {
 } from '../session/threadStore';
 
 import {
+  clampEffort,
+  DEFAULT_REASONING_EFFORTS,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
   resolveModelCapability,
   shouldShowReasoningControls,
+  type ReasoningEffortLevel,
 } from '@/services/modelCapability';
 
 import { StorageService } from '@/services/storageService';
@@ -324,7 +327,7 @@ export function applyThreadTuningToSession(container: HTMLElement | null): void 
 
 export function resolveSessionReasoningUiState(provider: string): {
   enabled: boolean;
-  effort: 'low' | 'medium' | 'high';
+  effort: ReasoningEffortLevel;
 } {
   const override = getActiveThread().reasoning;
   const global = normalizeReasoningUserPrefs(StorageService.getLLMConfig(provider)?.reasoningPrefs);
@@ -332,6 +335,59 @@ export function resolveSessionReasoningUiState(provider: string): {
     enabled: override?.enabled !== undefined ? Boolean(override.enabled) : global.enabled,
     effort: parseReasoningEffortValue(override?.effort ?? global.effort),
   };
+}
+
+/** 档位中文标签：与系统设置页保持同一套文案风格 */
+const REASONING_EFFORT_LABELS: Record<ReasoningEffortLevel, string> = {
+  low: '低 (low)',
+  medium: '中 (medium)',
+  high: '高 (high)',
+  xhigh: '极高 (xhigh)',
+  max: '最高 (max)',
+};
+
+/** 按模型能力重建档位选项；列表未变化时不重绘 DOM */
+function renderReasoningEffortOptions(
+  select: HTMLSelectElement,
+  levels: readonly ReasoningEffortLevel[]
+): void {
+  const current = Array.from(select.options).map(option => option.value);
+  if (
+    current.length === levels.length &&
+    current.every((value, index) => value === levels[index])
+  ) {
+    return;
+  }
+  select.textContent = '';
+  for (const level of levels) {
+    const option = document.createElement('option');
+    option.value = level;
+    option.textContent = REASONING_EFFORT_LABELS[level];
+    select.append(option);
+  }
+}
+
+/** 按模型能力重建档位选项、并把已存档位就近下调到可选范围内 */
+function applyReasoningEffortLevels(
+  container: HTMLElement,
+  select: HTMLSelectElement | null,
+  levels: readonly ReasoningEffortLevel[],
+  state: { enabled: boolean; effort: ReasoningEffortLevel }
+): void {
+  const clamped = clampEffort(state.effort, levels);
+  if (select) {
+    renderReasoningEffortOptions(select, levels);
+    select.value = clamped;
+    select.disabled = !state.enabled;
+  }
+  if (clamped === state.effort) {
+    return;
+  }
+  // UI 显示的档位必须与实际会发送的档位一致，否则下次请求会用超纲值
+  const prev = getActiveThread().reasoning || {};
+  updateActiveThreadFields(container, {
+    reasoning: { ...prev, enabled: state.enabled, effort: clamped },
+  });
 }
 
 /** 按当前线程 + 全局默认同步推理控件（会话切换 / 重置） */
@@ -363,14 +419,17 @@ export function syncDeepChatReasoningControlsFromThread(container: HTMLElement):
   });
   reasoningRoot.hidden = !shouldShowReasoningControls(cap);
 
-  const { enabled, effort } = resolveSessionReasoningUiState(config.provider);
+  const state = resolveSessionReasoningUiState(config.provider);
   if (reasoningEnabled) {
-    reasoningEnabled.checked = enabled;
+    reasoningEnabled.checked = state.enabled;
   }
-  if (reasoningEffort) {
-    reasoningEffort.value = effort;
-    reasoningEffort.disabled = !enabled;
-  }
+  // 产品档位为 low…max，但 UI 只列当前模型真正能发送的档位
+  applyReasoningEffortLevels(
+    container,
+    reasoningEffort,
+    cap.reasoningEfforts.length > 0 ? cap.reasoningEfforts : DEFAULT_REASONING_EFFORTS,
+    state
+  );
 }
 
 /** 卸载 / 切会话前，把调试面板当前值写回线程 */

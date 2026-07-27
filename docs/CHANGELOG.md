@@ -13,6 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [3.0.11-rc.13] - 2026-07-27
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.12` 之后的 **Deep Chat 模型能力最大化入口**：推理 effort 按模型能力动态档位，图片附件按 `supportsVision` 门控接入当轮请求。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- Deep Chat 图片附件：模型 `supportsVision` 时启用 deep-chat 图片上传；files → `visionUserParts`（`input_image`）当轮透传 chat/responses；单轮最多 4 张、单图 5MB；纯图回合用 `[图片]` 文本占位。
+- Deep Chat 推理强度档位按 `cap.reasoningEfforts` 动态渲染，覆盖 `low/medium/high/xhigh/max`；超纲档位 `clampEffort` 后回写 UI 与会话状态。
+
+### Changed
+
+- Deep Chat 推理 effort 类型与系统设置对齐到完整 `ReasoningEffortLevel`；调试口吻 hint 改为用户向说明。
+- 图片上传入口 fail-closed：非 vision 模型继续隐藏；麦克风/相机/音频/GIF/混合文件仍关闭。
+
+### Fixed
+
+- 多轮 messages 仅取**最后一条 user** 的 files，避免历史附件被重复收集进本轮 vision 载荷。
+- 图片 base64 **不写 thread / localStorage**，仅服务当轮 `callLLM`。
+
 ## [3.0.11-rc.12] - 2026-07-27
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
