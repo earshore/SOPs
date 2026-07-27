@@ -811,12 +811,20 @@ select.settings-control {
   margin-top: 0.5rem;
 }
 
-/* Pref-list-only tool-page: drop empty chrome box */
-.settings-tool-page:has(> .settings-pref-list:only-child) {
+/* Pref-list-only tool-page: drop empty chrome box (unless explicitly framed) */
+.settings-tool-page:has(> .settings-pref-list:only-child):not(.settings-tool-page--framed) {
   border: 0;
   border-radius: 0;
   background: transparent;
   padding: 0;
+}
+
+/* Keep frame even if later content becomes a single pref-list */
+.settings-tool-page--framed {
+  border: 1px solid color-mix(in srgb, var(--settings-border) 92%, transparent);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--settings-surface-muted) 72%, var(--settings-surface));
+  padding: 0.75rem;
 }
 
 /* Quiet status / note cards (diagnostics, security notice) */
