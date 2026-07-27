@@ -875,7 +875,8 @@ select.settings-control {
   color: var(--color-warning-dark, #b45309);
 }
 
-/* Appearance section — dense ops panel (ui-ux-pro-max: minimal + high density) */
+/* Preference list (appearance sample) — dense ops panel; alias keeps historical appearance class names */
+.settings-pref-list,
 .settings-appearance-grid {
   display: flex;
   flex-direction: column;
@@ -886,6 +887,7 @@ select.settings-control {
   overflow: hidden;
 }
 
+.settings-pref-row,
 .settings-appearance-row {
   display: flex;
   flex-wrap: wrap;
@@ -896,6 +898,7 @@ select.settings-control {
   min-height: 3.25rem;
 }
 
+.settings-pref-row__meta,
 .settings-appearance-row__meta {
   display: flex;
   align-items: center;
@@ -904,6 +907,7 @@ select.settings-control {
   flex: 1 1 10rem;
 }
 
+.settings-pref-row__icon,
 .settings-appearance-row__icon {
   display: inline-flex;
   align-items: center;
@@ -918,6 +922,7 @@ select.settings-control {
   align-self: center;
 }
 
+.settings-pref-row__title,
 .settings-appearance-row__title {
   margin: 0;
   font-size: 0.8125rem;
@@ -926,6 +931,7 @@ select.settings-control {
   line-height: 1.3;
 }
 
+.settings-pref-row__hint,
 .settings-appearance-row__hint {
   margin: 0.15rem 0 0;
   font-size: 0.6875rem;
@@ -934,6 +940,7 @@ select.settings-control {
   line-height: 1.4;
 }
 
+.settings-pref-row__control,
 .settings-appearance-row__control {
   flex: 0 1 14rem;
   min-width: 10rem;
@@ -941,6 +948,7 @@ select.settings-control {
   margin: 0;
 }
 
+.settings-pref-divider,
 .settings-appearance-divider {
   height: 1px;
   background: var(--color-border-light, var(--settings-border));

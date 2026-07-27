@@ -219,4 +219,11 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(html).toContain("setAppearanceColorMode('dark')");
     expect(html).toContain("setAppearanceColorMode('system')");
   });
+
+  it('UT-P1-06 appearance layout uses pref-list primitive with frozen color-mode testid', () => {
+    expect(html).toContain('class="settings-pref-list"');
+    expect(html).toContain('data-testid="settings-appearance-color-mode"');
+    expect(html).not.toContain('class="settings-appearance-grid"');
+    expect(html).not.toContain('class="settings-appearance-row"');
+  });
 });
