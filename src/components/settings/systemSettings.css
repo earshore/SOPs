@@ -786,7 +786,7 @@ select.settings-control {
   margin-top: 0.15rem;
 }
 
-.settings-pref-fold__body > .settings-tool-page .settings-pref-row:not(.settings-pref-row--metric) {
+.settings-pref-fold__body > .settings-tool-page .settings-pref-row {
   padding-left: 0;
   padding-right: 0;
 }
@@ -826,16 +826,12 @@ select.settings-control {
   box-sizing: border-box;
 }
 
-.settings-tool-page > .settings-pref-metrics:first-child {
-  margin-top: 0;
-}
-
-.settings-scrape-runtime > .settings-pref-metrics {
+.settings-scrape-runtime > .settings-pref-list {
   margin-top: 0.5rem;
 }
 
-/* Metrics-only tool-page: drop empty chrome box */
-.settings-tool-page:has(> .settings-pref-metrics:only-child) {
+/* Pref-list-only tool-page: drop empty chrome box */
+.settings-tool-page:has(> .settings-pref-list:only-child) {
   border: 0;
   border-radius: 0;
   background: transparent;

@@ -290,7 +290,7 @@ describe('UT-P1-06 appearance theme contracts', () => {
 
     const ppcListStart = html.indexOf('data-testid="settings-ppc-bool-pref-list"');
     expect(ppcListStart).toBeGreaterThan(-1);
-    const ppcChunk = html.slice(ppcListStart, ppcListStart + 2500);
+    const ppcChunk = html.slice(ppcListStart, ppcListStart + 12000);
     expect(ppcChunk).toContain('settings-pref-row');
     expect(ppcChunk).toContain('settings-switch');
     expect(ppcChunk).not.toContain('grid gap-3 sm:grid-cols-3');
@@ -336,11 +336,8 @@ describe('UT-P1-06 appearance theme contracts', () => {
     ]) {
       const start = html.indexOf(`data-testid="${testId}"`);
       expect(start).toBeGreaterThan(-1);
-      // KH listing now co-locates model/TTL rows before the cache switch in one list.
-      const chunk = html.slice(
-              start,
-              start + (testId === 'settings-kh-listing-cache-pref-list' ? 7000 : 1200)
-            );
+      // Unified tool-page lists often start with model/select/numeric rows before switches.
+      const chunk = html.slice(start, start + 14000);
       expect(chunk).toContain('settings-pref-row');
       expect(chunk).toContain('settings-switch');
       expect(chunk).not.toContain('settings-checkbox');
@@ -410,16 +407,17 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(toolChunk).not.toContain('settings-tool-app');
   });
 
-  it('tool strategy numeric clusters use pref-metrics grid of pref-row--metric cells', () => {
+  it('tool strategy bodies use a single pref-list with standard pref-rows (no metrics grids)', () => {
       const toolStart = html.indexOf('settings-tool-pref-list');
       const toolEnd = html.indexOf('settings-strategy-footer', toolStart);
       const toolChunk = html.slice(toolStart, toolEnd);
-      expect(toolChunk).toContain('settings-pref-metrics');
-      expect(toolChunk).toContain('settings-pref-row--metric');
-      expect(toolChunk).toContain('settings-pref-metrics--cols-4');
+      expect(toolChunk).not.toContain('settings-pref-metrics');
+      expect(toolChunk).not.toContain('settings-pref-row--metric');
       expect(toolChunk).not.toContain('settings-metrics-grid');
       expect(toolChunk).not.toContain('settings-metrics-cell');
       expect(toolChunk).not.toContain('mt-3 grid gap-3 sm:grid-cols-4');
+      expect(toolChunk).toContain('settings-pref-list');
+      expect(toolChunk).toContain('settings-pref-row');
       // Runtime preset is global first row, not nested under 通用 AI
       const presetAt = toolChunk.indexOf('data-testid="settings-runtime-presets"');
       const generalAt = toolChunk.indexOf('general-ai-runtime');

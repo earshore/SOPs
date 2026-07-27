@@ -1032,69 +1032,89 @@
                 </summary>
                 <div class="settings-pref-fold__body">
                   <div class="settings-tool-page mt-3">
-                    <div class="settings-pref-metrics settings-pref-metrics--cols-4">
-                      <label class="settings-pref-row settings-pref-row--metric">
+                    <div class="settings-pref-list">
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">AI / 工具请求超时（秒）</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">AI / 工具请求超时</span>
+                            <p class="settings-pref-row__hint">秒</p>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
-<input
-                          type="number"
-                          min="30"
-                          max="300"
-                          step="5"
-                          :value="runtimeAnalysisTimeoutSeconds"
-                          @input="setRuntimeNumber('llm.analysisTimeoutMs', $event, 1000)"
-                          class="settings-control settings-control--sm"
-                        />
+                          <input
+                            type="number"
+                            min="30"
+                            max="300"
+                            step="5"
+                            :value="runtimeAnalysisTimeoutSeconds"
+                            @input="setRuntimeNumber('llm.analysisTimeoutMs', $event, 1000)"
+                            class="settings-control settings-control--sm"
+                          />
                         </div>
                       </label>
-                      <label class="settings-pref-row settings-pref-row--metric">
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">模型重试次数</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">模型重试次数</span>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
-<input
-                          type="number"
-                          min="0"
-                          max="5"
-                          step="1"
-                          :value="runtimeStrategy.settings.llm.maxRetries"
-                          @input="setRuntimeNumber('llm.maxRetries', $event)"
-                          class="settings-control settings-control--sm"
-                        />
+                          <input
+                            type="number"
+                            min="0"
+                            max="5"
+                            step="1"
+                            :value="runtimeStrategy.settings.llm.maxRetries"
+                            @input="setRuntimeNumber('llm.maxRetries', $event)"
+                            class="settings-control settings-control--sm"
+                          />
                         </div>
                       </label>
-                      <label class="settings-pref-row settings-pref-row--metric">
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">重试间隔（秒）</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">重试间隔</span>
+                            <p class="settings-pref-row__hint">秒</p>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
-<input
-                          type="number"
-                          min="0.25"
-                          max="30"
-                          step="0.25"
-                          :value="getRuntimeNumber('llm.retryDelayMs', 1000)"
-                          @input="setRuntimeNumber('llm.retryDelayMs', $event, 1000)"
-                          class="settings-control settings-control--sm"
-                        />
+                          <input
+                            type="number"
+                            min="0.25"
+                            max="30"
+                            step="0.25"
+                            :value="getRuntimeNumber('llm.retryDelayMs', 1000)"
+                            @input="setRuntimeNumber('llm.retryDelayMs', $event, 1000)"
+                            class="settings-control settings-control--sm"
+                          />
                         </div>
                       </label>
-                      <label class="settings-pref-row settings-pref-row--metric">
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">连接测试超时（秒）</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">连接测试超时</span>
+                            <p class="settings-pref-row__hint">秒</p>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
-<input
-                          type="number"
-                          min="5"
-                          max="60"
-                          step="5"
-                          :value="runtimeTestConnectionTimeoutSeconds"
-                          @input="setRuntimeNumber('llm.testConnectionTimeoutMs', $event, 1000)"
-                          class="settings-control settings-control--sm"
-                        />
+                          <input
+                            type="number"
+                            min="5"
+                            max="60"
+                            step="5"
+                            :value="runtimeTestConnectionTimeoutSeconds"
+                            @input="setRuntimeNumber('llm.testConnectionTimeoutMs', $event, 1000)"
+                            class="settings-control settings-control--sm"
+                          />
                         </div>
                       </label>
                     </div>
@@ -1258,125 +1278,161 @@
                         ></p>
                       </div>
 
-                      <!-- 采集运行策略：扁平展示，保存合入底部「保存工具与运行策略」 -->
+                      <!-- 采集运行策略：同一 pref-list，保存合入底部「保存工具与运行策略」 -->
                       <div class="settings-scrape-runtime">
                         <div class="settings-scrape-runtime__head">
                           <h5 class="settings-scrape-runtime__title">采集运行策略</h5>
                           <span class="settings-badge settings-badge--scrape">影响采集</span>
                         </div>
-                        <div class="settings-pref-metrics settings-pref-metrics--cols-4">
-                          <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">请求超时（秒）</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                              type="number"
-                              min="5"
-                              max="120"
-                              step="5"
-                              :value="getRuntimeNumber('scraper.requestTimeoutMs', 1000)"
-                              @input="setRuntimeNumber('scraper.requestTimeoutMs', $event, 1000)"
-                              class="settings-control settings-control--sm"
-                          />
-                        </div>
-                      </label>
-                          <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">最大并发</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                              type="number"
-                              min="1"
-                              max="10"
-                              step="1"
-                              :value="runtimeStrategy.settings.scraper.maxConcurrent"
-                              @input="setRuntimeNumber('scraper.maxConcurrent', $event)"
-                              class="settings-control settings-control--sm"
-                          />
-                        </div>
-                      </label>
-                          <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">最大重试</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                              type="number"
-                              min="0"
-                              max="10"
-                              step="1"
-                              :value="runtimeStrategy.settings.scraper.maxRetries"
-                              @input="setRuntimeNumber('scraper.maxRetries', $event)"
-                              class="settings-control settings-control--sm"
-                          />
-                        </div>
-                      </label>
-                          <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">重试间隔（秒）</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                              type="number"
-                              min="0.1"
-                              max="30"
-                              step="0.1"
-                              :value="getRuntimeNumber('scraper.retryDelayMs', 1000)"
-                              @input="setRuntimeNumber('scraper.retryDelayMs', $event, 1000)"
-                              class="settings-control settings-control--sm"
-                          />
-                        </div>
-                      </label>
-                          <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">批次大小</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                              type="number"
-                              min="1"
-                              max="50"
-                              step="1"
-                              :value="runtimeStrategy.settings.scraper.batchSize"
-                              @input="setRuntimeNumber('scraper.batchSize', $event)"
-                              class="settings-control settings-control--sm"
-                          />
-                        </div>
-                      </label>
-                          <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">批次间隔（秒）</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                              type="number"
-                              min="0"
-                              max="60"
-                              step="0.5"
-                              :value="getRuntimeNumber('scraper.batchDelayMs', 1000)"
-                              @input="setRuntimeNumber('scraper.batchDelayMs', $event, 1000)"
-                              class="settings-control settings-control--sm"
-                          />
-                        </div>
-                      </label>
-                          <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">缓存时长（小时）</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                              type="number"
-                              min="1"
-                              max="720"
-                              step="1"
-                              :value="getRuntimeNumber('scraper.cacheDurationMs', 3600000)"
-                              @input="setRuntimeNumber('scraper.cacheDurationMs', $event, 3600000)"
-                              class="settings-control settings-control--sm"
-                          />
-                        </div>
-                      </label>
+                        <div class="settings-pref-list">
+                          <label class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title">请求超时</span>
+                                <p class="settings-pref-row__hint">秒</p>
+                              </div>
+                            </div>
+                            <div class="settings-pref-row__control">
+                              <input
+                                type="number"
+                                min="5"
+                                max="120"
+                                step="5"
+                                :value="getRuntimeNumber('scraper.requestTimeoutMs', 1000)"
+                                @input="setRuntimeNumber('scraper.requestTimeoutMs', $event, 1000)"
+                                class="settings-control settings-control--sm"
+                              />
+                            </div>
+                          </label>
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
+                          <label class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title">最大并发</span>
+                              </div>
+                            </div>
+                            <div class="settings-pref-row__control">
+                              <input
+                                type="number"
+                                min="1"
+                                max="10"
+                                step="1"
+                                :value="runtimeStrategy.settings.scraper.maxConcurrent"
+                                @input="setRuntimeNumber('scraper.maxConcurrent', $event)"
+                                class="settings-control settings-control--sm"
+                              />
+                            </div>
+                          </label>
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
+                          <label class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title">最大重试</span>
+                              </div>
+                            </div>
+                            <div class="settings-pref-row__control">
+                              <input
+                                type="number"
+                                min="0"
+                                max="10"
+                                step="1"
+                                :value="runtimeStrategy.settings.scraper.maxRetries"
+                                @input="setRuntimeNumber('scraper.maxRetries', $event)"
+                                class="settings-control settings-control--sm"
+                              />
+                            </div>
+                          </label>
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
+                          <label class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title">重试间隔</span>
+                                <p class="settings-pref-row__hint">秒</p>
+                              </div>
+                            </div>
+                            <div class="settings-pref-row__control">
+                              <input
+                                type="number"
+                                min="0.1"
+                                max="30"
+                                step="0.1"
+                                :value="getRuntimeNumber('scraper.retryDelayMs', 1000)"
+                                @input="setRuntimeNumber('scraper.retryDelayMs', $event, 1000)"
+                                class="settings-control settings-control--sm"
+                              />
+                            </div>
+                          </label>
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
+                          <label class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title">批次大小</span>
+                              </div>
+                            </div>
+                            <div class="settings-pref-row__control">
+                              <input
+                                type="number"
+                                min="1"
+                                max="50"
+                                step="1"
+                                :value="runtimeStrategy.settings.scraper.batchSize"
+                                @input="setRuntimeNumber('scraper.batchSize', $event)"
+                                class="settings-control settings-control--sm"
+                              />
+                            </div>
+                          </label>
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
+                          <label class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title">批次间隔</span>
+                                <p class="settings-pref-row__hint">秒</p>
+                              </div>
+                            </div>
+                            <div class="settings-pref-row__control">
+                              <input
+                                type="number"
+                                min="0"
+                                max="60"
+                                step="0.5"
+                                :value="getRuntimeNumber('scraper.batchDelayMs', 1000)"
+                                @input="setRuntimeNumber('scraper.batchDelayMs', $event, 1000)"
+                                class="settings-control settings-control--sm"
+                              />
+                            </div>
+                          </label>
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
+                          <label class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title">缓存时长</span>
+                                <p class="settings-pref-row__hint">小时</p>
+                              </div>
+                            </div>
+                            <div class="settings-pref-row__control">
+                              <input
+                                type="number"
+                                min="1"
+                                max="720"
+                                step="1"
+                                :value="getRuntimeNumber('scraper.cacheDurationMs', 3600000)"
+                                @input="setRuntimeNumber('scraper.cacheDurationMs', $event, 3600000)"
+                                class="settings-control settings-control--sm"
+                              />
+                            </div>
+                          </label>
                         </div>
                       </div>
                       </div>
@@ -1398,13 +1454,11 @@
                         </div>
 </div>
                       <div class="settings-tool-page settings-tool-l3__body">
-
-                      <template
-                        x-for="item in toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])"
-                        :key="item.id"
-                      >
-                        <div>
-                          <div class="settings-pref-list">
+                        <div class="settings-pref-list" data-testid="settings-ma-cache-pref-list">
+                          <template
+                            x-for="item in toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])"
+                            :key="item.id"
+                          >
                             <div class="settings-pref-row">
                               <div class="settings-pref-row__meta">
                                 <div class="min-w-0">
@@ -1443,121 +1497,131 @@
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                      </template>
-                      <div class="settings-pref-metrics settings-pref-metrics--cols-3">
-                          <div class="settings-pref-row settings-pref-row--metric">
+                          </template>
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
+                          <div class="settings-pref-row">
                             <div class="settings-pref-row__meta">
-                              <span class="settings-pref-row__title">调度偏好</span>
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title">调度偏好</span>
+                              </div>
                             </div>
                             <div class="settings-pref-row__control">
                               <div
-                              class="settings-schedule-select relative"
-                              @keydown.escape.window="schedulePreferenceMenuOpen = false"
-                              @click.outside="schedulePreferenceMenuOpen = false"
-                            >
-                              <button
-                                type="button"
-                                class="settings-control settings-control--sm settings-schedule-select__trigger"
-                                data-testid="settings-schedule-preference"
-                                :aria-expanded="schedulePreferenceMenuOpen.toString()"
-                                aria-haspopup="listbox"
-                                @click="schedulePreferenceMenuOpen = !schedulePreferenceMenuOpen"
+                                class="settings-schedule-select relative"
+                                @keydown.escape.window="schedulePreferenceMenuOpen = false"
+                                @click.outside="schedulePreferenceMenuOpen = false"
                               >
-                                <span
-                                  class="settings-schedule-select__value min-w-0 flex-1 text-left"
+                                <button
+                                  type="button"
+                                  class="settings-control settings-control--sm settings-schedule-select__trigger"
+                                  data-testid="settings-schedule-preference"
+                                  :aria-expanded="schedulePreferenceMenuOpen.toString()"
+                                  aria-haspopup="listbox"
+                                  @click="schedulePreferenceMenuOpen = !schedulePreferenceMenuOpen"
                                 >
                                   <span
-                                    class="settings-schedule-select__label"
-                                    x-text="masterAnalysisScheduleSelectedLabel"
-                                  ></span>
-                                  <span
-                                    class="settings-schedule-select__hint"
-                                    x-text="masterAnalysisScheduleSelectedHint"
-                                  ></span>
-                                </span>
-                                <i
-                                  class="fas fa-chevron-down text-[9px] text-slate-400 shrink-0"
-                                  aria-hidden="true"
-                                ></i>
-                              </button>
-                              <ul
-                                class="settings-schedule-select__menu"
-                                role="listbox"
-                                :hidden="!schedulePreferenceMenuOpen"
-                              >
-                                <template
-                                  x-for="opt in masterAnalysisScheduleOptions"
-                                  :key="opt.value"
+                                    class="settings-schedule-select__value min-w-0 flex-1 text-left"
+                                  >
+                                    <span
+                                      class="settings-schedule-select__label"
+                                      x-text="masterAnalysisScheduleSelectedLabel"
+                                    ></span>
+                                    <span
+                                      class="settings-schedule-select__hint"
+                                      x-text="masterAnalysisScheduleSelectedHint"
+                                    ></span>
+                                  </span>
+                                  <i
+                                    class="fas fa-chevron-down text-[9px] text-slate-400 shrink-0"
+                                    aria-hidden="true"
+                                  ></i>
+                                </button>
+                                <ul
+                                  class="settings-schedule-select__menu"
+                                  role="listbox"
+                                  :hidden="!schedulePreferenceMenuOpen"
                                 >
-                                  <li role="option">
-                                    <button
-                                      type="button"
-                                      class="settings-schedule-select__option"
-                                      :class="{
-                                      'is-active':
-                                        runtimeStrategy.settings.masterAnalysis
-                                          .schedulingPreference === opt.value,
-                                    }"
-                                      :aria-selected="(
-                                      runtimeStrategy.settings.masterAnalysis
-                                        .schedulingPreference === opt.value
-                                    ).toString()"
-                                      @click="setMasterAnalysisSchedulePreference(opt.value)"
-                                    >
-                                      <span
-                                        class="settings-schedule-select__label"
-                                        x-text="opt.label"
-                                      ></span>
-                                      <span
-                                        class="settings-schedule-select__hint"
-                                        x-text="opt.hint"
-                                      ></span>
-                                    </button>
-                                  </li>
-                                </template>
-                              </ul>
-                            </div>
+                                  <template
+                                    x-for="opt in masterAnalysisScheduleOptions"
+                                    :key="opt.value"
+                                  >
+                                    <li role="option">
+                                      <button
+                                        type="button"
+                                        class="settings-schedule-select__option"
+                                        :class="{
+                                          'is-active':
+                                            runtimeStrategy.settings.masterAnalysis
+                                              .schedulingPreference === opt.value,
+                                        }"
+                                        :aria-selected="(
+                                          runtimeStrategy.settings.masterAnalysis
+                                            .schedulingPreference === opt.value
+                                        ).toString()"
+                                        @click="setMasterAnalysisSchedulePreference(opt.value)"
+                                      >
+                                        <span
+                                          class="settings-schedule-select__label"
+                                          x-text="opt.label"
+                                        ></span>
+                                        <span
+                                          class="settings-schedule-select__hint"
+                                          x-text="opt.hint"
+                                        ></span>
+                                      </button>
+                                    </li>
+                                  </template>
+                                </ul>
+                              </div>
                             </div>
                           </div>
-                          <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">完整报告 Token</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-<input
-                              type="number"
-                              min="4096"
-                              max="64000"
-                              step="1024"
-                              :value="runtimeStrategy.settings.masterAnalysis.fullReportMaxTokens"
-                              @input="setRuntimeNumber('masterAnalysis.fullReportMaxTokens', $event)"
-                              class="settings-control settings-control--sm"
-                            />
-                        </div>
-                      </label>
-                          <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">翻译报告 Token</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-<input
-                              type="number"
-                              min="4096"
-                              max="64000"
-                              step="1024"
-                              :value="runtimeStrategy.settings.masterAnalysis.translationMaxTokens"
-                              @input="setRuntimeNumber('masterAnalysis.translationMaxTokens', $event)"
-                              class="settings-control settings-control--sm"
-                            />
-                        </div>
-                      </label>
-                        </div>
-                        <div
-                          class="settings-pref-list mt-3"
-                          data-testid="settings-ma-cache-pref-list"
-                        >
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
+                          <label class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title">完整报告 Token</span>
+                              </div>
+                            </div>
+                            <div class="settings-pref-row__control">
+                              <input
+                                type="number"
+                                min="4096"
+                                max="64000"
+                                step="1024"
+                                :value="runtimeStrategy.settings.masterAnalysis.fullReportMaxTokens"
+                                @input="setRuntimeNumber('masterAnalysis.fullReportMaxTokens', $event)"
+                                class="settings-control settings-control--sm"
+                              />
+                            </div>
+                          </label>
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
+                          <label class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title">翻译报告 Token</span>
+                              </div>
+                            </div>
+                            <div class="settings-pref-row__control">
+                              <input
+                                type="number"
+                                min="4096"
+                                max="64000"
+                                step="1024"
+                                :value="runtimeStrategy.settings.masterAnalysis.translationMaxTokens"
+                                @input="setRuntimeNumber('masterAnalysis.translationMaxTokens', $event)"
+                                class="settings-control settings-control--sm"
+                              />
+                            </div>
+                          </label>
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
                           <div class="settings-pref-row">
                             <div class="settings-pref-row__meta">
                               <div class="min-w-0">
@@ -1575,28 +1639,31 @@
                               <span class="settings-switch__track" aria-hidden="true"></span>
                             </label>
                           </div>
-                        </div>
-                        <div class="settings-pref-metrics settings-pref-metrics--cols-4">
-                        <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
-                          <label class="settings-pref-row settings-pref-row--metric">
-                            <div class="settings-pref-row__meta">
-                              <span class="settings-pref-row__title" x-text="item.label"></span>
-                            </div>
-                            <div class="settings-pref-row__control">
-                              <input
-                              type="number"
-                              :min="item.min"
-                              :max="item.max"
-                              :step="item.step"
-                              :value="item.value"
-                              @input="setRuntimeNumber(item.path, $event)"
-                              class="settings-control settings-control--sm"
-                            />
-                            </div>
-                          </label>
-                        </template>
-                      </div>
 
+                          <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
+                            <div>
+                              <div class="settings-pref-divider" role="separator"></div>
+                              <label class="settings-pref-row">
+                                <div class="settings-pref-row__meta">
+                                  <div class="min-w-0">
+                                    <span class="settings-pref-row__title" x-text="item.label"></span>
+                                  </div>
+                                </div>
+                                <div class="settings-pref-row__control">
+                                  <input
+                                    type="number"
+                                    :min="item.min"
+                                    :max="item.max"
+                                    :step="item.step"
+                                    :value="item.value"
+                                    @input="setRuntimeNumber(item.path, $event)"
+                                    class="settings-control settings-control--sm"
+                                  />
+                                </div>
+                              </label>
+                            </div>
+                          </template>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1626,62 +1693,59 @@
                 </summary>
                 <div class="settings-pref-fold__body">
                   <div class="settings-tool-page mt-3">
-                    <template
-                      x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
-                      :key="item.id"
-                    >
-                      <div>
-                        <div class="settings-pref-list">
-                            <div class="settings-pref-row">
-                              <div class="settings-pref-row__meta">
-                                <div class="min-w-0">
-                                  <label
-                                    class="settings-pref-row__title"
-                                    :for="'tool-strategy-model-' + item.id"
-                                    >默认模型</label
-                                  >
-                                  <p
-                                    class="settings-pref-row__hint"
-                                    x-text="item.model ? '覆盖全局模型' : '跟随全局模型'"
-                                  ></p>
-                                </div>
-                              </div>
-                              <div class="settings-pref-row__control settings-pref-row__control--model">
-                                <div class="settings-tool-page__model">
-                                  <select
-                                    :id="'tool-strategy-model-' + item.id"
-                                    :name="'tool-strategy-model-' + item.id"
-                                    :value="item.model"
-                                    @change="setToolTargetModel(item.id, $event)"
-                                    :disabled="toolStrategyModelSelectDisabled"
-                                    class="settings-control settings-control--sm settings-tool-page__model-select"
-                                  >
-                                    <option value="" x-text="item.followGlobalOptionLabel"></option>
-                                    <template x-for="model in llm.models" :key="getModelValue(model)">
-                                      <option
-                                        :value="getModelValue(model)"
-                                        x-text="getToolStrategyModelOptionLabel(model)"
-                                      ></option>
-                                    </template>
-                                  </select>
-                                  <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                                    <i class="fas fa-chevron-down"></i>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                      </div>
-                    </template>
-
-                    <!-- Peer preference rows: tools toggle (no nested "section under section") -->
                     <div
-                      class="settings-pref-list mt-3"
+                      class="settings-pref-list"
                       data-testid="settings-dc-tools-pref-list"
                       id="deep-chat-business-tools-title"
                       data-settings-nav-id="deep-chat-business-tools-title"
                       data-settings-nav-group="tool"
                     >
+                      <template
+                        x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
+                        :key="item.id"
+                      >
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <label
+                                class="settings-pref-row__title"
+                                :for="'tool-strategy-model-' + item.id"
+                                >默认模型</label
+                              >
+                              <p
+                                class="settings-pref-row__hint"
+                                x-text="item.model ? '覆盖全局模型' : '跟随全局模型'"
+                              ></p>
+                            </div>
+                          </div>
+                          <div class="settings-pref-row__control settings-pref-row__control--model">
+                            <div class="settings-tool-page__model">
+                              <select
+                                :id="'tool-strategy-model-' + item.id"
+                                :name="'tool-strategy-model-' + item.id"
+                                :value="item.model"
+                                @change="setToolTargetModel(item.id, $event)"
+                                :disabled="toolStrategyModelSelectDisabled"
+                                class="settings-control settings-control--sm settings-tool-page__model-select"
+                              >
+                                <option value="" x-text="item.followGlobalOptionLabel"></option>
+                                <template x-for="model in llm.models" :key="getModelValue(model)">
+                                  <option
+                                    :value="getModelValue(model)"
+                                    x-text="getToolStrategyModelOptionLabel(model)"
+                                  ></option>
+                                </template>
+                              </select>
+                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                <i class="fas fa-chevron-down"></i>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
                       <div class="settings-pref-row">
                         <div class="settings-pref-row__meta">
                           <div class="min-w-0">
@@ -1702,12 +1766,15 @@
                           <span class="settings-switch__track" aria-hidden="true"></span>
                         </label>
                       </div>
-                    </div>
 
-                    <div class="settings-pref-metrics settings-pref-metrics--cols-4">
-                        <label class="settings-pref-row settings-pref-row--metric">
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">请求超时（秒）</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">请求超时</span>
+                            <p class="settings-pref-row__hint">秒</p>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
                           <input
@@ -1718,12 +1785,17 @@
                             :value="runtimeDeepChatTimeoutSeconds"
                             @input="setRuntimeNumber('deepChat.requestTimeoutMs', $event, 1000)"
                             class="settings-control settings-control--sm"
-                        />
+                          />
                         </div>
                       </label>
-                        <label class="settings-pref-row settings-pref-row--metric">
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">输出 Token</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">输出 Token</span>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
                           <input
@@ -1734,12 +1806,17 @@
                             :value="runtimeStrategy.settings.deepChat.maxOutputTokens"
                             @input="setRuntimeNumber('deepChat.maxOutputTokens', $event)"
                             class="settings-control settings-control--sm"
-                        />
+                          />
                         </div>
                       </label>
-                        <label class="settings-pref-row settings-pref-row--metric">
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">上下文字符</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">上下文字符</span>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
                           <input
@@ -1750,12 +1827,17 @@
                             :value="runtimeStrategy.settings.deepChat.maxContextChars"
                             @input="setRuntimeNumber('deepChat.maxContextChars', $event)"
                             class="settings-control settings-control--sm"
-                        />
+                          />
                         </div>
                       </label>
-                        <label class="settings-pref-row settings-pref-row--metric">
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">会话保留数</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">会话保留数</span>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
                           <input
@@ -1766,12 +1848,17 @@
                             :value="runtimeStrategy.settings.deepChat.maxThreadCount"
                             @input="setRuntimeNumber('deepChat.maxThreadCount', $event)"
                             class="settings-control settings-control--sm"
-                        />
+                          />
                         </div>
                       </label>
-                        <label class="settings-pref-row settings-pref-row--metric">
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">单条消息字符</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">单条消息字符</span>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
                           <input
@@ -1782,12 +1869,17 @@
                             :value="runtimeStrategy.settings.deepChat.maxMessageChars"
                             @input="setRuntimeNumber('deepChat.maxMessageChars', $event)"
                             class="settings-control settings-control--sm"
-                        />
+                          />
                         </div>
                       </label>
-                        <label class="settings-pref-row settings-pref-row--metric">
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">系统提示词字符</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">系统提示词字符</span>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
                           <input
@@ -1798,12 +1890,17 @@
                             :value="runtimeStrategy.settings.deepChat.maxSystemPromptChars"
                             @input="setRuntimeNumber('deepChat.maxSystemPromptChars', $event)"
                             class="settings-control settings-control--sm"
-                        />
+                          />
                         </div>
                       </label>
-                        <label class="settings-pref-row settings-pref-row--metric">
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">每会话消息数</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">每会话消息数</span>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
                           <input
@@ -1814,12 +1911,17 @@
                             :value="runtimeStrategy.settings.deepChat.maxThreadMessageCount"
                             @input="setRuntimeNumber('deepChat.maxThreadMessageCount', $event)"
                             class="settings-control settings-control--sm"
-                        />
+                          />
                         </div>
                       </label>
-                        <label class="settings-pref-row settings-pref-row--metric">
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
                         <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">Prompt 草稿数</span>
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">Prompt 草稿数</span>
+                          </div>
                         </div>
                         <div class="settings-pref-row__control">
                           <input
@@ -1830,7 +1932,7 @@
                             :value="runtimeStrategy.settings.deepChat.maxPromptDraftCount"
                             @input="setRuntimeNumber('deepChat.maxPromptDraftCount', $event)"
                             class="settings-control settings-control--sm"
-                        />
+                          />
                         </div>
                       </label>
                     </div>
@@ -2229,201 +2331,225 @@
                 </summary>
                 <div class="settings-pref-fold__body">
                   <div class="settings-tool-page mt-3">
-                    <template
-                      x-for="item in toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])"
-                      :key="item.id"
-                    >
-                      <div>
-                        <div class="settings-pref-list">
-                            <div class="settings-pref-row">
-                              <div class="settings-pref-row__meta">
-                                <div class="min-w-0">
-                                  <label
-                                    class="settings-pref-row__title"
-                                    :for="'tool-strategy-model-' + item.id"
-                                    >默认模型</label
-                                  >
-                                  <p
-                                    class="settings-pref-row__hint"
-                                    x-text="item.model ? '覆盖全局模型' : '跟随全局模型'"
-                                  ></p>
-                                </div>
-                              </div>
-                              <div class="settings-pref-row__control settings-pref-row__control--model">
-                                <div class="settings-tool-page__model">
-                                  <select
-                                    :id="'tool-strategy-model-' + item.id"
-                                    :name="'tool-strategy-model-' + item.id"
-                                    :value="item.model"
-                                    @change="setToolTargetModel(item.id, $event)"
-                                    :disabled="toolStrategyModelSelectDisabled"
-                                    class="settings-control settings-control--sm settings-tool-page__model-select"
-                                  >
-                                    <option value="" x-text="item.followGlobalOptionLabel"></option>
-                                    <template x-for="model in llm.models" :key="getModelValue(model)">
-                                      <option
-                                        :value="getModelValue(model)"
-                                        x-text="getToolStrategyModelOptionLabel(model)"
-                                      ></option>
-                                    </template>
-                                  </select>
-                                  <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                                    <i class="fas fa-chevron-down"></i>
-                                  </span>
-                                </div>
-                              </div>
+                    <div class="settings-pref-list" data-testid="settings-ppc-bool-pref-list">
+                      <template
+                        x-for="item in toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])"
+                        :key="item.id"
+                      >
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <label
+                                class="settings-pref-row__title"
+                                :for="'tool-strategy-model-' + item.id"
+                                >默认模型</label
+                              >
+                              <p
+                                class="settings-pref-row__hint"
+                                x-text="item.model ? '覆盖全局模型' : '跟随全局模型'"
+                              ></p>
                             </div>
                           </div>
-                      </div>
-                    </template>
-                    <div class="settings-pref-metrics settings-pref-metrics--cols-4">
-                    <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">PPC 批次大小</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                        type="number"
-                        min="20"
-                        max="200"
-                        step="10"
-                        :value="runtimeStrategy.settings.ppcSearchTerms.batchSize"
-                        @input="setRuntimeNumber('ppcSearchTerms.batchSize', $event)"
-                        class="settings-control settings-control--sm"
-                    />
-                        </div>
-                      </label>
-                    <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">PPC 并发批次</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                        type="number"
-                        min="1"
-                        max="6"
-                        step="1"
-                        :value="runtimeStrategy.settings.ppcSearchTerms.maxConcurrentBatches"
-                        @input="setRuntimeNumber('ppcSearchTerms.maxConcurrentBatches', $event)"
-                        class="settings-control settings-control--sm"
-                    />
-                        </div>
-                      </label>
-                    <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">缓存 TTL（小时）</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                        type="number"
-                        min="1"
-                        max="720"
-                        step="1"
-                        :value="getRuntimeNumber('ppcSearchTerms.cacheTtlMs', 3600000)"
-                        @input="setRuntimeNumber('ppcSearchTerms.cacheTtlMs', $event, 3600000)"
-                        class="settings-control settings-control--sm"
-                    />
-                        </div>
-                      </label>
-                    <label class="settings-pref-row settings-pref-row--metric">
-                        <div class="settings-pref-row__meta">
-                          <span class="settings-pref-row__title">最大输出 Token</span>
-                        </div>
-                        <div class="settings-pref-row__control">
-                          <input
-                        type="number"
-                        min="1024"
-                        max="64000"
-                        step="1024"
-                        :value="runtimeStrategy.settings.ppcSearchTerms.maxOutputTokens"
-                        @input="setRuntimeNumber('ppcSearchTerms.maxOutputTokens', $event)"
-                        class="settings-control settings-control--sm"
-                    />
-                        </div>
-                      </label>
-                  </div>
-                  <div class="settings-pref-list mt-3" data-testid="settings-ppc-bool-pref-list">
-                    <div class="settings-pref-row">
-                      <div class="settings-pref-row__meta">
-                        <div class="min-w-0">
-                          <h4 class="settings-pref-row__title">启用 LLM 缓存</h4>
-                          <p class="settings-pref-row__hint">分析结果缓存</p>
-                        </div>
-                      </div>
-                      <label class="settings-switch">
-                        <span class="sr-only">启用 LLM 缓存</span>
-                        <input
-                          type="checkbox"
-                          :checked="runtimeStrategy.settings.ppcSearchTerms.enableLlmCache"
-                          @change="setRuntimeBoolean('ppcSearchTerms.enableLlmCache', $event)"
-                        />
-                        <span class="settings-switch__track" aria-hidden="true"></span>
-                      </label>
-                    </div>
-
-                    <div class="settings-pref-divider" role="separator"></div>
-
-                    <div class="settings-pref-row">
-                      <div class="settings-pref-row__meta">
-                        <div class="min-w-0">
-                          <h4 class="settings-pref-row__title">默认启用 Agent</h4>
-                          <p class="settings-pref-row__hint">优先走 Agent 路径</p>
-                        </div>
-                      </div>
-                      <label class="settings-switch">
-                        <span class="sr-only">默认启用 Agent</span>
-                        <input
-                          type="checkbox"
-                          :checked="runtimeStrategy.settings.ppcSearchTerms.useAgent"
-                          @change="setRuntimeBoolean('ppcSearchTerms.useAgent', $event)"
-                        />
-                        <span class="settings-switch__track" aria-hidden="true"></span>
-                      </label>
-                    </div>
-
-                    <div class="settings-pref-divider" role="separator"></div>
-
-                    <div class="settings-pref-row">
-                      <div class="settings-pref-row__meta">
-                        <div class="min-w-0">
-                          <h4 class="settings-pref-row__title">允许本地回退</h4>
-                          <p class="settings-pref-row__hint">模型失败时本地规则回退</p>
-                        </div>
-                      </div>
-                      <label class="settings-switch">
-                        <span class="sr-only">允许本地回退</span>
-                        <input
-                          type="checkbox"
-                          :checked="runtimeStrategy.settings.ppcSearchTerms.allowLocalFallback"
-                          @change="setRuntimeBoolean('ppcSearchTerms.allowLocalFallback', $event)"
-                        />
-                        <span class="settings-switch__track" aria-hidden="true"></span>
-                      </label>
-                    </div>
-                  </div>
-                  <div
-                      class="settings-pref-metrics settings-pref-metrics--cols-3"
-                      data-settings-focus="ppc-thresholds"
-                      id="ppc-thresholds"
-                    >
-                      <template x-for="item in ppcThresholdItems" :key="item.key">
-                        <label class="settings-pref-row settings-pref-row--metric">
-                            <div class="settings-pref-row__meta">
-                              <span class="settings-pref-row__title" x-text="item.label"></span>
+                          <div class="settings-pref-row__control settings-pref-row__control--model">
+                            <div class="settings-tool-page__model">
+                              <select
+                                :id="'tool-strategy-model-' + item.id"
+                                :name="'tool-strategy-model-' + item.id"
+                                :value="item.model"
+                                @change="setToolTargetModel(item.id, $event)"
+                                :disabled="toolStrategyModelSelectDisabled"
+                                class="settings-control settings-control--sm settings-tool-page__model-select"
+                              >
+                                <option value="" x-text="item.followGlobalOptionLabel"></option>
+                                <template x-for="model in llm.models" :key="getModelValue(model)">
+                                  <option
+                                    :value="getModelValue(model)"
+                                    x-text="getToolStrategyModelOptionLabel(model)"
+                                  ></option>
+                                </template>
+                              </select>
+                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                <i class="fas fa-chevron-down"></i>
+                              </span>
                             </div>
-                            <div class="settings-pref-row__control">
-                              <input
+                          </div>
+                        </div>
+                      </template>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">PPC 批次大小</span>
+                          </div>
+                        </div>
+                        <div class="settings-pref-row__control">
+                          <input
                             type="number"
-                            :min="item.min"
-                            :max="item.max"
-                            :step="item.step"
-                            :value="item.value"
-                            @input="setRuntimeNumber(item.path, $event)"
+                            min="20"
+                            max="200"
+                            step="10"
+                            :value="runtimeStrategy.settings.ppcSearchTerms.batchSize"
+                            @input="setRuntimeNumber('ppcSearchTerms.batchSize', $event)"
                             class="settings-control settings-control--sm"
                           />
-                            </div>
-                          </label>
-                      </template>
+                        </div>
+                      </label>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">PPC 并发批次</span>
+                          </div>
+                        </div>
+                        <div class="settings-pref-row__control">
+                          <input
+                            type="number"
+                            min="1"
+                            max="6"
+                            step="1"
+                            :value="runtimeStrategy.settings.ppcSearchTerms.maxConcurrentBatches"
+                            @input="setRuntimeNumber('ppcSearchTerms.maxConcurrentBatches', $event)"
+                            class="settings-control settings-control--sm"
+                          />
+                        </div>
+                      </label>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">缓存 TTL</span>
+                            <p class="settings-pref-row__hint">小时</p>
+                          </div>
+                        </div>
+                        <div class="settings-pref-row__control">
+                          <input
+                            type="number"
+                            min="1"
+                            max="720"
+                            step="1"
+                            :value="getRuntimeNumber('ppcSearchTerms.cacheTtlMs', 3600000)"
+                            @input="setRuntimeNumber('ppcSearchTerms.cacheTtlMs', $event, 3600000)"
+                            class="settings-control settings-control--sm"
+                          />
+                        </div>
+                      </label>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <label class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">最大输出 Token</span>
+                          </div>
+                        </div>
+                        <div class="settings-pref-row__control">
+                          <input
+                            type="number"
+                            min="1024"
+                            max="64000"
+                            step="1024"
+                            :value="runtimeStrategy.settings.ppcSearchTerms.maxOutputTokens"
+                            @input="setRuntimeNumber('ppcSearchTerms.maxOutputTokens', $event)"
+                            class="settings-control settings-control--sm"
+                          />
+                        </div>
+                      </label>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">启用 LLM 缓存</h4>
+                            <p class="settings-pref-row__hint">分析结果缓存</p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">启用 LLM 缓存</span>
+                          <input
+                            type="checkbox"
+                            :checked="runtimeStrategy.settings.ppcSearchTerms.enableLlmCache"
+                            @change="setRuntimeBoolean('ppcSearchTerms.enableLlmCache', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">默认启用 Agent</h4>
+                            <p class="settings-pref-row__hint">优先走 Agent 路径</p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">默认启用 Agent</span>
+                          <input
+                            type="checkbox"
+                            :checked="runtimeStrategy.settings.ppcSearchTerms.useAgent"
+                            @change="setRuntimeBoolean('ppcSearchTerms.useAgent', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">允许本地回退</h4>
+                            <p class="settings-pref-row__hint">模型失败时本地规则回退</p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">允许本地回退</span>
+                          <input
+                            type="checkbox"
+                            :checked="runtimeStrategy.settings.ppcSearchTerms.allowLocalFallback"
+                            @change="setRuntimeBoolean('ppcSearchTerms.allowLocalFallback', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
+
+                      <div
+                        class="contents"
+                        data-settings-focus="ppc-thresholds"
+                        id="ppc-thresholds"
+                      >
+                        <template x-for="item in ppcThresholdItems" :key="item.key">
+                          <div>
+                            <div class="settings-pref-divider" role="separator"></div>
+                            <label class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <span class="settings-pref-row__title" x-text="item.label"></span>
+                                </div>
+                              </div>
+                              <div class="settings-pref-row__control">
+                                <input
+                                  type="number"
+                                  :min="item.min"
+                                  :max="item.max"
+                                  :step="item.step"
+                                  :value="item.value"
+                                  @input="setRuntimeNumber(item.path, $event)"
+                                  class="settings-control settings-control--sm"
+                                />
+                              </div>
+                            </label>
+                          </div>
+                        </template>
+                      </div>
                     </div>
                   </div>
                 </div>
