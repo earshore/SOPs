@@ -1444,3 +1444,102 @@ textarea:focus-visible {
     background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)) !important;
   }
 }
+
+
+/* ---- ASIN product cards (collapsed / expanded) — dual-theme safe ---- */
+.asin-card {
+  transition:
+    background-color var(--duration-fast, 200ms) var(--ease-smooth, ease),
+    border-color var(--duration-fast, 200ms) var(--ease-smooth, ease),
+    box-shadow var(--duration-fast, 200ms) var(--ease-smooth, ease);
+}
+
+.asin-card--collapsed {
+  background: var(--surface-card, #ffffff);
+  border-color: var(--color-border-default, #e2e8f0);
+}
+
+.asin-card--collapsed:hover {
+  background: var(--surface-card-hover, #f8fafc);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 42%, transparent);
+  box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+}
+
+.asin-card--expanded {
+  background: color-mix(in srgb, var(--color-primary, #3b82f6) 14%, var(--surface-card, #ffffff));
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-primary, #3b82f6) 55%, transparent),
+    var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
+.asin-card--expanded:hover {
+  background: color-mix(in srgb, var(--color-primary, #3b82f6) 20%, var(--surface-card-hover, #f8fafc));
+  border-color: var(--color-primary, #3b82f6);
+}
+
+.dark .asin-card--collapsed,
+[data-color-mode-resolved='dark'] .asin-card--collapsed,
+[data-theme='dark'] .asin-card--collapsed {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+}
+
+.dark .asin-card--collapsed:hover,
+[data-color-mode-resolved='dark'] .asin-card--collapsed:hover,
+[data-theme='dark'] .asin-card--collapsed:hover {
+  background: var(--surface-card-hover, #334155);
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 48%, transparent);
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.7);
+}
+
+.dark .asin-card--expanded,
+[data-color-mode-resolved='dark'] .asin-card--expanded,
+[data-theme='dark'] .asin-card--expanded {
+  background: color-mix(in srgb, var(--color-primary, #818cf8) 22%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 70%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-primary, #818cf8) 45%, transparent),
+    0 10px 24px -14px rgba(0, 0, 0, 0.65);
+}
+
+.dark .asin-card--expanded:hover,
+[data-color-mode-resolved='dark'] .asin-card--expanded:hover,
+[data-theme='dark'] .asin-card--expanded:hover {
+  background: color-mix(in srgb, var(--color-primary, #818cf8) 28%, var(--surface-card-hover, #334155));
+}
+
+.dark .asin-card .text-slate-800,
+.dark .asin-card .text-slate-700,
+[data-color-mode-resolved='dark'] .asin-card .text-slate-800,
+[data-color-mode-resolved='dark'] .asin-card .text-slate-700,
+[data-theme='dark'] .asin-card .text-slate-800,
+[data-theme='dark'] .asin-card .text-slate-700 {
+  color: var(--color-text-primary, #f8fafc) !important;
+}
+
+.dark .asin-card .text-slate-600,
+.dark .asin-card .text-slate-500,
+[data-color-mode-resolved='dark'] .asin-card .text-slate-600,
+[data-color-mode-resolved='dark'] .asin-card .text-slate-500,
+[data-theme='dark'] .asin-card .text-slate-600,
+[data-theme='dark'] .asin-card .text-slate-500 {
+  color: var(--color-text-secondary, #cbd5e1) !important;
+}
+
+.dark .asin-card .bg-slate-100,
+.dark .asin-card .border-slate-200,
+[data-color-mode-resolved='dark'] .asin-card .bg-slate-100,
+[data-color-mode-resolved='dark'] .asin-card .border-slate-200,
+[data-theme='dark'] .asin-card .bg-slate-100,
+[data-theme='dark'] .asin-card .border-slate-200 {
+  background-color: color-mix(in srgb, var(--surface-panel, #0f172a) 85%, #000) !important;
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1)) !important;
+  color: var(--color-text-secondary, #cbd5e1) !important;
+}
+
+.dark .asin-card .border-slate-200\/60,
+[data-color-mode-resolved='dark'] .asin-card .border-slate-200\/60,
+[data-theme='dark'] .asin-card .border-slate-200\/60 {
+  border-color: color-mix(in srgb, #fff 10%, transparent) !important;
+}

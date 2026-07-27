@@ -91,11 +91,42 @@
   border-color: var(--color-primary-dark, #1d4ed8);
   background: var(--color-primary-dark, #1d4ed8);
   color: white;
+  /* Use surface token — pure white ring reads as a broken double border on dark chrome */
   box-shadow:
-    0 0 0 2px var(--color-white, #ffffff),
+    0 0 0 2px var(--surface-panel, #ffffff),
     0 0 0 4px
-      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 35%, transparent);
+      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 40%, transparent);
 }
+
+.dark .keyword-hunter-title-icon-btn--primary,
+[data-color-mode-resolved='dark'] .keyword-hunter-title-icon-btn--primary,
+[data-theme='dark'] .keyword-hunter-title-icon-btn--primary {
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 75%, #fff);
+  background: var(--color-primary, #818cf8);
+  color: #f8fafc;
+}
+
+.dark .keyword-hunter-title-icon-btn--primary:hover,
+.dark .keyword-hunter-title-icon-btn--primary:focus-visible,
+[data-color-mode-resolved='dark'] .keyword-hunter-title-icon-btn--primary:hover,
+[data-color-mode-resolved='dark'] .keyword-hunter-title-icon-btn--primary:focus-visible,
+[data-theme='dark'] .keyword-hunter-title-icon-btn--primary:hover,
+[data-theme='dark'] .keyword-hunter-title-icon-btn--primary:focus-visible {
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 55%, #e0e7ff);
+  background: color-mix(in srgb, var(--color-primary, #818cf8) 82%, #0f172a);
+  color: #fff;
+  box-shadow:
+    0 0 0 2px var(--surface-panel, #0f172a),
+    0 0 0 4px color-mix(in srgb, var(--color-primary, #818cf8) 45%, transparent);
+}
+
+.dark #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
+[data-color-mode-resolved='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
+[data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary {
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 70%, transparent);
+}
+
 
 .keyword-hunter-title-action-btn {
   width: auto;

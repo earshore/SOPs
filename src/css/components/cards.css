@@ -1528,16 +1528,87 @@
 .dark .card,
 [data-color-mode-resolved='dark'] .card,
 [data-theme='dark'] .card {
-  --card-bg: var(--color-bg-secondary, #1e293b);
-  --card-border: var(--color-border-light, rgba(255, 255, 255, 0.06));
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --card-shadow-hover: 0 10px 40px -10px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+  --card-bg: var(--surface-card, #1e293b);
+  --card-border: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  --card-shadow: var(--shadow-card, 0 1px 2px rgba(0, 0, 0, 0.26));
+  --card-shadow-hover: var(--shadow-card-hover, 0 8px 22px -20px rgba(0, 0, 0, 0.72));
 }
 
 .dark .card:hover,
 [data-color-mode-resolved='dark'] .card:hover,
 [data-theme='dark'] .card:hover {
-  --card-border: rgba(129, 140, 248, 0.2);
+  /* Border-only indigo 0.2 was invisible on slate-800 — lift surface + stronger rim */
+  --card-bg: var(--surface-card-hover, #334155);
+  --card-border: color-mix(in srgb, var(--color-primary, #818cf8) 42%, transparent);
+  background: var(--card-bg);
+  border-color: var(--card-border);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.dark .sop-card,
+[data-color-mode-resolved='dark'] .sop-card,
+[data-theme='dark'] .sop-card {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(0, 0, 0, 0.26));
+}
+
+.dark .sop-card:hover,
+[data-color-mode-resolved='dark'] .sop-card:hover,
+[data-theme='dark'] .sop-card:hover {
+  background: var(--surface-card-hover, #334155);
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 45%, transparent);
+  box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(0, 0, 0, 0.72));
+}
+
+.dark .amz_card-hover,
+[data-color-mode-resolved='dark'] .amz_card-hover,
+[data-theme='dark'] .amz_card-hover {
+  background: var(--surface-card, #1e293b);
+}
+
+.dark .amz_card-hover:hover,
+[data-color-mode-resolved='dark'] .amz_card-hover:hover,
+[data-theme='dark'] .amz_card-hover:hover {
+  background: var(--surface-card-hover, #334155);
+  box-shadow:
+    0 16px 28px -12px color-mix(in srgb, var(--color-primary, #818cf8) 28%, transparent),
+    0 8px 14px -10px rgba(0, 0, 0, 0.45);
+}
+
+.dark .analysis-widget-card,
+[data-color-mode-resolved='dark'] .analysis-widget-card,
+[data-theme='dark'] .analysis-widget-card {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(0, 0, 0, 0.26));
+}
+
+.dark .analysis-widget-card:hover,
+[data-color-mode-resolved='dark'] .analysis-widget-card:hover,
+[data-theme='dark'] .analysis-widget-card:hover {
+  background: var(--surface-card-hover, #334155);
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 38%, transparent);
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.65);
+}
+
+.dark .keyword-hunter-input-card,
+.dark .keyword-hunter-surface-card,
+[data-color-mode-resolved='dark'] .keyword-hunter-input-card,
+[data-color-mode-resolved='dark'] .keyword-hunter-surface-card,
+[data-theme='dark'] .keyword-hunter-input-card,
+[data-theme='dark'] .keyword-hunter-surface-card {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(0, 0, 0, 0.26));
+}
+
+.dark .keyword-hunter-input-card:hover,
+[data-color-mode-resolved='dark'] .keyword-hunter-input-card:hover,
+[data-theme='dark'] .keyword-hunter-input-card:hover {
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 40%, transparent);
+  box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(0, 0, 0, 0.72));
+  background: var(--surface-card-hover, #334155);
 }
 
 .dark .card-title,

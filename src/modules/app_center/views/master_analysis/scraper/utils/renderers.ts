@@ -274,9 +274,7 @@ function renderProductCardBody(viewModel: ProductCardViewModel): string {
 
 export function renderProductCard(options: ProductCardOptions): string {
   const viewModel = createProductCardViewModel(options);
-  const expandedClass = viewModel.isExpanded
-    ? 'border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary-light)_30%,transparent)] ring-1 ring-[var(--color-primary)]'
-    : 'bg-white border-slate-200 hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)]';
+  const expandedClass = viewModel.isExpanded ? 'asin-card--expanded' : 'asin-card--collapsed';
 
   return `
         <div id="card-${viewModel.product.asin}" 

@@ -409,21 +409,22 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   getListingTargetCardClass(targetId: string): string {
+    // Surface tokens so dark mode doesn't rely on white/slate-50 light-only washes.
     return this.isTargetSelected(targetId)
-      ? 'border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] bg-[var(--color-primary-light)] shadow-sm'
-      : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white';
+      ? 'border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_18%,var(--surface-card))] shadow-sm'
+      : 'border-[color-mix(in_srgb,var(--color-border-default)_100%,transparent)] bg-[var(--surface-card)] hover:border-[color-mix(in_srgb,var(--color-primary)_42%,transparent)] hover:bg-[var(--surface-card-hover)]';
   },
 
   getReviewTargetCardClass(targetId: string): string {
     return this.isTargetSelected(targetId)
-      ? 'border-amber-300 bg-amber-50 shadow-sm'
-      : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white';
+      ? 'border-[color-mix(in_srgb,var(--color-amber-400,#fbbf24)_55%,transparent)] bg-[color-mix(in_srgb,var(--color-amber-400,#fbbf24)_16%,var(--surface-card))] shadow-sm'
+      : 'border-[color-mix(in_srgb,var(--color-border-default)_100%,transparent)] bg-[var(--surface-card)] hover:border-[color-mix(in_srgb,var(--color-amber-400,#fbbf24)_45%,transparent)] hover:bg-[var(--surface-card-hover)]';
   },
 
   getListingTargetIconWrapClass(targetId: string): string {
     return this.isTargetSelected(targetId)
-      ? 'bg-[var(--color-primary-light)]'
-      : 'bg-slate-100 group-hover:bg-slate-200';
+      ? 'bg-[color-mix(in_srgb,var(--color-primary)_22%,var(--surface-card))]'
+      : 'bg-[color-mix(in_srgb,var(--surface-panel)_88%,#000)] group-hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--surface-card-hover))]';
   },
 
   getListingTargetIconClass(targetId: string): string {
@@ -432,18 +433,18 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   getReviewTargetIconWrapClass(targetId: string): string {
     return this.isTargetSelected(targetId)
-      ? 'bg-amber-50'
-      : 'bg-slate-100 group-hover:bg-slate-200';
+      ? 'bg-[color-mix(in_srgb,var(--color-amber-400,#fbbf24)_20%,var(--surface-card))]'
+      : 'bg-[color-mix(in_srgb,var(--surface-panel)_88%,#000)] group-hover:bg-[color-mix(in_srgb,var(--color-amber-400,#fbbf24)_14%,var(--surface-card-hover))]';
   },
 
   getReviewTargetIconClass(targetId: string): string {
-    return `${this.getTargetById(targetId)?.icon || 'fa-solid fa-circle'} text-amber-600`;
+    return `${this.getTargetById(targetId)?.icon || 'fa-solid fa-circle'} text-amber-500 dark:text-amber-300`;
   },
 
   getTargetCheckClass(targetId: string): string {
     return this.isTargetSelected(targetId)
       ? 'border-[var(--color-primary)] bg-[var(--color-primary)]'
-      : 'border-slate-300 group-hover:border-slate-400';
+      : 'border-[color-mix(in_srgb,var(--color-border-strong)_100%,transparent)] group-hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)]';
   },
 
   togglePromptPanel() {

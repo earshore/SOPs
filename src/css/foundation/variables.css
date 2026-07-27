@@ -504,8 +504,13 @@
 [data-theme='dark'],
 [data-color-mode='dark'],
 [data-color-mode-resolved='dark'] {
-  /* Appearance primary / focus / link tokens stay on Layer A (ThemeManager).
-     Dark mode only adjusts neutral surfaces, text, borders, status shades. */
+  /* Appearance primary / focus / link hues stay on Layer A (ThemeManager).
+     Soft fills derived from primary must still be re-tuned for dark surfaces:
+     light-mode `rgba(blue, 0.1)` washes are nearly invisible on slate-800/900. */
+
+  /* Soft brand fill for selected chips / cards (not a hue stomp) */
+  --color-primary-light: color-mix(in srgb, var(--color-primary) 22%, transparent);
+  --color-bg-selected: color-mix(in srgb, var(--color-primary) 18%, var(--surface-card, #1e293b));
 
   /* ---- 次要色（中性 slate 明度，非 brand stomp） ---- */
   --color-secondary: var(--color-slate-400);

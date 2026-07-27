@@ -274,7 +274,8 @@ it('computes selection, target, prompt, and visual class branches', () => {
     'hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]'
   );
   expect(panel.getListingTargetCardClass('selling-points')).toContain('var(--color-primary)');
-  expect(panel.getReviewTargetCardClass('review-insights')).toContain('hover:border-slate-200');
+  expect(panel.getListingTargetCardClass('selling-points')).toContain('var(--surface-card)');
+  expect(panel.getReviewTargetCardClass('review-insights')).toContain('var(--surface-card-hover)');
   expect(panel.getListingTargetIconClass('missing')).toContain('fa-circle');
   expect(panel.getTargetCheckClass('selling-points')).toContain('bg-[var(--color-primary)]');
   expect(panel.getTargetColor('blue')).toBe('target-blue');
@@ -399,14 +400,16 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
     'text-[var(--color-primary-dark,var(--color-primary))]'
   );
   expect(panel.getAsinTextClass('B002')).toBe('text-slate-700');
-  expect(panel.getListingTargetCardClass('selling-points')).toContain('hover:border-slate-200');
-  expect(panel.getReviewTargetCardClass('review-insights')).toContain('border-amber-300');
-  expect(panel.getListingTargetIconWrapClass('selling-points')).toContain(
-    'group-hover:bg-slate-200'
+  expect(panel.getListingTargetCardClass('selling-points')).toContain(
+    'hover:bg-[var(--surface-card-hover)]'
   );
-  expect(panel.getReviewTargetIconWrapClass('review-insights')).toContain('bg-amber-50');
+  expect(panel.getReviewTargetCardClass('review-insights')).toContain('var(--color-amber-400');
+  expect(panel.getListingTargetIconWrapClass('selling-points')).toContain('var(--surface-card-hover)');
+  expect(panel.getReviewTargetIconWrapClass('review-insights')).toContain('var(--color-amber-400');
   expect(panel.getReviewTargetIconClass('missing')).toContain('fa-circle');
-  expect(panel.getTargetCheckClass('selling-points')).toContain('group-hover:border-slate-400');
+  expect(panel.getTargetCheckClass('selling-points')).toContain(
+    'group-hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)]'
+  );
 
   panel.hasScraperData = false;
   panel.hasData = false;
