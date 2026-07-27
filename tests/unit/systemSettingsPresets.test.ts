@@ -342,21 +342,20 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect((deepChatChunk.match(/class="settings-tool-page(?:\s|"|$)/g) || []).length).toBe(1);
   });
 
-  it('Master Analysis uses two product tool-pages (scrape + AI) like Keyword Hunter', () => {
+  it('Master Analysis is static L2 with two foldable L3 modules (scrape + AI)', () => {
     const maStart = html.indexOf('>Master Analysis<');
     expect(maStart).toBeGreaterThan(-1);
     const maChunk = html.slice(maStart, html.indexOf('Playground \u00b7 Deep Chat', maStart));
 
-    expect(maChunk).toContain('settings-tool-page-stack');
+    expect(maChunk).toContain('settings-tool-app--static');
+    expect(maChunk).toContain('settings-tool-l3-stack');
     expect(maChunk).toContain('data-settings-nav-id="master-analysis-scrape"');
     expect(maChunk).toContain('data-settings-nav-id="master-analysis-ai"');
     expect(maChunk).toContain('id="settings-section-network"');
     expect(maChunk).toContain("toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])");
-    expect((maChunk.match(/class="settings-tool-page(?:\s|"|$)/g) || []).length).toBe(2);
-
-    // No nested collapsible product cards under Master Analysis app body
+    // L3 fold targets
+    expect((maChunk.match(/<details[^>]*class="settings-tool-l3"/g) || []).length).toBe(2);
     expect(maChunk).not.toContain('settings-submodule');
-    expect(maChunk).not.toContain('settings-collapsible-card');
   });
 
   it('PPC Tools is one product tool-page (Deep Chat pattern), not ad-hoc slate card', () => {

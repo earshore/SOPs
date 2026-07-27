@@ -186,7 +186,7 @@
                 :class="{ 'is-current': isNavTargetCurrent('llm-step-4-title') }"
                 @click="navigateToNavTarget('llm-step-4-title', 'llm')"
               >
-                高级选项
+                服务层级
               </button>
             </div>
           </div>
@@ -610,9 +610,9 @@
                   </div>
                 </details>
 
-                <!-- Step 2: 凭证 -->
-                <details class="settings-llm-step" aria-labelledby="llm-step-2-title">
-                  <summary class="settings-llm-step__header">
+                <!-- L2 凭证（常开）：L3 = API Key 输入 -->
+                <div class="settings-llm-step settings-llm-step--static" aria-labelledby="llm-step-2-title">
+                  <div class="settings-llm-step__header settings-llm-step__header--static">
                     <div class="min-w-0">
                       <h4
                         id="llm-step-2-title"
@@ -622,12 +622,9 @@
                       >
                         凭证
                       </h4>
+                      <p class="settings-llm-step__desc">API Key</p>
                     </div>
-                    <i
-                      class="settings-llm-step__chevron fas fa-chevron-down text-[10px] text-slate-400"
-                      aria-hidden="true"
-                    ></i>
-                  </summary>
+                  </div>
                   <div class="settings-llm-step__body">
                     <div class="group">
                       <label
@@ -666,7 +663,7 @@
                       <p class="settings-field-help" x-text="localSecretBoundaryText"></p>
                     </div>
                   </div>
-                </details>
+                </div>
 
                 <!-- Step 3: 模型与能力 -->
                 <details class="settings-llm-step" aria-labelledby="llm-step-3-title">
@@ -819,9 +816,9 @@
                   </div>
                 </details>
 
-                <!-- Step 4: 高级选项 -->
-                <details class="settings-llm-step" aria-labelledby="llm-step-4-title">
-                  <summary class="settings-llm-step__header">
+                <!-- L2 服务层级（常开；无伪折叠） -->
+                <div class="settings-llm-step settings-llm-step--static" aria-labelledby="llm-step-4-title">
+                  <div class="settings-llm-step__header settings-llm-step__header--static">
                     <div class="min-w-0">
                       <h4
                         id="llm-step-4-title"
@@ -829,15 +826,11 @@
                         data-settings-nav-id="llm-step-4-title"
                         data-settings-nav-group="llm"
                       >
-                        高级选项
+                        服务层级（service_tier）
                       </h4>
-                      <p class="settings-llm-step__desc">service_tier（可选）</p>
+                      <p class="settings-llm-step__desc">多数保持「不发送」</p>
                     </div>
-                    <i
-                      class="settings-llm-step__chevron fas fa-chevron-down text-[10px] text-slate-400"
-                      aria-hidden="true"
-                    ></i>
-                  </summary>
+                  </div>
                   <div class="settings-llm-step__body">
                     <div
                       class="settings-pref-list"
@@ -847,9 +840,9 @@
                         <div class="settings-pref-row__meta">
                           <div class="min-w-0">
                             <label for="llm-service-tier" class="settings-pref-row__title"
-                              >服务层级（service_tier）</label
+                              >service_tier</label
                             >
-                            <p class="settings-pref-row__hint">多数保持「不发送」</p>
+                            <p class="settings-pref-row__hint">请求可选服务层级</p>
                           </div>
                         </div>
                         <label class="settings-pref-row__control">
@@ -871,7 +864,7 @@
                       </div>
                     </div>
                   </div>
-                </details>
+                </div>
 
                 <div class="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:gap-2.5">
                   <button
@@ -1062,41 +1055,37 @@
                   </div>
                 </div>
               </details>
-
-              <div class="settings-app-group-label">
-                <h4 class="settings-card__title">应用中心</h4>
-              </div>
-
-              <details
-                class="settings-tool-app"
+              <div
+                class="settings-tool-app settings-tool-app--static"
                 data-settings-focus="master-analysis"
                 data-settings-nav-id="master-analysis"
                 data-settings-nav-group="tool"
-                data-settings-tool-app
               >
-                <summary
-                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
-                >
+                <div class="settings-tool-app-summary settings-tool-app-summary--static flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h4 class="settings-card__title">Master Analysis</h4>
                     <p class="settings-card__desc">数据采集 → AI 智能分析</p>
                   </div>
-                  <span class="settings-card__badge">2 项能力</span>
-                  <i
-                    class="settings-tool-app-chevron fas fa-chevron-down text-[10px] text-slate-400"
-                    aria-hidden="true"
-                  ></i>
-                </summary>
+                </div>
                 <div class="settings-tool-app-body">
-                  <div class="settings-tool-page-stack">
+                  <div class="settings-tool-l3-stack">
                     <!-- Product page: 数据采集 (proxy + scrape runtime) -->
-                    <div
-                      class="settings-tool-page"
+                    <details
+                      class="settings-tool-l3"
                       id="settings-section-network"
                       data-settings-focus="master-analysis-scrape"
                       data-settings-nav-id="master-analysis-scrape"
                       data-settings-nav-group="tool"
                     >
+                      <summary class="settings-tool-l3__summary">
+                        <div class="min-w-0">
+                          <h5 class="settings-card__title">数据采集</h5>
+                          <p class="settings-tool-page__hint">代理连接与采集运行策略</p>
+                        </div>
+                        <i class="settings-tool-l3__chevron fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true"></i>
+                      </summary>
+                      <div class="settings-tool-page settings-tool-l3__body">
+
                       <div class="settings-tool-page__head">
                         <div class="settings-tool-page__head-main">
                           <h5 class="settings-card__title">数据采集</h5>
@@ -1307,15 +1296,26 @@
                         </div>
                       </div>
                       </div>
-                    </div>
+                    
+                      </div>
+                    </details>
 
                     <!-- Product page: AI 智能分析 -->
-                    <div
-                      class="settings-tool-page"
+                    <details
+                      class="settings-tool-l3"
                       data-settings-focus="master-analysis-ai"
                       data-settings-nav-id="master-analysis-ai"
                       data-settings-nav-group="tool"
                     >
+                      <summary class="settings-tool-l3__summary">
+                        <div class="min-w-0">
+                          <h5 class="settings-card__title">AI 智能分析</h5>
+                          <p class="settings-tool-page__hint">默认模型、调度与 Token 限额</p>
+                        </div>
+                        <i class="settings-tool-l3__chevron fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true"></i>
+                      </summary>
+                      <div class="settings-tool-page settings-tool-l3__body">
+
                       <template
                         x-for="item in toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])"
                         :key="item.id"
@@ -1498,29 +1498,20 @@
                           </label>
                         </template>
                       </div>
-                    </div>
+                    
+                      </div>
+                    </details>
                   </div>
                 </div>
-              </details>
+              </div>
 
-              <details class="settings-tool-app" data-settings-tool-app>
-                <summary
-                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
-                >
+              <div class="settings-tool-app settings-tool-app--static">
+                <div class="settings-tool-app-summary settings-tool-app-summary--static flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h4 class="settings-card__title">Playground · Deep Chat</h4>
                     <p class="settings-card__desc">默认模型、业务工具与限额</p>
                   </div>
-                  <span
-                    class="settings-card__badge"
-                    x-text="runtimeStrategy.settings.deepChat.enableBusinessTools ? '业务工具开' : '业务工具关'"
-                  >
-                  </span>
-                  <i
-                    class="settings-tool-app-chevron fas fa-chevron-down text-[10px] text-slate-400"
-                    aria-hidden="true"
-                  ></i>
-                </summary>
+                </div>
                 <div class="settings-tool-app-body">
                   <!-- One product page: model + tools + limits share a single tool-page surface -->
                   <div class="settings-tool-page mt-3">
@@ -1695,32 +1686,32 @@
                     </div>
                   </div>
                 </div>
-              </details>
+              </div>
 
-              <details
-                class="settings-tool-app"
+              <div
+                class="settings-tool-app settings-tool-app--static"
                 data-settings-focus="keyword-hunter"
                 data-settings-nav-id="keyword-hunter"
                 data-settings-nav-group="tool"
-                data-settings-tool-app
                 data-testid="settings-keyword-hunter"
               >
-                <summary
-                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
-                >
+                <div class="settings-tool-app-summary settings-tool-app-summary--static flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h4 class="settings-card__title">Keyword Hunter</h4>
                     <p class="settings-card__desc">SEO 与 Listing 默认模型</p>
                   </div>
-                  <span class="settings-card__badge"> 2 个模块 </span>
-                  <i
-                    class="settings-tool-app-chevron fas fa-chevron-down text-[10px] text-slate-400"
-                    aria-hidden="true"
-                  ></i>
-                </summary>
+                </div>
                 <div class="settings-tool-app-body">
-                  <div class="settings-tool-page-stack">
-                    <div class="settings-tool-page">
+                  <div class="settings-tool-l3-stack">
+                    <details class="settings-tool-l3">
+                      <summary class="settings-tool-l3__summary">
+                        <div class="min-w-0">
+                          <h5 class="settings-card__title">SEO 处理</h5>
+                        </div>
+                        <i class="settings-tool-l3__chevron fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true"></i>
+                      </summary>
+                      <div class="settings-tool-page settings-tool-l3__body">
+
                       <template
                         x-for="item in toolStrategyTargetItemsByIds(['keyword-hunter-seo-process'])"
                         :key="item.id"
@@ -1895,8 +1886,18 @@
                           </label>
                         </div>
                       </div>
-                    </div>
-                    <div class="settings-tool-page">
+                    
+                      </div>
+                    </details>
+                    <details class="settings-tool-l3">
+                      <summary class="settings-tool-l3__summary">
+                        <div class="min-w-0">
+                          <h5 class="settings-card__title">Listing 评审</h5>
+                        </div>
+                        <i class="settings-tool-l3__chevron fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true"></i>
+                      </summary>
+                      <div class="settings-tool-page settings-tool-l3__body">
+
                       <template
                         x-for="item in toolStrategyTargetItemsByIds(['keyword-hunter-listing-review'])"
                         :key="item.id"
@@ -1991,31 +1992,25 @@
                           </label>
                         </div>
                       </div>
-                    </div>
+                    
+                      </div>
+                    </details>
                   </div>
                 </div>
-              </details>
+              </div>
 
-              <details
-                class="settings-tool-app"
+              <div
+                class="settings-tool-app settings-tool-app--static"
                 data-settings-focus="ppc-analysis-flags"
                 data-settings-nav-id="ppc-analysis-flags"
                 data-settings-nav-group="tool"
-                data-settings-tool-app
               >
-                <summary
-                  class="settings-tool-app-summary flex flex-wrap items-center justify-between gap-2"
-                >
+                <div class="settings-tool-app-summary settings-tool-app-summary--static flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h4 class="settings-card__title">PPC Tools</h4>
                     <p class="settings-card__desc">搜索词模型与阈值</p>
                   </div>
-                  <span class="settings-card__badge"> 1 个模块 </span>
-                  <i
-                    class="settings-tool-app-chevron fas fa-chevron-down text-[10px] text-slate-400"
-                    aria-hidden="true"
-                  ></i>
-                </summary>
+                </div>
                 <div class="settings-tool-app-body">
                   <!-- One product page (Deep Chat pattern): model + runtime + prefs -->
                   <div class="settings-tool-page mt-3">
@@ -2194,7 +2189,7 @@
                     </div>
                   </div>
                 </div>
-              </details>
+              </div>
 
               <!-- 底部操作：与 AI 连接区同层级 — 次要等宽 + 主保存更宽 -->
               <div class="settings-strategy-footer">
@@ -2292,25 +2287,18 @@
                 </div>
               </div>
 
-              <details
+              <div
                 id="settings-export-buckets"
-                class="settings-collapsible-card"
+                class="settings-data-panel"
                 data-testid="settings-export-buckets"
                 data-settings-nav-id="settings-export-buckets"
                 data-settings-nav-group="data"
               >
-                <summary
-                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
-                >
-                  <div class="min-w-0">
-                    <h4 class="settings-card__title">数据导入与导出</h4>
-                  </div>
-                  <i
-                    class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
-                    aria-hidden="true"
-                  ></i>
-                </summary>
-                <div class="settings-collapsible-body">
+                <div class="settings-data-panel__head">
+                  <h4 class="settings-card__title">数据导入与导出</h4>
+                  <p class="settings-card__desc">选择分桶后导出或导入备份</p>
+                </div>
+                <div class="settings-data-panel__body">
                   <div class="mt-1 grid gap-1.5 sm:grid-cols-2">
                     <template x-for="bucket in localDataBucketItems" :key="'export-' + bucket.id">
                       <label
@@ -2349,30 +2337,20 @@
                     </button>
                   </div>
                 </div>
-              </details>
+              </div>
 
-              <details
+              <div
                 id="settings-data-retention"
-                class="settings-collapsible-card"
+                class="settings-data-panel"
                 data-settings-focus="settings-data-retention"
                 data-settings-nav-id="settings-data-retention"
                 data-settings-nav-group="data"
               >
-                <summary
-                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
-                >
-                  <div class="min-w-0">
-                    <h4 class="settings-card__title">数据保留策略</h4>
-                    <p class="settings-card__desc">
-                      显式保存 runtime.storage；与工具区共用 runtime API，不是第二套引擎
-                    </p>
-                  </div>
-                  <i
-                    class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
-                    aria-hidden="true"
-                  ></i>
-                </summary>
-                <div class="settings-collapsible-body">
+                <div class="settings-data-panel__head">
+                  <h4 class="settings-card__title">数据保留策略</h4>
+                  <p class="settings-card__desc">历史条数与缓存清理阈值</p>
+                </div>
+                <div class="settings-data-panel__body">
                   <div class="mt-1 grid gap-3 sm:grid-cols-3">
                     <label class="block">
                       <span class="settings-label">历史保留条数</span>
@@ -2424,7 +2402,7 @@
                     </button>
                   </div>
                 </div>
-              </details>
+              </div>
 
               <div class="space-y-2.5">
                 <button

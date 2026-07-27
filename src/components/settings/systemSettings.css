@@ -1281,6 +1281,101 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   padding: 0.75rem 0.875rem 0.875rem;
 }
 
+/* L2 static blocks: same chrome as steps/apps, no chevron / no collapse */
+.settings-llm-step__header--static,
+.settings-tool-app-summary--static {
+  cursor: default;
+  list-style: none;
+}
+
+.settings-llm-step__header--static:hover,
+.settings-tool-app-summary--static:hover {
+  background: transparent;
+}
+
+/* L3 only fold under static L2 apps (MA pages / KH modules) */
+.settings-tool-l3-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+details.settings-tool-l3 {
+  border: 1px solid color-mix(in srgb, var(--settings-border) 92%, transparent);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--settings-surface-muted) 55%, var(--settings-surface));
+  overflow: hidden;
+}
+
+.settings-tool-l3__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  list-style: none;
+  cursor: pointer;
+  padding: 0.65rem 0.75rem;
+  user-select: none;
+}
+
+.settings-tool-l3__summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-tool-l3__summary:hover,
+.settings-tool-l3__summary:focus-visible {
+  background: color-mix(in srgb, var(--settings-surface-muted) 92%, transparent);
+  outline: none;
+}
+
+.settings-tool-l3__chevron {
+  flex-shrink: 0;
+  transition: transform 160ms ease;
+}
+
+details.settings-tool-l3[open] > .settings-tool-l3__summary .settings-tool-l3__chevron {
+  transform: rotate(180deg);
+}
+
+.settings-tool-l3__body {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  border-top: 1px solid color-mix(in srgb, var(--settings-border) 90%, transparent);
+  background: color-mix(in srgb, var(--settings-surface-muted) 72%, var(--settings-surface));
+}
+
+/* Data section: L2 static panels (no pseudo-collapsible shell) */
+.settings-data-panel {
+  border: 1px solid color-mix(in srgb, var(--settings-border) 95%, transparent);
+  border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
+  background: color-mix(in srgb, var(--settings-surface) 90%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 3%, transparent);
+  overflow: hidden;
+}
+
+.settings-data-panel__head {
+  padding: 0.75rem 0.875rem 0.35rem;
+}
+
+.settings-data-panel__head .settings-card__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.settings-data-panel__head .settings-card__desc {
+  margin: 0.15rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.settings-data-panel__body {
+  padding: 0.35rem 0.875rem 0.875rem;
+}
+
 /* Endpoint + path side-by-side: endpoint gets the space */
 .settings-endpoint-path-row {
   display: flex;

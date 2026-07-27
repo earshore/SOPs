@@ -1282,7 +1282,7 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('AI 模型与连接');
   expect(template).toContain('工具策略');
   expect(template).toContain('通用 AI 执行策略');
-  expect(template).toContain('应用中心');
+  expect(template).not.toContain('应用中心');
   expect(template).toContain('toolStrategyTargetItemsByIds');
   expect(template).not.toContain('<template x-for="item in toolStrategyTargetItems"');
   expect(template).toContain('setToolTargetModel(item.id, $event)');
@@ -1291,17 +1291,15 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain("toolStrategyTargetItemsByIds(['keyword-hunter-seo-process'])");
   expect(template).toContain("toolStrategyTargetItemsByIds(['keyword-hunter-listing-review'])");
   expect(template).toContain("toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])");
-  expect(template.match(/<details\s+[^>]*class="settings-tool-app/g) || []).toHaveLength(4);
-  expect(template).toContain('settings-tool-app-summary');
-  expect(template).toContain('settings-tool-app-chevron');
-  // Tool app groups stay collapsed by default
-  expect(template).not.toMatch(/settings-tool-app[^>]*\bopen\b/);
-  expect(template).toContain('data-settings-tool-app');
+  // L2 apps are static (no fold); L3 modules may fold when multi-item
+  expect(template.match(/settings-tool-app--static/g) || []).toHaveLength(4);
+  expect(template.match(/<details\s+[^>]*class="settings-tool-app/g) || []).toHaveLength(0);
+  expect(template).toContain('settings-tool-l3');
   expect(template).toContain('settings-section-tip');
   expect(template).not.toContain('class="settings-coach"');
-  expect(template.indexOf('通用 AI 执行策略')).toBeLessThan(template.indexOf('应用中心'));
   // Content order (exclude side-nav secondary labels which may mention the same names)
   const sectionsChunk = template.slice(template.indexOf('settings-panel-sections'));
+  expect(sectionsChunk.indexOf('通用 AI 执行策略')).toBeLessThan(sectionsChunk.indexOf('Master Analysis'));
   expect(sectionsChunk.indexOf('Master Analysis')).toBeLessThan(
     sectionsChunk.indexOf('Playground')
   );
@@ -1314,8 +1312,11 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('settings-collapsible-summary');
   expect(template).toContain('settings-collapsible-chevron');
   expect(template).toContain('settings-llm-step');
-  // prettier may put class on the next line after <details
+  // basic info / model steps still fold; credential + service_tier are static L2
   expect(template).toMatch(/<details[\s\S]*?class="settings-llm-step"/);
+  expect(template).toContain('settings-llm-step--static');
+  expect(template).toContain('服务层级（service_tier）');
+  expect(template).toContain('settings-data-panel');
   expect(template).not.toContain('settings-expand-bar');
   expect(template).toContain('data-settings-focus="general-ai-runtime"');
   expect(template).toContain('数据与备份');
