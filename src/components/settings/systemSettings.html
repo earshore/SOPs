@@ -2679,19 +2679,30 @@
                   </summary>
                   <div class="settings-pref-fold__body">
                     <div class="settings-tool-page settings-tool-page--framed">
-                      <div class="grid gap-1.5 sm:grid-cols-2">
+                      <div class="settings-pref-list">
                         <template x-for="bucket in localDataBucketItems" :key="'export-' + bucket.id">
-                          <label class="settings-pref-check">
-                            <input
-                              type="checkbox"
-                              class="settings-checkbox h-3.5 w-3.5 rounded border-slate-300"
-                              :checked="isExportBucketSelected(bucket.id)"
-                              @change="toggleExportBucket(bucket.id)"
-                              :disabled="localData.isBusy"
-                              :data-export-bucket="bucket.id"
-                            />
-                            <span class="min-w-0 truncate" x-text="bucket.label"></span>
-                          </label>
+                          <div>
+                            <label class="settings-pref-row settings-pref-row--check">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <span class="settings-pref-row__title" x-text="bucket.label"></span>
+                                  <p class="settings-pref-row__hint">纳入本次导入 / 导出</p>
+                                </div>
+                              </div>
+                              <span class="settings-pref-row__check">
+                                <input
+                                  type="checkbox"
+                                  class="settings-checkbox h-4 w-4 rounded border-slate-300"
+                                  :checked="isExportBucketSelected(bucket.id)"
+                                  @change="toggleExportBucket(bucket.id)"
+                                  :disabled="localData.isBusy"
+                                  :data-export-bucket="bucket.id"
+                                  :aria-label="bucket.label"
+                                />
+                              </span>
+                            </label>
+                            <div class="settings-pref-divider" role="separator"></div>
+                          </div>
                         </template>
                       </div>
                       <div class="settings-data-io-actions mt-3">
