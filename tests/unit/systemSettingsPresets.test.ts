@@ -392,7 +392,7 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(reasoningChunk).toContain('settings-pref-divider');
   });
 
-  it('P2 LLM service_tier uses pref-list row + frozen select contracts', () => {
+  it('P2 LLM service_tier uses static header-inline select + frozen contracts', () => {
     expect(html).toContain('data-testid="settings-llm-service-tier-pref-list"');
     expect(html).toContain('id="llm-service-tier"');
     expect(html).toContain('name="llm-service-tier"');
@@ -402,9 +402,11 @@ describe('UT-P1-06 appearance theme contracts', () => {
     const tierStart = html.indexOf('data-testid="settings-llm-service-tier-pref-list"');
     expect(tierStart).toBeGreaterThan(-1);
     const tierChunk = html.slice(tierStart, tierStart + 1500);
-    expect(tierChunk).toContain('settings-pref-row');
-    expect(tierChunk).toContain('settings-pref-row__control');
+    expect(tierChunk).toContain('settings-llm-step__header--static');
+    expect(tierChunk).toContain('settings-llm-step__header-control');
     expect(tierChunk).toContain('settings-control--sm');
+    expect(tierChunk).toContain('id="llm-service-tier"');
+    expect(tierChunk).not.toContain('settings-pref-row');
     expect(tierChunk).not.toContain('settings-field-help');
   });
 });

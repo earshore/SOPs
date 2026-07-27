@@ -1323,6 +1323,29 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   background: transparent;
 }
 
+/* Inline control on a static L2 header (e.g. service_tier select) */
+.settings-llm-step__header--static {
+  gap: 0.75rem 1rem;
+}
+
+.settings-llm-step__header-control {
+  flex: 0 1 12rem;
+  min-width: 10rem;
+  max-width: 16rem;
+  width: 100%;
+}
+
+.settings-llm-step__header-control .settings-control {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .settings-llm-step__header-control {
+    width: 12rem;
+    flex-shrink: 0;
+  }
+}
+
 /* L3 only fold under static L2 apps (MA pages / KH modules) */
 .settings-tool-l3-stack {
   display: flex;

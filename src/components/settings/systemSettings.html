@@ -823,8 +823,12 @@
                   </div>
                 </details>
 
-                <!-- L2 服务层级（常开；无伪折叠） -->
-                <div class="settings-llm-step settings-llm-step--static" aria-labelledby="llm-step-4-title">
+                <!-- L2 服务层级：标题行内联下拉（无 body 假分层） -->
+                <div
+                  class="settings-llm-step settings-llm-step--static"
+                  aria-labelledby="llm-step-4-title"
+                  data-testid="settings-llm-service-tier-pref-list"
+                >
                   <div class="settings-llm-step__header settings-llm-step__header--static">
                     <div class="min-w-0">
                       <h4
@@ -837,38 +841,21 @@
                       </h4>
                       <p class="settings-llm-step__desc">多数保持「不发送」</p>
                     </div>
-                  </div>
-                  <div class="settings-llm-step__body">
-                    <div
-                      class="settings-pref-list"
-                      data-testid="settings-llm-service-tier-pref-list"
-                    >
-                      <div class="settings-pref-row">
-                        <div class="settings-pref-row__meta">
-                          <div class="min-w-0">
-                            <label for="llm-service-tier" class="settings-pref-row__title"
-                              >service_tier</label
-                            >
-                            <p class="settings-pref-row__hint">请求可选服务层级</p>
-                          </div>
-                        </div>
-                        <label class="settings-pref-row__control">
-                          <span class="sr-only">服务层级</span>
-                          <select
-                            id="llm-service-tier"
-                            name="llm-service-tier"
-                            :value="llm.serviceTier || ''"
-                            @change="setLlmServiceTier($event)"
-                            class="settings-control settings-control--sm"
-                          >
-                            <option value="">不发送（默认）</option>
-                            <option value="auto">auto</option>
-                            <option value="default">default</option>
-                            <option value="flex">flex</option>
-                            <option value="priority">priority</option>
-                          </select>
-                        </label>
-                      </div>
+                    <div class="settings-llm-step__header-control">
+                      <label class="sr-only" for="llm-service-tier">服务层级</label>
+                      <select
+                        id="llm-service-tier"
+                        name="llm-service-tier"
+                        :value="llm.serviceTier || ''"
+                        @change="setLlmServiceTier($event)"
+                        class="settings-control settings-control--sm"
+                      >
+                        <option value="">不发送（默认）</option>
+                        <option value="auto">auto</option>
+                        <option value="default">default</option>
+                        <option value="flex">flex</option>
+                        <option value="priority">priority</option>
+                      </select>
                     </div>
                   </div>
                 </div>
