@@ -1007,50 +1007,59 @@
                     </label>
                   </div>
                   <div
-                    class="settings-preset-panel mt-4"
+                    class="settings-pref-list mt-4"
                     id="settings-runtime-presets"
                     data-settings-focus="settings-runtime-presets"
                     data-testid="settings-runtime-presets"
                   >
-                    <div class="settings-preset-panel__head">
-                      <div>
-                        <h5 class="settings-card__title">运行策略一键预设</h5>
-                        <p class="settings-card__desc">不改 Key / 代理 / 工具模型；需保存。</p>
+                    <div class="settings-pref-row">
+                      <div class="settings-pref-row__meta">
+                        <div class="min-w-0">
+                          <h4 class="settings-pref-row__title">运行策略预设</h4>
+                          <p class="settings-pref-row__hint">
+                            不改 Key / 代理 / 工具模型；切换后立即生效
+                          </p>
+                        </div>
                       </div>
-                      <span class="settings-badge settings-badge--global">需保存</span>
-                    </div>
-                    <div class="settings-preset-group mt-3" role="group" aria-label="运行策略预设">
-                      <button
-                        type="button"
-                        class="settings-preset-group__btn"
-                        data-testid="settings-preset-reliability"
-                        :class="{ 'is-active': activeRuntimePresetId === 'reliability' }"
-                        :aria-pressed="(activeRuntimePresetId === 'reliability').toString()"
-                        @click="applyRuntimePresetById('reliability')"
+                      <div
+                        class="settings-segmented settings-segmented--inline settings-segmented--effort"
+                        role="radiogroup"
+                        aria-label="运行策略预设"
                       >
-                        <i class="fas fa-shield-halved" aria-hidden="true"></i>
-                        稳定优先
-                      </button>
-                      <button
-                        type="button"
-                        class="settings-preset-group__btn"
-                        data-testid="settings-preset-speed"
-                        :class="{ 'is-active': activeRuntimePresetId === 'speed' }"
-                        :aria-pressed="(activeRuntimePresetId === 'speed').toString()"
-                        @click="applyRuntimePresetById('speed')"
-                      >
-                        <i class="fas fa-bolt" aria-hidden="true"></i> 速度优先
-                      </button>
-                      <button
-                        type="button"
-                        class="settings-preset-group__btn"
-                        data-testid="settings-preset-cost"
-                        :class="{ 'is-active': activeRuntimePresetId === 'cost' }"
-                        :aria-pressed="(activeRuntimePresetId === 'cost').toString()"
-                        @click="applyRuntimePresetById('cost')"
-                      >
-                        <i class="fas fa-coins" aria-hidden="true"></i> 成本优先
-                      </button>
+                        <button
+                          type="button"
+                          role="radio"
+                          class="settings-segmented__btn"
+                          data-testid="settings-preset-reliability"
+                          :class="{ 'is-active': activeRuntimePresetId === 'reliability' }"
+                          :aria-checked="(activeRuntimePresetId === 'reliability').toString()"
+                          @click="applyRuntimePresetById('reliability')"
+                        >
+                          稳定
+                        </button>
+                        <button
+                          type="button"
+                          role="radio"
+                          class="settings-segmented__btn"
+                          data-testid="settings-preset-speed"
+                          :class="{ 'is-active': activeRuntimePresetId === 'speed' }"
+                          :aria-checked="(activeRuntimePresetId === 'speed').toString()"
+                          @click="applyRuntimePresetById('speed')"
+                        >
+                          速度
+                        </button>
+                        <button
+                          type="button"
+                          role="radio"
+                          class="settings-segmented__btn"
+                          data-testid="settings-preset-cost"
+                          :class="{ 'is-active': activeRuntimePresetId === 'cost' }"
+                          :aria-checked="(activeRuntimePresetId === 'cost').toString()"
+                          @click="applyRuntimePresetById('cost')"
+                        >
+                          成本
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

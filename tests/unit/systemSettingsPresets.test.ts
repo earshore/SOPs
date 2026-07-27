@@ -182,10 +182,24 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(html).toContain('settings-section-frame--appearance');
     // Runtime presets live under tool strategy (not appearance)
     expect(html).toContain('id="settings-section-tool-strategy"');
-    expect(html).toContain('settings-preset-group');
     expect(html).toContain('data-testid="settings-runtime-presets"');
     expect(html).toContain('settings-section-tip');
     expect(html).not.toContain('class="settings-coach"');
+
+    // Pref-row + effort-style segmented (same surface as reasoning effort)
+    const presetStart = html.indexOf('data-testid="settings-runtime-presets"');
+    expect(presetStart).toBeGreaterThan(-1);
+    const presetChunk = html.slice(presetStart, presetStart + 2500);
+    expect(presetChunk).toContain('settings-pref-row');
+    expect(presetChunk).toContain(
+      'settings-segmented settings-segmented--inline settings-segmented--effort'
+    );
+    expect(presetChunk).toContain('data-testid="settings-preset-reliability"');
+    expect(presetChunk).toContain('data-testid="settings-preset-speed"');
+    expect(presetChunk).toContain('data-testid="settings-preset-cost"');
+    expect(presetChunk).toContain("applyRuntimePresetById('reliability')");
+    expect(presetChunk).not.toContain('settings-preset-group');
+    expect(presetChunk).not.toContain('需保存');
   });
 
   it('UT-P1-06 color mode uses applyColorMode and stays independent of applyTheme', () => {

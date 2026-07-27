@@ -24,7 +24,7 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'settings-runtime-presets',
     sectionId: 'settings-section-tool-strategy',
-    labels: ['运行策略一键预设', '预设', '稳定优先', '速度优先', '成本优先'],
+    labels: ['运行策略预设', '运行策略一键预设', '预设', '稳定', '速度', '成本', '稳定优先', '速度优先', '成本优先'],
   },
   {
     id: 'master-analysis',

@@ -49,8 +49,8 @@ const PRESET_OVERLAYS: Record<
 };
 
 /**
- * Apply a runtime preset overlay onto `base` (in-memory only).
- * Does not persist; caller assigns result → dirty runtime partition → user must save.
+ * Apply a runtime preset overlay onto `base` (pure merge).
+ * Does not persist; UI caller (applyRuntimePresetById) assigns + instant-saves.
  */
 export function applyRuntimePreset(
   base: RuntimeStrategySettings,
