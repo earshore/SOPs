@@ -1285,7 +1285,8 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('settings-collapsible-summary');
   expect(template).toContain('settings-collapsible-chevron');
   expect(template).toContain('settings-llm-step');
-  expect(template).toContain('<details class="settings-llm-step"');
+  // prettier may put class on the next line after <details
+  expect(template).toMatch(/<details[\s\S]*?class="settings-llm-step"/);
   expect(template).not.toContain('settings-expand-bar');
   expect(template).toContain('data-settings-focus="general-ai-runtime"');
   expect(template).toContain('数据与备份');

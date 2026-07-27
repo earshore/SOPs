@@ -1535,60 +1535,59 @@
                   ></i>
                 </summary>
                 <div class="settings-tool-app-body">
-                  <div class="settings-tool-page-stack">
-                    <div class="settings-tool-page">
-                      <template
-                        x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
-                        :key="item.id"
-                      >
-                        <div>
-                          <div class="settings-tool-page__head">
-                            <div class="settings-tool-page__head-main">
-                              <h5 class="settings-card__title" x-text="item.label"></h5>
-                              <span
-                                class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
-                                x-text="item.modelHint"
-                              ></span>
-                            </div>
-                            <div class="settings-tool-page__model">
-                              <label class="sr-only" :for="'tool-strategy-model-' + item.id"
-                                >默认模型</label
-                              >
-                              <select
-                                :id="'tool-strategy-model-' + item.id"
-                                :name="'tool-strategy-model-' + item.id"
-                                :value="item.model"
-                                @change="setToolTargetModel(item.id, $event)"
-                                :disabled="toolStrategyModelSelectDisabled"
-                                class="settings-control settings-control--sm"
-                              >
-                                <option value="">跟随全局模型</option>
-                                <template x-for="model in llm.models" :key="getModelValue(model)">
-                                  <option
-                                    :value="getModelValue(model)"
-                                    x-text="getModelLabel(model)"
-                                  ></option>
-                                </template>
-                              </select>
-                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                                <i class="fas fa-chevron-down"></i>
-                              </span>
-                            </div>
-                          </div>
-                          <p class="settings-tool-page__hint" x-text="item.description"></p>
-                          <p class="settings-tool-page__hint">
-                            当前执行模型：
+                  <!-- One product page: model + tools + limits share a single tool-page surface -->
+                  <div class="settings-tool-page mt-3">
+                    <template
+                      x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
+                      :key="item.id"
+                    >
+                      <div>
+                        <div class="settings-tool-page__head">
+                          <div class="settings-tool-page__head-main">
+                            <h5 class="settings-card__title" x-text="item.label"></h5>
                             <span
-                              class="settings-tool-page__hint-mono"
-                              x-text="item.resolvedModel"
+                              class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
+                              x-text="item.modelHint"
                             ></span>
-                          </p>
+                          </div>
+                          <div class="settings-tool-page__model">
+                            <label class="sr-only" :for="'tool-strategy-model-' + item.id"
+                              >默认模型</label
+                            >
+                            <select
+                              :id="'tool-strategy-model-' + item.id"
+                              :name="'tool-strategy-model-' + item.id"
+                              :value="item.model"
+                              @change="setToolTargetModel(item.id, $event)"
+                              :disabled="toolStrategyModelSelectDisabled"
+                              class="settings-control settings-control--sm"
+                            >
+                              <option value="">跟随全局模型</option>
+                              <template x-for="model in llm.models" :key="getModelValue(model)">
+                                <option
+                                  :value="getModelValue(model)"
+                                  x-text="getModelLabel(model)"
+                                ></option>
+                              </template>
+                            </select>
+                            <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                              <i class="fas fa-chevron-down"></i>
+                            </span>
+                          </div>
                         </div>
-                      </template>
-                    </div>
+                        <p class="settings-tool-page__hint" x-text="item.description"></p>
+                        <p class="settings-tool-page__hint">
+                          当前执行模型：
+                          <span
+                            class="settings-tool-page__hint-mono"
+                            x-text="item.resolvedModel"
+                          ></span>
+                        </p>
+                      </div>
+                    </template>
 
                     <div
-                      class="settings-tool-page"
+                      class="mt-3"
                       role="group"
                       aria-labelledby="deep-chat-business-tools-title"
                       data-settings-nav-id="deep-chat-business-tools-title"
@@ -1625,7 +1624,7 @@
                       </div>
                     </div>
 
-                    <div class="settings-tool-page">
+                    <div class="mt-3">
                       <h5 class="settings-card__title">运行限额</h5>
                       <p class="settings-tool-page__hint">超时、输出与会话存储上限</p>
                       <div class="mt-3 grid gap-3 sm:grid-cols-4">

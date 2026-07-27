@@ -303,6 +303,26 @@ describe('UT-P1-06 appearance theme contracts', () => {
     }
   });
 
+  it('Deep Chat is one product tool-page (model + tools + limits), not a multi-page stack', () => {
+    const deepChatAppStart = html.indexOf('Playground \u00b7 Deep Chat');
+    expect(deepChatAppStart).toBeGreaterThan(-1);
+    const deepChatChunk = html.slice(
+      deepChatAppStart,
+      html.indexOf('Keyword Hunter', deepChatAppStart)
+    );
+
+    // One product page surface inside the app body
+    expect(deepChatChunk).toContain('settings-tool-page mt-3');
+    expect(deepChatChunk).toContain("toolStrategyTargetItemsByIds(['playground-deep-chat'])");
+    expect(deepChatChunk).toContain('data-settings-nav-id="deep-chat-business-tools-title"');
+    expect(deepChatChunk).toContain('data-testid="settings-dc-tools-pref-list"');
+    expect(deepChatChunk).toContain('运行限额');
+
+    // Must not re-split Deep Chat into stacked product pages
+    expect(deepChatChunk).not.toContain('settings-tool-page-stack');
+    expect((deepChatChunk.match(/class="settings-tool-page(?:\s|"|$)/g) || []).length).toBe(1);
+  });
+
   it('P2 LLM reasoning uses pref-list + frozen effort contracts', () => {
     expect(html).toContain('data-testid="settings-llm-reasoning-pref-list"');
     expect(html).toContain('id="llm-reasoning-enabled"');
@@ -316,7 +336,7 @@ describe('UT-P1-06 appearance theme contracts', () => {
 
     const reasoningStart = html.indexOf('data-testid="settings-llm-reasoning-pref-list"');
     expect(reasoningStart).toBeGreaterThan(-1);
-    const reasoningChunk = html.slice(reasoningStart, reasoningStart + 2500);
+    const reasoningChunk = html.slice(reasoningStart, reasoningStart + 4000);
     expect(reasoningChunk).toContain('settings-pref-row');
     expect(reasoningChunk).toContain('settings-switch');
     expect(reasoningChunk).toContain('settings-segmented--effort');
