@@ -248,8 +248,9 @@ async function openGlobalSettings(page: Page): Promise<void> {
 }
 
 /**
- * LLM setup uses collapsed <details> steps (凭证 / 模型与能力).
- * Expand them so endpoint, API key, and model sync controls are interactable.
+ * LLM setup uses collapsed <details class="settings-pref-fold"> rows
+ * (基本信息 / 模型与能力). Expand them so endpoint, API key,
+ * and model sync controls are interactable. Credential API key is static.
  */
 async function prepareLlmConnectionControls(page: Page): Promise<void> {
   const llmSection = page.locator('#settings-section-llm');
@@ -258,7 +259,7 @@ async function prepareLlmConnectionControls(page: Page): Promise<void> {
     .getByRole('button', { name: 'AI 模型与连接', exact: true })
     .click();
 
-  await llmSection.locator('details.settings-llm-step').evaluateAll(nodes => {
+  await llmSection.locator('details.settings-pref-fold').evaluateAll(nodes => {
     for (const node of nodes) {
       if (node instanceof HTMLDetailsElement) {
         node.open = true;
