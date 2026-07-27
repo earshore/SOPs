@@ -154,7 +154,7 @@ test.describe('system settings', () => {
     await expect(presets).toBeVisible();
   });
 
-  test('E2E-P1-07 Master Analysis lists 数据采集 before AI 智能分析 and AI is collapsible', async ({
+  test('E2E-P1-07 Master Analysis lists 数据采集 before AI 智能分析 as static L3 modules', async ({
     page,
   }) => {
     const settings = new SystemSettingsPage(page);
@@ -172,12 +172,19 @@ test.describe('system settings', () => {
     expect(body).toContain('AI 智能分析');
     expect(body).toContain('数据采集');
 
-    const aiBlock = master.locator('details[data-settings-focus="master-analysis-ai"]');
-    await expect(aiBlock).toBeVisible();
-    // default collapsed
-    await expect(aiBlock.locator('.settings-submodule__body')).toBeHidden();
-    await aiBlock.locator('summary').click();
-    await expect(aiBlock.locator('.settings-submodule__body')).toBeVisible();
+    // L3 modules are static open panels (not collapsible details/submodules)
+    const scrape = master.locator('#settings-section-network.settings-tool-l3--static');
+    const ai = master.locator(
+      '.settings-tool-l3--static[data-settings-focus="master-analysis-ai"]'
+    );
+    await expect(scrape).toBeVisible();
+    await expect(ai).toBeVisible();
+    await expect(scrape.locator('.settings-tool-page.settings-tool-l3__body')).toBeVisible();
+    await expect(ai.locator('.settings-tool-page.settings-tool-l3__body')).toBeVisible();
+    await expect(master.locator('details[data-settings-focus="master-analysis-ai"]')).toHaveCount(
+      0
+    );
+    await expect(master.locator('.settings-submodule')).toHaveCount(0);
   });
 
   test('E2E-P1-nav primary and secondary menu levels', async ({ page }) => {

@@ -1,7 +1,7 @@
 # Settings Preference List 规范
 
 **Date:** 2026-07-27  
-**Status:** P0+P1 shipped · P2 LLM partial · tool strategy single pref-list · appearance CSS hard-cut · data retention skipped（无纯 toggle）
+**Status:** P0+P1 shipped · tool/data/diagnostics pref-list · LLM C still partial · appearance hard-cut
 **Updated:** 2026-07-27  
 **Visual route:** A — Operational Quiet  
 **Scope note:** 只推广「单点偏好拼接列表」原语，**不是**全页 iOS 式设置列表。  
@@ -9,9 +9,9 @@
 
 - 企业级硬化：`docs/superpowers/specs/2026-07-25-system-settings-enterprise-hardening-design.md`（外观即时生效 / 反孤岛 / 测例锁；本 Spec 不得与之冲突）
 - 主题架构：`docs/superpowers/specs/2026-07-25-theme-architecture-enterprise-design.md`
-- 样板实现：`src/components/settings/systemSettings.html`（`#settings-section-appearance` ~2492–2716）
-- 样板样式：`src/components/settings/systemSettings.css`（`.settings-appearance-*` ~879–1020；含 `.settings-segmented--inline` / `--color-mode`）
-- 实现入口：`src/components/settings/systemSettings.{html,css,ts}`（P0 **默认不改** `.ts` 业务）
+- 样板实现：`src/components/settings/systemSettings.html`（`#settings-section-appearance`）
+- 样板样式：`src/components/settings/systemSettings.css`（`.settings-pref-*` + `.settings-segmented--inline` / `--color-mode`）
+- 实现入口：`src/components/settings/systemSettings.{html,css,ts}`
 
 ---
 
@@ -117,7 +117,7 @@
 | **L4** | 嵌套字段列表 | 细节偏好                        | **禁止** `settings-pref-row__icon`       | tool-app 内 boolean pref-list；step 内推理 list |
 
 **判定「是否顶层 L2」：**  
-该 `settings-pref-list` 是否**直接**落在 section frame 下，且**祖先中没有** `settings-tool-app` / `settings-llm-step` / `settings-collapsible-card` / `settings-submodule`。
+该 `settings-pref-list` 是否**直接**落在 section frame 下，且**祖先中没有** `settings-tool-page` / `settings-tool-l3` / `settings-pref-fold__body` / `settings-llm-step`。
 
 - 是 → L2，行 icon 允许（与外观一致）
 - 否 → L3/L4，**必须去掉**行 icon，只留标题+hint+控件

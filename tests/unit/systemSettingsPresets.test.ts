@@ -268,9 +268,13 @@ describe('UT-P1-06 appearance theme contracts', () => {
 
     const debugListStart = html.indexOf('data-testid="settings-dev-debug-pref-list"');
     expect(debugListStart).toBeGreaterThan(-1);
-    const debugChunk = html.slice(debugListStart, debugListStart + 4500);
+    // Nested tool-page lists under 监控/调试/实验 expand the outer chunk size.
+    const debugChunk = html.slice(debugListStart, debugListStart + 12000);
     expect(debugChunk).toContain('settings-pref-row');
     expect(debugChunk).toContain('settings-switch');
+    expect(debugChunk).toContain('settings-tool-page');
+    // Each diagnostics fold body uses one nested settings-pref-list
+    expect((debugChunk.match(/settings-tool-page[\s\S]*?settings-pref-list/g) || []).length).toBeGreaterThanOrEqual(3);
     expect(debugChunk).not.toContain('grid gap-3 sm:grid-cols-2');
     expect(debugChunk).not.toContain('text-emerald-600 focus:ring-emerald-500');
 

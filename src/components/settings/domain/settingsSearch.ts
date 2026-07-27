@@ -17,6 +17,26 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
     labels: ['AI 模型与连接', 'Endpoint', 'API Key', '模型', '连接测试', '厂商'],
   },
   {
+    id: 'llm-step-1-title',
+    sectionId: 'settings-section-llm',
+    labels: ['基本信息', 'AI 厂商', '配置档', 'API 类型', 'Endpoint', 'API 路径'],
+  },
+  {
+    id: 'llm-step-2-title',
+    sectionId: 'settings-section-llm',
+    labels: ['凭证', 'API Key', '密钥'],
+  },
+  {
+    id: 'llm-step-3-title',
+    sectionId: 'settings-section-llm',
+    labels: ['模型与能力', '默认模型', '推理', '推理等级'],
+  },
+  {
+    id: 'llm-step-4-title',
+    sectionId: 'settings-section-llm',
+    labels: ['服务层级', 'service_tier', 'Service Tier'],
+  },
+  {
     id: 'settings-section-tool-strategy',
     sectionId: 'settings-section-tool-strategy',
     labels: ['工具策略', '默认模型', '运行策略', '通用 AI 执行策略', '重试'],
@@ -46,6 +66,11 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
     ],
   },
   {
+    id: 'general-ai-runtime',
+    sectionId: 'settings-section-tool-strategy',
+    labels: ['通用 AI 执行策略', '超时', '重试', '连接测试超时', 'analysisTimeout'],
+  },
+  {
     id: 'master-analysis',
     sectionId: 'settings-section-tool-strategy',
     labels: [
@@ -57,6 +82,28 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
       '性能设置',
       '调度偏好',
     ],
+  },
+  {
+    id: 'master-analysis-ai',
+    sectionId: 'settings-section-tool-strategy',
+    labels: ['AI 智能分析', '输出预算', '完整报告', '翻译报告', '性能设置'],
+  },
+  {
+    id: 'playground-deep-chat',
+    sectionId: 'settings-section-tool-strategy',
+    labels: [
+      'Playground',
+      'Deep Chat',
+      'Playground · Deep Chat',
+      '业务工具',
+      '输出 Token',
+      '会话',
+    ],
+  },
+  {
+    id: 'deep-chat-business-tools-title',
+    sectionId: 'settings-section-tool-strategy',
+    labels: ['业务工具', '网页搜索', '搜索 X', '会话只读', 'enableBusinessTools'],
   },
   {
     id: 'keyword-hunter',
@@ -110,15 +157,48 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
     labels: ['数据与备份', '导出', '导入', '清理', 'localStorage', 'IndexedDB', '数据保留'],
   },
   {
+    id: 'settings-export-buckets',
+    sectionId: 'settings-section-data',
+    labels: ['数据导入与导出', '导出备份', '导入备份', '分桶', 'export'],
+  },
+  {
+    id: 'settings-data-retention',
+    sectionId: 'settings-section-data',
+    labels: [
+      '数据保留策略',
+      '历史保留条数',
+      '缓存清理阈值',
+      '缓存清理比例',
+      '保存数据策略',
+    ],
+  },
+  {
+    id: 'settings-data-cleanup-items',
+    sectionId: 'settings-section-data',
+    labels: ['清理项', '清理本地数据', '分桶清理'],
+  },
+  {
+    id: 'settings-data-danger',
+    sectionId: 'settings-section-data',
+    labels: ['清空全部本地数据', '破坏性', '清空'],
+  },
+  {
     id: 'settings-section-appearance',
     sectionId: 'settings-section-appearance',
-    labels: ['外观与体验', '主题', '动画', '减少动效', '动效'],
+    labels: ['外观与体验', '主题', '色调', '动画', '减少动效', '动效', '动画速度'],
   },
-
   {
     id: 'settings-section-performance',
     sectionId: 'settings-section-performance',
-    labels: ['开发者诊断', '性能监控', '调试配置'],
+    labels: [
+      '开发者诊断',
+      '性能监控',
+      '调试配置',
+      '监控',
+      '调试采集',
+      '实验特性',
+      '日志级别',
+    ],
   },
 ] as const;
 

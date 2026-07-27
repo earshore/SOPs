@@ -1204,51 +1204,9 @@ select.settings-control {
   max-width: 18rem;
 }
 
-/* App group + submodule under tool strategy */
+/* App group label under tool strategy (if used) */
 .settings-app-group-label {
   padding: 0.25rem 0.15rem 0;
-}
-
-.settings-submodule {
-  border: 1px solid var(--settings-border);
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--settings-surface) 90%, transparent);
-  padding: 0;
-  overflow: visible;
-}
-
-details.settings-submodule > summary.settings-submodule__head {
-  list-style: none;
-  cursor: pointer;
-  margin: 0;
-  padding: 0.75rem;
-  border-bottom: 1px solid transparent;
-}
-
-details.settings-submodule > summary.settings-submodule__head::-webkit-details-marker {
-  display: none;
-}
-
-details.settings-submodule[open] > summary.settings-submodule__head {
-  border-bottom-color: var(--color-border-light, #f1f5f9);
-}
-
-.settings-submodule__body {
-  padding: 0 0.75rem 0.75rem;
-}
-
-.settings-submodule__title {
-  margin: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--settings-text);
-}
-
-.settings-submodule__desc {
-  margin: 0.15rem 0 0;
-  font-size: 0.625rem;
-  font-weight: 400;
-  color: var(--color-text-tertiary, #94a3b8);
 }
 
 .settings-toolbar--search-only {
@@ -1439,25 +1397,6 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
 
 .settings-pref-fold__body--flush {
   padding-top: 0.15rem;
-}
-
-.settings-pref-check {
-  display: flex;
-  min-height: 2rem;
-  cursor: pointer;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--settings-border) 90%, transparent);
-  background: color-mix(in srgb, var(--settings-surface) 96%, transparent);
-  padding: 0.35rem 0.65rem;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  color: var(--settings-text);
-}
-
-.settings-pref-check:hover {
-  background: color-mix(in srgb, var(--settings-surface-muted) 80%, var(--settings-surface));
 }
 
 /* Cleanup bucket list: divider lines only, no nested cards inside tool-page frame */

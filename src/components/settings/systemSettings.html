@@ -1675,6 +1675,8 @@
 
                 <details
                 class="settings-pref-fold"
+                data-settings-focus="playground-deep-chat"
+                data-settings-nav-id="playground-deep-chat"
                 data-settings-nav-group="tool"
               >
                 <summary class="settings-pref-row settings-pref-row--fold">
@@ -3250,40 +3252,42 @@
                   </summary>
                   <div class="settings-pref-fold__body">
                     <div class="settings-tool-page">
-                      <div class="settings-pref-row">
-                        <div class="settings-pref-row__meta">
-                          <div class="min-w-0">
-                            <h4 class="settings-pref-row__title">打开监控面板</h4>
-                            <p class="settings-pref-row__hint">性能 / 错误 / 行为</p>
+                      <div class="settings-pref-list">
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">打开监控面板</h4>
+                              <p class="settings-pref-row__hint">性能 / 错误 / 行为</p>
+                            </div>
                           </div>
+                          <button
+                            type="button"
+                            class="settings-pref-row__action"
+                            @click="openPerformanceMonitor()"
+                          >
+                            打开
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          class="settings-pref-row__action"
-                          @click="openPerformanceMonitor()"
-                        >
-                          打开
-                        </button>
-                      </div>
 
-                      <div class="settings-pref-divider" role="separator"></div>
+                        <div class="settings-pref-divider" role="separator"></div>
 
-                      <div class="settings-pref-row">
-                        <div class="settings-pref-row__meta">
-                          <div class="min-w-0">
-                            <h4 class="settings-pref-row__title">性能监控</h4>
-                            <p class="settings-pref-row__hint">Web Vitals、加载耗时与运行指标采集</p>
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">性能监控</h4>
+                              <p class="settings-pref-row__hint">Web Vitals、加载耗时与运行指标采集</p>
+                            </div>
                           </div>
+                          <label class="settings-switch">
+                            <span class="sr-only">启用性能监控</span>
+                            <input
+                              type="checkbox"
+                              :checked="developerDiagnostics.performanceEnableMonitoring"
+                              @change="setDeveloperDiagnosticBoolean('performanceEnableMonitoring', $event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                          </label>
                         </div>
-                        <label class="settings-switch">
-                          <span class="sr-only">启用性能监控</span>
-                          <input
-                            type="checkbox"
-                            :checked="developerDiagnostics.performanceEnableMonitoring"
-                            @change="setDeveloperDiagnosticBoolean('performanceEnableMonitoring', $event)"
-                          />
-                          <span class="settings-switch__track" aria-hidden="true"></span>
-                        </label>
                       </div>
                     </div>
                   </div>
@@ -3309,62 +3313,64 @@
                   </summary>
                   <div class="settings-pref-fold__body">
                     <div class="settings-tool-page">
-                      <div class="settings-pref-row">
-                        <div class="settings-pref-row__meta">
-                          <div class="min-w-0">
-                            <h4 class="settings-pref-row__title">事件调试</h4>
-                            <p class="settings-pref-row__hint">记录 app:* 自定义事件流</p>
+                      <div class="settings-pref-list">
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">事件调试</h4>
+                              <p class="settings-pref-row__hint">记录 app:* 自定义事件流</p>
+                            </div>
                           </div>
+                          <label class="settings-switch">
+                            <span class="sr-only">启用事件调试</span>
+                            <input
+                              type="checkbox"
+                              :checked="developerDiagnostics.eventDebugEnabled"
+                              @change="setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                          </label>
                         </div>
-                        <label class="settings-switch">
-                          <span class="sr-only">启用事件调试</span>
-                          <input
-                            type="checkbox"
-                            :checked="developerDiagnostics.eventDebugEnabled"
-                            @change="setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)"
-                          />
-                          <span class="settings-switch__track" aria-hidden="true"></span>
-                        </label>
-                      </div>
 
-                      <div class="settings-pref-divider" role="separator"></div>
+                        <div class="settings-pref-divider" role="separator"></div>
 
-                      <div class="settings-pref-row">
-                        <div class="settings-pref-row__meta">
-                          <div class="min-w-0">
-                            <h4 class="settings-pref-row__title">错误追踪</h4>
-                            <p class="settings-pref-row__hint">捕获运行异常与错误上下文</p>
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">错误追踪</h4>
+                              <p class="settings-pref-row__hint">捕获运行异常与错误上下文</p>
+                            </div>
                           </div>
+                          <label class="settings-switch">
+                            <span class="sr-only">启用错误追踪</span>
+                            <input
+                              type="checkbox"
+                              :checked="developerDiagnostics.errorTrackerEnabled"
+                              @change="setDeveloperDiagnosticBoolean('errorTrackerEnabled', $event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                          </label>
                         </div>
-                        <label class="settings-switch">
-                          <span class="sr-only">启用错误追踪</span>
-                          <input
-                            type="checkbox"
-                            :checked="developerDiagnostics.errorTrackerEnabled"
-                            @change="setDeveloperDiagnosticBoolean('errorTrackerEnabled', $event)"
-                          />
-                          <span class="settings-switch__track" aria-hidden="true"></span>
-                        </label>
-                      </div>
 
-                      <div class="settings-pref-divider" role="separator"></div>
+                        <div class="settings-pref-divider" role="separator"></div>
 
-                      <div class="settings-pref-row">
-                        <div class="settings-pref-row__meta">
-                          <div class="min-w-0">
-                            <h4 class="settings-pref-row__title">行为分析</h4>
-                            <p class="settings-pref-row__hint">记录用户行为分析事件</p>
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">行为分析</h4>
+                              <p class="settings-pref-row__hint">记录用户行为分析事件</p>
+                            </div>
                           </div>
+                          <label class="settings-switch">
+                            <span class="sr-only">启用行为分析</span>
+                            <input
+                              type="checkbox"
+                              :checked="developerDiagnostics.analyticsEnabled"
+                              @change="setDeveloperDiagnosticBoolean('analyticsEnabled', $event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                          </label>
                         </div>
-                        <label class="settings-switch">
-                          <span class="sr-only">启用行为分析</span>
-                          <input
-                            type="checkbox"
-                            :checked="developerDiagnostics.analyticsEnabled"
-                            @change="setDeveloperDiagnosticBoolean('analyticsEnabled', $event)"
-                          />
-                          <span class="settings-switch__track" aria-hidden="true"></span>
-                        </label>
                       </div>
                     </div>
                   </div>
@@ -3390,62 +3396,64 @@
                   </summary>
                   <div class="settings-pref-fold__body">
                     <div class="settings-tool-page">
-                      <div class="settings-pref-row">
-                        <div class="settings-pref-row__meta">
-                          <div class="min-w-0">
-                            <h4 class="settings-pref-row__title">实验功能</h4>
-                            <p class="settings-pref-row__hint">启用 experimental feature flags</p>
+                      <div class="settings-pref-list">
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">实验功能</h4>
+                              <p class="settings-pref-row__hint">启用 experimental feature flags</p>
+                            </div>
                           </div>
+                          <label class="settings-switch">
+                            <span class="sr-only">启用实验功能</span>
+                            <input
+                              type="checkbox"
+                              :checked="developerDiagnostics.enableExperimentalFeatures"
+                              @change="setDeveloperDiagnosticBoolean('enableExperimentalFeatures', $event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                          </label>
                         </div>
-                        <label class="settings-switch">
-                          <span class="sr-only">启用实验功能</span>
-                          <input
-                            type="checkbox"
-                            :checked="developerDiagnostics.enableExperimentalFeatures"
-                            @change="setDeveloperDiagnosticBoolean('enableExperimentalFeatures', $event)"
-                          />
-                          <span class="settings-switch__track" aria-hidden="true"></span>
-                        </label>
-                      </div>
 
-                      <div class="settings-pref-divider" role="separator"></div>
+                        <div class="settings-pref-divider" role="separator"></div>
 
-                      <div class="settings-pref-row">
-                        <div class="settings-pref-row__meta">
-                          <div class="min-w-0">
-                            <h4 class="settings-pref-row__title">Beta 功能</h4>
-                            <p class="settings-pref-row__hint">启用 beta feature flags</p>
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">Beta 功能</h4>
+                              <p class="settings-pref-row__hint">启用 beta feature flags</p>
+                            </div>
                           </div>
+                          <label class="settings-switch">
+                            <span class="sr-only">启用 Beta 功能</span>
+                            <input
+                              type="checkbox"
+                              :checked="developerDiagnostics.enableBetaFeatures"
+                              @change="setDeveloperDiagnosticBoolean('enableBetaFeatures', $event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                          </label>
                         </div>
-                        <label class="settings-switch">
-                          <span class="sr-only">启用 Beta 功能</span>
-                          <input
-                            type="checkbox"
-                            :checked="developerDiagnostics.enableBetaFeatures"
-                            @change="setDeveloperDiagnosticBoolean('enableBetaFeatures', $event)"
-                          />
-                          <span class="settings-switch__track" aria-hidden="true"></span>
-                        </label>
-                      </div>
 
-                      <div class="settings-pref-divider" role="separator"></div>
+                        <div class="settings-pref-divider" role="separator"></div>
 
-                      <div class="settings-pref-row">
-                        <div class="settings-pref-row__meta">
-                          <div class="min-w-0">
-                            <h4 class="settings-pref-row__title">Debug 模式</h4>
-                            <p class="settings-pref-row__hint">启用调试模式相关运行分支</p>
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h4 class="settings-pref-row__title">Debug 模式</h4>
+                              <p class="settings-pref-row__hint">启用调试模式相关运行分支</p>
+                            </div>
                           </div>
+                          <label class="settings-switch">
+                            <span class="sr-only">启用 Debug 模式</span>
+                            <input
+                              type="checkbox"
+                              :checked="developerDiagnostics.enableDebugMode"
+                              @change="setDeveloperDiagnosticBoolean('enableDebugMode', $event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                          </label>
                         </div>
-                        <label class="settings-switch">
-                          <span class="sr-only">启用 Debug 模式</span>
-                          <input
-                            type="checkbox"
-                            :checked="developerDiagnostics.enableDebugMode"
-                            @change="setDeveloperDiagnosticBoolean('enableDebugMode', $event)"
-                          />
-                          <span class="settings-switch__track" aria-hidden="true"></span>
-                        </label>
                       </div>
                     </div>
                   </div>
