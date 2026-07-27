@@ -93,15 +93,77 @@ export function resolveSettingsNavGroupFromSection(sectionId: string): string | 
   }
 }
 
-/** Resolve a settings target by id, focus marker, or nav marker. */
+/**
+ * Prefer fold/card markers over bare title ids so nav scroll + highlight
+ * land on a real content surface (not an h4 outline).
+ */
 export function findSettingsNavTarget(targetId: string): HTMLElement | null {
   if (!targetId) return null;
   const escaped = escapeAttrSelector(targetId);
   return (
-    document.getElementById(targetId) ||
     document.querySelector<HTMLElement>(`[data-settings-focus="${escaped}"]`) ||
-    document.querySelector<HTMLElement>(`[data-settings-nav-id="${escaped}"]`)
+    document.querySelector<HTMLElement>(`[data-settings-nav-id="${escaped}"]`) ||
+    document.getElementById(targetId)
   );
+}
+
+/** Surfaces large enough for a calm focus ring (nav / deep-link highlight). */
+const HIGHLIGHT_SURFACE_SELECTOR = [
+  '.settings-pref-fold',
+  '.settings-tool-l3',
+  '.settings-pref-row',
+  '.settings-card',
+  '.settings-tool-page',
+  '.settings-section-frame',
+  '.settings-pref-list',
+  '.settings-panel-section',
+].join(', ');
+
+/**
+ * Promote a title / control hit to the nearest card-like container so the
+ * highlight box is one coherent block instead of a messy outline on text.
+ *
+ * L3 modules (数据采集 / AI 智能分析 …): always the whole
+ * `.settings-tool-l3` (title strip + body), never body-only.
+ */
+export function resolveSettingsHighlightTarget(el: HTMLElement): HTMLElement {
+  const l3 = el.matches('.settings-tool-l3')
+    ? el
+    : el.closest<HTMLElement>('.settings-tool-l3');
+  if (l3) {
+    return l3;
+  }
+
+  if (el.matches(HIGHLIGHT_SURFACE_SELECTOR)) {
+    return el;
+  }
+  return el.closest<HTMLElement>(HIGHLIGHT_SURFACE_SELECTOR) ?? el;
+}
+
+const HIGHLIGHT_CLASS = 'settings-deep-link-highlight';
+const HIGHLIGHT_MS = 1600;
+let highlightClearTimer: number | null = null;
+
+/** Remove any active nav/deep-link highlight (and its clear timer). */
+export function clearSettingsDeepLinkHighlight(): void {
+  if (highlightClearTimer != null) {
+    window.clearTimeout(highlightClearTimer);
+    highlightClearTimer = null;
+  }
+  document.querySelectorAll(`.${HIGHLIGHT_CLASS}`).forEach(node => {
+    node.classList.remove(HIGHLIGHT_CLASS);
+  });
+}
+
+function applySettingsDeepLinkHighlight(surface: HTMLElement): void {
+  clearSettingsDeepLinkHighlight();
+  // Restart CSS animation when clicking the same target again.
+  void surface.offsetWidth;
+  surface.classList.add(HIGHLIGHT_CLASS);
+  highlightClearTimer = window.setTimeout(() => {
+    surface.classList.remove(HIGHLIGHT_CLASS);
+    highlightClearTimer = null;
+  }, HIGHLIGHT_MS);
 }
 
 /** Open all ancestor <details> for a target (nav secondary / deep-link). */
@@ -119,10 +181,7 @@ export function expandSettingsFocusTarget(focus: string): HTMLElement | null {
     node = node.parentElement;
   }
 
-  el.classList.add('settings-deep-link-highlight');
-  window.setTimeout(() => {
-    el.classList.remove('settings-deep-link-highlight');
-  }, 2000);
-
-  return el;
+  const surface = resolveSettingsHighlightTarget(el);
+  applySettingsDeepLinkHighlight(surface);
+  return surface;
 }

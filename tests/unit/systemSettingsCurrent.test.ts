@@ -578,6 +578,8 @@ it('exposes deepChat enableVision toggle under Prompt draft count', () => {
   expect(template).toContain('runtimeStrategy.settings.deepChat.enableVision');
   expect(template).toContain('settings-pref-row__title">启用 Vision');
   expect(template).toContain('data-testid="settings-dc-vision-pref-list"');
+  expect(template).toContain('settings-badge settings-badge--alpha');
+  expect(template).toMatch(/settings-badge--alpha[\s\S]*?>Alpha</);
   // Order: Prompt 草稿数 appears before enableVision binding
   const draftIdx = template.indexOf('Prompt 草稿数');
   const visionIdx = template.indexOf("setRuntimeBoolean('deepChat.enableVision'");

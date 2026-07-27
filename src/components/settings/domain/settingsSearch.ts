@@ -118,7 +118,7 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'deep-chat-vision-title',
     sectionId: 'settings-section-tool-strategy',
-    labels: ['启用 Vision', 'Vision', '图片上传', 'enableVision'],
+    labels: ['启用 Vision', 'Vision', '图片上传', 'enableVision', 'Alpha', '不稳定'],
   },
   {
     id: 'keyword-hunter',
