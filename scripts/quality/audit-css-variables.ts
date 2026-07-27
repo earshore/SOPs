@@ -143,7 +143,7 @@ const NAMING_PATTERNS = {
   componentCheckRadio:
     /^--(check|radio)-(size|size-sm|size-lg|radius|border|border-hover|bg|color-active|ring-focus)$/,
   componentHeader:
-    /^--header-(height|height-sm|bg|bg-solid|border|text|shadow|shadow-scrolled|nav-idle)$/,
+    /^--header-(height|height-sm|bg|bg-solid|border|text|shadow|shadow-scrolled|nav-idle|nav-active)$/,
   componentCode: /^--(code|syntax|json|terminal)-[\w-]+$/,
   transition: /^--transition-[\w-]+$/,
   componentPanel: /^--panel-[\w-]+$/,
