@@ -988,9 +988,9 @@ select.settings-control {
 }
 
 .settings-pref-row__control--secret {
-  flex: 1 1 16rem;
-  min-width: 14rem;
-  max-width: 24rem;
+  flex: 1 1 18rem;
+  min-width: 16rem;
+  max-width: min(36rem, 100%);
   margin-left: auto;
 }
 
@@ -1001,7 +1001,13 @@ select.settings-control {
   }
 
   .settings-pref-row--secret .settings-pref-row__meta {
-    flex: 0 1 10rem;
+    flex: 0 1 8.5rem;
+  }
+
+  .settings-pref-row__control--secret {
+    flex: 1 1 auto;
+    min-width: 18rem;
+    max-width: none;
   }
 }
 
