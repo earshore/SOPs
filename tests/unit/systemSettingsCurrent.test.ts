@@ -564,7 +564,34 @@ it('exposes deepChat business tools toggle binding in settings template', () => 
   // Peer pref-row title (flattened; no nested "启用业务工具" section)
   expect(template).toContain('settings-pref-row__title">业务工具');
   expect(template).toContain('settings-save-tool-strategy');
-  expect(template).toContain('修改后需保存');
+  expect(template).toContain('切换后立即生效');
+});
+
+it('setRuntimeBoolean instant-persists runtime strategy without footer save', async () => {
+  const runtime = await import('@/services/runtimeStrategyService');
+  const saveRuntime = vi.spyOn(runtime, 'saveRuntimeStrategySettings');
+  const panel = createPanel();
+  await panel.open();
+  panel.captureSettingsBaseline();
+  vi.mocked(StorageService.set).mockClear();
+  saveRuntime.mockClear();
+
+  panel.setRuntimeBoolean('deepChat.enableBusinessTools', {
+    target: { checked: false },
+  } as any);
+  // setRuntimeBoolean fires persist without awaiting; drain microtasks
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  expect(saveRuntime).toHaveBeenCalled();
+  expect(StorageService.set).toHaveBeenCalledWith(
+    'runtime_strategy_settings',
+    expect.objectContaining({
+      deepChat: expect.objectContaining({ enableBusinessTools: false }),
+    })
+  );
+  // baseline refreshed so close does not treat the toggle as unsaved dirty
+  expect(panel.dirtyPartitions).toEqual([]);
+  expect(showToast).toHaveBeenCalledWith('已保存', { type: 'success' });
 });
 
 it('fetches models and handles validation or API failures', async () => {

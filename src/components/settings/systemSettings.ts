@@ -2754,6 +2754,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
       path,
       (event.target as HTMLInputElement).checked
     );
+    // Switch controls: instant-save runtime strategy (no footer click required)
+    void this.persistRuntimeStrategySettings({ toast: '已保存' });
   },
 
   setRuntimeString(path: string, event: Event): void {
