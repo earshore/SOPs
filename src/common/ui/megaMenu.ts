@@ -324,13 +324,12 @@ function renderCard(opts: CardOptions): string {
 
         <!-- Header -->
         <div class="flex items-start justify-between">
-          <div class="w-10 h-10 ${g.iconBg} rounded-xl
+          <div class="mega-menu-card-icon w-10 h-10 ${g.iconBg} rounded-xl
             flex items-center justify-center
-            shadow-lg ${g.iconShadow}
-            ring-1 ring-white/50">
-            <i class="${icon} text-white text-sm"></i>
+            shadow-lg ${g.iconShadow}">
+            <i class="${icon} mega-menu-card-icon__glyph text-white text-sm" aria-hidden="true"></i>
           </div>
-          <span class="text-[10px] font-mono font-semibold
+          <span class="mega-menu-card-version text-[10px] font-mono font-semibold
             ${g.versionText} ${g.versionBg}
             px-2 py-0.5 rounded-md
             backdrop-blur-sm border border-white/40">
@@ -405,10 +404,9 @@ function renderErrorCard(message: string = '菜单加载失败'): string {
       <div class="absolute inset-0 bg-red-50/60 backdrop-blur-xl
         border border-red-200/40 rounded-lg"></div>
       <div class="relative z-10 p-5 flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-rose-600
-          flex items-center justify-center shadow-lg shadow-red-500/30
-          ring-1 ring-white/50">
-          <i class="fas fa-exclamation-triangle text-white text-xs"></i>
+        <div class="mega-menu-card-icon w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-rose-600
+          flex items-center justify-center shadow-lg shadow-red-500/30">
+          <i class="fas fa-exclamation-triangle mega-menu-card-icon__glyph text-white text-xs" aria-hidden="true"></i>
         </div>
         <div>
           <p class="text-sm font-semibold text-red-800">${safeMessage}</p>

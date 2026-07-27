@@ -283,6 +283,12 @@ describe('current UI mega menu helpers', () => {
     renderMegaMenu();
     renderSopsMegaMenu();
     renderHubMegaMenu();
+
+    // Dark-mode jag fix: no hard white rings on gradient icon tiles
+    const apps = document.getElementById('mega-menu-content');
+    expect(apps?.innerHTML ?? '').toContain('mega-menu-card-icon');
+    expect(apps?.innerHTML ?? '').not.toContain('ring-white/50');
+    expect(apps?.innerHTML ?? '').toContain('mega-menu-card-icon__glyph');
     renderMoreMenu();
 
     expect(getEl('mega-menu-content')?.querySelector('[data-action="switch-tab"]')).not.toBeNull();
