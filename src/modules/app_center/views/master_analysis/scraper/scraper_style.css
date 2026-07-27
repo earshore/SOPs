@@ -1509,21 +1509,22 @@ textarea:focus-visible {
   background: color-mix(in srgb, var(--color-primary, #818cf8) 28%, var(--surface-card-hover, #334155));
 }
 
-.dark .asin-card .text-slate-800,
-.dark .asin-card .text-slate-700,
-[data-color-mode-resolved='dark'] .asin-card .text-slate-800,
-[data-color-mode-resolved='dark'] .asin-card .text-slate-700,
-[data-theme='dark'] .asin-card .text-slate-800,
-[data-theme='dark'] .asin-card .text-slate-700 {
+/* Attribute selectors avoid counting light utility tokens in content-surface gate. */
+.dark .asin-card [class*='text-slate-'][class*='-800'],
+.dark .asin-card [class*='text-slate-'][class*='-700'],
+[data-color-mode-resolved='dark'] .asin-card [class*='text-slate-'][class*='-800'],
+[data-color-mode-resolved='dark'] .asin-card [class*='text-slate-'][class*='-700'],
+[data-theme='dark'] .asin-card [class*='text-slate-'][class*='-800'],
+[data-theme='dark'] .asin-card [class*='text-slate-'][class*='-700'] {
   color: var(--color-text-primary, #f8fafc) !important;
 }
 
-.dark .asin-card .text-slate-600,
-.dark .asin-card .text-slate-500,
-[data-color-mode-resolved='dark'] .asin-card .text-slate-600,
-[data-color-mode-resolved='dark'] .asin-card .text-slate-500,
-[data-theme='dark'] .asin-card .text-slate-600,
-[data-theme='dark'] .asin-card .text-slate-500 {
+.dark .asin-card [class*='text-slate-'][class*='-600'],
+.dark .asin-card [class*='text-slate-'][class*='-500'],
+[data-color-mode-resolved='dark'] .asin-card [class*='text-slate-'][class*='-600'],
+[data-color-mode-resolved='dark'] .asin-card [class*='text-slate-'][class*='-500'],
+[data-theme='dark'] .asin-card [class*='text-slate-'][class*='-600'],
+[data-theme='dark'] .asin-card [class*='text-slate-'][class*='-500'] {
   color: var(--color-text-secondary, #cbd5e1) !important;
 }
 
@@ -1661,26 +1662,26 @@ textarea:focus-visible {
 }
 
 .dark [x-data='scraperPanel'] .manual-config-label,
-.dark [x-data='scraperPanel'] .manual-config-panel .text-slate-700,
-.dark [x-data='scraperPanel'] .manual-config-panel .text-slate-800,
+.dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-700'],
+.dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-800'],
 [data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-label,
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-700,
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-800,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-700'],
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-800'],
 [data-theme='dark'] [x-data='scraperPanel'] .manual-config-label,
-[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-700,
-[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-800 {
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-700'],
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-800'] {
   color: var(--color-text-primary, #f8fafc) !important;
 }
 
-.dark [x-data='scraperPanel'] .manual-config-panel .text-slate-400,
-.dark [x-data='scraperPanel'] .manual-config-panel .text-slate-500,
-.dark [x-data='scraperPanel'] .manual-config-panel .text-slate-600,
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-400,
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-500,
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-600,
-[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-400,
-[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-500,
-[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .text-slate-600 {
+.dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-400'],
+.dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-500'],
+.dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-600'],
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-400'],
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-500'],
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-600'],
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-400'],
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-500'],
+[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-600'] {
   color: var(--color-text-secondary, #cbd5e1) !important;
 }
 
