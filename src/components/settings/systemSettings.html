@@ -931,107 +931,110 @@
                   ></i>
                 </summary>
                 <div class="settings-pref-fold__body">
-<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <label class="block">
-                      <span class="settings-label">AI / 工具请求超时（秒）</span>
-                      <input
-                        type="number"
-                        min="30"
-                        max="300"
-                        step="5"
-                        :value="runtimeAnalysisTimeoutSeconds"
-                        @input="setRuntimeNumber('llm.analysisTimeoutMs', $event, 1000)"
-                        class="settings-control settings-control--sm"
-                      />
-                    </label>
-                    <label class="block">
-                      <span class="settings-label">模型重试次数</span>
-                      <input
-                        type="number"
-                        min="0"
-                        max="5"
-                        step="1"
-                        :value="runtimeStrategy.settings.llm.maxRetries"
-                        @input="setRuntimeNumber('llm.maxRetries', $event)"
-                        class="settings-control settings-control--sm"
-                      />
-                    </label>
-                    <label class="block">
-                      <span class="settings-label">重试间隔（秒）</span>
-                      <input
-                        type="number"
-                        min="0.25"
-                        max="30"
-                        step="0.25"
-                        :value="getRuntimeNumber('llm.retryDelayMs', 1000)"
-                        @input="setRuntimeNumber('llm.retryDelayMs', $event, 1000)"
-                        class="settings-control settings-control--sm"
-                      />
-                    </label>
-                    <label class="block">
-                      <span class="settings-label">连接测试超时（秒）</span>
-                      <input
-                        type="number"
-                        min="5"
-                        max="60"
-                        step="5"
-                        :value="runtimeTestConnectionTimeoutSeconds"
-                        @input="setRuntimeNumber('llm.testConnectionTimeoutMs', $event, 1000)"
-                        class="settings-control settings-control--sm"
-                      />
-                    </label>
-                  </div>
-                  <div
-                    class="settings-pref-list mt-4"
-                    id="settings-runtime-presets"
-                    data-settings-focus="settings-runtime-presets"
-                    data-testid="settings-runtime-presets"
-                  >
-                    <div class="settings-pref-row">
-                      <div class="settings-pref-row__meta">
-                        <div class="min-w-0">
-                          <h4 class="settings-pref-row__title">运行策略预设</h4>
-                          <p class="settings-pref-row__hint">不改 Key / 代理 / 工具模型</p>
+                  <div class="settings-tool-page mt-3">
+                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <label class="block">
+                        <span class="settings-label">AI / 工具请求超时（秒）</span>
+                        <input
+                          type="number"
+                          min="30"
+                          max="300"
+                          step="5"
+                          :value="runtimeAnalysisTimeoutSeconds"
+                          @input="setRuntimeNumber('llm.analysisTimeoutMs', $event, 1000)"
+                          class="settings-control settings-control--sm"
+                        />
+                      </label>
+                      <label class="block">
+                        <span class="settings-label">模型重试次数</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="5"
+                          step="1"
+                          :value="runtimeStrategy.settings.llm.maxRetries"
+                          @input="setRuntimeNumber('llm.maxRetries', $event)"
+                          class="settings-control settings-control--sm"
+                        />
+                      </label>
+                      <label class="block">
+                        <span class="settings-label">重试间隔（秒）</span>
+                        <input
+                          type="number"
+                          min="0.25"
+                          max="30"
+                          step="0.25"
+                          :value="getRuntimeNumber('llm.retryDelayMs', 1000)"
+                          @input="setRuntimeNumber('llm.retryDelayMs', $event, 1000)"
+                          class="settings-control settings-control--sm"
+                        />
+                      </label>
+                      <label class="block">
+                        <span class="settings-label">连接测试超时（秒）</span>
+                        <input
+                          type="number"
+                          min="5"
+                          max="60"
+                          step="5"
+                          :value="runtimeTestConnectionTimeoutSeconds"
+                          @input="setRuntimeNumber('llm.testConnectionTimeoutMs', $event, 1000)"
+                          class="settings-control settings-control--sm"
+                        />
+                      </label>
+                    </div>
+
+                    <div
+                      class="settings-pref-list mt-3"
+                      id="settings-runtime-presets"
+                      data-settings-focus="settings-runtime-presets"
+                      data-testid="settings-runtime-presets"
+                    >
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">运行策略预设</h4>
+                            <p class="settings-pref-row__hint">不改 Key / 代理 / 工具模型</p>
+                          </div>
                         </div>
-                      </div>
-                      <div
-                        class="settings-segmented settings-segmented--inline settings-segmented--effort"
-                        role="radiogroup"
-                        aria-label="运行策略预设"
-                      >
-                        <button
-                          type="button"
-                          role="radio"
-                          class="settings-segmented__btn"
-                          data-testid="settings-preset-reliability"
-                          :class="{ 'is-active': activeRuntimePresetId === 'reliability' }"
-                          :aria-checked="(activeRuntimePresetId === 'reliability').toString()"
-                          @click="applyRuntimePresetById('reliability')"
+                        <div
+                          class="settings-segmented settings-segmented--inline settings-segmented--effort"
+                          role="radiogroup"
+                          aria-label="运行策略预设"
                         >
-                          稳定
-                        </button>
-                        <button
-                          type="button"
-                          role="radio"
-                          class="settings-segmented__btn"
-                          data-testid="settings-preset-speed"
-                          :class="{ 'is-active': activeRuntimePresetId === 'speed' }"
-                          :aria-checked="(activeRuntimePresetId === 'speed').toString()"
-                          @click="applyRuntimePresetById('speed')"
-                        >
-                          速度
-                        </button>
-                        <button
-                          type="button"
-                          role="radio"
-                          class="settings-segmented__btn"
-                          data-testid="settings-preset-cost"
-                          :class="{ 'is-active': activeRuntimePresetId === 'cost' }"
-                          :aria-checked="(activeRuntimePresetId === 'cost').toString()"
-                          @click="applyRuntimePresetById('cost')"
-                        >
-                          成本
-                        </button>
+                          <button
+                            type="button"
+                            role="radio"
+                            class="settings-segmented__btn"
+                            data-testid="settings-preset-reliability"
+                            :class="{ 'is-active': activeRuntimePresetId === 'reliability' }"
+                            :aria-checked="(activeRuntimePresetId === 'reliability').toString()"
+                            @click="applyRuntimePresetById('reliability')"
+                          >
+                            稳定
+                          </button>
+                          <button
+                            type="button"
+                            role="radio"
+                            class="settings-segmented__btn"
+                            data-testid="settings-preset-speed"
+                            :class="{ 'is-active': activeRuntimePresetId === 'speed' }"
+                            :aria-checked="(activeRuntimePresetId === 'speed').toString()"
+                            @click="applyRuntimePresetById('speed')"
+                          >
+                            速度
+                          </button>
+                          <button
+                            type="button"
+                            role="radio"
+                            class="settings-segmented__btn"
+                            data-testid="settings-preset-cost"
+                            :class="{ 'is-active': activeRuntimePresetId === 'cost' }"
+                            :aria-checked="(activeRuntimePresetId === 'cost').toString()"
+                            @click="applyRuntimePresetById('cost')"
+                          >
+                            成本
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -799,7 +799,8 @@ select.settings-control {
 .settings-llm-step .settings-pref-list,
 .settings-collapsible-card .settings-pref-list,
 .settings-submodule .settings-pref-list,
-.settings-tool-page .settings-pref-list {
+.settings-tool-page .settings-pref-list,
+.settings-pref-fold__body .settings-tool-page .settings-pref-list {
   border: none;
   border-radius: 0;
   background: transparent;
@@ -1457,6 +1458,16 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
 
 .settings-pref-fold__body {
   padding: 0 1rem 0.85rem;
+}
+
+/* General AI / similar folds: tool-page surface sits flush in fold body */
+.settings-pref-fold__body > .settings-tool-page.mt-3 {
+  margin-top: 0.35rem;
+}
+
+.settings-pref-fold__body > .settings-tool-page .settings-pref-row {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .settings-pref-fold__body--flush {
