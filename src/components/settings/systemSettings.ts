@@ -2004,9 +2004,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
         const focusSectionId =
           deepLink.sectionId ||
           SETTINGS_SEARCH_INDEX.find(entry => entry.id === deepLink.focus)?.sectionId;
-        const groupId = focusSectionId
-          ? resolveSettingsNavGroupFromSection(focusSectionId)
-          : null;
+        const groupId = focusSectionId ? resolveSettingsNavGroupFromSection(focusSectionId) : null;
         if (groupId) {
           this.navOpenGroup = groupId;
         }

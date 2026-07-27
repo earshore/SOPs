@@ -508,9 +508,14 @@
   align-items: center;
   gap: 0.125rem;
   padding: 0.1875rem;
-  border: 1px solid color-mix(in srgb, var(--settings-border, #e2e8f0) 88%, var(--settings-text-muted));
+  border: 1px solid
+    color-mix(in srgb, var(--settings-border, #e2e8f0) 88%, var(--settings-text-muted));
   border-radius: var(--settings-radius-control, 0.75rem);
-  background: color-mix(in srgb, var(--settings-surface-muted, #f8fafc) 88%, var(--settings-text-muted) 12%);
+  background: color-mix(
+    in srgb,
+    var(--settings-surface-muted, #f8fafc) 88%,
+    var(--settings-text-muted) 12%
+  );
   box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 55%, transparent);
 }
 
@@ -1848,7 +1853,6 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
   color: var(--color-text-tertiary, #94a3b8);
 }
 
-
 /* Effort / preset segmented: slightly stronger pill in pref-rows */
 .settings-segmented--effort {
   flex: 1 1 14rem;
@@ -1879,7 +1883,6 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
   color: var(--settings-accent-strong, var(--settings-accent));
   font-weight: 700;
 }
-
 
 /* Scraper runtime fields (flat, under proxy actions) */
 .settings-scrape-runtime {
@@ -2221,7 +2224,10 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
 
 /* Export bucket rows: hairline between items; last row has no bottom line
  * (actions bar supplies the only rule above buttons). */
-.settings-tool-page--framed > .settings-pref-list > .settings-pref-row--check + .settings-pref-row--check {
+.settings-tool-page--framed
+  > .settings-pref-list
+  > .settings-pref-row--check
+  + .settings-pref-row--check {
   border-top: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
 }
 
@@ -2357,8 +2363,9 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
 
 .settings-panel-footer__version {
   flex-shrink: 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
   font-size: 0.6875rem;
   line-height: 1.3;
   color: var(--color-text-tertiary, #cbd5e1);

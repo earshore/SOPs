@@ -99,14 +99,7 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'playground-deep-chat',
     sectionId: 'settings-section-tool-strategy',
-    labels: [
-      'Playground',
-      'Deep Chat',
-      'Playground · Deep Chat',
-      '业务工具',
-      '输出 Token',
-      '会话',
-    ],
+    labels: ['Playground', 'Deep Chat', 'Playground · Deep Chat', '业务工具', '输出 Token', '会话'],
   },
   {
     id: 'deep-chat-business-tools-title',
@@ -178,13 +171,7 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'settings-data-retention',
     sectionId: 'settings-section-data',
-    labels: [
-      '数据保留策略',
-      '历史保留条数',
-      '缓存清理阈值',
-      '缓存清理比例',
-      '保存数据策略',
-    ],
+    labels: ['数据保留策略', '历史保留条数', '缓存清理阈值', '缓存清理比例', '保存数据策略'],
   },
   {
     id: 'settings-data-cleanup-items',

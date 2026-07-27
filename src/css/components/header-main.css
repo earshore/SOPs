@@ -1092,11 +1092,7 @@
 [data-color-mode-resolved='dark'] .quick-access-item:focus-visible,
 [data-theme='dark'] .quick-access-item:hover,
 [data-theme='dark'] .quick-access-item:focus-visible {
-  background: color-mix(
-    in srgb,
-    var(--color-primary, #818cf8) 18%,
-    var(--surface-card, #1e293b)
-  );
+  background: color-mix(in srgb, var(--color-primary, #818cf8) 18%, var(--surface-card, #1e293b));
   color: var(--color-slate-50, #f8fafc);
 }
 

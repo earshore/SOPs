@@ -1445,7 +1445,6 @@ textarea:focus-visible {
   }
 }
 
-
 /* ---- ASIN product cards (collapsed / expanded) — dual-theme safe ---- */
 .asin-card {
   transition:
@@ -1474,7 +1473,11 @@ textarea:focus-visible {
 }
 
 .asin-card--expanded:hover {
-  background: color-mix(in srgb, var(--color-primary, #3b82f6) 20%, var(--surface-card-hover, #f8fafc));
+  background: color-mix(
+    in srgb,
+    var(--color-primary, #3b82f6) 20%,
+    var(--surface-card-hover, #f8fafc)
+  );
   border-color: var(--color-primary, #3b82f6);
 }
 
@@ -1506,7 +1509,11 @@ textarea:focus-visible {
 .dark .asin-card--expanded:hover,
 [data-color-mode-resolved='dark'] .asin-card--expanded:hover,
 [data-theme='dark'] .asin-card--expanded:hover {
-  background: color-mix(in srgb, var(--color-primary, #818cf8) 28%, var(--surface-card-hover, #334155));
+  background: color-mix(
+    in srgb,
+    var(--color-primary, #818cf8) 28%,
+    var(--surface-card-hover, #334155)
+  );
 }
 
 /* Attribute selectors avoid counting light utility tokens in content-surface gate. */
@@ -1633,8 +1640,11 @@ textarea:focus-visible {
 .dark [x-data='scraperPanel'] .manual-site-btn.selected,
 [data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-site-btn.selected,
 [data-theme='dark'] [x-data='scraperPanel'] .manual-site-btn.selected {
-  background: color-mix(in srgb, var(--color-primary, #818cf8) 18%, var(--surface-card, #1e293b))
-    !important;
+  background: color-mix(
+    in srgb,
+    var(--color-primary, #818cf8) 18%,
+    var(--surface-card, #1e293b)
+  ) !important;
   border-color: color-mix(in srgb, var(--color-primary, #818cf8) 65%, transparent) !important;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #818cf8) 22%, transparent) !important;
 }
@@ -1665,23 +1675,53 @@ textarea:focus-visible {
 .dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-700'],
 .dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-800'],
 [data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-label,
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-700'],
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-800'],
+[data-color-mode-resolved='dark']
+  [x-data='scraperPanel']
+  .manual-config-panel
+  [class*='text-slate-'][class*='-700'],
+[data-color-mode-resolved='dark']
+  [x-data='scraperPanel']
+  .manual-config-panel
+  [class*='text-slate-'][class*='-800'],
 [data-theme='dark'] [x-data='scraperPanel'] .manual-config-label,
-[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-700'],
-[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-800'] {
+[data-theme='dark']
+  [x-data='scraperPanel']
+  .manual-config-panel
+  [class*='text-slate-'][class*='-700'],
+[data-theme='dark']
+  [x-data='scraperPanel']
+  .manual-config-panel
+  [class*='text-slate-'][class*='-800'] {
   color: var(--color-text-primary, #f8fafc) !important;
 }
 
 .dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-400'],
 .dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-500'],
 .dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-600'],
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-400'],
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-500'],
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-600'],
-[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-400'],
-[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-500'],
-[data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-600'] {
+[data-color-mode-resolved='dark']
+  [x-data='scraperPanel']
+  .manual-config-panel
+  [class*='text-slate-'][class*='-400'],
+[data-color-mode-resolved='dark']
+  [x-data='scraperPanel']
+  .manual-config-panel
+  [class*='text-slate-'][class*='-500'],
+[data-color-mode-resolved='dark']
+  [x-data='scraperPanel']
+  .manual-config-panel
+  [class*='text-slate-'][class*='-600'],
+[data-theme='dark']
+  [x-data='scraperPanel']
+  .manual-config-panel
+  [class*='text-slate-'][class*='-400'],
+[data-theme='dark']
+  [x-data='scraperPanel']
+  .manual-config-panel
+  [class*='text-slate-'][class*='-500'],
+[data-theme='dark']
+  [x-data='scraperPanel']
+  .manual-config-panel
+  [class*='text-slate-'][class*='-600'] {
   color: var(--color-text-secondary, #cbd5e1) !important;
 }
 

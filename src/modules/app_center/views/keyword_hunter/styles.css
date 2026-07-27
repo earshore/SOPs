@@ -124,7 +124,8 @@
 .dark .keyword-hunter-title-icon-btn--primary,
 .dark #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
 [data-color-mode-resolved='dark'] .keyword-hunter-title-icon-btn--primary,
-[data-color-mode-resolved='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
+[data-color-mode-resolved='dark']
+  #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary,
 [data-theme='dark'] .keyword-hunter-title-icon-btn--primary,
 [data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary {
   /* Same token as light — do not freeze indigo/blue fallback fill */
@@ -141,19 +142,21 @@
 .dark #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible,
 [data-color-mode-resolved='dark'] .keyword-hunter-title-icon-btn--primary:hover,
 [data-color-mode-resolved='dark'] .keyword-hunter-title-icon-btn--primary:focus-visible,
-[data-color-mode-resolved='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
-[data-color-mode-resolved='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible,
+[data-color-mode-resolved='dark']
+  #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
+[data-color-mode-resolved='dark']
+  #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible,
 [data-theme='dark'] .keyword-hunter-title-icon-btn--primary:hover,
 [data-theme='dark'] .keyword-hunter-title-icon-btn--primary:focus-visible,
 [data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
-[data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible {
+[data-theme='dark']
+  #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible {
   border-color: var(--color-primary-dark, var(--color-primary)) !important;
   background-color: var(--color-primary-dark, var(--color-primary)) !important;
   background-image: none !important;
   color: #ffffff !important;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 32%, transparent) !important;
 }
-
 
 .keyword-hunter-title-action-btn {
   width: auto;
