@@ -194,6 +194,7 @@ export function saveThreadMessages(
       assistantReasoning: options.assistantReasoning,
       assistantReasoningDurationSec: options.assistantReasoningDurationSec,
       assistantPreReplySteps: options.assistantPreReplySteps,
+      userAttachmentMeta: options.userAttachmentMeta,
     }
   );
 

@@ -4,6 +4,7 @@ import type { ChatMessage } from '@/services/llmService';
 import {
   buildStoredThreadMessages,
   mergeThreadHistoryWithRequest,
+  normalizeAttachmentMeta,
   normalizeStoredThreadMessages,
   type DeepChatMessage,
 } from '../session/conversationContext';
@@ -174,5 +175,24 @@ describe('normalizeStoredThreadMessages', () => {
         }
       )
     ).toEqual([{ role: 'ai', text: '保留', createdAt: 5000 }]);
+  });
+
+  it('normalizeAttachmentMeta keeps finite count 1-4 only', () => {
+    expect(normalizeAttachmentMeta({ count: 2 })).toEqual({ count: 2 });
+    expect(normalizeAttachmentMeta({ count: 0 })).toBeUndefined();
+    expect(normalizeAttachmentMeta({ count: 5 })).toBeUndefined();
+    expect(normalizeAttachmentMeta({ count: 2, src: 'data:image/png;base64,xx' })).toEqual({
+      count: 2,
+    });
+    expect(normalizeAttachmentMeta('x')).toBeUndefined();
+  });
+
+  it('normalizeStoredThreadMessages preserves attachmentMeta without inventing files', () => {
+    const messages: DeepChatMessage[] = [
+      { role: 'user', text: '[图片]', attachmentMeta: { count: 2 }, createdAt: 1 },
+    ];
+    const out = normalizeStoredThreadMessages(messages);
+    expect(out[0]?.attachmentMeta).toEqual({ count: 2 });
+    expect(JSON.stringify(out)).not.toContain('data:image');
   });
 });

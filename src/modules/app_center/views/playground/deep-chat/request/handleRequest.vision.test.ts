@@ -40,6 +40,10 @@ vi.mock('@/common/ui/notifications', () => ({
 const { sessionState } = await import('../session/sessionState');
 const { handleDeepChatRequest } = await import('./handleRequest');
 const { showToast } = await import('@/common/ui/notifications');
+const {
+  DEEP_CHAT_VISION_MAX_FILE_BYTES,
+  DEEP_CHAT_VISION_COPY,
+} = await import('./visionAttachments');
 
 const config = {
   provider: 'new_api',
@@ -155,5 +159,67 @@ describe('handleDeepChatRequest vision attachments', () => {
     expect(serialized).not.toContain(src.slice(0, 40));
     // 文本仍落盘；图片本身不落盘
     expect(thread?.messages.some(m => m.text?.includes('describe'))).toBe(true);
+  });
+
+  it('rejects total over cap with toast and no callLLM', async () => {
+    resolveModelCapability.mockReturnValue({
+      supportsVision: true,
+      supportsReasoning: false,
+      supportsTools: false,
+      reasoningEfforts: [],
+      mapRequest: null,
+    });
+    // Three ~4.1MB data URLs → over 12MB total, each under 5MB
+    const per = Math.floor(DEEP_CHAT_VISION_MAX_FILE_BYTES * 0.82);
+    const payload = 'A'.repeat(Math.ceil((per * 4) / 3) + 16);
+    const src = `data:image/png;base64,${payload}`;
+    const files = [0, 1, 2].map(i => ({
+      type: 'image',
+      src,
+      name: `t${i}.png`,
+    }));
+
+    await handleDeepChatRequest(
+      document.createElement('div'),
+      {
+        text: 'big',
+        messages: [{ role: 'user', text: 'big', files }],
+      },
+      { onResponse: vi.fn(async () => undefined), onClose: vi.fn() }
+    );
+
+    expect(callLLM).not.toHaveBeenCalled();
+    expect(vi.mocked(showToast)).toHaveBeenCalledWith(DEEP_CHAT_VISION_COPY.maxTotal(12), {
+      type: 'warning',
+    });
+  });
+
+  it('stamps attachmentMeta.count on stored user message without base64', async () => {
+    resolveModelCapability.mockReturnValue({
+      supportsVision: true,
+      supportsReasoning: false,
+      supportsTools: false,
+      reasoningEfforts: [],
+      mapRequest: null,
+    });
+    const src = tinyPngDataUrl();
+    await handleDeepChatRequest(
+      document.createElement('div'),
+      {
+        text: 'describe',
+        messages: [
+          {
+            role: 'user',
+            text: 'describe',
+            files: [{ type: 'image', src, name: 'a.png' }],
+          },
+        ],
+      },
+      { onResponse: vi.fn(async () => undefined), onClose: vi.fn() }
+    );
+    const thread = sessionState.threadStore.threads[0];
+    const user = thread?.messages.find(m => m.role === 'user');
+    expect(user?.attachmentMeta).toEqual({ count: 1 });
+    expect(JSON.stringify(thread)).not.toContain('data:image');
   });
 });

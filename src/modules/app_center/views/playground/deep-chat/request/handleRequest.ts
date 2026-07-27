@@ -45,6 +45,7 @@ import {
   type DeepChatRequestBudget,
 } from './budget';
 import {
+  DEEP_CHAT_VISION_COPY,
   DEEP_CHAT_VISION_PLACEHOLDER_TEXT,
   resolveDeepChatVisionUserParts,
 } from './visionAttachments';
@@ -75,6 +76,7 @@ export async function handleDeepChatRequest(
   let requestController: AbortController | null = null;
   let pendingThreadId: string | null = null;
   let lifecyclePendingRequest: PendingDeepChatRequest | null = null;
+  let hadVisionParts = false;
 
   try {
     const preparedRequest = await prepareDeepChatRequest(body, signals);
@@ -90,6 +92,12 @@ export async function handleDeepChatRequest(
       visionUserParts,
     } = preparedRequest;
 
+    const userAttachmentMeta =
+      visionUserParts && visionUserParts.length > 0
+        ? { count: visionUserParts.length }
+        : undefined;
+    hadVisionParts = Boolean(userAttachmentMeta);
+
     uiHooks.setConversationActive(container, true);
     signals.onOpen?.();
     requestController = createRequestController();
@@ -103,9 +111,10 @@ export async function handleDeepChatRequest(
     lifecyclePendingRequest = pendingRequest;
     bindStopSignal(signals, pendingRequest);
     sessionState.pendingRequests.set(activeThread.id, pendingRequest);
-    // conversationMessages 仅文本；vision base64 永不落盘。
+    // conversationMessages 仅文本；vision base64 永不落盘；count-only meta 可落盘。
     saveThreadMessages(container, conversationMessages, '', {
       threadId: activeThread.id,
+      ...(userAttachmentMeta ? { userAttachmentMeta } : {}),
     });
     // 本请求的 messages 已烘焙 skill 系统提示；立即卸挂载（单次执行）
     uiHooks.consumeMountedSkillsAfterSend(container, activeThread.id);
@@ -132,6 +141,8 @@ export async function handleDeepChatRequest(
       assistantReasoning: pendingRequest.reasoningText,
       assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
       assistantPreReplySteps: pendingRequest.preReplySteps,
+      // Re-pass meta so user row is not stripped on final assistant save.
+      ...(userAttachmentMeta ? { userAttachmentMeta } : {}),
       // Explicitly omit assistantStatus so partial 「未完成」 is cleared in store.
     });
     markPendingDeepChatRequestSettled(pendingRequest);
@@ -157,16 +168,30 @@ export async function handleDeepChatRequest(
       return;
     }
     const message = error instanceof Error ? error.message : '模型调用失败';
-    const responseText = formatDeepChatErrorResponse(message);
+    const preferPayloadLarge = hadVisionParts && looksLikePayloadTooLarge(error);
+    const userFacingMessage = preferPayloadLarge ? DEEP_CHAT_VISION_COPY.payloadLarge : message;
+    const responseText = formatDeepChatErrorResponse(userFacingMessage);
     nativeLoggerConsole.error('[Deep Chat] LLM 调用失败:', redactSensitiveError(error));
-    // Surface config/auth failures with settings deep-link; in-chat still shows full text.
-    showLlmFailureToast(error, { titlePrefix: '模型调用失败: ' });
+    if (preferPayloadLarge) {
+      showToast(DEEP_CHAT_VISION_COPY.payloadLarge, { type: 'warning' });
+    } else {
+      // Surface config/auth failures with settings deep-link; in-chat still shows full text.
+      showLlmFailureToast(error, { titlePrefix: '模型调用失败: ' });
+    }
     saveFailedDeepChatResponse(pendingThreadId, responseText);
     await emitDeepChatResponse(signals, { text: responseText });
   } finally {
     cleanupLifecyclePendingRequest(pendingThreadId, lifecyclePendingRequest);
     signals.onClose?.();
   }
+}
+
+/** Best-effort: gateway / provider size signals for vision turns. */
+function looksLikePayloadTooLarge(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error ?? '');
+  return /413|payload|too large|content.?length|request entity|entity too large|context_length|maximum context/i.test(
+    msg
+  );
 }
 
 export async function prepareDeepChatRequest(
