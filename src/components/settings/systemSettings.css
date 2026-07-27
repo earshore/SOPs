@@ -642,6 +642,10 @@
 }
 
 .settings-segmented__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   min-height: 2rem;
   padding: 0.25rem 0.75rem;
   border: none;
@@ -888,7 +892,7 @@ select.settings-control {
 
 .settings-pref-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem 1rem;
@@ -896,12 +900,52 @@ select.settings-control {
   min-height: 3.25rem;
 }
 
+/* Segmented / 宽 control 才允许换行；开关行强制左右并排 */
+.settings-pref-row:has(.settings-segmented),
+.settings-pref-row:has(.settings-pref-row__control) {
+  flex-wrap: wrap;
+}
+
 .settings-pref-row__meta {
   display: flex;
   align-items: center;
   gap: 0.625rem;
   min-width: 0;
-  flex: 1 1 10rem;
+  flex: 1 1 auto;
+}
+
+.settings-pref-row:has(.settings-switch) .settings-pref-row__meta {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.settings-pref-row .settings-switch {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.settings-pref-row__action {
+  flex-shrink: 0;
+  margin-left: auto;
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--settings-border, #e2e8f0);
+  border-radius: calc(var(--settings-radius-control, 0.75rem) - 0.125rem);
+  background: var(--settings-surface, #fff);
+  color: var(--settings-text, #334155);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-pref-row__action:hover {
+  border-color: color-mix(in srgb, var(--settings-accent) 35%, var(--settings-border, #e2e8f0));
+  color: var(--settings-accent);
+}
+
+.settings-pref-row__action:focus-visible {
+  outline: none;
+  box-shadow: var(--settings-focus-ring);
 }
 
 .settings-pref-row__icon {
@@ -1007,6 +1051,10 @@ select.settings-control {
 }
 
 .settings-segmented--inline .settings-segmented__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   flex: 1 1 0;
   min-height: 1.875rem;
   padding: 0.25rem 0.5rem;
