@@ -102,6 +102,7 @@ import {
   type SettingsDirtyPartition,
   type SettingsDirtySnapshot,
 } from '@/components/settings/domain/settingsDirty';
+import { APP_VERSION } from '@/common/constants/constants';
 import {
   evaluateSettingsHealth,
   isRuntimeRawInvalid,
@@ -435,6 +436,8 @@ interface SettingsPanelData {
   _settingsBaseline: SettingsDirtySnapshot | null;
   _runtimeHealthNormalized: boolean;
   healthMessages: string[];
+  settingsFooterStatusText: string;
+  settingsAppVersionLabel: string;
   dirtyPartitions: SettingsDirtyPartition[];
   /** P2-4: another tab changed settings keys */
   externalChangeNotice: boolean;
@@ -1847,6 +1850,17 @@ const settingsPanelBehavior: SettingsPanelPart = {
   get localDataCleanupSummaryText(): string {
     const total = this.localData.usage ? this.formatBytes(this.localData.usage.total) : '计算中';
     return `${this.localDataBucketItems.length} 类数据 · 总计 ${total}`;
+  },
+
+  get settingsFooterStatusText(): string {
+    if (this.healthMessages.length > 0) {
+      return this.healthMessages[0] || '设置需要关注';
+    }
+    return '系统正常运行';
+  },
+
+  get settingsAppVersionLabel(): string {
+    return `AihangSOP v${APP_VERSION}`;
   },
 
   get localDataCleanupToggleText(): string {

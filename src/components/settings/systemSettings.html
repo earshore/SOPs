@@ -877,28 +877,30 @@
                 </div>
               </div>
 
-<div class="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:gap-2.5">
-                  <button
-                    type="button"
-                    :aria-label="testConnectionText"
-                    @click="testConnection()"
-                    :disabled="llm.isTesting"
-                    class="settings-focus-ring flex-1 min-h-[44px] py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-medium rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 active:translate-y-px cursor-pointer"
-                  >
-                    <i class="fas text-xs" :class="testConnectionIconClass" aria-hidden="true"></i>
-                    <span x-text="testConnectionText"></span>
-                  </button>
-                  <button
-                    type="button"
-                    data-testid="settings-save-provider"
-                    @click="saveProviderConfig()"
-                    class="settings-btn-primary flex-[2]"
-                  >
-                    <i class="fas fa-check text-xs" aria-hidden="true"></i>
-                    保存配置
-                  </button>
+<div class="settings-strategy-footer">
+                  <div class="settings-strategy-footer__row">
+                    <button
+                      type="button"
+                      :aria-label="testConnectionText"
+                      @click="testConnection()"
+                      :disabled="llm.isTesting"
+                      class="settings-strategy-footer__btn settings-strategy-footer__btn--secondary"
+                    >
+                      <i class="fas text-xs" :class="testConnectionIconClass" aria-hidden="true"></i>
+                      <span x-text="testConnectionText"></span>
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="settings-save-provider"
+                      @click="saveProviderConfig()"
+                      class="settings-strategy-footer__btn settings-strategy-footer__btn--primary"
+                    >
+                      <i class="fas fa-check text-xs" aria-hidden="true"></i>
+                      <span>保存配置</span>
+                    </button>
+                  </div>
+                  <p class="settings-strategy-footer__hint">测试不改配置；保存后生效。</p>
                 </div>
-                <p class="settings-field-help">测试不改配置；保存后生效。</p>
               </div>
           </section>
 
@@ -2859,68 +2861,68 @@
                     ></i>
                   </summary>
                   <div class="settings-pref-fold__body">
-                    <div class="settings-tool-page">
+                    <div class="settings-tool-page settings-tool-page--framed">
                       <div class="settings-data-bucket-list">
-                      <template x-for="bucket in localDataBucketItems" :key="bucket.id">
-                        <div class="settings-data-bucket-row">
-                          <div class="settings-data-bucket-row__main">
-                            <div class="min-w-0 flex-1">
-                              <div class="flex flex-wrap items-center gap-2">
-                                <h4
-                                  class="settings-pref-row__title truncate"
-                                  x-text="bucket.label"
-                                ></h4>
+                        <template x-for="bucket in localDataBucketItems" :key="bucket.id">
+                          <div class="settings-data-bucket-row">
+                            <div class="settings-data-bucket-row__main">
+                              <div class="settings-data-bucket-row__copy min-w-0 flex-1">
+                                <div class="settings-data-bucket-row__title-line">
+                                  <h4
+                                    class="settings-pref-row__title truncate"
+                                    x-text="bucket.label"
+                                  ></h4>
+                                  <span
+                                    class="settings-data-bucket-row__badge"
+                                    x-text="bucket.percentText"
+                                  ></span>
+                                </div>
+                                <p
+                                  class="settings-pref-row__hint"
+                                  x-text="bucket.description"
+                                ></p>
+                              </div>
+                              <div class="settings-data-bucket-row__stats">
                                 <span
-                                  class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500"
-                                  x-text="bucket.percentText"
+                                  class="settings-data-bucket-row__used"
+                                  x-text="bucket.usedText"
+                                ></span>
+                                <span
+                                  class="settings-data-bucket-row__keys"
+                                  x-text="bucket.keysText"
                                 ></span>
                               </div>
-                              <p
-                                class="settings-pref-row__hint"
-                                x-text="bucket.description"
-                              ></p>
                             </div>
-                            <div class="shrink-0 text-right">
-                              <span
-                                class="block text-xs font-medium text-slate-700"
-                                x-text="bucket.usedText"
-                              ></span>
-                              <span
-                                class="block text-[10px] text-slate-400"
-                                x-text="bucket.keysText"
-                              ></span>
-                            </div>
-                          </div>
-                          <div class="mt-2 flex items-center gap-2">
-                            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                              <progress
-                                class="settings-local-data-progress h-full w-full"
-                                value="0"
-                                max="100"
-                                :value="bucket.percentValue"
-                                :data-bucket="bucket.id"
-                                :aria-label="bucket.label"
-                              ></progress>
-                            </div>
-                            <button
-                              type="button"
-                              @click="clearLocalDataBucket(bucket.id)"
-                              :disabled="localData.isBusy || bucket.isEmpty"
-                              class="settings-focus-ring min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-45"
-                              :class="bucket.buttonClass"
-                            >
-                              <span :hidden="bucket.isClearing" x-text="bucket.actionLabel"></span>
-                              <span
-                                :hidden="!bucket.isClearing"
-                                class="inline-flex items-center gap-1"
+                            <div class="settings-data-bucket-row__meter">
+                              <div class="settings-data-bucket-row__track">
+                                <progress
+                                  class="settings-local-data-progress"
+                                  value="0"
+                                  max="100"
+                                  :value="bucket.percentValue"
+                                  :data-bucket="bucket.id"
+                                  :aria-label="bucket.label"
+                                ></progress>
+                              </div>
+                              <button
+                                type="button"
+                                @click="clearLocalDataBucket(bucket.id)"
+                                :disabled="localData.isBusy || bucket.isEmpty"
+                                class="settings-data-bucket-row__action"
+                                :class="bucket.buttonClass"
                               >
-                                <i class="fas fa-circle-notch fa-spin"></i>
-                                清理中
-                              </span>
-                            </button>
+                                <span :hidden="bucket.isClearing" x-text="bucket.actionLabel"></span>
+                                <span
+                                  :hidden="!bucket.isClearing"
+                                  class="settings-data-bucket-row__busy"
+                                >
+                                  <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
+                                  清理中
+                                </span>
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      </template>
+                        </template>
                       </div>
                     </div>
                   </div>
@@ -3524,10 +3526,14 @@
     <!-- Footer: flex-shrink-0 keeps it pinned; never scrolls with section nav -->
     <div class="settings-panel-footer">
       <div class="settings-panel-footer__status">
-        <div class="settings-panel-footer__dot" aria-hidden="true"></div>
-        <span class="settings-panel-footer__label">系统正常运行</span>
+        <div
+          class="settings-panel-footer__dot"
+          :class="{ 'is-warn': healthMessages.length > 0 }"
+          aria-hidden="true"
+        ></div>
+        <span class="settings-panel-footer__label" x-text="settingsFooterStatusText"></span>
       </div>
-      <span class="settings-panel-footer__version">AihangSOP v1.0.0</span>
+      <span class="settings-panel-footer__version" x-text="settingsAppVersionLabel"></span>
     </div>
   </div>
 </div>
