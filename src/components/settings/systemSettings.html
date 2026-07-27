@@ -963,6 +963,17 @@
                       type="button"
                       role="radio"
                       class="settings-segmented__btn"
+                      data-testid="settings-preset-default"
+                      :class="{ 'is-active': activeRuntimePresetId === 'default' }"
+                      :aria-checked="(activeRuntimePresetId === 'default').toString()"
+                      @click="applyRuntimePresetById('default')"
+                    >
+                      默认
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
                       data-testid="settings-preset-reliability"
                       :class="{ 'is-active': activeRuntimePresetId === 'reliability' }"
                       :aria-checked="(activeRuntimePresetId === 'reliability').toString()"

@@ -122,6 +122,7 @@ import {
 import {
   applyRuntimePreset,
   isRuntimePresetId,
+  matchRuntimePreset,
   type RuntimePresetId,
 } from '@/components/settings/domain/settingsPresets';
 import {
@@ -331,7 +332,10 @@ interface SettingsPanelData {
   appearanceAnimationSpeed: AnimationSpeed;
   /** Appearance: respect prefers-reduced-motion */
   appearanceRespectSystemPreference: boolean;
-  /** Last applied runtime preset id (UI highlight only; not persisted) */
+  /**
+   * Active 应用策略预案 chip (`default` | reliability | speed | cost).
+   * Derived from runtime fingerprint when possible; null = customized.
+   */
   activeRuntimePresetId: RuntimePresetId | null;
   /** API path custom dropdown open state */
   llmApiPathMenuOpen: boolean;
@@ -543,6 +547,7 @@ interface SettingsPanelData {
   setAppearanceAnimationsEnabled(event: Event): void;
   setAppearanceAnimationSpeed(speed: AnimationSpeed): void;
   setAppearanceRespectSystemPreference(event: Event): void;
+  syncActiveRuntimePresetFromSettings(): void;
   applyRuntimePresetById(id: RuntimePresetId | string): void;
   formatBytes(bytes: number): string;
   getProxyDisplayName(type: string): string;
@@ -1952,7 +1957,6 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.isOpen = true;
     this.searchQuery = '';
     this.searchHitId = '';
-    this.activeRuntimePresetId = null;
     const rawRuntime = StorageService.get(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS);
     this._runtimeHealthNormalized = isRuntimeRawInvalid(rawRuntime);
     this.loadRuntimeStrategy();
@@ -2308,12 +2312,18 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.loadAppearanceSettings();
   },
 
+  syncActiveRuntimePresetFromSettings(): void {
+    this.activeRuntimePresetId = matchRuntimePreset(this.runtimeStrategy.settings);
+  },
+
   applyRuntimePresetById(id: RuntimePresetId | string): void {
     if (!isRuntimePresetId(id)) return;
     this.runtimeStrategy.settings = applyRuntimePreset(this.runtimeStrategy.settings, id);
     this.activeRuntimePresetId = id;
     // Button control: auto-persist runtime strategy
-    void this.persistRuntimeStrategySettings({ toast: '已应用并保存策略预案' });
+    void this.persistRuntimeStrategySettings({
+      toast: id === 'default' ? '已应用并保存默认策略预案' : '已应用并保存策略预案',
+    });
   },
 
   onSettingsSearch(event?: Event): void {
@@ -2581,6 +2591,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   loadRuntimeStrategy(): void {
     this.runtimeStrategy.settings = getRuntimeStrategySettings();
+    this.syncActiveRuntimePresetFromSettings();
   },
 
   async persistRuntimeStrategySettings(options?: { toast?: string }): Promise<void> {
@@ -2611,6 +2622,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.runtimeStrategy.settings = normalizeRuntimeStrategySettings(
       DEFAULT_RUNTIME_STRATEGY_SETTINGS
     );
+    this.syncActiveRuntimePresetFromSettings();
   },
 
   // --- Proxy Logic ---
@@ -2810,6 +2822,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   setRuntimeNumber(path: string, event: Event, multiplier = 1): void {
     setRuntimePathValue(this.runtimeStrategy.settings, path, getInputNumber(event) * multiplier);
+    this.syncActiveRuntimePresetFromSettings();
   },
 
   setRuntimeBoolean(path: string, event: Event): void {
@@ -2818,6 +2831,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
       path,
       (event.target as HTMLInputElement).checked
     );
+    this.syncActiveRuntimePresetFromSettings();
     // Switch controls: instant-save runtime strategy (no footer click required)
     void this.persistRuntimeStrategySettings({ toast: '已保存' });
   },
@@ -2828,12 +2842,14 @@ const settingsPanelBehavior: SettingsPanelPart = {
       path,
       (event.target as HTMLSelectElement).value
     );
+    this.syncActiveRuntimePresetFromSettings();
   },
 
   setMasterAnalysisSchedulePreference(preference: SchedulingPreference): void {
     if (!isSchedulingPreference(preference)) return;
     this.runtimeStrategy.settings.masterAnalysis.schedulingPreference = preference;
     this.schedulePreferenceMenuOpen = false;
+    this.syncActiveRuntimePresetFromSettings();
     void this.persistRuntimeStrategySettings({ toast: '调度偏好已保存' });
   },
 

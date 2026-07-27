@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   applyRuntimePreset,
+  matchRuntimePreset,
   type RuntimePresetId,
 } from '@/components/settings/domain/settingsPresets';
 import {
@@ -151,6 +152,18 @@ describe('settingsPresets', () => {
     applyRuntimePreset(base, 'speed' satisfies RuntimePresetId);
     expect(JSON.stringify(base)).toBe(before);
   });
+
+  it('matches product baseline fingerprint as default plan chip', () => {
+    const base = structuredClone(DEFAULT_RUNTIME_STRATEGY_SETTINGS);
+    expect(matchRuntimePreset(base)).toBe('default');
+
+    const reliability = applyRuntimePreset(base, 'reliability');
+    expect(matchRuntimePreset(reliability)).toBe('reliability');
+
+    const customized = applyRuntimePreset(base, 'cost');
+    customized.llm.maxRetries = 99;
+    expect(matchRuntimePreset(customized)).toBeNull();
+  });
 });
 
 describe('UT-P1-06 appearance theme contracts', () => {
@@ -189,15 +202,18 @@ describe('UT-P1-06 appearance theme contracts', () => {
     // Pref-row + effort-style segmented (same surface as reasoning effort)
     const presetStart = html.indexOf('data-testid="settings-runtime-presets"');
     expect(presetStart).toBeGreaterThan(-1);
-    const presetChunk = html.slice(presetStart, presetStart + 2500);
+    const presetChunk = html.slice(presetStart, presetStart + 4500);
     expect(presetChunk).toContain('settings-pref-row');
     expect(presetChunk).toContain(
       'settings-segmented settings-segmented--inline settings-segmented--effort'
     );
+    expect(presetChunk).toContain('data-testid="settings-preset-default"');
     expect(presetChunk).toContain('data-testid="settings-preset-reliability"');
     expect(presetChunk).toContain('data-testid="settings-preset-speed"');
     expect(presetChunk).toContain('data-testid="settings-preset-cost"');
+    expect(presetChunk).toContain("applyRuntimePresetById('default')");
     expect(presetChunk).toContain("applyRuntimePresetById('reliability')");
+    expect(presetChunk).toMatch(/>\s*默认\s*</);
     expect(presetChunk).not.toContain('settings-preset-group');
     expect(presetChunk).not.toContain('需保存');
   });

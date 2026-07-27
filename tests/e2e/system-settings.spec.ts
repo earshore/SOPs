@@ -143,9 +143,14 @@ test.describe('system settings', () => {
     const presets = page.getByTestId('settings-runtime-presets');
     await expect(presets).toBeVisible();
     await expect(presets.getByText('应用策略预案')).toBeVisible();
+    await expect(page.getByTestId('settings-preset-default')).toBeVisible();
     await expect(page.getByTestId('settings-preset-reliability')).toBeVisible();
     await expect(page.getByTestId('settings-preset-cost')).toBeVisible();
+    // Click 默认 so the active plan chip is always visible regardless of prior suite state
+    await page.getByTestId('settings-preset-default').click();
+    await expect(page.getByTestId('settings-preset-default')).toHaveClass(/is-active/);
     await page.getByTestId('settings-preset-cost').click();
+    await expect(page.getByTestId('settings-preset-cost')).toHaveClass(/is-active/);
     await expect(presets).toBeVisible();
   });
 
