@@ -65,6 +65,19 @@ export function applyDeepChatVisionUploadConfig(chat: DeepChatElement | null | u
   }
 }
 
+/** Best-effort: composer still has staged image attachments in shadow DOM. */
+export function deepChatHasStagedImageAttachments(
+  chat: DeepChatElement | null | undefined
+): boolean {
+  const root = chat?.shadowRoot;
+  if (!root) return false;
+  const strip = root.querySelector('#file-attachment-container');
+  if (strip && strip.childElementCount > 0) return true;
+  const fileInput = root.querySelector<HTMLInputElement>('#file-input');
+  if (fileInput?.files && fileInput.files.length > 0) return true;
+  return false;
+}
+
 /**
  * Host chrome: microcopy outside #text-input-container (inside #input), vision only.
  * Exact Chinese string from DEEP_CHAT_VISION_COPY.helper.

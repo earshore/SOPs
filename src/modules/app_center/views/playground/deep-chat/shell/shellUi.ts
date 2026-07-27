@@ -72,7 +72,9 @@ import {
   configureDeepChatBase,
   configureDeepChatConnection,
   configureDeepChatStyles,
+  deepChatHasStagedImageAttachments,
 } from '../infra/deepChatConfig';
+import { DEEP_CHAT_VISION_COPY } from '../request/visionAttachments';
 
 import { refreshMessageToolbarStatuses, setupMessageToolbars } from '../composer/messageToolbar';
 
@@ -196,14 +198,41 @@ export function bindModelControls(refs: ModelControlRefs): void {
         lastResponseModel: undefined,
       });
     }
+    const chat = getChat(container);
+    const hadVision = chat?.classList.contains('is-vision-enabled') ?? false;
+    const hadFiles = deepChatHasStagedImageAttachments(chat);
+
     sessionState.selectedModel = nextModel;
     // Capability-gated controls must re-evaluate when the model changes.
     syncDeepChatReasoningControlsFromThread(container);
-    applyDeepChatVisionUploadConfig(getChat(container));
+    applyDeepChatVisionUploadConfig(chat);
+
+    const hasVision = chat?.classList.contains('is-vision-enabled') ?? false;
+    if (hadVision && !hasVision && hadFiles) {
+      showToast(DEEP_CHAT_VISION_COPY.modelSwitch, { type: 'warning' });
+    }
   };
   modelSelect?.addEventListener('change', onModelChange);
   sessionState.cleanupCallbacks.push(() =>
     modelSelect?.removeEventListener('change', onModelChange)
+  );
+
+  // Best-effort: paste image while non-vision model — warn, do not clear/block.
+  const onNonVisionPaste = (event: ClipboardEvent): void => {
+    const chat = getChat(container);
+    if (!chat || chat.classList.contains('is-vision-enabled')) return;
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith('image/')) {
+        showToast(DEEP_CHAT_VISION_COPY.nonVision, { type: 'warning' });
+        break;
+      }
+    }
+  };
+  container.addEventListener('paste', onNonVisionPaste);
+  sessionState.cleanupCallbacks.push(() =>
+    container.removeEventListener('paste', onNonVisionPaste)
   );
 
   const onRefresh = async (): Promise<void> => {
