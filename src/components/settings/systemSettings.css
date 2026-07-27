@@ -1340,9 +1340,15 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 }
 
 .settings-llm-step__header-control--secret {
-  flex: 1 1 16rem;
-  min-width: 14rem;
-  max-width: min(36rem, 100%);
+  flex: 1 1 18rem;
+  min-width: 16rem;
+  max-width: none;
+}
+
+/* Credentials header: keep title compact so the secret field can grow */
+.settings-llm-step--static:has(#llm-api-key) > .settings-llm-step__header--static > div:first-child {
+  flex: 0 1 auto;
+  max-width: 11rem;
 }
 
 @media (min-width: 640px) {
@@ -1354,7 +1360,12 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   .settings-llm-step__header-control--secret {
     width: auto;
     flex: 1 1 auto;
-    min-width: 18rem;
+    min-width: 22rem;
+    max-width: none;
+  }
+
+  .settings-llm-step--static:has(#llm-api-key) > .settings-llm-step__header--static > div:first-child {
+    flex: 0 0 auto;
     max-width: none;
   }
 }
