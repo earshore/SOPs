@@ -1271,6 +1271,9 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain("toggleNavGroup('data', 'settings-section-data')");
   expect(template).toContain("navigateToNavTarget('llm-step-1-title', 'llm')");
   expect(template).toContain("navigateToNavTarget('master-analysis-scrape', 'tool')");
+  expect(template).toContain("navigateToNavTarget('settings-runtime-presets', 'tool')");
+  expect(template).toContain("navigateToNavTarget('playground-deep-chat', 'tool')");
+  expect(template).toContain("navigateToNavTarget('settings-data-cleanup-items', 'data')");
   expect(template).toContain('settings-panel-nav-link--secondary');
   expect(template).toContain('id="settings-section-llm"');
   expect(template).toContain('id="settings-section-tool-strategy"');

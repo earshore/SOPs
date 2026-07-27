@@ -209,10 +209,18 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-runtime-presets') }"
+                @click="navigateToNavTarget('settings-runtime-presets', 'tool')"
+              >
+                应用策略预案
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
                 :class="{ 'is-current': isNavTargetCurrent('general-ai-runtime') }"
                 @click="navigateToNavTarget('general-ai-runtime', 'tool')"
               >
-                通用 AI 策略
+                通用 AI 执行策略
               </button>
               <button
                 type="button"
@@ -241,8 +249,8 @@
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
-                :class="{ 'is-current': isNavTargetCurrent('deep-chat-business-tools-title') }"
-                @click="navigateToNavTarget('deep-chat-business-tools-title', 'tool')"
+                :class="{ 'is-current': isNavTargetCurrent('playground-deep-chat') }"
+                @click="navigateToNavTarget('playground-deep-chat', 'tool')"
               >
                 Deep Chat
               </button>
@@ -296,6 +304,14 @@
                 @click="navigateToNavTarget('settings-data-retention', 'data')"
               >
                 数据保留策略
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-data-cleanup-items') }"
+                @click="navigateToNavTarget('settings-data-cleanup-items', 'data')"
+              >
+                清理项
               </button>
               <button
                 type="button"
@@ -926,6 +942,7 @@
                   id="settings-runtime-presets"
                   data-settings-focus="settings-runtime-presets"
                   data-testid="settings-runtime-presets"
+                  data-settings-nav-id="settings-runtime-presets"
                   data-settings-nav-group="tool"
                 >
                   <div class="settings-pref-row__meta">
@@ -2813,8 +2830,10 @@
                 <div class="settings-pref-divider" role="separator"></div>
 
                 <details
+                  id="settings-data-cleanup-items"
                   class="settings-pref-fold"
                   data-settings-focus="settings-data-cleanup-items"
+                  data-settings-nav-id="settings-data-cleanup-items"
                   data-settings-nav-group="data"
                 >
                   <summary class="settings-pref-row settings-pref-row--fold">

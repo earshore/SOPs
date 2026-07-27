@@ -112,9 +112,13 @@ import {
   applySettingsDeepLink,
   expandSettingsFocusTarget,
   normalizeSettingsOpenOptions,
+  resolveSettingsNavGroupFromSection,
   type SettingsOpenOptions,
 } from '@/components/settings/domain/settingsDeepLink';
-import { findFirstSettingsSearchMatch } from '@/components/settings/domain/settingsSearch';
+import {
+  findFirstSettingsSearchMatch,
+  SETTINGS_SEARCH_INDEX,
+} from '@/components/settings/domain/settingsSearch';
 import {
   measureSettingsNavMarkers,
   pickActiveSettingsNavGroup,
@@ -542,7 +546,7 @@ interface SettingsPanelData {
   toggleNavGroup(groupId: string, sectionId: string): void;
   navigateToNavTarget(targetId: string, groupId?: string): void;
   onSettingsSearch(event?: Event): void;
-  scrollToSearchHit(hitId: string): void;
+  scrollToSearchHit(hitId: string, sectionId?: string): void;
   loadAppearanceSettings(): void;
   setAppearanceTheme(themeId: string): void;
   setAppearanceThemeFromEvent(event: Event): void;
@@ -1988,6 +1992,33 @@ const settingsPanelBehavior: SettingsPanelPart = {
     if (deepLink.sectionId || deepLink.focus) {
       // Defer until panel is painted so section nodes exist for scroll/focus.
       queueMicrotask(() => {
+        const focusSectionId =
+          deepLink.sectionId ||
+          SETTINGS_SEARCH_INDEX.find(entry => entry.id === deepLink.focus)?.sectionId;
+        const groupId = focusSectionId
+          ? resolveSettingsNavGroupFromSection(focusSectionId)
+          : null;
+        if (groupId) {
+          this.navOpenGroup = groupId;
+        }
+
+        // Prefer real focus targets for scroll/highlight; invalid focus still falls back to section.
+        if (deepLink.focus) {
+          const focusEl = expandSettingsFocusTarget(deepLink.focus);
+          if (focusEl) {
+            this.activeNavTargetId = deepLink.focus;
+            this._navScrollPauseUntil = Date.now() + 800;
+            requestAnimationFrame(() => {
+              this.scrollToElementInPanel(focusEl);
+            });
+            return;
+          }
+        }
+
+        if (deepLink.sectionId) {
+          this.activeNavTargetId = deepLink.sectionId;
+          this._navScrollPauseUntil = Date.now() + 800;
+        }
         applySettingsDeepLink(deepLink, {
           scrollToSection: sectionId => this.scrollToSection(sectionId),
         });
@@ -2349,51 +2380,36 @@ const settingsPanelBehavior: SettingsPanelPart = {
       return;
     }
     queueMicrotask(() => {
-      this.scrollToSearchHit(match.id);
+      this.scrollToSearchHit(match.id, match.sectionId);
     });
   },
 
-  scrollToSearchHit(hitId: string): void {
-    const el =
-      document.getElementById(hitId) ||
-      document.querySelector<HTMLElement>(
-        `[data-settings-focus="${typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(hitId) : hitId.replace(/"/g, '\\"')}"]`
-      );
+  scrollToSearchHit(hitId: string, sectionId?: string): void {
+    const indexEntry =
+      SETTINGS_SEARCH_INDEX.find(entry => entry.id === hitId) ||
+      findFirstSettingsSearchMatch(this.searchQuery);
+    const resolvedSectionId = sectionId || indexEntry?.sectionId || '';
+    const groupId = resolvedSectionId
+      ? resolveSettingsNavGroupFromSection(resolvedSectionId)
+      : null;
+
+    if (groupId) {
+      this.navOpenGroup = groupId;
+    }
+    this.activeNavTargetId = hitId;
+    this._navScrollPauseUntil = Date.now() + 800;
+
+    const el = expandSettingsFocusTarget(hitId);
     if (!el) {
-      // Fall back to section scroll via index entry
-      const match = findFirstSettingsSearchMatch(this.searchQuery);
-      if (match?.sectionId) {
-        this.scrollToSection(match.sectionId);
+      if (resolvedSectionId) {
+        this.scrollToSection(resolvedSectionId);
       }
       return;
     }
 
-    // Expand ancestor details so advanced/focus content is reachable
-    let node: HTMLElement | null = el;
-    while (node) {
-      if (node instanceof HTMLDetailsElement) {
-        node.open = true;
-      }
-      node = node.parentElement;
-    }
-
-    const scroller = el.closest('.settings-panel-scroll');
-    if (scroller instanceof HTMLElement) {
-      const scrollerRect = scroller.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
-      const nextTop = scroller.scrollTop + (elRect.top - scrollerRect.top) - 8;
-      scroller.scrollTo({
-        top: Math.max(0, nextTop),
-        behavior: 'smooth',
-      });
-    } else if (el.id) {
-      this.scrollToSection(el.id);
-    }
-
-    el.classList.add('settings-deep-link-highlight');
-    window.setTimeout(() => {
-      el.classList.remove('settings-deep-link-highlight');
-    }, 2000);
+    requestAnimationFrame(() => {
+      this.scrollToElementInPanel(el);
+    });
   },
 
   // 打开性能监控面板

@@ -74,12 +74,33 @@ function escapeAttrSelector(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-/** Resolve a settings target by id or data-settings-focus. */
+/** Map a settings section id to side-nav group id (llm|tool|data|appearance|dev). */
+export function resolveSettingsNavGroupFromSection(sectionId: string): string | null {
+  switch (sectionId) {
+    case 'settings-section-llm':
+      return 'llm';
+    case 'settings-section-tool-strategy':
+    case 'settings-section-network':
+      return 'tool';
+    case 'settings-section-data':
+      return 'data';
+    case 'settings-section-appearance':
+      return 'appearance';
+    case 'settings-section-performance':
+      return 'dev';
+    default:
+      return null;
+  }
+}
+
+/** Resolve a settings target by id, focus marker, or nav marker. */
 export function findSettingsNavTarget(targetId: string): HTMLElement | null {
   if (!targetId) return null;
+  const escaped = escapeAttrSelector(targetId);
   return (
     document.getElementById(targetId) ||
-    document.querySelector<HTMLElement>(`[data-settings-focus="${escapeAttrSelector(targetId)}"]`)
+    document.querySelector<HTMLElement>(`[data-settings-focus="${escaped}"]`) ||
+    document.querySelector<HTMLElement>(`[data-settings-nav-id="${escaped}"]`)
   );
 }
 

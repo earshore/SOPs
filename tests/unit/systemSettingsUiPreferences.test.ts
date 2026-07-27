@@ -3,9 +3,14 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   findFirstSettingsSearchMatch,
+  findSettingsSearchMatches,
   SETTINGS_SEARCH_INDEX,
 } from '@/components/settings/domain/settingsSearch';
-import { applySettingsDeepLink } from '@/components/settings/domain/settingsDeepLink';
+import {
+  applySettingsDeepLink,
+  findSettingsNavTarget,
+  resolveSettingsNavGroupFromSection,
+} from '@/components/settings/domain/settingsDeepLink';
 
 describe('settingsSearch', () => {
   it('UT-P1-05 query ACOS hits PPC thresholds focus id', () => {
@@ -23,6 +28,43 @@ describe('settingsSearch', () => {
     expect(SETTINGS_SEARCH_INDEX.some(e => e.sectionId === 'settings-section-llm')).toBe(true);
     expect(SETTINGS_SEARCH_INDEX.some(e => e.sectionId === 'settings-section-tool-strategy')).toBe(
       true
+    );
+  });
+
+  it('ranks exact/prefix hits above loose substring', () => {
+    const hit = findFirstSettingsSearchMatch('凭证');
+    expect(hit?.id).toBe('llm-step-2-title');
+  });
+
+  it('returns ranked multi-matches for shared labels', () => {
+    const hits = findSettingsSearchMatches('Deep Chat', SETTINGS_SEARCH_INDEX, 3);
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits[0]?.id).toBe('playground-deep-chat');
+  });
+
+  it('covers nav-aligned targets including presets and cleanup', () => {
+    const ids = SETTINGS_SEARCH_INDEX.map(e => e.id);
+    expect(ids).toContain('settings-runtime-presets');
+    expect(ids).toContain('settings-data-cleanup-items');
+    expect(ids).toContain('playground-deep-chat');
+    expect(ids).toContain('settings-appearance-color-mode');
+    expect(ids).toContain('master-analysis-scrape');
+  });
+});
+
+describe('settings deep-link target resolve', () => {
+  it('maps section ids to nav groups', () => {
+    expect(resolveSettingsNavGroupFromSection('settings-section-llm')).toBe('llm');
+    expect(resolveSettingsNavGroupFromSection('settings-section-network')).toBe('tool');
+    expect(resolveSettingsNavGroupFromSection('settings-section-performance')).toBe('dev');
+  });
+
+  it('finds targets by data-settings-nav-id', () => {
+    document.body.innerHTML = `
+      <div data-settings-nav-id="settings-appearance-theme" data-settings-nav-group="appearance"></div>
+    `;
+    expect(findSettingsNavTarget('settings-appearance-theme')?.getAttribute('data-settings-nav-id')).toBe(
+      'settings-appearance-theme'
     );
   });
 });

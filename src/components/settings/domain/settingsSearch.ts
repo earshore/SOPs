@@ -138,7 +138,7 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
     ],
   },
   {
-    id: 'settings-section-network',
+    id: 'master-analysis-scrape',
     sectionId: 'settings-section-tool-strategy',
     labels: [
       '数据采集',
@@ -149,7 +149,13 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
       '采集运行策略',
       '最大并发',
       'Master Analysis 采集',
+      'master-analysis-scrape',
     ],
+  },
+  {
+    id: 'settings-section-network',
+    sectionId: 'settings-section-tool-strategy',
+    labels: ['settings-section-network', '采集网络', '网络采集'],
   },
   {
     id: 'settings-section-data',
@@ -188,6 +194,21 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
     labels: ['外观与体验', '主题', '色调', '动画', '减少动效', '动效', '动画速度'],
   },
   {
+    id: 'settings-appearance-color-mode',
+    sectionId: 'settings-section-appearance',
+    labels: ['主题', '浅色', '深色', '跟随系统', 'color mode', 'appearance color'],
+  },
+  {
+    id: 'settings-appearance-theme',
+    sectionId: 'settings-section-appearance',
+    labels: ['色调', '主题色', 'accent', 'theme preset'],
+  },
+  {
+    id: 'settings-appearance-animation',
+    sectionId: 'settings-section-appearance',
+    labels: ['动画与动效', '动画', '减少动效', '动效速度', 'animation'],
+  },
+  {
     id: 'settings-section-performance',
     sectionId: 'settings-section-performance',
     labels: [
@@ -198,21 +219,50 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
       '调试采集',
       '实验特性',
       '日志级别',
+      '监控与调试',
     ],
   },
 ] as const;
 
-/** First entry whose labels contain the query (case-insensitive substring). */
+function scoreSettingsSearchLabel(label: string, query: string): number {
+  const normalized = label.toLowerCase();
+  if (normalized === query) return 100;
+  if (normalized.startsWith(query)) return 80;
+  const idx = normalized.indexOf(query);
+  if (idx >= 0) {
+    // Prefer earlier substring hits slightly.
+    return Math.max(20, 50 - Math.min(idx, 20));
+  }
+  return 0;
+}
+
+function scoreSettingsSearchEntry(entry: SettingsSearchEntry, query: string): number {
+  let best = 0;
+  for (const label of entry.labels) {
+    best = Math.max(best, scoreSettingsSearchLabel(label, query));
+  }
+  return best;
+}
+
+/** Ranked matches (exact > prefix > substring). Stable by index order on ties. */
+export function findSettingsSearchMatches(
+  query: string,
+  index: readonly SettingsSearchEntry[] = SETTINGS_SEARCH_INDEX,
+  limit = 8
+): SettingsSearchEntry[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const ranked = index
+    .map((entry, order) => ({ entry, order, score: scoreSettingsSearchEntry(entry, q) }))
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score || a.order - b.order);
+  return ranked.slice(0, Math.max(1, limit)).map(item => item.entry);
+}
+
+/** Best ranked entry whose labels match the query. */
 export function findFirstSettingsSearchMatch(
   query: string,
   index: readonly SettingsSearchEntry[] = SETTINGS_SEARCH_INDEX
 ): SettingsSearchEntry | null {
-  const q = query.trim().toLowerCase();
-  if (!q) return null;
-  for (const entry of index) {
-    if (entry.labels.some(label => label.toLowerCase().includes(q))) {
-      return entry;
-    }
-  }
-  return null;
+  return findSettingsSearchMatches(query, index, 1)[0] ?? null;
 }
