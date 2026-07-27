@@ -425,35 +425,27 @@
 
             <div class="settings-section-frame settings-section-frame--llm space-y-4">
               <div
-                :hidden="!showDangerousEndpointWarning"
-                class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl shadow-sm"
+                class="settings-note settings-note--warn"
                 role="alert"
+                :hidden="!showDangerousEndpointWarning"
               >
-                <div class="flex items-start gap-3">
-                  <div
-                    class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5"
-                    aria-hidden="true"
-                  >
-                    <i class="fas fa-exclamation-triangle text-amber-500 text-xs"></i>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <h4 class="font-semibold text-amber-800 text-sm mb-1.5">安全提示</h4>
-                    <p class="text-xs text-amber-700/80 leading-relaxed mb-2.5">
-                      浏览器直连公有云有密钥暴露风险，优先走中转/网关。
-                    </p>
-                    <div class="flex flex-wrap gap-1.5">
-                      <span
-                        class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700"
-                      >
-                        <i class="fas fa-server" aria-hidden="true"></i> 官方 API 或兼容网关
-                      </span>
-                      <span
-                        class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700"
-                      >
-                        <i class="fas fa-shield-alt" aria-hidden="true"></i>
-                        密钥仅存本机
-                      </span>
-                    </div>
+                <span class="settings-note__icon" aria-hidden="true">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </span>
+                <div class="settings-note__body">
+                  <p class="settings-note__title">安全提示</p>
+                  <p class="settings-note__text">
+                    浏览器直连公有云有密钥暴露风险，优先走中转/网关。
+                  </p>
+                  <div class="settings-note__chips">
+                    <span class="settings-note__chip">
+                      <i class="fas fa-server" aria-hidden="true"></i>
+                      官方 API 或兼容网关
+                    </span>
+                    <span class="settings-note__chip">
+                      <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                      密钥仅存本机
+                    </span>
                   </div>
                 </div>
               </div>
@@ -737,7 +729,7 @@
                           :aria-label="fetchModelsText"
                           @click="fetchModels()"
                           :disabled="llm.isFetching"
-                          class="settings-focus-ring px-4 py-2.5 min-h-[42px] bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 rounded-xl transition duration-200 text-sm font-medium flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:translate-y-px cursor-pointer"
+                          class="settings-btn-secondary"
                         >
                           <i
                             class="fas text-xs"
@@ -749,16 +741,14 @@
                       </div>
                       <p class="settings-field-help">工具未单独指定时使用此模型。</p>
                       <div
-                        class="mt-2 flex flex-wrap gap-1.5"
+                        class="settings-capability-badges"
                         :hidden="modelCapabilityBadges.length === 0"
                         aria-label="当前路径能力摘要"
                       >
                         <template x-for="badge in modelCapabilityBadges" :key="badge.id">
                           <span
-                            class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium tracking-wide transition-colors"
-                            :class="badge.active
-                              ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200/80'
-                              : 'bg-slate-50 text-slate-400 ring-1 ring-inset ring-slate-200/80'"
+                            class="settings-capability-badge"
+                            :class="badge.active ? 'is-on' : 'is-off'"
                             :title="badge.title"
                             x-text="badge.label"
                           ></span>
@@ -904,16 +894,7 @@
               </div>
           </section>
 
-          <!-- Decorative Divider -->
-          <div class="flex items-center gap-3 py-1">
-            <div
-              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
-            ></div>
-            <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
-            <div
-              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
-            ></div>
-          </div>
+          <div class="settings-section-sep" role="separator" aria-hidden="true"></div>
 
           <!-- Section 2: Tool Strategy -->
           <section
@@ -2602,16 +2583,7 @@
             </div>
           </section>
 
-          <!-- Decorative Divider -->
-          <div class="flex items-center gap-3 py-1">
-            <div
-              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
-            ></div>
-            <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
-            <div
-              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
-            ></div>
-          </div>
+          <div class="settings-section-sep" role="separator" aria-hidden="true"></div>
 
           <!-- Section 4: Data and Backup -->
           <section
@@ -2959,16 +2931,7 @@
             </div>
           </section>
 
-          <!-- Decorative Divider -->
-          <div class="flex items-center gap-3 py-1">
-            <div
-              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
-            ></div>
-            <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
-            <div
-              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
-            ></div>
-          </div>
+          <div class="settings-section-sep" role="separator" aria-hidden="true"></div>
 
           <!-- Section 5: Appearance & Experience -->
 
@@ -3199,16 +3162,7 @@
             </div>
           </section>
 
-          <!-- Decorative Divider -->
-          <div class="flex items-center gap-3 py-1">
-            <div
-              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
-            ></div>
-            <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
-            <div
-              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
-            ></div>
-          </div>
+          <div class="settings-section-sep" role="separator" aria-hidden="true"></div>
 
           <!-- Section 6: Developer Diagnostics -->
           <section
