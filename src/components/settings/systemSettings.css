@@ -852,19 +852,26 @@ select.settings-control {
   }
 }
 
-/* Mini A-row: horizontal meta | control.
- * Only horizontal hairlines — no cell cages / vertical frames. */
+/*
+ * Metric cell layout (readable dense):
+ * Stack title ABOVE full-width control.
+ * Why not horizontal meta|control in 3–4 cols?
+ *   Long CN labels (e.g. “AI / 工具请求超时（秒）”) share a ~1/4 panel
+ *   cell with a fixed ~5.75rem input → title ellipsizes and “looks unreadable”.
+ * That is primarily compression, not contrast.
+ * Keep pref-row grammar (__meta / __title / __control); only axis changes.
+ */
 .settings-pref-row.settings-pref-row--metric {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: nowrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 0.65rem;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.35rem;
   min-width: 0;
-  min-height: 2.625rem;
+  min-height: 0;
   margin: 0;
-  padding: 0.45rem 0.5rem;
+  padding: 0.55rem 0.15rem 0.65rem;
   border: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--settings-border) 72%, transparent);
   border-radius: 0;
@@ -873,32 +880,52 @@ select.settings-control {
   transition: background-color 160ms ease;
 }
 
+/* Soft column gutters without cell cages */
+@media (min-width: 640px) {
+  .settings-pref-metrics--cols-3 > .settings-pref-row--metric,
+  .settings-pref-metrics--cols-4 > .settings-pref-row--metric {
+    padding-left: 0.45rem;
+    padding-right: 0.45rem;
+  }
+
+  .settings-pref-metrics--cols-3 > .settings-pref-row--metric:nth-child(3n + 1),
+  .settings-pref-metrics--cols-4 > .settings-pref-row--metric:nth-child(4n + 1) {
+    padding-left: 0.1rem;
+  }
+
+  .settings-pref-metrics--cols-3 > .settings-pref-row--metric:nth-child(3n),
+  .settings-pref-metrics--cols-4 > .settings-pref-row--metric:nth-child(4n) {
+    padding-right: 0.1rem;
+  }
+}
+
 .settings-pref-row.settings-pref-row--metric:hover,
 .settings-pref-row.settings-pref-row--metric:focus-within {
-  background: color-mix(in srgb, var(--settings-surface-muted) 55%, transparent);
+  background: color-mix(in srgb, var(--settings-surface-muted) 42%, transparent);
 }
 
 .settings-pref-row--metric .settings-pref-row__meta {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
-  gap: 0;
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
   min-width: 0;
   max-width: none;
 }
 
 .settings-pref-row--metric .settings-pref-row__title,
 .settings-pref-row--metric .settings-label {
+  display: block;
   margin: 0;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8125rem; /* match standard pref-row title — readable */
+  /* Allow 2 lines — never force single-line ellipsis on CN metric labels */
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+  font-size: 0.75rem;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.35;
   letter-spacing: 0;
-  color: var(--settings-text, #0f172a);
+  color: var(--color-text-primary, var(--settings-text, #0f172a));
 }
 
 .settings-pref-row--metric .settings-pref-row__hint {
@@ -907,18 +934,17 @@ select.settings-control {
 
 .settings-pref-row--metric .settings-pref-row__control {
   flex: 0 0 auto;
-  width: 5.75rem;
-  min-width: 5rem;
-  max-width: 7.5rem;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
   margin: 0;
-  margin-left: auto;
 }
 
 .settings-pref-row--metric:has(.settings-schedule-select) .settings-pref-row__control,
 .settings-pref-row--metric .settings-pref-row__control--wide {
-  width: min(100%, 9.5rem);
-  max-width: 11rem;
-  min-width: 7.25rem;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
 }
 
 .settings-pref-row--metric .settings-control,
@@ -926,16 +952,16 @@ select.settings-control {
   display: block;
   width: 100%;
   min-width: 0;
-  min-height: 2rem;
-  padding: 0.28rem 0.5rem;
-  border-color: color-mix(in srgb, var(--settings-border, #cbd5e1) 92%, #94a3b8);
+  min-height: 2.125rem;
+  padding: 0.35rem 0.55rem;
+  border-color: color-mix(in srgb, var(--settings-border, #cbd5e1) 88%, #64748b);
   background: var(--settings-surface, #fff);
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1.25;
-  color: var(--settings-text, #0f172a);
-  text-align: right;
+  color: var(--color-text-primary, var(--settings-text, #0f172a));
+  text-align: left;
 }
 
 .settings-pref-row--metric .settings-control:focus-visible,
@@ -962,16 +988,16 @@ select.settings-control {
 
 .settings-pref-row--metric .settings-schedule-select__trigger {
   gap: 0.35rem;
-  min-height: 2rem;
-  padding: 0.28rem 0.45rem;
+  min-height: 2.125rem;
+  padding: 0.3rem 0.5rem;
   font-size: 0.75rem;
-  color: var(--settings-text, #0f172a);
+  color: var(--color-text-primary, var(--settings-text, #0f172a));
 }
 
 .settings-pref-row--metric .settings-schedule-select__value {
-  flex-direction: row;
-  align-items: baseline;
-  gap: 0.3rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.05rem;
 }
 
 .settings-pref-row--metric .settings-schedule-select__label {
@@ -980,7 +1006,7 @@ select.settings-control {
   white-space: nowrap;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--settings-text, #0f172a);
+  color: var(--color-text-primary, var(--settings-text, #0f172a));
 }
 
 .settings-pref-row--metric .settings-schedule-select__hint {
@@ -997,37 +1023,12 @@ select.settings-control {
   }
 
   .settings-pref-row.settings-pref-row--metric {
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    justify-content: flex-start;
-    gap: 0.3rem;
-    min-height: 0;
-    padding: 0.55rem 0.6rem;
-  }
-
-  .settings-pref-row--metric .settings-pref-row__meta {
-    flex: 0 0 auto;
-    width: 100%;
-  }
-
-  .settings-pref-row--metric .settings-pref-row__control {
-    width: 100%;
-    max-width: none;
-    min-width: 0;
-    margin-left: 0;
+    padding: 0.55rem 0.35rem 0.65rem;
   }
 
   .settings-pref-row--metric .settings-control,
   .settings-pref-row--metric .settings-control--sm {
     min-height: 2.25rem;
-    text-align: left;
-  }
-
-  .settings-pref-row--metric .settings-schedule-select__value {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.1rem;
   }
 }
 

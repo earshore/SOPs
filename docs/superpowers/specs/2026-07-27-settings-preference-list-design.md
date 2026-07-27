@@ -407,7 +407,7 @@
 | 何时用 | ≥3 个**短**数字/enum 参数；同一决策域；无长 hint |
 | 何时不用 | toggle 簇 → 普通 `settings-pref-list`；单字段 → 全宽 A；长 label/URL/key → B |
 | DOM 合同 | 必须有 `__meta` + `__title` + `__control`；禁止裸 input 格子 |
-| 布局 | sm+：**横向** title 左 / control 右；control 宽约 `5–7.25rem`（schedule 可 `--wide`） |
+| 布局 | **纵向** title 上 / control 下、control **全宽**（多列 lattice 下横向 meta\|control 会把中文 label 挤成省略号，可读性崩） |
 | 格子表面 | **禁止** per-cell fill / radius / shadow；仅 hairline 十字分割 |
 | 外框 | 落在 `.settings-tool-page` 内时 **不**再套 metrics 外框；独立区可用顶+左 hairline 闭合 lattice |
 | 列数 | 默认 2；`sm+` 用 `--cols-3` / `--cols-4` |
@@ -415,7 +415,7 @@
 | Icon | **禁止** L3 metric 行 icon |
 | a11y | `label` 包裹 cell，或 `for`/`aria-label`；number 用 `type="number"` + min/max |
 | 触控 | 桌面 control ~30px 高可接受（扫读优先）；窄屏 control 全宽 + ≥36px |
-| CSS 红线 | 通用 `.settings-pref-row:has(.settings-pref-row__control){flex-wrap:wrap}` **不得**作用到 `--metric` |
+| CSS 红线 | 通用 `.settings-pref-row:has(.settings-pref-row__control){flex-wrap:wrap}` **不得**作用到 `--metric`；metric 内 **禁止** `white-space: nowrap` + ellipsis 作为默认标题策略 |
 
 **产品放置提醒：** 全局「应用策略预案」是 tool 区顶层 A 行（`#settings-runtime-presets`），hint `LLM / 采集 / 分析 / Deep Chat / PPC`；**不是**「通用 AI」专属，也不是「数据采集」专属。
 
