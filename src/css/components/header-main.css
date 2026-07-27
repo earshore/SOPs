@@ -858,9 +858,14 @@
 .dark .header,
 [data-color-mode-resolved='dark'] .header,
 [data-theme='dark'] .header {
-  /* idle nav labels: slate-300 = 4.5:1+ on the dark header */
-  --header-nav-idle: var(--color-slate-300, #cbd5e1);
-  /* surface-panel already dark; keep slightly denser frost for chrome */
+  /*
+   * Hierarchy (dark):
+   * - idle: muted slate-400 (secondary)
+   * - active / open / hover: bright slate-50 (highest contrast)
+   * Do NOT make idle brighter than current — felt inverted on dark chrome.
+   */
+  --header-nav-idle: var(--color-slate-400, #94a3b8);
+  --header-nav-active: var(--color-slate-50, #f8fafc);
   background: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, transparent);
   border-bottom-color: var(--color-border-light, rgba(255, 255, 255, 0.06));
 }
@@ -874,23 +879,39 @@
 .dark .nav-trigger,
 [data-color-mode-resolved='dark'] .nav-trigger,
 [data-theme='dark'] .nav-trigger {
-  /* slate-300: 4.5:1+ on slate-900 header (slate-400 was 3.75) */
-  color: var(--color-slate-300, #cbd5e1);
+  color: var(--header-nav-idle, var(--color-slate-400, #94a3b8));
 }
 
+/* Active/current must beat idle — use high-luma text, not dark primary */
 .dark .nav-group:hover .nav-trigger,
+.dark .nav-group.is-open .nav-trigger,
 .dark .nav-trigger:hover,
+.dark .nav-trigger:focus-visible,
 [data-color-mode-resolved='dark'] .nav-group:hover .nav-trigger,
+[data-color-mode-resolved='dark'] .nav-group.is-open .nav-trigger,
 [data-color-mode-resolved='dark'] .nav-trigger:hover,
+[data-color-mode-resolved='dark'] .nav-trigger:focus-visible,
 [data-theme='dark'] .nav-group:hover .nav-trigger,
-[data-theme='dark'] .nav-trigger:hover {
-  color: var(--color-primary, #818cf8);
+[data-theme='dark'] .nav-group.is-open .nav-trigger,
+[data-theme='dark'] .nav-trigger:hover,
+[data-theme='dark'] .nav-trigger:focus-visible {
+  color: var(--header-nav-active, var(--color-slate-50, #f8fafc));
 }
 
 .dark .nav-trigger[aria-current='page'],
 [data-color-mode-resolved='dark'] .nav-trigger[aria-current='page'],
 [data-theme='dark'] .nav-trigger[aria-current='page'] {
-  color: var(--color-primary, #818cf8);
+  color: var(--header-nav-active, var(--color-slate-50, #f8fafc));
+}
+
+.dark .nav-trigger[aria-current='page'] .nav-icon,
+.dark .nav-group.is-open .nav-trigger .nav-icon,
+[data-color-mode-resolved='dark'] .nav-trigger[aria-current='page'] .nav-icon,
+[data-color-mode-resolved='dark'] .nav-group.is-open .nav-trigger .nav-icon,
+[data-theme='dark'] .nav-trigger[aria-current='page'] .nav-icon,
+[data-theme='dark'] .nav-group.is-open .nav-trigger .nav-icon {
+  opacity: 1;
+  color: inherit;
 }
 
 .dark .mega-menu-inner,
@@ -1027,6 +1048,119 @@
   color: #f8fafc !important;
   filter: drop-shadow(0 0 0.35px rgba(255, 255, 255, 0.35));
   text-shadow: none;
+}
+
+/* More menu: sidebar divider was light-only slate-100 → glows on dark glass */
+.dark .more-menu-sidebar,
+[data-color-mode-resolved='dark'] .more-menu-sidebar,
+[data-theme='dark'] .more-menu-sidebar {
+  border-left-color: color-mix(in srgb, #fff 8%, transparent);
+}
+
+@media (max-width: 1024px) {
+  .dark .more-menu-sidebar,
+  [data-color-mode-resolved='dark'] .more-menu-sidebar,
+  [data-theme='dark'] .more-menu-sidebar {
+    border-top-color: color-mix(in srgb, #fff 8%, transparent);
+  }
+}
+
+.dark .quick-access-title,
+[data-color-mode-resolved='dark'] .quick-access-title,
+[data-theme='dark'] .quick-access-title {
+  color: var(--color-slate-400, #94a3b8);
+}
+
+.dark .quick-access-item,
+[data-color-mode-resolved='dark'] .quick-access-item,
+[data-theme='dark'] .quick-access-item {
+  color: var(--color-slate-300, #cbd5e1);
+}
+
+.dark .quick-access-icon,
+[data-color-mode-resolved='dark'] .quick-access-icon,
+[data-theme='dark'] .quick-access-icon {
+  background: color-mix(in srgb, var(--surface-card, #1e293b) 88%, #000);
+  color: var(--color-slate-400, #94a3b8);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
+}
+
+/* Hover was light indigo wash (0.06) → almost invisible / muddy on dark */
+.dark .quick-access-item:hover,
+.dark .quick-access-item:focus-visible,
+[data-color-mode-resolved='dark'] .quick-access-item:hover,
+[data-color-mode-resolved='dark'] .quick-access-item:focus-visible,
+[data-theme='dark'] .quick-access-item:hover,
+[data-theme='dark'] .quick-access-item:focus-visible {
+  background: color-mix(
+    in srgb,
+    var(--color-primary, #818cf8) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-slate-50, #f8fafc);
+}
+
+.dark .quick-access-item:hover .quick-access-icon,
+.dark .quick-access-item:focus-visible .quick-access-icon,
+[data-color-mode-resolved='dark'] .quick-access-item:hover .quick-access-icon,
+[data-color-mode-resolved='dark'] .quick-access-item:focus-visible .quick-access-icon,
+[data-theme='dark'] .quick-access-item:hover .quick-access-icon,
+[data-theme='dark'] .quick-access-item:focus-visible .quick-access-icon {
+  background: color-mix(in srgb, var(--color-primary, #818cf8) 28%, #0f172a);
+  color: #e0e7ff;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary, #818cf8) 35%, transparent);
+}
+
+/* Version card used near-white mint gradient — blown out on dark mega */
+.dark .version-card.tip-card,
+.dark .tip-card.version-card,
+[data-color-mode-resolved='dark'] .version-card.tip-card,
+[data-color-mode-resolved='dark'] .tip-card.version-card,
+[data-theme='dark'] .version-card.tip-card,
+[data-theme='dark'] .tip-card.version-card {
+  background: color-mix(in srgb, var(--surface-card, #1e293b) 92%, #022c22);
+  border-color: color-mix(in srgb, #fff 9%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 4%, transparent);
+}
+
+.dark .version-card .tip-card-icon,
+[data-color-mode-resolved='dark'] .version-card .tip-card-icon,
+[data-theme='dark'] .version-card .tip-card-icon {
+  background: color-mix(in srgb, #84cc16 18%, #0f172a);
+}
+
+.dark .version-card .tip-card-icon i,
+[data-color-mode-resolved='dark'] .version-card .tip-card-icon i,
+[data-theme='dark'] .version-card .tip-card-icon i {
+  color: #bef264;
+}
+
+.dark .version-card-label,
+[data-color-mode-resolved='dark'] .version-card-label,
+[data-theme='dark'] .version-card-label {
+  color: var(--color-slate-400, #94a3b8);
+}
+
+.dark .version-card-value,
+[data-color-mode-resolved='dark'] .version-card-value,
+[data-theme='dark'] .version-card-value {
+  color: var(--color-slate-100, #f1f5f9);
+}
+
+.dark .version-card-release-link,
+[data-color-mode-resolved='dark'] .version-card-release-link,
+[data-theme='dark'] .version-card-release-link {
+  color: var(--color-slate-300, #cbd5e1);
+}
+
+.dark .version-card-release-link:hover,
+.dark .version-card-release-link:focus-visible,
+[data-color-mode-resolved='dark'] .version-card-release-link:hover,
+[data-color-mode-resolved='dark'] .version-card-release-link:focus-visible,
+[data-theme='dark'] .version-card-release-link:hover,
+[data-theme='dark'] .version-card-release-link:focus-visible {
+  background: color-mix(in srgb, #fff 8%, transparent);
+  color: var(--color-slate-50, #f8fafc);
 }
 
 /* ========================================

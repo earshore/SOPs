@@ -59,22 +59,23 @@ describe('release accessibility contract', () => {
     );
   });
 
-  it.each([
-    [
-      'hover',
-      headerCss.match(
-        /\.dark \.nav-group:hover \.nav-trigger,\s*\.dark \.nav-trigger:hover,\s*\[data-color-mode-resolved='dark'\] \.nav-group:hover \.nav-trigger,\s*\[data-color-mode-resolved='dark'\] \.nav-trigger:hover,\s*\[data-theme='dark'\] \.nav-group:hover \.nav-trigger,\s*\[data-theme='dark'\] \.nav-trigger:hover\s*{[^}]*}/
-      )?.[0],
-    ],
-    [
-      'active',
-      headerCss.match(
-        /\.dark \.nav-trigger\[aria-current='page'\],\s*\[data-color-mode-resolved='dark'\] \.nav-trigger\[aria-current='page'\],\s*\[data-theme='dark'\] \.nav-trigger\[aria-current='page'\]\s*{[^}]*}/
-      )?.[0],
-    ],
-  ])('uses a foreground primary token for dark navigation %s', (_state, rule) => {
-    expect(rule).toContain('color: var(--color-primary, #818cf8);');
-    expect(rule).not.toContain('--color-primary-light');
+  it('keeps dark nav hierarchy: idle muted, active/open brightest', () => {
+    expect(headerCss).toContain('--header-nav-idle: var(--color-slate-400, #94a3b8);');
+    expect(headerCss).toContain('--header-nav-active: var(--color-slate-50, #f8fafc);');
+
+    const activeRule = headerCss.match(
+      /\.dark \.nav-trigger\[aria-current='page'\],[\s\S]*?\[data-theme='dark'\] \.nav-trigger\[aria-current='page'\]\s*{[^}]*}/
+    )?.[0];
+    expect(activeRule).toBeTruthy();
+    expect(activeRule).toContain('var(--header-nav-active');
+    expect(activeRule).not.toContain('--color-primary-light');
+    expect(activeRule).not.toMatch(/color:\s*var\(--color-primary-darker/);
+
+    expect(headerCss).toContain('border-left-color: color-mix(in srgb, #fff 8%, transparent);');
+    expect(headerCss).toContain('.dark .version-card.tip-card');
+    expect(headerCss).toContain('var(--surface-card, #1e293b) 92%');
+    expect(headerCss).toContain('.dark .quick-access-item:hover');
+    expect(headerCss).toContain('var(--color-primary, #818cf8) 18%');
   });
 
   it('keeps the PromptLab missing-report notice one level below its card heading', () => {
