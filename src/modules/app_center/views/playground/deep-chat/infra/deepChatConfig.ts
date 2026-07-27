@@ -10,7 +10,10 @@ import { findConfigModelsEntry } from '../session/uiHooks';
 import { sessionState } from '../session/sessionState';
 import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
 import { StorageService } from '@/services/storageService';
-import { resolveDeepChatImagesConfig } from '../request/visionAttachments';
+import {
+  DEEP_CHAT_VISION_COPY,
+  resolveDeepChatImagesConfig,
+} from '../request/visionAttachments';
 
 type DraftUpdater = (threadId: string, draftText: string) => void;
 type RequestHandler = (
@@ -53,6 +56,46 @@ export function applyDeepChatVisionUploadConfig(chat: DeepChatElement | null | u
   const supportsVision = resolveCurrentModelSupportsVision();
   chat.images = resolveDeepChatImagesConfig(supportsVision);
   chat.classList.toggle('is-vision-enabled', supportsVision);
+  syncDeepChatVisionHelper(chat, supportsVision);
+  // Best-effort: deep-chat may recreate the button later; re-apply when config re-runs.
+  const upload = chat.shadowRoot?.querySelector<HTMLElement>('#upload-images-button');
+  if (upload && supportsVision) {
+    upload.setAttribute('aria-label', DEEP_CHAT_VISION_COPY.uploadAria);
+    upload.setAttribute('title', DEEP_CHAT_VISION_COPY.uploadTooltip);
+  }
+}
+
+/**
+ * Host chrome: microcopy outside #text-input-container (inside #input), vision only.
+ * Exact Chinese string from DEEP_CHAT_VISION_COPY.helper.
+ */
+export function syncDeepChatVisionHelper(
+  chat: DeepChatElement | null | undefined,
+  supportsVision: boolean
+): void {
+  if (!chat?.shadowRoot) return;
+  const input = chat.shadowRoot.querySelector('#input');
+  if (!input) return;
+  let helper = chat.shadowRoot.querySelector<HTMLElement>('.deep-chat-vision-helper');
+  if (!supportsVision) {
+    helper?.remove();
+    return;
+  }
+  if (!helper) {
+    helper = document.createElement('div');
+    helper.className = 'deep-chat-vision-helper';
+    helper.setAttribute('aria-hidden', 'true');
+    helper.textContent = DEEP_CHAT_VISION_COPY.helper;
+    // place after #text-input-container inside #input
+    const card = input.querySelector('#text-input-container');
+    if (card?.nextSibling) {
+      input.insertBefore(helper, card.nextSibling);
+    } else {
+      input.appendChild(helper);
+    }
+  } else {
+    helper.textContent = DEEP_CHAT_VISION_COPY.helper;
+  }
 }
 
 function resolveCurrentModelSupportsVision(): boolean {

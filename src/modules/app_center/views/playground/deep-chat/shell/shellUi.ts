@@ -1091,6 +1091,13 @@ export function initDeepChat(container: HTMLElement): void {
   }
   setupDraftInputHeightSync(container, chat);
   setupSubmitStopButtonSync(container, chat);
+  // Shadow #input / upload button may appear after configure; re-sync helper + aria.
+  applyDeepChatVisionUploadConfig(chat);
+  window.setTimeout(() => {
+    if (getChat(container) === chat) {
+      applyDeepChatVisionUploadConfig(chat);
+    }
+  }, 120);
   // 恢复所有在飞/待输出会话（切出页面再回来时「生成中」不丢）
   sessionState.pendingRequests.forEach((_request, threadId) => {
     schedulePendingAssistantDisplay(threadId);

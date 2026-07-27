@@ -428,7 +428,17 @@ export function clearDraftInputHeightSync(): void {
  * deep-chat 把 inside-end 按钮容器挂在 #input 下（与 #text-input-container 同级）。
  * #input 可能包含短暂的载入提示；若按钮层 inset:0 铺满整列，单行会相对输入框偏下。
  * 策略：不依赖 reparent（deep-chat 可能改回），把按钮层几何对齐到输入框矩形。
+ *
+ * 仅认 submit/stop：排除 #upload-images-button（vision 上传与 send 同为 inside-end）。
  */
+const SUBMIT_INSIDE_END_SELECTOR =
+  '.input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active], .input-button.inside-end.submit-button:not(#upload-images-button), .input-button.inside-end.loading-button:not(#upload-images-button), .input-button.inside-end.disabled-button:not(#upload-images-button), .input-button.inside-end:not(#upload-images-button)';
+
+function querySubmitInsideEndButton(
+  root: ShadowRoot | Document | Element | null | undefined
+): HTMLElement | null {
+  return root?.querySelector<HTMLElement>(SUBMIT_INSIDE_END_SELECTOR) || null;
+}
 
 export function alignSubmitButtonLayerToTextInput(chat: DeepChatElement): boolean {
   const root = chat.shadowRoot;
@@ -437,7 +447,7 @@ export function alignSubmitButtonLayerToTextInput(chat: DeepChatElement): boolea
   const buttonContainer = root?.querySelector<HTMLElement>(
     '.input-button-container.inner-button-container'
   );
-  const button = root?.querySelector<HTMLElement>('.input-button.inside-end');
+  const button = querySubmitInsideEndButton(root);
   if (!inputArea || !textContainer || !buttonContainer || !button) {
     return false;
   }
@@ -509,7 +519,7 @@ export function observeSubmitButtonPin(container: HTMLElement, chat: DeepChatEle
       // 仅刷新 aria / stop 标记，内部会再 align 但 aligning 期间由上层短路
       const pending = sessionState.pendingRequests.get(sessionState.threadStore.activeThreadId);
       const isStopActive = Boolean(pending && !pending.isSettled);
-      const button = chat.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+      const button = querySubmitInsideEndButton(chat.shadowRoot);
       if (button) {
         syncSubmitButtonMetadata(button, isStopActive);
       }
@@ -586,7 +596,7 @@ export function observeSubmitButtonState(container: HTMLElement, chat: DeepChatE
   sessionState.submitButtonStateObserver?.disconnect();
   sessionState.submitButtonStateObserver = null;
 
-  const button = chat.shadowRoot?.querySelector('.input-button.inside-end');
+  const button = querySubmitInsideEndButton(chat.shadowRoot);
   if (!button) {
     return;
   }
@@ -695,7 +705,8 @@ export function getSubmitButtonFromEventPath(event: Event, chat: DeepChatElement
     (target): target is Element =>
       target instanceof Element &&
       target.classList.contains('input-button') &&
-      target.classList.contains('inside-end')
+      target.classList.contains('inside-end') &&
+      target.id !== 'upload-images-button'
   );
   if (pathButton) {
     return pathButton;
@@ -707,7 +718,11 @@ export function getSubmitButtonFromEventPath(event: Event, chat: DeepChatElement
   }
 
   const target = event.target instanceof Element ? event.target : null;
-  return target?.closest('.input-button.inside-end') || null;
+  const closest = target?.closest('.input-button.inside-end');
+  if (closest?.id === 'upload-images-button') {
+    return null;
+  }
+  return closest || null;
 }
 
 export function getSubmitButtonFromPointerEvent(
@@ -718,7 +733,7 @@ export function getSubmitButtonFromPointerEvent(
     return null;
   }
 
-  const button = chat.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+  const button = querySubmitInsideEndButton(chat.shadowRoot);
   if (!button) {
     return null;
   }
@@ -787,7 +802,7 @@ export function syncSubmitStopButtonState(container: HTMLElement): void {
   const isStopActive = Boolean(pending && !pending.isSettled);
   syncStopOverlayState(container, isStopActive);
 
-  const button = chat?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+  const button = querySubmitInsideEndButton(chat?.shadowRoot);
   if (!button) {
     return;
   }
