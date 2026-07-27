@@ -610,7 +610,7 @@
                   </div>
                 </details>
 
-                <!-- L2 凭证（常开）：L3 = API Key 输入 -->
+                <!-- L2 凭证（常开）：L3 = API Key 文案 + 输入框并排 -->
                 <div class="settings-llm-step settings-llm-step--static" aria-labelledby="llm-step-2-title">
                   <div class="settings-llm-step__header settings-llm-step__header--static">
                     <div class="min-w-0">
@@ -622,45 +622,52 @@
                       >
                         凭证
                       </h4>
-                      <p class="settings-llm-step__desc">API Key</p>
                     </div>
                   </div>
                   <div class="settings-llm-step__body">
-                    <div class="group">
-                      <label
-                        for="llm-api-key"
-                        class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
-                        >API Key</label
-                      >
-                      <div class="relative">
-                        <div
-                          class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center"
-                          aria-hidden="true"
-                        >
-                          <i class="fas fa-key text-amber-500 text-[9px]"></i>
+                    <div class="settings-pref-list">
+                      <div class="settings-pref-row settings-pref-row--secret">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <label for="llm-api-key" class="settings-pref-row__title">API Key</label>
+                            <p class="settings-pref-row__hint" x-text="localSecretBoundaryText"></p>
+                          </div>
                         </div>
-                        <input
-                          :type="llmApiKeyInputType"
-                          id="llm-api-key"
-                          name="llm-api-key"
-                          autocomplete="off"
-                          spellcheck="false"
-                          :value="llm.apiKey"
-                          @input="setLlmApiKey($event)"
-                          class="settings-control settings-secret-input w-full pl-12 pr-12 py-2.5 text-sm font-mono text-slate-600 transition duration-200 placeholder:text-slate-300"
-                          placeholder="sk-..."
-                        />
-                        <button
-                          type="button"
-                          @click="toggleLlmKeyVisibility()"
-                          :aria-label="llmApiKeyVisibilityLabel"
-                          :title="llmApiKeyVisibilityLabel"
-                          class="settings-focus-ring absolute right-2.5 top-1/2 -translate-y-1/2 min-h-[28px] min-w-[28px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 cursor-pointer"
-                        >
-                          <i class="fas text-xs" :class="llmApiKeyIconClass" aria-hidden="true"></i>
-                        </button>
+                        <div class="settings-pref-row__control settings-pref-row__control--secret">
+                          <div class="relative">
+                            <div
+                              class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center"
+                              aria-hidden="true"
+                            >
+                              <i class="fas fa-key text-amber-500 text-[9px]"></i>
+                            </div>
+                            <input
+                              :type="llmApiKeyInputType"
+                              id="llm-api-key"
+                              name="llm-api-key"
+                              autocomplete="off"
+                              spellcheck="false"
+                              :value="llm.apiKey"
+                              @input="setLlmApiKey($event)"
+                              class="settings-control settings-secret-input w-full pl-11 pr-11 py-2 text-sm font-mono text-slate-600 transition duration-200 placeholder:text-slate-300"
+                              placeholder="sk-..."
+                            />
+                            <button
+                              type="button"
+                              @click="toggleLlmKeyVisibility()"
+                              :aria-label="llmApiKeyVisibilityLabel"
+                              :title="llmApiKeyVisibilityLabel"
+                              class="settings-focus-ring absolute right-2 top-1/2 -translate-y-1/2 min-h-[28px] min-w-[28px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 cursor-pointer"
+                            >
+                              <i
+                                class="fas text-xs"
+                                :class="llmApiKeyIconClass"
+                                aria-hidden="true"
+                              ></i>
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <p class="settings-field-help" x-text="localSecretBoundaryText"></p>
                     </div>
                   </div>
                 </div>
