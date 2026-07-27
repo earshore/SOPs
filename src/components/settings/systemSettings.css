@@ -1999,13 +1999,25 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
 
 /* Collapsed data cards — shared summary rhythm */
 
-/* Import / export actions at bottom of 数据导入与导出 */
+/* Bottom actions inside framed data tool-pages (export/import, save retention) */
 .settings-data-io-actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.5rem;
+  margin-top: 0.65rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--color-border-light, #f1f5f9);
+  /* Single separator only — do not also trail a pref-list divider above */
+  border-top: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
+}
+
+.settings-data-io-actions--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Export bucket rows: hairline between items; last row has no bottom line
+ * (actions bar supplies the only rule above buttons). */
+.settings-tool-page--framed > .settings-pref-list > .settings-pref-row--check + .settings-pref-row--check {
+  border-top: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
 }
 
 .settings-data-io-actions__btn {

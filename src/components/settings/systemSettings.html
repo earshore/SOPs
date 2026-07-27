@@ -2681,31 +2681,28 @@
                     <div class="settings-tool-page settings-tool-page--framed">
                       <div class="settings-pref-list">
                         <template x-for="bucket in localDataBucketItems" :key="'export-' + bucket.id">
-                          <div>
-                            <label class="settings-pref-row settings-pref-row--check">
-                              <div class="settings-pref-row__meta">
-                                <div class="min-w-0">
-                                  <span class="settings-pref-row__title" x-text="bucket.label"></span>
-                                  <p class="settings-pref-row__hint">纳入本次导入 / 导出</p>
-                                </div>
+                          <label class="settings-pref-row settings-pref-row--check">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <span class="settings-pref-row__title" x-text="bucket.label"></span>
+                                <p class="settings-pref-row__hint">纳入本次导入 / 导出</p>
                               </div>
-                              <span class="settings-pref-row__check">
-                                <input
-                                  type="checkbox"
-                                  class="settings-checkbox h-4 w-4 rounded border-slate-300"
-                                  :checked="isExportBucketSelected(bucket.id)"
-                                  @change="toggleExportBucket(bucket.id)"
-                                  :disabled="localData.isBusy"
-                                  :data-export-bucket="bucket.id"
-                                  :aria-label="bucket.label"
-                                />
-                              </span>
-                            </label>
-                            <div class="settings-pref-divider" role="separator"></div>
-                          </div>
+                            </div>
+                            <span class="settings-pref-row__check">
+                              <input
+                                type="checkbox"
+                                class="settings-checkbox h-4 w-4 rounded border-slate-300"
+                                :checked="isExportBucketSelected(bucket.id)"
+                                @change="toggleExportBucket(bucket.id)"
+                                :disabled="localData.isBusy"
+                                :data-export-bucket="bucket.id"
+                                :aria-label="bucket.label"
+                              />
+                            </span>
+                          </label>
                         </template>
                       </div>
-                      <div class="settings-data-io-actions mt-3">
+                      <div class="settings-data-io-actions">
                         <button
                           type="button"
                           @click="exportLocalData()"
@@ -2754,7 +2751,7 @@
                     ></i>
                   </summary>
                   <div class="settings-pref-fold__body">
-                    <div class="settings-tool-page">
+                    <div class="settings-tool-page settings-tool-page--framed">
                       <div class="settings-pref-list">
                         <label class="settings-pref-row">
                           <div class="settings-pref-row__meta">
@@ -2820,26 +2817,18 @@
                             />
                           </div>
                         </label>
-
-                        <div class="settings-pref-divider" role="separator"></div>
-
-                        <div class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <span class="settings-pref-row__title">保存数据策略</span>
-                              <p class="settings-pref-row__hint">写入本地运行时配置</p>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            data-testid="settings-save-data-strategy"
-                            @click="saveRuntimeStrategy()"
-                            :disabled="runtimeStrategy.isSaving"
-                            class="settings-pref-row__action"
-                          >
-                            保存
-                          </button>
-                        </div>
+                      </div>
+                      <div class="settings-data-io-actions settings-data-io-actions--single">
+                        <button
+                          type="button"
+                          data-testid="settings-save-data-strategy"
+                          @click="saveRuntimeStrategy()"
+                          :disabled="runtimeStrategy.isSaving"
+                          class="settings-data-io-actions__btn"
+                        >
+                          <i class="fas fa-check settings-text-accent" aria-hidden="true"></i>
+                          <span>保存数据策略</span>
+                        </button>
                       </div>
                     </div>
                   </div>
