@@ -130,7 +130,7 @@ function configureDeepChatTextInputStyles(chat: DeepChatElement): void {
         color: 'var(--deep-chat-ink, #0f172a)',
         fontSize: '15px',
         lineHeight: '1.45',
-        padding: '18px 62px 16px 22px',
+        padding: '18px 108px 16px 22px',
         maxHeight: 'min(calc(42vh - 20px), 400px)',
         overflowY: 'auto',
       },
