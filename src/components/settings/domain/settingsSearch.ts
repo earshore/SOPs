@@ -54,6 +54,8 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
       '完整报告 Token',
       'tokenBudgetsByTarget',
       '分析缓存',
+      '性能设置',
+      '调度偏好',
     ],
   },
   {

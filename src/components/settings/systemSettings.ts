@@ -2850,7 +2850,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.runtimeStrategy.settings.masterAnalysis.schedulingPreference = preference;
     this.schedulePreferenceMenuOpen = false;
     this.syncActiveRuntimePresetFromSettings();
-    void this.persistRuntimeStrategySettings({ toast: '调度偏好已保存' });
+    void this.persistRuntimeStrategySettings({ toast: '性能设置已保存' });
   },
 
   setDeveloperDiagnosticBoolean(

@@ -182,7 +182,7 @@
 | 工具策略表单数值/开关（改后未点保存） | `setRuntime*` / 工具目标模型 | **脏**直至显式保存 | 运行时/工具分区 | 关时确认 |
 | 「保存工具与运行策略」 | `saveToolStrategy()` | **显式**（同时写 tool + runtime） | 清对应脏 | **不**自动关 |
 | 应用策略预案按钮 | `persistRuntimeStrategySettings({ toast })` | **即时** | 已写盘 | 不关 |
-| Master Analysis 调度偏好 | `persistRuntimeStrategySettings` | **即时** | 已写盘 | 不关 |
+| Master Analysis 性能设置 | `persistRuntimeStrategySettings` | **即时** | 已写盘 | 不关 |
 | 采集代理 Key/类型 + 保存 | `saveProxyConfig()` | **显式** | 网络分区 | 不关 |
 | 数据区「保存数据策略」（`runtime.storage.*`） | `saveRuntimeStrategy()` → 同 `saveRuntimeStrategySettings` | **显式**（有意分区按钮；与工具区同 runtime API 族，非第二引擎） | runtime | **不**自动关；Toast：`数据策略已保存` |
 | Appearance 主题 / 颜色模式 / 动效 | `ThemeManager` / `animationSettingsStore` | **即时**（独立 store） | 不走 LLM/工具脏分区 | 不关 |
