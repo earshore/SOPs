@@ -306,8 +306,7 @@ async function appendVisionPartFromCandidate(
   totalBytes: number,
   maxTotalBytes: number
 ): Promise<
-  | { ok: true; parts: DeepChatVisionUserPart[]; totalBytes: number }
-  | { ok: false; error: string }
+  { ok: true; parts: DeepChatVisionUserPart[]; totalBytes: number } | { ok: false; error: string }
 > {
   const typeError = validateVisionCandidateType(candidate);
   if (typeError) {
