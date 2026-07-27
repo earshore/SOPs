@@ -907,29 +907,31 @@
             </div>
 
             <div class="settings-section-frame settings-section-frame--strategy space-y-4">
+              <div class="settings-pref-list" data-testid="settings-tool-pref-list">
+
               <details
-                class="settings-card settings-collapsible-card"
+                class="settings-pref-fold"
                 data-settings-focus="general-ai-runtime"
                 data-settings-nav-id="general-ai-runtime"
                 data-settings-nav-group="tool"
               >
-                <summary
-                  class="settings-collapsible-summary flex flex-wrap items-center justify-between gap-2"
-                >
-                  <div>
-                    <h4 class="settings-card__title">通用 AI 执行策略</h4>
-                    <p class="settings-card__desc">超时、重试与一键预设</p>
-                  </div>
-                  <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="settings-badge settings-badge--global">全局</span>
+                <summary class="settings-pref-row settings-pref-row--fold">
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-microchip"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">通用 AI 执行策略</h4>
+                      <p class="settings-pref-row__hint">超时、重试与一键预设</p>
+                    </div>
                   </div>
                   <i
-                    class="settings-collapsible-chevron fas fa-chevron-down text-[10px] text-slate-400"
+                    class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
                     aria-hidden="true"
                   ></i>
                 </summary>
-                <div class="settings-collapsible-body pt-2">
-                  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="settings-pref-fold__body">
+<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <label class="block">
                       <span class="settings-label">AI / 工具请求超时（秒）</span>
                       <input
@@ -1035,20 +1037,32 @@
                   </div>
                 </div>
               </details>
-              <div
-                class="settings-tool-app settings-tool-app--static"
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <details
+                class="settings-pref-fold"
                 data-settings-focus="master-analysis"
                 data-settings-nav-id="master-analysis"
                 data-settings-nav-group="tool"
               >
-                <div class="settings-tool-app-summary settings-tool-app-summary--static flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h4 class="settings-card__title">Master Analysis</h4>
-                    <p class="settings-card__desc">数据采集 → AI 智能分析</p>
+                <summary class="settings-pref-row settings-pref-row--fold">
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-chart-pie"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">Master Analysis</h4>
+                      <p class="settings-pref-row__hint">数据采集 → AI 智能分析</p>
+                    </div>
                   </div>
-                </div>
-                <div class="settings-tool-app-body">
-                  <div class="settings-tool-l3-stack">
+                  <i
+                    class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                    aria-hidden="true"
+                  ></i>
+                </summary>
+                <div class="settings-pref-fold__body">
+<div class="settings-tool-l3-stack">
                     <!-- Product page: 数据采集 (proxy + scrape runtime) -->
                     <details
                       class="settings-tool-l3"
@@ -1483,17 +1497,31 @@
                     </details>
                   </div>
                 </div>
-              </div>
+              </details>
 
-              <div class="settings-tool-app settings-tool-app--static">
-                <div class="settings-tool-app-summary settings-tool-app-summary--static flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h4 class="settings-card__title">Playground · Deep Chat</h4>
-                    <p class="settings-card__desc">默认模型、业务工具与限额</p>
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <details
+                class="settings-pref-fold"
+                data-settings-nav-group="tool"
+              >
+                <summary class="settings-pref-row settings-pref-row--fold">
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-comments"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">Playground · Deep Chat</h4>
+                      <p class="settings-pref-row__hint">默认模型、业务工具与限额</p>
+                    </div>
                   </div>
-                </div>
-                <div class="settings-tool-app-body">
-                  <!-- One product page: model + tools + limits share a single tool-page surface -->
+                  <i
+                    class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                    aria-hidden="true"
+                  ></i>
+                </summary>
+                <div class="settings-pref-fold__body">
+<!-- One product page: model + tools + limits share a single tool-page surface -->
                   <div class="settings-tool-page mt-3">
                     <template
                       x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
@@ -1666,23 +1694,34 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </details>
 
-              <div
-                class="settings-tool-app settings-tool-app--static"
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <details
+                class="settings-pref-fold"
                 data-settings-focus="keyword-hunter"
                 data-settings-nav-id="keyword-hunter"
                 data-settings-nav-group="tool"
                 data-testid="settings-keyword-hunter"
               >
-                <div class="settings-tool-app-summary settings-tool-app-summary--static flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h4 class="settings-card__title">Keyword Hunter</h4>
-                    <p class="settings-card__desc">SEO 与 Listing 默认模型</p>
+                <summary class="settings-pref-row settings-pref-row--fold">
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-magnifying-glass"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">Keyword Hunter</h4>
+                      <p class="settings-pref-row__hint">SEO 与 Listing 默认模型</p>
+                    </div>
                   </div>
-                </div>
-                <div class="settings-tool-app-body">
-                  <div class="settings-tool-l3-stack">
+                  <i
+                    class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                    aria-hidden="true"
+                  ></i>
+                </summary>
+                <div class="settings-pref-fold__body">
+<div class="settings-tool-l3-stack">
                     <details class="settings-tool-l3">
                       <summary class="settings-tool-l3__summary">
                         <div class="min-w-0">
@@ -1977,22 +2016,33 @@
                     </details>
                   </div>
                 </div>
-              </div>
+              </details>
 
-              <div
-                class="settings-tool-app settings-tool-app--static"
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <details
+                class="settings-pref-fold"
                 data-settings-focus="ppc-analysis-flags"
                 data-settings-nav-id="ppc-analysis-flags"
                 data-settings-nav-group="tool"
               >
-                <div class="settings-tool-app-summary settings-tool-app-summary--static flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h4 class="settings-card__title">PPC Tools</h4>
-                    <p class="settings-card__desc">搜索词模型与阈值</p>
+                <summary class="settings-pref-row settings-pref-row--fold">
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-bullseye"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">PPC Tools</h4>
+                      <p class="settings-pref-row__hint">搜索词模型与策略</p>
+                    </div>
                   </div>
-                </div>
-                <div class="settings-tool-app-body">
-                  <!-- One product page (Deep Chat pattern): model + runtime + prefs -->
+                  <i
+                    class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                    aria-hidden="true"
+                  ></i>
+                </summary>
+                <div class="settings-pref-fold__body">
+<!-- One product page (Deep Chat pattern): model + runtime + prefs -->
                   <div class="settings-tool-page mt-3">
                     <template
                       x-for="item in toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])"
@@ -2169,10 +2219,11 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </details>
 
               <!-- 底部操作：与 AI 连接区同层级 — 次要等宽 + 主保存更宽 -->
-              <div class="settings-strategy-footer">
+                            </div>
+<div class="settings-strategy-footer">
                 <div class="settings-strategy-footer__row">
                   <button
                     type="button"

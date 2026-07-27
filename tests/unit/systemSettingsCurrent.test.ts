@@ -1291,9 +1291,10 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain("toolStrategyTargetItemsByIds(['keyword-hunter-seo-process'])");
   expect(template).toContain("toolStrategyTargetItemsByIds(['keyword-hunter-listing-review'])");
   expect(template).toContain("toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])");
-  // L2 apps are static (no fold); L3 modules may fold when multi-item
-  expect(template.match(/settings-tool-app--static/g) || []).toHaveLength(4);
-  expect(template.match(/<details\s+[^>]*class="settings-tool-app/g) || []).toHaveLength(0);
+  // Tool strategy titles are appearance-like pref folds
+  expect(template).toContain('data-testid="settings-tool-pref-list"');
+  expect((template.match(/class="settings-pref-fold"/g) || []).length).toBeGreaterThanOrEqual(5);
+  expect(template).not.toContain('settings-tool-app');
   expect(template).toContain('settings-tool-l3');
   expect(template).toContain('settings-section-tip');
   expect(template).not.toContain('class="settings-coach"');
@@ -1309,8 +1310,9 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('数据采集');
   expect(template).toContain('采集运行策略');
   expect(template).toContain('id="settings-section-network"');
-  expect(template).toContain('settings-collapsible-summary');
-  expect(template).toContain('settings-collapsible-chevron');
+  // Tool strategy uses pref-fold rows; collapsible chrome may remain elsewhere
+  expect(template).toContain('settings-pref-row--fold');
+  expect(template).toContain('settings-pref-fold__chevron');
   expect(template).toContain('settings-llm-step');
   // basic info / model steps still fold; credential + service_tier are static L2
   expect(template).toMatch(/<details[\s\S]*?class="settings-llm-step"/);

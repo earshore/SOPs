@@ -349,12 +349,11 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect((deepChatChunk.match(/class="settings-tool-page(?:\s|"|$)/g) || []).length).toBe(1);
   });
 
-  it('Master Analysis is static L2 with two foldable L3 modules (scrape + AI)', () => {
-    const maStart = html.indexOf('>Master Analysis<');
+  it('Master Analysis is a pref-fold with two foldable L3 modules (scrape + AI)', () => {
+    const maStart = html.indexOf('settings-pref-row__title">Master Analysis');
     expect(maStart).toBeGreaterThan(-1);
     const maChunk = html.slice(maStart, html.indexOf('Playground \u00b7 Deep Chat', maStart));
 
-    expect(maChunk).toContain('settings-tool-app--static');
     expect(maChunk).toContain('settings-tool-l3-stack');
     expect(maChunk).toContain('data-settings-nav-id="master-analysis-scrape"');
     expect(maChunk).toContain('data-settings-nav-id="master-analysis-ai"');
@@ -363,6 +362,25 @@ describe('UT-P1-06 appearance theme contracts', () => {
     // L3 fold targets
     expect((maChunk.match(/<details[^>]*class="settings-tool-l3"/g) || []).length).toBe(2);
     expect(maChunk).not.toContain('settings-submodule');
+    expect(maChunk).not.toContain('settings-tool-app');
+  });
+
+  it('tool strategy app titles use appearance-like pref-fold rows', () => {
+    const toolStart = html.indexOf('settings-section-frame--strategy');
+    const toolEnd = html.indexOf('settings-strategy-footer', toolStart);
+    const toolChunk = html.slice(toolStart, toolEnd);
+    expect(toolChunk).toContain('data-testid="settings-tool-pref-list"');
+    for (const title of [
+      '通用 AI 执行策略',
+      'Master Analysis',
+      'Playground \u00b7 Deep Chat',
+      'Keyword Hunter',
+      'PPC Tools',
+    ]) {
+      expect(toolChunk).toContain(`settings-pref-row__title">${title}`);
+    }
+    expect(toolChunk).not.toContain('settings-card settings-collapsible-card');
+    expect(toolChunk).not.toContain('settings-tool-app');
   });
 
   it('PPC Tools is one product tool-page (Deep Chat pattern), not ad-hoc slate card', () => {
