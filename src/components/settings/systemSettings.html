@@ -2679,40 +2679,70 @@
                   </summary>
                   <div class="settings-pref-fold__body">
                     <div class="settings-tool-page">
-                      <div class="grid gap-1.5 sm:grid-cols-2">
+                      <div class="settings-pref-list">
                         <template x-for="bucket in localDataBucketItems" :key="'export-' + bucket.id">
-                          <label class="settings-pref-check">
-                            <input
-                              type="checkbox"
-                              class="settings-checkbox h-3.5 w-3.5 rounded border-slate-300"
-                              :checked="isExportBucketSelected(bucket.id)"
-                              @change="toggleExportBucket(bucket.id)"
-                              :disabled="localData.isBusy"
-                              :data-export-bucket="bucket.id"
-                            />
-                            <span class="min-w-0 truncate" x-text="bucket.label"></span>
-                          </label>
+                          <div>
+                            <label class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <span class="settings-pref-row__title" x-text="bucket.label"></span>
+                                  <p class="settings-pref-row__hint">纳入本次导入 / 导出</p>
+                                </div>
+                              </div>
+                              <label class="settings-switch">
+                                <span class="sr-only" x-text="'选择 ' + bucket.label"></span>
+                                <input
+                                  type="checkbox"
+                                  class="settings-checkbox"
+                                  :checked="isExportBucketSelected(bucket.id)"
+                                  @change="toggleExportBucket(bucket.id)"
+                                  :disabled="localData.isBusy"
+                                  :data-export-bucket="bucket.id"
+                                />
+                                <span class="settings-switch__track" aria-hidden="true"></span>
+                              </label>
+                            </label>
+                            <div class="settings-pref-divider" role="separator"></div>
+                          </div>
                         </template>
-                      </div>
-                      <div class="settings-data-io-actions mt-3">
-                        <button
-                          type="button"
-                          @click="exportLocalData()"
-                          :disabled="localData.isBusy"
-                          class="settings-data-io-actions__btn"
-                        >
-                          <i class="fas fa-file-export settings-text-accent" aria-hidden="true"></i>
-                          <span x-text="exportLocalDataButtonText"></span>
-                        </button>
-                        <button
-                          type="button"
-                          @click="importLocalData()"
-                          :disabled="localData.isBusy"
-                          class="settings-data-io-actions__btn"
-                        >
-                          <i class="fas fa-file-import text-emerald-500" aria-hidden="true"></i>
-                          <span>导入备份</span>
-                        </button>
+
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">导出备份</span>
+                              <p class="settings-pref-row__hint">按已选分桶生成备份文件</p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            @click="exportLocalData()"
+                            :disabled="localData.isBusy"
+                            class="settings-pref-row__action"
+                          >
+                            <i class="fas fa-file-export mr-1" aria-hidden="true"></i>
+                            <span x-text="exportLocalDataButtonText"></span>
+                          </button>
+                        </div>
+
+                        <div class="settings-pref-divider" role="separator"></div>
+
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">导入备份</span>
+                              <p class="settings-pref-row__hint">可能覆盖当前本地数据</p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            @click="importLocalData()"
+                            :disabled="localData.isBusy"
+                            class="settings-pref-row__action"
+                          >
+                            <i class="fas fa-file-import mr-1" aria-hidden="true"></i>
+                            导入备份
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2744,55 +2774,91 @@
                   </summary>
                   <div class="settings-pref-fold__body">
                     <div class="settings-tool-page">
-                      <div class="grid gap-3 sm:grid-cols-3">
-                        <label class="block">
-                          <span class="settings-label">历史保留条数</span>
-                          <input
-                            type="number"
-                            min="10"
-                            max="500"
-                            step="10"
-                            data-testid="settings-storage-history-max"
-                            :value="runtimeStrategy.settings.storage.historyMaxItems"
-                            @input="setRuntimeNumber('storage.historyMaxItems', $event)"
-                            class="settings-control settings-control--sm w-full"
-                          />
+                      <div class="settings-pref-list">
+                        <label class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">历史保留条数</span>
+                              <p class="settings-pref-row__hint">超出后优先淘汰旧记录</p>
+                            </div>
+                          </div>
+                          <div class="settings-pref-row__control">
+                            <input
+                              type="number"
+                              min="10"
+                              max="500"
+                              step="10"
+                              data-testid="settings-storage-history-max"
+                              :value="runtimeStrategy.settings.storage.historyMaxItems"
+                              @input="setRuntimeNumber('storage.historyMaxItems', $event)"
+                              class="settings-control settings-control--sm"
+                            />
+                          </div>
                         </label>
-                        <label class="block">
-                          <span class="settings-label">缓存清理阈值</span>
-                          <input
-                            type="number"
-                            min="0.5"
-                            max="0.95"
-                            step="0.05"
-                            :value="runtimeStrategy.settings.storage.lruWarningThreshold"
-                            @input="setRuntimeNumber('storage.lruWarningThreshold', $event)"
-                            class="settings-control settings-control--sm w-full"
-                          />
+
+                        <div class="settings-pref-divider" role="separator"></div>
+
+                        <label class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">缓存清理阈值</span>
+                              <p class="settings-pref-row__hint">占用达到该比例时提示清理</p>
+                            </div>
+                          </div>
+                          <div class="settings-pref-row__control">
+                            <input
+                              type="number"
+                              min="0.5"
+                              max="0.95"
+                              step="0.05"
+                              :value="runtimeStrategy.settings.storage.lruWarningThreshold"
+                              @input="setRuntimeNumber('storage.lruWarningThreshold', $event)"
+                              class="settings-control settings-control--sm"
+                            />
+                          </div>
                         </label>
-                        <label class="block">
-                          <span class="settings-label">缓存清理比例</span>
-                          <input
-                            type="number"
-                            min="0.05"
-                            max="0.8"
-                            step="0.05"
-                            :value="runtimeStrategy.settings.storage.lruCleanupRatio"
-                            @input="setRuntimeNumber('storage.lruCleanupRatio', $event)"
-                            class="settings-control settings-control--sm w-full"
-                          />
+
+                        <div class="settings-pref-divider" role="separator"></div>
+
+                        <label class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">缓存清理比例</span>
+                              <p class="settings-pref-row__hint">触发清理时淘汰的比例</p>
+                            </div>
+                          </div>
+                          <div class="settings-pref-row__control">
+                            <input
+                              type="number"
+                              min="0.05"
+                              max="0.8"
+                              step="0.05"
+                              :value="runtimeStrategy.settings.storage.lruCleanupRatio"
+                              @input="setRuntimeNumber('storage.lruCleanupRatio', $event)"
+                              class="settings-control settings-control--sm"
+                            />
+                          </div>
                         </label>
-                      </div>
-                      <div class="mt-3 flex justify-end">
-                        <button
-                          type="button"
-                          data-testid="settings-save-data-strategy"
-                          @click="saveRuntimeStrategy()"
-                          :disabled="runtimeStrategy.isSaving"
-                          class="settings-btn-primary settings-btn-primary--sm"
-                        >
-                          保存数据策略
-                        </button>
+
+                        <div class="settings-pref-divider" role="separator"></div>
+
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">保存数据策略</span>
+                              <p class="settings-pref-row__hint">写入本地运行时配置</p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            data-testid="settings-save-data-strategy"
+                            @click="saveRuntimeStrategy()"
+                            :disabled="runtimeStrategy.isSaving"
+                            class="settings-pref-row__action"
+                          >
+                            保存
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
