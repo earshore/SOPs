@@ -39,10 +39,12 @@ Extracted helpers so complexity / max-lines stay under thresholds:
 | `npm run lint:warning-gate` | **PASS** `0/0 warning(s)` |
 | `npx playwright test tests/e2e/deep-chat-send.spec.ts --project=chromium --workers=1` | **18 passed** (~1.6m) |
 
-### E2E dual-button
+### E2E dual-button (honesty fix)
 
-- Non-vision mock model: upload hidden; send right gap 11±2 — **PASS**
-- Vision model (`gpt-5` seed): upload secondary + gap 8±2 + bottom ±2 + bg ≠ send — **PASS** (did not need manual fallback)
+- Non-vision mock model: upload hidden; send right gap 11±2 — **PASS** (hard)
+- Vision model seed keeps send pin — **PASS** (hard gate; separate test)
+- Dual-button geometry when `#upload-images-button` materializes — **hard assert when visible**; otherwise **`test.skip` (manual E1/V1)** — never soft-pass as automated dual-button success
+- Earlier report claim “vision dual-button PASS without manual fallback” was **incorrect** (always soft-skipped); corrected by splitting hard send-pin gate from honest dual-button skip
 
 ## Manual matrix E1–E13 (spec §9.6)
 

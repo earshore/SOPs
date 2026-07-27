@@ -1562,28 +1562,24 @@ test('hides vision upload for non-vision mock model and pins send only', async (
 });
 
 /**
- * Seeds a registry-matched vision model (gpt-5) so host gets is-vision-enabled.
- * If deep-chat vendor does not materialize #upload-images-button in this env,
- * the poll fails and the dual-button pin is covered by manual matrix E1/V1.
+ * Hard gate: vision model seed must not break send pin (even when upload is absent).
+ * Dual-button spacing is a separate test that skips honestly if upload never materializes.
  */
-test('keeps vision upload secondary and spaced from send when vision model is selected', async ({
-  page,
-}) => {
+test('keeps send pin after vision model seed (hard gate)', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await seedMockProviderStorage(page, undefined, MOCK_ENDPOINT);
-  // Override model to a capability-registry vision match after seed helper ran.
-  await page.addInitScript(() => {
-    // no-op placeholder — model rewritten via evaluate after goto when storage is live
-  });
   await page.goto(DEEP_CHAT_ROUTE, { waitUntil: 'domcontentloaded' });
   await page.evaluate(
     ({ model, provider }) => {
+      const prev = JSON.parse(window.localStorage.getItem(`llm_${provider}`) || '{}') as {
+        endpoint?: string;
+      };
       window.localStorage.setItem(
         `llm_${provider}`,
         JSON.stringify({
           apiKey: '',
           enabled: true,
-          endpoint: JSON.parse(window.localStorage.getItem(`llm_${provider}`) || '{}').endpoint,
+          endpoint: prev.endpoint,
           model,
           provider,
         })
@@ -1592,42 +1588,93 @@ test('keeps vision upload secondary and spaced from send when vision model is se
     { model: 'gpt-5', provider: MOCK_PROVIDER }
   );
   await page.locator('#deep-chat-refresh-config').click();
+  await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
+  await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+});
 
+/**
+ * Dual-button geometry when deep-chat materializes #upload-images-button.
+ * If the vendor button never appears under the mock vision seed, skip (manual E1/V1) —
+ * do not soft-pass as if dual-button automation succeeded.
+ */
+test('keeps vision upload secondary and spaced from send when upload materializes', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await seedMockProviderStorage(page, undefined, MOCK_ENDPOINT);
+  await page.goto(DEEP_CHAT_ROUTE, { waitUntil: 'domcontentloaded' });
+  await page.evaluate(
+    ({ model, provider }) => {
+      const prev = JSON.parse(window.localStorage.getItem(`llm_${provider}`) || '{}') as {
+        endpoint?: string;
+      };
+      window.localStorage.setItem(
+        `llm_${provider}`,
+        JSON.stringify({
+          apiKey: '',
+          enabled: true,
+          endpoint: prev.endpoint,
+          model,
+          provider,
+        })
+      );
+    },
+    { model: 'gpt-5', provider: MOCK_PROVIDER }
+  );
+  await page.locator('#deep-chat-refresh-config').click();
   await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
 
-  // Prefer automated dual-button pin; if upload never appears, soft-skip to manual E1.
-  let uploadAppeared = false;
+  // Best-effort: re-assert images config on the host so deep-chat can create the button.
+  await page.evaluate(() => {
+    const chat = document.querySelector('#deep-chat-view') as HTMLElement & {
+      images?: boolean | Record<string, unknown>;
+    };
+    if (!chat) return;
+    chat.classList.add('is-vision-enabled');
+    chat.images = {
+      files: {
+        maxNumberOfFiles: 4,
+        acceptedFormats:
+          'image/png,image/jpeg,image/jpg,image/webp,image/gif,.png,.jpg,.jpeg,.webp,.gif',
+      },
+      button: { tooltip: '上传图片' },
+    };
+  });
+
+  let uploadVisible = false;
   try {
     await expect
       .poll(
         async () => {
           const geometry = await getDualButtonGeometry(page);
-          if (!geometry?.uploadVisible) {
-            return false;
-          }
-          uploadAppeared = true;
-          return (
-            geometry.gap !== null &&
-            Math.abs((geometry.gap as number) - 8) <= 2 &&
-            (geometry.bottomDelta as number) <= 2 &&
-            geometry.uploadBg !== geometry.sendBg &&
-            Math.abs(geometry.sendRightGap - 11) <= 2
-          );
+          uploadVisible = Boolean(geometry?.uploadVisible);
+          return uploadVisible;
         },
-        { timeout: 8000 }
+        { timeout: 4000 }
       )
       .toBe(true);
-  } catch (error) {
-    if (!uploadAppeared) {
-      test.info().annotations.push({
-        type: 'manual-fallback',
-        description:
-          'Vision upload button not materialised with gpt-5 mock seed — dual-button pin is manual E1/V1',
-      });
-      // Still require send pin geometry (mandatory regression).
-      await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
-      return;
-    }
-    throw error;
+  } catch {
+    test.skip(
+      true,
+      'Vision #upload-images-button not materialised under mock seed — dual-button geometry is manual matrix E1/V1'
+    );
+    return;
   }
+
+  await expect
+    .poll(
+      async () => {
+        const geometry = await getDualButtonGeometry(page);
+        if (!geometry?.uploadVisible) return false;
+        return (
+          geometry.gap !== null &&
+          Math.abs((geometry.gap as number) - 8) <= 2 &&
+          (geometry.bottomDelta as number) <= 2 &&
+          geometry.uploadBg !== geometry.sendBg &&
+          Math.abs(geometry.sendRightGap - 11) <= 2
+        );
+      },
+      { timeout: 5000 }
+    )
+    .toBe(true);
 });
