@@ -1333,7 +1333,8 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain("setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)");
   expect(template).toContain('setDeveloperDiagnosticLogLevel($event)');
   expect(template).toContain('developerDangerousEndpointText');
-  expect(template).toContain('这是当前环境的只读安全提示，不属于调试开关。');
+  expect(template).toContain('settings-note settings-note--warn');
+  expect(template).toContain('只读提示：不属于调试开关。');
   expect(template).not.toContain('diagnosticStatusItems');
   expect(template).toContain('危险操作');
   expect(template).toContain('清空全部本地数据');

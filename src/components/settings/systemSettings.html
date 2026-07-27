@@ -962,8 +962,8 @@
                 </summary>
                 <div class="settings-pref-fold__body">
                   <div class="settings-tool-page mt-3">
-                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                      <label class="block">
+                    <div class="settings-metrics-grid settings-metrics-grid--cols-4">
+                      <label class="settings-metrics-cell">
                         <span class="settings-label">AI / 工具请求超时（秒）</span>
                         <input
                           type="number"
@@ -975,7 +975,7 @@
                           class="settings-control settings-control--sm"
                         />
                       </label>
-                      <label class="block">
+                      <label class="settings-metrics-cell">
                         <span class="settings-label">模型重试次数</span>
                         <input
                           type="number"
@@ -987,7 +987,7 @@
                           class="settings-control settings-control--sm"
                         />
                       </label>
-                      <label class="block">
+                      <label class="settings-metrics-cell">
                         <span class="settings-label">重试间隔（秒）</span>
                         <input
                           type="number"
@@ -999,7 +999,7 @@
                           class="settings-control settings-control--sm"
                         />
                       </label>
-                      <label class="block">
+                      <label class="settings-metrics-cell">
                         <span class="settings-label">连接测试超时（秒）</span>
                         <input
                           type="number"
@@ -1233,8 +1233,8 @@
                           <h5 class="settings-scrape-runtime__title">采集运行策略</h5>
                           <span class="settings-badge settings-badge--scrape">影响采集</span>
                         </div>
-                        <div class="mt-3 grid gap-3 sm:grid-cols-4">
-                          <label class="block"
+                        <div class="settings-metrics-grid settings-metrics-grid--cols-4">
+                          <label class="settings-metrics-cell"
                             ><span class="settings-label">请求超时（秒）</span
                             ><input
                               type="number"
@@ -1245,7 +1245,7 @@
                               @input="setRuntimeNumber('scraper.requestTimeoutMs', $event, 1000)"
                               class="settings-control settings-control--sm"
                           /></label>
-                          <label class="block"
+                          <label class="settings-metrics-cell"
                             ><span class="settings-label">最大并发</span
                             ><input
                               type="number"
@@ -1256,7 +1256,7 @@
                               @input="setRuntimeNumber('scraper.maxConcurrent', $event)"
                               class="settings-control settings-control--sm"
                           /></label>
-                          <label class="block"
+                          <label class="settings-metrics-cell"
                             ><span class="settings-label">最大重试</span
                             ><input
                               type="number"
@@ -1267,7 +1267,7 @@
                               @input="setRuntimeNumber('scraper.maxRetries', $event)"
                               class="settings-control settings-control--sm"
                           /></label>
-                          <label class="block"
+                          <label class="settings-metrics-cell"
                             ><span class="settings-label">重试间隔（秒）</span
                             ><input
                               type="number"
@@ -1278,7 +1278,7 @@
                               @input="setRuntimeNumber('scraper.retryDelayMs', $event, 1000)"
                               class="settings-control settings-control--sm"
                           /></label>
-                          <label class="block"
+                          <label class="settings-metrics-cell"
                             ><span class="settings-label">批次大小</span
                             ><input
                               type="number"
@@ -1289,7 +1289,7 @@
                               @input="setRuntimeNumber('scraper.batchSize', $event)"
                               class="settings-control settings-control--sm"
                           /></label>
-                          <label class="block"
+                          <label class="settings-metrics-cell"
                             ><span class="settings-label">批次间隔（秒）</span
                             ><input
                               type="number"
@@ -1300,7 +1300,7 @@
                               @input="setRuntimeNumber('scraper.batchDelayMs', $event, 1000)"
                               class="settings-control settings-control--sm"
                           /></label>
-                          <label class="block"
+                          <label class="settings-metrics-cell"
                             ><span class="settings-label">缓存时长（小时）</span
                             ><input
                               type="number"
@@ -1380,8 +1380,8 @@
                           </div>
                         </div>
                       </template>
-                      <div class="mt-3 grid gap-3 sm:grid-cols-3">
-                          <div class="block min-w-0">
+                      <div class="settings-metrics-grid settings-metrics-grid--cols-3">
+                          <div class="settings-metrics-cell">
                             <span class="settings-label">调度偏好</span>
                             <div
                               class="settings-schedule-select relative"
@@ -1451,7 +1451,7 @@
                               </ul>
                             </div>
                           </div>
-                          <label class="block">
+                          <label class="settings-metrics-cell">
                             <span class="settings-label">完整报告 Token</span>
                             <input
                               type="number"
@@ -1463,7 +1463,7 @@
                               class="settings-control settings-control--sm"
                             />
                           </label>
-                          <label class="block">
+                          <label class="settings-metrics-cell">
                             <span class="settings-label">翻译报告 Token</span>
                             <input
                               type="number"
@@ -1498,9 +1498,9 @@
                             </label>
                           </div>
                         </div>
-                        <div class="mt-3 grid gap-3 sm:grid-cols-4">
+                        <div class="settings-metrics-grid settings-metrics-grid--cols-4">
                         <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
-                          <label class="block">
+                          <label class="settings-metrics-cell">
                             <span class="settings-label" x-text="item.label"></span>
                             <input
                               type="number"
@@ -1622,8 +1622,8 @@
                       </div>
                     </div>
 
-                    <div class="mt-3 grid gap-3 sm:grid-cols-4">
-                        <label class="block"
+                    <div class="settings-metrics-grid settings-metrics-grid--cols-4">
+                        <label class="settings-metrics-cell"
                           ><span class="settings-label">请求超时（秒）</span
                           ><input
                             type="number"
@@ -1634,7 +1634,7 @@
                             @input="setRuntimeNumber('deepChat.requestTimeoutMs', $event, 1000)"
                             class="settings-control settings-control--sm"
                         /></label>
-                        <label class="block"
+                        <label class="settings-metrics-cell"
                           ><span class="settings-label">输出 Token</span
                           ><input
                             type="number"
@@ -1645,7 +1645,7 @@
                             @input="setRuntimeNumber('deepChat.maxOutputTokens', $event)"
                             class="settings-control settings-control--sm"
                         /></label>
-                        <label class="block"
+                        <label class="settings-metrics-cell"
                           ><span class="settings-label">上下文字符</span
                           ><input
                             type="number"
@@ -1656,7 +1656,7 @@
                             @input="setRuntimeNumber('deepChat.maxContextChars', $event)"
                             class="settings-control settings-control--sm"
                         /></label>
-                        <label class="block"
+                        <label class="settings-metrics-cell"
                           ><span class="settings-label">会话保留数</span
                           ><input
                             type="number"
@@ -1667,7 +1667,7 @@
                             @input="setRuntimeNumber('deepChat.maxThreadCount', $event)"
                             class="settings-control settings-control--sm"
                         /></label>
-                        <label class="block"
+                        <label class="settings-metrics-cell"
                           ><span class="settings-label">单条消息字符</span
                           ><input
                             type="number"
@@ -1678,7 +1678,7 @@
                             @input="setRuntimeNumber('deepChat.maxMessageChars', $event)"
                             class="settings-control settings-control--sm"
                         /></label>
-                        <label class="block"
+                        <label class="settings-metrics-cell"
                           ><span class="settings-label">系统提示词字符</span
                           ><input
                             type="number"
@@ -1689,7 +1689,7 @@
                             @input="setRuntimeNumber('deepChat.maxSystemPromptChars', $event)"
                             class="settings-control settings-control--sm"
                         /></label>
-                        <label class="block"
+                        <label class="settings-metrics-cell"
                           ><span class="settings-label">每会话消息数</span
                           ><input
                             type="number"
@@ -1700,7 +1700,7 @@
                             @input="setRuntimeNumber('deepChat.maxThreadMessageCount', $event)"
                             class="settings-control settings-control--sm"
                         /></label>
-                        <label class="block"
+                        <label class="settings-metrics-cell"
                           ><span class="settings-label">Prompt 草稿数</span
                           ><input
                             type="number"
@@ -2154,8 +2154,8 @@
                           </div>
                       </div>
                     </template>
-                    <div class="mt-3 grid gap-3 sm:grid-cols-4">
-                    <label class="block"
+                    <div class="settings-metrics-grid settings-metrics-grid--cols-4">
+                    <label class="settings-metrics-cell"
                       ><span class="settings-label">PPC 批次大小</span
                       ><input
                         type="number"
@@ -2166,7 +2166,7 @@
                         @input="setRuntimeNumber('ppcSearchTerms.batchSize', $event)"
                         class="settings-control settings-control--sm"
                     /></label>
-                    <label class="block"
+                    <label class="settings-metrics-cell"
                       ><span class="settings-label">PPC 并发批次</span
                       ><input
                         type="number"
@@ -2177,7 +2177,7 @@
                         @input="setRuntimeNumber('ppcSearchTerms.maxConcurrentBatches', $event)"
                         class="settings-control settings-control--sm"
                     /></label>
-                    <label class="block"
+                    <label class="settings-metrics-cell"
                       ><span class="settings-label">缓存 TTL（小时）</span
                       ><input
                         type="number"
@@ -2188,7 +2188,7 @@
                         @input="setRuntimeNumber('ppcSearchTerms.cacheTtlMs', $event, 3600000)"
                         class="settings-control settings-control--sm"
                     /></label>
-                    <label class="block"
+                    <label class="settings-metrics-cell"
                       ><span class="settings-label">最大输出 Token</span
                       ><input
                         type="number"
@@ -2260,12 +2260,12 @@
                     </div>
                   </div>
                   <div
-                      class="mt-3 grid gap-3 sm:grid-cols-3"
+                      class="settings-metrics-grid settings-metrics-grid--cols-3"
                       data-settings-focus="ppc-thresholds"
                       id="ppc-thresholds"
                     >
                       <template x-for="item in ppcThresholdItems" :key="item.key">
-                        <label class="block">
+                        <label class="settings-metrics-cell">
                           <span class="settings-label" x-text="item.label"></span>
                           <input
                             type="number"
@@ -3171,60 +3171,28 @@
                 </div>
               </div>
 
-              <div class="rounded-lg border border-amber-100 bg-amber-50/60 p-3">
-                <div class="flex items-start gap-2.5">
-                  <span
-                    class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700 ring-1 ring-amber-200"
-                  >
-                    <i class="fas fa-shield-halved text-[11px]"></i>
-                  </span>
-                  <span class="min-w-0 flex-1">
-                    <span class="flex flex-wrap items-center justify-between gap-2">
-                      <span class="settings-card__title">端点安全策略</span>
-                      <span
-                        class="shrink-0 rounded-md bg-white/80 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700"
-                        x-text="developerDangerousEndpointText"
-                      ></span>
-                    </span>
-                    <span class="mt-1 block text-[10px] leading-relaxed text-slate-500">
-                      这是当前环境的只读安全提示，不属于调试开关。
-                    </span>
-                  </span>
+              <div class="settings-note settings-note--warn" role="status">
+                <span class="settings-note__icon" aria-hidden="true">
+                  <i class="fas fa-shield-halved"></i>
+                </span>
+                <div class="settings-note__body">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <p class="settings-note__title">端点安全策略</p>
+                    <span class="settings-note__badge" x-text="developerDangerousEndpointText"></span>
+                  </div>
+                  <p class="settings-note__text">只读提示：不属于调试开关。</p>
                 </div>
               </div>
 
-              <!-- Info Card -->
-              <div
-                class="p-3.5 bg-gradient-to-r from-slate-50/80 to-emerald-50/30 border border-slate-100/60 rounded-2xl"
-              >
-                <div class="flex gap-3">
-                  <div
-                    class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5"
-                  >
-                    <i class="fas fa-info-circle text-slate-400 text-[10px]"></i>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-[11px] text-slate-500 leading-[1.7] mb-2">
-                      监控面板提供实时性能数据、错误统计和用户行为分析，帮助您了解应用运行状态。
-                    </p>
-                    <div class="flex flex-wrap gap-1.5">
-                      <span
-                        class="inline-flex items-center gap-1 px-2 py-1 bg-white/80 rounded-md text-[10px] font-medium text-slate-600"
-                      >
-                        <i class="fas fa-bolt text-amber-500"></i> Web Vitals
-                      </span>
-                      <span
-                        class="inline-flex items-center gap-1 px-2 py-1 bg-white/80 rounded-md text-[10px] font-medium text-slate-600"
-                      >
-                        <i class="fas fa-bug text-red-500"></i> 错误追踪
-                      </span>
-                      <span
-                        class="inline-flex items-center gap-1 px-2 py-1 bg-white/80 rounded-md text-[10px] font-medium text-slate-600"
-                      >
-                        <i class="fas fa-users text-blue-500"></i> 用户分析
-                      </span>
-                    </div>
-                  </div>
+              <div class="settings-note" role="note">
+                <span class="settings-note__icon" aria-hidden="true">
+                  <i class="fas fa-info-circle"></i>
+                </span>
+                <div class="settings-note__body">
+                  <p class="settings-note__title">监控面板</p>
+                  <p class="settings-note__text">
+                    性能、错误与行为分析；用于排查运行状态，不改变业务配置。
+                  </p>
                 </div>
               </div>
             </div>

@@ -394,7 +394,18 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(toolChunk).not.toContain('settings-tool-app');
   });
 
-  it('PPC Tools is one product tool-page (Deep Chat pattern), not ad-hoc slate card', () => {
+  it('tool strategy numeric clusters use settings-metrics-grid primitive', () => {
+      const toolStart = html.indexOf('settings-tool-pref-list');
+      const toolEnd = html.indexOf('settings-strategy-footer', toolStart);
+      const toolChunk = html.slice(toolStart, toolEnd);
+      expect(toolChunk).toContain('settings-metrics-grid');
+      expect(toolChunk).toContain('settings-metrics-cell');
+      expect(toolChunk).toContain('settings-metrics-grid--cols-4');
+      expect(toolChunk).not.toContain('mt-3 grid gap-3 sm:grid-cols-4');
+      expect(toolChunk).not.toContain('grid gap-3 sm:grid-cols-2 lg:grid-cols-4');
+    });
+
+    it('PPC Tools is one product tool-page (Deep Chat pattern), not ad-hoc slate card', () => {
     const ppcStart = html.indexOf('settings-pref-row__title">PPC Tools');
     expect(ppcStart).toBeGreaterThan(-1);
     const ppcChunk = html.slice(ppcStart, html.indexOf('settings-strategy-footer', ppcStart));

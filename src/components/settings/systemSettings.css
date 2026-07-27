@@ -302,30 +302,6 @@
 }
 
 /* Expand / collapse bar for tool-strategy app groups */
-.settings-expand-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.35rem;
-}
-
-.settings-expand-bar__btn {
-  min-height: 1.75rem;
-  padding: 0.2rem 0.55rem;
-  border: 1px solid var(--settings-border);
-  border-radius: 0.5rem;
-  background: var(--settings-surface);
-  color: var(--settings-text-muted);
-  font-size: 0.625rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.settings-expand-bar__btn:hover {
-  background: var(--settings-surface-muted);
-  color: var(--settings-text);
-}
 
 /* Inner cards (runtime blocks, app groups, etc.) — elevated surface, not hard white */
 .settings-card {
@@ -824,6 +800,139 @@ select.settings-control {
   border-radius: 0.5rem;
   background: color-mix(in srgb, var(--settings-surface-muted) 72%, var(--settings-surface));
   padding: 0.75rem;
+}
+
+/*
+ * Metrics grid — dense numeric/enum cells for tool strategy.
+ * Not full-width pref-rows (too sparse); not raw Tailwind grids (off-language).
+ * Each cell is a mini stacked field: label over control.
+ */
+.settings-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.settings-tool-page > .settings-metrics-grid:first-child {
+  margin-top: 0;
+}
+
+@media (min-width: 640px) {
+  .settings-metrics-grid--cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .settings-metrics-grid--cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.settings-metrics-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.28rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.45rem 0.5rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--settings-surface) 88%, var(--settings-surface-muted));
+  box-sizing: border-box;
+}
+
+.settings-metrics-cell .settings-label,
+.settings-metrics-cell__label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--settings-text-muted, #64748b);
+}
+
+.settings-metrics-cell .settings-control,
+.settings-metrics-cell .settings-control--sm {
+  width: 100%;
+  min-width: 0;
+}
+
+.settings-metrics-cell .settings-schedule-select {
+  width: 100%;
+}
+
+/* Quiet status / note cards (diagnostics, security notice) */
+.settings-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--settings-border) 90%, transparent);
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--settings-surface-muted) 78%, var(--settings-surface));
+}
+
+.settings-note--warn {
+  border-color: color-mix(in srgb, var(--color-warning, #f59e0b) 28%, var(--settings-border));
+  background: color-mix(in srgb, var(--color-warning, #f59e0b) 8%, var(--settings-surface));
+}
+
+.settings-note__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--settings-text-muted) 12%, var(--settings-surface));
+  color: var(--settings-text-muted, #64748b);
+  font-size: 0.6875rem;
+}
+
+.settings-note--warn .settings-note__icon {
+  background: color-mix(in srgb, var(--color-warning, #f59e0b) 16%, var(--settings-surface));
+  color: var(--color-warning-dark, #b45309);
+}
+
+.settings-note__body {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.settings-note__title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--settings-text, #334155);
+}
+
+.settings-note__text {
+  margin: 0.2rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--settings-text-muted, #64748b);
+}
+
+.settings-note__badge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--settings-surface) 88%, transparent);
+  color: var(--color-warning-dark, #b45309);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .settings-tool-page-stack {
@@ -1557,87 +1666,6 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
   color: var(--color-text-tertiary, #94a3b8);
 }
 
-.settings-api-path-menu {
-  /* float over content — no layout shift */
-  left: auto;
-  right: 0;
-  width: max(100%, min(22rem, 78vw));
-  min-width: 100%;
-  max-width: min(26rem, 88vw);
-  z-index: 40;
-  border: 1px solid var(--settings-border);
-  border-radius: 0.75rem;
-  background: var(--settings-surface);
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb, #cbd5e1) transparent;
-  box-shadow:
-    0 10px 28px rgba(15, 23, 42, 0.1),
-    0 2px 6px rgba(15, 23, 42, 0.06);
-}
-
-/* Two-line options: title row + smaller description */
-.settings-api-path-option {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.2rem;
-  width: 100%;
-  margin: 0;
-  padding: 0.55rem 0.75rem;
-  border: 0;
-  background: transparent;
-  box-sizing: border-box;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 120ms ease;
-}
-
-.settings-api-path-option:hover,
-.settings-api-path-option:focus-visible {
-  background: var(--settings-surface-muted);
-  outline: none;
-}
-
-.settings-api-path-option__title,
-.settings-api-path-option__path {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  color: var(--settings-text);
-  font-size: 0.8125rem;
-  line-height: 1.35;
-  word-break: break-all;
-  white-space: normal;
-}
-
-.settings-api-path-option__desc {
-  display: block;
-  width: 100%;
-  color: var(--color-text-tertiary, #94a3b8);
-  font-size: 0.625rem;
-  font-weight: 400;
-  line-height: 1.35;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.settings-api-path-option.is-selected {
-  background: color-mix(in srgb, #8b5cf6 10%, var(--settings-surface));
-}
-
-.settings-api-path-option.is-selected:hover,
-.settings-api-path-option.is-selected:focus-visible {
-  background: color-mix(in srgb, #8b5cf6 16%, var(--settings-surface));
-}
-
-.settings-api-path-option.is-selected .settings-api-path-option__path {
-  color: color-mix(in srgb, #7c3aed 72%, var(--settings-text));
-}
-
-.settings-api-path-option.is-selected .settings-api-path-option__desc {
-  color: color-mix(in srgb, #8b5cf6 55%, var(--settings-text-muted));
-}
 
 /* Effort / preset segmented: slightly stronger pill in pref-rows */
 .settings-segmented--effort {
@@ -1670,65 +1698,6 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
   font-weight: 700;
 }
 
-/* L3 directory shells — visual peers of .settings-llm-step */
-.settings-tool-app,
-.settings-collapsible-card {
-  border: 1px solid color-mix(in srgb, var(--settings-border) 95%, transparent);
-  border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  background: color-mix(in srgb, var(--settings-surface) 90%, transparent);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 3%, transparent);
-  overflow: hidden;
-}
-
-.settings-tool-app-summary,
-.settings-collapsible-summary {
-  cursor: pointer;
-  list-style: none;
-  user-select: none;
-  transition: background-color 160ms ease;
-}
-
-.settings-tool-app-summary::-webkit-details-marker,
-.settings-collapsible-summary::-webkit-details-marker {
-  display: none;
-}
-
-/* Trailing badge / chevron cluster hugs the end of the L3 header row */
-.settings-tool-app-summary > .settings-card__badge,
-.settings-tool-app-summary > .settings-badge,
-.settings-collapsible-summary > .settings-card__badge,
-.settings-collapsible-summary > .settings-badge,
-.settings-tool-app-summary > .settings-tool-app-chevron,
-.settings-collapsible-summary > .settings-collapsible-chevron {
-  margin-left: 0;
-}
-
-.settings-tool-app-summary > div:first-child,
-.settings-collapsible-summary > div:first-child,
-.settings-llm-step__header > div:first-child {
-  min-width: 0;
-  flex: 1 1 10rem;
-}
-
-.settings-tool-app-chevron,
-.settings-collapsible-chevron,
-.settings-llm-step__chevron {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  flex-shrink: 0;
-  color: var(--color-text-tertiary, #94a3b8);
-  transition: transform 160ms ease;
-}
-
-.settings-tool-app[open] .settings-tool-app-chevron,
-.settings-collapsible-card[open] .settings-collapsible-chevron,
-.settings-llm-step[open] .settings-llm-step__chevron,
-details.settings-submodule[open] .settings-collapsible-chevron {
-  transform: rotate(180deg);
-}
 
 /* Scraper runtime fields (flat, under proxy actions) */
 .settings-scrape-runtime {
@@ -2052,15 +2021,6 @@ details.settings-submodule[open] .settings-collapsible-chevron {
 }
 
 /* Collapsed data cards — shared summary rhythm */
-.settings-collapsible-card > .settings-collapsible-summary {
-  padding: 0.75rem 0.875rem;
-  min-height: 2.75rem;
-  align-items: center;
-}
-
-.settings-collapsible-card > .settings-collapsible-body {
-  border-top: 1px solid var(--color-border-light, #f1f5f9);
-}
 
 /* Import / export actions at bottom of 数据导入与导出 */
 .settings-data-io-actions {
