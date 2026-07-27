@@ -257,6 +257,13 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(debugChunk).toContain('settings-switch');
     expect(debugChunk).not.toContain('grid gap-3 sm:grid-cols-2');
     expect(debugChunk).not.toContain('text-emerald-600 focus:ring-emerald-500');
+
+    // Top-level under section frame (same elevation as appearance theme list)
+    const perfFrame = html.indexOf('settings-section-frame--performance');
+    expect(perfFrame).toBeGreaterThan(-1);
+    expect(debugListStart).toBeGreaterThan(perfFrame);
+    expect(html.slice(perfFrame, debugListStart)).not.toContain('settings-card p-3.5');
+    expect(html.slice(perfFrame, debugListStart + 80)).not.toContain('调试配置');
   });
 
   it('P1-2 PPC Search Terms booleans use pref-list + setRuntimeBoolean paths', () => {
