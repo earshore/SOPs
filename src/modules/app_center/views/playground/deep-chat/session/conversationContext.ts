@@ -147,9 +147,7 @@ function buildAssistantStoredMessage(
     ...(options.assistantStatus === 'stopped' || options.assistantStatus === 'partial'
       ? { status: options.assistantStatus }
       : {}),
-    ...(reasoning
-      ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) }
-      : {}),
+    ...(reasoning ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) } : {}),
     ...(typeof durationSec === 'number' && Number.isFinite(durationSec) && durationSec >= 0
       ? { reasoningDurationSec: Math.max(0, Math.round(durationSec)) }
       : {}),

@@ -22,8 +22,7 @@ export const DEEP_CHAT_VISION_PLACEHOLDER_TEXT = '[图片]';
 
 export const DEEP_CHAT_VISION_COPY = {
   maxCount: (n: number) => `单次最多上传 ${n} 张图片，请减少后重试。`,
-  maxFile: (name: string, mb: number) =>
-    `图片「${name || '未命名'}」超过 ${mb}MB 上限。`,
+  maxFile: (name: string, mb: number) => `图片「${name || '未命名'}」超过 ${mb}MB 上限。`,
   maxTotal: (mb: number) => `本轮图片合计超过 ${mb}MB，请压缩或减少张数。`,
   type: '不支持的文件类型，请使用 PNG、JPEG、WebP 或 GIF。',
   svg: '不支持 SVG 图片，请改用 PNG 或 JPEG。',
@@ -39,13 +38,7 @@ export const DEEP_CHAT_VISION_COPY = {
   modelSwitch: '已切换到不支持图片的模型，发送前请移除图片或换回视觉模型。',
 } as const;
 
-const ALLOWED_MIME = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/jpg',
-  'image/webp',
-  'image/gif',
-]);
+const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif']);
 
 export type DeepChatVisionUserPart = {
   type: 'input_image';
@@ -335,12 +328,7 @@ export async function resolveDeepChatVisionUserParts(args: {
     if (typeError) {
       return { ok: false, error: typeError };
     }
-    const sizeCheck = checkVisionCandidateSize(
-      candidate,
-      maxFileBytes,
-      totalBytes,
-      maxTotalBytes
-    );
+    const sizeCheck = checkVisionCandidateSize(candidate, maxFileBytes, totalBytes, maxTotalBytes);
     if ('error' in sizeCheck) {
       return { ok: false, error: sizeCheck.error };
     }

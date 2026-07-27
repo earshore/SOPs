@@ -9,10 +9,7 @@ import {
 } from './threadStore';
 import type { ChatMessage } from '@/services/llmService';
 
-import {
-  buildStoredThreadMessages,
-  withVisionAttachmentMetaDisplay,
-} from './conversationContext';
+import { buildStoredThreadMessages, withVisionAttachmentMetaDisplay } from './conversationContext';
 import {
   abortPendingDeepChatRequest,
   appendPendingDeepChatAssistantText,

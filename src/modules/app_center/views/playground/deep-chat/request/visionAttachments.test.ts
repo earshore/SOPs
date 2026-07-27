@@ -244,9 +244,7 @@ describe('resolveDeepChatVisionUserParts hardening', () => {
     });
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error).toBe(
-        '不支持的文件类型，请使用 PNG、JPEG、WebP 或 GIF。'
-      );
+      expect(result.error).toBe('不支持的文件类型，请使用 PNG、JPEG、WebP 或 GIF。');
     }
   });
 
@@ -305,9 +303,7 @@ describe('resolveDeepChatVisionUserParts hardening', () => {
     });
     expect(nonVision.ok).toBe(false);
     if (!nonVision.ok) {
-      expect(nonVision.error).toBe(
-        '当前模型不支持图片输入，请切换到支持视觉的模型后再试。'
-      );
+      expect(nonVision.error).toBe('当前模型不支持图片输入，请切换到支持视觉的模型后再试。');
     }
 
     const oversized = await resolveDeepChatVisionUserParts({

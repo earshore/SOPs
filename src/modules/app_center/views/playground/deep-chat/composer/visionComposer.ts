@@ -391,9 +391,7 @@ function onUploadClick(event: Event): void {
     showToast(DEEP_CHAT_VISION_COPY.maxCount(DEEP_CHAT_VISION_MAX_FILES), { type: 'warning' });
     return;
   }
-  const input = state.chat?.shadowRoot?.querySelector<HTMLInputElement>(
-    `#${VISION_FILE_INPUT_ID}`
-  );
+  const input = state.chat?.shadowRoot?.querySelector<HTMLInputElement>(`#${VISION_FILE_INPUT_ID}`);
   input?.click();
 }
 

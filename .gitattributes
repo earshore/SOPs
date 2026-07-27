@@ -1,2 +1,21 @@
-# Auto detect text files and perform LF normalization
+# Normalize text files; let working tree use platform line endings.
+# Prettier uses endOfLine: "auto" so format:check does not fail on CRLF workspaces.
 * text=auto
+
+# Explicit binary (never convert)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.7z binary
+*.gz binary
+*.mp4 binary
+*.webm binary

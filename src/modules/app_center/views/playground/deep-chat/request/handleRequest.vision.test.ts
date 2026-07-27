@@ -52,10 +52,8 @@ vi.mock('@/services/runtimeStrategyService', async importOriginal => {
 const { sessionState } = await import('../session/sessionState');
 const { handleDeepChatRequest } = await import('./handleRequest');
 const { showToast } = await import('@/common/ui/notifications');
-const {
-  DEEP_CHAT_VISION_MAX_FILE_BYTES,
-  DEEP_CHAT_VISION_COPY,
-} = await import('./visionAttachments');
+const { DEEP_CHAT_VISION_MAX_FILE_BYTES, DEEP_CHAT_VISION_COPY } =
+  await import('./visionAttachments');
 
 const config = {
   provider: 'new_api',

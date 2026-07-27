@@ -78,9 +78,7 @@ function paintSettledGenerationChrome(): void {
   const mount = getMountedRenderContainer();
   if (!mount) return;
   uiHooks.syncAllDeepThinkingChrome(mount);
-  refreshMessageToolbarStatuses(getChat(mount), () =>
-    getThreadDisplayMessages(getActiveThread())
-  );
+  refreshMessageToolbarStatuses(getChat(mount), () => getThreadDisplayMessages(getActiveThread()));
 }
 
 async function reportDeepChatRequestFailure(
@@ -131,9 +129,7 @@ export async function handleDeepChatRequest(
     } = preparedRequest;
 
     const userAttachmentMeta =
-      visionUserParts && visionUserParts.length > 0
-        ? { count: visionUserParts.length }
-        : undefined;
+      visionUserParts && visionUserParts.length > 0 ? { count: visionUserParts.length } : undefined;
     hadVisionParts = Boolean(userAttachmentMeta);
 
     uiHooks.setConversationActive(container, true);
@@ -229,8 +225,7 @@ export async function prepareDeepChatRequest(
 
   // Product gate (default off) + model capability; UI is also hidden when feature off.
   const visionFeatureOn = isDeepChatVisionFeatureEnabled();
-  const supportsVision =
-    visionFeatureOn && resolveRequestSupportsVision(config, model);
+  const supportsVision = visionFeatureOn && resolveRequestSupportsVision(config, model);
   // When feature is off: no host staged files; body.files (if any) fail closed via supportsVision=false.
   const hostFiles = visionFeatureOn ? getStagedVisionFiles() : [];
   const visionResult = await resolveDeepChatVisionUserParts({
