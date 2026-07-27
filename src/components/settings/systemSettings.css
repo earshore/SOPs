@@ -140,59 +140,22 @@
   );
 }
 
-/* Soft tint per section — color-mix into surface (dual-safe, not fixed pastels) */
-.settings-section-frame--llm {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, #8b5cf6 8%, var(--settings-surface)),
-    color-mix(in srgb, var(--settings-surface-muted) 70%, var(--settings-surface))
-  );
-  border-color: color-mix(in srgb, #8b5cf6 22%, var(--settings-border));
-}
-
-.settings-section-frame--strategy {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, #6366f1 8%, var(--settings-surface)),
-    color-mix(in srgb, var(--settings-surface-muted) 70%, var(--settings-surface))
-  );
-  border-color: color-mix(in srgb, #6366f1 22%, var(--settings-border));
-}
-
-.settings-section-frame--network {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, #06b6d4 8%, var(--settings-surface)),
-    color-mix(in srgb, var(--settings-surface-muted) 70%, var(--settings-surface))
-  );
-  border-color: color-mix(in srgb, #06b6d4 22%, var(--settings-border));
-}
-
-.settings-section-frame--data {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, #3b82f6 8%, var(--settings-surface)),
-    color-mix(in srgb, var(--settings-surface-muted) 70%, var(--settings-surface))
-  );
-  border-color: color-mix(in srgb, #3b82f6 22%, var(--settings-border));
-}
-
-.settings-section-frame--performance {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, #10b981 8%, var(--settings-surface)),
-    color-mix(in srgb, var(--settings-surface-muted) 70%, var(--settings-surface))
-  );
-  border-color: color-mix(in srgb, #10b981 22%, var(--settings-border));
-}
-
+/*
+ * Section frames are hierarchy shells, not brand chips (Operational Quiet).
+ * Variant classes kept for HTML stability; all map to the same neutral surface.
+ */
+.settings-section-frame--llm,
+.settings-section-frame--strategy,
+.settings-section-frame--network,
+.settings-section-frame--data,
+.settings-section-frame--performance,
 .settings-section-frame--appearance {
   background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--settings-surface-muted) 95%, var(--settings-surface)),
+    180deg,
+    color-mix(in srgb, var(--settings-surface) 92%, transparent),
     color-mix(in srgb, var(--settings-surface-muted) 72%, var(--settings-surface))
   );
-  border-color: color-mix(in srgb, var(--settings-border) 90%, transparent);
+  border-color: color-mix(in srgb, var(--settings-border) 85%, transparent);
 }
 
 /* Section title row (icon + title row + short desc) */
@@ -227,31 +190,12 @@
   margin-top: 0.05rem;
 }
 
-.settings-section-head__icon--violet {
-  background: color-mix(in srgb, #8b5cf6 14%, var(--settings-surface));
-  color: #8b5cf6;
-}
-
-.settings-section-head__icon--indigo {
-  background: color-mix(in srgb, #6366f1 14%, var(--settings-surface));
-  color: #6366f1;
-}
-
-.settings-section-head__icon--cyan {
-  background: color-mix(in srgb, #06b6d4 14%, var(--settings-surface));
-  color: #06b6d4;
-}
-
-.settings-section-head__icon--blue {
-  background: color-mix(in srgb, #3b82f6 14%, var(--settings-surface));
-  color: #3b82f6;
-}
-
-.settings-section-head__icon--emerald {
-  background: color-mix(in srgb, #10b981 14%, var(--settings-surface));
-  color: #10b981;
-}
-
+/* L1 section icons: muted only — color is not hierarchy */
+.settings-section-head__icon--violet,
+.settings-section-head__icon--indigo,
+.settings-section-head__icon--cyan,
+.settings-section-head__icon--blue,
+.settings-section-head__icon--emerald,
 .settings-section-head__icon--slate {
   background: color-mix(in srgb, var(--settings-text-muted) 12%, var(--settings-surface));
   color: var(--settings-text-muted);
@@ -890,6 +834,20 @@ select.settings-control {
   overflow: hidden;
 }
 
+/*
+ * Nested pref-list (L4 inside L3 shell): drop second chrome box.
+ * Dividers alone separate rows; outer tool-app / step / card already frames the group.
+ */
+.settings-tool-app .settings-pref-list,
+.settings-llm-step .settings-pref-list,
+.settings-collapsible-card .settings-pref-list,
+.settings-submodule .settings-pref-list {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .settings-pref-row {
   display: flex;
   flex-wrap: nowrap;
@@ -1213,11 +1171,12 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 }
 
 /* ---- LLM setup: numbered steps 1–4 (collapsible, default closed) ---- */
+/* L3 directory node shell — shared with tool-app / collapsible */
 .settings-llm-step {
-  border: 1px solid color-mix(in srgb, var(--settings-border) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--settings-border) 95%, transparent);
   border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  background: color-mix(in srgb, var(--settings-surface) 78%, transparent);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  background: color-mix(in srgb, var(--settings-surface) 90%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 3%, transparent);
   /* visible so API-path dropdown is not clipped */
   overflow: visible;
 }
@@ -1239,16 +1198,26 @@ details.settings-submodule[open] > summary.settings-submodule__head {
     var(--settings-radius-card, var(--workbench-radius, 8px)) 0 0;
 }
 
-.settings-llm-step__header {
+/* L3 header row: title cluster + trailing badge/chevron (same rhythm as tool-app) */
+.settings-llm-step__header,
+.settings-tool-app-summary,
+.settings-collapsible-summary {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.625rem;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
   padding: 0.75rem 0.875rem;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--settings-surface-muted) 90%, transparent),
-    color-mix(in srgb, var(--settings-surface) 40%, transparent)
-  );
+  background: transparent;
+}
+
+.settings-llm-step__header:hover,
+.settings-tool-app-summary:hover,
+.settings-tool-app-summary:focus-visible,
+.settings-collapsible-summary:hover,
+.settings-collapsible-summary:focus-visible {
+  background: color-mix(in srgb, var(--settings-surface-muted) 92%, transparent);
+  outline: none;
 }
 
 /* Real FA icon — more reliable than CSS content \f078 */
@@ -1262,22 +1231,29 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   transform: rotate(180deg);
 }
 
-.settings-llm-step__title {
-  font-size: 0.75rem;
+.settings-llm-step__title,
+.settings-tool-app-summary .settings-card__title,
+.settings-collapsible-summary .settings-card__title {
+  margin: 0;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--settings-text);
   line-height: 1.25;
 }
 
-.settings-llm-step__desc {
-  margin-top: 0.125rem;
-  font-size: 0.625rem;
-  line-height: 1.45;
+.settings-llm-step__desc,
+.settings-tool-app-summary .settings-card__desc,
+.settings-collapsible-summary .settings-card__desc {
+  margin: 0.125rem 0 0;
+  font-size: 0.6875rem;
+  line-height: 1.4;
   color: var(--color-text-tertiary, #94a3b8);
 }
 
-.settings-llm-step__body {
-  padding: 0.875rem;
+.settings-llm-step__body,
+.settings-tool-app-body,
+.settings-collapsible-body {
+  padding: 0.75rem 0.875rem 0.875rem;
 }
 
 /* Endpoint + path side-by-side: endpoint gets the space */
@@ -1483,13 +1459,13 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Collapsible app / data cards — match llm-step cards */
+/* L3 directory shells — visual peers of .settings-llm-step */
 .settings-tool-app,
 .settings-collapsible-card {
   border: 1px solid color-mix(in srgb, var(--settings-border) 95%, transparent);
   border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
   background: color-mix(in srgb, var(--settings-surface) 90%, transparent);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 3%, transparent);
   overflow: hidden;
 }
 
@@ -1498,7 +1474,6 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   cursor: pointer;
   list-style: none;
   user-select: none;
-  padding: 0.75rem;
   transition: background-color 160ms ease;
 }
 
@@ -1507,17 +1482,21 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   display: none;
 }
 
-.settings-tool-app-summary > span,
-.settings-collapsible-summary > span {
-  margin-left: auto;
+/* Trailing badge / chevron cluster hugs the end of the L3 header row */
+.settings-tool-app-summary > .settings-card__badge,
+.settings-tool-app-summary > .settings-badge,
+.settings-collapsible-summary > .settings-card__badge,
+.settings-collapsible-summary > .settings-badge,
+.settings-tool-app-summary > .settings-tool-app-chevron,
+.settings-collapsible-summary > .settings-collapsible-chevron {
+  margin-left: 0;
 }
 
-.settings-tool-app-summary:hover,
-.settings-tool-app-summary:focus-visible,
-.settings-collapsible-summary:hover,
-.settings-collapsible-summary:focus-visible {
-  background: color-mix(in srgb, var(--settings-surface-muted) 95%, transparent);
-  outline: none;
+.settings-tool-app-summary > div:first-child,
+.settings-collapsible-summary > div:first-child,
+.settings-llm-step__header > div:first-child {
+  min-width: 0;
+  flex: 1 1 10rem;
 }
 
 .settings-tool-app-chevron,

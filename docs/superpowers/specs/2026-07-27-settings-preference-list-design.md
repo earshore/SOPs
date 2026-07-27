@@ -127,8 +127,9 @@
 1. **最上层才示意**：导航 + section +（可选）顶层 pref 行
 2. **越深越安静**：嵌套只靠缩进、折叠标题、divider，不再叠小图标
 3. **同 list 一致**：同一 list 内不要「有的行有 icon、有的没有」（L2 全有或全无；L4 全无）
-4. **颜色不层级**：层级用结构与字重，不用彩虹 section 色带当主导航（Operational Quiet；彩色 frame 为遗留，择机中性化）
-5. **折叠 = 目录节点**：tool-app / llm-step 扮演「子目录」；其内部字段是叶子，叶子不戴 icon
+4. **颜色不层级**：层级用结构与字重，**不用**彩虹 section 色带当导航（Operational Quiet）。Section frame / L1 icon 统一中性 surface。
+5. **折叠 = 目录节点**：tool-app / llm-step / collapsible 共用 **L3 目录头** 节奏（title 13px、desc 11px、chevron、可选 badge）；内部字段是叶子，叶子不戴 icon
+6. **嵌套 list 去框**：L4 `settings-pref-list` 落在 L3 壳内时去掉 border/radius/背景，只保留 divider，避免框套框
 
 ### 3.2 Class 映射（历史 → 规范）
 

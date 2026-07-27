@@ -1080,7 +1080,7 @@
                     aria-hidden="true"
                   ></i>
                 </summary>
-                <div class="settings-tool-app-body px-3 pb-3 space-y-3">
+                <div class="settings-tool-app-body space-y-3">
                   <details
                     class="settings-collapsible-card mt-3"
                     id="settings-section-network"
@@ -1103,7 +1103,7 @@
                         aria-hidden="true"
                       ></i>
                     </summary>
-                    <div class="settings-collapsible-body px-3 pb-3 space-y-3 mt-2">
+                    <div class="settings-collapsible-body space-y-3 mt-2">
                       <!--
                         连接方式 | 密钥 始终双列并排；
                         无需密钥时右侧禁用占位，避免并排塌陷
@@ -1538,7 +1538,7 @@
                     aria-hidden="true"
                   ></i>
                 </summary>
-                <div class="settings-tool-app-body px-3 pb-3">
+                <div class="settings-tool-app-body">
                   <template
                     x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
                     :key="item.id"
@@ -1743,7 +1743,7 @@
                     aria-hidden="true"
                   ></i>
                 </summary>
-                <div class="settings-tool-app-body px-3 pb-3">
+                <div class="settings-tool-app-body">
                   <div class="mt-3 grid gap-3 lg:grid-cols-2">
                     <div class="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
                       <template
@@ -2041,7 +2041,7 @@
                     aria-hidden="true"
                   ></i>
                 </summary>
-                <div class="settings-tool-app-body px-3 pb-3">
+                <div class="settings-tool-app-body">
                   <template
                     x-for="item in toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])"
                     :key="item.id"
@@ -2338,7 +2338,7 @@
                     aria-hidden="true"
                   ></i>
                 </summary>
-                <div class="settings-collapsible-body px-3 pb-3">
+                <div class="settings-collapsible-body">
                   <div class="mt-1 grid gap-1.5 sm:grid-cols-2">
                     <template x-for="bucket in localDataBucketItems" :key="'export-' + bucket.id">
                       <label
@@ -2400,7 +2400,7 @@
                     aria-hidden="true"
                   ></i>
                 </summary>
-                <div class="settings-collapsible-body px-3 pb-3">
+                <div class="settings-collapsible-body">
                   <div class="mt-1 grid gap-3 sm:grid-cols-3">
                     <label class="block">
                       <span class="settings-label">历史保留条数</span>
