@@ -1421,26 +1421,40 @@ details.settings-submodule[open] > summary.settings-submodule__head {
 
 .settings-tool-page__model-bar {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
-  margin-bottom: 0.5rem;
+  gap: 0.5rem 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.settings-tool-page__model-label {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--settings-text-muted, #64748b);
+  letter-spacing: 0.01em;
 }
 
 .settings-tool-page__model-bar .settings-tool-page__model {
+  position: relative;
   width: 100%;
+  min-width: 12rem;
+  max-width: 100%;
 }
 
 @media (min-width: 640px) {
   .settings-tool-page__model-bar .settings-tool-page__model {
-    width: 14rem;
-    max-width: 16rem;
+    width: 16rem;
+    max-width: 20rem;
+    flex: 0 1 16rem;
   }
 }
 
-.settings-tool-page__resolved {
-  margin: 0 0 0.5rem;
-  font-size: 0.6875rem;
-  line-height: 1.4;
-  color: var(--color-text-tertiary, #94a3b8);
+/* Option text uses "·" as status-dot stand-in (native <option> cannot style a real dot) */
+.settings-tool-page__model select option[value=''] {
+  font-weight: 500;
 }
 
 /* Data section: pref-list folds (appearance family) */

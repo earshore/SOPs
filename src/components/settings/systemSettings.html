@@ -1308,10 +1308,11 @@
                         :key="item.id"
                       >
                         <div>
-                          <div class="settings-tool-page__model-bar"><div class="settings-tool-page__model">
-                              <label class="sr-only" :for="'tool-strategy-model-' + item.id"
-                                >默认模型</label
-                              >
+                          <div class="settings-tool-page__model-bar">
+                            <label class="settings-tool-page__model-label" :for="'tool-strategy-model-' + item.id"
+                              >模型</label
+                            >
+                            <div class="settings-tool-page__model">
                               <select
                                 :id="'tool-strategy-model-' + item.id"
                                 :name="'tool-strategy-model-' + item.id"
@@ -1320,7 +1321,7 @@
                                 :disabled="toolStrategyModelSelectDisabled"
                                 class="settings-control settings-control--sm"
                               >
-                                <option value="">跟随全局模型</option>
+                                <option value="" x-text="item.followGlobalOptionLabel"></option>
                                 <template x-for="model in llm.models" :key="getModelValue(model)">
                                   <option
                                     :value="getModelValue(model)"
@@ -1331,13 +1332,8 @@
                               <span class="settings-tool-page__model-chevron" aria-hidden="true">
                                 <i class="fas fa-chevron-down"></i>
                               </span>
-                            </div></div>
-                          <p class="settings-tool-page__resolved">当前执行模型：
-                            <span
-                              class="settings-tool-page__hint-mono"
-                              x-text="item.resolvedModel"
-                            ></span>
-                          </p>
+                            </div>
+                          </div>
                         </div>
                       </template>
                       <div class="mt-3 grid gap-3 sm:grid-cols-3">
@@ -1503,43 +1499,45 @@
                   ></i>
                 </summary>
                 <div class="settings-pref-fold__body">
-<!-- One product page: model + tools + limits share a single tool-page surface -->
-                  <div class="settings-tool-page mt-3">
+                  <div class="settings-tool-l3 settings-tool-l3--static">
+                    <div class="settings-tool-l3__summary">
+                      <div class="min-w-0">
+                        <h5 class="settings-card__title">Deep Chat</h5>
+                        <p class="settings-tool-page__hint">默认模型、业务工具与限额</p>
+                      </div>
+                    </div>
+                  <div class="settings-tool-page settings-tool-l3__body">
                     <template
                       x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
                       :key="item.id"
                     >
                       <div>
-                        <div class="settings-tool-page__model-bar"><div class="settings-tool-page__model">
-                            <label class="sr-only" :for="'tool-strategy-model-' + item.id"
-                              >默认模型</label
+                        <div class="settings-tool-page__model-bar">
+                            <label class="settings-tool-page__model-label" :for="'tool-strategy-model-' + item.id"
+                              >模型</label
                             >
-                            <select
-                              :id="'tool-strategy-model-' + item.id"
-                              :name="'tool-strategy-model-' + item.id"
-                              :value="item.model"
-                              @change="setToolTargetModel(item.id, $event)"
-                              :disabled="toolStrategyModelSelectDisabled"
-                              class="settings-control settings-control--sm"
-                            >
-                              <option value="">跟随全局模型</option>
-                              <template x-for="model in llm.models" :key="getModelValue(model)">
-                                <option
-                                  :value="getModelValue(model)"
-                                  x-text="getModelLabel(model)"
-                                ></option>
-                              </template>
-                            </select>
-                            <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                              <i class="fas fa-chevron-down"></i>
-                            </span>
-                          </div></div>
-                          <p class="settings-tool-page__resolved">当前执行模型：
-                          <span
-                            class="settings-tool-page__hint-mono"
-                            x-text="item.resolvedModel"
-                          ></span>
-                        </p>
+                            <div class="settings-tool-page__model">
+                              <select
+                                :id="'tool-strategy-model-' + item.id"
+                                :name="'tool-strategy-model-' + item.id"
+                                :value="item.model"
+                                @change="setToolTargetModel(item.id, $event)"
+                                :disabled="toolStrategyModelSelectDisabled"
+                                class="settings-control settings-control--sm"
+                              >
+                                <option value="" x-text="item.followGlobalOptionLabel"></option>
+                                <template x-for="model in llm.models" :key="getModelValue(model)">
+                                  <option
+                                    :value="getModelValue(model)"
+                                    x-text="getModelLabel(model)"
+                                  ></option>
+                                </template>
+                              </select>
+                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                <i class="fas fa-chevron-down"></i>
+                              </span>
+                            </div>
+                          </div>
                       </div>
                     </template>
 
@@ -1664,6 +1662,7 @@
                         /></label>
                     </div>
                   </div>
+                  </div>
                 </div>
               </details>
 
@@ -1706,10 +1705,11 @@
                         :key="item.id"
                       >
                         <div>
-                          <div class="settings-tool-page__model-bar"><div class="settings-tool-page__model">
-                              <label class="sr-only" :for="'tool-strategy-model-' + item.id"
-                                >默认模型</label
-                              >
+                          <div class="settings-tool-page__model-bar">
+                            <label class="settings-tool-page__model-label" :for="'tool-strategy-model-' + item.id"
+                              >模型</label
+                            >
+                            <div class="settings-tool-page__model">
                               <select
                                 :id="'tool-strategy-model-' + item.id"
                                 :name="'tool-strategy-model-' + item.id"
@@ -1718,7 +1718,7 @@
                                 :disabled="toolStrategyModelSelectDisabled"
                                 class="settings-control settings-control--sm"
                               >
-                                <option value="">跟随全局模型</option>
+                                <option value="" x-text="item.followGlobalOptionLabel"></option>
                                 <template x-for="model in llm.models" :key="getModelValue(model)">
                                   <option
                                     :value="getModelValue(model)"
@@ -1729,13 +1729,8 @@
                               <span class="settings-tool-page__model-chevron" aria-hidden="true">
                                 <i class="fas fa-chevron-down"></i>
                               </span>
-                            </div></div>
-                          <p class="settings-tool-page__resolved">当前执行模型：
-                            <span
-                              class="settings-tool-page__hint-mono"
-                              x-text="item.resolvedModel"
-                            ></span>
-                          </p>
+                            </div>
+                          </div>
                         </div>
                       </template>
                       <div class="mt-3 grid gap-3 sm:grid-cols-2">
@@ -1880,10 +1875,11 @@
                         :key="item.id"
                       >
                         <div>
-                          <div class="settings-tool-page__model-bar"><div class="settings-tool-page__model">
-                              <label class="sr-only" :for="'tool-strategy-model-' + item.id"
-                                >默认模型</label
-                              >
+                          <div class="settings-tool-page__model-bar">
+                            <label class="settings-tool-page__model-label" :for="'tool-strategy-model-' + item.id"
+                              >模型</label
+                            >
+                            <div class="settings-tool-page__model">
                               <select
                                 :id="'tool-strategy-model-' + item.id"
                                 :name="'tool-strategy-model-' + item.id"
@@ -1892,7 +1888,7 @@
                                 :disabled="toolStrategyModelSelectDisabled"
                                 class="settings-control settings-control--sm"
                               >
-                                <option value="">跟随全局模型</option>
+                                <option value="" x-text="item.followGlobalOptionLabel"></option>
                                 <template x-for="model in llm.models" :key="getModelValue(model)">
                                   <option
                                     :value="getModelValue(model)"
@@ -1903,13 +1899,8 @@
                               <span class="settings-tool-page__model-chevron" aria-hidden="true">
                                 <i class="fas fa-chevron-down"></i>
                               </span>
-                            </div></div>
-                          <p class="settings-tool-page__resolved">当前执行模型：
-                            <span
-                              class="settings-tool-page__hint-mono"
-                              x-text="item.resolvedModel"
-                            ></span>
-                          </p>
+                            </div>
+                          </div>
                         </div>
                       </template>
                       <div class="mt-3 grid gap-3 sm:grid-cols-2">
@@ -1989,43 +1980,45 @@
                   ></i>
                 </summary>
                 <div class="settings-pref-fold__body">
-<!-- One product page (Deep Chat pattern): model + runtime + prefs -->
-                  <div class="settings-tool-page mt-3">
+                  <div class="settings-tool-l3 settings-tool-l3--static">
+                    <div class="settings-tool-l3__summary">
+                      <div class="min-w-0">
+                        <h5 class="settings-card__title">PPC Search Terms</h5>
+                        <p class="settings-tool-page__hint">搜索词模型与策略</p>
+                      </div>
+                    </div>
+                  <div class="settings-tool-page settings-tool-l3__body">
                     <template
                       x-for="item in toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])"
                       :key="item.id"
                     >
                       <div>
-                        <div class="settings-tool-page__model-bar"><div class="settings-tool-page__model">
-                            <label class="sr-only" :for="'tool-strategy-model-' + item.id"
-                              >默认模型</label
+                        <div class="settings-tool-page__model-bar">
+                            <label class="settings-tool-page__model-label" :for="'tool-strategy-model-' + item.id"
+                              >模型</label
                             >
-                            <select
-                              :id="'tool-strategy-model-' + item.id"
-                              :name="'tool-strategy-model-' + item.id"
-                              :value="item.model"
-                              @change="setToolTargetModel(item.id, $event)"
-                              :disabled="toolStrategyModelSelectDisabled"
-                              class="settings-control settings-control--sm"
-                            >
-                              <option value="">跟随全局模型</option>
-                              <template x-for="model in llm.models" :key="getModelValue(model)">
-                                <option
-                                  :value="getModelValue(model)"
-                                  x-text="getModelLabel(model)"
-                                ></option>
-                              </template>
-                            </select>
-                            <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                              <i class="fas fa-chevron-down"></i>
-                            </span>
-                          </div></div>
-                          <p class="settings-tool-page__resolved">当前执行模型：
-                          <span
-                            class="settings-tool-page__hint-mono"
-                            x-text="item.resolvedModel"
-                          ></span>
-                        </p>
+                            <div class="settings-tool-page__model">
+                              <select
+                                :id="'tool-strategy-model-' + item.id"
+                                :name="'tool-strategy-model-' + item.id"
+                                :value="item.model"
+                                @change="setToolTargetModel(item.id, $event)"
+                                :disabled="toolStrategyModelSelectDisabled"
+                                class="settings-control settings-control--sm"
+                              >
+                                <option value="" x-text="item.followGlobalOptionLabel"></option>
+                                <template x-for="model in llm.models" :key="getModelValue(model)">
+                                  <option
+                                    :value="getModelValue(model)"
+                                    x-text="getModelLabel(model)"
+                                  ></option>
+                                </template>
+                              </select>
+                              <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                                <i class="fas fa-chevron-down"></i>
+                              </span>
+                            </div>
+                          </div>
                       </div>
                     </template>
                     <div class="mt-3 grid gap-3 sm:grid-cols-4">
@@ -2153,6 +2146,7 @@
                         </label>
                       </template>
                     </div>
+                  </div>
                   </div>
                 </div>
               </details>

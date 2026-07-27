@@ -553,6 +553,8 @@ interface ToolStrategyTargetView {
   modelHint: string;
   model: string;
   resolvedModel: string;
+  /** Follow-global option label with live resolved model, e.g. 跟随全局（· NEW:grok-4.5） */
+  followGlobalOptionLabel: string;
 }
 
 interface RuntimeNumberFieldView {
@@ -1640,10 +1642,17 @@ const settingsPanelBehavior: SettingsPanelPart = {
   get toolStrategyTargetItems(): ToolStrategyTargetView[] {
     return TOOL_STRATEGY_TARGETS.map(target => {
       const model = this.toolStrategy.targetModels[target.id] || '';
+      const resolvedModel = model || this.llm.model || '未选择模型';
+      const providerLabel = this.toolStrategyProviderLabel;
+      const followGlobalOptionLabel =
+        resolvedModel && resolvedModel !== '未选择模型'
+          ? `跟随全局（· ${providerLabel}:${resolvedModel}）`
+          : '跟随全局（未选择模型）';
       return {
         ...target,
         model,
-        resolvedModel: model || this.llm.model || '未选择模型',
+        resolvedModel,
+        followGlobalOptionLabel,
       };
     });
   },

@@ -333,7 +333,8 @@ describe('UT-P1-06 appearance theme contracts', () => {
     );
 
     // One product page surface inside the app body
-    expect(deepChatChunk).toContain('settings-tool-page mt-3');
+    expect(deepChatChunk).toContain('settings-tool-l3--static');
+    expect(deepChatChunk).toContain('settings-tool-page settings-tool-l3__body');
     expect(deepChatChunk).toContain("toolStrategyTargetItemsByIds(['playground-deep-chat'])");
     expect(deepChatChunk).toContain('data-settings-nav-id="deep-chat-business-tools-title"');
     expect(deepChatChunk).toContain('data-testid="settings-dc-tools-pref-list"');
@@ -386,14 +387,16 @@ describe('UT-P1-06 appearance theme contracts', () => {
   });
 
   it('PPC Tools is one product tool-page (Deep Chat pattern), not ad-hoc slate card', () => {
-    const ppcStart = html.indexOf('>PPC Tools<');
+    const ppcStart = html.indexOf('settings-pref-row__title">PPC Tools');
     expect(ppcStart).toBeGreaterThan(-1);
     const ppcChunk = html.slice(ppcStart, html.indexOf('settings-strategy-footer', ppcStart));
 
-    expect(ppcChunk).toContain('settings-tool-page mt-3');
+    expect(ppcChunk).toContain('settings-tool-l3--static');
+    expect(ppcChunk).toContain('settings-tool-page settings-tool-l3__body');
     expect(ppcChunk).toContain("toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])");
     expect(ppcChunk).toContain('data-testid="settings-ppc-bool-pref-list"');
     expect(ppcChunk).toContain('settings-tool-page__model');
+    expect(ppcChunk).toContain('followGlobalOptionLabel');
     expect(ppcChunk).not.toContain('settings-tool-page-stack');
     expect(ppcChunk).not.toContain('border-slate-100 bg-slate-50/70');
     expect((ppcChunk.match(/class="settings-tool-page(?:\s|"|$)/g) || []).length).toBe(1);
