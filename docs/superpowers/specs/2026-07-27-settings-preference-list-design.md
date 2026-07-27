@@ -1,7 +1,7 @@
 # Settings Preference List 规范
 
 **Date:** 2026-07-27  
-**Status:** calibrated（可实施）  
+**Status:** calibrated · P0 shipped · P1-1 diagnostics booleans on pref-list (alias period)  
 **Updated:** 2026-07-27  
 **Visual route:** A — Operational Quiet  
 **Scope note:** 只推广「单点偏好拼接列表」原语，**不是**全页 iOS 式设置列表。  

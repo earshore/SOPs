@@ -226,4 +226,22 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(html).not.toContain('class="settings-appearance-grid"');
     expect(html).not.toContain('class="settings-appearance-row"');
   });
+
+  it('P1-1 developer debug toggles use pref-list + switch primitive', () => {
+    expect(html).toContain('data-testid="settings-dev-debug-pref-list"');
+    expect(html).toContain(
+      "setDeveloperDiagnosticBoolean('performanceEnableMonitoring', $event)"
+    );
+    expect(html).toContain("setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)");
+    expect(html).toContain('setDeveloperDiagnosticLogLevel($event)');
+    expect(html).toContain('settings-switch__track');
+
+    const debugListStart = html.indexOf('data-testid="settings-dev-debug-pref-list"');
+    expect(debugListStart).toBeGreaterThan(-1);
+    const debugChunk = html.slice(debugListStart, debugListStart + 4500);
+    expect(debugChunk).toContain('settings-pref-row');
+    expect(debugChunk).toContain('settings-switch');
+    expect(debugChunk).not.toContain('grid gap-3 sm:grid-cols-2');
+    expect(debugChunk).not.toContain('text-emerald-600 focus:ring-emerald-500');
+  });
 });
