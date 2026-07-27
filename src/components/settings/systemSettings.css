@@ -1424,33 +1424,95 @@ details.settings-tool-l3[open] > .settings-tool-l3__summary .settings-tool-l3__c
   background: color-mix(in srgb, var(--settings-surface-muted) 72%, var(--settings-surface));
 }
 
-/* Data section: L2 static panels (no pseudo-collapsible shell) */
-.settings-data-panel {
-  border: 1px solid color-mix(in srgb, var(--settings-border) 95%, transparent);
-  border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  background: color-mix(in srgb, var(--settings-surface) 90%, transparent);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 3%, transparent);
-  overflow: hidden;
-}
-
-.settings-data-panel__head {
-  padding: 0.75rem 0.875rem 0.35rem;
-}
-
-.settings-data-panel__head .settings-card__title {
+/* Data section: pref-list folds (appearance family) */
+.settings-pref-fold {
   margin: 0;
-  font-size: 0.8125rem;
-  font-weight: 600;
 }
 
-.settings-data-panel__head .settings-card__desc {
-  margin: 0.15rem 0 0;
+.settings-pref-fold > summary.settings-pref-row--fold {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.settings-pref-fold > summary.settings-pref-row--fold::-webkit-details-marker {
+  display: none;
+}
+
+.settings-pref-fold > summary.settings-pref-row--fold:hover,
+.settings-pref-fold > summary.settings-pref-row--fold:focus-visible {
+  background: color-mix(in srgb, var(--settings-surface-muted) 88%, transparent);
+  outline: none;
+}
+
+.settings-pref-fold__chevron {
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: transform 160ms ease;
+}
+
+details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
+  transform: rotate(180deg);
+}
+
+.settings-pref-fold__body {
+  padding: 0 1rem 0.85rem;
+}
+
+.settings-pref-fold__body--flush {
+  padding-top: 0.15rem;
+}
+
+.settings-pref-check {
+  display: flex;
+  min-height: 2rem;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--settings-border) 90%, transparent);
+  background: color-mix(in srgb, var(--settings-surface) 96%, transparent);
+  padding: 0.35rem 0.65rem;
   font-size: 0.6875rem;
-  color: var(--color-text-tertiary, #94a3b8);
+  font-weight: 500;
+  color: var(--settings-text);
 }
 
-.settings-data-panel__body {
-  padding: 0.35rem 0.875rem 0.875rem;
+.settings-pref-check:hover {
+  background: color-mix(in srgb, var(--settings-surface-muted) 80%, var(--settings-surface));
+}
+
+.settings-data-bucket-row {
+  border: 1px solid color-mix(in srgb, var(--settings-border) 90%, transparent);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--settings-surface) 96%, transparent);
+  padding: 0.65rem 0.75rem;
+}
+
+.settings-data-bucket-row__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.settings-pref-row--danger {
+  align-items: center;
+}
+
+.settings-pref-row__icon--danger {
+  background: color-mix(in srgb, #dc2626 12%, var(--settings-surface));
+  color: #b91c1c;
+}
+
+.settings-pref-row__action--danger {
+  border-color: color-mix(in srgb, #dc2626 28%, var(--settings-border, #e2e8f0));
+  color: #b91c1c;
+}
+
+.settings-pref-row__action--danger:hover {
+  border-color: color-mix(in srgb, #dc2626 45%, var(--settings-border, #e2e8f0));
+  color: #991b1b;
+  background: color-mix(in srgb, #fef2f2 80%, var(--settings-surface));
 }
 
 /* Endpoint + path side-by-side: endpoint gets the space */

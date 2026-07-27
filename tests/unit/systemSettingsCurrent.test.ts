@@ -1316,7 +1316,10 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toMatch(/<details[\s\S]*?class="settings-llm-step"/);
   expect(template).toContain('settings-llm-step--static');
   expect(template).toContain('服务层级（service_tier）');
-  expect(template).toContain('settings-data-panel');
+  expect(template).toContain('settings-data-pref-list');
+  expect(template).toContain('settings-pref-fold');
+  expect(template).toContain('data-testid="settings-export-buckets"');
+  expect(template).not.toContain('settings-data-panel');
   expect(template).not.toContain('settings-expand-bar');
   expect(template).toContain('data-settings-focus="general-ai-runtime"');
   expect(template).toContain('数据与备份');
