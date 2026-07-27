@@ -786,7 +786,7 @@ select.settings-control {
   margin-top: 0.15rem;
 }
 
-.settings-pref-fold__body > .settings-tool-page .settings-pref-row {
+.settings-pref-fold__body > .settings-tool-page .settings-pref-row:not(.settings-pref-row--metric) {
   padding-left: 0;
   padding-right: 0;
 }
@@ -803,66 +803,111 @@ select.settings-control {
 }
 
 /*
- * Metrics grid — dense numeric/enum cells for tool strategy.
- * Not full-width pref-rows (too sparse); not raw Tailwind grids (off-language).
- * Each cell is a mini stacked field: label over control.
+ * Pref-row metrics grid (Form C dense):
+ * Same language as settings-pref-row (meta title + control), laid out as a grid so
+ * numeric clusters stay scannable without a 10-row left-title/right-input tower.
+ * No per-cell chrome boxes — only hairline dividers inside one surface.
  */
-.settings-metrics-grid {
+.settings-pref-metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem 0.5rem;
+  gap: 0;
   margin: 0.75rem 0 0;
-  padding: 0;
-  border: none;
-  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--settings-border) 90%, transparent);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--settings-surface) 94%, var(--settings-surface-muted));
+  overflow: hidden;
 }
 
-.settings-tool-page > .settings-metrics-grid:first-child {
+/* Nested under tool-page frame: drop second outer border, keep cell dividers */
+.settings-tool-page > .settings-pref-metrics,
+.settings-pref-fold__body .settings-tool-page > .settings-pref-metrics {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  margin-top: 0.65rem;
+}
+
+.settings-tool-page > .settings-pref-metrics:first-child {
   margin-top: 0;
 }
 
 @media (min-width: 640px) {
-  .settings-metrics-grid--cols-3 {
+  .settings-pref-metrics--cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .settings-metrics-grid--cols-4 {
+  .settings-pref-metrics--cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-.settings-metrics-cell {
+/* Mini pref-row: title (meta) above control — same tokens as full pref-row */
+.settings-pref-row--metric {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.28rem;
+  justify-content: flex-start;
+  gap: 0.3rem;
   min-width: 0;
+  min-height: 0;
   margin: 0;
-  padding: 0.45rem 0.5rem 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
-  border-radius: 0.45rem;
-  background: color-mix(in srgb, var(--settings-surface) 88%, var(--settings-surface-muted));
+  padding: 0.55rem 0.65rem 0.6rem;
+  border: none;
+  border-right: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
+  border-radius: 0;
+  background: transparent;
   box-sizing: border-box;
 }
 
-.settings-metrics-cell .settings-label,
-.settings-metrics-cell__label {
+.settings-pref-row--metric:hover,
+.settings-pref-row--metric:focus-within {
+  background: color-mix(in srgb, var(--settings-surface-muted) 55%, transparent);
+}
+
+.settings-pref-row--metric .settings-pref-row__meta {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  gap: 0;
+  align-items: flex-start;
+}
+
+.settings-pref-row--metric .settings-pref-row__title,
+.settings-pref-row--metric .settings-label {
   margin: 0;
   font-size: 0.6875rem;
   font-weight: 600;
   line-height: 1.25;
-  color: var(--settings-text-muted, #64748b);
+  color: var(--settings-text, #334155);
 }
 
-.settings-metrics-cell .settings-control,
-.settings-metrics-cell .settings-control--sm {
+.settings-pref-row--metric .settings-pref-row__hint {
+  margin: 0.1rem 0 0;
+  font-size: 0.625rem;
+  line-height: 1.3;
+}
+
+.settings-pref-row--metric .settings-pref-row__control {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+}
+
+.settings-pref-row--metric .settings-control,
+.settings-pref-row--metric .settings-control--sm {
   width: 100%;
   min-width: 0;
 }
 
-.settings-metrics-cell .settings-schedule-select {
+.settings-pref-row--metric .settings-schedule-select {
   width: 100%;
 }
+
+
 
 /* Quiet status / note cards (diagnostics, security notice) */
 .settings-note {
@@ -1453,11 +1498,6 @@ details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
 /* General AI / similar folds: tool-page surface sits flush in fold body */
 .settings-pref-fold__body > .settings-tool-page.mt-3 {
   margin-top: 0.35rem;
-}
-
-.settings-pref-fold__body > .settings-tool-page .settings-pref-row {
-  padding-left: 0;
-  padding-right: 0;
 }
 
 .settings-pref-fold__body--flush {

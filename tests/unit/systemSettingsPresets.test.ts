@@ -394,15 +394,23 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(toolChunk).not.toContain('settings-tool-app');
   });
 
-  it('tool strategy numeric clusters use settings-metrics-grid primitive', () => {
+  it('tool strategy numeric clusters use pref-metrics grid of pref-row--metric cells', () => {
       const toolStart = html.indexOf('settings-tool-pref-list');
       const toolEnd = html.indexOf('settings-strategy-footer', toolStart);
       const toolChunk = html.slice(toolStart, toolEnd);
-      expect(toolChunk).toContain('settings-metrics-grid');
-      expect(toolChunk).toContain('settings-metrics-cell');
-      expect(toolChunk).toContain('settings-metrics-grid--cols-4');
+      expect(toolChunk).toContain('settings-pref-metrics');
+      expect(toolChunk).toContain('settings-pref-row--metric');
+      expect(toolChunk).toContain('settings-pref-metrics--cols-4');
+      expect(toolChunk).not.toContain('settings-metrics-grid');
+      expect(toolChunk).not.toContain('settings-metrics-cell');
       expect(toolChunk).not.toContain('mt-3 grid gap-3 sm:grid-cols-4');
-      expect(toolChunk).not.toContain('grid gap-3 sm:grid-cols-2 lg:grid-cols-4');
+      // Runtime preset is global first row, not nested under 通用 AI
+      const presetAt = toolChunk.indexOf('data-testid="settings-runtime-presets"');
+      const generalAt = toolChunk.indexOf('general-ai-runtime');
+      expect(presetAt).toBeGreaterThan(-1);
+      expect(generalAt).toBeGreaterThan(-1);
+      expect(presetAt).toBeLessThan(generalAt);
+      expect(toolChunk).toContain('全局档位');
     });
 
     it('PPC Tools is one product tool-page (Deep Chat pattern), not ad-hoc slate card', () => {

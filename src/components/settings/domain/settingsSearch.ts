@@ -24,7 +24,21 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'settings-runtime-presets',
     sectionId: 'settings-section-tool-strategy',
-    labels: ['运行策略预设', '运行策略一键预设', '预设', '稳定', '速度', '成本', '稳定优先', '速度优先', '成本优先'],
+    labels: [
+      '运行策略预设',
+      '运行策略一键预设',
+      '全局档位',
+      '预设',
+      '稳定',
+      '速度',
+      '成本',
+      '稳定优先',
+      '速度优先',
+      '成本优先',
+      'reliability',
+      'speed',
+      'cost',
+    ],
   },
   {
     id: 'master-analysis',
@@ -93,11 +107,7 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
     sectionId: 'settings-section-appearance',
     labels: ['外观与体验', '主题', '动画', '减少动效', '动效'],
   },
-  {
-    id: 'settings-runtime-presets',
-    sectionId: 'settings-section-appearance',
-    labels: ['一键预设', '运行策略预设', '稳定', '速度', '成本', 'reliability', 'speed', 'cost'],
-  },
+
   {
     id: 'settings-section-performance',
     sectionId: 'settings-section-performance',
