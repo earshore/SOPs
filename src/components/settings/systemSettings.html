@@ -754,30 +754,24 @@
                       </div>
                     </div>
 
-                    <!-- Reasoning: segmented effort, model-paired -->
+                    <!-- Reasoning: segmented effort, model-paired (pref-list) -->
                     <div
-                      class="settings-reasoning-card"
+                      class="settings-pref-list"
+                      data-testid="settings-llm-reasoning-pref-list"
                       :hidden="!showReasoningControls"
                       role="group"
                       aria-labelledby="llm-reasoning-heading"
                     >
-                      <div class="settings-reasoning-card__top">
-                        <div class="min-w-0 flex-1">
-                          <div class="flex items-center gap-2">
-                            <span class="settings-reasoning-card__icon" aria-hidden="true">
-                              <i class="fas fa-brain"></i>
-                            </span>
-                            <div class="min-w-0">
-                              <h5
-                                id="llm-reasoning-heading"
-                                class="text-xs font-semibold text-slate-700"
-                              >
-                                推理
-                              </h5>
-                            </div>
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h5 id="llm-reasoning-heading" class="settings-pref-row__title">
+                              推理
+                            </h5>
+                            <p class="settings-pref-row__hint">启用后可调推理等级（按模型能力）</p>
                           </div>
                         </div>
-                        <label class="settings-reasoning-switch">
+                        <label class="settings-switch">
                           <input
                             id="llm-reasoning-enabled"
                             name="llm-reasoning-enabled"
@@ -786,43 +780,39 @@
                             :checked="llm.reasoningPrefs.enabled"
                             @change="setReasoningEnabled($event)"
                           />
-                          <span
-                            class="settings-reasoning-switch__track"
-                            :class="llm.reasoningPrefs.enabled ? 'is-on' : ''"
-                            aria-hidden="true"
-                          >
-                            <span class="settings-reasoning-switch__thumb"></span>
-                          </span>
+                          <span class="settings-switch__track" aria-hidden="true"></span>
                           <span class="sr-only">启用推理</span>
                         </label>
                       </div>
-
                       <div
-                        class="settings-reasoning-card__effort"
+                        class="settings-pref-divider"
+                        role="separator"
                         :hidden="!llm.reasoningPrefs.enabled"
-                      >
-                        <div class="settings-reasoning-effort-row">
-                          <div class="min-w-0 settings-reasoning-effort-row__label">
-                            <span class="settings-label mb-0">推理等级</span>
+                      ></div>
+                      <div class="settings-pref-row" :hidden="!llm.reasoningPrefs.enabled">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <span class="settings-pref-row__title">推理等级</span>
+                            <p class="settings-pref-row__hint">仅列出当前模型可用档位</p>
                           </div>
-                          <div
-                            class="settings-segmented settings-segmented--inline settings-segmented--effort"
-                            role="radiogroup"
-                            aria-label="推理等级"
-                            data-testid="settings-reasoning-effort"
-                          >
-                            <template x-for="level in reasoningEffortOptions" :key="level">
-                              <button
-                                type="button"
-                                role="radio"
-                                class="settings-segmented__btn"
-                                :class="{ 'is-active': llm.reasoningPrefs.effort === level }"
-                                :aria-checked="(llm.reasoningPrefs.effort === level).toString()"
-                                @click="setReasoningEffortLevel(level)"
-                                x-text="reasoningEffortButtonLabel(level)"
-                              ></button>
-                            </template>
-                          </div>
+                        </div>
+                        <div
+                          class="settings-segmented settings-segmented--inline settings-segmented--effort"
+                          role="radiogroup"
+                          aria-label="推理等级"
+                          data-testid="settings-reasoning-effort"
+                        >
+                          <template x-for="level in reasoningEffortOptions" :key="level">
+                            <button
+                              type="button"
+                              role="radio"
+                              class="settings-segmented__btn"
+                              :class="{ 'is-active': llm.reasoningPrefs.effort === level }"
+                              :aria-checked="(llm.reasoningPrefs.effort === level).toString()"
+                              @click="setReasoningEffortLevel(level)"
+                              x-text="reasoningEffortButtonLabel(level)"
+                            ></button>
+                          </template>
                         </div>
                       </div>
                     </div>
@@ -849,34 +839,36 @@
                     ></i>
                   </summary>
                   <div class="settings-llm-step__body">
-                    <div class="group">
-                      <label
-                        for="llm-service-tier"
-                        class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
-                        >服务层级（service_tier）</label
-                      >
-                      <div class="relative">
-                        <select
-                          id="llm-service-tier"
-                          name="llm-service-tier"
-                          :value="llm.serviceTier || ''"
-                          @change="setLlmServiceTier($event)"
-                          class="settings-control w-full pl-4 pr-10 py-2.5 appearance-none text-sm transition duration-200 cursor-pointer"
-                        >
-                          <option value="">不发送（默认）</option>
-                          <option value="auto">auto</option>
-                          <option value="default">default</option>
-                          <option value="flex">flex</option>
-                          <option value="priority">priority</option>
-                        </select>
-                        <div
-                          class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
-                          aria-hidden="true"
-                        >
-                          <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                    <div
+                      class="settings-pref-list"
+                      data-testid="settings-llm-service-tier-pref-list"
+                    >
+                      <div class="settings-pref-row">
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <label for="llm-service-tier" class="settings-pref-row__title"
+                              >服务层级（service_tier）</label
+                            >
+                            <p class="settings-pref-row__hint">多数保持「不发送」</p>
+                          </div>
                         </div>
+                        <label class="settings-pref-row__control">
+                          <span class="sr-only">服务层级</span>
+                          <select
+                            id="llm-service-tier"
+                            name="llm-service-tier"
+                            :value="llm.serviceTier || ''"
+                            @change="setLlmServiceTier($event)"
+                            class="settings-control settings-control--sm"
+                          >
+                            <option value="">不发送（默认）</option>
+                            <option value="auto">auto</option>
+                            <option value="default">default</option>
+                            <option value="flex">flex</option>
+                            <option value="priority">priority</option>
+                          </select>
+                        </label>
                       </div>
-                      <p class="settings-field-help">多数保持「不发送」。</p>
                     </div>
                   </div>
                 </details>
@@ -1613,10 +1605,7 @@
                       业务工具
                     </h5>
                     <p class="settings-card__desc mt-1">注入搜索等工具；是否调用由模型决定。</p>
-                    <div
-                      class="settings-pref-list mt-3"
-                      data-testid="settings-dc-tools-pref-list"
-                    >
+                    <div class="settings-pref-list mt-3" data-testid="settings-dc-tools-pref-list">
                       <div class="settings-pref-row">
                         <div class="settings-pref-row__meta">
                           <div class="min-w-0">
@@ -2153,10 +2142,7 @@
                         class="settings-control settings-control--sm"
                     /></label>
                   </div>
-                  <div
-                    class="settings-pref-list mt-3"
-                    data-testid="settings-ppc-bool-pref-list"
-                  >
+                  <div class="settings-pref-list mt-3" data-testid="settings-ppc-bool-pref-list">
                     <div class="settings-pref-row">
                       <div class="settings-pref-row__meta">
                         <div class="min-w-0">
@@ -2919,17 +2905,12 @@
                   ></i>
                 </summary>
                 <div class="settings-collapsible-body pt-2">
-                  <div
-                    class="settings-pref-list mt-3"
-                    data-testid="settings-dev-debug-pref-list"
-                  >
+                  <div class="settings-pref-list mt-3" data-testid="settings-dev-debug-pref-list">
                     <div class="settings-pref-row">
                       <div class="settings-pref-row__meta">
                         <div class="min-w-0">
                           <h4 class="settings-pref-row__title">性能监控</h4>
-                          <p class="settings-pref-row__hint">
-                            Web Vitals、加载耗时与运行指标采集
-                          </p>
+                          <p class="settings-pref-row__hint">Web Vitals、加载耗时与运行指标采集</p>
                         </div>
                       </div>
                       <label class="settings-switch">

@@ -875,9 +875,8 @@ select.settings-control {
   color: var(--color-warning-dark, #b45309);
 }
 
-/* Preference list (appearance sample) — dense ops panel; alias keeps historical appearance class names */
-.settings-pref-list,
-.settings-appearance-grid {
+/* Preference list (appearance sample) — dense ops panel; hard-cut: settings-pref-* only */
+.settings-pref-list {
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -887,8 +886,7 @@ select.settings-control {
   overflow: hidden;
 }
 
-.settings-pref-row,
-.settings-appearance-row {
+.settings-pref-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -898,8 +896,7 @@ select.settings-control {
   min-height: 3.25rem;
 }
 
-.settings-pref-row__meta,
-.settings-appearance-row__meta {
+.settings-pref-row__meta {
   display: flex;
   align-items: center;
   gap: 0.625rem;
@@ -907,8 +904,7 @@ select.settings-control {
   flex: 1 1 10rem;
 }
 
-.settings-pref-row__icon,
-.settings-appearance-row__icon {
+.settings-pref-row__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -922,8 +918,7 @@ select.settings-control {
   align-self: center;
 }
 
-.settings-pref-row__title,
-.settings-appearance-row__title {
+.settings-pref-row__title {
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -931,8 +926,7 @@ select.settings-control {
   line-height: 1.3;
 }
 
-.settings-pref-row__hint,
-.settings-appearance-row__hint {
+.settings-pref-row__hint {
   margin: 0.15rem 0 0;
   font-size: 0.6875rem;
   font-weight: 400;
@@ -940,16 +934,14 @@ select.settings-control {
   line-height: 1.4;
 }
 
-.settings-pref-row__control,
-.settings-appearance-row__control {
+.settings-pref-row__control {
   flex: 0 1 14rem;
   min-width: 10rem;
   max-width: 16rem;
   margin: 0;
 }
 
-.settings-pref-divider,
-.settings-appearance-divider {
+.settings-pref-divider {
   height: 1px;
   background: var(--color-border-light, var(--settings-border));
   margin: 0;
@@ -1427,99 +1419,7 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   color: color-mix(in srgb, #8b5cf6 55%, var(--settings-text-muted));
 }
 
-/* Reasoning card redesign */
-.settings-reasoning-card {
-  border: 1px solid color-mix(in srgb, #8b5cf6 24%, var(--settings-border));
-  border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, #8b5cf6 7%, var(--settings-surface)),
-    color-mix(in srgb, var(--settings-surface) 95%, transparent)
-  );
-  padding: 0.875rem;
-  box-shadow: 0 1px 2px rgba(91, 33, 182, 0.04);
-}
-
-.settings-reasoning-card__top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.settings-reasoning-card__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.625rem;
-  height: 1.625rem;
-  flex-shrink: 0;
-  border-radius: 0.5rem;
-  background: rgba(139, 92, 246, 0.1);
-  color: color-mix(in srgb, #7c3aed 72%, var(--settings-text));
-  font-size: 0.6875rem;
-}
-
-.settings-reasoning-switch {
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-}
-
-.settings-reasoning-switch__track {
-  position: relative;
-  width: 2.5rem;
-  height: 1.375rem;
-  border-radius: 9999px;
-  background: color-mix(in srgb, var(--settings-text-muted) 24%, var(--settings-surface));
-  transition: background-color 160ms ease;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
-}
-
-.settings-reasoning-switch__track.is-on {
-  background: linear-gradient(90deg, #8b5cf6, #6366f1);
-}
-
-.settings-reasoning-switch__thumb {
-  position: absolute;
-  top: 0.125rem;
-  left: 0.125rem;
-  width: 1.125rem;
-  height: 1.125rem;
-  border-radius: 9999px;
-  background: var(--settings-surface);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.14);
-  transition: transform 160ms ease;
-}
-
-.settings-reasoning-switch__track.is-on .settings-reasoning-switch__thumb {
-  transform: translateX(1.125rem);
-}
-
-.settings-reasoning-card__effort {
-  margin-top: 0.875rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid color-mix(in srgb, #8b5cf6 18%, var(--settings-border));
-}
-
-/* Label + effort segmented side-by-side (like appearance animation speed) */
-.settings-reasoning-effort-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
-  min-height: 2.25rem;
-}
-
-.settings-reasoning-effort-row__label {
-  flex: 0 1 auto;
-  min-width: 4rem;
-}
-
-/* 5-tier effort control — same visual language as appearance animation speed */
+/* Effort segmented: width rules only (layout shell is settings-pref-row) */
 .settings-segmented--effort {
   flex: 1 1 14rem;
   min-width: 12rem;
@@ -1533,81 +1433,6 @@ details.settings-submodule[open] > summary.settings-submodule__head {
   padding: 0.25rem 0.35rem;
   font-size: 0.6875rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-/* legacy class kept for safety if any residual markup references it */
-.settings-reasoning-effort {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.3125rem;
-  padding: 0.3125rem;
-  border-radius: 0.75rem;
-  background: var(--color-bg-tertiary, #f1f5f9);
-  border: 1px solid var(--settings-border);
-}
-
-.settings-reasoning-effort__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.375rem;
-  width: 100%;
-  margin: 0;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid transparent;
-  border-radius: 0.55rem;
-  background: transparent;
-  color: var(--settings-text-muted);
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  cursor: pointer;
-  user-select: none;
-  transition:
-    background-color 140ms ease,
-    color 140ms ease,
-    border-color 140ms ease,
-    box-shadow 140ms ease;
-}
-
-.settings-reasoning-effort__btn:hover {
-  color: var(--settings-text);
-  background: color-mix(in srgb, var(--settings-surface) 72%, transparent);
-  border-color: color-mix(in srgb, var(--settings-border) 90%, transparent);
-}
-
-.settings-reasoning-effort__btn.is-active {
-  background: var(--settings-surface);
-  color: color-mix(in srgb, #7c3aed 72%, var(--settings-text));
-  border-color: color-mix(in srgb, #8b5cf6 45%, var(--settings-border));
-  box-shadow:
-    0 1px 2px rgba(91, 33, 182, 0.08),
-    0 0 0 1px rgba(167, 139, 250, 0.35);
-}
-
-.settings-reasoning-effort__btn:focus-visible {
-  outline: 2px solid #8b5cf6;
-  outline-offset: 1px;
-}
-
-.settings-reasoning-effort__btn:active {
-  transform: translateY(0.5px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .settings-reasoning-switch__track,
-  .settings-reasoning-switch__thumb,
-  .settings-reasoning-effort__btn {
-    transition: none;
-  }
-
-  .settings-reasoning-effort__btn:active {
-    transform: none;
-  }
 }
 
 /* Collapsible app / data cards — match llm-step cards */

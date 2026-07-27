@@ -225,13 +225,13 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(html).toContain('data-testid="settings-appearance-color-mode"');
     expect(html).not.toContain('class="settings-appearance-grid"');
     expect(html).not.toContain('class="settings-appearance-row"');
+    expect(html).not.toContain('settings-appearance-row__');
+    expect(html).not.toContain('settings-appearance-divider');
   });
 
   it('P1-1 developer debug toggles use pref-list + switch primitive', () => {
     expect(html).toContain('data-testid="settings-dev-debug-pref-list"');
-    expect(html).toContain(
-      "setDeveloperDiagnosticBoolean('performanceEnableMonitoring', $event)"
-    );
+    expect(html).toContain("setDeveloperDiagnosticBoolean('performanceEnableMonitoring', $event)");
     expect(html).toContain("setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)");
     expect(html).toContain('setDeveloperDiagnosticLogLevel($event)');
     expect(html).toContain('settings-switch__track');
@@ -262,9 +262,7 @@ describe('UT-P1-06 appearance theme contracts', () => {
 
   it('P1-2 Keyword Hunter SEO match booleans use pref-list + setRuntimeBoolean paths', () => {
     expect(html).toContain('data-testid="settings-kh-seo-bool-pref-list"');
-    expect(html).toContain(
-      "setRuntimeBoolean('keywordHunterSeoProcess.enableLlmCache', $event)"
-    );
+    expect(html).toContain("setRuntimeBoolean('keywordHunterSeoProcess.enableLlmCache', $event)");
     expect(html).toContain("setRuntimeBoolean('keywordHunterSeoProcess.matchPartial', $event)");
     expect(html).toContain("setRuntimeBoolean('keywordHunterSeoProcess.matchPlural', $event)");
     expect(html).toContain("setRuntimeBoolean('keywordHunterSeoProcess.matchStem', $event)");
@@ -303,5 +301,41 @@ describe('UT-P1-06 appearance theme contracts', () => {
       expect(chunk).toContain('settings-switch');
       expect(chunk).not.toContain('settings-checkbox');
     }
+  });
+
+  it('P2 LLM reasoning uses pref-list + frozen effort contracts', () => {
+    expect(html).toContain('data-testid="settings-llm-reasoning-pref-list"');
+    expect(html).toContain('id="llm-reasoning-enabled"');
+    expect(html).toContain('data-testid="settings-reasoning-effort"');
+    expect(html).toContain('showReasoningControls');
+    expect(html).toContain('setReasoningEnabled($event)');
+    expect(html).toContain('setReasoningEffortLevel(level)');
+    expect(html).toContain('reasoningEffortOptions');
+    expect(html).toContain('reasoningEffortButtonLabel(level)');
+    expect(html).not.toContain('settings-reasoning-card');
+
+    const reasoningStart = html.indexOf('data-testid="settings-llm-reasoning-pref-list"');
+    expect(reasoningStart).toBeGreaterThan(-1);
+    const reasoningChunk = html.slice(reasoningStart, reasoningStart + 2500);
+    expect(reasoningChunk).toContain('settings-pref-row');
+    expect(reasoningChunk).toContain('settings-switch');
+    expect(reasoningChunk).toContain('settings-segmented--effort');
+    expect(reasoningChunk).toContain('settings-pref-divider');
+  });
+
+  it('P2 LLM service_tier uses pref-list row + frozen select contracts', () => {
+    expect(html).toContain('data-testid="settings-llm-service-tier-pref-list"');
+    expect(html).toContain('id="llm-service-tier"');
+    expect(html).toContain('name="llm-service-tier"');
+    expect(html).toContain('setLlmServiceTier($event)');
+    expect(html).toContain('<option value="">不发送（默认）</option>');
+
+    const tierStart = html.indexOf('data-testid="settings-llm-service-tier-pref-list"');
+    expect(tierStart).toBeGreaterThan(-1);
+    const tierChunk = html.slice(tierStart, tierStart + 1500);
+    expect(tierChunk).toContain('settings-pref-row');
+    expect(tierChunk).toContain('settings-pref-row__control');
+    expect(tierChunk).toContain('settings-control--sm');
+    expect(tierChunk).not.toContain('settings-field-help');
   });
 });
