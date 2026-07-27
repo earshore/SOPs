@@ -68,6 +68,38 @@ import { showToast } from '@/common/ui/notifications';
 
 import { sessionState, nativeLoggerConsole } from '../session/sessionState';
 
+function paintSettledGenerationChrome(): void {
+  const mount = getMountedRenderContainer();
+  if (!mount) return;
+  uiHooks.syncAllDeepThinkingChrome(mount);
+  refreshMessageToolbarStatuses(getChat(mount), () =>
+    getThreadDisplayMessages(getActiveThread())
+  );
+}
+
+async function reportDeepChatRequestFailure(
+  error: unknown,
+  pendingThreadId: string | null,
+  hadVisionParts: boolean,
+  signals: DeepChatSignals
+): Promise<void> {
+  if (preserveTimedOutPartialResponse(pendingThreadId, error)) {
+    return;
+  }
+  const message = error instanceof Error ? error.message : '模型调用失败';
+  const preferPayloadLarge = hadVisionParts && looksLikePayloadTooLarge(error);
+  const userFacingMessage = preferPayloadLarge ? DEEP_CHAT_VISION_COPY.payloadLarge : message;
+  const responseText = formatDeepChatErrorResponse(userFacingMessage);
+  nativeLoggerConsole.error('[Deep Chat] LLM 调用失败:', redactSensitiveError(error));
+  if (preferPayloadLarge) {
+    showToast(DEEP_CHAT_VISION_COPY.payloadLarge, { type: 'warning' });
+  } else {
+    showLlmFailureToast(error, { titlePrefix: '模型调用失败: ' });
+  }
+  saveFailedDeepChatResponse(pendingThreadId, responseText);
+  await emitDeepChatResponse(signals, { text: responseText });
+}
+
 export async function handleDeepChatRequest(
   container: HTMLElement,
   body: DeepChatRequestBody | DeepChatMessage[],
@@ -116,10 +148,8 @@ export async function handleDeepChatRequest(
       threadId: activeThread.id,
       ...(userAttachmentMeta ? { userAttachmentMeta } : {}),
     });
-    // 本请求的 messages 已烘焙 skill 系统提示；立即卸挂载（单次执行）
     uiHooks.consumeMountedSkillsAfterSend(container, activeThread.id);
     syncPendingRequestView(activeThread.id);
-    // 仅在进入生成态时刷新列表（勿在每个 stream token 重绘，否则无法点选其他会话）
     renderMountedThreadList();
     notifyContextBudgetApplied(droppedMessageCount);
 
@@ -141,45 +171,17 @@ export async function handleDeepChatRequest(
       assistantReasoning: pendingRequest.reasoningText,
       assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
       assistantPreReplySteps: pendingRequest.preReplySteps,
-      // Re-pass meta so user row is not stripped on final assistant save.
       ...(userAttachmentMeta ? { userAttachmentMeta } : {}),
-      // Explicitly omit assistantStatus so partial 「未完成」 is cleared in store.
     });
     markPendingDeepChatRequestSettled(pendingRequest);
-    // Paint 「已完成」 immediately (before body typewriter finishes draining).
-    {
-      const mount = getMountedRenderContainer();
-      if (mount) {
-        uiHooks.syncAllDeepThinkingChrome(mount);
-        // Clear toolbar 「未完成」 without waiting for thread switch / refresh.
-        refreshMessageToolbarStatuses(getChat(mount), () =>
-          getThreadDisplayMessages(getActiveThread())
-        );
-      }
-    }
-    // 后台会话：LLM 一完成就标未读并刷新列表（不等打字机 drain）
+    paintSettledGenerationChrome();
     notifyBackgroundPendingSettled(activeThread.id);
     schedulePendingAssistantDisplay(activeThread.id);
   } catch (error) {
     if (requestController?.signal.aborted) {
       return;
     }
-    if (preserveTimedOutPartialResponse(pendingThreadId, error)) {
-      return;
-    }
-    const message = error instanceof Error ? error.message : '模型调用失败';
-    const preferPayloadLarge = hadVisionParts && looksLikePayloadTooLarge(error);
-    const userFacingMessage = preferPayloadLarge ? DEEP_CHAT_VISION_COPY.payloadLarge : message;
-    const responseText = formatDeepChatErrorResponse(userFacingMessage);
-    nativeLoggerConsole.error('[Deep Chat] LLM 调用失败:', redactSensitiveError(error));
-    if (preferPayloadLarge) {
-      showToast(DEEP_CHAT_VISION_COPY.payloadLarge, { type: 'warning' });
-    } else {
-      // Surface config/auth failures with settings deep-link; in-chat still shows full text.
-      showLlmFailureToast(error, { titlePrefix: '模型调用失败: ' });
-    }
-    saveFailedDeepChatResponse(pendingThreadId, responseText);
-    await emitDeepChatResponse(signals, { text: responseText });
+    await reportDeepChatRequestFailure(error, pendingThreadId, hadVisionParts, signals);
   } finally {
     cleanupLifecyclePendingRequest(pendingThreadId, lifecyclePendingRequest);
     signals.onClose?.();

@@ -227,6 +227,80 @@ async function partFromFileCandidate(
   return partFromSrc(src);
 }
 
+function validateVisionCandidateType(candidate: FileCandidate): string | null {
+  if (isSvg(candidate.type, candidate.name)) {
+    return DEEP_CHAT_VISION_COPY.svg;
+  }
+  if (candidate.file) {
+    if (isSvg(candidate.file.type, candidate.file.name)) {
+      return DEEP_CHAT_VISION_COPY.svg;
+    }
+    if (!isAllowedVisionImage(candidate.file.type, candidate.file.name)) {
+      return DEEP_CHAT_VISION_COPY.type;
+    }
+    return null;
+  }
+  if (!candidate.src) return null;
+  const src = candidate.src.trim();
+  if (isHttpImageUrl(src)) {
+    return DEEP_CHAT_VISION_COPY.remote;
+  }
+  if (!isDataUrlImage(src)) return null;
+  const mimeMatch = /^data:(image\/[a-z0-9.+-]+)/i.exec(src);
+  const mime = mimeMatch?.[1];
+  if (isSvg(mime, candidate.name)) {
+    return DEEP_CHAT_VISION_COPY.svg;
+  }
+  if (!isAllowedVisionImage(mime, candidate.name)) {
+    return DEEP_CHAT_VISION_COPY.type;
+  }
+  return null;
+}
+
+function checkVisionCandidateSize(
+  candidate: FileCandidate,
+  maxFileBytes: number,
+  totalBytes: number,
+  maxTotalBytes: number
+): { error: string } | { totalBytes: number } {
+  const size = estimateCandidateBytes(candidate);
+  if (size === null) {
+    return { totalBytes };
+  }
+  if (size > maxFileBytes) {
+    return {
+      error: DEEP_CHAT_VISION_COPY.maxFile(
+        candidate.name || '',
+        Math.floor(maxFileBytes / (1024 * 1024))
+      ),
+    };
+  }
+  const nextTotal = totalBytes + size;
+  if (nextTotal > maxTotalBytes) {
+    return {
+      error: DEEP_CHAT_VISION_COPY.maxTotal(Math.floor(maxTotalBytes / (1024 * 1024))),
+    };
+  }
+  return { totalBytes: nextTotal };
+}
+
+function gateVisionCandidates(
+  candidates: FileCandidate[],
+  supportsVision: boolean,
+  maxFiles: number
+): ResolveDeepChatVisionResult | null {
+  if (candidates.length === 0) {
+    return { ok: true, parts: [] };
+  }
+  if (!supportsVision) {
+    return { ok: false, error: DEEP_CHAT_VISION_COPY.nonVision };
+  }
+  if (candidates.length > maxFiles) {
+    return { ok: false, error: DEEP_CHAT_VISION_COPY.maxCount(maxFiles) };
+  }
+  return null;
+}
+
 /**
  * 从 deep-chat 请求 body 提取 visionUserParts。
  * - supportsVision=false：有图则报错，无图返回空数组；
@@ -243,75 +317,27 @@ export async function resolveDeepChatVisionUserParts(args: {
   const maxFileBytes = args.maxFileBytes ?? DEEP_CHAT_VISION_MAX_FILE_BYTES;
   const maxTotalBytes = args.maxTotalBytes ?? DEEP_CHAT_VISION_MAX_TOTAL_BYTES;
   const candidates = collectFileCandidates(args.body);
-
-  if (candidates.length === 0) {
-    return { ok: true, parts: [] };
-  }
-  if (!args.supportsVision) {
-    return {
-      ok: false,
-      error: DEEP_CHAT_VISION_COPY.nonVision,
-    };
-  }
-  if (candidates.length > maxFiles) {
-    return {
-      ok: false,
-      error: DEEP_CHAT_VISION_COPY.maxCount(maxFiles),
-    };
-  }
+  const gated = gateVisionCandidates(candidates, args.supportsVision, maxFiles);
+  if (gated) return gated;
 
   const parts: DeepChatVisionUserPart[] = [];
   let totalBytes = 0;
 
   for (const candidate of candidates) {
-    if (isSvg(candidate.type, candidate.name)) {
-      return { ok: false, error: DEEP_CHAT_VISION_COPY.svg };
+    const typeError = validateVisionCandidateType(candidate);
+    if (typeError) {
+      return { ok: false, error: typeError };
     }
-    if (candidate.file) {
-      if (isSvg(candidate.file.type, candidate.file.name)) {
-        return { ok: false, error: DEEP_CHAT_VISION_COPY.svg };
-      }
-      if (!isAllowedVisionImage(candidate.file.type, candidate.file.name)) {
-        return { ok: false, error: DEEP_CHAT_VISION_COPY.type };
-      }
-    } else if (candidate.src) {
-      const src = candidate.src.trim();
-      if (isHttpImageUrl(src)) {
-        return { ok: false, error: DEEP_CHAT_VISION_COPY.remote };
-      }
-      if (isDataUrlImage(src)) {
-        const mimeMatch = /^data:(image\/[a-z0-9.+-]+)/i.exec(src);
-        const mime = mimeMatch?.[1];
-        if (isSvg(mime, candidate.name)) {
-          return { ok: false, error: DEEP_CHAT_VISION_COPY.svg };
-        }
-        if (!isAllowedVisionImage(mime, candidate.name)) {
-          return { ok: false, error: DEEP_CHAT_VISION_COPY.type };
-        }
-      }
+    const sizeCheck = checkVisionCandidateSize(
+      candidate,
+      maxFileBytes,
+      totalBytes,
+      maxTotalBytes
+    );
+    if ('error' in sizeCheck) {
+      return { ok: false, error: sizeCheck.error };
     }
-
-    const size = estimateCandidateBytes(candidate);
-    if (size !== null && size > maxFileBytes) {
-      return {
-        ok: false,
-        error: DEEP_CHAT_VISION_COPY.maxFile(
-          candidate.name || '',
-          Math.floor(maxFileBytes / (1024 * 1024))
-        ),
-      };
-    }
-    if (size !== null) {
-      totalBytes += size;
-      if (totalBytes > maxTotalBytes) {
-        return {
-          ok: false,
-          error: DEEP_CHAT_VISION_COPY.maxTotal(
-            Math.floor(maxTotalBytes / (1024 * 1024))
-          ),
-        };
-      }
-    }
+    totalBytes = sizeCheck.totalBytes;
 
     const result = await partFromFileCandidate(candidate);
     if (!result.ok) return result;

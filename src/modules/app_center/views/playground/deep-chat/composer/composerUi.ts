@@ -430,9 +430,9 @@ export function clearDraftInputHeightSync(): void {
  * 策略：不依赖 reparent（deep-chat 可能改回），把按钮层几何对齐到输入框矩形。
  *
  * 仅认 submit/stop：排除 #upload-images-button（vision 上传与 send 同为 inside-end）。
+ * Prefer a single selector — multi-branch lists break querySelector under jsdom ShadowRoot.
  */
-const SUBMIT_INSIDE_END_SELECTOR =
-  '.input-button.inside-end:not(#upload-images-button)[data-deep-chat-stop-active], .input-button.inside-end.submit-button:not(#upload-images-button), .input-button.inside-end.loading-button:not(#upload-images-button), .input-button.inside-end.disabled-button:not(#upload-images-button), .input-button.inside-end:not(#upload-images-button)';
+const SUBMIT_INSIDE_END_SELECTOR = '.input-button.inside-end:not(#upload-images-button)';
 
 function querySubmitInsideEndButton(
   root: ShadowRoot | Document | Element | null | undefined

@@ -128,6 +128,49 @@ export function mergeThreadHistoryWithRequest(
   return [...historyMessages, ...requestMessages];
 }
 
+function buildAssistantStoredMessage(
+  assistantText: string,
+  now: number,
+  options: BuildStoredThreadMessagesOptions
+): DeepChatMessage {
+  const reasoning = options.assistantReasoning?.trim();
+  const durationSec = options.assistantReasoningDurationSec;
+  const preReplySteps = normalizePreReplyActivitySteps(
+    options.assistantPreReplySteps,
+    options.maxMessageChars
+  );
+  return {
+    role: 'ai',
+    text: truncateStoredMessage(assistantText, options.maxMessageChars),
+    createdAt: getFiniteTimestamp(options.assistantCreatedAt, now),
+    // Only persist incomplete markers; omit status when settled (clears 「未完成」).
+    ...(options.assistantStatus === 'stopped' || options.assistantStatus === 'partial'
+      ? { status: options.assistantStatus }
+      : {}),
+    ...(reasoning
+      ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) }
+      : {}),
+    ...(typeof durationSec === 'number' && Number.isFinite(durationSec) && durationSec >= 0
+      ? { reasoningDurationSec: Math.max(0, Math.round(durationSec)) }
+      : {}),
+    ...(preReplySteps ? { preReplySteps } : {}),
+  };
+}
+
+function stampUserAttachmentMeta(
+  storedMessages: DeepChatMessage[],
+  userAttachmentMeta: DeepChatAttachmentMeta | undefined
+): void {
+  if (!userAttachmentMeta) return;
+  for (let i = storedMessages.length - 1; i >= 0; i--) {
+    const msg = storedMessages[i];
+    if (msg?.role === 'user') {
+      storedMessages[i] = { ...msg, attachmentMeta: userAttachmentMeta };
+      return;
+    }
+  }
+}
+
 export function buildStoredThreadMessages(
   existingMessages: DeepChatMessage[],
   conversationMessages: ChatMessage[],
@@ -171,41 +214,11 @@ export function buildStoredThreadMessages(
 
   const trimmedAssistantText = assistantText.trim();
   if (trimmedAssistantText) {
-    const reasoning = options.assistantReasoning?.trim();
-    const durationSec = options.assistantReasoningDurationSec;
-    const preReplySteps = normalizePreReplyActivitySteps(
-      options.assistantPreReplySteps,
-      options.maxMessageChars
-    );
-    storedMessages.push({
-      role: 'ai',
-      text: truncateStoredMessage(trimmedAssistantText, options.maxMessageChars),
-      createdAt: getFiniteTimestamp(options.assistantCreatedAt, now),
-      // Only persist incomplete markers; omit status when settled (clears 「未完成」).
-      ...(options.assistantStatus === 'stopped' || options.assistantStatus === 'partial'
-        ? { status: options.assistantStatus }
-        : {}),
-      ...(reasoning
-        ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) }
-        : {}),
-      ...(typeof durationSec === 'number' && Number.isFinite(durationSec) && durationSec >= 0
-        ? { reasoningDurationSec: Math.max(0, Math.round(durationSec)) }
-        : {}),
-      ...(preReplySteps ? { preReplySteps } : {}),
-    });
+    storedMessages.push(buildAssistantStoredMessage(trimmedAssistantText, now, options));
   }
 
   // Stamp count-only meta onto newest user turn (never image bytes / names).
-  const userAttachmentMeta = normalizeAttachmentMeta(options.userAttachmentMeta);
-  if (userAttachmentMeta) {
-    for (let i = storedMessages.length - 1; i >= 0; i--) {
-      const msg = storedMessages[i];
-      if (msg?.role === 'user') {
-        storedMessages[i] = { ...msg, attachmentMeta: userAttachmentMeta };
-        break;
-      }
-    }
-  }
+  stampUserAttachmentMeta(storedMessages, normalizeAttachmentMeta(options.userAttachmentMeta));
 
   return limitStoredMessages(storedMessages, options.maxMessages);
 }
