@@ -99,12 +99,26 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'playground-deep-chat',
     sectionId: 'settings-section-tool-strategy',
-    labels: ['Playground', 'Deep Chat', 'Playground · Deep Chat', '业务工具', '输出 Token', '会话'],
+    labels: [
+      'Playground',
+      'Deep Chat',
+      'Playground · Deep Chat',
+      '业务工具',
+      '启用 Vision',
+      '图片上传',
+      '输出 Token',
+      '会话',
+    ],
   },
   {
     id: 'deep-chat-business-tools-title',
     sectionId: 'settings-section-tool-strategy',
     labels: ['业务工具', '网页搜索', '搜索 X', '会话只读', 'enableBusinessTools'],
+  },
+  {
+    id: 'deep-chat-vision-title',
+    sectionId: 'settings-section-tool-strategy',
+    labels: ['启用 Vision', 'Vision', '图片上传', 'enableVision'],
   },
   {
     id: 'keyword-hunter',

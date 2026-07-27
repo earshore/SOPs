@@ -40,6 +40,15 @@ Vendor-button skin failed enterprise UX:
 - Modify: `infra/deepChatConfig.ts`, `infra/deepChatStyles.ts`, `request/handleRequest.ts`, `request/visionAttachments.ts`, `shell/shellUi.ts`, `controller.ts`
 - E2E: `tests/e2e/deep-chat-send.spec.ts` host-control geometry
 
+## Product gate (2026-07-28)
+
+| Setting | Path | Default |
+| --- | --- | --- |
+| `deepChat.enableVision` | 系统设置 → 工具策略 → Playground · Deep Chat → **启用 Vision**（Prompt 草稿数下方） | **false** |
+
+- **Off:** host entry unmounted; request path does not attach vision parts (capability code retained).
+- **On:** host text entry above composer; model `supportsVision` still gates enable vs disabled state.
+
 ## Non-goals (unchanged)
 
 - Client compression / multi-turn pixel memory / PDF-camera-mic

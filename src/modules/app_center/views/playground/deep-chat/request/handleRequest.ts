@@ -55,6 +55,7 @@ import {
   setVisionComposerPending,
 } from '../composer/visionComposer';
 import { findConfigModelsEntry } from '../session/uiHooks';
+import { isDeepChatVisionFeatureEnabled } from '@/services/runtimeStrategyService';
 
 import { refreshMessageToolbarStatuses } from '../composer/messageToolbar';
 
@@ -226,8 +227,12 @@ export async function prepareDeepChatRequest(
     return null;
   }
 
-  const supportsVision = resolveRequestSupportsVision(config, model);
-  const hostFiles = getStagedVisionFiles();
+  // Product gate (default off) + model capability; UI is also hidden when feature off.
+  const visionFeatureOn = isDeepChatVisionFeatureEnabled();
+  const supportsVision =
+    visionFeatureOn && resolveRequestSupportsVision(config, model);
+  // When feature is off: no host staged files; body.files (if any) fail closed via supportsVision=false.
+  const hostFiles = visionFeatureOn ? getStagedVisionFiles() : [];
   const visionResult = await resolveDeepChatVisionUserParts({
     body,
     supportsVision,

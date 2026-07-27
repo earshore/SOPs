@@ -37,6 +37,18 @@ vi.mock('@/common/ui/notifications', () => ({
   showToast: vi.fn(),
 }));
 
+const { mockIsDeepChatVisionFeatureEnabled } = vi.hoisted(() => ({
+  mockIsDeepChatVisionFeatureEnabled: vi.fn(() => true),
+}));
+
+vi.mock('@/services/runtimeStrategyService', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/services/runtimeStrategyService')>();
+  return {
+    ...actual,
+    isDeepChatVisionFeatureEnabled: () => mockIsDeepChatVisionFeatureEnabled(),
+  };
+});
+
 const { sessionState } = await import('../session/sessionState');
 const { handleDeepChatRequest } = await import('./handleRequest');
 const { showToast } = await import('@/common/ui/notifications');
@@ -82,8 +94,40 @@ describe('handleDeepChatRequest vision attachments', () => {
     callLLM.mockReset();
     callLLM.mockResolvedValue('vision-ok');
     resolveModelCapability.mockReset();
+    mockIsDeepChatVisionFeatureEnabled.mockReset();
+    mockIsDeepChatVisionFeatureEnabled.mockReturnValue(true);
     vi.mocked(showToast).mockReset();
     resetThread();
+  });
+
+  it('does not send visionUserParts when product enableVision is off', async () => {
+    mockIsDeepChatVisionFeatureEnabled.mockReturnValue(false);
+    resolveModelCapability.mockReturnValue({
+      supportsVision: true,
+      supportsTools: true,
+      supportsStreaming: true,
+    });
+    const src = tinyPngDataUrl();
+    const signals = {
+      onOpen: vi.fn(),
+      onResponse: vi.fn(),
+      onClose: vi.fn(),
+    };
+    await handleDeepChatRequest(
+      document.createElement('div'),
+      {
+        messages: [
+          {
+            role: 'user',
+            text: 'see',
+            files: [{ type: 'image', src, name: 'a.png' }],
+          },
+        ],
+      } as never,
+      signals as never
+    );
+    // Feature off forces supportsVision=false → body files fail closed, no LLM call.
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
   it('does not send visionUserParts when model lacks vision', async () => {

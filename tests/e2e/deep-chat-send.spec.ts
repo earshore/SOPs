@@ -1567,9 +1567,54 @@ test('shows a pressed stop control and stops with Space', async ({ page }) => {
   }
 });
 
-test('shows host vision upload disabled for non-vision model and pins send', async ({ page }) => {
+/** Opt-in product flag: deepChat.enableVision (default false). */
+async function seedDeepChatVisionFeatureEnabled(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const key = 'runtime_strategy_settings';
+    let prev: Record<string, unknown> = {};
+    try {
+      prev = JSON.parse(window.localStorage.getItem(key) || '{}') as Record<string, unknown>;
+    } catch {
+      prev = {};
+    }
+    const deepChat =
+      prev.deepChat && typeof prev.deepChat === 'object'
+        ? (prev.deepChat as Record<string, unknown>)
+        : {};
+    window.localStorage.setItem(
+      key,
+      JSON.stringify({
+        ...prev,
+        deepChat: {
+          ...deepChat,
+          enableVision: true,
+        },
+      })
+    );
+  });
+}
+
+test('hides host vision entry by default when enableVision is off', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await seedMockProviderStorage(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
+  await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+  await expect
+    .poll(async () => {
+      const geometry = await getDualButtonGeometry(page);
+      return geometry && geometry.uploadVisible === false && Math.abs(geometry.sendRightGap - 11) <= 2;
+    })
+    .toBe(true);
+});
+
+test('shows host vision upload disabled for non-vision model when feature enabled', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await seedMockProviderStorage(page);
+  await seedDeepChatVisionFeatureEnabled(page);
   await openDeepChatAndRefreshMockConfig(page);
 
   await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
@@ -1590,11 +1635,12 @@ test('shows host vision upload disabled for non-vision model and pins send', asy
 });
 
 /**
- * Hard gate: vision model seed must not break send pin; host upload stays discoverable.
+ * Hard gate: vision model seed must not break send pin; host upload stays discoverable when feature on.
  */
 test('keeps send pin after vision model seed (hard gate)', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await seedMockProviderStorage(page, undefined, MOCK_ENDPOINT);
+  await seedDeepChatVisionFeatureEnabled(page);
   await page.goto(DEEP_CHAT_ROUTE, { waitUntil: 'domcontentloaded' });
   await page.evaluate(
     ({ model, provider }) => {
@@ -1631,6 +1677,7 @@ test('keeps send pin after vision model seed (hard gate)', async ({ page }) => {
 test('keeps host vision text entry above the send box', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await seedMockProviderStorage(page, undefined, MOCK_ENDPOINT);
+  await seedDeepChatVisionFeatureEnabled(page);
   await page.goto(DEEP_CHAT_ROUTE, { waitUntil: 'domcontentloaded' });
   await page.evaluate(
     ({ model, provider }) => {

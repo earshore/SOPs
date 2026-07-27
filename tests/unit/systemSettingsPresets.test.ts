@@ -335,6 +335,8 @@ describe('UT-P1-06 appearance theme contracts', () => {
 
     expect(html).toContain('data-testid="settings-dc-tools-pref-list"');
     expect(html).toContain("setRuntimeBoolean('deepChat.enableBusinessTools', $event)");
+    expect(html).toContain('data-testid="settings-dc-vision-pref-list"');
+    expect(html).toContain("setRuntimeBoolean('deepChat.enableVision', $event)");
 
     expect(html).toContain('data-testid="settings-kh-listing-cache-pref-list"');
     expect(html).toContain(
@@ -344,6 +346,7 @@ describe('UT-P1-06 appearance theme contracts', () => {
     for (const testId of [
       'settings-ma-cache-pref-list',
       'settings-dc-tools-pref-list',
+      'settings-dc-vision-pref-list',
       'settings-kh-listing-cache-pref-list',
     ]) {
       const start = html.indexOf(`data-testid="${testId}"`);

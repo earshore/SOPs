@@ -15,7 +15,9 @@ import {
   hasStagedVisionAttachments,
   mountVisionComposer,
   syncVisionComposerCapability,
+  unmountVisionComposer,
 } from '../composer/visionComposer';
+import { isDeepChatVisionFeatureEnabled } from '@/services/runtimeStrategyService';
 
 type DraftUpdater = (threadId: string, draftText: string) => void;
 type RequestHandler = (
@@ -54,14 +56,25 @@ export function configureDeepChatBase(
 }
 
 /**
- * Host vision composer：入口始终挂载；supportsVision 控制可点/灰态。
- * 原生 deep-chat images 按钮保持关闭。
+ * Host vision composer：
+ * - 产品开关 `deepChat.enableVision`（默认关）控制入口是否挂载；
+ * - 开启后由模型 supportsVision 控制可点/灰态；
+ * - 原生 deep-chat images 按钮始终关闭。
  */
 export function applyDeepChatVisionUploadConfig(chat: DeepChatElement | null | undefined): void {
   if (!chat) return;
-  const supportsVision = resolveCurrentModelSupportsVision();
   // Force-off vendor upload UI (Approach B host surface).
-  chat.images = resolveDeepChatImagesConfig(supportsVision);
+  chat.images = resolveDeepChatImagesConfig(false);
+
+  const featureOn = isDeepChatVisionFeatureEnabled();
+  if (!featureOn) {
+    chat.classList.remove('is-vision-enabled');
+    // Keep pipeline code; hide entry and drop any staged files while feature is off.
+    unmountVisionComposer({ keepStaged: false });
+    return;
+  }
+
+  const supportsVision = resolveCurrentModelSupportsVision();
   chat.classList.toggle('is-vision-enabled', supportsVision);
   const pending = sessionState.pendingRequests.has(sessionState.threadStore.activeThreadId);
   mountVisionComposer(chat, { supportsVision, pending });

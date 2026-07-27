@@ -1965,6 +1965,32 @@
                           />
                         </div>
                       </label>
+
+                      <div class="settings-pref-divider" role="separator"></div>
+
+                      <div
+                        class="settings-pref-row"
+                        data-testid="settings-dc-vision-pref-list"
+                      >
+                        <div class="settings-pref-row__meta">
+                          <div class="min-w-0">
+                            <h4 class="settings-pref-row__title">启用 Vision</h4>
+                            <p class="settings-pref-row__hint">
+                              在 Deep Chat 显示图片上传入口；默认关闭，仅当轮发送、不落盘原图
+                            </p>
+                          </div>
+                        </div>
+                        <label class="settings-switch">
+                          <span class="sr-only">启用 Vision</span>
+                          <input
+                            id="runtime-deep-chat-enable-vision"
+                            type="checkbox"
+                            :checked="runtimeStrategy.settings.deepChat.enableVision"
+                            @change="setRuntimeBoolean('deepChat.enableVision', $event)"
+                          />
+                          <span class="settings-switch__track" aria-hidden="true"></span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
