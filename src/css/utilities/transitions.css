@@ -82,23 +82,20 @@
 /* ========================================
    Color mode flip (light/dark)
    applyColorMode toggles .color-mode-switching briefly.
-   CRITICAL: never target * / *::before / *::after — universal
-   transitions force style recalc on the whole tree and feel janky.
-   Only soft-fade a few shell surfaces; leaf widgets snap.
+
+   Do NOT fade color/background across the tree:
+   - Permanent utilities like `transition-colors duration-200` keep animating
+     text after shell/cards already flipped → text looks “laggy”.
+   - Soft shell `color` transitions on #app also lag inherited copy.
+
+   Instead: kill transitions for one paint window so bg + text snap together.
+   `transition: none` on * is cheap (cancels work); enabling transitions on *
+   is what janks.
    ======================================== */
-@media (prefers-reduced-motion: no-preference) {
-  html.color-mode-switching,
-  html.color-mode-switching body,
-  html.color-mode-switching #app,
-  html.color-mode-switching .settings-panel-root,
-  html.color-mode-switching .settings-panel-scroll,
-  html.color-mode-switching .app-shell,
-  html.color-mode-switching .main-content,
-  html.color-mode-switching .sidebar {
-    transition:
-      background-color 140ms var(--ease-smooth, ease),
-      color 140ms var(--ease-smooth, ease),
-      border-color 140ms var(--ease-smooth, ease),
-      box-shadow 140ms var(--ease-smooth, ease);
-  }
+html.color-mode-switching,
+html.color-mode-switching *,
+html.color-mode-switching *::before,
+html.color-mode-switching *::after {
+  transition: none !important;
+  animation: none !important;
 }
