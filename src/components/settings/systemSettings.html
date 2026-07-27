@@ -1067,30 +1067,21 @@
                 <div class="settings-pref-fold__body">
 <div class="settings-tool-l3-stack">
                     <!-- Product page: 数据采集 (proxy + scrape runtime) -->
-                    <details
-                      class="settings-tool-l3"
+                    <div
+                      class="settings-tool-l3 settings-tool-l3--static"
                       id="settings-section-network"
                       data-settings-focus="master-analysis-scrape"
                       data-settings-nav-id="master-analysis-scrape"
                       data-settings-nav-group="tool"
                     >
-                      <summary class="settings-tool-l3__summary">
+                      <div class="settings-tool-l3__summary">
                         <div class="min-w-0">
                           <h5 class="settings-card__title">数据采集</h5>
                           <p class="settings-tool-page__hint">代理连接与采集运行策略</p>
                         </div>
-                        <i class="settings-tool-l3__chevron fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true"></i>
-                      </summary>
+</div>
                       <div class="settings-tool-page settings-tool-l3__body">
-
-                      <div class="settings-tool-page__head">
-                        <div class="settings-tool-page__head-main">
-                          <h5 class="settings-card__title">数据采集</h5>
-                          <span class="settings-badge settings-badge--scrape">影响采集</span>
-                        </div>
-                      </div>
-                      <p class="settings-tool-page__hint">代理连接与采集运行策略</p>
-                      <div class="mt-3 space-y-3">
+<div class="mt-3 space-y-3">
                       <!--
                         连接方式 | 密钥 始终双列并排；
                         无需密钥时右侧禁用占位，避免并排塌陷
@@ -1295,22 +1286,21 @@
                       </div>
                     
                       </div>
-                    </details>
+                    </div>
 
                     <!-- Product page: AI 智能分析 -->
-                    <details
-                      class="settings-tool-l3"
+                    <div
+                      class="settings-tool-l3 settings-tool-l3--static"
                       data-settings-focus="master-analysis-ai"
                       data-settings-nav-id="master-analysis-ai"
                       data-settings-nav-group="tool"
                     >
-                      <summary class="settings-tool-l3__summary">
+                      <div class="settings-tool-l3__summary">
                         <div class="min-w-0">
                           <h5 class="settings-card__title">AI 智能分析</h5>
                           <p class="settings-tool-page__hint">默认模型、调度与 Token 限额</p>
                         </div>
-                        <i class="settings-tool-l3__chevron fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true"></i>
-                      </summary>
+</div>
                       <div class="settings-tool-page settings-tool-l3__body">
 
                       <template
@@ -1318,15 +1308,7 @@
                         :key="item.id"
                       >
                         <div>
-                          <div class="settings-tool-page__head">
-                            <div class="settings-tool-page__head-main">
-                              <h5 class="settings-card__title" x-text="item.label"></h5>
-                              <span
-                                class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
-                                x-text="item.modelHint"
-                              ></span>
-                            </div>
-                            <div class="settings-tool-page__model">
+                          <div class="settings-tool-page__model-bar"><div class="settings-tool-page__model">
                               <label class="sr-only" :for="'tool-strategy-model-' + item.id"
                                 >默认模型</label
                               >
@@ -1349,11 +1331,8 @@
                               <span class="settings-tool-page__model-chevron" aria-hidden="true">
                                 <i class="fas fa-chevron-down"></i>
                               </span>
-                            </div>
-                          </div>
-                          <p class="settings-tool-page__hint" x-text="item.description"></p>
-                          <p class="settings-tool-page__hint">
-                            当前执行模型：
+                            </div></div>
+                          <p class="settings-tool-page__resolved">当前执行模型：
                             <span
                               class="settings-tool-page__hint-mono"
                               x-text="item.resolvedModel"
@@ -1497,7 +1476,7 @@
                       </div>
                     
                       </div>
-                    </details>
+                    </div>
                   </div>
                 </div>
               </details>
@@ -1531,15 +1510,7 @@
                       :key="item.id"
                     >
                       <div>
-                        <div class="settings-tool-page__head">
-                          <div class="settings-tool-page__head-main">
-                            <h5 class="settings-card__title" x-text="item.label"></h5>
-                            <span
-                              class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
-                              x-text="item.modelHint"
-                            ></span>
-                          </div>
-                          <div class="settings-tool-page__model">
+                        <div class="settings-tool-page__model-bar"><div class="settings-tool-page__model">
                             <label class="sr-only" :for="'tool-strategy-model-' + item.id"
                               >默认模型</label
                             >
@@ -1562,11 +1533,8 @@
                             <span class="settings-tool-page__model-chevron" aria-hidden="true">
                               <i class="fas fa-chevron-down"></i>
                             </span>
-                          </div>
-                        </div>
-                        <p class="settings-tool-page__hint" x-text="item.description"></p>
-                        <p class="settings-tool-page__hint">
-                          当前执行模型：
+                          </div></div>
+                          <p class="settings-tool-page__resolved">当前执行模型：
                           <span
                             class="settings-tool-page__hint-mono"
                             x-text="item.resolvedModel"
@@ -1725,13 +1693,12 @@
                 </summary>
                 <div class="settings-pref-fold__body">
 <div class="settings-tool-l3-stack">
-                    <details class="settings-tool-l3">
-                      <summary class="settings-tool-l3__summary">
+                    <div class="settings-tool-l3 settings-tool-l3--static">
+                      <div class="settings-tool-l3__summary">
                         <div class="min-w-0">
                           <h5 class="settings-card__title">SEO 处理</h5>
                         </div>
-                        <i class="settings-tool-l3__chevron fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true"></i>
-                      </summary>
+</div>
                       <div class="settings-tool-page settings-tool-l3__body">
 
                       <template
@@ -1739,15 +1706,7 @@
                         :key="item.id"
                       >
                         <div>
-                          <div class="settings-tool-page__head">
-                            <div class="settings-tool-page__head-main">
-                              <h5 class="settings-card__title" x-text="item.label"></h5>
-                              <span
-                                class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
-                                x-text="item.modelHint"
-                              ></span>
-                            </div>
-                            <div class="settings-tool-page__model">
+                          <div class="settings-tool-page__model-bar"><div class="settings-tool-page__model">
                               <label class="sr-only" :for="'tool-strategy-model-' + item.id"
                                 >默认模型</label
                               >
@@ -1770,11 +1729,8 @@
                               <span class="settings-tool-page__model-chevron" aria-hidden="true">
                                 <i class="fas fa-chevron-down"></i>
                               </span>
-                            </div>
-                          </div>
-                          <p class="settings-tool-page__hint" x-text="item.description"></p>
-                          <p class="settings-tool-page__hint">
-                            当前执行模型：
+                            </div></div>
+                          <p class="settings-tool-page__resolved">当前执行模型：
                             <span
                               class="settings-tool-page__hint-mono"
                               x-text="item.resolvedModel"
@@ -1910,14 +1866,13 @@
                       </div>
                     
                       </div>
-                    </details>
-                    <details class="settings-tool-l3">
-                      <summary class="settings-tool-l3__summary">
+                    </div>
+                    <div class="settings-tool-l3 settings-tool-l3--static">
+                      <div class="settings-tool-l3__summary">
                         <div class="min-w-0">
                           <h5 class="settings-card__title">Listing 评审</h5>
                         </div>
-                        <i class="settings-tool-l3__chevron fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true"></i>
-                      </summary>
+</div>
                       <div class="settings-tool-page settings-tool-l3__body">
 
                       <template
@@ -1925,15 +1880,7 @@
                         :key="item.id"
                       >
                         <div>
-                          <div class="settings-tool-page__head">
-                            <div class="settings-tool-page__head-main">
-                              <h5 class="settings-card__title" x-text="item.label"></h5>
-                              <span
-                                class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
-                                x-text="item.modelHint"
-                              ></span>
-                            </div>
-                            <div class="settings-tool-page__model">
+                          <div class="settings-tool-page__model-bar"><div class="settings-tool-page__model">
                               <label class="sr-only" :for="'tool-strategy-model-' + item.id"
                                 >默认模型</label
                               >
@@ -1956,11 +1903,8 @@
                               <span class="settings-tool-page__model-chevron" aria-hidden="true">
                                 <i class="fas fa-chevron-down"></i>
                               </span>
-                            </div>
-                          </div>
-                          <p class="settings-tool-page__hint" x-text="item.description"></p>
-                          <p class="settings-tool-page__hint">
-                            当前执行模型：
+                            </div></div>
+                          <p class="settings-tool-page__resolved">当前执行模型：
                             <span
                               class="settings-tool-page__hint-mono"
                               x-text="item.resolvedModel"
@@ -2016,7 +1960,7 @@
                       </div>
                     
                       </div>
-                    </details>
+                    </div>
                   </div>
                 </div>
               </details>
@@ -2052,15 +1996,7 @@
                       :key="item.id"
                     >
                       <div>
-                        <div class="settings-tool-page__head">
-                          <div class="settings-tool-page__head-main">
-                            <h5 class="settings-card__title" x-text="item.label"></h5>
-                            <span
-                              class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
-                              x-text="item.modelHint"
-                            ></span>
-                          </div>
-                          <div class="settings-tool-page__model">
+                        <div class="settings-tool-page__model-bar"><div class="settings-tool-page__model">
                             <label class="sr-only" :for="'tool-strategy-model-' + item.id"
                               >默认模型</label
                             >
@@ -2083,11 +2019,8 @@
                             <span class="settings-tool-page__model-chevron" aria-hidden="true">
                               <i class="fas fa-chevron-down"></i>
                             </span>
-                          </div>
-                        </div>
-                        <p class="settings-tool-page__hint" x-text="item.description"></p>
-                        <p class="settings-tool-page__hint">
-                          当前执行模型：
+                          </div></div>
+                          <p class="settings-tool-page__resolved">当前执行模型：
                           <span
                             class="settings-tool-page__hint-mono"
                             x-text="item.resolvedModel"

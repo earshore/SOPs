@@ -359,8 +359,10 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(maChunk).toContain('data-settings-nav-id="master-analysis-ai"');
     expect(maChunk).toContain('id="settings-section-network"');
     expect(maChunk).toContain("toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])");
-    // L3 fold targets
-    expect((maChunk.match(/<details[^>]*class="settings-tool-l3"/g) || []).length).toBe(2);
+    // L3 modules are static (always open), not nested details
+    expect((maChunk.match(/settings-tool-l3--static/g) || []).length).toBe(2);
+    expect(maChunk).not.toMatch(/<details[^>]*settings-tool-l3/);
+    expect(maChunk).not.toContain('settings-tool-page__head');
     expect(maChunk).not.toContain('settings-submodule');
     expect(maChunk).not.toContain('settings-tool-app');
   });
