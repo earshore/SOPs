@@ -11,9 +11,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Deep Chat vision upload: whitelist formats (no SVG), 12MB total cap, ghost upload control, helper limits line, count-only history honesty, safer error redaction.
+### Fixed
+
+## [3.0.12-rc.1] - 2026-07-28
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.11`。
+> 收口 `v3.0.11` 之后的 **Deep Chat host vision 上传 UX**（默认关闭、产品开关）与 **系统设置导航定位遮罩** 打磨。
+> 生产回滚目标为 `v3.0.11` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- Deep Chat **host vision composer**：图片入口由宿主绘制（非 vendor 默认壳），白名单格式（不含 SVG）、总容量上限、ghost 上传控件与 helper 限额说明；历史诚实展示张数、错误脱敏。
+- 系统设置工具策略 **「启用 Vision」** 开关（`deepChat.enableVision`，默认 `false`）；产品侧 Alpha 徽章与搜索词（Alpha / 不稳定）。
+- 系统设置左导航定位：将目标解析到 fold / L3 内容面，主题 soft 遮罩（`--settings-accent-soft`）短暂高亮，避免标题外框杂乱。
+
+### Changed
+
+- Vision UI 默认关闭；仅当设置开启且模型支持 vision 时显示上传入口。
+- 左导航深链高亮改为单遮罩、可切换清除，跟随 Appearance 主色与深浅色 soft 阶。
 
 ### Fixed
+
+- Prettier `endOfLine: auto` + 关键文件格式债，解除 `npm run build` / `format:check` 阻塞。
+- 导航高亮 inset 阴影被子元素遮挡：改为 `::after` 叠层 veil。
 
 ## [3.0.11] - 2026-07-27
 

@@ -44,6 +44,7 @@
 - `v3.0.9`（2026-07-19）为历史 GA：落地 release-debt hardening（静态托管合同、质量/浏览器门禁、本地 `release:gate`）并收口构建质量门。
 - `v3.0.10`（2026-07-20）为历史 GA：收口 `v3.0.9` 后热修（数据备份 UX、Vercel 构建、UI 打磨、confirm 弹窗去重）并恢复 package / tag / Release / 生产三者一致。
 - `v3.0.11`（2026-07-27）为当前 GA：定稿 `v3.0.11-rc.1`…`rc.13`（系统设置 pref-list / ≤L3、企业主题 v2、Deep Chat 动态推理与 vision、四路径 LLM 对齐）；Latest 指向 `v3.0.11`，回滚基线 `v3.0.10`。
+- `v3.0.12-rc.1`（2026-07-28）为生产验证候选：Deep Chat host vision 上传 UX（`enableVision` 默认关 + Alpha）、系统设置导航 soft 遮罩定位；**Pre-release**，Latest 仍为 `v3.0.11`。
 - `v3.0.11-rc.1`（2026-07-21）为生产验证候选：Amazon Skills 目录 + Deep Chat 技能挂载 / 并发会话体验；**Pre-release**（历史）；当时 Latest 为 `v3.0.10`。
 - `v3.0.11-rc.2`（2026-07-22）为生产验证候选：技能页叙事对齐 + Deep Chat Chip/输入热修；**Pre-release**，Latest 仍为 `v3.0.10`。
 - `v3.0.11-rc.3`（2026-07-22）为生产验证候选：Deep Chat 会话稳定性、发布门禁与 Skill Registry 构建产物优化；**Pre-release**，Latest 仍为 `v3.0.10`。
@@ -57,7 +58,7 @@
 - `v3.0.11-rc.11`（2026-07-27）为生产验证候选：企业主题 v2 双色轴全面落地、Claude/Gemini 厂商 API 对齐修复、CI 迁 ubuntu 恢复全绿；**Pre-release**，Latest 仍为 `v3.0.10`。
 - `v3.0.11-rc.13`（2026-07-21…27 线终点）为生产验证候选：Deep Chat 推理 effort 按模型能力动态档位 + vision 图片附件门控（当轮 visionUserParts、不落盘 base64）；**Pre-release**（已并入 `v3.0.11` GA）。
 - `v3.0.11-rc.12`（2026-07-27）为生产验证候选：四路径 LLM API 官方对齐（传输层/协议层）、jsonMode 原生路径与 OpenAI effort clamp 残留风险修复、暗色 WCAG 对比度清零；**Pre-release**（已并入 `v3.0.11` GA）。
-- GA 后不得再发 `v3.0.11-rc.*`；下一候选进入 `v3.0.12-rc.1`（patch）或 `v3.1.0-rc.1`（minor，若变更体量升档）。
+- GA 后不得再发 `v3.0.11-rc.*`；当前候选线为 `v3.0.12-rc.*`（patch）。下一候选递增 `rc.N`，定稿后发 `v3.0.12` GA。
 
 ## 3. 何时创建 GitHub Release
 
