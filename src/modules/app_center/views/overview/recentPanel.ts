@@ -1014,23 +1014,27 @@ function createRecentCardBody(item: RecentQueueItem): HTMLElement {
   const { presentation } = item;
   const body = document.createElement('div');
   body.className = 'app-overview-recent-body';
-  const title = document.createElement('strong');
-  title.className = 'app-overview-recent-title';
-  title.textContent = presentation.primaryTitle;
-  body.append(createRecentMetaRow(item), title);
+  body.append(createRecentMetaRow(item));
 
   const denseFacts = presentation.facts.slice(0, RECENT_BODY_FACT_LIMIT);
-  if (denseFacts.length === 0) return body;
+  const workContext = presentation.primaryTitle.trim();
+
+  // Primary line: live metrics. Secondary line: marketplace / ASIN work context.
+  const title = document.createElement('strong');
+  title.className = 'app-overview-recent-title';
+  title.textContent =
+    denseFacts.length > 0 ? denseFacts.join(' · ') : workContext || presentation.typeLabel;
+  body.append(title);
+
+  if (denseFacts.length === 0 || !workContext) return body;
 
   const facts = document.createElement('div');
   facts.className = 'app-overview-recent-facts';
-  facts.setAttribute('aria-label', '关键信息');
-  denseFacts.forEach(factText => {
-    const fact = document.createElement('span');
-    fact.className = 'app-overview-recent-fact';
-    fact.textContent = factText;
-    facts.append(fact);
-  });
+  facts.setAttribute('aria-label', '作业上下文');
+  const fact = document.createElement('span');
+  fact.className = 'app-overview-recent-fact';
+  fact.textContent = workContext;
+  facts.append(fact);
   body.append(facts);
   return body;
 }

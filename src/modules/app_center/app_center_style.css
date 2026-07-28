@@ -1211,8 +1211,8 @@
 }
 
 .app-overview-recent-icon {
-  width: 2rem;
-  height: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -1221,7 +1221,7 @@
   border: 1px solid var(--app-recent-accent-border);
   background: var(--app-recent-accent-soft);
   color: var(--app-recent-accent);
-  font-size: 0.8125rem;
+  font-size: 1rem;
   line-height: 1;
 }
 
