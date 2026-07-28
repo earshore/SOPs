@@ -610,11 +610,7 @@ function showLoadingState(container: HTMLElement): () => void {
   };
 }
 
-function setAnalysisLoadingCopy(
-  titleText: string,
-  hintText: string,
-  streamLabel?: string
-): void {
+function setAnalysisLoadingCopy(titleText: string, hintText: string, streamLabel?: string): void {
   const loadingEl = document.getElementById('keyword-hunter-loading-state');
   if (loadingEl) {
     const title = loadingEl.querySelector('p.font-semibold');

@@ -465,10 +465,7 @@ function getLiveStageSummary(
   return formatArtifactFallbackSummary(state, stageArtifact);
 }
 
-function resolvePpcReviewState(
-  unavailable: boolean,
-  complete: boolean
-): RecentJourneyStepState {
+function resolvePpcReviewState(unavailable: boolean, complete: boolean): RecentJourneyStepState {
   if (unavailable) return 'unavailable';
   return complete ? 'complete' : 'current';
 }
@@ -482,8 +479,7 @@ function getPpcJourney(item: RecentQueueItem): RecentJourney {
   const openAction = unavailable
     ? null
     : ({ kind: 'resume', artifact: item.artifact, mode: 'open' } as const);
-  const suggestionSummary =
-    live || item.artifact.summary?.trim() || '已生成动作候选';
+  const suggestionSummary = live || item.artifact.summary?.trim() || '已生成动作候选';
   const reviewSummary = live || (complete ? '复核完成' : '待确认否词/收割等动作');
 
   return {

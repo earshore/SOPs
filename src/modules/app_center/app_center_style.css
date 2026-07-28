@@ -916,7 +916,11 @@
 
 /* Only pinned cards get a row fill; ordinary items stay transparent. */
 .app-overview-recent-item--pinned {
-  background: color-mix(in srgb, var(--app-overview-accent-surface) 72%, var(--app-overview-surface));
+  background: color-mix(
+    in srgb,
+    var(--app-overview-accent-surface) 72%,
+    var(--app-overview-surface)
+  );
   box-shadow: inset 3px 0 0 var(--app-overview-accent-strong);
 }
 
@@ -1109,7 +1113,11 @@
 .app-overview-recent-item--pinned:focus,
 .app-overview-recent-item--pinned:focus-within,
 .app-overview-recent-item--pinned:active {
-  background: color-mix(in srgb, var(--app-overview-accent-surface) 72%, var(--app-overview-surface));
+  background: color-mix(
+    in srgb,
+    var(--app-overview-accent-surface) 72%,
+    var(--app-overview-surface)
+  );
   box-shadow: inset 3px 0 0 var(--app-overview-accent-strong);
 }
 
@@ -1126,7 +1134,11 @@
 .app-overview-recent-item--pinned.app-overview-recent-item--attention:focus,
 .app-overview-recent-item--pinned.app-overview-recent-item--attention:focus-within,
 .app-overview-recent-item--pinned.app-overview-recent-item--attention:active {
-  background: color-mix(in srgb, var(--app-overview-accent-surface) 72%, var(--app-overview-surface));
+  background: color-mix(
+    in srgb,
+    var(--app-overview-accent-surface) 72%,
+    var(--app-overview-surface)
+  );
   box-shadow: inset 3px 0 0 var(--app-overview-accent-strong);
 }
 

@@ -1419,8 +1419,7 @@ textarea:focus-visible {
   }
 
   /* Keep status pill chrome; density flat-wash must not strip badge fill. */
-  [x-data='scraperPanel']
-    :where(.plugin-card, .strategy-item, .empty-state-icon, .plugin-icon) {
+  [x-data='scraperPanel'] :where(.plugin-card, .strategy-item, .empty-state-icon, .plugin-icon) {
     background-image: none !important;
     box-shadow: none !important;
     transform: none !important;

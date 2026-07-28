@@ -348,7 +348,12 @@ function getAnalysisDimensionCount(report: Record<string, unknown>): number {
   if (confidence && Object.keys(confidence).length > 0) return Object.keys(confidence).length;
   // Count non-meta report sections with object payloads.
   return Object.entries(report).filter(([key, value]) => {
-    if (key.startsWith('_') || key === 'parse_error' || key === 'raw_response' || key === 'error_detail') {
+    if (
+      key.startsWith('_') ||
+      key === 'parse_error' ||
+      key === 'raw_response' ||
+      key === 'error_detail'
+    ) {
       return false;
     }
     return value !== null && typeof value === 'object';
@@ -370,10 +375,7 @@ function getAnalysisModelLabel(report: Record<string, unknown>): string {
   return typeof model === 'string' ? model.trim() : '';
 }
 
-function getAnalysisAsinCount(
-  historyItem: HistoryItem,
-  report: Record<string, unknown>
-): number {
+function getAnalysisAsinCount(historyItem: HistoryItem, report: Record<string, unknown>): number {
   const meta = asRecord(report._metadata);
   const sourceAsins = meta?.sourceAsins;
   if (Array.isArray(sourceAsins) && sourceAsins.length > 0) {
