@@ -12,8 +12,13 @@ import { generateAnalysisPrompt, getReviewSamplingMetadata } from '../prompts/an
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse, validateAnalysisResult } from './analysisResultParser';
 import { runSellingPointsPipeline } from './sellingPointsPipeline';
+import { runReviewEvidencePipeline, type ReviewEvidenceTargetId } from './reviewEvidencePipeline';
 import { AppError, ErrorLevel, ErrorCategory } from '@/common/errors/AppError';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
+
+function isReviewEvidenceTarget(targetId: string): targetId is ReviewEvidenceTargetId {
+  return targetId === 'fatal-flaws' || targetId === 'wow-moments';
+}
 
 const nativeLoggerConsole = globalThis.console;
 
@@ -117,6 +122,16 @@ async function analyzeTarget(
         language,
       });
       logger.debug('[AI分析] selling-points pipeline:', pipeline.stats, 'AIAnalysisService');
+      return pipeline.data;
+    }
+
+    if (isReviewEvidenceTarget(targetId)) {
+      const pipeline = await runReviewEvidencePipeline(targetId, {
+        product,
+        config,
+        language,
+      });
+      logger.debug(`[AI分析] ${targetId} pipeline:`, pipeline.stats, 'AIAnalysisService');
       return pipeline.data;
     }
 

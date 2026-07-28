@@ -26,12 +26,17 @@ import {
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse } from './analysisResultParser';
 import { runSellingPointsPipeline } from './sellingPointsPipeline';
+import { runReviewEvidencePipeline, type ReviewEvidenceTargetId } from './reviewEvidencePipeline';
 import { estimateTokenCount } from '../utils/tokenCounter';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
 
 const DEFAULT_ANALYSIS_CONCURRENCY = 8;
 const MAX_ANALYSIS_CONCURRENCY = 8;
-const ANALYSIS_CACHE_VERSION = 'v5';
+const ANALYSIS_CACHE_VERSION = 'v6';
+
+function isReviewEvidenceTarget(targetId: string): targetId is ReviewEvidenceTargetId {
+  return targetId === 'fatal-flaws' || targetId === 'wow-moments';
+}
 const LEGACY_ANALYSIS_CACHE_VERSION = 'v2';
 const ANALYSIS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_CACHE_IDENTITY: AnalysisCacheIdentity = {
@@ -543,6 +548,30 @@ async function executeAnalysisTask(
     if (task.targetId === 'selling-points') {
       // Multi-ASIN / long bullets: Map–Reduce keeps full bullet text, avoids one-shot schema drop.
       const pipeline = await runSellingPointsPipeline({
+        product,
+        config,
+        language,
+        retryBudget,
+        onFirstResponse: metrics => {
+          task.firstResponseMs = metrics.elapsedMs;
+          onFirstResponse?.(task, metrics);
+        },
+        onStreamUpdate: update => {
+          task.streamChunks = update.chunkCount;
+          task.streamedChars = update.content.length;
+        },
+      });
+      actualResult = pipeline.data;
+      task.promptChars = pipeline.promptChars;
+      task.estimatedInputTokens = pipeline.estimatedInputTokens;
+      task.streamChunks = pipeline.streamChunks;
+      task.streamedChars = pipeline.streamedChars;
+      if (pipeline.firstResponseMs !== undefined) {
+        task.firstResponseMs = pipeline.firstResponseMs;
+      }
+    } else if (isReviewEvidenceTarget(task.targetId)) {
+      // Multi-ASIN / long review sets: Map–Reduce keeps full 1–3★ / 5★ evidence text.
+      const pipeline = await runReviewEvidencePipeline(task.targetId, {
         product,
         config,
         language,

@@ -89,6 +89,23 @@ describe('analysisResultParser', () => {
     ).toBe(true);
   });
 
+  it('accepts fatal-flaws map shards without return_triggers', () => {
+    const mapped = parseAnalysisResponse(
+      'fatal-flaws',
+      JSON.stringify({
+        critical_issues: [{ issue: 'leak', severity: 'major' }],
+      }),
+      { phase: 'map' }
+    );
+    expect(mapped.data.critical_issues).toHaveLength(1);
+    expect(
+      validateAnalysisResult('fatal-flaws', { critical_issues: [{ issue: 'leak' }] }, 'map')
+    ).toBe(true);
+    expect(
+      validateAnalysisResult('fatal-flaws', { critical_issues: [{ issue: 'leak' }] }, 'full')
+    ).toBe(false);
+  });
+
   it('exposes validation for existing service callers', () => {
     expect(
       validateAnalysisResult('buyer-profile', {

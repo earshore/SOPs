@@ -107,6 +107,26 @@ export interface ParsedAnalysisResponse {
   wasRepaired: boolean;
 }
 
+const fatalFlawsMapSchema = z
+  .object({
+    critical_issues: objectArray,
+    return_triggers: stringArray.optional(),
+    expectation_gaps: objectArray.optional(),
+    actionable_fixes: stringArray.optional(),
+    risk_assessment: looseRecord.optional(),
+  })
+  .passthrough();
+
+const wowMomentsMapSchema = z
+  .object({
+    moments: objectArray,
+    emotional_triggers: stringArray.optional(),
+    high_conversion_phrases: stringArray.optional(),
+    unexpected_benefits: stringArray.optional(),
+    copywriting_angles: stringArray.optional(),
+  })
+  .passthrough();
+
 function resolveAnalysisSchema(
   targetId: string,
   phase: AnalysisParsePhase = 'full'
@@ -115,6 +135,15 @@ function resolveAnalysisSchema(
     if (phase === 'map') return sellingPointsMapSchema;
     if (phase === 'reduce') return sellingPointsReduceSchema;
     return sellingPointsFullSchema;
+  }
+  if (targetId === 'fatal-flaws') {
+    // Map shards may omit return_triggers; Reduce enforces fuller synthesis.
+    if (phase === 'map') return fatalFlawsMapSchema;
+    return analysisSchemas['fatal-flaws'];
+  }
+  if (targetId === 'wow-moments') {
+    if (phase === 'map') return wowMomentsMapSchema;
+    return analysisSchemas['wow-moments'];
   }
   return analysisSchemas[targetId];
 }

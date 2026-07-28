@@ -107,11 +107,12 @@ export function mergeProducts(products: Product[]): Product {
       merged: true,
       product_count: products.length,
       asins: products.map(p => p.asin),
-      // Preserve per-ASIN listings for selling-points Map–Reduce (no truncation).
+      // Preserve per-ASIN listings/reviews for Map–Reduce (no truncation of sources).
       source_products: products.map(p => ({
         asin: p.asin,
         productTitle: p.productTitle,
         feature_bullets: [...p.feature_bullets],
+        customer_reviews: p.customer_reviews.map(review => ({ ...review })),
       })),
     },
   };
