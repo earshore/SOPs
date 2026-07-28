@@ -610,7 +610,7 @@ function renderSelectableContent(data: unknown, dimensionId: string, subItemKey:
   // 对象类型 - 将每个字段作为可选项
   if (typeof data === 'object') {
     const obj = data as Record<string, unknown>;
-    const entries = Object.entries(obj);
+    const entries = Object.entries(obj).filter(([key]) => !isInternalReportKey(key));
     if (entries.length === 0) return '<div class="text-xs text-slate-400 py-2">空对象</div>';
 
     return entries
@@ -628,6 +628,10 @@ function renderSelectableContent(data: unknown, dimensionId: string, subItemKey:
 /**
  * 格式化值为字符串
  */
+function isInternalReportKey(key: string): boolean {
+  return key === '_pipeline' || key === 'pipeline' || key === '_metadata' || key.startsWith('_');
+}
+
 function formatValue(value: unknown): string {
   if (value === null || value === undefined) return '-';
   if (typeof value === 'string') return value;
@@ -721,8 +725,13 @@ export function renderLegacyFormatModules(
     'templateUsed',
     'templateId',
     'raw_response',
+    '_metadata',
+    '_pipeline',
+    'pipeline',
   ];
-  const keys = Object.keys(reportObj).filter(k => !ignoreKeys.includes(k));
+  const keys = Object.keys(reportObj).filter(
+    k => !ignoreKeys.includes(k) && !isInternalReportKey(k)
+  );
 
   if (isFirstLoad) {
     ctx.profile.selectedReportSections = [...keys];

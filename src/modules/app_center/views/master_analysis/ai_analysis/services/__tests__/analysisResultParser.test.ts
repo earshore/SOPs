@@ -106,6 +106,27 @@ describe('analysisResultParser', () => {
     ).toBe(false);
   });
 
+  it.each([
+    ['wow-moments', { moments: [] }],
+    ['hesitation-points', { hesitations: [] }],
+    ['buyer-profile', { buyer_types: [] }],
+    ['vocab-gap', { seller_terms: [] }],
+    ['promise-reality', { gaps: [] }],
+  ])('accepts partial %s map shards', (targetId, shard) => {
+    expect(validateAnalysisResult(targetId, shard, 'map')).toBe(true);
+  });
+
+  it('keeps the full schema for title-keywords map shards', () => {
+    expect(
+      validateAnalysisResult(
+        'title-keywords',
+        { primary_keywords: [], secondary_keywords: [] },
+        'map'
+      )
+    ).toBe(true);
+    expect(validateAnalysisResult('title-keywords', { primary_keywords: [] }, 'map')).toBe(false);
+  });
+
   it('exposes validation for existing service callers', () => {
     expect(
       validateAnalysisResult('buyer-profile', {

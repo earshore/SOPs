@@ -302,8 +302,8 @@ it('computes hero, progress, report, JSON, and confidence branches', () => {
   expect(panel.analysisHeroIsComplete).toBe(true);
   expect(panel.analysisHeroIsStrong).toBe(false);
   expect(panel.analysisHeroIsCompact).toBe(true);
-  expect(panel.analysisHeroCardClass).toContain('bg-white');
-  expect(panel.analysisHeroBackdropClass).toBe('bg-white');
+  expect(panel.analysisHeroCardClass).toContain('bg-surface');
+  expect(panel.analysisHeroBackdropClass).toBe('bg-surface');
   expect(panel.analysisHeroIconClass).toBe('fa-solid fa-circle-check');
   expect(panel.isAnalysisComplete).toBe(true);
   expect(panel.isAnalysisRunning).toBe(false);
@@ -312,14 +312,17 @@ it('computes hero, progress, report, JSON, and confidence branches', () => {
   expect(panel.canRunAnalysis).toBe(true);
   expect(panel.runAnalysisDisabled).toBe(false);
   expect(panel.runAnalysisButtonClass).toContain('bg-[var(--color-primary)]');
-  expect(panel.performanceSummaryText).toBe('并发 3 · 缓存开 · 失败继续');
+  expect(panel.performanceSummaryText).toBe('并发 3 · 均衡 · 缓存开 · 失败继续');
   expect(panel.runAnalysisNotRunningLabel).toBe('重新分析');
   expect(panel.runAnalysisNotRunningIconClass).toContain('rotate-right');
   expect(panel.showRunDisabledHint).toBe(false);
   expect(panel.progressText).toBe('72%');
   expect(panel.progressAriaValue).toBe(72);
-  expect(panel.progressStyle).toBe('width: 72%');
-  expect(panel.progressInsightStepClass).toBe('text-white/80');
+  expect(panel.progressStyle).toBe('width: 72%;');
+  expect(panel.analysisProgressStages[2]?.state).toBe('active');
+  expect(panel.getProgressStageClass(panel.analysisProgressStages[2]?.state)).toBe(
+    'text-white font-semibold'
+  );
   expect(panel.reportStatusText).toBe('分析结果');
   expect(panel.reportStatusBadgeText).toBe('已完成');
   expect(panel.reportStatusIconClass).toContain('circle-check');
@@ -370,6 +373,69 @@ it('computes hero, progress, report, JSON, and confidence branches', () => {
   expect(panel.isMissingTargetOnly).toBe(true);
 });
 
+it('summarizes map-reduce hygiene and preserves status and stage priority', () => {
+  const panel = createPanel();
+  panel.hasReport = true;
+  panel.reportResults = panelMocks.reportResults;
+  panel.analysisReport = {
+    _metadata: {
+      runSummary: {
+        successCount: 3,
+        failedCount: 1,
+        failedTargetIds: ['selling-points'],
+        cachedCount: 2,
+        elapsedMs: 65_000,
+      },
+      reviewSampling: {
+        mapReduceHygiene: {
+          lowStar: {
+            duplicatesRemoved: 1,
+            emptyRemoved: 0,
+            omittedByBudget: 2,
+            budgetApplied: true,
+            budgetLimit: 96,
+            includedAfterPack: 4,
+          },
+          highStar: {
+            duplicatesRemoved: 0,
+            emptyRemoved: 1,
+            omittedByBudget: 1,
+            budgetApplied: true,
+            budgetLimit: 96,
+            includedAfterPack: 3,
+          },
+          general: {
+            duplicatesRemoved: 0,
+            emptyRemoved: 0,
+            omittedByBudget: 1,
+            budgetApplied: true,
+            budgetLimit: 160,
+            includedAfterPack: 3,
+          },
+        },
+      },
+    },
+  };
+  panel.currentStep = '';
+
+  expect(panel.evidenceHygieneShortText).toBe(
+    '已去重 2 · 预算采样 4 · 保留 1 个标题 · 0 个卖点 · 10 条评论'
+  );
+  expect(panel.analysisHeroStatusText).toBe(
+    '成功 3 · 失败 1（卖点结构拆解） · 缓存 2 · 耗时 1m5s'
+  );
+
+  panel.hasReport = false;
+  panel.progress = 36;
+  panel.currentStep = '评论证据 Map';
+  expect(panel.analysisProgressStages.map((stage: { state: string }) => stage.state)).toEqual([
+    'done',
+    'done',
+    'active',
+    'pending',
+  ]);
+});
+
 it('exposes CSP-safe Math helpers for Alpine expressions', () => {
   const panel = createPanel();
 
@@ -399,7 +465,7 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   expect(panel.getAsinTextClass('B001')).toBe(
     'text-[var(--color-primary-dark,var(--color-primary))]'
   );
-  expect(panel.getAsinTextClass('B002')).toBe('text-slate-700');
+  expect(panel.getAsinTextClass('B002')).toBe('text-tertiary');
   expect(panel.getListingTargetCardClass('selling-points')).toContain(
     'hover:bg-[var(--surface-card-hover)]'
   );
@@ -423,8 +489,8 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   expect(panel.runAnalysisButtonClass).toContain('cursor-not-allowed');
   expect(panel.analysisHeroAmbientClass).toBe('opacity-0');
   expect(panel.analysisHeroPatternClass).toBe('opacity-0');
-  expect(panel.analysisHeroTextClass).toBe('text-slate-800');
-  expect(panel.analysisHeroSubtextClass).toBe('text-slate-500');
+  expect(panel.analysisHeroTextClass).toBe('text-primary');
+  expect(panel.analysisHeroSubtextClass).toBe('text-secondary');
   expect(panel.analysisHeroMetricPillClass).toContain('bg-slate-100');
   expect(panel.analysisPerfButtonClass).toContain('bg-slate-50');
   expect(panel.analysisHeroIconWrapClass).toContain('bg-slate-100');
@@ -438,9 +504,11 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   expect(panel.jsonViewerCollapsed).toBe(false);
 
   panel.progress = -1;
-  expect(panel.progressDataStepClass).toBe('');
+  expect(panel.analysisProgressStages[0]?.state).toBe('active');
   panel.progress = 100;
-  expect(panel.progressDoneStepClass).toBe('text-white/80');
+  expect(panel.analysisProgressStages.every((stage: { state: string }) => stage.state === 'done')).toBe(
+    true
+  );
   panel.isAnalyzing = true;
   expect(panel.reportStatusText).toContain('实时更新');
   expect(panel.reportStatusBadgeClass).toContain('bg-blue-50');
@@ -448,7 +516,7 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   expect(panel.reportStatusBadgeText).toBe('实时生成');
   panel.perfSettings.settings.enableCache = false;
   panel.perfSettings.settings.failureStrategy = 'stop';
-  expect(panel.performanceSummaryText).toBe('并发 3 · 缓存关 · 失败中止');
+  expect(panel.performanceSummaryText).toBe('并发 3 · 均衡 · 缓存关 · 失败中止');
 
   panel.analysisReport = null;
   expect(panel.reportConfidence).toBeNull();

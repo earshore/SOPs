@@ -11,6 +11,10 @@ import { PROMPTLAB_DISPLAY_LIMITS } from '../../config/displayLimits';
 // 工具函数
 // ==========================================
 
+function isInternalPreviewKey(key: string): boolean {
+  return key === '_pipeline' || key === 'pipeline' || key.startsWith('_');
+}
+
 /**
  * 递归查找对象或数组中第一个有意义的字符串值
  * @param obj   任意值
@@ -19,16 +23,18 @@ import { PROMPTLAB_DISPLAY_LIMITS } from '../../config/displayLimits';
 export function findFirstStringValue(obj: unknown, depth: number = 0): string | null {
   if (depth > 3) return null;
 
-  if (typeof obj === 'string' && obj.trim().length > 0) {
-    return obj.trim();
+  if (typeof obj === 'string') {
+    return obj.trim() || null;
   }
 
-  if (Array.isArray(obj) && obj.length > 0) {
+  if (Array.isArray(obj)) {
     return findFirstStringValue(obj[0], depth + 1);
   }
 
   if (obj && typeof obj === 'object') {
     for (const key of Object.keys(obj)) {
+      // Skip internal diagnostics leaked from analysis runtime.
+      if (isInternalPreviewKey(key)) continue;
       const result = findFirstStringValue((obj as Record<string, unknown>)[key], depth + 1);
       if (result) return result;
     }

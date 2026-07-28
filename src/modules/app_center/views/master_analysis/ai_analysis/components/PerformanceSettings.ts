@@ -51,6 +51,8 @@ const SCHEDULE_TIER_CONFIG: Record<ScheduleTier, { label: string; activeClass: s
  */
 export interface PerformanceSettings {
   schedulingPreference: SchedulingPreference;
+  /** From runtime strategy: fast | balanced | deep */
+  evidenceDepth: 'fast' | 'balanced' | 'deep';
   enableCache: boolean;
   maxConcurrency: number;
   failureStrategy: FailureStrategy;
@@ -72,6 +74,7 @@ type PerformanceSettingsPanel = PerformanceSettingsPanelContext &
 
 const DEFAULT_SETTINGS: PerformanceSettings = {
   schedulingPreference: 'recommended',
+  evidenceDepth: 'balanced',
   maxConcurrency: 4,
   enableCache: true,
   failureStrategy: 'continue',
@@ -102,9 +105,16 @@ function normalizeSettings(settings: Partial<PerformanceSettings>): PerformanceS
   const schedulingPreference = inferSchedulingPreference(settings);
   const schedule = resolveAnalysisSchedule({ schedulingPreference });
 
+  const depth = settings.evidenceDepth;
+  const evidenceDepth =
+    depth === 'fast' || depth === 'balanced' || depth === 'deep'
+      ? depth
+      : DEFAULT_SETTINGS.evidenceDepth;
+
   return {
     ...settings,
     schedulingPreference,
+    evidenceDepth,
     enableCache: settings.enableCache ?? DEFAULT_SETTINGS.enableCache,
     maxConcurrency: schedule.maxConcurrency,
     failureStrategy: schedule.failureStrategy,
@@ -134,6 +144,7 @@ export function savePerformanceSettings(settings: PerformanceSettings): void {
       masterAnalysis: {
         ...runtimeSettings.masterAnalysis,
         schedulingPreference: normalized.schedulingPreference,
+        evidenceDepth: normalized.evidenceDepth,
         enableCache: normalized.enableCache,
       },
     });
@@ -149,6 +160,7 @@ function createPerformanceSettingsActions(): PanelMixin<{
   toggleSettings(): void;
   openSystemSettings(): void;
   refreshSettingsFromRuntime(): void;
+  setEvidenceDepth(depth: PerformanceSettings['evidenceDepth']): void;
   clearCache(): Promise<void>;
   formatSize(bytes: number): string;
 }> {
@@ -174,12 +186,29 @@ function createPerformanceSettingsActions(): PanelMixin<{
       this.settings = getPerformanceSettings();
     },
 
+    /** In-page quality/speed control without leaving the analysis workbench. */
+    setEvidenceDepth(depth: PerformanceSettings['evidenceDepth']) {
+      if (depth !== 'fast' && depth !== 'balanced' && depth !== 'deep') return;
+      if (this.settings.evidenceDepth === depth) return;
+      try {
+        savePerformanceSettings({
+          ...this.settings,
+          evidenceDepth: depth,
+        });
+        this.refreshSettingsFromRuntime();
+        const label = depth === 'fast' ? '快速' : depth === 'deep' ? '深入' : '均衡';
+        showToast(`证据深度已切换为「${label}」`, { type: 'success' });
+      } catch (error) {
+        showToast('切换失败: ' + (error as Error).message, { type: 'error' });
+      }
+    },
+
     /** Deep-link into system settings tool strategy → Master Analysis. */
     openSystemSettings() {
       this.showSettings = false;
       openSettings({
         sectionId: 'settings-section-tool-strategy',
-        focus: 'master-analysis',
+        focus: 'master-analysis-ai',
       });
     },
 

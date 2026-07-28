@@ -89,12 +89,17 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
       '分析缓存',
       '性能设置',
       '调度偏好',
+      '证据深度',
+      'evidenceDepth',
+      '快速',
+      '均衡',
+      '深入',
     ],
   },
   {
     id: 'master-analysis-ai',
     sectionId: 'settings-section-tool-strategy',
-    labels: ['AI 智能分析', '输出预算', '完整报告', '翻译报告', '性能设置'],
+    labels: ['AI 智能分析', '输出预算', '完整报告', '翻译报告', '性能设置', '证据深度'],
   },
   {
     id: 'playground-deep-chat',

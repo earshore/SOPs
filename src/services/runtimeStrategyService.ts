@@ -1,6 +1,8 @@
 import { StorageService, STORAGE_KEYS } from './storageService';
 
 export type MasterAnalysisSchedulingPreference = 'recommended' | 'reliability' | 'speed';
+/** Evidence pack depth: trade analysis completeness for speed/cost. */
+export type MasterAnalysisEvidenceDepth = 'fast' | 'balanced' | 'deep';
 
 export interface PpcSearchTermsThresholds {
   targetAcos: number;
@@ -28,6 +30,8 @@ export interface RuntimeStrategySettings {
   };
   masterAnalysis: {
     schedulingPreference: MasterAnalysisSchedulingPreference;
+    /** fast=更少证据更快；balanced=默认；deep=更高覆盖更慢 */
+    evidenceDepth: MasterAnalysisEvidenceDepth;
     enableCache: boolean;
     tokenBudgetsByTarget: Record<string, number>;
     fullReportMaxTokens: number;
@@ -116,6 +120,7 @@ export const DEFAULT_RUNTIME_STRATEGY_SETTINGS: RuntimeStrategySettings = {
   },
   masterAnalysis: {
     schedulingPreference: 'recommended',
+    evidenceDepth: 'balanced',
     enableCache: true,
     tokenBudgetsByTarget: {
       'title-keywords': 4096,
@@ -226,6 +231,13 @@ function getSchedulingPreference(
   return value === 'recommended' || value === 'reliability' || value === 'speed' ? value : fallback;
 }
 
+function getEvidenceDepth(
+  value: unknown,
+  fallback: MasterAnalysisEvidenceDepth
+): MasterAnalysisEvidenceDepth {
+  return value === 'fast' || value === 'balanced' || value === 'deep' ? value : fallback;
+}
+
 function normalizeTokenBudgets(value: unknown): Record<string, number> {
   const defaults = DEFAULT_RUNTIME_STRATEGY_SETTINGS.masterAnalysis.tokenBudgetsByTarget;
   const raw = isRecord(value) ? value : {};
@@ -291,6 +303,7 @@ function normalizeMasterAnalysisSettings(
       raw.schedulingPreference,
       defaults.masterAnalysis.schedulingPreference
     ),
+    evidenceDepth: getEvidenceDepth(raw.evidenceDepth, defaults.masterAnalysis.evidenceDepth),
     enableCache: getBoolean(raw.enableCache, defaults.masterAnalysis.enableCache),
     tokenBudgetsByTarget: normalizeTokenBudgets(raw.tokenBudgetsByTarget),
     fullReportMaxTokens: getNumber(

@@ -77,6 +77,7 @@ import {
   getRuntimeStrategySettings,
   normalizeRuntimeStrategySettings,
   saveRuntimeStrategySettings,
+  type MasterAnalysisEvidenceDepth,
   type RuntimeStrategySettings,
 } from '@/services/runtimeStrategyService';
 import {
@@ -503,11 +504,19 @@ interface SettingsPanelData {
   setRuntimeBoolean(path: string, event: Event): void;
   setRuntimeString(path: string, event: Event): void;
   setMasterAnalysisSchedulePreference(preference: SchedulingPreference): void;
+  setMasterAnalysisEvidenceDepth(depth: MasterAnalysisEvidenceDepth): void;
   masterAnalysisScheduleOptions: Array<{
     value: SchedulingPreference;
     label: string;
     hint: string;
   }>;
+  masterAnalysisEvidenceDepthOptions: Array<{
+    value: MasterAnalysisEvidenceDepth;
+    label: string;
+    hint: string;
+  }>;
+  masterAnalysisEvidenceDepthSelectedLabel: string;
+  masterAnalysisEvidenceDepthSelectedHint: string;
   masterAnalysisScheduleSelectedLabel: string;
   masterAnalysisScheduleSelectedHint: string;
   setDeveloperDiagnosticBoolean(
@@ -1796,6 +1805,45 @@ const settingsPanelBehavior: SettingsPanelPart = {
     );
   },
 
+  get masterAnalysisEvidenceDepthOptions(): Array<{
+    value: MasterAnalysisEvidenceDepth;
+    label: string;
+    hint: string;
+  }> {
+    return [
+      {
+        value: 'fast',
+        label: '快速',
+        hint: '更少评论/要点 · 更高并发 · 适合扫一轮',
+      },
+      {
+        value: 'balanced',
+        label: '均衡',
+        hint: '默认覆盖 · 速度与完整度折中',
+      },
+      {
+        value: 'deep',
+        label: '深入',
+        hint: '更多证据 · 更完整字段 · 更慢更贵',
+      },
+    ];
+  },
+
+  get masterAnalysisEvidenceDepthSelectedLabel(): string {
+    const depth = this.runtimeStrategy.settings.masterAnalysis.evidenceDepth || 'balanced';
+    return (
+      this.masterAnalysisEvidenceDepthOptions.find(item => item.value === depth)?.label || '均衡'
+    );
+  },
+
+  get masterAnalysisEvidenceDepthSelectedHint(): string {
+    const depth = this.runtimeStrategy.settings.masterAnalysis.evidenceDepth || 'balanced';
+    return (
+      this.masterAnalysisEvidenceDepthOptions.find(item => item.value === depth)?.hint ||
+      '默认覆盖 · 速度与完整度折中'
+    );
+  },
+
   get ppcThresholdItems(): RuntimeNumberFieldView[] {
     return PPC_THRESHOLD_FIELDS.map(field => ({
       ...field,
@@ -2897,6 +2945,13 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.schedulePreferenceMenuOpen = false;
     this.syncActiveRuntimePresetFromSettings();
     void this.persistRuntimeStrategySettings({ toast: '性能设置已保存' });
+  },
+
+  setMasterAnalysisEvidenceDepth(depth: MasterAnalysisEvidenceDepth): void {
+    if (depth !== 'fast' && depth !== 'balanced' && depth !== 'deep') return;
+    this.runtimeStrategy.settings.masterAnalysis.evidenceDepth = depth;
+    this.syncActiveRuntimePresetFromSettings();
+    void this.persistRuntimeStrategySettings({ toast: '证据深度已保存' });
   },
 
   setDeveloperDiagnosticBoolean(

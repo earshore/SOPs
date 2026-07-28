@@ -84,6 +84,9 @@ export const ANALYSIS_TASK_DEFINITIONS: Record<string, AnalysisTaskDefinition> =
 ### Task: Title Core Keywords Extraction (标题核心词根)
 Analyze the product title to extract absolute core keywords that determine traffic attributes.
 
+**STRICT JSON OUTPUT RULE** (do not ignore):
+You MUST return ONLY valid JSON. Nothing else. No markdown, no code blocks, no explanations, no extra text. The entire response must be parseable by JSON.parse().
+
 Instructions:
 1. Remove brand names (e.g., "Ycz", "YCZ") from analysis
 2. Remove pure modifier words (e.g., "premium", "best", "perfect")
@@ -343,6 +346,8 @@ Instructions:
 4. Identify seller jargon vs buyer natural language
 5. Suggest terms to add to Listing
 
+CRITICAL: Output buyer_terms as a flat array of strings only. Do not include objects, nested arrays, or mixed types in buyer_terms.
+
 Listing Content:
 Title: {{productTitle}}
 Bullets: {{featureBullets}}
@@ -447,11 +452,26 @@ export interface ReviewSamplingBucketMetadata {
   bodyCharLimit: number;
 }
 
+export interface EvidenceHygieneMetadata {
+  duplicatesRemoved: number;
+  emptyRemoved: number;
+  budgetApplied: boolean;
+  budgetLimit: number;
+  omittedByBudget: number;
+  includedAfterPack: number;
+}
+
 export interface ReviewSamplingMetadata {
   totalReviews: number;
   lowStar: ReviewSamplingBucketMetadata;
   highStar: ReviewSamplingBucketMetadata;
   general: ReviewSamplingBucketMetadata & { strategy: 'representative' };
+  /** Map–Reduce pack hygiene across multi-ASIN evidence (when available). */
+  mapReduceHygiene?: {
+    lowStar: EvidenceHygieneMetadata;
+    highStar: EvidenceHygieneMetadata;
+    general: EvidenceHygieneMetadata;
+  };
 }
 
 const REVIEW_LIMITS = {
@@ -624,24 +644,49 @@ function createReviewSamplingBucket(
   };
 }
 
+function emptyHygieneMetadata(): EvidenceHygieneMetadata {
+  return {
+    duplicatesRemoved: 0,
+    emptyRemoved: 0,
+    budgetApplied: false,
+    budgetLimit: 0,
+    omittedByBudget: 0,
+    includedAfterPack: 0,
+  };
+}
+
+/**
+ * Optional lazy import avoided: callers that know multi-ASIN packs can attach hygiene via
+ * `withMapReduceHygieneMetadata`. Keep oneshot metadata pure and synchronous here.
+ */
 export function getReviewSamplingMetadata(product: Product): ReviewSamplingMetadata {
   const reviews = Array.isArray(product.customer_reviews) ? product.customer_reviews : [];
   const lowStarReviews = reviews.filter(review => review.star_rating <= 3);
   const highStarReviews = reviews.filter(review => review.star_rating === 5);
+  const lowStarIncluded = takeUniqueReviews(lowStarReviews, REVIEW_LIMITS.lowStar.count).length;
+  const highStarIncluded = takeUniqueReviews(highStarReviews, REVIEW_LIMITS.highStar.count).length;
   const representativeReviews = selectRepresentativeReviews(reviews, REVIEW_LIMITS.general.count);
 
   return {
     totalReviews: reviews.length,
-    lowStar: createReviewSamplingBucket(
-      lowStarReviews.length,
-      REVIEW_LIMITS.lowStar.count,
-      REVIEW_LIMITS.lowStar.bodyChars
-    ),
-    highStar: createReviewSamplingBucket(
-      highStarReviews.length,
-      REVIEW_LIMITS.highStar.count,
-      REVIEW_LIMITS.highStar.bodyChars
-    ),
+    lowStar: {
+      ...createReviewSamplingBucket(
+        lowStarReviews.length,
+        REVIEW_LIMITS.lowStar.count,
+        REVIEW_LIMITS.lowStar.bodyChars
+      ),
+      includedReviews: lowStarIncluded,
+      omittedReviews: Math.max(0, lowStarReviews.length - lowStarIncluded),
+    },
+    highStar: {
+      ...createReviewSamplingBucket(
+        highStarReviews.length,
+        REVIEW_LIMITS.highStar.count,
+        REVIEW_LIMITS.highStar.bodyChars
+      ),
+      includedReviews: highStarIncluded,
+      omittedReviews: Math.max(0, highStarReviews.length - highStarIncluded),
+    },
     general: {
       ...createReviewSamplingBucket(
         reviews.length,
@@ -652,6 +697,21 @@ export function getReviewSamplingMetadata(product: Product): ReviewSamplingMetad
       omittedReviews: Math.max(0, reviews.length - representativeReviews.length),
       strategy: 'representative',
     },
+    mapReduceHygiene: {
+      lowStar: emptyHygieneMetadata(),
+      highStar: emptyHygieneMetadata(),
+      general: emptyHygieneMetadata(),
+    },
+  };
+}
+
+export function withMapReduceHygieneMetadata(
+  base: ReviewSamplingMetadata,
+  hygiene: NonNullable<ReviewSamplingMetadata['mapReduceHygiene']>
+): ReviewSamplingMetadata {
+  return {
+    ...base,
+    mapReduceHygiene: hygiene,
   };
 }
 
@@ -680,18 +740,26 @@ function formatReviewsForPrompt(
 }
 
 function createPromptData(product: Product): PromptData {
+  const lowStarSource = product.customer_reviews.filter(r => r.star_rating <= 3);
+  const highStarSource = product.customer_reviews.filter(r => r.star_rating === 5);
+  // Exact dedupe before oneshot caps (align with Map–Reduce evidence pack hygiene).
+  const lowStarUnique = takeUniqueReviews(lowStarSource, REVIEW_LIMITS.lowStar.count);
+  const highStarUnique = takeUniqueReviews(highStarSource, REVIEW_LIMITS.highStar.count);
+
   return {
     lowStarReviews: formatReviewsForPrompt(
-      product.customer_reviews.filter(r => r.star_rating <= 3),
+      lowStarUnique,
       REVIEW_LIMITS.lowStar.count,
       REVIEW_LIMITS.lowStar.bodyChars,
-      'No 1-3 star reviews available'
+      'No 1-3 star reviews available',
+      lowStarSource.length
     ),
     highStarReviews: formatReviewsForPrompt(
-      product.customer_reviews.filter(r => r.star_rating === 5),
+      highStarUnique,
       REVIEW_LIMITS.highStar.count,
       REVIEW_LIMITS.highStar.bodyChars,
-      'No 5 star reviews available'
+      'No 5 star reviews available',
+      highStarSource.length
     ),
     allReviews: formatReviewsForPrompt(
       selectRepresentativeReviews(product.customer_reviews, REVIEW_LIMITS.general.count),

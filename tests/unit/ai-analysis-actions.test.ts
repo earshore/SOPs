@@ -25,6 +25,7 @@ import {
   copyJson,
   copyMarkdown,
   downloadJson,
+  rerunAnalysisTargetsAction,
   runAnalysisAction
 } from '../../src/modules/app_center/views/master_analysis/ai_analysis/components/actions';
 import { AlpineContext } from '../../src/modules/app_center/views/master_analysis/ai_analysis/types';
@@ -66,11 +67,13 @@ vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/utils/da
   getProductsByAsins: vi.fn((_scrapedData, _asins) => [
     {
       asin: 'B001',
-      title: 'Test Product',
-      bulletPoints: ['Feature 1'],
-      reviews: []
-    }
-  ])
+      productTitle: 'Test Product',
+      feature_bullets: ['Feature 1'],
+      customer_reviews: [],
+      scrape_status: 'success',
+      metadata: {},
+    },
+  ]),
 }));
 
 vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService', () => ({
@@ -606,9 +609,11 @@ function createRunAnalysisActionTestState(): { mockContext: AlpineContext; mockP
   const mockProducts = [
     {
       asin: 'B001',
-      title: 'Test Product',
-      bulletPoints: ['Feature 1'],
-      reviews: []
+      productTitle: 'Test Product',
+      feature_bullets: ['Feature 1'],
+      customer_reviews: [],
+      scrape_status: 'success',
+      metadata: {},
     }
   ];
 
@@ -658,11 +663,11 @@ describe('actions - 执行分析', () => {
     });
     expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({
       progress: 100,
-      currentStep: '分析完成'
+      currentStep: '分析完成：成功 1/1'
     });
     expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({ isAnalyzing: false });
     expect(mockContext.progress).toBe(100);
-    expect(mockContext.currentStep).toBe('分析完成');
+    expect(mockContext.currentStep).toBe('分析完成：成功 1/1');
   });
 
   it('应该使用调度计划执行分析', async () => {
@@ -700,5 +705,24 @@ describe('actions - 执行分析', () => {
         onTaskComplete: undefined
       })
     );
+  });
+
+  it('在没有现有报告时只重跑去重后的告警维度并恢复选择', async () => {
+    const { mockContext, mockProducts } = createRunAnalysisActionTestState();
+    mockContext.selectedTargets = ['title-keywords'];
+
+    await rerunAnalysisTargetsAction(mockContext, mockProducts, [
+      'selling-points',
+      'selling-points',
+    ]);
+
+    expect(mockRunParallelAIAnalysis).toHaveBeenCalledWith(
+      ['selling-points'],
+      expect.objectContaining({ asin: 'B001' }),
+      expect.any(Function),
+      expect.any(String),
+      expect.any(Object)
+    );
+    expect(mockContext.selectedTargets).toEqual(['title-keywords']);
   });
 });

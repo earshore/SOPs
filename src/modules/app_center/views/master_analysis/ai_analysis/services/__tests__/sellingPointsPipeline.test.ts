@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Product } from '../../config/sampleData';
 import {
+  buildSellingPointsSourcePack,
   getSellingPointsSourceSlices,
   normalizeSellingPointsResult,
   shouldUseSellingPointsMapReduce,
@@ -19,7 +20,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
 }
 
 describe('sellingPointsPipeline helpers', () => {
-  it('uses map-reduce for multi-ASIN source_products without dropping bullets', () => {
+  it('keeps multi-ASIN slices without forcing map-reduce for moderate bullet counts', () => {
     const product = makeProduct({
       asin: 'B001, B002',
       feature_bullets: Array.from({ length: 10 }, (_, i) => `bullet-${i}`),
@@ -40,6 +41,7 @@ describe('sellingPointsPipeline helpers', () => {
       },
     });
 
+    // 10 bullets slightly above default threshold => map-reduce; slices preserved.
     expect(shouldUseSellingPointsMapReduce(product)).toBe(true);
     const slices = getSellingPointsSourceSlices(product);
     expect(slices).toHaveLength(2);
@@ -54,11 +56,60 @@ describe('sellingPointsPipeline helpers', () => {
     expect(shouldUseSellingPointsMapReduce(product)).toBe(false);
   });
 
+  it('dedupes identical bullets per ASIN while keeping multi-ASIN slices', () => {
+    const product = makeProduct({
+      asin: 'B001, B002',
+      feature_bullets: ['a', 'a', 'b'],
+      metadata: {
+        merged: true,
+        source_products: [
+          {
+            asin: 'B001',
+            productTitle: 'A',
+            feature_bullets: ['Long lasting scent', 'long lasting scent', '  ', 'Gift ready'],
+          },
+          {
+            asin: 'B002',
+            productTitle: 'B',
+            feature_bullets: ['Long lasting scent', 'Travel size'],
+          },
+        ],
+      },
+    });
+
+    const pack = buildSellingPointsSourcePack(product);
+    expect(pack.slices).toHaveLength(2);
+    expect(pack.slices[0]?.feature_bullets).toEqual(['Long lasting scent', 'Gift ready']);
+    expect(pack.slices[1]?.feature_bullets).toEqual(['Long lasting scent', 'Travel size']);
+    expect(pack.rawBulletCount).toBe(6);
+    expect(pack.bulletCount).toBe(4);
+    expect(pack.dedupe.duplicatesRemoved).toBe(1);
+    expect(pack.dedupe.emptyRemoved).toBe(1);
+    expect(getSellingPointsSourceSlices(product)).toHaveLength(2);
+  });
+
   it('normalizes missing strategy objects so partial map output is renderable', () => {
     const normalized = normalizeSellingPointsResult({
       bullet_analysis: [{ bullet_index: 1, original_text_summary: 'x' }],
     });
     expect(normalized.bullet_analysis).toHaveLength(1);
+    expect(normalized.overall_strategy).toMatchObject({
+      primary_differentiation: '',
+      emotional_hooks: [],
+    });
+    expect(normalized.function_scene_matrix).toMatchObject({
+      functions: [],
+      scenes: [],
+      pain_points: [],
+    });
+  });
+
+  it('normalizes non-record strategy fields to their safe defaults', () => {
+    const normalized = normalizeSellingPointsResult({
+      overall_strategy: [],
+      function_scene_matrix: null,
+    });
+
     expect(normalized.overall_strategy).toMatchObject({
       primary_differentiation: '',
       emotional_hooks: [],

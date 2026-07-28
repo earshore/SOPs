@@ -140,7 +140,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-teal-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-teal-400) 22%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-violet-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-violet-400) 22%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-violet-50\/50:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-violet-400) 8%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-white:not(.twb-keep):hover { background-color: var(--surface-card-hover); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-white\/50:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--surface-card) 50%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-yellow-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-yellow-400) 22%, transparent); }
 

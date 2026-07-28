@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { Product, Review } from '../../config/sampleData';
 import {
+  buildReviewSourcePack,
   countReviewsForTarget,
+  estimateReviewMapCalls,
   getReviewSourceSlices,
+  isGeneralReviewEvidenceTargetId,
   isReviewEvidenceTargetId,
   normalizeBuyerProfileResult,
   normalizeFatalFlawsResult,
@@ -45,9 +48,11 @@ describe('reviewEvidencePipeline helpers', () => {
     expect(isReviewEvidenceTargetId('vocab-gap')).toBe(true);
     expect(isReviewEvidenceTargetId('promise-reality')).toBe(true);
     expect(isReviewEvidenceTargetId('selling-points')).toBe(false);
+    expect(isGeneralReviewEvidenceTargetId('hesitation-points')).toBe(true);
+    expect(isGeneralReviewEvidenceTargetId('fatal-flaws')).toBe(false);
   });
 
-  it('filters low/high star reviews and uses map-reduce for multi-ASIN sources', () => {
+  it('filters low/high star reviews; multi-ASIN alone no longer forces map-reduce', () => {
     const product = makeProduct({
       asin: 'B001, B002',
       metadata: {
@@ -71,11 +76,12 @@ describe('reviewEvidencePipeline helpers', () => {
     });
 
     expect(countReviewsForTarget(product, 'fatal-flaws')).toBe(3);
-    expect(shouldUseReviewMapReduce(product, 'fatal-flaws')).toBe(true);
+    // volume-gated: 3 low-star reviews stay oneshot for better TTFT
+    expect(shouldUseReviewMapReduce(product, 'fatal-flaws')).toBe(false);
     expect(countReviewsForTarget(product, 'wow-moments')).toBe(2);
     // general targets use all stars
     expect(countReviewsForTarget(product, 'hesitation-points')).toBe(5);
-    expect(shouldUseReviewMapReduce(product, 'buyer-profile')).toBe(true);
+    expect(shouldUseReviewMapReduce(product, 'buyer-profile')).toBe(false);
   });
 
   it('keeps oneshot for small single-ASIN review sets', () => {
@@ -92,6 +98,77 @@ describe('reviewEvidencePipeline helpers', () => {
     });
     expect(shouldUseReviewMapReduce(product, 'vocab-gap')).toBe(true);
     expect(getReviewSourceSlices(product, 'vocab-gap')[0]?.customer_reviews).toHaveLength(45);
+  });
+
+  it('dedupes exact reviews per ASIN without dropping ASIN coverage', () => {
+    const product = makeProduct({
+      asin: 'B001, B002',
+      metadata: {
+        source_products: [
+          {
+            asin: 'B001',
+            productTitle: 'A',
+            customer_reviews: [
+              makeReview(1, 'broke after a week'),
+              makeReview(1, 'broke after a week'),
+              makeReview(2, '   '),
+              makeReview(1, 'leaks from nozzle'),
+            ],
+          },
+          {
+            asin: 'B002',
+            productTitle: 'B',
+            customer_reviews: [makeReview(1, 'broke after a week'), makeReview(3, 'smell bad')],
+          },
+        ],
+      },
+    });
+
+    const pack = buildReviewSourcePack(product, 'fatal-flaws');
+    expect(pack.slices).toHaveLength(2);
+    expect(pack.slices[0]?.customer_reviews).toHaveLength(2);
+    expect(pack.slices[1]?.customer_reviews).toHaveLength(2);
+    // Same text on different ASINs is kept so competitive coverage stays honest.
+    expect(pack.rawReviewCount).toBe(6);
+    expect(pack.reviewCount).toBe(4);
+    expect(pack.dedupe.duplicatesRemoved).toBe(1);
+    expect(pack.dedupe.emptyRemoved).toBe(1);
+    expect(pack.budget.applied).toBe(false);
+    expect(countReviewsForTarget(product, 'fatal-flaws')).toBe(4);
+  });
+
+  it('applies fair review budget on oversized multi-ASIN packs', () => {
+    const product = makeProduct({
+      asin: 'B001, B002, B003',
+      metadata: {
+        source_products: [
+          {
+            asin: 'B001',
+            productTitle: 'A',
+            customer_reviews: Array.from({ length: 50 }, (_, i) => makeReview(1, `a-${i}`)),
+          },
+          {
+            asin: 'B002',
+            productTitle: 'B',
+            customer_reviews: Array.from({ length: 50 }, (_, i) => makeReview(2, `b-${i}`)),
+          },
+          {
+            asin: 'B003',
+            productTitle: 'C',
+            customer_reviews: Array.from({ length: 50 }, (_, i) => makeReview(3, `c-${i}`)),
+          },
+        ],
+      },
+    });
+
+    const pack = buildReviewSourcePack(product, 'fatal-flaws');
+    expect(pack.budget.applied).toBe(true);
+    // balanced default budget for star buckets = 96
+    expect(pack.reviewCount).toBeLessThanOrEqual(160);
+    expect(pack.reviewCount).toBeGreaterThan(0);
+    expect(pack.slices).toHaveLength(3);
+    expect(pack.slices.every(slice => slice.customer_reviews.length >= 1)).toBe(true);
+    expect(estimateReviewMapCalls(product, 'fatal-flaws')).toBeGreaterThan(0);
   });
 
   it('normalizes partial map aggregates for each review target', () => {

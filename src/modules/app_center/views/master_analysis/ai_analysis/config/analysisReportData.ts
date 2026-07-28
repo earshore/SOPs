@@ -167,7 +167,16 @@ export interface AnalysisReportMetadata {
     successCount: number;
     failedCount: number;
     failedTargetIds: string[];
+    /** Dimensions served from cache this run. */
+    cachedCount?: number;
+    /** Wall-clock duration for this analysis run. */
+    elapsedMs?: number;
   };
+  /** Quality signals such as Reduce fallback / sparse synthesis fields. */
+  qualityWarnings?: {
+    targetId: string;
+    notes: string[];
+  }[];
   reviewSampling?: {
     totalReviews: number;
     lowStar: {
@@ -188,6 +197,32 @@ export interface AnalysisReportMetadata {
       omittedReviews: number;
       bodyCharLimit: number;
       strategy: 'representative';
+    };
+    mapReduceHygiene?: {
+      lowStar: {
+        duplicatesRemoved: number;
+        emptyRemoved: number;
+        budgetApplied: boolean;
+        budgetLimit: number;
+        omittedByBudget: number;
+        includedAfterPack: number;
+      };
+      highStar: {
+        duplicatesRemoved: number;
+        emptyRemoved: number;
+        budgetApplied: boolean;
+        budgetLimit: number;
+        omittedByBudget: number;
+        includedAfterPack: number;
+      };
+      general: {
+        duplicatesRemoved: number;
+        emptyRemoved: number;
+        budgetApplied: boolean;
+        budgetLimit: number;
+        omittedByBudget: number;
+        includedAfterPack: number;
+      };
     };
   }; // Review 采样透明度
   sourceHistoryId?: string | number | null; // 源采集历史记录 ID

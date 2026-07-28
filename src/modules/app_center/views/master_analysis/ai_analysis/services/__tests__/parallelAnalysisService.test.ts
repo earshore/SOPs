@@ -15,6 +15,7 @@ vi.mock('@/services/llmService', () => ({
 import {
   generateCacheKey,
   getCachedResult,
+  humanizeAnalysisPhaseMessage,
   runParallelAIAnalysis,
   setCachedResult,
 } from '../parallelAnalysisService';
@@ -367,20 +368,18 @@ describe('运行时调度失败策略', () => {
     const product = createProduct();
     const onProgress = vi.fn();
     mockLlmConfig();
-    llmMocks.callLLM
-      .mockRejectedValueOnce(new Error('title failed'))
-      .mockResolvedValueOnce(
-        JSON.stringify({
-          bullet_analysis: [],
-          overall_strategy: {
-            primary_differentiation: 'x',
-            target_positioning: 'y',
-            emotional_hooks: [],
-            missing_elements: [],
-          },
-          function_scene_matrix: { functions: [], scenes: [], pain_points: [] },
-        })
-      );
+    llmMocks.callLLM.mockRejectedValueOnce(new Error('title failed')).mockResolvedValueOnce(
+      JSON.stringify({
+        bullet_analysis: [],
+        overall_strategy: {
+          primary_differentiation: 'x',
+          target_positioning: 'y',
+          emotional_hooks: [],
+          missing_elements: [],
+        },
+        function_scene_matrix: { functions: [], scenes: [], pain_points: [] },
+      })
+    );
 
     const report = await runParallelAIAnalysis(
       ['title-keywords', 'selling-points'],
@@ -396,19 +395,43 @@ describe('运行时调度失败策略', () => {
       }
     );
 
-    expect(report._metadata?.runSummary).toEqual({
+    expect(report._metadata?.runSummary).toMatchObject({
       successCount: 1,
       failedCount: 1,
       failedTargetIds: ['title-keywords'],
+      cachedCount: 0,
     });
-    expect(onProgress).toHaveBeenCalledWith(
-      100,
-      expect.stringContaining('失败 1')
+    expect(typeof report._metadata?.runSummary?.elapsedMs).toBe('number');
+    expect(onProgress).toHaveBeenCalledWith(100, expect.stringContaining('失败 1'));
+    expect(onProgress).toHaveBeenCalledWith(100, expect.stringContaining('title-keywords'));
+  });
+});
+
+describe('humanizeAnalysisPhaseMessage', () => {
+  it('converts engineering phase labels into user-facing progress copy', () => {
+    expect(humanizeAnalysisPhaseMessage('shared-general Map 2/5 · B00TEST')).toBe(
+      '评论证据抽取 2/5 · B00TEST'
     );
-    expect(onProgress).toHaveBeenCalledWith(
-      100,
-      expect.stringContaining('title-keywords')
+    expect(humanizeAnalysisPhaseMessage('fatal-flaws Map 1/3 · 并发2')).toBe(
+      '致命劝退点 · 证据抽取 1/3'
     );
+    expect(humanizeAnalysisPhaseMessage('buyer-profile Reduce · 合并证据中…')).toBe(
+      '用户画像 · 合并洞察中'
+    );
+  });
+
+  it('keeps phase fallbacks and suppresses implementation-only map details', () => {
+    expect(humanizeAnalysisPhaseMessage('shared-general Map 0/4 · 并发3 · balanced')).toBe(
+      '评论证据抽取 0/4'
+    );
+    expect(humanizeAnalysisPhaseMessage('title-keywords Map 1/2 · #1')).toBe(
+      '标题核心词 · 证据抽取 1/2'
+    );
+    expect(humanizeAnalysisPhaseMessage('卖点 Map 1/2 · B001')).toBe(
+      '卖点结构 · 证据抽取 1/2 · B001'
+    );
+    expect(humanizeAnalysisPhaseMessage('')).toBe('分析进行中…');
+    expect(humanizeAnalysisPhaseMessage('自定义进度')).toBe('自定义进度');
   });
 });
 

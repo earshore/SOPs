@@ -866,18 +866,20 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     }
 
     const subItems: Record<string, SubItemSelection> = {};
-    Object.keys(dimensionData).forEach(key => {
-      const value = (dimensionData as Record<string, unknown>)[key];
-      // 如果是数组，初始化为对象结构以支持具体项选择
-      if (getContentItemIndexes(value).length > 0) {
-        subItems[key] = {
-          enabled: true,
-          items: {}, // 空对象表示全选
-        };
-      } else {
-        subItems[key] = true; // 非数组类型保持简单布尔值
-      }
-    });
+    Object.keys(dimensionData)
+      .filter(key => key !== '_pipeline' && key !== 'pipeline' && !key.startsWith('_'))
+      .forEach(key => {
+        const value = (dimensionData as Record<string, unknown>)[key];
+        // 如果是数组，初始化为对象结构以支持具体项选择
+        if (getContentItemIndexes(value).length > 0) {
+          subItems[key] = {
+            enabled: true,
+            items: {}, // 空对象表示全选
+          };
+        } else {
+          subItems[key] = true; // 非数组类型保持简单布尔值
+        }
+      });
 
     this.profile.selectedReportItems[dimensionId] = {
       enabled: true,

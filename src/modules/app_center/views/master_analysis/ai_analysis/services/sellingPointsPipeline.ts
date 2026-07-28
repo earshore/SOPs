@@ -12,15 +12,47 @@ import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import type { ResolvedToolLlmConfig } from '@/services/llmToolBridge';
 import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
 import { sanitizePromptInput } from '@/common/utils/promptSanitizer';
+import { isObject } from '@/common/utils/typeGuards';
 import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { parseAnalysisResponse } from './analysisResultParser';
-import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
+import {
+  getMasterAnalysisReduceMaxTokens,
+  getMasterAnalysisTargetMaxTokens,
+} from '../../services/llmOutputBudget';
+import {
+  getRuntimeMasterAnalysisOptions,
+  type MasterAnalysisEvidenceDepth,
+} from '@/services/runtimeStrategyService';
+import {
+  applyFairSliceBudget,
+  compactForReduce,
+  dedupeBullets,
+  mapWithConcurrency,
+  mergeDedupeStats,
+  type EvidenceBudgetStats,
+  type EvidenceDedupeStats,
+} from '../utils/evidencePack';
 import { estimateTokenCount } from '../utils/tokenCounter';
 
 const MAP_CHUNK_BULLETS = 8;
 /** Prefer Map–Reduce when many bullets or multi-ASIN source groups. */
 const MAP_REDUCE_BULLET_THRESHOLD = 8;
+/** Hard cap after hygiene (fair per-ASIN quota). */
+const SELLING_POINTS_MAP_BUDGET_BY_DEPTH: Record<MasterAnalysisEvidenceDepth, number> = {
+  fast: 24,
+  balanced: 64,
+  deep: 96,
+};
+const SELLING_POINTS_MAP_CONCURRENCY_BY_DEPTH: Record<MasterAnalysisEvidenceDepth, number> = {
+  fast: 4,
+  balanced: 3,
+  deep: 2,
+};
+
+function getEvidenceDepth(): MasterAnalysisEvidenceDepth {
+  return getRuntimeMasterAnalysisOptions().evidenceDepth || 'balanced';
+}
 
 type SourceProductSlice = {
   asin: string;
@@ -33,7 +65,13 @@ export type SellingPointsPipelineStats = {
   mapCalls: number;
   reduceCalls: number;
   bulletCount: number;
+  /** Bullets after empty/exact dedupe (map path). */
+  rawBulletCount?: number;
+  dedupe?: EvidenceDedupeStats;
+  budget?: EvidenceBudgetStats;
   mapFailures: number;
+  reduceFallback?: boolean;
+  qualityNotes?: string[];
 };
 
 export type SellingPointsPipelineResult = {
@@ -70,29 +108,89 @@ function isSourceProductSlice(value: unknown): value is SourceProductSlice {
   );
 }
 
-export function getSellingPointsSourceSlices(product: Product): SourceProductSlice[] {
+export type SellingPointsSourcePack = {
+  slices: SourceProductSlice[];
+  rawBulletCount: number;
+  bulletCount: number;
+  dedupe: EvidenceDedupeStats;
+  budget: EvidenceBudgetStats;
+};
+
+/** Per-ASIN bullet slices: empty/exact dedupe → fair budget if over cap. */
+export function buildSellingPointsSourcePack(product: Product): SellingPointsSourcePack {
   const raw = product.metadata?.source_products;
-  if (Array.isArray(raw) && raw.length > 0 && raw.every(isSourceProductSlice)) {
-    return raw.filter(slice => slice.feature_bullets.length > 0);
+  const baseSlices: SourceProductSlice[] =
+    Array.isArray(raw) && raw.length > 0 && raw.every(isSourceProductSlice)
+      ? raw.map(slice => ({
+          asin: slice.asin,
+          productTitle: slice.productTitle,
+          feature_bullets: [...slice.feature_bullets],
+        }))
+      : product.feature_bullets.length === 0
+        ? []
+        : [
+            {
+              asin: product.asin,
+              productTitle: product.productTitle,
+              feature_bullets: [...product.feature_bullets],
+            },
+          ];
+
+  const statsParts: EvidenceDedupeStats[] = [];
+  const hygienic: Array<SourceProductSlice & { items: string[] }> = [];
+  let rawBulletCount = 0;
+
+  for (const slice of baseSlices) {
+    const sourceBullets = Array.isArray(slice.feature_bullets) ? slice.feature_bullets : [];
+    rawBulletCount += sourceBullets.length;
+    const { bullets, stats } = dedupeBullets(sourceBullets);
+    statsParts.push(stats);
+    if (bullets.length === 0) continue;
+    hygienic.push({ ...slice, feature_bullets: bullets, items: bullets });
   }
 
-  if (product.feature_bullets.length === 0) {
-    return [];
-  }
+  const dedupe = mergeDedupeStats(statsParts);
+  const budgeted = applyFairSliceBudget<string, SourceProductSlice & { items: string[] }>(
+    hygienic,
+    SELLING_POINTS_MAP_BUDGET_BY_DEPTH[getEvidenceDepth()],
+    (slice, items) => ({
+      ...slice,
+      feature_bullets: items,
+      items,
+    })
+  );
 
-  return [
-    {
-      asin: product.asin,
-      productTitle: product.productTitle,
-      feature_bullets: [...product.feature_bullets],
-    },
-  ];
+  const slices: SourceProductSlice[] = budgeted.slices.map(slice => ({
+    asin: slice.asin,
+    productTitle: slice.productTitle,
+    feature_bullets: slice.feature_bullets,
+  }));
+
+  return {
+    slices,
+    rawBulletCount,
+    bulletCount: budgeted.stats.afterCount,
+    dedupe,
+    budget: budgeted.stats,
+  };
+}
+
+export function getSellingPointsSourceSlices(product: Product): SourceProductSlice[] {
+  return buildSellingPointsSourcePack(product).slices;
 }
 
 export function shouldUseSellingPointsMapReduce(product: Product): boolean {
-  const slices = getSellingPointsSourceSlices(product);
-  if (slices.length > 1) return true;
-  return product.feature_bullets.length > MAP_REDUCE_BULLET_THRESHOLD;
+  const pack = buildSellingPointsSourcePack(product);
+  if (pack.bulletCount === 0) return false;
+  const depth = getEvidenceDepth();
+  const threshold =
+    depth === 'fast'
+      ? MAP_REDUCE_BULLET_THRESHOLD + 6
+      : depth === 'deep'
+        ? Math.max(4, MAP_REDUCE_BULLET_THRESHOLD - 2)
+        : MAP_REDUCE_BULLET_THRESHOLD;
+  // Multi-ASIN alone no longer forces map-reduce when bullet volume is small.
+  return pack.bulletCount > threshold;
 }
 
 function chunkBullets(bullets: string[], size: number): string[][] {
@@ -162,7 +260,15 @@ function compactBulletsForReduce(bullets: unknown[]): unknown[] {
 }
 
 function buildReducePrompt(product: Product, language: string, bulletAnalysis: unknown[]): string {
-  const compact = JSON.stringify(compactBulletsForReduce(bulletAnalysis), null, 2);
+  const compact = JSON.stringify(
+    compactForReduce(compactBulletsForReduce(bulletAnalysis), {
+      maxStringChars: 140,
+      maxArrayItems: 40,
+      maxObjectKeys: 16,
+    }),
+    null,
+    2
+  );
   return `
 You are a Data Extraction Engine for Amazon listing strategy synthesis.
 Output ONLY valid JSON (no markdown). Language for analysis fields: **${language}**.
@@ -220,18 +326,12 @@ export function normalizeSellingPointsResult(
   partial: Record<string, unknown>
 ): Record<string, unknown> {
   const bullet_analysis = Array.isArray(partial.bullet_analysis) ? partial.bullet_analysis : [];
-  const overall_strategy =
-    partial.overall_strategy &&
-    typeof partial.overall_strategy === 'object' &&
-    !Array.isArray(partial.overall_strategy)
-      ? (partial.overall_strategy as Record<string, unknown>)
-      : emptyOverallStrategy();
-  const function_scene_matrix =
-    partial.function_scene_matrix &&
-    typeof partial.function_scene_matrix === 'object' &&
-    !Array.isArray(partial.function_scene_matrix)
-      ? (partial.function_scene_matrix as Record<string, unknown>)
-      : emptyFunctionSceneMatrix();
+  const overall_strategy = isObject(partial.overall_strategy)
+    ? partial.overall_strategy
+    : emptyOverallStrategy();
+  const function_scene_matrix = isObject(partial.function_scene_matrix)
+    ? partial.function_scene_matrix
+    : emptyFunctionSceneMatrix();
 
   return {
     ...partial,
@@ -333,6 +433,124 @@ function extractBulletAnalysis(data: Record<string, unknown>): unknown[] {
   return Array.isArray(data.bullet_analysis) ? data.bullet_analysis : [];
 }
 
+type SellingPointsMapUnit = {
+  slice: SourceProductSlice;
+  bullets: string[];
+  offset: number;
+};
+
+type SellingPointsMapPhaseState = {
+  promptChars: number;
+  estimatedInputTokens: number;
+  streamChunks: number;
+  streamedChars: number;
+  firstResponseMs?: number;
+  mapFailures: number;
+  completedMaps: number;
+};
+
+type SellingPointsMapPhaseResult = Omit<SellingPointsMapPhaseState, 'completedMaps'> & {
+  mapUnits: SellingPointsMapUnit[];
+  mappedBullets: unknown[];
+};
+
+function buildSellingPointsMapUnits(slices: SourceProductSlice[]): SellingPointsMapUnit[] {
+  const mapUnits: SellingPointsMapUnit[] = [];
+  let offset = 0;
+
+  for (const slice of slices) {
+    for (const bullets of chunkBullets(slice.feature_bullets, MAP_CHUNK_BULLETS)) {
+      mapUnits.push({
+        slice: { ...slice, feature_bullets: bullets },
+        bullets,
+        offset,
+      });
+      offset += bullets.length;
+    }
+  }
+
+  return mapUnits;
+}
+
+function getSellingPointsMapMaxTokens(mapUnits: SellingPointsMapUnit[]): number {
+  const firstMapBullets = mapUnits[0]?.bullets.length ?? MAP_CHUNK_BULLETS;
+  return Math.min(
+    getMasterAnalysisTargetMaxTokens('selling-points'),
+    Math.max(2048, 512 + firstMapBullets * 400)
+  );
+}
+
+async function runSellingPointsMapUnit(
+  options: CallOptions,
+  unit: SellingPointsMapUnit,
+  totalUnits: number,
+  mapMaxTokens: number,
+  state: SellingPointsMapPhaseState
+): Promise<unknown[]> {
+  const prompt = buildMapPrompt(unit.slice, options.language, unit.offset);
+  state.promptChars += prompt.length;
+  state.estimatedInputTokens += estimateTokenCount(prompt);
+
+  try {
+    const call = await callAnalysisJson({
+      prompt,
+      config: options.config,
+      schemaName: 'analysis_selling-points_map',
+      maxTokens: mapMaxTokens,
+      retryBudget: options.retryBudget,
+      onFirstResponse: metrics => {
+        if (state.firstResponseMs === undefined) {
+          state.firstResponseMs = metrics.elapsedMs;
+          options.onFirstResponse?.(metrics);
+        }
+      },
+      onStreamUpdate: update => {
+        state.streamChunks += update.chunkCount;
+        state.streamedChars += update.content.length;
+        options.onStreamUpdate?.(update);
+      },
+    });
+    const parsed = parseAnalysisResponse('selling-points', call.text, { phase: 'map' }).data;
+    return extractBulletAnalysis(parsed);
+  } catch (error) {
+    state.mapFailures += 1;
+    console.error('[selling-points Map] shard failed:', error);
+    return [];
+  } finally {
+    state.completedMaps += 1;
+    options.onPhase?.(`卖点 Map ${state.completedMaps}/${totalUnits} · ${unit.slice.asin}`);
+  }
+}
+
+async function runSellingPointsMapPhase(
+  options: CallOptions,
+  pack: SellingPointsSourcePack
+): Promise<SellingPointsMapPhaseResult> {
+  const mapUnits = buildSellingPointsMapUnits(pack.slices);
+  const mapMaxTokens = getSellingPointsMapMaxTokens(mapUnits);
+  const state: SellingPointsMapPhaseState = {
+    promptChars: 0,
+    estimatedInputTokens: 0,
+    streamChunks: 0,
+    streamedChars: 0,
+    mapFailures: 0,
+    completedMaps: 0,
+  };
+  const mapConcurrency = SELLING_POINTS_MAP_CONCURRENCY_BY_DEPTH[getEvidenceDepth()];
+  options.onPhase?.(
+    `卖点 Map 0/${mapUnits.length} · 并发${Math.min(mapConcurrency, Math.max(1, mapUnits.length))} · ${getEvidenceDepth()}`
+  );
+  const shards = await mapWithConcurrency(mapUnits, mapConcurrency, unit =>
+    runSellingPointsMapUnit(options, unit, mapUnits.length, mapMaxTokens, state)
+  );
+
+  return {
+    ...state,
+    mapUnits,
+    mappedBullets: shards.flat(),
+  };
+}
+
 /**
  * One-shot full selling-points (small listings).
  * Uses full generateAnalysisPrompt + normalized defaults for missing strategy fields.
@@ -368,88 +586,29 @@ async function runOneshot(options: CallOptions): Promise<SellingPointsPipelineRe
 }
 
 async function runMapReduce(options: CallOptions): Promise<SellingPointsPipelineResult> {
-  const slices = getSellingPointsSourceSlices(options.product);
-  const mapUnits: Array<{ slice: SourceProductSlice; bullets: string[]; offset: number }> = [];
-  let offset = 0;
-  for (const slice of slices) {
-    const chunks = chunkBullets(slice.feature_bullets, MAP_CHUNK_BULLETS);
-    for (const bullets of chunks) {
-      mapUnits.push({
-        slice: { ...slice, feature_bullets: bullets },
-        bullets,
-        offset,
-      });
-      offset += bullets.length;
-    }
-  }
-
-  const firstMapBullets = mapUnits[0]?.bullets.length ?? MAP_CHUNK_BULLETS;
-  const mapMaxTokens = Math.min(
-    getMasterAnalysisTargetMaxTokens('selling-points'),
-    Math.max(2048, 512 + firstMapBullets * 400)
-  );
-
-  let promptChars = 0;
-  let estimatedInputTokens = 0;
-  let streamChunks = 0;
-  let streamedChars = 0;
-  let firstResponseMs: number | undefined;
-  let mapFailures = 0;
-  const mappedBullets: unknown[] = [];
-
-  // Sequential maps keep gateway rate limits predictable; still cheaper than one giant fail.
-  let mapIndex = 0;
-  for (const unit of mapUnits) {
-    mapIndex += 1;
-    options.onPhase?.(
-      `卖点 Map ${mapIndex}/${mapUnits.length} · ${unit.slice.asin}`
-    );
-    const prompt = buildMapPrompt(unit.slice, options.language, unit.offset);
-    promptChars += prompt.length;
-    estimatedInputTokens += estimateTokenCount(prompt);
-    try {
-      const call = await callAnalysisJson({
-        prompt,
-        config: options.config,
-        schemaName: 'analysis_selling-points_map',
-        maxTokens: mapMaxTokens,
-        retryBudget: options.retryBudget,
-        onFirstResponse: metrics => {
-          if (firstResponseMs === undefined) {
-            firstResponseMs = metrics.elapsedMs;
-            options.onFirstResponse?.(metrics);
-          }
-        },
-        onStreamUpdate: update => {
-          streamChunks += update.chunkCount;
-          streamedChars += update.content.length;
-          options.onStreamUpdate?.(update);
-        },
-      });
-      const parsed = parseAnalysisResponse('selling-points', call.text, {
-        phase: 'map',
-      }).data;
-      mappedBullets.push(...extractBulletAnalysis(parsed));
-    } catch (error) {
-      mapFailures += 1;
-      console.error('[selling-points Map] shard failed:', error);
-    }
-  }
+  const pack = buildSellingPointsSourcePack(options.product);
+  const mapPhase = await runSellingPointsMapPhase(options, pack);
+  const { mapUnits, mappedBullets } = mapPhase;
+  let promptChars = mapPhase.promptChars;
+  let estimatedInputTokens = mapPhase.estimatedInputTokens;
+  let streamChunks = mapPhase.streamChunks;
+  let streamedChars = mapPhase.streamedChars;
+  const firstResponseMs = mapPhase.firstResponseMs;
 
   if (mappedBullets.length === 0) {
     throw new Error(
-      `selling-points Map produced no bullet_analysis (mapFailures=${mapFailures}/${mapUnits.length})`
+      `selling-points Map produced no bullet_analysis (mapFailures=${mapPhase.mapFailures}/${mapUnits.length})`
     );
   }
 
   let overall_strategy = emptyOverallStrategy();
   let function_scene_matrix = emptyFunctionSceneMatrix();
   let reduceCalls = 0;
+  let reduceFallback = false;
+  const qualityNotes: string[] = [];
 
   try {
-    options.onPhase?.(
-      `卖点 Reduce · 合成策略（已映射 ${mappedBullets.length} 条 bullets）`
-    );
+    options.onPhase?.(`卖点 Reduce · 合成策略（已映射 ${mappedBullets.length} 条 bullets）`);
     const reducePrompt = buildReducePrompt(options.product, options.language, mappedBullets);
     promptChars += reducePrompt.length;
     estimatedInputTokens += estimateTokenCount(reducePrompt);
@@ -458,7 +617,7 @@ async function runMapReduce(options: CallOptions): Promise<SellingPointsPipeline
       prompt: reducePrompt,
       config: options.config,
       schemaName: 'analysis_selling-points_reduce',
-      maxTokens: Math.min(getMasterAnalysisTargetMaxTokens('selling-points'), 4096),
+      maxTokens: getMasterAnalysisReduceMaxTokens('selling-points'),
       retryBudget: options.retryBudget,
       onStreamUpdate: update => {
         streamChunks += update.chunkCount;
@@ -476,6 +635,8 @@ async function runMapReduce(options: CallOptions): Promise<SellingPointsPipeline
       function_scene_matrix = reduced.function_scene_matrix as Record<string, unknown>;
     }
   } catch (error) {
+    reduceFallback = true;
+    qualityNotes.push('reduce_fallback_to_mapped');
     console.error(
       '[selling-points Reduce] failed; keeping mapped bullets with empty strategy:',
       error
@@ -492,8 +653,13 @@ async function runMapReduce(options: CallOptions): Promise<SellingPointsPipeline
       mode: 'map-reduce',
       mapCalls: mapUnits.length,
       reduceCalls,
-      bulletCount: mappedBullets.length,
-      mapFailures,
+      bulletCount: pack.bulletCount,
+      rawBulletCount: pack.rawBulletCount,
+      dedupe: pack.dedupe,
+      budget: pack.budget,
+      mapFailures: mapPhase.mapFailures,
+      reduceFallback,
+      qualityNotes,
     },
     promptChars,
     estimatedInputTokens,

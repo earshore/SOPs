@@ -12,7 +12,7 @@ import { getPromptTokenCount, getFormattedTokenCount } from './helpers';
 import * as actions from './actions';
 import { AlpineContext, FullReportData } from '../types';
 import { createComputedProperties, ComputedProperties } from './computedProperties';
-import type { FullAnalysisReport } from '../config/analysisReportData';
+import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analysisReportData';
 import { createMultipleStateSyncs, cleanupSubscriptions } from '@/common/utils/stateSync';
 import { createPerformanceSettingsPanel } from './PerformanceSettings';
 import { navigateToRouteId } from '@/common/router/initRouter';
@@ -55,9 +55,36 @@ type AiAnalysisPanelState = Pick<
 > & {
   productSummaryTooltipVisible: boolean;
   showSelectionPanel: boolean;
+  isCollapsed: boolean;
   Math: AlpineSafeMath;
   _navigationHandler: EventListener | null;
   perfSettings: ReturnType<typeof createPerformanceSettingsPanel>;
+};
+
+type AnalysisRunSummary = NonNullable<AnalysisReportMetadata['runSummary']>;
+
+type EvidenceHygieneSummary = {
+  duplicatesRemoved: number;
+  emptyRemoved: number;
+  omittedByBudget: number;
+  budgetApplied: boolean;
+  includedAfterPack: number;
+  titleCount: number;
+  bulletCount: number;
+  reviewCount: number;
+  budgetLimit: number;
+};
+
+type EvidenceHygieneBucket = Pick<
+  EvidenceHygieneSummary,
+  'duplicatesRemoved' | 'emptyRemoved' | 'omittedByBudget' | 'budgetApplied' | 'includedAfterPack'
+>;
+
+type AnalysisProgressStageId = 'prep' | 'fast' | 'evidence' | 'done';
+type AnalysisProgressStage = {
+  id: AnalysisProgressStageId;
+  label: string;
+  state: 'pending' | 'active' | 'done';
 };
 
 type AiAnalysisPanelThis = AiAnalysisPanelContext &
@@ -72,17 +99,39 @@ type AiAnalysisPanelThis = AiAnalysisPanelContext &
     analysisHeroIsStrong: boolean;
     analysisHeroIsCompact: boolean;
     hasAnalysisSelection: boolean;
+    analysisRunSummary: AnalysisRunSummary | null;
+    hasPartialAnalysisFailures: boolean;
+    analysisHeroStatusText: string;
+    showAnalysisHeroStatus: boolean;
     progressAriaValue: number;
+    progressStyle: string;
+    analysisProgressStages: AnalysisProgressStage[];
+    getProgressStageClass(state: 'pending' | 'active' | 'done'): string;
+    evidenceDepthValue: 'fast' | 'balanced' | 'deep';
+    evidenceDepthLabel: string;
+    selectEvidenceDepth(depth: string): void;
     reportConfidence: Record<string, number> | null;
     overallConfidence: number;
     overallConfidencePercent: number;
     hasConfidenceData: boolean;
+    evidenceHygieneSummary: EvidenceHygieneSummary | null;
+    hasEvidenceHygieneSummary: boolean;
+    evidenceHygieneShortText: string;
+    evidenceHygieneDetailText: string;
+    analysisQualityWarnings: Array<{ targetId: string; notes: string[] }>;
+    hasAnalysisQualityWarnings: boolean;
+    analysisQualityWarningText: string;
+    canRerunWarnedTargets: boolean;
+    rerunWarnedTargetsLabel: string;
+    rerunWarnedTargets(): Promise<void>;
     getPromptText(targetId: string): string;
+    calculateEvidenceHygieneSummary(buckets: EvidenceHygieneBucket[]): EvidenceHygieneSummary;
     getPromptTokenCount(targetId: string): number;
     getResultColor(targetId: string): string;
     getResultColorEnd(targetId: string): string;
     getResultIcon(targetId: string): string;
     getTargetById(targetId: string): (typeof analysisTargets)[number] | undefined;
+    getTargetName(targetId: string): string;
     getTargetConfidence(targetId: string): number;
     getConfidenceLevel(percent: number): string;
     isTargetSelected(targetId: string): boolean;
@@ -146,6 +195,113 @@ const ALPINE_SAFE_MATH: AlpineSafeMath = Object.freeze({
   round: (value: number) => Math.round(value),
 });
 
+const ANALYSIS_PROGRESS_STAGE_DEFINITIONS: Array<Pick<AnalysisProgressStage, 'id' | 'label'>> = [
+  { id: 'prep', label: '准备数据' },
+  { id: 'fast', label: '快速洞察' },
+  { id: 'evidence', label: '评论证据' },
+  { id: 'done', label: '汇总完成' },
+];
+
+function hasEvidenceHygieneSignal(summary: EvidenceHygieneSummary): boolean {
+  return [
+    summary.duplicatesRemoved > 0,
+    summary.emptyRemoved > 0,
+    summary.omittedByBudget > 0,
+    summary.budgetApplied,
+    summary.includedAfterPack > 0,
+    summary.titleCount > 0,
+    summary.bulletCount > 0,
+    summary.reviewCount > 0,
+  ].some(Boolean);
+}
+
+function formatAnalysisElapsed(elapsedMs: number | undefined): string | null {
+  if (typeof elapsedMs !== 'number' || elapsedMs < 0) return null;
+  const totalSeconds = Math.round(elapsedMs / 1000);
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const seconds = totalSeconds % 60;
+  return `${Math.floor(totalSeconds / 60)}m${seconds > 0 ? `${seconds}s` : ''}`;
+}
+
+function formatAnalysisCompletionExtras(summary: AnalysisRunSummary): string {
+  const extras: string[] = [];
+  if ((summary.cachedCount || 0) > 0) extras.push(`缓存 ${summary.cachedCount}`);
+  const elapsed = formatAnalysisElapsed(summary.elapsedMs);
+  if (elapsed) extras.push(`耗时 ${elapsed}`);
+  return extras.length > 0 ? ` · ${extras.join(' · ')}` : '';
+}
+
+function formatAnalysisCompletionStatus(
+  summary: AnalysisRunSummary,
+  getTargetName: (targetId: string) => string
+): string {
+  const extraText = formatAnalysisCompletionExtras(summary);
+  if ((summary.failedCount || 0) <= 0) {
+    return `成功 ${summary.successCount || 0} 个维度${extraText}`;
+  }
+  const labels = (summary.failedTargetIds || []).map(getTargetName).join('、');
+  return labels
+    ? `成功 ${summary.successCount || 0} · 失败 ${summary.failedCount}（${labels}）${extraText}`
+    : `成功 ${summary.successCount || 0} · 失败 ${summary.failedCount}${extraText}`;
+}
+
+function normalizeAnalysisProgress(value: number): number {
+  return Math.max(0, Math.min(100, Number(value) || 0));
+}
+
+function stepMentions(step: string, patterns: RegExp[]): boolean {
+  return patterns.some(pattern => pattern.test(step));
+}
+
+function resolveAnalysisProgressStage(
+  progress: number,
+  currentStep: string,
+  resultCount: number
+): AnalysisProgressStageId {
+  const step = currentStep.toLowerCase();
+  const isDone = [progress >= 100, stepMentions(step, [/分析完成/, /完成：成功/])].some(Boolean);
+  if (isDone) return 'done';
+  const inEvidence = [
+    stepMentions(step, [
+      /评论证据/,
+      /证据抽取/,
+      /致命/,
+      /惊喜/,
+      /犹豫/,
+      /画像/,
+      /词汇/,
+      /承诺/,
+      /合并洞察/,
+      /shared-general/,
+      /map/,
+      /reduce/,
+    ]),
+    progress >= 35,
+  ].some(Boolean);
+  if (inEvidence) return 'evidence';
+  const inFastInsight = [
+    resultCount > 0,
+    stepMentions(step, [
+      /标题/,
+      /卖点/,
+      /快速洞察/,
+      /title-keywords/,
+      /selling-points/,
+      /已开始返回/,
+    ]),
+  ].some(Boolean);
+  if (inFastInsight || progress >= 20) return 'fast';
+  return 'prep';
+}
+
+function getAnalysisProgressStageState(
+  index: number,
+  activeIndex: number
+): AnalysisProgressStage['state'] {
+  if (index < activeIndex) return 'done';
+  return index === activeIndex ? 'active' : 'pending';
+}
+
 function getResultToneClass(map: Record<string, string>, color: string, fallback: string): string {
   return map[color] || fallback;
 }
@@ -155,6 +311,7 @@ function createAiAnalysisPanelState(): AiAnalysisPanelState {
     selectedAsins: [] as string[],
     selectedTargets: [] as string[],
     isAnalyzing: false,
+    isCollapsed: false,
     progress: 0,
     currentStep: '',
     analysisReport: null as unknown,
@@ -357,7 +514,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   get selectionPanelChevronClass(): string {
-    return `fa-solid fa-chevron-${this.showSelectionPanel ? 'up' : 'down'} text-slate-400 text-base`;
+    return `fa-solid fa-chevron-${this.showSelectionPanel ? 'up' : 'down'} text-[color:var(--color-text-tertiary)] text-base`;
   },
 
   get promptPanelChevronClass(): string {
@@ -365,7 +522,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   getPromptItemChevronClass(index: number): string {
-    return `fa-solid fa-chevron-${this.expandedPromptIndex === index ? 'up' : 'down'} text-slate-400`;
+    return `fa-solid fa-chevron-${this.expandedPromptIndex === index ? 'up' : 'down'} text-[color:var(--color-text-tertiary)]`;
   },
 
   getTargetById(targetId: string) {
@@ -405,7 +562,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   getAsinTextClass(asin: string): string {
     return this.selectedAsins.includes(asin)
       ? 'text-[var(--color-primary-dark,var(--color-primary))]'
-      : 'text-slate-700';
+      : 'text-[color:var(--color-text-tertiary)]';
   },
 
   getListingTargetCardClass(targetId: string): string {
@@ -506,16 +663,16 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   get analysisHeroCardClass(): string {
     if (this.analysisHeroIsCompact)
-      return 'bg-white border border-slate-200 shadow-sm shadow-slate-200/60';
+      return 'bg-surface border border-slate-200 shadow-sm shadow-slate-200/60';
     return this.analysisHeroIsStrong
       ? 'shadow-lg shadow-indigo-200/30'
-      : 'bg-white border border-slate-200 shadow-sm shadow-slate-200/60';
+      : 'bg-surface border border-slate-200 shadow-sm shadow-slate-200/60';
   },
 
   get analysisHeroBackdropClass(): string {
     return this.analysisHeroIsStrong
       ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600'
-      : 'bg-white';
+      : 'bg-surface';
   },
 
   get analysisHeroAmbientClass(): string {
@@ -527,22 +684,22 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   get analysisHeroTextClass(): string {
-    return this.analysisHeroIsStrong ? 'text-white' : 'text-slate-800';
+    return this.analysisHeroIsStrong ? 'text-white' : 'text-[color:var(--color-text-primary)]';
   },
 
   get analysisHeroSubtextClass(): string {
-    return this.analysisHeroIsStrong ? 'text-white/70' : 'text-slate-500';
+    return this.analysisHeroIsStrong ? 'text-white/70' : 'text-[color:var(--color-text-secondary)]';
   },
 
   get analysisHeroMetricPillClass(): string {
     return this.analysisHeroIsStrong
-      ? 'bg-white/20 text-white'
-      : 'bg-slate-100 text-slate-700 border border-slate-200';
+      ? 'bg-surface/20 text-white'
+      : 'bg-slate-100 text-[color:var(--color-text-tertiary)] border border-slate-200';
   },
 
   get analysisPerfButtonClass(): string {
     return this.analysisHeroIsStrong
-      ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:border-white/30'
+      ? 'bg-surface/10 text-white hover:bg-surface/20 border border-white/20 hover:border-white/30'
       : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200 hover:border-slate-300';
   },
 
@@ -550,10 +707,10 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     if (this.analysisHeroIsComplete)
       return 'w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm';
     if (!this.analysisHeroIsStrong)
-      return 'w-14 h-14 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 shadow-sm';
+      return 'w-14 h-14 rounded-xl bg-slate-100 text-[color:var(--color-text-secondary)] border border-slate-200 shadow-sm';
     return this.isAnalyzing
-      ? 'w-16 h-16 rounded-2xl bg-white/20 text-white border border-white/20 backdrop-blur-sm shadow-lg'
-      : 'w-16 h-16 rounded-2xl bg-white/10 text-white border border-white/20 backdrop-blur-sm shadow-lg';
+      ? 'w-16 h-16 rounded-2xl bg-surface/20 text-white border border-white/20 backdrop-blur-sm shadow-lg'
+      : 'w-16 h-16 rounded-2xl bg-surface/10 text-white border border-white/20 backdrop-blur-sm shadow-lg';
   },
 
   get analysisHeroIconClass(): string {
@@ -573,7 +730,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     return !this.isAnalyzing && !this.analysisHeroIsComplete;
   },
 
-  get analysisRunSummary() {
+  get analysisRunSummary(): AnalysisRunSummary | null {
     const report = this.analysisReport;
     if (!report || typeof report === 'string') {
       return null;
@@ -583,6 +740,135 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
       return null;
     }
     return runSummary;
+  },
+
+  get evidenceHygieneSummary(): EvidenceHygieneSummary | null {
+    const report = this.analysisReport;
+    if (!report || typeof report === 'string') {
+      return null;
+    }
+    const hygiene = (report as FullAnalysisReport)._metadata?.reviewSampling?.mapReduceHygiene;
+    if (!hygiene) {
+      return null;
+    }
+
+    const buckets: EvidenceHygieneBucket[] = [
+      hygiene.lowStar,
+      hygiene.highStar,
+      hygiene.general,
+    ].filter(Boolean);
+    if (buckets.length === 0) {
+      return null;
+    }
+
+    const summary = this.calculateEvidenceHygieneSummary(buckets);
+
+    const titleCount = this.currentProducts.reduce(
+      (total, product) => total + (product.productTitle ? 1 : 0),
+      0
+    );
+    const bulletCount = this.currentProducts.reduce(
+      (total, product) => total + (product.feature_bullets?.length || 0),
+      0
+    );
+    const reviewCount = summary.includedAfterPack;
+
+    return hasEvidenceHygieneSignal(summary)
+      ? {
+          ...summary,
+          titleCount,
+          bulletCount,
+          reviewCount,
+        }
+      : null;
+  },
+
+  calculateEvidenceHygieneSummary(buckets: EvidenceHygieneBucket[]): EvidenceHygieneSummary {
+    return buckets.reduce(
+      (acc, bucket) =>
+        ({
+          ...acc,
+          duplicatesRemoved: acc.duplicatesRemoved + bucket.duplicatesRemoved,
+          emptyRemoved: acc.emptyRemoved + bucket.emptyRemoved,
+          omittedByBudget: acc.omittedByBudget + bucket.omittedByBudget,
+          budgetApplied: acc.budgetApplied || bucket.budgetApplied,
+          includedAfterPack: acc.includedAfterPack + bucket.includedAfterPack,
+        }) as EvidenceHygieneSummary,
+      {
+        duplicatesRemoved: 0,
+        emptyRemoved: 0,
+        omittedByBudget: 0,
+        budgetApplied: false,
+        includedAfterPack: 0,
+        titleCount: 0,
+        bulletCount: 0,
+        reviewCount: 0,
+        budgetLimit: 0,
+      } as EvidenceHygieneSummary
+    ) as EvidenceHygieneSummary;
+  },
+
+  get hasEvidenceHygieneSummary(): boolean {
+    return this.evidenceHygieneSummary !== null;
+  },
+
+  get evidenceHygieneShortText(): string {
+    const summary = this.evidenceHygieneSummary;
+    if (!summary) {
+      return '';
+    }
+    const cleaned = summary.duplicatesRemoved + summary.emptyRemoved;
+    const parts: string[] = [];
+    if (cleaned > 0) {
+      parts.push(`已去重 ${cleaned}`);
+    }
+    if (summary.omittedByBudget > 0 || summary.budgetApplied) {
+      parts.push(`预算采样 ${summary.omittedByBudget}`);
+    }
+    const hasSourceContent = [summary.titleCount, summary.bulletCount, summary.reviewCount].some(
+      count => count > 0
+    );
+    if (hasSourceContent) {
+      parts.push(
+        `保留 ${summary.titleCount} 个标题 · ${summary.bulletCount} 个卖点 · ${summary.reviewCount} 条评论`
+      );
+    }
+    return parts.join(' · ');
+  },
+
+  get evidenceHygieneDetailText(): string {
+    const summary = this.evidenceHygieneSummary;
+    if (!summary) {
+      return '';
+    }
+    return [
+      `重复评论 ${summary.duplicatesRemoved}`,
+      `空评论 ${summary.emptyRemoved}`,
+      `预算省略 ${summary.omittedByBudget}`,
+      `保留 ${summary.titleCount || 0} 个标题 · ${summary.bulletCount || 0} 个卖点 · ${summary.reviewCount || 0} 条评论`,
+    ].join(' · ');
+  },
+
+  get analysisQualityWarnings(): Array<{ targetId: string; notes: string[] }> {
+    const report = this.analysisReport;
+    if (!report || typeof report === 'string') return [];
+    const warnings = (report as FullAnalysisReport)._metadata?.qualityWarnings;
+    return Array.isArray(warnings) ? warnings : [];
+  },
+
+  get hasAnalysisQualityWarnings(): boolean {
+    return this.analysisQualityWarnings.length > 0;
+  },
+
+  get analysisQualityWarningText(): string {
+    const warnings = this.analysisQualityWarnings;
+    if (warnings.length === 0) return '';
+    const labels = warnings
+      .map(item => this.getTargetName(item.targetId))
+      .filter(Boolean)
+      .slice(0, 3);
+    const suffix = warnings.length > 3 ? ` 等${warnings.length}个维度` : '';
+    return `部分字段可能不完整：${labels.join('、')}${suffix}`;
   },
 
   get hasPartialAnalysisFailures(): boolean {
@@ -602,15 +888,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     }
     const summary = this.analysisRunSummary;
     if (this.analysisHeroIsComplete && summary) {
-      if (summary.failedCount > 0) {
-        const labels = (summary.failedTargetIds || [])
-          .map(id => this.getTargetName(id))
-          .join('、');
-        return labels
-          ? `成功 ${summary.successCount} · 失败 ${summary.failedCount}（${labels}）`
-          : `成功 ${summary.successCount} · 失败 ${summary.failedCount}`;
-      }
-      return `成功 ${summary.successCount} 个维度`;
+      return formatAnalysisCompletionStatus(summary, id => this.getTargetName(id));
     }
     return '';
   },
@@ -650,14 +928,14 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   get runAnalysisButtonClass(): string {
     if (this.isAnalyzing)
-      return 'bg-white/20 text-white cursor-wait backdrop-blur-sm border border-white/30 shadow-2xl';
+      return 'bg-white/15 text-white cursor-wait backdrop-blur-sm border border-white/30 shadow-2xl';
     if (this.canRunAnalysis && !this.analysisHeroIsStrong) {
       // Appearance primary (not ownership indigo) for default workbench CTA.
-      return 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border border-[var(--color-primary)] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2';
+      return 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border border-transparent shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2';
     }
     return this.canRunAnalysis
-      ? 'bg-white text-[var(--color-primary)] hover:bg-[var(--color-primary-light)] border border-white/50 shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2'
-      : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none';
+      ? 'bg-white/25 text-white hover:bg-white/35 border border-white/50 shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2'
+      : 'bg-[color:var(--color-bg-tertiary)] text-[color:var(--color-text-tertiary)] cursor-not-allowed border border-[color:var(--border-subtle)] shadow-none';
   },
 
   get analysisHeroBodyClass(): string {
@@ -672,7 +950,24 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     const settings = this.perfSettings.settings;
     const cacheText = settings.enableCache ? '缓存开' : '缓存关';
     const failureText = settings.failureStrategy === 'continue' ? '失败继续' : '失败中止';
-    return `并发 ${settings.maxConcurrency} · ${cacheText} · ${failureText}`;
+    const depthText = this.evidenceDepthLabel;
+    return `并发 ${settings.maxConcurrency} · ${depthText} · ${cacheText} · ${failureText}`;
+  },
+
+  get evidenceDepthValue(): 'fast' | 'balanced' | 'deep' {
+    const depth = this.perfSettings?.settings?.evidenceDepth;
+    return depth === 'fast' || depth === 'deep' ? depth : 'balanced';
+  },
+
+  get evidenceDepthLabel(): string {
+    if (this.evidenceDepthValue === 'fast') return '快速';
+    if (this.evidenceDepthValue === 'deep') return '深入';
+    return '均衡';
+  },
+
+  selectEvidenceDepth(depth: string): void {
+    if (depth !== 'fast' && depth !== 'balanced' && depth !== 'deep') return;
+    this.perfSettings.setEvidenceDepth(depth);
   },
 
   get runAnalysisNotRunningLabel(): string {
@@ -713,23 +1008,34 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   get progressStyle(): string {
-    return `width: ${this.progress}%`;
+    const value = Math.max(0, Math.min(100, Number(this.progress) || 0));
+    return `width: ${value}%;`;
   },
 
-  get progressDataStepClass(): string {
-    return this.progress >= 0 ? 'text-white/80' : '';
+  /**
+   * Real business stages instead of fake NLP labels.
+   * Stage activation is driven by progress + currentStep semantics.
+   */
+  get analysisProgressStages(): AnalysisProgressStage[] {
+    const progress = normalizeAnalysisProgress(this.progress);
+    const resultCount = Array.isArray(this.reportResults) ? this.reportResults.length : 0;
+    const activeId = resolveAnalysisProgressStage(progress, this.currentStep || '', resultCount);
+    if (activeId === 'done') {
+      return ANALYSIS_PROGRESS_STAGE_DEFINITIONS.map(stage => ({ ...stage, state: 'done' }));
+    }
+    const activeIndex = ANALYSIS_PROGRESS_STAGE_DEFINITIONS.findIndex(
+      stage => stage.id === activeId
+    );
+    return ANALYSIS_PROGRESS_STAGE_DEFINITIONS.map((stage, index) => ({
+      ...stage,
+      state: getAnalysisProgressStageState(index, activeIndex),
+    }));
   },
 
-  get progressNlpStepClass(): string {
-    return this.progress >= 33 ? 'text-white/80' : '';
-  },
-
-  get progressInsightStepClass(): string {
-    return this.progress >= 66 ? 'text-white/80' : '';
-  },
-
-  get progressDoneStepClass(): string {
-    return this.progress >= 100 ? 'text-white/80' : '';
+  getProgressStageClass(state: 'pending' | 'active' | 'done'): string {
+    if (state === 'done') return 'text-white/85 font-medium';
+    if (state === 'active') return 'text-white font-semibold';
+    return 'text-white/40';
   },
 
   get reportStatusText(): string {
@@ -908,6 +1214,27 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   async runAnalysis() {
     const ctx = this as unknown as AlpineContext & ComputedProperties;
     await actions.runAnalysisAction(ctx, ctx.currentProducts);
+  },
+
+  get canRerunWarnedTargets(): boolean {
+    return (
+      !this.isAnalyzing &&
+      this.hasReportWithResults &&
+      this.analysisQualityWarnings.length > 0 &&
+      this.selectedAsins.length > 0
+    );
+  },
+
+  get rerunWarnedTargetsLabel(): string {
+    const count = this.analysisQualityWarnings.length;
+    return count > 0 ? `仅重跑问题维度 (${count})` : '仅重跑问题维度';
+  },
+
+  async rerunWarnedTargets() {
+    if (!this.canRerunWarnedTargets) return;
+    const ctx = this as unknown as AlpineContext & ComputedProperties;
+    const targetIds = this.analysisQualityWarnings.map(item => item.targetId);
+    await actions.rerunAnalysisTargetsAction(ctx, ctx.currentProducts, targetIds);
   },
 
   async navigateToScraper() {

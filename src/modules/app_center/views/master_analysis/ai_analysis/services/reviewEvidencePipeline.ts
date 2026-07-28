@@ -11,10 +11,28 @@ import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import type { ResolvedToolLlmConfig } from '@/services/llmToolBridge';
 import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
 import { sanitizePromptInput } from '@/common/utils/promptSanitizer';
+import { isObject } from '@/common/utils/typeGuards';
 import type { Product, Review } from '../config/sampleData';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { parseAnalysisResponse } from './analysisResultParser';
-import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
+import { parseLlmJson } from '@/common/utils/parseLlmJson';
+import {
+  getMasterAnalysisReduceMaxTokens,
+  getMasterAnalysisTargetMaxTokens,
+} from '../../services/llmOutputBudget';
+import {
+  getRuntimeMasterAnalysisOptions,
+  type MasterAnalysisEvidenceDepth,
+} from '@/services/runtimeStrategyService';
+import {
+  applyFairSliceBudget,
+  compactForReduce,
+  dedupeReviews,
+  mapWithConcurrency,
+  mergeDedupeStats,
+  type EvidenceBudgetStats,
+  type EvidenceDedupeStats,
+} from '../utils/evidencePack';
 import { estimateTokenCount } from '../utils/tokenCounter';
 
 export type ReviewEvidenceTargetId =
@@ -37,7 +55,28 @@ const REVIEW_CHUNK_SIZE = 16;
 /** Old oneshot caps: 24 for star buckets, 40 for general sample. */
 const STAR_MAP_REDUCE_THRESHOLD = 24;
 const GENERAL_MAP_REDUCE_THRESHOLD = 40;
+/** Hard cap for map-reduce after hygiene (fair per-ASIN quota). */
+const STAR_MAP_BUDGET_BY_DEPTH: Record<MasterAnalysisEvidenceDepth, number> = {
+  // Fast prioritizes wall-clock over exhaustive coverage for 5-8 ASIN daily runs.
+  fast: 36,
+  balanced: 96,
+  deep: 160,
+};
+const GENERAL_MAP_BUDGET_BY_DEPTH: Record<MasterAnalysisEvidenceDepth, number> = {
+  fast: 56,
+  balanced: 160,
+  deep: 240,
+};
+const MAP_CONCURRENCY_BY_DEPTH: Record<MasterAnalysisEvidenceDepth, number> = {
+  fast: 4,
+  balanced: 3,
+  deep: 2,
+};
 const BODY_CHARS = 700;
+
+function getEvidenceDepth(): MasterAnalysisEvidenceDepth {
+  return getRuntimeMasterAnalysisOptions().evidenceDepth || 'balanced';
+}
 
 type SourceProductSlice = {
   asin: string;
@@ -51,7 +90,14 @@ export type ReviewEvidencePipelineStats = {
   mapCalls: number;
   reduceCalls: number;
   reviewCount: number;
+  /** Reviews after star-filter, before dedupe (map-reduce packs). */
+  rawReviewCount?: number;
+  dedupe?: EvidenceDedupeStats;
+  budget?: EvidenceBudgetStats;
   mapFailures: number;
+  /** True when Reduce failed/truncated and mapped evidence was kept. */
+  reduceFallback?: boolean;
+  qualityNotes?: string[];
 };
 
 export type ReviewEvidencePipelineResult = {
@@ -725,46 +771,118 @@ export function isReviewEvidenceTargetId(targetId: string): targetId is ReviewEv
   return targetId in TARGET_HANDLERS;
 }
 
+export type ReviewSourcePack = {
+  slices: SourceProductSlice[];
+  /** After star-filter, before dedupe. */
+  rawReviewCount: number;
+  /** After star-filter + empty/exact dedupe + optional budget. */
+  reviewCount: number;
+  dedupe: EvidenceDedupeStats;
+  budget: EvidenceBudgetStats;
+};
+
+function getReviewMapBudget(targetId: ReviewEvidenceTargetId): number {
+  const depth = getEvidenceDepth();
+  return STAR_BUCKET_TARGETS.includes(targetId)
+    ? STAR_MAP_BUDGET_BY_DEPTH[depth]
+    : GENERAL_MAP_BUDGET_BY_DEPTH[depth];
+}
+
+function getReviewMapConcurrency(): number {
+  return MAP_CONCURRENCY_BY_DEPTH[getEvidenceDepth()];
+}
+
+/**
+ * Build per-ASIN review slices for a target:
+ * star-filter → empty drop → exact dedupe → fair budget (only if over cap).
+ * Does not drop ASINs that still have unique reviews after hygiene when budget allows.
+ */
+export function buildReviewSourcePack(
+  product: Product,
+  targetId: ReviewEvidenceTargetId
+): ReviewSourcePack {
+  const handler = TARGET_HANDLERS[targetId];
+  const raw = product.metadata?.source_products;
+  const safeReviews = Array.isArray(product.customer_reviews) ? product.customer_reviews : [];
+  const baseSlices: SourceProductSlice[] =
+    Array.isArray(raw) && raw.length > 0 && raw.every(isSourceProductSlice)
+      ? raw.map(slice => ({
+          ...slice,
+          customer_reviews: handler.starFilter(
+            Array.isArray(slice.customer_reviews) ? slice.customer_reviews : []
+          ),
+        }))
+      : [
+          {
+            asin: product.asin,
+            productTitle: product.productTitle,
+            customer_reviews: handler.starFilter(safeReviews),
+          },
+        ];
+
+  const statsParts: EvidenceDedupeStats[] = [];
+  const hygienic: Array<SourceProductSlice & { items: Review[] }> = [];
+  let rawReviewCount = 0;
+
+  for (const slice of baseSlices) {
+    rawReviewCount += slice.customer_reviews.length;
+    const { reviews, stats } = dedupeReviews(slice.customer_reviews);
+    statsParts.push(stats);
+    if (reviews.length === 0) continue;
+    hygienic.push({ ...slice, customer_reviews: reviews, items: reviews });
+  }
+
+  const dedupe = mergeDedupeStats(statsParts);
+  const budgeted = applyFairSliceBudget<Review, SourceProductSlice & { items: Review[] }>(
+    hygienic,
+    getReviewMapBudget(targetId),
+    (slice, items) => ({
+      ...slice,
+      customer_reviews: items,
+      items,
+    })
+  );
+
+  const slices: SourceProductSlice[] = budgeted.slices.map(slice => ({
+    asin: slice.asin,
+    productTitle: slice.productTitle,
+    customer_reviews: slice.customer_reviews,
+  }));
+
+  return {
+    slices,
+    rawReviewCount,
+    reviewCount: budgeted.stats.afterCount,
+    dedupe,
+    budget: budgeted.stats,
+  };
+}
+
 export function getReviewSourceSlices(
   product: Product,
   targetId: ReviewEvidenceTargetId
 ): SourceProductSlice[] {
-  const handler = TARGET_HANDLERS[targetId];
-  const raw = product.metadata?.source_products;
-  if (Array.isArray(raw) && raw.length > 0 && raw.every(isSourceProductSlice)) {
-    return raw
-      .map(slice => ({
-        ...slice,
-        customer_reviews: handler.starFilter(slice.customer_reviews),
-      }))
-      .filter(slice => slice.customer_reviews.length > 0);
-  }
-
-  const filtered = handler.starFilter(product.customer_reviews);
-  if (filtered.length === 0) return [];
-  return [
-    {
-      asin: product.asin,
-      productTitle: product.productTitle,
-      customer_reviews: filtered,
-    },
-  ];
+  return buildReviewSourcePack(product, targetId).slices;
 }
 
 export function countReviewsForTarget(product: Product, targetId: ReviewEvidenceTargetId): number {
-  return getReviewSourceSlices(product, targetId).reduce(
-    (sum, slice) => sum + slice.customer_reviews.length,
-    0
-  );
+  return buildReviewSourcePack(product, targetId).reviewCount;
 }
 
 export function shouldUseReviewMapReduce(
   product: Product,
   targetId: ReviewEvidenceTargetId
 ): boolean {
-  const slices = getReviewSourceSlices(product, targetId);
-  if (slices.length > 1) return true;
-  return countReviewsForTarget(product, targetId) > TARGET_HANDLERS[targetId].mapReduceThreshold;
+  // Gate only by packed evidence volume (not multi-ASIN alone).
+  // Multi-ASIN with few cleaned reviews is faster/safer as oneshot, improving TTFT.
+  const packedCount = countReviewsForTarget(product, targetId);
+  if (packedCount === 0) return false;
+  const depth = getEvidenceDepth();
+  const base = TARGET_HANDLERS[targetId].mapReduceThreshold;
+  // Fast stays oneshot longer to cut multi-target TTFT; deep maps earlier for coverage.
+  const threshold =
+    depth === 'fast' ? Math.round(base * 1.75) : depth === 'deep' ? Math.round(base * 0.75) : base;
+  return packedCount > threshold;
 }
 
 function chunkReviews(reviews: Review[], size: number): Review[][] {
@@ -880,13 +998,10 @@ async function runOneshot(
   };
 }
 
-async function runMapReduce(
-  targetId: ReviewEvidenceTargetId,
-  options: CallOptions
-): Promise<ReviewEvidencePipelineResult> {
-  const handler = TARGET_HANDLERS[targetId];
-  const slices = getReviewSourceSlices(options.product, targetId);
-  const units: Array<{ slice: SourceProductSlice; offset: number }> = [];
+type ReviewMapUnit = { slice: SourceProductSlice; offset: number };
+
+function buildMapUnits(slices: SourceProductSlice[]): ReviewMapUnit[] {
+  const units: ReviewMapUnit[] = [];
   let offset = 0;
   for (const slice of slices) {
     for (const chunk of chunkReviews(slice.customer_reviews, REVIEW_CHUNK_SIZE)) {
@@ -897,7 +1012,42 @@ async function runMapReduce(
       offset += chunk.length;
     }
   }
+  return units;
+}
 
+/** Approximate Map shard count after hygiene/budget (for UX estimates). */
+export function estimateReviewMapCalls(product: Product, targetId: ReviewEvidenceTargetId): number {
+  const pack = buildReviewSourcePack(product, targetId);
+  if (pack.reviewCount === 0) return 0;
+  if (!shouldUseReviewMapReduce(product, targetId)) return 1;
+  return buildMapUnits(pack.slices).length;
+}
+
+function compactMappedForReduce(mapped: Record<string, unknown>): Record<string, unknown> {
+  // Compact long quotes / wide arrays so Reduce stays under maxTokens and parses cleanly.
+  return compactForReduce(mapped, {
+    maxStringChars: 160,
+    maxArrayItems: 20,
+    maxObjectKeys: 32,
+  }) as Record<string, unknown>;
+}
+
+type MapPhaseTotals = {
+  mapped: Record<string, unknown>;
+  mapFailures: number;
+  promptChars: number;
+  estimatedInputTokens: number;
+  streamChunks: number;
+  streamedChars: number;
+  firstResponseMs?: number;
+};
+
+async function runReviewMapPhase(
+  targetId: ReviewEvidenceTargetId,
+  options: CallOptions,
+  units: Array<{ slice: SourceProductSlice; offset: number }>
+): Promise<MapPhaseTotals> {
+  const handler = TARGET_HANDLERS[targetId];
   const firstChunkLen = units[0]?.slice.customer_reviews.length ?? REVIEW_CHUNK_SIZE;
   const mapMaxTokens = Math.min(
     getMasterAnalysisTargetMaxTokens(targetId),
@@ -910,14 +1060,15 @@ async function runMapReduce(
   let streamedChars = 0;
   let firstResponseMs: number | undefined;
   let mapFailures = 0;
+  let completedMaps = 0;
   const agg = handler.emptyMapAggregate();
 
-  let mapIndex = 0;
-  for (const unit of units) {
-    mapIndex += 1;
-    options.onPhase?.(
-      `${targetId} Map ${mapIndex}/${units.length} · ${unit.slice.asin}`
-    );
+  const mapConcurrency = getReviewMapConcurrency();
+  options.onPhase?.(
+    `${targetId} Map 0/${units.length} · 并发${Math.min(mapConcurrency, Math.max(1, units.length))} · ${getEvidenceDepth()}`
+  );
+
+  await mapWithConcurrency(units, mapConcurrency, async (unit, mapIndex) => {
     const prompt = handler.buildMapPrompt(
       unit.slice,
       options.language,
@@ -950,8 +1101,13 @@ async function runMapReduce(
     } catch (error) {
       mapFailures += 1;
       console.error(`[${targetId} Map] shard failed:`, error);
+    } finally {
+      completedMaps += 1;
+      options.onPhase?.(
+        `${targetId} Map ${completedMaps}/${units.length} · ${unit.slice.asin} (#${mapIndex + 1})`
+      );
     }
-  }
+  });
 
   const mapped = handler.normalize(agg);
   if (!handler.hasMapSignal(mapped)) {
@@ -960,19 +1116,46 @@ async function runMapReduce(
     );
   }
 
-  let finalData = mapped;
-  let reduceCalls = 0;
+  return {
+    mapped,
+    mapFailures,
+    promptChars,
+    estimatedInputTokens,
+    streamChunks,
+    streamedChars,
+    firstResponseMs,
+  };
+}
+
+async function runReviewReducePhase(
+  targetId: ReviewEvidenceTargetId,
+  options: CallOptions,
+  mapped: Record<string, unknown>
+): Promise<{
+  finalData: Record<string, unknown>;
+  reduceCalls: number;
+  promptChars: number;
+  estimatedInputTokens: number;
+  streamChunks: number;
+  streamedChars: number;
+  reduceFallback: boolean;
+  qualityNotes: string[];
+}> {
+  const handler = TARGET_HANDLERS[targetId];
+  let streamChunks = 0;
+  let streamedChars = 0;
   try {
     options.onPhase?.(`${targetId} Reduce · 合并证据中…`);
-    const reducePrompt = handler.buildReducePrompt(options.product, options.language, mapped);
-    promptChars += reducePrompt.length;
-    estimatedInputTokens += estimateTokenCount(reducePrompt);
-    reduceCalls = 1;
+    const reducePrompt = handler.buildReducePrompt(
+      options.product,
+      options.language,
+      compactMappedForReduce(mapped)
+    );
     const call = await callAnalysisJson({
       prompt: reducePrompt,
       config: options.config,
       schemaName: `analysis_${targetId}_reduce`,
-      maxTokens: Math.min(getMasterAnalysisTargetMaxTokens(targetId), 4096),
+      maxTokens: getMasterAnalysisReduceMaxTokens(targetId),
       retryBudget: options.retryBudget,
       onStreamUpdate: update => {
         streamChunks += update.chunkCount;
@@ -981,26 +1164,61 @@ async function runMapReduce(
       },
     });
     const reduced = parseAnalysisResponse(targetId, call.text, { phase: 'reduce' }).data;
-    finalData = handler.mergeReduce(mapped, reduced);
+    return {
+      finalData: handler.mergeReduce(mapped, reduced),
+      reduceCalls: 1,
+      promptChars: reducePrompt.length,
+      estimatedInputTokens: estimateTokenCount(reducePrompt),
+      streamChunks,
+      streamedChars,
+      reduceFallback: false,
+      qualityNotes: [],
+    };
   } catch (error) {
     console.error(`[${targetId} Reduce] failed; keeping mapped evidence:`, error);
+    return {
+      finalData: mapped,
+      reduceCalls: 0,
+      promptChars: 0,
+      estimatedInputTokens: 0,
+      streamChunks,
+      streamedChars,
+      reduceFallback: true,
+      qualityNotes: ['reduce_fallback_to_mapped'],
+    };
   }
+}
+
+async function runMapReduce(
+  targetId: ReviewEvidenceTargetId,
+  options: CallOptions
+): Promise<ReviewEvidencePipelineResult> {
+  const pack = buildReviewSourcePack(options.product, targetId);
+  const units = buildMapUnits(pack.slices);
+  const mapPhase = await runReviewMapPhase(targetId, options, units);
+  const reducePhase = await runReviewReducePhase(targetId, options, mapPhase.mapped);
 
   return {
-    data: finalData,
+    // Keep diagnostics only in stats; never embed `_pipeline` into report payload.
+    data: reducePhase.finalData,
     stats: {
       targetId,
       mode: 'map-reduce',
       mapCalls: units.length,
-      reduceCalls,
-      reviewCount: countReviewsForTarget(options.product, targetId),
-      mapFailures,
+      reduceCalls: reducePhase.reduceCalls,
+      reviewCount: pack.reviewCount,
+      rawReviewCount: pack.rawReviewCount,
+      dedupe: pack.dedupe,
+      budget: pack.budget,
+      mapFailures: mapPhase.mapFailures,
+      reduceFallback: reducePhase.reduceFallback,
+      qualityNotes: reducePhase.qualityNotes,
     },
-    promptChars,
-    estimatedInputTokens,
-    streamChunks,
-    streamedChars,
-    firstResponseMs,
+    promptChars: mapPhase.promptChars + reducePhase.promptChars,
+    estimatedInputTokens: mapPhase.estimatedInputTokens + reducePhase.estimatedInputTokens,
+    streamChunks: mapPhase.streamChunks + reducePhase.streamChunks,
+    streamedChars: mapPhase.streamedChars + reducePhase.streamedChars,
+    firstResponseMs: mapPhase.firstResponseMs,
   };
 }
 
@@ -1012,6 +1230,317 @@ export async function runReviewEvidencePipeline(
     return runMapReduce(targetId, options);
   }
   return runOneshot(targetId, options);
+}
+
+export function isGeneralReviewEvidenceTargetId(
+  targetId: string
+): targetId is (typeof GENERAL_REVIEW_TARGETS)[number] {
+  return (GENERAL_REVIEW_TARGETS as readonly string[]).includes(targetId);
+}
+
+export type SharedGeneralMapBundle = {
+  pack: ReviewSourcePack;
+  mapCalls: number;
+  mapFailures: number;
+  promptChars: number;
+  estimatedInputTokens: number;
+  streamChunks: number;
+  streamedChars: number;
+  firstResponseMs?: number;
+  mappedByTarget: Partial<Record<ReviewEvidenceTargetId, Record<string, unknown>>>;
+};
+
+function buildSharedGeneralMapPrompt(
+  slice: SourceProductSlice,
+  language: string,
+  offset: number,
+  product: Product
+): string {
+  return `
+You extract multi-dimension review evidence for Amazon products in ONE pass.
+Output ONLY valid JSON (no markdown). Analysis language: **${language}**.
+Do not invent quotes. Empty arrays are allowed when evidence is missing.
+
+## Listing bullets
+${formatBullets(product)}
+
+## Reviews
+- ASIN: ${sanitizePromptInput(slice.asin)}
+- Title: ${sanitizePromptInput(slice.productTitle)}
+${buildReviewBlock(slice, offset)}
+
+## Strict Output Schema
+{
+  "hesitation-points": {
+    "hesitations": [{"pre_purchase_worry":"string","post_purchase_resolution":"string","user_evidence":"string","qa_recommendation":"string"}],
+    "common_doubts": ["string"],
+    "trust_builders": ["string"],
+    "qa_optimization_items": [{"question":"string","suggested_answer":"string"}]
+  },
+  "buyer-profile": {
+    "demographics": {"likely_gender":"male|female|mixed","age_range_estimate":"string","lifestyle_indicators":["string"]},
+    "buyer_types": [{"type":"string","percentage_estimate":"string","evidence":"string"}],
+    "usage_scenes": [{"scene":"string","frequency":"daily|weekly|occasional|special","context":"string"}],
+    "purchase_motivations": ["string"],
+    "geographic_insights": {}
+  },
+  "vocab-gap": {
+    "seller_terms": ["string"],
+    "buyer_terms": ["string"],
+    "uncovered_buyer_terms": [{"term":"string","frequency":"high|medium|low","context":"string","recommendation":"add to title|add to bullets|add to description"}],
+    "term_translations": [{"seller_term":"string","buyer_term":"string"}]
+  },
+  "promise-reality": {
+    "gaps": [{"listing_claim":"string","review_reality":"string","contradiction_severity":"severe|moderate|minor","evidence_quotes":["string"],"false_advertising_risk":"high|medium|low","recommended_action":"string"}],
+    "verified_claims": ["string"],
+    "unverified_claims": ["string"]
+  }
+}
+`;
+}
+
+type SharedGeneralMapState = {
+  promptChars: number;
+  estimatedInputTokens: number;
+  streamChunks: number;
+  streamedChars: number;
+  firstResponseMs?: number;
+  mapFailures: number;
+  completedMaps: number;
+};
+
+type SharedGeneralMapPhaseResult = Omit<SharedGeneralMapState, 'completedMaps'> & {
+  mappedByTarget: Partial<Record<ReviewEvidenceTargetId, Record<string, unknown>>>;
+};
+
+type SharedGeneralMapUnitArgs = {
+  options: CallOptions;
+  requested: ReviewEvidenceTargetId[];
+  units: ReviewMapUnit[];
+  mapMaxTokens: number;
+  state: SharedGeneralMapState;
+  aggregates: Record<string, Record<string, unknown>>;
+  unit: ReviewMapUnit;
+  mapIndex: number;
+};
+
+function buildSharedGeneralAggregates(
+  requested: ReviewEvidenceTargetId[]
+): Record<string, Record<string, unknown>> {
+  const aggregates: Record<string, Record<string, unknown>> = {};
+  for (const targetId of requested) {
+    aggregates[targetId] = TARGET_HANDLERS[targetId].emptyMapAggregate();
+  }
+  return aggregates;
+}
+
+function buildSharedGeneralMappedByTarget(
+  requested: ReviewEvidenceTargetId[],
+  aggregates: Record<string, Record<string, unknown>>
+): Partial<Record<ReviewEvidenceTargetId, Record<string, unknown>>> {
+  const mappedByTarget: Partial<Record<ReviewEvidenceTargetId, Record<string, unknown>>> = {};
+  for (const targetId of requested) {
+    const mapped = TARGET_HANDLERS[targetId].normalize(aggregates[targetId] || {});
+    if (TARGET_HANDLERS[targetId].hasMapSignal(mapped)) {
+      mappedByTarget[targetId] = mapped;
+    }
+  }
+  return mappedByTarget;
+}
+
+async function runSharedGeneralMapUnit({
+  options,
+  requested,
+  units,
+  mapMaxTokens,
+  state,
+  aggregates,
+  unit,
+  mapIndex,
+}: SharedGeneralMapUnitArgs): Promise<void> {
+  const prompt = buildSharedGeneralMapPrompt(
+    unit.slice,
+    options.language,
+    unit.offset,
+    options.product
+  );
+  state.promptChars += prompt.length;
+  state.estimatedInputTokens += estimateTokenCount(prompt);
+
+  try {
+    const call = await callAnalysisJson({
+      prompt,
+      config: options.config,
+      schemaName: 'analysis_shared_general_map',
+      maxTokens: mapMaxTokens,
+      retryBudget: options.retryBudget,
+      onFirstResponse: metrics => {
+        if (state.firstResponseMs === undefined) {
+          state.firstResponseMs = metrics.elapsedMs;
+          options.onFirstResponse?.(metrics);
+        }
+      },
+      onStreamUpdate: update => {
+        state.streamChunks += update.chunkCount;
+        state.streamedChars += update.content.length;
+        options.onStreamUpdate?.(update);
+      },
+    });
+
+    const rawValue = parseLlmJson(call.text).value;
+    const raw = isObject(rawValue) ? rawValue : {};
+    for (const targetId of requested) {
+      const section = raw[targetId];
+      if (!isObject(section)) continue;
+      const aggregate = aggregates[targetId];
+      if (!aggregate) continue;
+      try {
+        const parsed = parseAnalysisResponse(targetId, JSON.stringify({ [targetId]: section }), {
+          phase: 'map',
+        }).data;
+        TARGET_HANDLERS[targetId].mergeMapShard(aggregate, parsed);
+      } catch {
+        // ignore per-target parse error for this shard
+      }
+    }
+  } catch (error) {
+    state.mapFailures += 1;
+    console.error('[shared-general Map] shard failed:', error);
+  } finally {
+    state.completedMaps += 1;
+    options.onPhase?.(
+      `shared-general Map ${state.completedMaps}/${units.length} · ${unit.slice.asin} (#${mapIndex + 1})`
+    );
+  }
+}
+
+async function runSharedGeneralMapPhase(
+  options: CallOptions,
+  requested: ReviewEvidenceTargetId[],
+  units: ReviewMapUnit[],
+  mapMaxTokens: number
+): Promise<SharedGeneralMapPhaseResult> {
+  const state: SharedGeneralMapState = {
+    promptChars: 0,
+    estimatedInputTokens: 0,
+    streamChunks: 0,
+    streamedChars: 0,
+    mapFailures: 0,
+    completedMaps: 0,
+  };
+  const aggregates = buildSharedGeneralAggregates(requested);
+  const mapConcurrency = getReviewMapConcurrency();
+  options.onPhase?.(
+    `shared-general Map 0/${units.length} · 并发${Math.min(mapConcurrency, units.length)} · ${getEvidenceDepth()}`
+  );
+  await mapWithConcurrency(units, mapConcurrency, (unit, mapIndex) =>
+    runSharedGeneralMapUnit({
+      options,
+      requested,
+      units,
+      mapMaxTokens,
+      state,
+      aggregates,
+      unit,
+      mapIndex,
+    })
+  );
+
+  return {
+    ...state,
+    mappedByTarget: buildSharedGeneralMappedByTarget(requested, aggregates),
+  };
+}
+
+/**
+ * Shared Map for general review targets (hesitation/buyer/vocab/promise).
+ * One map pass over the same review shards, then each target can Reduce independently.
+ */
+export async function buildSharedGeneralReviewMap(
+  options: CallOptions,
+  targetIds: ReviewEvidenceTargetId[]
+): Promise<SharedGeneralMapBundle> {
+  const requested = targetIds.filter(isGeneralReviewEvidenceTargetId);
+  if (requested.length === 0) {
+    return {
+      pack: buildReviewSourcePack(options.product, 'hesitation-points'),
+      mapCalls: 0,
+      mapFailures: 0,
+      promptChars: 0,
+      estimatedInputTokens: 0,
+      streamChunks: 0,
+      streamedChars: 0,
+      mappedByTarget: {},
+    };
+  }
+
+  // Same evidence pack for all general targets.
+  const pack = buildReviewSourcePack(options.product, 'hesitation-points');
+  const units = buildMapUnits(pack.slices);
+  if (units.length === 0) {
+    return {
+      pack,
+      mapCalls: 0,
+      mapFailures: 0,
+      promptChars: 0,
+      estimatedInputTokens: 0,
+      streamChunks: 0,
+      streamedChars: 0,
+      mappedByTarget: {},
+    };
+  }
+
+  const firstChunkLen = units[0]?.slice.customer_reviews.length ?? REVIEW_CHUNK_SIZE;
+  const mapMaxTokens = Math.min(8192, Math.max(3072, 768 + firstChunkLen * 280));
+  const mapPhase = await runSharedGeneralMapPhase(options, requested, units, mapMaxTokens);
+
+  return {
+    pack,
+    mapCalls: units.length,
+    ...mapPhase,
+  };
+}
+
+/** Reduce-only path after a shared general Map bundle is ready. */
+export async function runReviewEvidenceReduceFromMapped(
+  targetId: ReviewEvidenceTargetId,
+  mapped: Record<string, unknown>,
+  options: CallOptions,
+  shared?: Pick<
+    SharedGeneralMapBundle,
+    | 'pack'
+    | 'mapCalls'
+    | 'mapFailures'
+    | 'promptChars'
+    | 'estimatedInputTokens'
+    | 'streamChunks'
+    | 'streamedChars'
+    | 'firstResponseMs'
+  >
+): Promise<ReviewEvidencePipelineResult> {
+  const pack = shared?.pack || buildReviewSourcePack(options.product, targetId);
+  const reducePhase = await runReviewReducePhase(targetId, options, mapped);
+  return {
+    data: reducePhase.finalData,
+    stats: {
+      targetId,
+      mode: 'map-reduce',
+      mapCalls: shared?.mapCalls ?? 0,
+      reduceCalls: reducePhase.reduceCalls,
+      reviewCount: pack.reviewCount,
+      rawReviewCount: pack.rawReviewCount,
+      dedupe: pack.dedupe,
+      budget: pack.budget,
+      mapFailures: shared?.mapFailures ?? 0,
+      reduceFallback: reducePhase.reduceFallback,
+      qualityNotes: [...reducePhase.qualityNotes, 'shared_general_map'],
+    },
+    promptChars: (shared?.promptChars || 0) + reducePhase.promptChars,
+    estimatedInputTokens: (shared?.estimatedInputTokens || 0) + reducePhase.estimatedInputTokens,
+    streamChunks: (shared?.streamChunks || 0) + reducePhase.streamChunks,
+    streamedChars: (shared?.streamedChars || 0) + reducePhase.streamedChars,
+    firstResponseMs: shared?.firstResponseMs,
+  };
 }
 
 export const REVIEW_EVIDENCE_TARGET_IDS: readonly ReviewEvidenceTargetId[] = [

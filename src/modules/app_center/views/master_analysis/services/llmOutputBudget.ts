@@ -27,6 +27,17 @@ export function getMasterAnalysisTargetMaxTokens(targetId: string): number {
   );
 }
 
+/**
+ * Reduce-phase output budget.
+ * Previously hard-capped at 4096 which truncated multi-ASIN synthesis and left optional
+ * arrays/strategy fields empty even when Map evidence was rich.
+ */
+export function getMasterAnalysisReduceMaxTokens(targetId: string): number {
+  const targetBudget = getMasterAnalysisTargetMaxTokens(targetId);
+  // Allow most of the target budget for reduce synthesis, but keep a usable floor.
+  return Math.max(3072, Math.min(targetBudget, Math.round(targetBudget * 0.85)));
+}
+
 export function getMasterAnalysisFullReportMaxTokens(): number {
   return getRuntimeMasterAnalysisOptions().fullReportMaxTokens;
 }

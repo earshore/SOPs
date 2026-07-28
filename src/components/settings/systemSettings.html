@@ -1608,6 +1608,37 @@
 
                           <div class="settings-pref-divider" role="separator"></div>
 
+                          <div class="settings-pref-row">
+                            <div class="settings-pref-row__meta">
+                              <div class="min-w-0">
+                                <h4 class="settings-pref-row__title">证据深度</h4>
+                                <p class="settings-pref-row__hint">
+                                  控制评论/要点采样量：快速更省时，深入更完整
+                                </p>
+                              </div>
+                            </div>
+                            <div class="settings-pref-row__control">
+                              <select
+                                class="settings-control settings-control--sm"
+                                data-testid="settings-evidence-depth"
+                                :value="runtimeStrategy.settings.masterAnalysis.evidenceDepth || 'balanced'"
+                                @change="setMasterAnalysisEvidenceDepth($event.target.value)"
+                              >
+                                <template
+                                  x-for="opt in masterAnalysisEvidenceDepthOptions"
+                                  :key="opt.value"
+                                >
+                                  <option
+                                    :value="opt.value"
+                                    x-text="opt.label + ' — ' + opt.hint"
+                                  ></option>
+                                </template>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div class="settings-pref-divider" role="separator"></div>
+
                           <label class="settings-pref-row">
                             <div class="settings-pref-row__meta">
                               <div class="min-w-0">

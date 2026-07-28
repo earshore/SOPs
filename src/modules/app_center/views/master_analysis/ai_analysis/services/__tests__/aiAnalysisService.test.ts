@@ -54,6 +54,10 @@ vi.mock('@/common/config/ConfigCenter', () => ({
 vi.mock('../../prompts/analysisPrompts', () => ({
   generateAnalysisPrompt: mocks.generateAnalysisPrompt,
   getReviewSamplingMetadata: mocks.getReviewSamplingMetadata,
+  withMapReduceHygieneMetadata: (base: unknown, hygiene: unknown) => ({
+    ...(base as object),
+    mapReduceHygiene: hygiene,
+  }),
 }));
 
 vi.mock('../confidenceCalculator', () => ({

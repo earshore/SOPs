@@ -166,24 +166,31 @@ const promiseRealityMapSchema = z
   })
   .passthrough();
 
+const sellingPointsPhaseSchemas: Record<AnalysisParsePhase, z.ZodType<Record<string, unknown>>> = {
+  full: sellingPointsFullSchema,
+  map: sellingPointsMapSchema,
+  reduce: sellingPointsReduceSchema,
+};
+
+const mapPhaseSchemas: Record<string, z.ZodType<Record<string, unknown>>> = {
+  'fatal-flaws': fatalFlawsMapSchema,
+  'wow-moments': wowMomentsMapSchema,
+  'hesitation-points': hesitationMapSchema,
+  'buyer-profile': buyerProfileMapSchema,
+  'vocab-gap': vocabGapMapSchema,
+  'promise-reality': promiseRealityMapSchema,
+};
+
 function resolveAnalysisSchema(
   targetId: string,
   phase: AnalysisParsePhase = 'full'
 ): z.ZodType<Record<string, unknown>> | undefined {
   if (targetId === 'selling-points') {
-    if (phase === 'map') return sellingPointsMapSchema;
-    if (phase === 'reduce') return sellingPointsReduceSchema;
-    return sellingPointsFullSchema;
+    return sellingPointsPhaseSchemas[phase];
   }
-  if (phase === 'map') {
-    if (targetId === 'fatal-flaws') return fatalFlawsMapSchema;
-    if (targetId === 'wow-moments') return wowMomentsMapSchema;
-    if (targetId === 'hesitation-points') return hesitationMapSchema;
-    if (targetId === 'buyer-profile') return buyerProfileMapSchema;
-    if (targetId === 'vocab-gap') return vocabGapMapSchema;
-    if (targetId === 'promise-reality') return promiseRealityMapSchema;
-  }
-  return analysisSchemas[targetId];
+  return phase === 'map'
+    ? (mapPhaseSchemas[targetId] ?? analysisSchemas[targetId])
+    : analysisSchemas[targetId];
 }
 
 export function parseAnalysisResponse(

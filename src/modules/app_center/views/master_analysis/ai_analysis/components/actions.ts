@@ -21,9 +21,18 @@ import { generateMarkdownReport, generateJsonReportData } from '../services/repo
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
 import type { Product } from '../config/sampleData';
+import {
+  buildReviewSourcePack,
+  estimateReviewMapCalls,
+  isReviewEvidenceTargetId,
+} from '../services/reviewEvidencePipeline';
+import {
+  buildSellingPointsSourcePack,
+  shouldUseSellingPointsMapReduce,
+} from '../services/sellingPointsPipeline';
 import type { AlpineContext, FullReportData } from '../types';
 import { appStore } from '@/stores/useAppStore';
-import type { FullAnalysisReport } from '../config/analysisReportData';
+import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analysisReportData';
 import type { AnalysisReport } from '@/types/modules-business';
 import { BusinessError } from '@/common/errors/AppError';
 import { getPerformanceSettings } from './PerformanceSettings';
@@ -347,10 +356,15 @@ function shouldSkipAnalysisAction(context: AlpineContext, currentProducts: Produ
   );
 }
 
-function startAnalysisAction(context: AlpineContext): void {
+function startAnalysisAction(
+  context: AlpineContext,
+  options?: { preserveExistingReport?: boolean; progressLabel?: string }
+): void {
   context.isAnalyzing = true;
-  syncAnalysisProgress(context, 0, '正在准备分析...');
-  resetAnalysisReport(context);
+  syncAnalysisProgress(context, 0, options?.progressLabel || '正在准备分析...');
+  if (!options?.preserveExistingReport) {
+    resetAnalysisReport(context);
+  }
   appStore.getState().updateAnalysis({ isAnalyzing: true });
 }
 
@@ -376,22 +390,70 @@ function getProductsForAnalysis(context: AlpineContext): Product[] {
   );
 }
 
+function estimateMapWorkload(
+  product: Product,
+  selectedTargets: string[]
+): {
+  mapCalls: number;
+  hygieneHits: number;
+} {
+  let mapCalls = 0;
+  let hygieneHits = 0;
+
+  for (const targetId of selectedTargets) {
+    if (targetId === 'selling-points') {
+      const pack = buildSellingPointsSourcePack(product);
+      hygieneHits +=
+        pack.dedupe.duplicatesRemoved + pack.dedupe.emptyRemoved + pack.budget.omittedByBudget;
+      if (shouldUseSellingPointsMapReduce(product)) {
+        mapCalls += Math.max(1, Math.ceil(pack.bulletCount / 8));
+      } else {
+        mapCalls += 1;
+      }
+      continue;
+    }
+    if (isReviewEvidenceTargetId(targetId)) {
+      const pack = buildReviewSourcePack(product, targetId);
+      mapCalls += estimateReviewMapCalls(product, targetId);
+      hygieneHits +=
+        pack.dedupe.duplicatesRemoved + pack.dedupe.emptyRemoved + pack.budget.omittedByBudget;
+      continue;
+    }
+    mapCalls += 1;
+  }
+
+  return { mapCalls, hygieneHits };
+}
+
 async function prepareAnalysisRun(
   context: AlpineContext,
   selectedTargets: string[],
   sourceBinding: AnalysisSourceBinding
 ): Promise<PreparedAnalysisRun> {
   const products = getProductsForAnalysis(context);
-  showToast(`正在调用 AI 分析 ${products.length} 个产品...`, { type: 'info' });
-
   const mergedProduct = mergeProducts(products);
+  const workload = estimateMapWorkload(mergedProduct, selectedTargets);
   const language = getMarketLanguage();
   const perfSettings = getPerformanceSettings();
+  const depthLabel =
+    perfSettings.evidenceDepth === 'fast'
+      ? '快速'
+      : perfSettings.evidenceDepth === 'deep'
+        ? '深入'
+        : '均衡';
   const preloadedCachedResults = await getCachedAnalysisResults(
     selectedTargets,
     mergedProduct,
     language,
     perfSettings.enableCache
+  );
+  const cachedCount = Object.keys(preloadedCachedResults).length;
+  const hygienePart = workload.hygieneHits > 0 ? `，证据清洗约 ${workload.hygieneHits} 条` : '';
+  const cachePart =
+    cachedCount > 0 ? `，缓存命中 ${cachedCount}/${selectedTargets.length} 维，预计更快` : '';
+  showToast(
+    `正在分析 ${products.length} 个 ASIN · ${depthLabel}档 · 约 ${workload.mapCalls} 次分片调用${hygienePart}${cachePart}`,
+    { type: 'info' }
   );
   const schedulePlan = resolveAnalysisSchedulePlan({
     preference: perfSettings.schedulingPreference,
@@ -475,40 +537,102 @@ function getAnalysisTargetLabel(targetId: string): string {
   return analysisTargets.find(target => target.id === targetId)?.name || targetId;
 }
 
+function humanizeElapsedMs(elapsedMs: number | undefined): string | null {
+  if (typeof elapsedMs !== 'number' || !Number.isFinite(elapsedMs) || elapsedMs < 0) {
+    return null;
+  }
+  const totalSeconds = Math.max(0, Math.round(elapsedMs / 1000));
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return seconds > 0 ? `${minutes}m${seconds}s` : `${minutes}m`;
+}
+
+type AnalysisRunSummary = NonNullable<AnalysisReportMetadata['runSummary']>;
+type AnalysisHygieneBucket = NonNullable<
+  NonNullable<AnalysisReportMetadata['reviewSampling']>['mapReduceHygiene']
+>['lowStar'];
+
+function getAnalysisRunSuccessCount(
+  total: number,
+  summary: AnalysisRunSummary | undefined
+): number {
+  return typeof summary?.successCount === 'number'
+    ? summary.successCount
+    : Math.max(0, total - (summary?.failedCount || 0));
+}
+
+function getAnalysisRunFailedCount(
+  total: number,
+  successCount: number,
+  summary: AnalysisRunSummary | undefined
+): number {
+  return typeof summary?.failedCount === 'number'
+    ? summary.failedCount
+    : Math.max(0, total - successCount);
+}
+
+function getHygieneBucketCount(bucket: Partial<AnalysisHygieneBucket>): number {
+  return (
+    (bucket.duplicatesRemoved || 0) + (bucket.emptyRemoved || 0) + (bucket.omittedByBudget || 0)
+  );
+}
+
+function getAnalysisHygieneCount(analysisReport: FullAnalysisReport): number {
+  const hygiene = analysisReport._metadata?.reviewSampling?.mapReduceHygiene;
+  if (!hygiene) return 0;
+  return [hygiene.lowStar, hygiene.highStar, hygiene.general].reduce(
+    (sum, bucket) => sum + getHygieneBucketCount(bucket),
+    0
+  );
+}
+
+function formatAnalysisCompletionExtras(
+  summary: AnalysisRunSummary | undefined,
+  hygieneCount: number
+): string {
+  const extras: string[] = [];
+  const cachedCount =
+    typeof summary?.cachedCount === 'number' ? Math.max(0, summary.cachedCount) : 0;
+  if (cachedCount > 0) extras.push(`缓存 ${cachedCount}`);
+  if (hygieneCount > 0) extras.push(`清洗 ${hygieneCount}`);
+  const elapsedLabel = humanizeElapsedMs(summary?.elapsedMs);
+  if (elapsedLabel) extras.push(`耗时 ${elapsedLabel}`);
+  return extras.length > 0 ? ` · ${extras.join(' · ')}` : '';
+}
+
 function formatAnalysisCompletionSummary(analysisReport: FullAnalysisReport): {
   step: string;
   toastMessage: string;
   toastType: 'success' | 'warning';
 } {
   const targetIds = analysisReport._metadata?.targetIds || [];
-  const total = targetIds.length || 0;
+  const total = targetIds.length;
   const runSummary = analysisReport._metadata?.runSummary;
-  const successCount =
-    typeof runSummary?.successCount === 'number'
-      ? runSummary.successCount
-      : Math.max(0, total - (runSummary?.failedCount || 0));
-  const failedCount =
-    typeof runSummary?.failedCount === 'number'
-      ? runSummary.failedCount
-      : Math.max(0, total - successCount);
+  const successCount = getAnalysisRunSuccessCount(total, runSummary);
+  const failedCount = getAnalysisRunFailedCount(total, successCount, runSummary);
   const failedTargetIds = Array.isArray(runSummary?.failedTargetIds)
     ? runSummary.failedTargetIds
     : [];
+  const extraText = formatAnalysisCompletionExtras(
+    runSummary,
+    getAnalysisHygieneCount(analysisReport)
+  );
 
   if (failedCount <= 0) {
     const step =
-      total > 0 ? `分析完成：成功 ${successCount}/${total}` : '分析完成';
+      total > 0 ? `分析完成：成功 ${successCount}/${total}${extraText}` : `分析完成${extraText}`;
     return {
       step,
-      toastMessage: total > 0 ? `分析完成：成功 ${successCount}/${total}` : '分析完成！',
+      toastMessage: total > 0 ? step : '分析完成！',
       toastType: 'success',
     };
   }
 
   const failedLabels = failedTargetIds.map(getAnalysisTargetLabel).join('、');
   const step = failedLabels
-    ? `分析完成：成功 ${successCount} · 失败 ${failedCount}（${failedLabels}）`
-    : `分析完成：成功 ${successCount} · 失败 ${failedCount}`;
+    ? `分析完成：成功 ${successCount} · 失败 ${failedCount}（${failedLabels}）${extraText}`
+    : `分析完成：成功 ${successCount} · 失败 ${failedCount}${extraText}`;
 
   return {
     step,
@@ -565,6 +689,175 @@ export async function runAnalysisAction(
   } finally {
     finishAnalysisAction(context);
   }
+}
+
+function getExistingAnalysisReport(context: AlpineContext): FullAnalysisReport | null {
+  return context.analysisReport && typeof context.analysisReport === 'object'
+    ? ({ ...(context.analysisReport as FullAnalysisReport) } as FullAnalysisReport)
+    : null;
+}
+
+async function rerunWithoutExistingReport(
+  context: AlpineContext,
+  currentProducts: Product[],
+  targetIds: string[]
+): Promise<void> {
+  const previousTargets = [...context.selectedTargets];
+  context.selectedTargets = targetIds;
+  try {
+    await runAnalysisAction(context, currentProducts);
+  } finally {
+    context.selectedTargets = previousTargets;
+  }
+}
+
+function mergeRerunConfidence(
+  existingReport: FullAnalysisReport,
+  partialReport: FullAnalysisReport
+): Record<string, number> {
+  return {
+    ...(existingReport._metadata?.confidence || {}),
+    ...(partialReport._metadata?.confidence || {}),
+  };
+}
+
+function getMergedOverallConfidence(
+  confidence: Record<string, number>,
+  existingReport: FullAnalysisReport,
+  partialReport: FullAnalysisReport
+): number {
+  const values = Object.values(confidence).filter(
+    value => typeof value === 'number' && Number.isFinite(value)
+  );
+  if (values.length > 0) {
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  }
+  return (
+    partialReport._metadata?.overallConfidence || existingReport._metadata?.overallConfidence || 0
+  );
+}
+
+function mergeRerunQualityWarnings(
+  existingReport: FullAnalysisReport,
+  partialReport: FullAnalysisReport,
+  rerunTargetIds: string[]
+): NonNullable<AnalysisReportMetadata['qualityWarnings']> {
+  const retained = (existingReport._metadata?.qualityWarnings || []).filter(
+    item => !rerunTargetIds.includes(item.targetId)
+  );
+  return [...retained, ...(partialReport._metadata?.qualityWarnings || [])];
+}
+
+function buildRerunOptionalMetadata(
+  existingMetadata: AnalysisReportMetadata | undefined,
+  partialMetadata: AnalysisReportMetadata | undefined,
+  qualityWarnings: NonNullable<AnalysisReportMetadata['qualityWarnings']>
+): Partial<AnalysisReportMetadata> {
+  const optionalMetadata: Partial<AnalysisReportMetadata> = {};
+  const model = partialMetadata?.model || existingMetadata?.model;
+  if (model) optionalMetadata.model = model;
+  const runSummary = partialMetadata?.runSummary || existingMetadata?.runSummary;
+  if (runSummary) optionalMetadata.runSummary = runSummary;
+  const reviewSampling = partialMetadata?.reviewSampling || existingMetadata?.reviewSampling;
+  if (reviewSampling) optionalMetadata.reviewSampling = reviewSampling;
+  if (qualityWarnings.length > 0) optionalMetadata.qualityWarnings = qualityWarnings;
+  return optionalMetadata;
+}
+
+function buildRerunMetadata(
+  existingReport: FullAnalysisReport,
+  partialReport: FullAnalysisReport,
+  rerunTargetIds: string[]
+): AnalysisReportMetadata {
+  const existingMetadata = existingReport._metadata;
+  const partialMetadata = partialReport._metadata;
+  const confidence = mergeRerunConfidence(existingReport, partialReport);
+  const qualityWarnings = mergeRerunQualityWarnings(existingReport, partialReport, rerunTargetIds);
+  return {
+    confidence,
+    overallConfidence: getMergedOverallConfidence(confidence, existingReport, partialReport),
+    analyzedAt: new Date().toISOString(),
+    targetIds: Array.from(
+      new Set([
+        ...(existingMetadata?.targetIds || []),
+        ...(partialMetadata?.targetIds || rerunTargetIds),
+      ])
+    ),
+    language: partialMetadata?.language || existingMetadata?.language || 'en',
+    sourceHistoryId: partialMetadata?.sourceHistoryId ?? existingMetadata?.sourceHistoryId,
+    sourceDataFingerprint:
+      partialMetadata?.sourceDataFingerprint || existingMetadata?.sourceDataFingerprint,
+    sourceAsins: partialMetadata?.sourceAsins || existingMetadata?.sourceAsins,
+    ...buildRerunOptionalMetadata(existingMetadata, partialMetadata, qualityWarnings),
+  };
+}
+
+function mergeRerunAnalysisReport(
+  existingReport: FullAnalysisReport,
+  partialReport: FullAnalysisReport,
+  rerunTargetIds: string[]
+): FullAnalysisReport {
+  return {
+    ...existingReport,
+    ...partialReport,
+    _metadata: buildRerunMetadata(existingReport, partialReport, rerunTargetIds),
+  };
+}
+
+async function runRerunWithExistingReport(
+  context: AlpineContext,
+  existingReport: FullAnalysisReport,
+  rerunTargetIds: string[]
+): Promise<void> {
+  const sourceBinding = createAnalysisSourceBinding(context);
+  const labels = rerunTargetIds.map(getAnalysisTargetLabel).join('、');
+  startAnalysisAction(context, {
+    preserveExistingReport: true,
+    progressLabel: `正在重跑：${labels}`,
+  });
+
+  try {
+    const preparedRun = await prepareAnalysisRun(context, rerunTargetIds, sourceBinding);
+    const partialReport = await runPreparedParallelAnalysis(context, preparedRun);
+    if (partialReport) {
+      await completeAnalysisAction(
+        context,
+        sourceBinding,
+        mergeRerunAnalysisReport(existingReport, partialReport, rerunTargetIds)
+      );
+    }
+  } catch (error) {
+    handleAnalysisActionError(context, error);
+  } finally {
+    finishAnalysisAction(context);
+  }
+}
+
+/**
+ * Re-run only problematic dimensions and merge into the existing report.
+ * Useful when quality warnings appear for a subset of targets.
+ */
+export async function rerunAnalysisTargetsAction(
+  context: AlpineContext,
+  currentProducts: Product[],
+  targetIds: string[]
+): Promise<void> {
+  if (context.isAnalyzing || currentProducts.length === 0) {
+    return;
+  }
+
+  const uniqueTargets = [...new Set(targetIds.filter(Boolean))];
+  if (uniqueTargets.length === 0) {
+    showToast('没有可重跑的维度', { type: 'warning' });
+    return;
+  }
+
+  const existingReport = getExistingAnalysisReport(context);
+  if (!existingReport) {
+    await rerunWithoutExistingReport(context, currentProducts, uniqueTargets);
+    return;
+  }
+  await runRerunWithExistingReport(context, existingReport, uniqueTargets);
 }
 
 /**

@@ -298,8 +298,8 @@ export const SEMANTIC_COLORS = {
   // 文本色
   text: {
     primary: 'var(--color-slate-900)',
-    secondary: 'var(--color-slate-600)',
-    tertiary: 'var(--color-slate-500)',
+    secondary: 'var(--color-slate-800)',
+    tertiary: 'var(--color-slate-700)',
     disabled: 'var(--color-slate-400)',
     inverse: 'var(--color-white)',
   },

@@ -92,7 +92,7 @@ describe('PerformanceSettings', () => {
     panel.openSystemSettings();
     expect(openSettingsMock).toHaveBeenCalledWith({
       sectionId: 'settings-section-tool-strategy',
-      focus: 'master-analysis',
+      focus: 'master-analysis-ai',
     });
   });
 
@@ -100,6 +100,7 @@ describe('PerformanceSettings', () => {
     vi.mocked(StorageService.get).mockReturnValue(null);
     savePerformanceSettings({
       schedulingPreference: 'speed',
+      evidenceDepth: 'fast',
       enableCache: true,
       maxConcurrency: 8,
       failureStrategy: 'continue',
@@ -111,20 +112,32 @@ describe('PerformanceSettings', () => {
         version: 2,
         masterAnalysis: expect.objectContaining({
           schedulingPreference: 'speed',
+          evidenceDepth: 'fast',
           enableCache: true,
         }),
       })
     );
   });
 
-  it('template exposes minimal clear-cache control and drops analysis-settings entry', () => {
+  it('template exposes minimal clear-cache control and simple evidence-depth select', () => {
     const template = readFileSync(
       'src/modules/app_center/views/master_analysis/ai_analysis/template.html',
       'utf8'
     );
     expect(template).toContain('data-testid="ma-clear-analysis-cache"');
+    expect(template).toContain('data-testid="ma-evidence-depth"');
+    expect(template).toContain('data-testid="ma-primary-split"');
+    expect(template).toContain('selectEvidenceDepth(');
+    expect(template).toContain('ai-analysis-depth-control__select');
+    expect(template).toContain('<option value="fast">');
+    expect(template).toContain('<option value="balanced">');
+    expect(template).toContain('<option value="deep">');
+    expect(template).not.toContain('openEvidenceDepthMenu()');
+    expect(template).not.toContain('scheduleCloseEvidenceDepthMenu()');
+    expect(template).not.toContain('evidenceDepthExpanded');
     expect(template).toContain('perfSettings.clearCache()');
-    expect(template).toContain('清除缓存');
+    expect(template).toContain('fa-trash-can');
+    expect(template).not.toContain('>清除缓存<');
     expect(template).not.toContain('分析设置');
     expect(template).not.toContain('perfSettings.toggleSettings()');
     expect(template).not.toContain('在系统设置中配置');

@@ -8,11 +8,20 @@ import { resolveToolLlmConfig, type ResolvedToolLlmConfig } from '@/services/llm
 import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
-import { generateAnalysisPrompt, getReviewSamplingMetadata } from '../prompts/analysisPrompts';
+import {
+  generateAnalysisPrompt,
+  getReviewSamplingMetadata,
+  withMapReduceHygieneMetadata,
+} from '../prompts/analysisPrompts';
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse, validateAnalysisResult } from './analysisResultParser';
 import { runSellingPointsPipeline } from './sellingPointsPipeline';
-import { isReviewEvidenceTargetId, runReviewEvidencePipeline } from './reviewEvidencePipeline';
+import {
+  buildReviewSourcePack,
+  isReviewEvidenceTargetId,
+  runReviewEvidencePipeline,
+  type ReviewSourcePack,
+} from './reviewEvidencePipeline';
 import { AppError, ErrorLevel, ErrorCategory } from '@/common/errors/AppError';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
 
@@ -259,6 +268,17 @@ function calculateReportConfidence(report: Partial<FullAnalysisReport>): {
   }
 }
 
+function hygieneFromPack(pack: ReviewSourcePack) {
+  return {
+    duplicatesRemoved: pack.dedupe.duplicatesRemoved,
+    emptyRemoved: pack.dedupe.emptyRemoved,
+    budgetApplied: pack.budget.applied,
+    budgetLimit: pack.budget.budgetLimit,
+    omittedByBudget: pack.budget.omittedByBudget,
+    includedAfterPack: pack.budget.afterCount,
+  };
+}
+
 function buildReportWithMetadata(
   report: Partial<FullAnalysisReport>,
   targetIds: string[],
@@ -276,7 +296,11 @@ function buildReportWithMetadata(
       analyzedAt: new Date().toISOString(),
       targetIds,
       language,
-      reviewSampling: getReviewSamplingMetadata(product),
+      reviewSampling: withMapReduceHygieneMetadata(getReviewSamplingMetadata(product), {
+        lowStar: hygieneFromPack(buildReviewSourcePack(product, 'fatal-flaws')),
+        highStar: hygieneFromPack(buildReviewSourcePack(product, 'wow-moments')),
+        general: hygieneFromPack(buildReviewSourcePack(product, 'hesitation-points')),
+      }),
       ...(modelLabel ? { model: modelLabel } : {}),
     },
   };
