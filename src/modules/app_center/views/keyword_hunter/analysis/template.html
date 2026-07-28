@@ -84,15 +84,17 @@
               <span>报告自动归档</span>
             </span>
 
-            <!-- Generate Button -->
+            <!-- Regenerate only (auto-starts from SEO 进入分析 when no report) -->
             <button
               type="button"
               class="keyword-hunter-analysis-action keyword-hunter-analysis-action--disabled cursor-not-allowed"
               disabled
               id="keyword-hunter-analyze-btn"
+              title="清空当前报告并重新生成"
+              aria-label="重新生成评审报告"
             >
-              <i class="fas fa-magic" aria-hidden="true"></i>
-              <span id="keyword-hunter-analyze-btn-text">生成报告</span>
+              <i class="fas fa-rotate" aria-hidden="true"></i>
+              <span id="keyword-hunter-analyze-btn-text">重新生成</span>
             </button>
           </div>
         </div>
@@ -141,9 +143,9 @@
             </p>
             <p class="text-sm text-slate-500 mb-8 max-w-md leading-relaxed">
               <span class="font-semibold text-slate-700">推荐操作：</span>
-              返回 STEP 1 / STEP 2 准备关键词和文案；当「<span class="text-rose-500 font-semibold"
-                >生成报告</span
-              >」按钮可用后再开始评审。
+              返回 STEP 2 SEO 处理完成匹配后，点击「<span class="text-rose-500 font-semibold"
+                >进入分析</span
+              >」会自动生成评审报告；若对已有报告不满意，可点「重新生成」。
             </p>
 
             <!-- Analysis Dimensions -->

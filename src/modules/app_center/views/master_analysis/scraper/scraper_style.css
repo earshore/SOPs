@@ -1419,10 +1419,15 @@ textarea:focus-visible {
   }
 
   /* Keep status pill chrome; density flat-wash must not strip badge fill. */
-  [x-data='scraperPanel']
-    :where(.history-card, .plugin-card, .strategy-item, .empty-state-icon, .plugin-icon) {
+  [x-data='scraperPanel'] :where(.plugin-card, .strategy-item, .empty-state-icon, .plugin-icon) {
     background-image: none !important;
     box-shadow: none !important;
+    transform: none !important;
+  }
+
+  /* Keep history cards free of gradient washes, but allow dark hover elevation. */
+  [x-data='scraperPanel'] .history-card {
+    background-image: none !important;
     transform: none !important;
   }
 
@@ -1617,6 +1622,92 @@ textarea:focus-visible {
   background: var(--surface-card-hover, #334155) !important;
   border-color: color-mix(in srgb, var(--color-primary, #818cf8) 40%, transparent) !important;
   box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* History snapshot cards: dark hover must lift surface (density can zero light shadows). */
+.dark .history-card,
+[data-color-mode-resolved='dark'] .history-card,
+[data-theme='dark'] .history-card {
+  background: var(--surface-card, #1e293b) !important;
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12)) !important;
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark .history-card:hover,
+[data-color-mode-resolved='dark'] .history-card:hover,
+[data-theme='dark'] .history-card:hover {
+  background: var(--surface-card-hover, #334155) !important;
+  border-color: color-mix(in srgb, var(--color-primary, #818cf8) 48%, transparent) !important;
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.72) !important;
+}
+
+.dark .history-card.analyzed,
+[data-color-mode-resolved='dark'] .history-card.analyzed,
+[data-theme='dark'] .history-card.analyzed {
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 38%, transparent) !important;
+}
+
+.dark .history-card.analyzed:hover,
+[data-color-mode-resolved='dark'] .history-card.analyzed:hover,
+[data-theme='dark'] .history-card.analyzed:hover {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 14%,
+    var(--surface-card-hover, #334155)
+  ) !important;
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 52%, transparent) !important;
+  box-shadow: 0 12px 28px -16px rgba(16, 185, 129, 0.28) !important;
+}
+
+.dark .history-card .text-slate-800,
+.dark .history-card .text-slate-700,
+[data-color-mode-resolved='dark'] .history-card .text-slate-800,
+[data-color-mode-resolved='dark'] .history-card .text-slate-700,
+[data-theme='dark'] .history-card .text-slate-800,
+[data-theme='dark'] .history-card .text-slate-700 {
+  color: var(--color-text-primary, #f8fafc) !important;
+}
+
+.dark .history-card .text-slate-500,
+.dark .history-card .text-slate-400,
+.dark .history-card .text-slate-300,
+[data-color-mode-resolved='dark'] .history-card .text-slate-500,
+[data-color-mode-resolved='dark'] .history-card .text-slate-400,
+[data-color-mode-resolved='dark'] .history-card .text-slate-300,
+[data-theme='dark'] .history-card .text-slate-500,
+[data-theme='dark'] .history-card .text-slate-400,
+[data-theme='dark'] .history-card .text-slate-300 {
+  color: var(--color-text-secondary, #cbd5e1) !important;
+}
+
+.dark .history-card .delete-btn,
+[data-color-mode-resolved='dark'] .history-card .delete-btn,
+[data-theme='dark'] .history-card .delete-btn {
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.dark .history-card .delete-btn:hover,
+[data-color-mode-resolved='dark'] .history-card .delete-btn:hover,
+[data-theme='dark'] .history-card .delete-btn:hover {
+  color: var(--color-red-400, #f87171);
+  background: color-mix(in srgb, var(--color-red-500, #ef4444) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-red-500, #ef4444) 28%, transparent);
+}
+
+.dark .history-card .load-btn,
+[data-color-mode-resolved='dark'] .history-card .load-btn,
+[data-theme='dark'] .history-card .load-btn {
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, #000);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .history-card .load-btn:hover,
+[data-color-mode-resolved='dark'] .history-card .load-btn:hover,
+[data-theme='dark'] .history-card .load-btn:hover {
+  background: var(--color-primary, #818cf8) !important;
+  border-color: var(--color-primary, #818cf8) !important;
+  color: #fff !important;
 }
 
 .dark .config-header:hover,

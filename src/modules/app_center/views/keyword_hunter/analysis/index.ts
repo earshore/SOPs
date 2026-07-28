@@ -21,6 +21,7 @@ import { appStore } from '@/stores/useAppStore';
 import { ErrorService } from '@/services/errorService';
 import { createSafeFragment, setSafeHtml } from '@/common/utils/security';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
+import { confirmWithModal } from '../utils/confirmModal';
 import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 import '../styles.css';
 
@@ -149,7 +150,13 @@ function renderAnalysisSuccess(
   }
 
   if (btn) {
-    setBtnState(btn, 'success', '报告已生成');
+    setBtnState(btn, 'success', getAnalyzeButtonLabel('success'));
+    // Keep regeneratable after success chrome
+    btn.disabled = false;
+    btn.classList.remove(...BTN_CLASSES.disabled, ...BTN_CLASSES.loading);
+    btn.classList.add(...BTN_CLASSES.active);
+    const textEl = document.getElementById('keyword-hunter-analyze-btn-text');
+    if (textEl) textEl.textContent = getAnalyzeButtonLabel('active');
   }
 }
 
@@ -470,16 +477,41 @@ function renderAnalysisModule(): void {
   updateAnalyzeButtonState();
 }
 
+function getAnalyzeButtonLabel(state: 'active' | 'disabled' | 'loading' | 'success'): string {
+  if (state === 'loading') return '分析中…';
+  if (state === 'success') return '报告已生成';
+  return '重新生成';
+}
+
 /**
- * 更新"生成报告"按钮的激活/禁用状态
+ * 更新「重新生成」按钮状态（首次生成由 SEO「进入分析」自动触发）。
  */
 function updateAnalyzeButtonState(): void {
   const btn = document.getElementById('keyword-hunter-analyze-btn') as HTMLButtonElement | null;
-  const hasContent = appStore.getState().keywordTracker?.processedCopy?.trim().length > 0;
-
   if (!btn) return;
 
-  setBtnState(btn, hasContent ? 'active' : 'disabled');
+  if (activeAnalysisRun?.status === 'pending' && isAnalysisRunForCurrentCopy(activeAnalysisRun)) {
+    setBtnState(btn, 'loading', getAnalyzeButtonLabel('loading'));
+    return;
+  }
+
+  const hasContent = Boolean(appStore.getState().keywordTracker?.processedCopy?.trim());
+  const hasReport = Boolean(
+    rawMarkdownCache.trim() || appStore.getState().keywordTracker?.llmAnalysisResult?.trim()
+  );
+
+  if (!hasContent) {
+    setBtnState(btn, 'disabled', getAnalyzeButtonLabel('disabled'));
+    return;
+  }
+
+  setBtnState(btn, hasReport ? 'success' : 'active', getAnalyzeButtonLabel('active'));
+  // Keep regeneratable even after success styling
+  if (hasReport) {
+    btn.disabled = false;
+    btn.classList.remove(...BTN_CLASSES.disabled, ...BTN_CLASSES.loading);
+    btn.classList.add(...BTN_CLASSES.active);
+  }
 }
 
 // ==========================================
@@ -734,8 +766,9 @@ function handleAnalysisFailure(
     renderAnalysisError(resultDiv, panelMessage, isValidation);
   }
 
-  // 恢复按钮为可点击
-  if (btn) setBtnState(btn, 'active', '生成报告');
+  // 恢复按钮为可点击（统一为「重新生成」）
+  if (btn) setBtnState(btn, 'active', getAnalyzeButtonLabel('active'));
+  updateAnalyzeButtonState();
 }
 
 function setBtnState(
@@ -1168,9 +1201,15 @@ function highlightScores(container: HTMLElement): void {
 
 /**
  * 运行 LLM 分析
+ * @param options.forceConfirm - 用户主动点「重新生成」时，已有报告需确认清空
+ * @param options.autoStart - 来自 SEO「进入分析」自动触发；有报告时不自动覆盖
  */
-async function runLLMAnalysis(): Promise<void> {
-  // 内容为空时快速失败
+async function runLLMAnalysis(
+  options: {
+    forceConfirm?: boolean;
+    autoStart?: boolean;
+  } = {}
+): Promise<void> {
   const processedCopy = getProcessedCopy();
   if (!processedCopy.trim()) {
     showToast('文案内容为空，无法进行 AI 分析', { type: 'warning' });
@@ -1182,6 +1221,29 @@ async function runLLMAnalysis(): Promise<void> {
     if (isAnalysisRunForCurrentCopy(activeAnalysisRun)) {
       return;
     }
+  }
+
+  const hasExistingReport = Boolean(
+    rawMarkdownCache.trim() || appStore.getState().keywordTracker?.llmAnalysisResult?.trim()
+  );
+
+  // Auto path: only start when there is no report yet (avoid silent overwrite).
+  if (options.autoStart && hasExistingReport) {
+    updateAnalyzeButtonState();
+    return;
+  }
+
+  if (hasExistingReport && (options.forceConfirm || !options.autoStart)) {
+    const confirmed = await confirmWithModal(
+      '重新生成评审报告',
+      '将清空当前报告并以最新文案与关键词重新生成 AI 评审。此操作无法撤销。',
+      'kh_ignore_regenerate_listing_report',
+      '重新生成'
+    );
+    if (!confirmed) return;
+
+    rawMarkdownCache = '';
+    appStore.getState().updateKeywordTracker({ llmAnalysisResult: '' });
   }
 
   attachAnalysisRunToPage(startAnalysisRun(processedCopy));
@@ -1199,7 +1261,8 @@ function setupEventListeners(container: HTMLElement): void {
     addEventListener(
       btnAnalyze as HTMLElement,
       'click',
-      (async () => await runLLMAnalysis()) as EventListenerOrEventListenerObject
+      (async () =>
+        await runLLMAnalysis({ forceConfirm: true })) as EventListenerOrEventListenerObject
     );
   }
 }
@@ -1294,6 +1357,21 @@ class KeywordHunterAnalysisModule extends BaseModule {
     try {
       setupEventListeners(container);
       await restoreAnalysisStateFromState();
+      updateAnalyzeButtonState();
+
+      // SEO「进入分析」落地：无报告则自动生成；有报告则只展示，需手动「重新生成」。
+      const hasContent = Boolean(getProcessedCopy().trim());
+      const hasReport = Boolean(
+        rawMarkdownCache.trim() || appStore.getState().keywordTracker?.llmAnalysisResult?.trim()
+      );
+      const pendingSameCopy =
+        activeAnalysisRun?.status === 'pending' && isAnalysisRunForCurrentCopy(activeAnalysisRun);
+
+      if (hasContent && !hasReport && !pendingSameCopy) {
+        void runLLMAnalysis({ autoStart: true });
+      } else if (pendingSameCopy && activeAnalysisRun) {
+        attachAnalysisRunToPage(activeAnalysisRun);
+      }
     } catch (error) {
       handleAnalysisMountError(error);
     }
