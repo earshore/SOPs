@@ -4,7 +4,7 @@
 // 🎯 P0优化: 使用统一类型定义
 // ================================================================
 
-import { callLLM, type LLMStreamMetrics } from '@/services/llmService';
+import { callLLM, type LLMStreamMetrics, type LLMStreamUpdate } from '@/services/llmService';
 import { ValidationError } from '@/common/errors/AppError';
 import {
   ANALYSIS_PROMPT_TEMPLATE,
@@ -49,7 +49,8 @@ interface KeywordHunterLlmOptions {
 export type KeywordHunterLlmStatus =
   | { stage: 'cache-hit' }
   | { stage: 'in-flight' }
-  | { stage: 'first-response'; metrics: LLMStreamMetrics };
+  | { stage: 'first-response'; metrics: LLMStreamMetrics }
+  | { stage: 'stream'; update: LLMStreamUpdate };
 
 type KeywordHunterLlmMessage = { role: 'system' | 'user'; content: string };
 type ResolvedKeywordHunterLlmOptions = Required<
@@ -498,6 +499,7 @@ async function callAndCacheKeywordHunterLlm({
     ...getRuntimeLlmAnalysisOptions(),
     stream: true,
     onFirstResponse: metrics => onStatus?.({ stage: 'first-response', metrics }),
+    onStreamUpdate: update => onStatus?.({ stage: 'stream', update }),
   });
   if (enableCache && response.trim()) {
     await setTimedLocalCacheValue(cacheKey, { response });

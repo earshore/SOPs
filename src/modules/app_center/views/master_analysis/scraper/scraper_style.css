@@ -464,6 +464,24 @@
   animation: badgePulse var(--duration-2s) var(--ease-in-out) infinite;
 }
 
+@keyframes badgePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 6px 14px -6px rgba(16, 185, 129, 0.45);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 8px 18px -4px rgba(16, 185, 129, 0.7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .analyzed-badge {
+    animation: none;
+  }
+}
+
 .dark .analyzed-badge,
 [data-color-mode-resolved='dark'] .analyzed-badge,
 [data-theme='dark'] .analyzed-badge {

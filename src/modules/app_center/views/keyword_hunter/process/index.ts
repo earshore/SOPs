@@ -980,6 +980,14 @@ function renderTranslationLlmStatus(status: KeywordHunterService.KeywordHunterLl
     return;
   }
 
+  // Stream chunks: keep receiving state without requiring first-response metrics.
+  if (status.stage === 'stream') {
+    renderTranslationStatusMessage(elements, 65, '正在接收译文...', '流式响应进行中');
+    return;
+  }
+
+  if (status.stage !== 'first-response') return;
+
   const firstMs = status.metrics.firstChunkMs ?? status.metrics.elapsedMs;
   renderTranslationStatusMessage(
     elements,

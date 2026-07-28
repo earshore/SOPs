@@ -555,7 +555,17 @@ function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
 
   const footer = createElement('div', 'keyword-hunter-input-snapshot-footer');
   const footerMeta = createElement('span', 'keyword-hunter-input-snapshot-footer-meta');
-  footerMeta.textContent = asins.length > 0 ? `${asins.length} 个竞品 ASIN` : competitorLabel;
+  const footerIcon = createElement('i', asins.length > 0 ? 'fas fa-box-open' : 'fas fa-store');
+  footerIcon.setAttribute('aria-hidden', 'true');
+  footerMeta.appendChild(footerIcon);
+  if (asins.length > 0) {
+    const countEl = createElement('strong');
+    countEl.textContent = String(asins.length);
+    footerMeta.appendChild(countEl);
+    footerMeta.appendChild(document.createTextNode(' 个竞品 ASIN'));
+  } else {
+    footerMeta.appendChild(document.createTextNode(competitorLabel));
+  }
   footer.appendChild(footerMeta);
   footer.appendChild(
     createSnapshotActionButton(

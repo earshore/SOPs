@@ -179,7 +179,9 @@ export const DEFAULT_RUNTIME_STRATEGY_SETTINGS: RuntimeStrategySettings = {
   keywordHunterListingReview: {
     enableLlmCache: true,
     cacheTtlMs: ONE_DAY_MS,
-    listingAnalysisMaxTokens: 6000,
+    // Full structured review + markdown tables need more room than 6k;
+    // default 6k often yields empty body / truncated finish on reasoning models.
+    listingAnalysisMaxTokens: 12000,
   },
   scraper: {
     requestTimeoutMs: 15000,

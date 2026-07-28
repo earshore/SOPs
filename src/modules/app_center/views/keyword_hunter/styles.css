@@ -475,7 +475,8 @@
   gap: 0.5rem;
   padding: 0.75rem;
   overflow: visible;
-  border: 2px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
+  /* Match scraper .history-card: 2px solid border + left accent rail via ::before */
+  border: 2px solid var(--border-subtle, rgba(148, 163, 184, 0.28));
   border-radius: 0.75rem;
   background: var(--surface-card, #ffffff);
   cursor: pointer;
@@ -485,12 +486,36 @@
     box-shadow var(--duration-fast) ease;
 }
 
+/* Left edge rail (scraper history-card ::before pattern) */
+.keyword-hunter-input-snapshot-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(
+    180deg,
+    var(--color-primary, #3b82f6),
+    color-mix(in srgb, var(--color-primary, #3b82f6) 70%, #fff)
+  );
+  transition: height var(--duration-normal, 200ms) ease;
+}
+
+.keyword-hunter-input-snapshot-item:hover::before,
+.keyword-hunter-input-snapshot-item:focus-within::before,
+.keyword-hunter-input-snapshot-item.current::before {
+  height: 60%;
+}
+
 .keyword-hunter-input-snapshot-item:hover,
 .keyword-hunter-input-snapshot-item:focus-within {
   border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 28%, transparent);
   background: var(--surface-card-hover, var(--color-slate-50, #f8fafc));
   box-shadow:
-    0 8px 24px -8px color-mix(in srgb, var(--color-primary, #3b82f6) 20%, transparent),
+    0 8px 24px -8px color-mix(in srgb, var(--color-primary, #3b82f6) 18%, transparent),
     0 4px 8px -4px color-mix(in srgb, var(--color-primary, #3b82f6) 8%, transparent);
 }
 
@@ -500,13 +525,27 @@
 }
 
 .keyword-hunter-input-snapshot-item.current {
-  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 42%, transparent);
-  background: color-mix(in srgb, var(--color-primary, #3b82f6) 8%, var(--surface-card, #ffffff));
-  box-shadow: inset 2px 0 0 var(--color-primary, #3b82f6);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 40%, transparent);
+  background: color-mix(in srgb, var(--color-primary, #3b82f6) 7%, var(--surface-card, #ffffff));
 }
 
 .keyword-hunter-input-snapshot-item.status-reported {
-  border-color: color-mix(in srgb, var(--color-emerald-500, #10b981) 22%, transparent);
+  border-color: color-mix(in srgb, var(--color-emerald-500, #10b981) 24%, transparent);
+}
+
+.keyword-hunter-input-snapshot-item.status-reported::before {
+  background: linear-gradient(
+    180deg,
+    var(--color-emerald-500, #10b981),
+    var(--color-emerald-400, #34d399)
+  );
+  height: 48%;
+}
+
+.keyword-hunter-input-snapshot-item.status-reported:hover::before,
+.keyword-hunter-input-snapshot-item.status-reported:focus-within::before,
+.keyword-hunter-input-snapshot-item.status-reported.current::before {
+  height: 60%;
 }
 
 .keyword-hunter-input-snapshot-item.status-matched {
@@ -515,8 +554,7 @@
 
 /*
  * Status badge: same outer-corner as scraper "已分析"
- * (absolute -top-2 -right-2 ≈ -0.5rem / -0.5rem on card edge).
- * Delete stays inside the header row top-right (original position).
+ * + solid fill + breathe/pulse for reported ("有报告").
  */
 .keyword-hunter-input-snapshot-status-badge {
   position: absolute;
@@ -528,12 +566,13 @@
   gap: 0.2rem;
   padding: 0.18rem 0.45rem;
   border-radius: 999px;
-  color: #fff;
+  color: #fff !important;
   font-size: 0.58rem;
   font-weight: 700;
   line-height: 1;
   pointer-events: none;
   white-space: nowrap;
+  border: 1px solid transparent;
   box-shadow: 0 6px 14px -8px rgba(15, 23, 42, 0.45);
 }
 
@@ -542,15 +581,40 @@
 }
 
 .keyword-hunter-input-snapshot-status-badge.draft {
-  background: linear-gradient(90deg, #64748b, #94a3b8);
+  background-color: #64748b !important;
+  border-color: color-mix(in srgb, #475569 70%, #fff 10%);
 }
 
 .keyword-hunter-input-snapshot-status-badge.matched {
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  background-color: var(--color-blue-500, #3b82f6) !important;
+  border-color: color-mix(in srgb, var(--color-blue-600, #2563eb) 70%, #fff 10%);
 }
 
+/* Mirror scraper .analyzed-badge: solid emerald + breath */
 .keyword-hunter-input-snapshot-status-badge.reported {
-  background: linear-gradient(90deg, #10b981, #22c55e);
+  background-color: var(--color-emerald-500, #10b981) !important;
+  background-image: none !important;
+  border-color: color-mix(in srgb, var(--color-emerald-600, #059669) 70%, #fff 10%);
+  box-shadow: 0 6px 14px -6px rgba(16, 185, 129, 0.55);
+  animation: badgePulse var(--duration-2s, 2s) ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 6px 14px -6px rgba(16, 185, 129, 0.45);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 8px 18px -4px rgba(16, 185, 129, 0.7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .keyword-hunter-input-snapshot-status-badge.reported {
+    animation: none;
+  }
 }
 
 .keyword-hunter-input-snapshot-item-head {
@@ -706,13 +770,28 @@
 }
 
 .keyword-hunter-input-snapshot-footer-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   min-width: 0;
   overflow: hidden;
-  color: var(--color-text-tertiary, var(--color-slate-400, #94a3b8));
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
   font-size: 0.68rem;
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.keyword-hunter-input-snapshot-footer-meta i {
+  flex: 0 0 auto;
+  color: var(--color-text-disabled, var(--color-slate-300, #cbd5e1));
+  font-size: 0.62rem;
+}
+
+.keyword-hunter-input-snapshot-footer-meta strong {
+  color: var(--color-text-primary, var(--color-slate-700, #334155));
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .keyword-hunter-input-snapshot-action {
@@ -3252,4 +3331,162 @@
 [data-color-mode-resolved='dark'] #keyword-hunter-llm-analysis-result .score-badge-mid,
 [data-theme='dark'] #keyword-hunter-llm-analysis-result .score-badge-mid {
   color: var(--color-amber-300, #fcd34d);
+}
+
+/* ==================== Listing review stream (typewriter + thinking) ==================== */
+
+.keyword-hunter-stream-shell {
+  display: grid;
+  gap: 0.75rem;
+  min-height: 12rem;
+}
+
+.keyword-hunter-stream-reasoning {
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--color-violet-500, #8b5cf6) 22%, transparent);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-violet-500, #8b5cf6) 8%, var(--surface-card, #fff));
+  overflow: hidden;
+}
+
+.keyword-hunter-stream-reasoning__summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  color: var(--color-violet-700, #6d28d9);
+  font-size: 0.78rem;
+  font-weight: 600;
+  user-select: none;
+  list-style: none;
+}
+
+.keyword-hunter-stream-reasoning__summary::-webkit-details-marker {
+  display: none;
+}
+
+.keyword-hunter-stream-reasoning__summary i {
+  color: var(--color-violet-500, #8b5cf6);
+}
+
+.keyword-hunter-stream-reasoning__hint {
+  margin-left: auto;
+  color: var(--color-text-tertiary, #94a3b8);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.keyword-hunter-stream-reasoning__body {
+  margin: 0;
+  max-height: 12rem;
+  overflow: auto;
+  padding: 0 0.85rem 0.75rem;
+  color: var(--color-text-secondary, #475569);
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.keyword-hunter-stream-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-rose-600, #e11d48);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.keyword-hunter-stream-meta i {
+  color: var(--color-rose-400, #fb7185);
+}
+
+.keyword-hunter-stream-content {
+  min-height: 6rem;
+  max-height: min(55vh, 28rem);
+  overflow: auto;
+  padding: 0.85rem 1rem;
+  border: 1px dashed color-mix(in srgb, var(--color-rose-400, #fb7185) 35%, transparent);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-rose-500, #f43f5e) 4%, var(--surface-card, #fff));
+  color: var(--color-text-primary, #0f172a);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.keyword-hunter-stream-cursor {
+  display: inline-block;
+  width: 0.45em;
+  height: 1em;
+  margin-left: 0.12em;
+  vertical-align: -0.1em;
+  background: var(--color-rose-500, #f43f5e);
+  border-radius: 1px;
+  animation: keywordHunterStreamCursor 0.9s steps(1) infinite;
+}
+
+@keyframes keywordHunterStreamCursor {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .keyword-hunter-stream-cursor {
+    animation: none;
+    opacity: 0.85;
+  }
+}
+
+.dark .keyword-hunter-stream-reasoning,
+[data-color-mode-resolved='dark'] .keyword-hunter-stream-reasoning,
+[data-theme='dark'] .keyword-hunter-stream-reasoning {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-500, #8b5cf6) 14%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 35%, transparent);
+}
+
+.dark .keyword-hunter-stream-reasoning__summary,
+[data-color-mode-resolved='dark'] .keyword-hunter-stream-reasoning__summary,
+[data-theme='dark'] .keyword-hunter-stream-reasoning__summary {
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .keyword-hunter-stream-reasoning__body,
+[data-color-mode-resolved='dark'] .keyword-hunter-stream-reasoning__body,
+[data-theme='dark'] .keyword-hunter-stream-reasoning__body {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .keyword-hunter-stream-content,
+[data-color-mode-resolved='dark'] .keyword-hunter-stream-content,
+[data-theme='dark'] .keyword-hunter-stream-content {
+  background: color-mix(in srgb, var(--color-rose-500, #f43f5e) 10%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-rose-400, #fb7185) 35%, transparent);
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark
+  .keyword-hunter-input-snapshot-item.status-reported
+  .keyword-hunter-input-snapshot-status-badge,
+[data-color-mode-resolved='dark']
+  .keyword-hunter-input-snapshot-item.status-reported
+  .keyword-hunter-input-snapshot-status-badge,
+[data-theme='dark']
+  .keyword-hunter-input-snapshot-item.status-reported
+  .keyword-hunter-input-snapshot-status-badge {
+  background-color: var(--color-emerald-500, #10b981) !important;
+  color: #fff !important;
 }

@@ -205,6 +205,122 @@ function finalizeAnalysisFailure(run: ActiveAnalysisRun, error: unknown): never 
   throw normalizedError;
 }
 
+function appendIconLabel(
+  parent: HTMLElement,
+  iconClass: string,
+  label: string,
+  labelClass?: string
+): HTMLElement {
+  const icon = document.createElement('i');
+  icon.className = iconClass;
+  icon.setAttribute('aria-hidden', 'true');
+  const span = document.createElement('span');
+  if (labelClass) span.className = labelClass;
+  span.textContent = label;
+  parent.append(icon, span);
+  return span;
+}
+
+/** Lightweight typewriter preview (final pass uses full markdown renderer). */
+function renderStreamContentPreview(container: HTMLElement, text: string): void {
+  container.replaceChildren();
+  const lines = text.split('\n');
+  lines.forEach((line, index) => {
+    if (line) container.appendChild(document.createTextNode(line));
+    if (index < lines.length - 1) container.appendChild(document.createElement('br'));
+  });
+  const cursor = document.createElement('span');
+  cursor.className = 'keyword-hunter-stream-cursor';
+  cursor.setAttribute('aria-hidden', 'true');
+  container.appendChild(cursor);
+  container.scrollTop = container.scrollHeight;
+}
+
+/** Ensure stream UI shell exists; return live content + reasoning nodes. */
+function ensureAnalysisStreamShell(resultDiv: HTMLElement): {
+  contentEl: HTMLElement;
+  reasoningBody: HTMLElement;
+} {
+  let shell = resultDiv.querySelector('.keyword-hunter-stream-shell') as HTMLElement | null;
+  if (!shell) {
+    resultDiv.replaceChildren();
+    shell = document.createElement('div');
+    shell.className = 'keyword-hunter-stream-shell';
+    shell.setAttribute('role', 'status');
+    shell.setAttribute('aria-live', 'polite');
+
+    const reasoning = document.createElement('details');
+    reasoning.className = 'keyword-hunter-stream-reasoning';
+    reasoning.open = true;
+    reasoning.hidden = true;
+
+    const summary = document.createElement('summary');
+    summary.className = 'keyword-hunter-stream-reasoning__summary';
+    appendIconLabel(summary, 'fas fa-brain', '模型思考过程');
+    const hint = document.createElement('span');
+    hint.className = 'keyword-hunter-stream-reasoning__hint';
+    hint.textContent = '点击收起/展开';
+    summary.appendChild(hint);
+
+    const reasoningBody = document.createElement('pre');
+    reasoningBody.className = 'keyword-hunter-stream-reasoning__body';
+    reasoning.append(summary, reasoningBody);
+
+    const meta = document.createElement('div');
+    meta.className = 'keyword-hunter-stream-meta';
+    appendIconLabel(
+      meta,
+      'fas fa-stream',
+      '正在流式生成报告…',
+      'keyword-hunter-stream-meta__label'
+    );
+    const metaCursor = document.createElement('span');
+    metaCursor.className = 'keyword-hunter-stream-cursor';
+    metaCursor.setAttribute('aria-hidden', 'true');
+    meta.appendChild(metaCursor);
+
+    const contentEl = document.createElement('div');
+    contentEl.className =
+      'keyword-hunter-stream-content markdown-content keyword-hunter-report-rendered';
+
+    shell.append(reasoning, meta, contentEl);
+    resultDiv.appendChild(shell);
+  }
+
+  const contentEl = shell.querySelector('.keyword-hunter-stream-content') as HTMLElement;
+  const reasoningBody = shell.querySelector(
+    '.keyword-hunter-stream-reasoning__body'
+  ) as HTMLElement;
+  return { contentEl, reasoningBody };
+}
+
+function applyAnalysisStreamUpdate(
+  run: ActiveAnalysisRun,
+  status: KeywordHunterService.KeywordHunterLlmStatus
+): void {
+  if (status.stage !== 'stream' || !isAnalysisRunForCurrentCopy(run)) return;
+
+  const resultDiv = document.getElementById('keyword-hunter-llm-analysis-result');
+  if (!resultDiv) return;
+
+  // Switch off static loading shell on first content/reasoning chunk.
+  const { contentEl, reasoningBody } = ensureAnalysisStreamShell(resultDiv);
+  const { update } = status;
+
+  if (update.content) {
+    renderStreamContentPreview(contentEl, update.content);
+  }
+
+  if (update.reasoningContent?.trim()) {
+    const reasoningWrap = reasoningBody.closest(
+      '.keyword-hunter-stream-reasoning'
+    ) as HTMLElement | null;
+    if (reasoningWrap) reasoningWrap.hidden = false;
+    reasoningBody.textContent = update.reasoningContent;
+    reasoningBody.scrollTop = reasoningBody.scrollHeight;
+  }
+}
+
 function startAnalysisRun(processedCopy: string): ActiveAnalysisRun {
   const run: ActiveAnalysisRun = {
     processedCopy,
@@ -215,6 +331,7 @@ function startAnalysisRun(processedCopy: string): ActiveAnalysisRun {
   run.promise = fetchListingAnalysis(processedCopy, status => {
     run.llmStatus = status;
     renderAnalysisLlmStatus(run, status);
+    applyAnalysisStreamUpdate(run, status);
   })
     .then(response => finalizeAnalysisSuccess(run, response))
     .catch(error => finalizeAnalysisFailure(run, error))
@@ -246,9 +363,13 @@ function attachAnalysisRunToPage(run: ActiveAnalysisRun): void {
   const viewVersion = analysisViewVersion;
   const { btn, resultDiv } = getCurrentAnalysisElements();
   if (btn) setBtnState(btn, 'loading', '分析中…');
-  const cancelLoading = resultDiv ? showLoadingState(resultDiv) : null;
+
+  // Prefer live stream shell if already receiving chunks; else classic loading phases.
+  const hasStreamShell = Boolean(resultDiv?.querySelector('.keyword-hunter-stream-shell'));
+  const cancelLoading = resultDiv && !hasStreamShell ? showLoadingState(resultDiv) : null;
   if (run.llmStatus) {
     renderAnalysisLlmStatus(run, run.llmStatus);
+    applyAnalysisStreamUpdate(run, run.llmStatus);
   }
 
   run.promise
@@ -449,28 +570,47 @@ function renderAnalysisLlmStatus(
 ): void {
   if (!isAnalysisRunForCurrentCopy(run)) return;
 
-  const loadingEl = document.getElementById('keyword-hunter-loading-state');
-  if (!loadingEl) return;
+  // Stream chunks are handled by applyAnalysisStreamUpdate (typewriter shell).
+  if (status.stage === 'stream') return;
 
-  const title = loadingEl.querySelector('p.font-semibold');
-  const hint = loadingEl.querySelector('p.text-xs');
-  if (!title || !hint) return;
+  const loadingEl = document.getElementById('keyword-hunter-loading-state');
+  const streamMeta = document.querySelector(
+    '.keyword-hunter-stream-meta__label'
+  ) as HTMLElement | null;
 
   if (status.stage === 'cache-hit') {
-    title.textContent = '已命中缓存，正在渲染报告…';
-    hint.textContent = '无需重新调用模型';
+    if (loadingEl) {
+      const title = loadingEl.querySelector('p.font-semibold');
+      const hint = loadingEl.querySelector('p.text-xs');
+      if (title) title.textContent = '已命中缓存，正在渲染报告…';
+      if (hint) hint.textContent = '无需重新调用模型';
+    }
+    if (streamMeta) streamMeta.textContent = '已命中缓存，正在渲染报告…';
     return;
   }
 
   if (status.stage === 'in-flight') {
-    title.textContent = '正在复用进行中的分析请求…';
-    hint.textContent = '相同 Listing 不会重复调用模型';
+    if (loadingEl) {
+      const title = loadingEl.querySelector('p.font-semibold');
+      const hint = loadingEl.querySelector('p.text-xs');
+      if (title) title.textContent = '正在复用进行中的分析请求…';
+      if (hint) hint.textContent = '相同 Listing 不会重复调用模型';
+    }
+    if (streamMeta) streamMeta.textContent = '正在复用进行中的分析请求…';
     return;
   }
 
-  const firstMs = status.metrics.firstChunkMs ?? status.metrics.elapsedMs;
-  title.textContent = `模型已首响 ${(firstMs / 1000).toFixed(1)}s，正在接收报告…`;
-  hint.textContent = '流式响应已开始';
+  if (status.stage === 'first-response') {
+    const firstMs = status.metrics.firstChunkMs ?? status.metrics.elapsedMs;
+    const titleText = `模型已首响 ${(firstMs / 1000).toFixed(1)}s，正在接收报告…`;
+    if (loadingEl) {
+      const title = loadingEl.querySelector('p.font-semibold');
+      const hint = loadingEl.querySelector('p.text-xs');
+      if (title) title.textContent = titleText;
+      if (hint) hint.textContent = '流式响应已开始';
+    }
+    if (streamMeta) streamMeta.textContent = titleText;
+  }
 }
 
 // ==========================================
