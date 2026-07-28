@@ -689,21 +689,32 @@
   font-size: 0.6875rem;
   font-weight: 500;
   cursor: pointer;
+  box-shadow: none;
 }
 
-.app-overview-recent-icon-btn:hover {
-  background: var(--app-overview-surface-muted);
+/* Icon-only emphasis: no chip chrome on hover/active/pressed. */
+.app-overview-recent-icon-btn:hover,
+.app-overview-recent-icon-btn:active,
+.app-overview-recent-icon-btn:focus,
+.app-overview-recent-icon-btn:focus-visible,
+.app-overview-recent-icon-btn.active,
+.app-overview-recent-icon-btn[aria-pressed='true'] {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
   color: var(--app-overview-text-primary);
 }
 
-.app-overview-recent-icon-btn.active,
-.app-overview-recent-icon-btn[aria-pressed='true'] {
-  border-color: var(--app-recent-accent-border, var(--app-overview-accent-border));
-  background: var(--app-recent-accent-soft, var(--app-overview-accent-surface));
-  color: var(--app-recent-accent-strong, var(--app-overview-accent-strong));
+.app-overview-recent-icon-btn:focus-visible {
+  outline: none;
+  color: var(--app-overview-text-primary);
 }
 
-.app-overview-recent-icon-btn--danger:hover {
+.app-overview-recent-icon-btn--danger:hover,
+.app-overview-recent-icon-btn--danger:active,
+.app-overview-recent-icon-btn--danger:focus-visible {
+  border-color: transparent;
+  background: transparent;
   color: var(--color-rose-600, #e11d48);
 }
 
@@ -753,8 +764,8 @@
 }
 
 .app-overview-recent-card-tools.is-open .app-overview-recent-card-tools-more {
-  border-color: var(--app-overview-border, rgba(148, 163, 184, 0.28));
-  background: var(--app-overview-surface-muted, rgba(248, 250, 252, 0.9));
+  border-color: transparent;
+  background: transparent;
   color: var(--app-overview-text-primary);
 }
 
@@ -842,6 +853,18 @@
 
 .app-overview-recent-card-tool[aria-pressed='true'] i {
   transform: rotate(0) scale(1.08);
+}
+
+/* Card corner tools: icon-only, no press wash. */
+.app-overview-recent-card-tools .app-overview-recent-icon-btn:hover,
+.app-overview-recent-card-tools .app-overview-recent-icon-btn:active,
+.app-overview-recent-card-tools .app-overview-recent-icon-btn:focus,
+.app-overview-recent-card-tools .app-overview-recent-icon-btn:focus-visible,
+.app-overview-recent-card-tools .app-overview-recent-icon-btn.active,
+.app-overview-recent-card-tools .app-overview-recent-icon-btn[aria-pressed='true'] {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .app-overview-recent-group-header {
@@ -1044,11 +1067,10 @@
   border-bottom: 1px solid color-mix(in srgb, var(--app-overview-border) 88%, transparent);
   border-radius: 0;
   background: transparent;
-  box-shadow: inset 2px 0 0 transparent;
+  /* No default inset rail — only pinned cards add a left bar intentionally. */
+  box-shadow: none;
   cursor: default;
-  transition:
-    background-color 160ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    box-shadow 160ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: background-color 160ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .app-overview-recent-item:last-child {
@@ -1063,23 +1085,51 @@
 }
 
 /*
- * No focus-within wash / left rail on the whole card.
- * Clicking tray tools (or journey buttons) would otherwise flash an inset
- * accent bar + soft overlay that reads poorly in dark mode.
- * Keep focus indication on the interactive control itself.
+ * No focus-within wash / left rail on the whole card when any control is active.
+ * Also neutralize spurious outline/box on the card itself.
  */
-.app-overview-recent-item:focus-within {
+.app-overview-recent-item:focus,
+.app-overview-recent-item:focus-within,
+.app-overview-recent-item:active {
+  outline: none;
   background: inherit;
   box-shadow: none;
 }
 
-/* Preserve pinned left rail when a control inside is focused. */
-.app-overview-recent-item--pinned:focus-within {
+/* Preserve pinned left rail only for pinned cards (not for focus). */
+.app-overview-recent-item--pinned,
+.app-overview-recent-item--pinned:focus,
+.app-overview-recent-item--pinned:focus-within,
+.app-overview-recent-item--pinned:active {
   box-shadow: inset 3px 0 0 var(--app-overview-accent-strong);
 }
 
-.app-overview-recent-item--attention:focus-within {
+.app-overview-recent-item--attention,
+.app-overview-recent-item--attention:focus,
+.app-overview-recent-item--attention:focus-within,
+.app-overview-recent-item--attention:active {
   background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 4%, var(--app-overview-surface));
+  box-shadow: none;
+}
+
+/* Journey first node must not paint a vertical left bar on click/focus. */
+.app-overview-recent-journey,
+.app-overview-recent-journey-step,
+.app-overview-recent-journey-button,
+.app-overview-recent-journey-button:focus,
+.app-overview-recent-journey-button:focus-visible,
+.app-overview-recent-journey-button:active {
+  box-shadow: none;
+  outline: none;
+}
+
+.app-overview-recent-journey-step:first-child {
+  box-shadow: none;
+  border-left: 0;
+}
+
+.app-overview-recent-journey-step:first-child::before {
+  content: none;
 }
 
 .app-overview-recent-item--scrape_history {
@@ -1348,8 +1398,13 @@
 }
 
 .app-overview-recent-journey-button:focus-visible {
-  outline: 2px solid var(--app-recent-accent);
-  outline-offset: 2px;
+  /* Prefer marker emphasis over a whole-button frame that can look like a left rail. */
+  outline: none;
+}
+
+.app-overview-recent-journey-button:focus-visible .app-overview-recent-journey-marker {
+  border-color: var(--app-recent-accent);
+  box-shadow: 0 0 0 3px var(--app-recent-accent-soft);
 }
 
 .app-overview-recent-journey-button:disabled {

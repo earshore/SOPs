@@ -25,6 +25,7 @@ import {
 } from '../../artifactResumeService';
 import {
   buildResumeClipboardSummary,
+  isGenericArtifactTitle,
   RECENT_ARTIFACT_TYPE_LABELS,
 } from '../../recentArtifactPresenter';
 import {
@@ -337,6 +338,42 @@ function createRecentTime(item: RecentQueueItem): HTMLTimeElement {
   return time;
 }
 
+/** Prefer real artifact summary / title; never invent workflow prose. */
+function getLiveStageSummary(
+  state: RecentJourneyStepState,
+  stageArtifact: AppCenterArtifactEnvelope | null,
+  options?: { issueCount?: number }
+): string {
+  if (state === 'unavailable') return '本地数据不可用';
+  if (state === 'upcoming') return '';
+
+  if (stageArtifact?.type === 'compliance_check') {
+    const review = getComplianceReviewView(stageArtifact);
+    if (options?.issueCount && options.issueCount > 0) {
+      return `发现 ${options.issueCount} 项问题 · 已复核 ${review.reviewedCount}/${review.totalCount}`;
+    }
+    if (stageArtifact.summary?.trim()) return stageArtifact.summary.trim();
+    return `已复核 ${review.reviewedCount}/${review.totalCount} 项`;
+  }
+
+  if (!stageArtifact) {
+    return state === 'current' ? '待开始' : '';
+  }
+
+  const summary = stageArtifact.summary?.trim();
+  if (summary) {
+    // Keep one scannable line for the node caption.
+    return summary.length > 56 ? `${summary.slice(0, 55)}…` : summary;
+  }
+
+  const typeLabel = RECENT_ARTIFACT_TYPE_LABELS[stageArtifact.type];
+  if (stageArtifact.title?.trim() && !isGenericArtifactTitle(stageArtifact.title, typeLabel)) {
+    return stageArtifact.title.trim();
+  }
+
+  return state === 'complete' ? '已完成' : state === 'current' ? '进行中' : '';
+}
+
 function getPpcJourney(item: RecentQueueItem): RecentJourney {
   const progress = getWorkItemProgress(item.artifact.workItemId);
   const complete = progress.completedSteps >= progress.totalSteps;
@@ -346,6 +383,10 @@ function getPpcJourney(item: RecentQueueItem): RecentJourney {
     mode: 'open',
   } as const;
   const unavailable = item.payloadStatus === 'missing';
+  const live = getLiveStageSummary(
+    unavailable ? 'unavailable' : complete ? 'complete' : 'current',
+    item.artifact
+  );
   return {
     currentLabel: complete ? '全部完成' : '人工复核',
     complete,
@@ -354,14 +395,20 @@ function getPpcJourney(item: RecentQueueItem): RecentJourney {
       {
         id: 'suggestions',
         label: '生成建议',
-        summary: '搜索词报告生成动作候选。',
+        summary: unavailable
+          ? '本地数据不可用'
+          : live || item.artifact.summary?.trim() || '已生成动作候选',
         state: unavailable ? 'unavailable' : 'complete',
         action: unavailable ? null : openAction,
       },
       {
         id: 'manual_review',
         label: '人工复核',
-        summary: '确认否词/收割等动作后再执行。',
+        summary: unavailable
+          ? '本地数据不可用'
+          : complete
+            ? live || '复核完成'
+            : live || '待确认否词/收割等动作',
         state: unavailable ? 'unavailable' : complete ? 'complete' : 'current',
         action: unavailable ? null : openAction,
       },
@@ -421,7 +468,7 @@ function getSequentialJourney(
       return {
         id: step.id,
         label: step.title,
-        summary: step.summary,
+        summary: getLiveStageSummary(state, stageArtifact, { issueCount }),
         state,
         action,
       };
@@ -639,26 +686,33 @@ function createRecentUtilityActions(
 
 const recentToolsAutoCloseTimers = new WeakMap<HTMLElement, number>();
 
-function closeRecentCardTools(tools: HTMLElement, moreBtn: HTMLButtonElement): void {
+function clearRecentCardToolsTimer(tools: HTMLElement): void {
   const timer = recentToolsAutoCloseTimers.get(tools);
   if (timer !== undefined) {
     window.clearTimeout(timer);
     recentToolsAutoCloseTimers.delete(tools);
   }
+}
+
+function closeRecentCardTools(tools: HTMLElement, moreBtn: HTMLButtonElement): void {
+  clearRecentCardToolsTimer(tools);
   tools.classList.remove('is-open');
   moreBtn.setAttribute('aria-expanded', 'false');
 }
 
 function scheduleRecentCardToolsAutoClose(tools: HTMLElement, moreBtn: HTMLButtonElement): void {
-  const prev = recentToolsAutoCloseTimers.get(tools);
-  if (prev !== undefined) window.clearTimeout(prev);
+  clearRecentCardToolsTimer(tools);
   const timer = window.setTimeout(() => {
     closeRecentCardTools(tools, moreBtn);
   }, 1500);
   recentToolsAutoCloseTimers.set(tools, timer);
 }
 
-function openRecentCardTools(tools: HTMLElement, moreBtn: HTMLButtonElement): void {
+function openRecentCardTools(
+  tools: HTMLElement,
+  moreBtn: HTMLButtonElement,
+  options?: { scheduleClose?: boolean }
+): void {
   // Close other open trays so only one reveals at a time.
   document
     .querySelectorAll<HTMLElement>('.app-overview-recent-card-tools.is-open')
@@ -672,7 +726,11 @@ function openRecentCardTools(tools: HTMLElement, moreBtn: HTMLButtonElement): vo
 
   tools.classList.add('is-open');
   moreBtn.setAttribute('aria-expanded', 'true');
-  scheduleRecentCardToolsAutoClose(tools, moreBtn);
+  // Stay open while pointer is over the icon area; only leave starts the timer.
+  clearRecentCardToolsTimer(tools);
+  if (options?.scheduleClose) {
+    scheduleRecentCardToolsAutoClose(tools, moreBtn);
+  }
 }
 
 function createRecentCardCorner(
@@ -693,17 +751,6 @@ function createRecentCardCorner(
   const buttons = createRecentUtilityActions(item, onRemoved);
   buttons.forEach(button => {
     button.dataset.tooltip = button.getAttribute('aria-label') || '';
-    // Keep tray open while user is choosing an action.
-    button.addEventListener('pointerenter', () => {
-      if (!tools.classList.contains('is-open')) return;
-      const more = tools.querySelector<HTMLButtonElement>('.app-overview-recent-card-tools-more');
-      if (more) scheduleRecentCardToolsAutoClose(tools, more);
-    });
-    button.addEventListener('focus', () => {
-      if (!tools.classList.contains('is-open')) return;
-      const more = tools.querySelector<HTMLButtonElement>('.app-overview-recent-card-tools-more');
-      if (more) scheduleRecentCardToolsAutoClose(tools, more);
-    });
   });
   tray.append(...buttons);
 
@@ -730,11 +777,11 @@ function createRecentCardCorner(
     openRecentCardTools(tools, moreBtn);
   });
 
-  tools.addEventListener('pointerleave', () => {
-    if (!tools.classList.contains('is-open')) return;
-    scheduleRecentCardToolsAutoClose(tools, moreBtn);
-  });
+  // Hover/click on the three-dots or icon area both reveal pin/copy/remove.
   tools.addEventListener('pointerenter', () => {
+    openRecentCardTools(tools, moreBtn);
+  });
+  tools.addEventListener('pointerleave', () => {
     if (!tools.classList.contains('is-open')) return;
     scheduleRecentCardToolsAutoClose(tools, moreBtn);
   });
@@ -743,11 +790,11 @@ function createRecentCardCorner(
     () => {
       window.requestAnimationFrame(() => {
         if (!tools.classList.contains('is-open')) return;
+        // Keep open while focus remains inside the tools cluster.
         if (tools.contains(document.activeElement)) {
-          scheduleRecentCardToolsAutoClose(tools, moreBtn);
+          clearRecentCardToolsTimer(tools);
           return;
         }
-        // Focus left the tray entirely — collapse soon.
         scheduleRecentCardToolsAutoClose(tools, moreBtn);
       });
     },
