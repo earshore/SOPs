@@ -380,15 +380,15 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
   return element;
 }
 
+/** Snapshot timestamp: MM/DD HH:mm (matches scraper history cards). */
 function formatSnapshotDate(value: string): string {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return value;
-  return date.toLocaleString('zh-CN', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${month}/${day} ${hours}:${minutes}`;
 }
 
 function getSnapshotStatusLabel(status: KeywordHunterSnapshot['status']): string {
@@ -400,8 +400,41 @@ function getSnapshotStatusLabel(status: KeywordHunterSnapshot['status']): string
   return labels[status];
 }
 
-function getSnapshotSourceLabel(): string {
-  return '手动输入';
+const ASIN_TOKEN_RE = /\bB0[A-Z0-9]{8}\b/gi;
+
+/** Extract ASIN-like tokens from free text (B0 + 8 alphanumerics). */
+function extractAsinTokens(text: string): string[] {
+  if (!text) return [];
+  const found = text.toUpperCase().match(ASIN_TOKEN_RE) || [];
+  return Array.from(new Set(found));
+}
+
+/**
+ * Prefer workspace sourceAsinOrSku; fall back to ASINs embedded in inputs.
+ * Shown in the snapshot card the way scraper history shows ASIN tags.
+ */
+function getSnapshotAsins(snapshot: KeywordHunterSnapshot): string[] {
+  const fromSource = snapshot.source?.sourceAsinOrSku?.trim().toUpperCase();
+  if (fromSource && /^B0[A-Z0-9]{8}$/.test(fromSource)) {
+    return [fromSource];
+  }
+
+  const combined = [
+    fromSource || '',
+    snapshot.input?.keywordsInputText || '',
+    snapshot.input?.copyInputText || '',
+    snapshot.title || '',
+  ].join('\n');
+
+  return extractAsinTokens(combined);
+}
+
+function getSnapshotCompetitorLabel(snapshot: KeywordHunterSnapshot): string {
+  const asins = getSnapshotAsins(snapshot);
+  const primary = asins[0];
+  if (asins.length === 1 && primary) return primary;
+  if (asins.length > 1 && primary) return `${primary} +${asins.length - 1}`;
+  return '匹配竞品 ASIN';
 }
 
 function getVisibleInputSnapshots(): KeywordHunterSnapshot[] {
@@ -428,56 +461,79 @@ function createSnapshotActionButton(
   return button;
 }
 
+function appendSnapshotStatusBadge(
+  item: HTMLElement,
+  status: KeywordHunterSnapshot['status'],
+  statusLabel: string
+): void {
+  const statusBadge = createElement('div', `keyword-hunter-input-snapshot-status-badge ${status}`);
+  statusBadge.setAttribute('aria-hidden', 'true');
+  const iconClass =
+    status === 'reported'
+      ? 'fas fa-check-circle'
+      : status === 'matched'
+        ? 'fas fa-link'
+        : 'fas fa-pen';
+  const statusIcon = createElement('i', iconClass);
+  statusIcon.setAttribute('aria-hidden', 'true');
+  const statusText = createElement('span');
+  statusText.textContent = statusLabel;
+  statusBadge.appendChild(statusIcon);
+  statusBadge.appendChild(statusText);
+  item.appendChild(statusBadge);
+}
+
+function appendSnapshotAsinRow(item: HTMLElement, asins: string[]): void {
+  const asinRow = createElement('div', 'keyword-hunter-input-snapshot-asins');
+  const visibleAsins = asins.slice(0, 3);
+  if (visibleAsins.length === 0) {
+    const placeholder = createElement('span', 'keyword-hunter-input-snapshot-asin is-empty');
+    placeholder.textContent = '匹配竞品 ASIN';
+    asinRow.appendChild(placeholder);
+  } else {
+    visibleAsins.forEach(asin => {
+      const tag = createElement('span', 'keyword-hunter-input-snapshot-asin');
+      tag.textContent = asin;
+      asinRow.appendChild(tag);
+    });
+    if (asins.length > 3) {
+      const more = createElement('span', 'keyword-hunter-input-snapshot-asin is-more');
+      more.textContent = `+${asins.length - 3}`;
+      asinRow.appendChild(more);
+    }
+  }
+  item.appendChild(asinRow);
+}
+
 function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
   const item = createElement('article', 'keyword-hunter-input-snapshot-item');
   const currentSnapshotId = appStore.getState().keywordTracker.currentSnapshotId;
   const isCurrent = snapshot.id === currentSnapshotId;
+  const asins = getSnapshotAsins(snapshot);
+  const competitorLabel = getSnapshotCompetitorLabel(snapshot);
+  const statusLabel = getSnapshotStatusLabel(snapshot.status);
 
-  if (isCurrent) {
-    item.classList.add('current');
-  }
-
+  if (isCurrent) item.classList.add('current');
+  item.classList.add(`status-${snapshot.status}`);
   item.tabIndex = 0;
   item.setAttribute('role', 'button');
-  item.setAttribute('aria-label', `${isCurrent ? '当前快照，' : ''}恢复快照 ${snapshot.title}`);
+  item.setAttribute(
+    'aria-label',
+    `${isCurrent ? '当前快照，' : ''}加载快照 ${competitorLabel}，${statusLabel}`
+  );
+
+  appendSnapshotStatusBadge(item, snapshot.status, statusLabel);
 
   const header = createElement('div', 'keyword-hunter-input-snapshot-item-head');
+  const titleBlock = createElement('div', 'keyword-hunter-input-snapshot-item-title');
   const title = createElement('h4');
   title.textContent = snapshot.title;
-  header.appendChild(title);
-
-  const status = createElement('span', `keyword-hunter-input-snapshot-status ${snapshot.status}`);
-  status.textContent = getSnapshotStatusLabel(snapshot.status);
-  header.appendChild(status);
-  item.appendChild(header);
-
-  const meta = createElement('div', 'keyword-hunter-input-snapshot-meta');
-  const source = createElement('span');
-  source.textContent = getSnapshotSourceLabel();
-  const time = createElement('span');
+  const time = createElement('span', 'keyword-hunter-input-snapshot-time');
   time.textContent = formatSnapshotDate(snapshot.updatedAt);
-  meta.appendChild(source);
-  meta.appendChild(time);
-  item.appendChild(meta);
-
-  const stats = createElement('div', 'keyword-hunter-input-snapshot-stats');
-  stats.appendChild(createSnapshotStat('覆盖', `${snapshot.result.coverageRate}%`));
-  stats.appendChild(createSnapshotStat('命中', String(snapshot.derived.matchedCount)));
-  stats.appendChild(createSnapshotStat('未命中', String(snapshot.derived.unmatchedCount)));
-  item.appendChild(stats);
-
-  const actions = createElement('div', 'keyword-hunter-input-snapshot-actions');
-  actions.appendChild(
-    createSnapshotActionButton(
-      'keyword-hunter-input-snapshot-action restore',
-      'fas fa-arrow-rotate-left',
-      '恢复到输入页',
-      () => {
-        void restoreInputSnapshot(snapshot);
-      }
-    )
-  );
-  actions.appendChild(
+  titleBlock.appendChild(title);
+  titleBlock.appendChild(time);
+  header.appendChild(titleBlock);
+  header.appendChild(
     createSnapshotActionButton(
       'keyword-hunter-input-snapshot-action delete',
       'fas fa-times',
@@ -487,7 +543,31 @@ function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
       }
     )
   );
-  item.appendChild(actions);
+  item.appendChild(header);
+
+  appendSnapshotAsinRow(item, asins);
+
+  const stats = createElement('div', 'keyword-hunter-input-snapshot-stats');
+  stats.appendChild(createSnapshotStat('覆盖', `${snapshot.result.coverageRate}%`));
+  stats.appendChild(createSnapshotStat('命中', String(snapshot.derived.matchedCount)));
+  stats.appendChild(createSnapshotStat('未命中', String(snapshot.derived.unmatchedCount)));
+  item.appendChild(stats);
+
+  const footer = createElement('div', 'keyword-hunter-input-snapshot-footer');
+  const footerMeta = createElement('span', 'keyword-hunter-input-snapshot-footer-meta');
+  footerMeta.textContent = asins.length > 0 ? `${asins.length} 个竞品 ASIN` : competitorLabel;
+  footer.appendChild(footerMeta);
+  footer.appendChild(
+    createSnapshotActionButton(
+      'keyword-hunter-input-snapshot-action restore',
+      'fas fa-arrow-right',
+      '加载快照（恢复到输入页）',
+      () => {
+        void restoreInputSnapshot(snapshot);
+      }
+    )
+  );
+  item.appendChild(footer);
 
   addEventListener(item, 'click', () => {
     void restoreInputSnapshot(snapshot);
