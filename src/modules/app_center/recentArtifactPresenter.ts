@@ -218,7 +218,13 @@ function appendTypeSpecificFacts(
   const meta = artifact.metadata || {};
   const handlers: Partial<Record<AppCenterArtifactType, () => void>> = {
     scrape_history: () => appendAsinCountFact(facts, workItem, blocked),
-    analysis_report: () => pushUniqueFact(facts, '分析报告已生成', blocked),
+    analysis_report: () => {
+      appendAsinCountFact(facts, workItem, blocked);
+      if (facts.length === 0) {
+        pushSummaryParts(facts, artifact.summary, blocked, { skipHistoryBound: true });
+      }
+      if (facts.length === 0) pushUniqueFact(facts, '分析报告已生成', blocked);
+    },
     listing_prompt: () => appendAsinCountFact(facts, workItem, blocked),
     listing_copy: () => pushSummaryParts(facts, artifact.summary, blocked),
     keyword_snapshot: () => pushSummaryParts(facts, artifact.summary, blocked),
@@ -241,17 +247,6 @@ function appendTypeSpecificFacts(
   handlers[artifact.type]?.();
 }
 
-function formatExecutionStart(value: string): string {
-  const time = new Date(value).getTime();
-  if (!Number.isFinite(time)) return '';
-  return new Date(time).toLocaleString('zh-CN', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 export function extractRecentFacts(
   artifact: AppCenterArtifactEnvelope,
   workItem: AppCenterWorkItem | null | undefined,
@@ -260,15 +255,8 @@ export function extractRecentFacts(
 ): string[] {
   const facts: string[] = [];
   const blocked = createFactBlockedSet(workItem, typeLabel, primaryTitle);
-  const executionStart = formatExecutionStart(workItem?.createdAt || '');
-  if (executionStart) pushUniqueFact(facts, `执行开始 ${executionStart}`, blocked);
-  if (
-    artifact.title.trim() &&
-    !isGenericArtifactTitle(artifact.title, typeLabel) &&
-    normalizeRecentText(artifact.title) !== normalizeRecentText(primaryTitle)
-  ) {
-    pushUniqueFact(facts, `名称：${artifact.title.trim()}`, blocked);
-  }
+  // Body stays compact: type-specific metrics only (no execution-start / name noise).
+  // Journey rail carries stage summaries; relative time lives in the card corner.
   appendTypeSpecificFacts(facts, artifact, workItem, blocked);
 
   if (facts.length === 0 && artifact.summary.trim()) {
@@ -277,7 +265,8 @@ export function extractRecentFacts(
     });
   }
 
-  return facts;
+  // Hard cap for scannable density in the recent-card body.
+  return facts.slice(0, 3);
 }
 
 export function resolvePrimaryTitle(

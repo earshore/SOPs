@@ -65,6 +65,8 @@ type RecentJourneyStepState = 'complete' | 'current' | 'upcoming' | 'issue' | 'u
 interface RecentJourneyStep {
   id: string;
   label: string;
+  /** Short stage summary shown under the node label in the journey rail. */
+  summary: string;
   state: RecentJourneyStepState;
   action:
     | { kind: 'resume'; artifact: AppCenterArtifactEnvelope; mode: ResumeMode }
@@ -352,12 +354,14 @@ function getPpcJourney(item: RecentQueueItem): RecentJourney {
       {
         id: 'suggestions',
         label: '生成建议',
+        summary: '搜索词报告生成动作候选。',
         state: unavailable ? 'unavailable' : 'complete',
         action: unavailable ? null : openAction,
       },
       {
         id: 'manual_review',
         label: '人工复核',
+        summary: '确认否词/收割等动作后再执行。',
         state: unavailable ? 'unavailable' : complete ? 'complete' : 'current',
         action: unavailable ? null : openAction,
       },
@@ -414,7 +418,13 @@ function getSequentialJourney(
       );
       if (stageType === 'compliance_check' && issueCount > 0 && complete) state = 'issue';
       else if (state !== 'upcoming' && action === null) state = 'unavailable';
-      return { id: step.id, label: step.title, state, action };
+      return {
+        id: step.id,
+        label: step.title,
+        summary: step.summary,
+        state,
+        action,
+      };
     }),
   };
 }
@@ -485,10 +495,23 @@ function createJourneyStepButton(
   const marker = document.createElement('span');
   marker.className = 'app-overview-recent-journey-marker';
   marker.setAttribute('aria-hidden', 'true');
+
+  const text = document.createElement('span');
+  text.className = 'app-overview-recent-journey-text';
+
   const label = document.createElement('span');
   label.className = 'app-overview-recent-journey-label';
   label.textContent = step.label;
-  button.append(marker, label);
+  text.append(label);
+
+  if (step.summary.trim()) {
+    const summary = document.createElement('span');
+    summary.className = 'app-overview-recent-journey-summary';
+    summary.textContent = step.summary.trim();
+    text.append(summary);
+  }
+
+  button.append(marker, text);
   return button;
 }
 
@@ -823,6 +846,9 @@ function handleComplianceNode(
   onRefresh();
 }
 
+/** Keep card body dense but light — detail lives in the journey rail. */
+const RECENT_BODY_FACT_LIMIT = 2;
+
 function createRecentCardBody(item: RecentQueueItem): HTMLElement {
   const { presentation } = item;
   const body = document.createElement('div');
@@ -832,11 +858,13 @@ function createRecentCardBody(item: RecentQueueItem): HTMLElement {
   title.textContent = presentation.primaryTitle;
   body.append(createRecentMetaRow(item), title);
 
-  if (presentation.facts.length === 0) return body;
+  const denseFacts = presentation.facts.slice(0, RECENT_BODY_FACT_LIMIT);
+  if (denseFacts.length === 0) return body;
+
   const facts = document.createElement('div');
   facts.className = 'app-overview-recent-facts';
   facts.setAttribute('aria-label', '关键信息');
-  presentation.facts.forEach(factText => {
+  denseFacts.forEach(factText => {
     const fact = document.createElement('span');
     fact.className = 'app-overview-recent-fact';
     fact.textContent = factText;
