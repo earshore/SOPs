@@ -1062,9 +1062,24 @@
   border-bottom-color: color-mix(in srgb, var(--app-overview-border) 88%, transparent);
 }
 
+/*
+ * No focus-within wash / left rail on the whole card.
+ * Clicking tray tools (or journey buttons) would otherwise flash an inset
+ * accent bar + soft overlay that reads poorly in dark mode.
+ * Keep focus indication on the interactive control itself.
+ */
 .app-overview-recent-item:focus-within {
-  background: color-mix(in srgb, var(--app-recent-accent-soft) 70%, var(--app-overview-surface));
-  box-shadow: inset 2px 0 0 var(--app-recent-accent);
+  background: inherit;
+  box-shadow: none;
+}
+
+/* Preserve pinned left rail when a control inside is focused. */
+.app-overview-recent-item--pinned:focus-within {
+  box-shadow: inset 3px 0 0 var(--app-overview-accent-strong);
+}
+
+.app-overview-recent-item--attention:focus-within {
+  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 4%, var(--app-overview-surface));
 }
 
 .app-overview-recent-item--scrape_history {
