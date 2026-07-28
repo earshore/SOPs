@@ -1313,6 +1313,15 @@
 }
 
 .app-overview-recent-journey {
+  /* Journey chrome follows Appearance 色调 (--color-primary*), not per-type card palette. */
+  --app-recent-accent: var(--color-primary);
+  --app-recent-accent-strong: var(--color-primary-dark, var(--color-primary));
+  --app-recent-accent-soft: var(
+    --color-primary-light,
+    color-mix(in srgb, var(--color-primary) 14%, transparent)
+  );
+  --app-recent-accent-border: color-mix(in srgb, var(--color-primary) 22%, transparent);
+
   display: grid;
   grid-column: 1 / -1;
   gap: 0.75rem;
