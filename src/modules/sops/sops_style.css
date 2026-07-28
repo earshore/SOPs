@@ -491,6 +491,227 @@
   background: var(--surface-card, #ffffff);
 }
 
+/* ---- NPI tables: dark mode readability ---- */
+.dark .npi-lifecycle-table-card,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table-card,
+[data-theme='dark'] .npi-lifecycle-table-card {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+}
+
+.dark .npi-lifecycle-table-help,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table-help,
+[data-theme='dark'] .npi-lifecycle-table-help {
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, #000);
+  border-bottom-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .npi-lifecycle-table,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table,
+[data-theme='dark'] .npi-lifecycle-table {
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark .npi-lifecycle-table th,
+.dark .npi-lifecycle-table td,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table th,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table td,
+[data-theme='dark'] .npi-lifecycle-table th,
+[data-theme='dark'] .npi-lifecycle-table td {
+  border-bottom-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+}
+
+.dark .npi-lifecycle-table thead tr:first-child th:nth-child(1),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table thead tr:first-child th:nth-child(1),
+[data-theme='dark'] .npi-lifecycle-table thead tr:first-child th:nth-child(1) {
+  background: color-mix(in srgb, var(--color-blue-500, #3b82f6) 18%, var(--surface-card, #1e293b));
+  color: var(--color-blue-200, #bfdbfe);
+}
+
+.dark .npi-lifecycle-table thead tr:first-child th:nth-child(2),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table thead tr:first-child th:nth-child(2),
+[data-theme='dark'] .npi-lifecycle-table thead tr:first-child th:nth-child(2) {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-500, #8b5cf6) 18%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-violet-200, #ddd6fe);
+}
+
+.dark .npi-lifecycle-table thead tr:first-child th:nth-child(3),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table thead tr:first-child th:nth-child(3),
+[data-theme='dark'] .npi-lifecycle-table thead tr:first-child th:nth-child(3) {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-emerald-200, #a7f3d0);
+}
+
+.dark .npi-lifecycle-table thead tr:first-child th:nth-child(4),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table thead tr:first-child th:nth-child(4),
+[data-theme='dark'] .npi-lifecycle-table thead tr:first-child th:nth-child(4) {
+  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 16%, var(--surface-card, #1e293b));
+  color: var(--color-amber-200, #fde68a);
+}
+
+.dark .npi-lifecycle-table thead tr:first-child th:nth-child(5),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table thead tr:first-child th:nth-child(5),
+[data-theme='dark'] .npi-lifecycle-table thead tr:first-child th:nth-child(5) {
+  background: color-mix(in srgb, var(--color-red-500, #ef4444) 16%, var(--surface-card, #1e293b));
+  color: var(--color-red-200, #fecaca);
+}
+
+.dark .npi-lifecycle-table thead tr:nth-child(2) th,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table thead tr:nth-child(2) th,
+[data-theme='dark'] .npi-lifecycle-table thead tr:nth-child(2) th {
+  background: var(--surface-card, #1e293b);
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .npi-lifecycle-table tbody tr:nth-child(even) td:not([class*='bg-']),
+[data-color-mode-resolved='dark']
+  .npi-lifecycle-table
+  tbody
+  tr:nth-child(even)
+  td:not([class*='bg-']),
+[data-theme='dark'] .npi-lifecycle-table tbody tr:nth-child(even) td:not([class*='bg-']) {
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 55%, var(--surface-card, #1e293b));
+}
+
+.dark .npi-lifecycle-table tbody tr:hover td:not([class*='bg-']),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table tbody tr:hover td:not([class*='bg-']),
+[data-theme='dark'] .npi-lifecycle-table tbody tr:hover td:not([class*='bg-']) {
+  background: color-mix(in srgb, var(--color-primary, #818cf8) 14%, var(--surface-card, #1e293b));
+}
+
+.dark .npi-lifecycle-table thead tr:nth-child(2) th:first-child,
+.dark .npi-lifecycle-table thead tr:nth-child(2) th:nth-child(2),
+.dark .npi-lifecycle-table tbody td:first-child,
+.dark .npi-lifecycle-table tbody td:nth-child(2),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table thead tr:nth-child(2) th:first-child,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table thead tr:nth-child(2) th:nth-child(2),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table tbody td:first-child,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table tbody td:nth-child(2),
+[data-theme='dark'] .npi-lifecycle-table thead tr:nth-child(2) th:first-child,
+[data-theme='dark'] .npi-lifecycle-table thead tr:nth-child(2) th:nth-child(2),
+[data-theme='dark'] .npi-lifecycle-table tbody td:first-child,
+[data-theme='dark'] .npi-lifecycle-table tbody td:nth-child(2) {
+  background: var(--surface-card, #1e293b);
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark .npi-lifecycle-table tbody tr:nth-child(even) td:first-child,
+.dark .npi-lifecycle-table tbody tr:nth-child(even) td:nth-child(2),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table tbody tr:nth-child(even) td:first-child,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table tbody tr:nth-child(even) td:nth-child(2),
+[data-theme='dark'] .npi-lifecycle-table tbody tr:nth-child(even) td:first-child,
+[data-theme='dark'] .npi-lifecycle-table tbody tr:nth-child(even) td:nth-child(2) {
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 55%, var(--surface-card, #1e293b));
+}
+
+.dark .npi-lifecycle-table tbody tr:hover td:first-child,
+.dark .npi-lifecycle-table tbody tr:hover td:nth-child(2),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table tbody tr:hover td:first-child,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table tbody tr:hover td:nth-child(2),
+[data-theme='dark'] .npi-lifecycle-table tbody tr:hover td:first-child,
+[data-theme='dark'] .npi-lifecycle-table tbody tr:hover td:nth-child(2) {
+  background: color-mix(in srgb, var(--color-primary, #818cf8) 14%, var(--surface-card, #1e293b));
+}
+
+.dark .npi-lifecycle-table :is(th, td):nth-child(9),
+.dark .npi-lifecycle-table :is(th, td):nth-child(15),
+.dark .npi-lifecycle-table :is(th, td):nth-child(21),
+.dark .npi-lifecycle-table :is(th, td):nth-child(26),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table :is(th, td):nth-child(9),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table :is(th, td):nth-child(15),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table :is(th, td):nth-child(21),
+[data-color-mode-resolved='dark'] .npi-lifecycle-table :is(th, td):nth-child(26),
+[data-theme='dark'] .npi-lifecycle-table :is(th, td):nth-child(9),
+[data-theme='dark'] .npi-lifecycle-table :is(th, td):nth-child(15),
+[data-theme='dark'] .npi-lifecycle-table :is(th, td):nth-child(21),
+[data-theme='dark'] .npi-lifecycle-table :is(th, td):nth-child(26) {
+  border-left-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .npi-lifecycle-table input[type='number'],
+.dark .npi-lifecycle-table select,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table input[type='number'],
+[data-color-mode-resolved='dark'] .npi-lifecycle-table select,
+[data-theme='dark'] .npi-lifecycle-table input[type='number'],
+[data-theme='dark'] .npi-lifecycle-table select {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.14));
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 90%, #000);
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark .npi-lifecycle-table-scroll,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table-scroll,
+[data-theme='dark'] .npi-lifecycle-table-scroll {
+  scrollbar-color: var(--color-slate-500, #64748b) var(--surface-panel, #0f172a);
+}
+
+.dark .npi-lifecycle-table-scroll::-webkit-scrollbar-track,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table-scroll::-webkit-scrollbar-track,
+[data-theme='dark'] .npi-lifecycle-table-scroll::-webkit-scrollbar-track {
+  background: var(--surface-panel, #0f172a);
+}
+
+.dark .npi-lifecycle-table-scroll::-webkit-scrollbar-thumb,
+[data-color-mode-resolved='dark'] .npi-lifecycle-table-scroll::-webkit-scrollbar-thumb,
+[data-theme='dark'] .npi-lifecycle-table-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-slate-500, #64748b);
+  border-color: var(--surface-panel, #0f172a);
+}
+
+/* Stage / review tables reuse the same help strip class */
+.dark #npi-stage-rules-table,
+.dark #npi-review-archive-table,
+[data-color-mode-resolved='dark'] #npi-stage-rules-table,
+[data-color-mode-resolved='dark'] #npi-review-archive-table,
+[data-theme='dark'] #npi-stage-rules-table,
+[data-theme='dark'] #npi-review-archive-table {
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark #npi-stage-rules-table th,
+.dark #npi-stage-rules-table td,
+.dark #npi-review-archive-table th,
+.dark #npi-review-archive-table td,
+[data-color-mode-resolved='dark'] #npi-stage-rules-table th,
+[data-color-mode-resolved='dark'] #npi-stage-rules-table td,
+[data-color-mode-resolved='dark'] #npi-review-archive-table th,
+[data-color-mode-resolved='dark'] #npi-review-archive-table td,
+[data-theme='dark'] #npi-stage-rules-table th,
+[data-theme='dark'] #npi-stage-rules-table td,
+[data-theme='dark'] #npi-review-archive-table th,
+[data-theme='dark'] #npi-review-archive-table td {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark #npi-stage-rules-table thead th,
+.dark #npi-review-archive-table thead th,
+[data-color-mode-resolved='dark'] #npi-stage-rules-table thead th,
+[data-color-mode-resolved='dark'] #npi-review-archive-table thead th,
+[data-theme='dark'] #npi-stage-rules-table thead th,
+[data-theme='dark'] #npi-review-archive-table thead th {
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 80%, var(--surface-card, #1e293b));
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark #npi-stage-rules-table tbody tr:nth-child(even),
+.dark #npi-review-archive-table tbody tr:nth-child(even),
+[data-color-mode-resolved='dark'] #npi-stage-rules-table tbody tr:nth-child(even),
+[data-color-mode-resolved='dark'] #npi-review-archive-table tbody tr:nth-child(even),
+[data-theme='dark'] #npi-stage-rules-table tbody tr:nth-child(even),
+[data-theme='dark'] #npi-review-archive-table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 45%, transparent);
+}
+
 body .npi-lifecycle-table select[data-action='update-field'] {
   min-height: 2rem;
   height: 2rem;

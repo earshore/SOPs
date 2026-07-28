@@ -614,19 +614,124 @@ function createRecentUtilityActions(
   ];
 }
 
+const recentToolsAutoCloseTimers = new WeakMap<HTMLElement, number>();
+
+function closeRecentCardTools(tools: HTMLElement, moreBtn: HTMLButtonElement): void {
+  const timer = recentToolsAutoCloseTimers.get(tools);
+  if (timer !== undefined) {
+    window.clearTimeout(timer);
+    recentToolsAutoCloseTimers.delete(tools);
+  }
+  tools.classList.remove('is-open');
+  moreBtn.setAttribute('aria-expanded', 'false');
+}
+
+function scheduleRecentCardToolsAutoClose(tools: HTMLElement, moreBtn: HTMLButtonElement): void {
+  const prev = recentToolsAutoCloseTimers.get(tools);
+  if (prev !== undefined) window.clearTimeout(prev);
+  const timer = window.setTimeout(() => {
+    closeRecentCardTools(tools, moreBtn);
+  }, 1500);
+  recentToolsAutoCloseTimers.set(tools, timer);
+}
+
+function openRecentCardTools(tools: HTMLElement, moreBtn: HTMLButtonElement): void {
+  // Close other open trays so only one reveals at a time.
+  document
+    .querySelectorAll<HTMLElement>('.app-overview-recent-card-tools.is-open')
+    .forEach(open => {
+      if (open === tools) return;
+      const otherMore = open.querySelector<HTMLButtonElement>(
+        '.app-overview-recent-card-tools-more'
+      );
+      if (otherMore) closeRecentCardTools(open, otherMore);
+    });
+
+  tools.classList.add('is-open');
+  moreBtn.setAttribute('aria-expanded', 'true');
+  scheduleRecentCardToolsAutoClose(tools, moreBtn);
+}
+
 function createRecentCardCorner(
   item: RecentQueueItem,
   onRemoved: (queueId: string) => void
 ): HTMLElement {
   const corner = document.createElement('div');
   corner.className = 'app-overview-recent-card-corner';
+
   const tools = document.createElement('div');
   tools.className = 'app-overview-recent-card-tools';
+
+  const tray = document.createElement('div');
+  tray.className = 'app-overview-recent-card-tools-tray';
+  tray.setAttribute('role', 'group');
+  tray.setAttribute('aria-label', '作业快捷操作');
+
   const buttons = createRecentUtilityActions(item, onRemoved);
   buttons.forEach(button => {
     button.dataset.tooltip = button.getAttribute('aria-label') || '';
+    // Keep tray open while user is choosing an action.
+    button.addEventListener('pointerenter', () => {
+      if (!tools.classList.contains('is-open')) return;
+      const more = tools.querySelector<HTMLButtonElement>('.app-overview-recent-card-tools-more');
+      if (more) scheduleRecentCardToolsAutoClose(tools, more);
+    });
+    button.addEventListener('focus', () => {
+      if (!tools.classList.contains('is-open')) return;
+      const more = tools.querySelector<HTMLButtonElement>('.app-overview-recent-card-tools-more');
+      if (more) scheduleRecentCardToolsAutoClose(tools, more);
+    });
   });
-  tools.append(...buttons);
+  tray.append(...buttons);
+
+  const moreBtn = document.createElement('button');
+  moreBtn.type = 'button';
+  moreBtn.className = 'app-overview-recent-icon-btn app-overview-recent-card-tools-more';
+  moreBtn.setAttribute('aria-label', '展开快捷操作');
+  moreBtn.setAttribute('aria-expanded', 'false');
+  moreBtn.setAttribute('aria-haspopup', 'true');
+  moreBtn.title = '快捷操作';
+  moreBtn.dataset.tooltip = '快捷操作';
+  const moreIcon = document.createElement('i');
+  moreIcon.className = 'fas fa-ellipsis';
+  moreIcon.setAttribute('aria-hidden', 'true');
+  moreBtn.append(moreIcon);
+
+  moreBtn.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (tools.classList.contains('is-open')) {
+      closeRecentCardTools(tools, moreBtn);
+      return;
+    }
+    openRecentCardTools(tools, moreBtn);
+  });
+
+  tools.addEventListener('pointerleave', () => {
+    if (!tools.classList.contains('is-open')) return;
+    scheduleRecentCardToolsAutoClose(tools, moreBtn);
+  });
+  tools.addEventListener('pointerenter', () => {
+    if (!tools.classList.contains('is-open')) return;
+    scheduleRecentCardToolsAutoClose(tools, moreBtn);
+  });
+  tools.addEventListener(
+    'focusout',
+    () => {
+      window.requestAnimationFrame(() => {
+        if (!tools.classList.contains('is-open')) return;
+        if (tools.contains(document.activeElement)) {
+          scheduleRecentCardToolsAutoClose(tools, moreBtn);
+          return;
+        }
+        // Focus left the tray entirely — collapse soon.
+        scheduleRecentCardToolsAutoClose(tools, moreBtn);
+      });
+    },
+    true
+  );
+
+  tools.append(tray, moreBtn);
   corner.append(tools, createRecentTime(item));
   return corner;
 }

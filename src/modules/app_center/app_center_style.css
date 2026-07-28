@@ -719,11 +719,82 @@
 .app-overview-recent-card-tools {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  justify-content: flex-end;
+  gap: 0.2rem;
+  min-height: 2.75rem;
+}
+
+/* Collapsed by default: only the ellipsis (three dots) shows. */
+.app-overview-recent-card-tools-tray {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateX(0.45rem);
+  pointer-events: none;
+  transition:
+    max-width 220ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    opacity 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 220ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.app-overview-recent-card-tools.is-open .app-overview-recent-card-tools-tray {
+  max-width: 9.5rem;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.app-overview-recent-card-tools-more {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.app-overview-recent-card-tools.is-open .app-overview-recent-card-tools-more {
+  border-color: var(--app-overview-border, rgba(148, 163, 184, 0.28));
+  background: var(--app-overview-surface-muted, rgba(248, 250, 252, 0.9));
+  color: var(--app-overview-text-primary);
+}
+
+.app-overview-recent-card-tools-more::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--rounded-sm, 6px);
+  background: var(--app-overview-text-primary);
+  color: var(--app-overview-surface);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-0.2rem);
+  transition:
+    opacity 140ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 140ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.app-overview-recent-card-tools-more:hover::after,
+.app-overview-recent-card-tools-more:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-overview-recent-card-tools-tray {
+    transition: none;
+  }
 }
 
 .app-overview-recent-card-tool {
   position: relative;
+  flex: 0 0 auto;
 }
 
 .app-overview-recent-card-tool::after {
