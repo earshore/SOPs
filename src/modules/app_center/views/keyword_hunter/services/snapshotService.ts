@@ -110,6 +110,9 @@ function createResult(tracker: KeywordTrackerState): KeywordHunterSnapshotResult
       typeof paragraph === 'string' ? paragraph : { ...paragraph }
     ),
     llmAnalysisResult: tracker.llmAnalysisResult || '',
+    ...(tracker.llmAnalysisModel?.trim()
+      ? { llmAnalysisModel: tracker.llmAnalysisModel.trim() }
+      : {}),
     showTranslation: tracker.showTranslation,
     translationMode: tracker.translationMode,
     coverageRate: getCoverageRate(tracker),

@@ -579,6 +579,8 @@ export interface KeywordTrackerState {
   copyInputText?: string;
   // Analysis 模块状态
   llmAnalysisResult?: string;
+  /** Model id used for the latest Listing 评审 report (journey captions). */
+  llmAnalysisModel?: string;
   // Process 模块状态
   showTranslation?: boolean;
   currentSnapshotId?: string | null;

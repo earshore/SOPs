@@ -190,7 +190,7 @@ function appendAsinCountFact(
   blocked: Set<string>
 ): void {
   const asinCount = countAsins(workItem);
-  if (asinCount > 0) pushUniqueFact(facts, `${asinCount} ASIN`, blocked);
+  if (asinCount > 0) pushUniqueFact(facts, `${asinCount}个ASIN`, blocked);
 }
 
 function appendPpcFacts(
@@ -218,8 +218,11 @@ function appendTypeSpecificFacts(
   const meta = artifact.metadata || {};
   const handlers: Partial<Record<AppCenterArtifactType, () => void>> = {
     scrape_history: () => {
+      if (typeof meta.marketplace === 'string' && meta.marketplace.trim()) {
+        pushUniqueFact(facts, meta.marketplace.trim(), blocked);
+      }
       if (typeof meta.asinCount === 'number' && meta.asinCount > 0) {
-        pushUniqueFact(facts, `${meta.asinCount} ASIN`, blocked);
+        pushUniqueFact(facts, `${meta.asinCount}个ASIN`, blocked);
       } else {
         appendAsinCountFact(facts, workItem, blocked);
       }
@@ -228,6 +231,9 @@ function appendTypeSpecificFacts(
       }
     },
     analysis_report: () => {
+      if (typeof meta.asinCount === 'number' && meta.asinCount > 0) {
+        pushUniqueFact(facts, `${meta.asinCount}个ASIN`, blocked);
+      }
       if (typeof meta.dimensionCount === 'number' && meta.dimensionCount > 0) {
         pushUniqueFact(facts, `${meta.dimensionCount}个分析维度`, blocked);
       }
@@ -235,10 +241,7 @@ function appendTypeSpecificFacts(
         typeof meta.overallConfidencePercent === 'number' &&
         Number.isFinite(meta.overallConfidencePercent)
       ) {
-        pushUniqueFact(facts, `${Math.round(meta.overallConfidencePercent)}% 置信度`, blocked);
-      }
-      if (typeof meta.model === 'string' && meta.model.trim()) {
-        pushUniqueFact(facts, meta.model.trim(), blocked);
+        pushUniqueFact(facts, `${Math.round(meta.overallConfidencePercent)}%置信度`, blocked);
       }
       if (facts.length === 0) {
         pushSummaryParts(facts, artifact.summary, blocked, { skipHistoryBound: true });
@@ -276,10 +279,13 @@ function appendTypeSpecificFacts(
     },
     listing_review: () => {
       if (typeof meta.grade === 'string' && meta.grade.trim()) {
-        pushUniqueFact(facts, `综合评级：${meta.grade.trim()}`, blocked);
+        pushUniqueFact(facts, meta.grade.trim(), blocked);
       }
       if (typeof meta.score === 'number') {
         pushUniqueFact(facts, `${meta.score}/100`, blocked);
+      }
+      if (typeof meta.model === 'string' && meta.model.trim()) {
+        pushUniqueFact(facts, meta.model.trim(), blocked);
       }
       if (facts.length === 0) pushSummaryParts(facts, artifact.summary, blocked);
     },

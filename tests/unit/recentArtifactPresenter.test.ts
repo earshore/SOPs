@@ -95,7 +95,7 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
     expect(presentation.typeLabel).toBe('采集');
     expect(presentation.primaryTitle).toBe('DE · B000000001 +1 ASIN');
     expect(presentation.primaryTitle).not.toBe('采集历史');
-    expect(presentation.facts).toContain('2 ASIN');
+    expect(presentation.facts).toContain('2个ASIN');
     expect(presentation.facts).not.toContain('采集');
     expect(presentation.facts).not.toContain('采集历史');
   });
@@ -130,14 +130,15 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
         type: 'scrape_history',
         sourceRoute: 'scraper',
         title: '采集历史',
-        summary: 'DE · 2 ASIN · JSON导入',
+        summary: 'DE · 2个ASIN · JSON导入',
         payloadRef: 'history:hist-001',
         createdAt: '2026-01-01T00:10:00.000Z',
         metadata: { asinCount: 2, dataSource: 'JSON导入', marketplace: 'DE' },
       },
       makeWorkItem({ asinOrSku: 'B000000001, B000000002' })
     );
-    expect(scrape.facts).toEqual(expect.arrayContaining(['2 ASIN', 'JSON导入']));
+    // Marketplace is already in the card title; body keeps ASIN + source density.
+    expect(scrape.facts).toEqual(expect.arrayContaining(['2个ASIN', 'JSON导入']));
 
     const analysis = buildRecentArtifactPresentation(
       {
@@ -146,10 +147,11 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
         type: 'analysis_report',
         sourceRoute: 'ai_analysis',
         title: 'AI 分析报告',
-        summary: '3个分析维度 · 82% 置信度 · grok-4.5',
+        summary: '2个ASIN · 3个分析维度 · 82%置信度',
         payloadRef: 'history:hist-001#analysis',
         createdAt: '2026-01-01T00:20:00.000Z',
         metadata: {
+          asinCount: 2,
           dimensionCount: 3,
           overallConfidencePercent: 82,
           model: 'grok-4.5',
@@ -157,7 +159,7 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
       },
       makeWorkItem()
     );
-    expect(analysis.facts).toEqual(['3个分析维度', '82% 置信度', 'grok-4.5']);
+    expect(analysis.facts).toEqual(['2个ASIN', '3个分析维度', '82%置信度']);
 
     const prompt = buildRecentArtifactPresentation(
       {
@@ -214,13 +216,13 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
         type: 'listing_review',
         sourceRoute: 'keyword_hunter_analysis',
         title: '文案评审',
-        summary: '综合评级：良好 · 78/100',
+        summary: '良好 · 78/100 · grok-4.5',
         payloadRef: 'keyword_snapshot:k1',
         createdAt: '2026-01-01T00:35:00.000Z',
-        metadata: { grade: '良好', score: 78 },
+        metadata: { grade: '良好', score: 78, model: 'grok-4.5' },
       },
       makeWorkItem()
     );
-    expect(review.facts).toEqual(['综合评级：良好', '78/100']);
+    expect(review.facts).toEqual(['良好', '78/100', 'grok-4.5']);
   });
 });

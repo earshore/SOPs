@@ -642,6 +642,8 @@ export interface KeywordHunterSnapshotResult {
   wordFrequency: Array<[string, number]>;
   paragraphs: Array<string | KeywordHunterSnapshotParagraph>;
   llmAnalysisResult?: string;
+  /** Model id used when generating llmAnalysisResult (for journey captions). */
+  llmAnalysisModel?: string;
   showTranslation?: boolean;
   translationMode?: boolean;
   coverageRate: number;

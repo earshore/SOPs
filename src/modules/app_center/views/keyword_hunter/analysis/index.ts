@@ -23,6 +23,7 @@ import { createSafeFragment, setSafeHtml } from '@/common/utils/security';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { confirmWithModal } from '../utils/confirmModal';
 import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
+import { resolveToolLlmPublicConfig } from '@/services/llmToolBridge';
 import '../styles.css';
 
 // ==========================================
@@ -169,10 +170,23 @@ function renderAnalysisSuccess(
  * 只保存原始 Markdown 文本，不保存渲染后的 HTML，
  * 以避免恢复时 highlightScores 二次处理产生重复徽章。
  */
+function resolveListingReviewModelLabel(): string {
+  try {
+    const model = resolveToolLlmPublicConfig('keyword-hunter-listing-review', {
+      module: 'keyword_hunter',
+    }).model;
+    return typeof model === 'string' ? model.trim() : '';
+  } catch {
+    return '';
+  }
+}
+
 function saveAnalysisStateToState(): void {
   if (rawMarkdownCache) {
+    const model = resolveListingReviewModelLabel();
     appStore.getState().updateKeywordTracker({
       llmAnalysisResult: rawMarkdownCache,
+      ...(model ? { llmAnalysisModel: model } : {}),
     });
   }
 }
@@ -1243,7 +1257,10 @@ async function runLLMAnalysis(
     if (!confirmed) return;
 
     rawMarkdownCache = '';
-    appStore.getState().updateKeywordTracker({ llmAnalysisResult: '' });
+    appStore.getState().updateKeywordTracker({
+      llmAnalysisResult: '',
+      llmAnalysisModel: '',
+    });
   }
 
   attachAnalysisRunToPage(startAnalysisRun(processedCopy));

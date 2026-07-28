@@ -351,8 +351,11 @@ function formatStageSummaryFromMetadata(stageArtifact: AppCenterArtifactEnvelope
   switch (stageArtifact.type) {
     case 'scrape_history': {
       const parts: string[] = [];
+      if (typeof meta.marketplace === 'string' && meta.marketplace.trim()) {
+        parts.push(meta.marketplace.trim());
+      }
       if (typeof meta.asinCount === 'number' && meta.asinCount > 0) {
-        parts.push(`${meta.asinCount} ASIN`);
+        parts.push(`${meta.asinCount}个ASIN`);
       }
       if (typeof meta.dataSource === 'string' && meta.dataSource.trim()) {
         parts.push(meta.dataSource.trim());
@@ -361,6 +364,9 @@ function formatStageSummaryFromMetadata(stageArtifact: AppCenterArtifactEnvelope
     }
     case 'analysis_report': {
       const parts: string[] = [];
+      if (typeof meta.asinCount === 'number' && meta.asinCount > 0) {
+        parts.push(`${meta.asinCount}个ASIN`);
+      }
       if (typeof meta.dimensionCount === 'number' && meta.dimensionCount > 0) {
         parts.push(`${meta.dimensionCount}个分析维度`);
       }
@@ -368,10 +374,7 @@ function formatStageSummaryFromMetadata(stageArtifact: AppCenterArtifactEnvelope
         typeof meta.overallConfidencePercent === 'number' &&
         Number.isFinite(meta.overallConfidencePercent)
       ) {
-        parts.push(`${Math.round(meta.overallConfidencePercent)}% 置信度`);
-      }
-      if (typeof meta.model === 'string' && meta.model.trim()) {
-        parts.push(meta.model.trim());
+        parts.push(`${Math.round(meta.overallConfidencePercent)}%置信度`);
       }
       return parts.join(' · ');
     }
@@ -399,13 +402,17 @@ function formatStageSummaryFromMetadata(stageArtifact: AppCenterArtifactEnvelope
       return parts.join(' · ');
     }
     case 'listing_review': {
-      if (typeof meta.grade === 'string' && typeof meta.score === 'number') {
-        return `综合评级：${meta.grade} · ${meta.score}/100`;
+      const parts: string[] = [];
+      if (typeof meta.grade === 'string' && meta.grade.trim()) {
+        parts.push(meta.grade.trim());
       }
       if (typeof meta.score === 'number') {
-        return `${meta.score}/100`;
+        parts.push(`${meta.score}/100`);
       }
-      return '';
+      if (typeof meta.model === 'string' && meta.model.trim()) {
+        parts.push(meta.model.trim());
+      }
+      return parts.join(' · ');
     }
     default:
       return '';

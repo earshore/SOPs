@@ -331,7 +331,7 @@ function createHistoryArtifact(historyItem: HistoryItem): AppCenterArtifactEnvel
     type: 'scrape_history',
     sourceRoute: 'scraper',
     title: '采集历史',
-    summary: `${historyItem.site || '站点'} · ${asinCount} ASIN · ${dataSource}`,
+    summary: `${historyItem.site || '站点'} · ${asinCount}个ASIN · ${dataSource}`,
     payloadRef: `history:${String(historyItem.id)}`,
     createdAt: historyItem.timestamp,
     metadata: {
@@ -389,6 +389,22 @@ function getAnalysisModelLabel(report: Record<string, unknown>): string {
   return typeof model === 'string' ? model.trim() : '';
 }
 
+function getAnalysisAsinCount(
+  historyItem: HistoryItem,
+  report: Record<string, unknown>
+): number {
+  const meta = asRecord(report._metadata);
+  const sourceAsins = meta?.sourceAsins;
+  if (Array.isArray(sourceAsins) && sourceAsins.length > 0) {
+    return sourceAsins.filter(asin => typeof asin === 'string' && asin.trim()).length;
+  }
+  const statusAsins = historyItem.analysisStatus?.sourceAsins;
+  if (Array.isArray(statusAsins) && statusAsins.length > 0) {
+    return statusAsins.filter(asin => typeof asin === 'string' && asin.trim()).length;
+  }
+  return historyItem.asins.length;
+}
+
 function buildAnalysisArtifactSummary(historyItem: HistoryItem): {
   summary: string;
   metadata: Record<string, string | number | boolean>;
@@ -401,14 +417,16 @@ function buildAnalysisArtifactSummary(historyItem: HistoryItem): {
   const dimensionCount = getAnalysisDimensionCount(report);
   const confidencePercent = getAnalysisOverallConfidencePercent(report);
   const model = getAnalysisModelLabel(report);
+  const analysisAsinCount = getAnalysisAsinCount(historyItem, report);
   const parts: string[] = [];
+  if (analysisAsinCount > 0) parts.push(`${analysisAsinCount}个ASIN`);
   if (dimensionCount > 0) parts.push(`${dimensionCount}个分析维度`);
-  if (confidencePercent !== null) parts.push(`${confidencePercent}% 置信度`);
-  if (model) parts.push(model);
+  if (confidencePercent !== null) parts.push(`${confidencePercent}%置信度`);
 
   return {
     summary: parts.length > 0 ? parts.join(' · ') : '绑定当前采集历史的分析报告',
     metadata: {
+      ...(analysisAsinCount > 0 ? { asinCount: analysisAsinCount } : {}),
       ...(dimensionCount > 0 ? { dimensionCount } : {}),
       ...(confidencePercent !== null ? { overallConfidencePercent: confidencePercent } : {}),
       ...(model ? { model } : {}),
@@ -617,9 +635,17 @@ export function registerKeywordSnapshotArtifact(
 
   if (snapshot.status === 'reported' && snapshot.result.llmAnalysisResult?.trim()) {
     const reviewScore = parseListingReviewScore(snapshot.result.llmAnalysisResult);
-    const reviewSummary = reviewScore
-      ? `综合评级：${reviewScore.grade} · ${reviewScore.score}/100`
-      : 'Listing 评审报告已生成';
+    const reviewModel =
+      typeof snapshot.result.llmAnalysisModel === 'string'
+        ? snapshot.result.llmAnalysisModel.trim()
+        : '';
+    const reviewParts: string[] = [];
+    if (reviewScore) {
+      reviewParts.push(reviewScore.grade, `${reviewScore.score}/100`);
+    }
+    if (reviewModel) reviewParts.push(reviewModel);
+    const reviewSummary =
+      reviewParts.length > 0 ? reviewParts.join(' · ') : 'Listing 评审报告已生成';
     upsertArtifact({
       id: `${workItemId}:listing_review:${snapshot.id}`,
       workItemId,
@@ -634,6 +660,7 @@ export function registerKeywordSnapshotArtifact(
         ...(reviewScore
           ? { score: reviewScore.score, grade: reviewScore.grade }
           : {}),
+        ...(reviewModel ? { model: reviewModel } : {}),
       },
     });
   }

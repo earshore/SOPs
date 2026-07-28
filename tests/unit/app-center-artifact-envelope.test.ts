@@ -221,7 +221,7 @@ describe('App Center artifact envelope service', () => {
         expect.objectContaining({
           type: 'listing_review',
           payloadRef: 'keyword_snapshot:kh-001',
-          summary: '综合评级：良好 · 82/100',
+          summary: '良好 · 82/100',
           metadata: {
             keywordSnapshotId: 'kh-001',
             score: 82,
