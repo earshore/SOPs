@@ -201,7 +201,7 @@ describe('App Center artifact envelope service', () => {
   it('registers a distinct listing review artifact for a reported Keyword Hunter snapshot', () => {
     const snapshot = createKeywordSnapshot();
     snapshot.status = 'reported';
-    snapshot.result.llmAnalysisResult = '# Listing review';
+    snapshot.result.llmAnalysisResult = '# Listing review\n\n综合得分 82/100';
 
     registerKeywordSnapshotArtifact(snapshot, createWorkspaceContext());
 
@@ -210,11 +210,17 @@ describe('App Center artifact envelope service', () => {
         expect.objectContaining({
           type: 'keyword_snapshot',
           payloadRef: 'keyword_snapshot:kh-001',
+          summary: '1个关键词 · 1个命中 · 0个未命中',
         }),
         expect.objectContaining({
           type: 'listing_review',
           payloadRef: 'keyword_snapshot:kh-001',
-          metadata: { keywordSnapshotId: 'kh-001' },
+          summary: '综合评级：良好 · 82/100',
+          metadata: {
+            keywordSnapshotId: 'kh-001',
+            score: 82,
+            grade: '良好',
+          },
         }),
       ])
     );
@@ -233,15 +239,18 @@ describe('App Center artifact envelope service', () => {
       marketplace: 'DE',
       asinOrSku: 'B000000001',
       createdAt: '2026-01-01T00:25:00.000Z',
+      model: 'gpt-4.1',
     });
 
     expect(envelope).toMatchObject({
       type: 'listing_copy',
       sourceRoute: 'playground_deep_chat',
       payloadRef: 'listing_copy:thread-1:2000',
+      summary: '2个SEO关键词 · gpt-4.1',
       metadata: {
         promptId: 'listing-prompt-001',
         keywordCount: 2,
+        model: 'gpt-4.1',
       },
     });
     expect(getRecentArtifacts(1)[0]?.type).toBe('listing_copy');

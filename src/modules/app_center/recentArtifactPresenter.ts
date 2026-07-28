@@ -219,16 +219,61 @@ function appendTypeSpecificFacts(
   const handlers: Partial<Record<AppCenterArtifactType, () => void>> = {
     scrape_history: () => appendAsinCountFact(facts, workItem, blocked),
     analysis_report: () => {
-      appendAsinCountFact(facts, workItem, blocked);
+      if (typeof meta.dimensionCount === 'number' && meta.dimensionCount > 0) {
+        pushUniqueFact(facts, `${meta.dimensionCount}分析维度`, blocked);
+      }
+      if (
+        typeof meta.overallConfidencePercent === 'number' &&
+        Number.isFinite(meta.overallConfidencePercent)
+      ) {
+        pushUniqueFact(facts, `${Math.round(meta.overallConfidencePercent)}%总体置信度`, blocked);
+      }
+      if (typeof meta.model === 'string' && meta.model.trim()) {
+        pushUniqueFact(facts, meta.model.trim(), blocked);
+      }
       if (facts.length === 0) {
         pushSummaryParts(facts, artifact.summary, blocked, { skipHistoryBound: true });
       }
       if (facts.length === 0) pushUniqueFact(facts, '分析报告已生成', blocked);
     },
-    listing_prompt: () => appendAsinCountFact(facts, workItem, blocked),
-    listing_copy: () => pushSummaryParts(facts, artifact.summary, blocked),
-    keyword_snapshot: () => pushSummaryParts(facts, artifact.summary, blocked),
-    listing_review: () => pushSummaryParts(facts, artifact.summary, blocked),
+    listing_prompt: () => {
+      if (typeof meta.strategy === 'string' && meta.strategy.trim()) {
+        pushUniqueFact(facts, `生成策略：${meta.strategy.trim()}`, blocked);
+      } else {
+        pushSummaryParts(facts, artifact.summary, blocked);
+      }
+      if (facts.length === 0) pushUniqueFact(facts, '生成策略配置', blocked);
+    },
+    listing_copy: () => {
+      if (typeof meta.keywordCount === 'number') {
+        pushUniqueFact(facts, `${meta.keywordCount}个SEO关键词`, blocked);
+      }
+      if (typeof meta.model === 'string' && meta.model.trim()) {
+        pushUniqueFact(facts, meta.model.trim(), blocked);
+      }
+      if (facts.length === 0) pushSummaryParts(facts, artifact.summary, blocked);
+    },
+    keyword_snapshot: () => {
+      if (typeof meta.keywordCount === 'number') {
+        pushUniqueFact(facts, `${meta.keywordCount}个关键词`, blocked);
+      }
+      if (typeof meta.matchedCount === 'number') {
+        pushUniqueFact(facts, `${meta.matchedCount}个命中`, blocked);
+      }
+      if (typeof meta.unmatchedCount === 'number') {
+        pushUniqueFact(facts, `${meta.unmatchedCount}个未命中`, blocked);
+      }
+      if (facts.length === 0) pushSummaryParts(facts, artifact.summary, blocked);
+    },
+    listing_review: () => {
+      if (typeof meta.grade === 'string' && meta.grade.trim()) {
+        pushUniqueFact(facts, `综合评级：${meta.grade.trim()}`, blocked);
+      }
+      if (typeof meta.score === 'number') {
+        pushUniqueFact(facts, `${meta.score}/100`, blocked);
+      }
+      if (facts.length === 0) pushSummaryParts(facts, artifact.summary, blocked);
+    },
     ppc_action_list: () => appendPpcFacts(facts, meta, blocked),
     compliance_check: () => {
       const review = getComplianceReviewView(artifact);

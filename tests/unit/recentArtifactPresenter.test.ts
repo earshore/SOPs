@@ -121,4 +121,90 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
     expect(presentation.isFresh).toBe(true);
     expect(presentation.relativeTime).toBe('30 分钟前');
   });
+
+  it('formats analysis / listing / keyword stage facts from metadata', () => {
+    const analysis = buildRecentArtifactPresentation(
+      {
+        id: 'analysis-1',
+        workItemId: 'competitor_listing:hist-001',
+        type: 'analysis_report',
+        sourceRoute: 'ai_analysis',
+        title: 'AI 分析报告',
+        summary: '3分析维度 · 82%总体置信度 · grok-4.5',
+        payloadRef: 'history:hist-001#analysis',
+        createdAt: '2026-01-01T00:20:00.000Z',
+        metadata: {
+          dimensionCount: 3,
+          overallConfidencePercent: 82,
+          model: 'grok-4.5',
+        },
+      },
+      makeWorkItem()
+    );
+    expect(analysis.facts).toEqual(['3分析维度', '82%总体置信度', 'grok-4.5']);
+
+    const prompt = buildRecentArtifactPresentation(
+      {
+        id: 'prompt-1',
+        workItemId: 'competitor_listing:hist-001',
+        type: 'listing_prompt',
+        sourceRoute: 'promptlab',
+        title: 'Listing Prompt',
+        summary: '生成策略：专业 · COSMO',
+        payloadRef: 'prompt:p1',
+        createdAt: '2026-01-01T00:22:00.000Z',
+        metadata: { strategy: '专业 · COSMO', asinCount: 1, marketplace: 'DE' },
+      },
+      makeWorkItem()
+    );
+    expect(prompt.facts).toContain('生成策略：专业 · COSMO');
+
+    const copy = buildRecentArtifactPresentation(
+      {
+        id: 'copy-1',
+        workItemId: 'competitor_listing:hist-001',
+        type: 'listing_copy',
+        sourceRoute: 'playground_deep_chat',
+        title: '产品文案',
+        summary: '2个SEO关键词 · gpt-4.1',
+        payloadRef: 'listing_copy:c1',
+        createdAt: '2026-01-01T00:25:00.000Z',
+        metadata: { keywordCount: 2, model: 'gpt-4.1', promptId: 'p1', threadId: 't1' },
+      },
+      makeWorkItem()
+    );
+    expect(copy.facts).toEqual(['2个SEO关键词', 'gpt-4.1']);
+
+    const keywords = buildRecentArtifactPresentation(
+      {
+        id: 'kw-1',
+        workItemId: 'competitor_listing:hist-001',
+        type: 'keyword_snapshot',
+        sourceRoute: 'keyword_hunter_analysis',
+        title: '关键词',
+        summary: '4个关键词 · 3个命中 · 1个未命中',
+        payloadRef: 'keyword_snapshot:k1',
+        createdAt: '2026-01-01T00:30:00.000Z',
+        metadata: { keywordCount: 4, matchedCount: 3, unmatchedCount: 1 },
+      },
+      makeWorkItem()
+    );
+    expect(keywords.facts).toEqual(['4个关键词', '3个命中', '1个未命中']);
+
+    const review = buildRecentArtifactPresentation(
+      {
+        id: 'review-1',
+        workItemId: 'competitor_listing:hist-001',
+        type: 'listing_review',
+        sourceRoute: 'keyword_hunter_analysis',
+        title: '文案评审',
+        summary: '综合评级：良好 · 78/100',
+        payloadRef: 'keyword_snapshot:k1',
+        createdAt: '2026-01-01T00:35:00.000Z',
+        metadata: { grade: '良好', score: 78 },
+      },
+      makeWorkItem()
+    );
+    expect(review.facts).toEqual(['综合评级：良好', '78/100']);
+  });
 });

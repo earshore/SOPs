@@ -160,6 +160,8 @@ export interface AnalysisReportMetadata {
   analyzedAt: string; // 分析时间
   targetIds: string[]; // 分析的目标ID列表
   language: string; // 分析语言
+  /** LLM model id used for this analysis run (for journey summaries). */
+  model?: string;
   reviewSampling?: {
     totalReviews: number;
     lowStar: {

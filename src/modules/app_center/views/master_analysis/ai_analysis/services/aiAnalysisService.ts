@@ -241,9 +241,11 @@ function buildReportWithMetadata(
   report: Partial<FullAnalysisReport>,
   targetIds: string[],
   product: Product,
-  language: string
+  language: string,
+  model?: string
 ): FullAnalysisReport {
   const { confidenceScores, overallConfidence } = calculateReportConfidence(report);
+  const modelLabel = typeof model === 'string' ? model.trim() : '';
   const reportWithConfidence = {
     ...report,
     _metadata: {
@@ -253,6 +255,7 @@ function buildReportWithMetadata(
       targetIds,
       language,
       reviewSampling: getReviewSamplingMetadata(product),
+      ...(modelLabel ? { model: modelLabel } : {}),
     },
   };
 
@@ -289,7 +292,7 @@ export async function runAIAnalysis(
   const report = await analyzeTargets(targetIds, product, config, language, onProgress);
 
   onProgress(100, '分析完成!');
-  return buildReportWithMetadata(report, targetIds, product, language);
+  return buildReportWithMetadata(report, targetIds, product, language, config.model);
 }
 
 export { validateAnalysisResult };

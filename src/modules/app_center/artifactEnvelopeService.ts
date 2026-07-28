@@ -308,12 +308,114 @@ function createHistoryArtifact(historyItem: HistoryItem): AppCenterArtifactEnvel
   };
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
+}
+
+function getAnalysisReportRecord(historyItem: HistoryItem): Record<string, unknown> | null {
+  const report = historyItem.analysisStatus?.analysisReport || historyItem.report;
+  if (!report) return null;
+  if (typeof report === 'string') {
+    try {
+      return asRecord(JSON.parse(report));
+    } catch {
+      return null;
+    }
+  }
+  return asRecord(report);
+}
+
+function getAnalysisDimensionCount(report: Record<string, unknown>): number {
+  const meta = asRecord(report._metadata);
+  const targetIds = meta?.targetIds;
+  if (Array.isArray(targetIds) && targetIds.length > 0) return targetIds.length;
+  const confidence = asRecord(meta?.confidence);
+  if (confidence && Object.keys(confidence).length > 0) return Object.keys(confidence).length;
+  // Count non-meta report sections with object payloads.
+  return Object.entries(report).filter(([key, value]) => {
+    if (key.startsWith('_') || key === 'parse_error' || key === 'raw_response' || key === 'error_detail') {
+      return false;
+    }
+    return value !== null && typeof value === 'object';
+  }).length;
+}
+
+function getAnalysisOverallConfidencePercent(report: Record<string, unknown>): number | null {
+  const meta = asRecord(report._metadata);
+  const overall = meta?.overallConfidence;
+  if (typeof overall !== 'number' || !Number.isFinite(overall)) return null;
+  // Stored as 0–1; tolerate already-percent values.
+  const percent = overall <= 1 ? Math.round(overall * 100) : Math.round(overall);
+  return Math.max(0, Math.min(100, percent));
+}
+
+function getAnalysisModelLabel(report: Record<string, unknown>): string {
+  const meta = asRecord(report._metadata);
+  const model = meta?.model;
+  return typeof model === 'string' ? model.trim() : '';
+}
+
+function buildAnalysisArtifactSummary(historyItem: HistoryItem): {
+  summary: string;
+  metadata: Record<string, string | number | boolean>;
+} {
+  const report = getAnalysisReportRecord(historyItem);
+  if (!report) {
+    return { summary: '绑定当前采集历史的分析报告', metadata: {} };
+  }
+
+  const dimensionCount = getAnalysisDimensionCount(report);
+  const confidencePercent = getAnalysisOverallConfidencePercent(report);
+  const model = getAnalysisModelLabel(report);
+  const parts: string[] = [];
+  if (dimensionCount > 0) parts.push(`${dimensionCount}分析维度`);
+  if (confidencePercent !== null) parts.push(`${confidencePercent}%总体置信度`);
+  if (model) parts.push(model);
+
+  return {
+    summary: parts.length > 0 ? parts.join(' · ') : '绑定当前采集历史的分析报告',
+    metadata: {
+      ...(dimensionCount > 0 ? { dimensionCount } : {}),
+      ...(confidencePercent !== null ? { overallConfidencePercent: confidencePercent } : {}),
+      ...(model ? { model } : {}),
+    },
+  };
+}
+
+function buildPromptStrategyLabel(profile: GeneratedPromptRecord['profile'] | undefined): string {
+  if (!profile) return '默认策略';
+  const bits: string[] = [];
+  if (profile.tone?.trim()) bits.push(profile.tone.trim());
+  if (profile.useCosmo) bits.push('COSMO');
+  if (profile.useRufus) bits.push('Rufus');
+  if (profile.useEmoji) bits.push('Emoji');
+  if (profile.customStrategy?.trim()) bits.push('自定义策略');
+  if (Array.isArray(profile.selectedReportSections) && profile.selectedReportSections.length > 0) {
+    bits.push(`${profile.selectedReportSections.length} 报告模块`);
+  }
+  return bits.length > 0 ? bits.join(' · ') : '默认策略';
+}
+
+function parseListingReviewScore(markdown: string): { score: number; grade: string } | null {
+  if (!markdown.trim()) return null;
+  const match = markdown.match(/(\d{1,3})\s*\/\s*100/);
+  const scoreText = match?.[1];
+  if (!scoreText) return null;
+  const score = Number.parseInt(scoreText, 10);
+  if (!Number.isFinite(score)) return null;
+  const clamped = Math.max(0, Math.min(100, score));
+  const grade =
+    clamped >= 85 ? '优秀' : clamped >= 75 ? '良好' : clamped >= 70 ? '待优化' : '高风险';
+  return { score: clamped, grade };
+}
+
 function createAnalysisArtifact(historyItem: HistoryItem): AppCenterArtifactEnvelope | null {
   if (!historyItem.analysisStatus?.analysisReport && !historyItem.report) {
     return null;
   }
 
   const workItemId = createWorkItemIdFromHistoryItem(historyItem);
+  const { summary, metadata } = buildAnalysisArtifactSummary(historyItem);
 
   return {
     id: `${workItemId}:analysis_report`,
@@ -321,9 +423,10 @@ function createAnalysisArtifact(historyItem: HistoryItem): AppCenterArtifactEnve
     type: 'analysis_report',
     sourceRoute: 'ai_analysis',
     title: 'AI 分析报告',
-    summary: '绑定当前采集历史的分析报告',
+    summary,
     payloadRef: `history:${String(historyItem.id)}#analysis`,
     createdAt: historyItem.analysisStatus?.analyzedAt || historyItem.timestamp,
+    ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
   };
 }
 
@@ -333,15 +436,21 @@ function createPromptArtifact(
 ): AppCenterArtifactEnvelope {
   const workItemId = createWorkItemIdFromHistoryItem(historyItem);
 
+  const strategy = buildPromptStrategyLabel(prompt.profile);
   return {
     id: `${workItemId}:listing_prompt:${prompt.id}`,
     workItemId,
     type: 'listing_prompt',
     sourceRoute: 'promptlab',
     title: 'Listing Prompt',
-    summary: `${prompt.asins.length || historyItem.asins.length} ASIN · ${prompt.marketplace || historyItem.site}`,
+    summary: strategy ? `生成策略：${strategy}` : '生成策略配置',
     payloadRef: `prompt:${prompt.id}`,
     createdAt: prompt.generatedAt,
+    metadata: {
+      strategy,
+      asinCount: prompt.asins.length || historyItem.asins.length,
+      marketplace: prompt.marketplace || historyItem.site || '',
+    },
   };
 }
 
@@ -451,28 +560,47 @@ export function registerKeywordSnapshotArtifact(
 
   upsertWorkItem(createKeywordSnapshotWorkItem(snapshot, boundContext));
 
+  const keywordCount = snapshot.result.keywords.length;
+  const matchedCount = snapshot.derived?.matchedCount ?? snapshot.result.matchedKeywords.length;
+  const unmatchedCount =
+    snapshot.derived?.unmatchedCount ?? snapshot.result.unmatchedKeywords.length;
   const keywordArtifact = upsertArtifact({
     id: `${workItemId}:keyword_snapshot:${snapshot.id}`,
     workItemId,
     type: 'keyword_snapshot',
     sourceRoute: context.sourceRoute || 'keyword_hunter_analysis',
     title: snapshot.title,
-    summary: `${snapshot.result.keywords.length} 关键词 · 覆盖率 ${snapshot.result.coverageRate}%`,
+    summary: `${keywordCount}个关键词 · ${matchedCount}个命中 · ${unmatchedCount}个未命中`,
     payloadRef: `keyword_snapshot:${snapshot.id}`,
     createdAt: snapshot.updatedAt,
+    metadata: {
+      keywordCount,
+      matchedCount,
+      unmatchedCount,
+      coverageRate: snapshot.result.coverageRate,
+    },
   });
 
   if (snapshot.status === 'reported' && snapshot.result.llmAnalysisResult?.trim()) {
+    const reviewScore = parseListingReviewScore(snapshot.result.llmAnalysisResult);
+    const reviewSummary = reviewScore
+      ? `综合评级：${reviewScore.grade} · ${reviewScore.score}/100`
+      : 'Listing 评审报告已生成';
     upsertArtifact({
       id: `${workItemId}:listing_review:${snapshot.id}`,
       workItemId,
       type: 'listing_review',
       sourceRoute: context.sourceRoute || 'keyword_hunter_analysis',
       title: '文案评审',
-      summary: `${snapshot.result.keywords.length} 关键词 · Listing 评审报告已生成`,
+      summary: reviewSummary,
       payloadRef: `keyword_snapshot:${snapshot.id}`,
       createdAt: snapshot.updatedAt,
-      metadata: { keywordSnapshotId: snapshot.id },
+      metadata: {
+        keywordSnapshotId: snapshot.id,
+        ...(reviewScore
+          ? { score: reviewScore.score, grade: reviewScore.grade }
+          : {}),
+      },
     });
   }
 
@@ -496,19 +624,23 @@ function createListingCopyWorkItem(copy: AppCenterListingCopy): AppCenterWorkIte
 export function registerListingCopyArtifact(copy: AppCenterListingCopy): AppCenterArtifactEnvelope {
   upsertWorkItem(createListingCopyWorkItem(copy));
 
+  const model = typeof copy.model === 'string' ? copy.model.trim() : '';
   return upsertArtifact({
     id: `${copy.workItemId}:listing_copy:${copy.id}`,
     workItemId: copy.workItemId,
     type: 'listing_copy',
     sourceRoute: 'playground_deep_chat',
     title: '产品文案',
-    summary: `${copy.seoKeywords.length} 个 SEO 关键词 · Deep Chat 生成`,
+    summary: model
+      ? `${copy.seoKeywords.length}个SEO关键词 · ${model}`
+      : `${copy.seoKeywords.length}个SEO关键词`,
     payloadRef: `listing_copy:${copy.id}`,
     createdAt: copy.createdAt,
     metadata: {
       promptId: copy.promptId,
       threadId: copy.threadId,
       keywordCount: copy.seoKeywords.length,
+      ...(model ? { model } : {}),
     },
   });
 }

@@ -250,6 +250,7 @@ describe('runAIAnalysis results', () => {
       overallConfidence: 0.75,
       targetIds: ['title-keywords'],
       language: 'zh',
+      model: 'gpt-test',
       reviewSampling: {
         totalReviews: 0,
       },

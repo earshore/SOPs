@@ -486,6 +486,10 @@ export async function sendAssistantCopyToKeywordHunter(
   if (!trimmedContent) return;
   const activeThread = getActiveThread();
   const createdAtMs = Number.isFinite(message?.createdAt) ? Number(message?.createdAt) : Date.now();
+  const model =
+    sessionState.selectedModel?.trim() ||
+    sessionState.currentConfig?.model?.trim() ||
+    '';
   const copy: AppCenterListingCopy = {
     id: `${activeThread.id}:${createdAtMs}`,
     workItemId: promptContext.workItemId,
@@ -496,6 +500,7 @@ export async function sendAssistantCopyToKeywordHunter(
     marketplace: promptContext.marketplace,
     asinOrSku: promptContext.asinOrSku,
     createdAt: new Date().toISOString(),
+    ...(model ? { model } : {}),
   };
 
   try {

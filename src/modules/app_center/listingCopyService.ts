@@ -13,6 +13,8 @@ export interface AppCenterListingCopy {
   marketplace: string;
   asinOrSku: string;
   createdAt: string;
+  /** Model id used when generating this listing copy (for journey summaries). */
+  model?: string;
 }
 
 function isListingCopy(value: unknown): value is AppCenterListingCopy {
@@ -26,7 +28,8 @@ function isListingCopy(value: unknown): value is AppCenterListingCopy {
     typeof copy.content === 'string' &&
     Array.isArray(copy.seoKeywords) &&
     copy.seoKeywords.every(keyword => typeof keyword === 'string') &&
-    typeof copy.createdAt === 'string'
+    typeof copy.createdAt === 'string' &&
+    (copy.model === undefined || typeof copy.model === 'string')
   );
 }
 

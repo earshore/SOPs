@@ -338,7 +338,71 @@ function createRecentTime(item: RecentQueueItem): HTMLTimeElement {
   return time;
 }
 
-/** Prefer real artifact summary / title; never invent workflow prose. */
+function clipStageSummary(text: string, max = 64): string {
+  const trimmed = text.trim();
+  if (!trimmed) return '';
+  return trimmed.length > max ? `${trimmed.slice(0, max - 1)}…` : trimmed;
+}
+
+/** Build a live one-line caption from metadata first, then artifact.summary. */
+function formatStageSummaryFromMetadata(stageArtifact: AppCenterArtifactEnvelope): string {
+  const meta = stageArtifact.metadata || {};
+
+  switch (stageArtifact.type) {
+    case 'analysis_report': {
+      const parts: string[] = [];
+      if (typeof meta.dimensionCount === 'number' && meta.dimensionCount > 0) {
+        parts.push(`${meta.dimensionCount}分析维度`);
+      }
+      if (
+        typeof meta.overallConfidencePercent === 'number' &&
+        Number.isFinite(meta.overallConfidencePercent)
+      ) {
+        parts.push(`${Math.round(meta.overallConfidencePercent)}%总体置信度`);
+      }
+      if (typeof meta.model === 'string' && meta.model.trim()) {
+        parts.push(meta.model.trim());
+      }
+      return parts.join(' · ');
+    }
+    case 'listing_prompt': {
+      if (typeof meta.strategy === 'string' && meta.strategy.trim()) {
+        return `生成策略：${meta.strategy.trim()}`;
+      }
+      return '生成策略配置';
+    }
+    case 'listing_copy': {
+      const parts: string[] = [];
+      if (typeof meta.keywordCount === 'number') {
+        parts.push(`${meta.keywordCount}个SEO关键词`);
+      }
+      if (typeof meta.model === 'string' && meta.model.trim()) {
+        parts.push(meta.model.trim());
+      }
+      return parts.join(' · ');
+    }
+    case 'keyword_snapshot': {
+      const parts: string[] = [];
+      if (typeof meta.keywordCount === 'number') parts.push(`${meta.keywordCount}个关键词`);
+      if (typeof meta.matchedCount === 'number') parts.push(`${meta.matchedCount}个命中`);
+      if (typeof meta.unmatchedCount === 'number') parts.push(`${meta.unmatchedCount}个未命中`);
+      return parts.join(' · ');
+    }
+    case 'listing_review': {
+      if (typeof meta.grade === 'string' && typeof meta.score === 'number') {
+        return `综合评级：${meta.grade} · ${meta.score}/100`;
+      }
+      if (typeof meta.score === 'number') {
+        return `${meta.score}/100`;
+      }
+      return '';
+    }
+    default:
+      return '';
+  }
+}
+
+/** Prefer real artifact metrics / summary / title; never invent workflow prose. */
 function getLiveStageSummary(
   state: RecentJourneyStepState,
   stageArtifact: AppCenterArtifactEnvelope | null,
@@ -360,10 +424,13 @@ function getLiveStageSummary(
     return state === 'current' ? '待开始' : '';
   }
 
+  const fromMeta = formatStageSummaryFromMetadata(stageArtifact);
+  if (fromMeta) return clipStageSummary(fromMeta);
+
   const summary = stageArtifact.summary?.trim();
   if (summary) {
     // Keep one scannable line for the node caption.
-    return summary.length > 56 ? `${summary.slice(0, 55)}…` : summary;
+    return clipStageSummary(summary);
   }
 
   const typeLabel = RECENT_ARTIFACT_TYPE_LABELS[stageArtifact.type];
