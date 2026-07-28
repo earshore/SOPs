@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.12-rc.3] - 2026-07-29
+
+### Changed
+
+- AI 智能分析页面样式可读性修复 + 控件适配（浅/深主题 + 色调）
+- 模板 HTML 类名替换 ~80 处
+- AlpinePanel.ts 类名 + runAnalysisButtonClass 状态重写
+- ai_analysis_style.css 死代码删除 + 下拉框样式重构
+- 新增 ai-analysis-contrast-audit.md 诊断报告
+
 ## [Unreleased]
 
 ### Added
