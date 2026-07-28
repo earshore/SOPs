@@ -52,6 +52,43 @@ describe('analysisResultParser', () => {
     ).toThrow('schema mismatch');
   });
 
+  it('rejects incomplete selling-points on full phase but accepts map phase bullets-only', () => {
+    const bulletsOnly = {
+      bullet_analysis: [
+        {
+          bullet_index: 1,
+          original_text_summary: 'portable 50ml',
+          functions: ['portable'],
+          scenes: ['travel'],
+          pain_points_addressed: ['hard to carry'],
+          differentiation_angle: 'portability',
+          credibility_score: 'high',
+        },
+      ],
+    };
+
+    // Full oneshot path still requires strategy objects (contract for small listings).
+    expect(() => parseAnalysisResponse('selling-points', JSON.stringify(bulletsOnly))).toThrow(
+      /selling-points.*overall_strategy.*function_scene_matrix/
+    );
+
+    // Map phase for multi-ASIN pipeline allows bullets without strategy.
+    const mapped = parseAnalysisResponse('selling-points', JSON.stringify(bulletsOnly), {
+      phase: 'map',
+    });
+    expect(mapped.data.bullet_analysis).toHaveLength(1);
+    expect(validateAnalysisResult('selling-points', bulletsOnly, 'map')).toBe(true);
+    expect(validateAnalysisResult('selling-points', bulletsOnly, 'full')).toBe(false);
+
+    expect(
+      validateAnalysisResult('selling-points', {
+        bullet_analysis: [],
+        overall_strategy: {},
+        function_scene_matrix: {},
+      })
+    ).toBe(true);
+  });
+
   it('exposes validation for existing service callers', () => {
     expect(
       validateAnalysisResult('buyer-profile', {

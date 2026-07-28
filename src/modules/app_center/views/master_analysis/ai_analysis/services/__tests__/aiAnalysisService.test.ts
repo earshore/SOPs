@@ -291,10 +291,17 @@ describe('runAIAnalysis results', () => {
       primary_keywords: [],
       secondary_keywords: [],
     });
-    expect(report['selling-points']).toEqual({
+    expect(report['selling-points']).toMatchObject({
       bullet_analysis: [],
-      overall_strategy: {},
-      function_scene_matrix: {},
+      overall_strategy: {
+        primary_differentiation: '',
+        emotional_hooks: [],
+      },
+      function_scene_matrix: {
+        functions: [],
+        scenes: [],
+        pain_points: [],
+      },
     });
   });
 });
@@ -313,10 +320,17 @@ describe('runAIAnalysis failure handling', () => {
     const report = await runAIAnalysis(['title-keywords', 'selling-points'], product, onProgress);
 
     expect(report['title-keywords']).toBeUndefined();
-    expect(report['selling-points']).toEqual({
+    expect(report['selling-points']).toMatchObject({
       bullet_analysis: [],
-      overall_strategy: {},
-      function_scene_matrix: {},
+      overall_strategy: {
+        primary_differentiation: '',
+        emotional_hooks: [],
+      },
+      function_scene_matrix: {
+        functions: [],
+        scenes: [],
+        pain_points: [],
+      },
     });
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       '[AIAnalysisService] [AI分析] 失败:',

@@ -11,6 +11,7 @@ import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt, getReviewSamplingMetadata } from '../prompts/analysisPrompts';
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse, validateAnalysisResult } from './analysisResultParser';
+import { runSellingPointsPipeline } from './sellingPointsPipeline';
 import { AppError, ErrorLevel, ErrorCategory } from '@/common/errors/AppError';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
 
@@ -109,6 +110,16 @@ async function analyzeTarget(
   ];
 
   try {
+    if (targetId === 'selling-points') {
+      const pipeline = await runSellingPointsPipeline({
+        product,
+        config,
+        language,
+      });
+      logger.debug('[AI分析] selling-points pipeline:', pipeline.stats, 'AIAnalysisService');
+      return pipeline.data;
+    }
+
     const response = await callLLM(
       messages,
       config.provider,

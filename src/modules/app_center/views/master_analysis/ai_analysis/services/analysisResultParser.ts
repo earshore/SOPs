@@ -6,6 +6,34 @@ const looseRecord = z.record(z.string(), z.unknown());
 const objectArray = z.array(looseRecord);
 const stringArray = z.array(z.string());
 
+export type AnalysisParsePhase = 'full' | 'map' | 'reduce';
+
+const sellingPointsFullSchema = z
+  .object({
+    bullet_analysis: objectArray,
+    overall_strategy: looseRecord,
+    function_scene_matrix: looseRecord,
+  })
+  .passthrough();
+
+/** Map phase: bullets only (strategy comes from Reduce). */
+const sellingPointsMapSchema = z
+  .object({
+    bullet_analysis: objectArray,
+    overall_strategy: looseRecord.optional(),
+    function_scene_matrix: looseRecord.optional(),
+  })
+  .passthrough();
+
+/** Reduce phase: strategy objects; bullets optional pass-through. */
+const sellingPointsReduceSchema = z
+  .object({
+    overall_strategy: looseRecord,
+    function_scene_matrix: looseRecord,
+    bullet_analysis: objectArray.optional(),
+  })
+  .passthrough();
+
 const analysisSchemas: Record<string, z.ZodType<Record<string, unknown>>> = {
   'title-keywords': z
     .object({
@@ -18,13 +46,7 @@ const analysisSchemas: Record<string, z.ZodType<Record<string, unknown>>> = {
       optimization_suggestions: stringArray.optional(),
     })
     .passthrough(),
-  'selling-points': z
-    .object({
-      bullet_analysis: objectArray,
-      overall_strategy: looseRecord,
-      function_scene_matrix: looseRecord,
-    })
-    .passthrough(),
+  'selling-points': sellingPointsFullSchema,
   'fatal-flaws': z
     .object({
       critical_issues: objectArray,
@@ -85,10 +107,27 @@ export interface ParsedAnalysisResponse {
   wasRepaired: boolean;
 }
 
-export function parseAnalysisResponse(targetId: string, response: string): ParsedAnalysisResponse {
+function resolveAnalysisSchema(
+  targetId: string,
+  phase: AnalysisParsePhase = 'full'
+): z.ZodType<Record<string, unknown>> | undefined {
+  if (targetId === 'selling-points') {
+    if (phase === 'map') return sellingPointsMapSchema;
+    if (phase === 'reduce') return sellingPointsReduceSchema;
+    return sellingPointsFullSchema;
+  }
+  return analysisSchemas[targetId];
+}
+
+export function parseAnalysisResponse(
+  targetId: string,
+  response: string,
+  options?: { phase?: AnalysisParsePhase }
+): ParsedAnalysisResponse {
   const parsed = parseLlmJson(response);
   const unwrapped = unwrapAnalysisResult(targetId, parsed.value);
-  const schema = analysisSchemas[targetId];
+  const phase = options?.phase ?? 'full';
+  const schema = resolveAnalysisSchema(targetId, phase);
 
   if (!schema) {
     return { data: unwrapped, wasRepaired: parsed.wasRepaired };
@@ -105,19 +144,23 @@ export function parseAnalysisResponse(targetId: string, response: string): Parse
       'AI_PARSER_001',
       'result',
       unwrapped,
-      { module: 'analysisResultParser', action: 'parseAnalysisResult', targetId }
+      { module: 'analysisResultParser', action: 'parseAnalysisResult', targetId, phase }
     );
   }
 
   return { data: validation.data, wasRepaired: parsed.wasRepaired };
 }
 
-export function validateAnalysisResult(targetId: string, result: unknown): boolean {
+export function validateAnalysisResult(
+  targetId: string,
+  result: unknown,
+  phase: AnalysisParsePhase = 'full'
+): boolean {
   if (!result || typeof result !== 'object' || Array.isArray(result)) {
     return false;
   }
 
-  const schema = analysisSchemas[targetId];
+  const schema = resolveAnalysisSchema(targetId, phase);
   if (!schema) {
     return true;
   }

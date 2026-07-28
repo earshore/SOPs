@@ -113,15 +113,17 @@ Input Title: {{productTitle}}
     name: '卖点结构拆解',
     taskPrompt: `
 ### Task: Selling Points Structure Analysis (卖点结构拆解)
-Deconstruct the 5-bullet description into a "Function-Scene-Pain Point" matrix.
+Deconstruct all listing bullet points (single or multi-ASIN) into a "Function-Scene-Pain Point" matrix.
+Multi-ASIN jobs may contain more than five bullets; analyze every bullet provided—do not drop ASIN-specific claims.
 
 Instructions:
-1. Parse each bullet point separately
+1. Parse each bullet point separately (keep bullet_index aligned with the numbered list)
 2. Identify FUNCTION claims (what it does)
 3. Identify SCENE positioning (where/when to use)
 4. Identify PAIN POINTS addressed (problems solved)
-5. Detect differentiation strategy
+5. Detect differentiation strategy across the full set
 6. Note any exaggerated or unverifiable claims
+7. Always fill overall_strategy and function_scene_matrix after bullet_analysis
 
 Input Bullet Points:
 {{featureBullets}}
