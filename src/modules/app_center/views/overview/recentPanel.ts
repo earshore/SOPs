@@ -344,79 +344,110 @@ function clipStageSummary(text: string, max = 64): string {
   return trimmed.length > max ? `${trimmed.slice(0, max - 1)}…` : trimmed;
 }
 
+function pushMetaString(
+  parts: string[],
+  value: string | number | boolean | undefined,
+  format: (text: string) => string = text => text
+): void {
+  if (typeof value !== 'string') return;
+  const text = value.trim();
+  if (text) parts.push(format(text));
+}
+
+function pushMetaCount(
+  parts: string[],
+  value: string | number | boolean | undefined,
+  suffix: string
+): void {
+  if (typeof value === 'number' && value > 0) parts.push(`${value}${suffix}`);
+}
+
+function formatScrapeStageSummary(meta: Record<string, string | number | boolean>): string {
+  const parts: string[] = [];
+  pushMetaString(parts, meta.marketplace);
+  pushMetaCount(parts, meta.asinCount, '个ASIN');
+  pushMetaString(parts, meta.dataSource);
+  return parts.join(' · ');
+}
+
+function formatAnalysisStageSummary(meta: Record<string, string | number | boolean>): string {
+  const parts: string[] = [];
+  pushMetaCount(parts, meta.asinCount, '个ASIN');
+  pushMetaCount(parts, meta.dimensionCount, '个分析维度');
+  if (
+    typeof meta.overallConfidencePercent === 'number' &&
+    Number.isFinite(meta.overallConfidencePercent)
+  ) {
+    parts.push(`${Math.round(meta.overallConfidencePercent)}%置信度`);
+  }
+  return parts.join(' · ');
+}
+
+function formatListingCopyStageSummary(meta: Record<string, string | number | boolean>): string {
+  const parts: string[] = [];
+  if (typeof meta.keywordCount === 'number') parts.push(`${meta.keywordCount}个SEO关键词`);
+  pushMetaString(parts, meta.model);
+  return parts.join(' · ');
+}
+
+function formatKeywordStageSummary(meta: Record<string, string | number | boolean>): string {
+  const parts: string[] = [];
+  if (typeof meta.keywordCount === 'number') parts.push(`${meta.keywordCount}个关键词`);
+  if (typeof meta.matchedCount === 'number') parts.push(`${meta.matchedCount}个命中`);
+  if (typeof meta.unmatchedCount === 'number') parts.push(`${meta.unmatchedCount}个未命中`);
+  return parts.join(' · ');
+}
+
+function formatListingReviewStageSummary(meta: Record<string, string | number | boolean>): string {
+  const parts: string[] = [];
+  pushMetaString(parts, meta.grade);
+  if (typeof meta.score === 'number') parts.push(`${meta.score}/100`);
+  pushMetaString(parts, meta.model);
+  return parts.join(' · ');
+}
+
 /** Build a live one-line caption from metadata first, then artifact.summary. */
 function formatStageSummaryFromMetadata(stageArtifact: AppCenterArtifactEnvelope): string {
   const meta = stageArtifact.metadata || {};
+  const formatters: Partial<
+    Record<AppCenterArtifactType, (m: Record<string, string | number | boolean>) => string>
+  > = {
+    scrape_history: formatScrapeStageSummary,
+    analysis_report: formatAnalysisStageSummary,
+    listing_prompt: m =>
+      typeof m.strategy === 'string' && m.strategy.trim() ? m.strategy.trim() : '默认策略',
+    listing_copy: formatListingCopyStageSummary,
+    keyword_snapshot: formatKeywordStageSummary,
+    listing_review: formatListingReviewStageSummary,
+  };
+  return formatters[stageArtifact.type]?.(meta) || '';
+}
 
-  switch (stageArtifact.type) {
-    case 'scrape_history': {
-      const parts: string[] = [];
-      if (typeof meta.marketplace === 'string' && meta.marketplace.trim()) {
-        parts.push(meta.marketplace.trim());
-      }
-      if (typeof meta.asinCount === 'number' && meta.asinCount > 0) {
-        parts.push(`${meta.asinCount}个ASIN`);
-      }
-      if (typeof meta.dataSource === 'string' && meta.dataSource.trim()) {
-        parts.push(meta.dataSource.trim());
-      }
-      return parts.join(' · ');
-    }
-    case 'analysis_report': {
-      const parts: string[] = [];
-      if (typeof meta.asinCount === 'number' && meta.asinCount > 0) {
-        parts.push(`${meta.asinCount}个ASIN`);
-      }
-      if (typeof meta.dimensionCount === 'number' && meta.dimensionCount > 0) {
-        parts.push(`${meta.dimensionCount}个分析维度`);
-      }
-      if (
-        typeof meta.overallConfidencePercent === 'number' &&
-        Number.isFinite(meta.overallConfidencePercent)
-      ) {
-        parts.push(`${Math.round(meta.overallConfidencePercent)}%置信度`);
-      }
-      return parts.join(' · ');
-    }
-    case 'listing_prompt': {
-      if (typeof meta.strategy === 'string' && meta.strategy.trim()) {
-        return meta.strategy.trim();
-      }
-      return '默认策略';
-    }
-    case 'listing_copy': {
-      const parts: string[] = [];
-      if (typeof meta.keywordCount === 'number') {
-        parts.push(`${meta.keywordCount}个SEO关键词`);
-      }
-      if (typeof meta.model === 'string' && meta.model.trim()) {
-        parts.push(meta.model.trim());
-      }
-      return parts.join(' · ');
-    }
-    case 'keyword_snapshot': {
-      const parts: string[] = [];
-      if (typeof meta.keywordCount === 'number') parts.push(`${meta.keywordCount}个关键词`);
-      if (typeof meta.matchedCount === 'number') parts.push(`${meta.matchedCount}个命中`);
-      if (typeof meta.unmatchedCount === 'number') parts.push(`${meta.unmatchedCount}个未命中`);
-      return parts.join(' · ');
-    }
-    case 'listing_review': {
-      const parts: string[] = [];
-      if (typeof meta.grade === 'string' && meta.grade.trim()) {
-        parts.push(meta.grade.trim());
-      }
-      if (typeof meta.score === 'number') {
-        parts.push(`${meta.score}/100`);
-      }
-      if (typeof meta.model === 'string' && meta.model.trim()) {
-        parts.push(meta.model.trim());
-      }
-      return parts.join(' · ');
-    }
-    default:
-      return '';
+function formatComplianceStageSummary(
+  stageArtifact: AppCenterArtifactEnvelope,
+  issueCount?: number
+): string {
+  const review = getComplianceReviewView(stageArtifact);
+  if (issueCount && issueCount > 0) {
+    return `发现 ${issueCount} 项问题 · 已复核 ${review.reviewedCount}/${review.totalCount}`;
   }
+  return stageArtifact.summary?.trim() || `已复核 ${review.reviewedCount}/${review.totalCount} 项`;
+}
+
+function formatArtifactFallbackSummary(
+  state: RecentJourneyStepState,
+  stageArtifact: AppCenterArtifactEnvelope
+): string {
+  const fromMeta = formatStageSummaryFromMetadata(stageArtifact);
+  if (fromMeta) return clipStageSummary(fromMeta);
+  if (stageArtifact.summary?.trim()) return clipStageSummary(stageArtifact.summary);
+  const typeLabel = RECENT_ARTIFACT_TYPE_LABELS[stageArtifact.type];
+  if (stageArtifact.title?.trim() && !isGenericArtifactTitle(stageArtifact.title, typeLabel)) {
+    return stageArtifact.title.trim();
+  }
+  if (state === 'complete') return '已完成';
+  if (state === 'current') return '进行中';
+  return '';
 }
 
 /** Prefer real artifact metrics / summary / title; never invent workflow prose. */
@@ -427,50 +458,34 @@ function getLiveStageSummary(
 ): string {
   if (state === 'unavailable') return '本地数据不可用';
   if (state === 'upcoming') return '';
-
   if (stageArtifact?.type === 'compliance_check') {
-    const review = getComplianceReviewView(stageArtifact);
-    if (options?.issueCount && options.issueCount > 0) {
-      return `发现 ${options.issueCount} 项问题 · 已复核 ${review.reviewedCount}/${review.totalCount}`;
-    }
-    if (stageArtifact.summary?.trim()) return stageArtifact.summary.trim();
-    return `已复核 ${review.reviewedCount}/${review.totalCount} 项`;
+    return formatComplianceStageSummary(stageArtifact, options?.issueCount);
   }
+  if (!stageArtifact) return state === 'current' ? '待开始' : '';
+  return formatArtifactFallbackSummary(state, stageArtifact);
+}
 
-  if (!stageArtifact) {
-    return state === 'current' ? '待开始' : '';
-  }
-
-  const fromMeta = formatStageSummaryFromMetadata(stageArtifact);
-  if (fromMeta) return clipStageSummary(fromMeta);
-
-  const summary = stageArtifact.summary?.trim();
-  if (summary) {
-    // Keep one scannable line for the node caption.
-    return clipStageSummary(summary);
-  }
-
-  const typeLabel = RECENT_ARTIFACT_TYPE_LABELS[stageArtifact.type];
-  if (stageArtifact.title?.trim() && !isGenericArtifactTitle(stageArtifact.title, typeLabel)) {
-    return stageArtifact.title.trim();
-  }
-
-  return state === 'complete' ? '已完成' : state === 'current' ? '进行中' : '';
+function resolvePpcReviewState(
+  unavailable: boolean,
+  complete: boolean
+): RecentJourneyStepState {
+  if (unavailable) return 'unavailable';
+  return complete ? 'complete' : 'current';
 }
 
 function getPpcJourney(item: RecentQueueItem): RecentJourney {
   const progress = getWorkItemProgress(item.artifact.workItemId);
   const complete = progress.completedSteps >= progress.totalSteps;
-  const openAction = {
-    kind: 'resume',
-    artifact: item.artifact,
-    mode: 'open',
-  } as const;
   const unavailable = item.payloadStatus === 'missing';
-  const live = getLiveStageSummary(
-    unavailable ? 'unavailable' : complete ? 'complete' : 'current',
-    item.artifact
-  );
+  const reviewState = resolvePpcReviewState(unavailable, complete);
+  const live = getLiveStageSummary(reviewState, item.artifact);
+  const openAction = unavailable
+    ? null
+    : ({ kind: 'resume', artifact: item.artifact, mode: 'open' } as const);
+  const suggestionSummary =
+    live || item.artifact.summary?.trim() || '已生成动作候选';
+  const reviewSummary = live || (complete ? '复核完成' : '待确认否词/收割等动作');
+
   return {
     currentLabel: complete ? '全部完成' : '人工复核',
     complete,
@@ -479,22 +494,16 @@ function getPpcJourney(item: RecentQueueItem): RecentJourney {
       {
         id: 'suggestions',
         label: '生成建议',
-        summary: unavailable
-          ? '本地数据不可用'
-          : live || item.artifact.summary?.trim() || '已生成动作候选',
+        summary: unavailable ? '本地数据不可用' : suggestionSummary,
         state: unavailable ? 'unavailable' : 'complete',
-        action: unavailable ? null : openAction,
+        action: openAction,
       },
       {
         id: 'manual_review',
         label: '人工复核',
-        summary: unavailable
-          ? '本地数据不可用'
-          : complete
-            ? live || '复核完成'
-            : live || '待确认否词/收割等动作',
-        state: unavailable ? 'unavailable' : complete ? 'complete' : 'current',
-        action: unavailable ? null : openAction,
+        summary: unavailable ? '本地数据不可用' : reviewSummary,
+        state: reviewState,
+        action: openAction,
       },
     ],
   };

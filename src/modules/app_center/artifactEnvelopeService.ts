@@ -295,29 +295,10 @@ function createWorkItemFromHistoryItem(historyItem: HistoryItem): AppCenterWorkI
 
 function resolveHistoryDataSourceLabel(historyItem: HistoryItem): 'JSON导入' | '采集' {
   const meta = asRecord(historyItem.data?.metadata);
-  if (!meta) return '采集';
-
-  const source = meta.data_source ?? meta.dataSource ?? meta.last_action;
-  if (typeof source === 'string') {
-    const normalized = source.trim().toLowerCase();
-    if (
-      normalized === 'json_import' ||
-      normalized === 'import' ||
-      normalized.includes('import')
-    ) {
-      return 'JSON导入';
-    }
-    if (
-      normalized === 'scrape' ||
-      normalized === 'scraper' ||
-      normalized === 'collection' ||
-      normalized === 'plugin'
-    ) {
-      return '采集';
-    }
-  }
-
-  return '采集';
+  const source = meta?.data_source ?? meta?.dataSource ?? meta?.last_action;
+  if (typeof source !== 'string') return '采集';
+  const normalized = source.trim().toLowerCase();
+  return normalized.includes('import') ? 'JSON导入' : '采集';
 }
 
 function createHistoryArtifact(historyItem: HistoryItem): AppCenterArtifactEnvelope {
@@ -594,33 +575,68 @@ export function registerHistoryArtifacts(historyItem: HistoryItem): AppCenterArt
   return getArtifactsForWorkItem(createWorkItemIdFromHistoryItem(historyItem));
 }
 
+function resolveKeywordSnapshotWorkItemId(
+  snapshot: KeywordHunterSnapshot,
+  context: AppCenterWorkspaceContext
+): string {
+  const sourceWorkItemId =
+    snapshot.source && 'workItemId' in snapshot.source ? snapshot.source.workItemId : undefined;
+  return context.workItemId || sourceWorkItemId || `keyword_review:${snapshot.id}`;
+}
+
+function registerListingReviewFromSnapshot(
+  snapshot: KeywordHunterSnapshot,
+  workItemId: string,
+  sourceRoute: string
+): void {
+  if (snapshot.status !== 'reported' || !snapshot.result.llmAnalysisResult?.trim()) return;
+
+  const reviewScore = parseListingReviewScore(snapshot.result.llmAnalysisResult);
+  const reviewModel =
+    typeof snapshot.result.llmAnalysisModel === 'string'
+      ? snapshot.result.llmAnalysisModel.trim()
+      : '';
+  const reviewParts: string[] = [];
+  if (reviewScore) reviewParts.push(reviewScore.grade, `${reviewScore.score}/100`);
+  if (reviewModel) reviewParts.push(reviewModel);
+
+  upsertArtifact({
+    id: `${workItemId}:listing_review:${snapshot.id}`,
+    workItemId,
+    type: 'listing_review',
+    sourceRoute,
+    title: '文案评审',
+    summary: reviewParts.length > 0 ? reviewParts.join(' · ') : 'Listing 评审报告已生成',
+    payloadRef: `keyword_snapshot:${snapshot.id}`,
+    createdAt: snapshot.updatedAt,
+    metadata: {
+      keywordSnapshotId: snapshot.id,
+      ...(reviewScore ? { score: reviewScore.score, grade: reviewScore.grade } : {}),
+      ...(reviewModel ? { model: reviewModel } : {}),
+    },
+  });
+}
+
 export function registerKeywordSnapshotArtifact(
   snapshot: KeywordHunterSnapshot,
   context: AppCenterWorkspaceContext
 ): AppCenterArtifactEnvelope | null {
   // Prefer active workspace work item; otherwise bind a local-only work item to the snapshot
   // so pure Keyword Hunter usage still appears in 最近继续 (no cloud / multi-user identity).
-  const workItemId =
-    context.workItemId ||
-    (snapshot.source && 'workItemId' in snapshot.source && snapshot.source.workItemId) ||
-    `keyword_review:${snapshot.id}`;
-
-  const boundContext: AppCenterWorkspaceContext = {
-    ...context,
-    workItemId,
-  };
-
+  const workItemId = resolveKeywordSnapshotWorkItemId(snapshot, context);
+  const boundContext: AppCenterWorkspaceContext = { ...context, workItemId };
   upsertWorkItem(createKeywordSnapshotWorkItem(snapshot, boundContext));
 
   const keywordCount = snapshot.result.keywords.length;
   const matchedCount = snapshot.derived?.matchedCount ?? snapshot.result.matchedKeywords.length;
   const unmatchedCount =
     snapshot.derived?.unmatchedCount ?? snapshot.result.unmatchedKeywords.length;
+  const sourceRoute = context.sourceRoute || 'keyword_hunter_analysis';
   const keywordArtifact = upsertArtifact({
     id: `${workItemId}:keyword_snapshot:${snapshot.id}`,
     workItemId,
     type: 'keyword_snapshot',
-    sourceRoute: context.sourceRoute || 'keyword_hunter_analysis',
+    sourceRoute,
     title: snapshot.title,
     summary: `${keywordCount}个关键词 · ${matchedCount}个命中 · ${unmatchedCount}个未命中`,
     payloadRef: `keyword_snapshot:${snapshot.id}`,
@@ -633,38 +649,7 @@ export function registerKeywordSnapshotArtifact(
     },
   });
 
-  if (snapshot.status === 'reported' && snapshot.result.llmAnalysisResult?.trim()) {
-    const reviewScore = parseListingReviewScore(snapshot.result.llmAnalysisResult);
-    const reviewModel =
-      typeof snapshot.result.llmAnalysisModel === 'string'
-        ? snapshot.result.llmAnalysisModel.trim()
-        : '';
-    const reviewParts: string[] = [];
-    if (reviewScore) {
-      reviewParts.push(reviewScore.grade, `${reviewScore.score}/100`);
-    }
-    if (reviewModel) reviewParts.push(reviewModel);
-    const reviewSummary =
-      reviewParts.length > 0 ? reviewParts.join(' · ') : 'Listing 评审报告已生成';
-    upsertArtifact({
-      id: `${workItemId}:listing_review:${snapshot.id}`,
-      workItemId,
-      type: 'listing_review',
-      sourceRoute: context.sourceRoute || 'keyword_hunter_analysis',
-      title: '文案评审',
-      summary: reviewSummary,
-      payloadRef: `keyword_snapshot:${snapshot.id}`,
-      createdAt: snapshot.updatedAt,
-      metadata: {
-        keywordSnapshotId: snapshot.id,
-        ...(reviewScore
-          ? { score: reviewScore.score, grade: reviewScore.grade }
-          : {}),
-        ...(reviewModel ? { model: reviewModel } : {}),
-      },
-    });
-  }
-
+  registerListingReviewFromSnapshot(snapshot, workItemId, sourceRoute);
   return keywordArtifact;
 }
 

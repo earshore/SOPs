@@ -610,6 +610,24 @@ function showLoadingState(container: HTMLElement): () => void {
   };
 }
 
+function setAnalysisLoadingCopy(
+  titleText: string,
+  hintText: string,
+  streamLabel?: string
+): void {
+  const loadingEl = document.getElementById('keyword-hunter-loading-state');
+  if (loadingEl) {
+    const title = loadingEl.querySelector('p.font-semibold');
+    const hint = loadingEl.querySelector('p.text-xs');
+    if (title) title.textContent = titleText;
+    if (hint) hint.textContent = hintText;
+  }
+  const streamMeta = document.querySelector(
+    '.keyword-hunter-stream-meta__label'
+  ) as HTMLElement | null;
+  if (streamMeta) streamMeta.textContent = streamLabel ?? titleText;
+}
+
 function renderAnalysisLlmStatus(
   run: ActiveAnalysisRun,
   status: KeywordHunterService.KeywordHunterLlmStatus
@@ -619,43 +637,22 @@ function renderAnalysisLlmStatus(
   // Stream chunks are handled by applyAnalysisStreamUpdate (typewriter shell).
   if (status.stage === 'stream') return;
 
-  const loadingEl = document.getElementById('keyword-hunter-loading-state');
-  const streamMeta = document.querySelector(
-    '.keyword-hunter-stream-meta__label'
-  ) as HTMLElement | null;
-
   if (status.stage === 'cache-hit') {
-    if (loadingEl) {
-      const title = loadingEl.querySelector('p.font-semibold');
-      const hint = loadingEl.querySelector('p.text-xs');
-      if (title) title.textContent = '已命中缓存，正在渲染报告…';
-      if (hint) hint.textContent = '无需重新调用模型';
-    }
-    if (streamMeta) streamMeta.textContent = '已命中缓存，正在渲染报告…';
+    setAnalysisLoadingCopy('已命中缓存，正在渲染报告…', '无需重新调用模型');
     return;
   }
 
   if (status.stage === 'in-flight') {
-    if (loadingEl) {
-      const title = loadingEl.querySelector('p.font-semibold');
-      const hint = loadingEl.querySelector('p.text-xs');
-      if (title) title.textContent = '正在复用进行中的分析请求…';
-      if (hint) hint.textContent = '相同 Listing 不会重复调用模型';
-    }
-    if (streamMeta) streamMeta.textContent = '正在复用进行中的分析请求…';
+    setAnalysisLoadingCopy('正在复用进行中的分析请求…', '相同 Listing 不会重复调用模型');
     return;
   }
 
   if (status.stage === 'first-response') {
     const firstMs = status.metrics.firstChunkMs ?? status.metrics.elapsedMs;
-    const titleText = `模型已首响 ${(firstMs / 1000).toFixed(1)}s，正在接收报告…`;
-    if (loadingEl) {
-      const title = loadingEl.querySelector('p.font-semibold');
-      const hint = loadingEl.querySelector('p.text-xs');
-      if (title) title.textContent = titleText;
-      if (hint) hint.textContent = '流式响应已开始';
-    }
-    if (streamMeta) streamMeta.textContent = titleText;
+    setAnalysisLoadingCopy(
+      `模型已首响 ${(firstMs / 1000).toFixed(1)}s，正在接收报告…`,
+      '流式响应已开始'
+    );
   }
 }
 
@@ -1218,6 +1215,26 @@ function highlightScores(container: HTMLElement): void {
  * @param options.forceConfirm - 用户主动点「重新生成」时，已有报告需确认清空
  * @param options.autoStart - 来自 SEO「进入分析」自动触发；有报告时不自动覆盖
  */
+async function confirmRegenerateListingReportIfNeeded(
+  hasExistingReport: boolean,
+  options: { forceConfirm?: boolean; autoStart?: boolean }
+): Promise<boolean> {
+  if (!hasExistingReport || !(options.forceConfirm || !options.autoStart)) return true;
+  const confirmed = await confirmWithModal(
+    '重新生成评审报告',
+    '将清空当前报告并以最新文案与关键词重新生成 AI 评审。此操作无法撤销。',
+    'kh_ignore_regenerate_listing_report',
+    '重新生成'
+  );
+  if (!confirmed) return false;
+  rawMarkdownCache = '';
+  appStore.getState().updateKeywordTracker({
+    llmAnalysisResult: '',
+    llmAnalysisModel: '',
+  });
+  return true;
+}
+
 async function runLLMAnalysis(
   options: {
     forceConfirm?: boolean;
@@ -1232,9 +1249,7 @@ async function runLLMAnalysis(
 
   if (activeAnalysisRun?.status === 'pending') {
     attachAnalysisRunToPage(activeAnalysisRun);
-    if (isAnalysisRunForCurrentCopy(activeAnalysisRun)) {
-      return;
-    }
+    if (isAnalysisRunForCurrentCopy(activeAnalysisRun)) return;
   }
 
   const hasExistingReport = Boolean(
@@ -1247,22 +1262,7 @@ async function runLLMAnalysis(
     return;
   }
 
-  if (hasExistingReport && (options.forceConfirm || !options.autoStart)) {
-    const confirmed = await confirmWithModal(
-      '重新生成评审报告',
-      '将清空当前报告并以最新文案与关键词重新生成 AI 评审。此操作无法撤销。',
-      'kh_ignore_regenerate_listing_report',
-      '重新生成'
-    );
-    if (!confirmed) return;
-
-    rawMarkdownCache = '';
-    appStore.getState().updateKeywordTracker({
-      llmAnalysisResult: '',
-      llmAnalysisModel: '',
-    });
-  }
-
+  if (!(await confirmRegenerateListingReportIfNeeded(hasExistingReport, options))) return;
   attachAnalysisRunToPage(startAnalysisRun(processedCopy));
 }
 

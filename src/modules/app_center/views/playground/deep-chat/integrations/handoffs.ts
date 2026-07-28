@@ -464,15 +464,35 @@ export function warnIfSystemPromptOverBudget(systemPrompt: string): void {
 
 /** 在 light DOM / shadow 中查找技能 UI 节点 */
 
+function buildListingCopyFromPrompt(
+  content: string,
+  message: DeepChatMessage | undefined,
+  promptContext: NonNullable<ReturnType<typeof getActiveListingPromptContext>>
+): AppCenterListingCopy {
+  const activeThread = getActiveThread();
+  const createdAtMs = Number.isFinite(message?.createdAt) ? Number(message?.createdAt) : Date.now();
+  const model = (sessionState.selectedModel || sessionState.currentConfig?.model || '').trim();
+  return {
+    id: `${activeThread.id}:${createdAtMs}`,
+    workItemId: promptContext.workItemId,
+    promptId: promptContext.promptId,
+    threadId: activeThread.id,
+    content,
+    seoKeywords: [...promptContext.seoKeywords],
+    marketplace: promptContext.marketplace,
+    asinOrSku: promptContext.asinOrSku,
+    createdAt: new Date().toISOString(),
+    ...(model ? { model } : {}),
+  };
+}
+
 export async function sendAssistantCopyToKeywordHunter(
   content: string,
   message?: DeepChatMessage
 ): Promise<void> {
   const promptContext = getActiveListingPromptContext();
   if (!promptContext) {
-    showToast('请先在右侧 Prompt 列表选择一个 Listing Prompt', {
-      type: 'warning',
-    });
+    showToast('请先在右侧 Prompt 列表选择一个 Listing Prompt', { type: 'warning' });
     return;
   }
   if (promptContext.seoKeywords.length === 0) {
@@ -484,24 +504,7 @@ export async function sendAssistantCopyToKeywordHunter(
 
   const trimmedContent = content.trim();
   if (!trimmedContent) return;
-  const activeThread = getActiveThread();
-  const createdAtMs = Number.isFinite(message?.createdAt) ? Number(message?.createdAt) : Date.now();
-  const model =
-    sessionState.selectedModel?.trim() ||
-    sessionState.currentConfig?.model?.trim() ||
-    '';
-  const copy: AppCenterListingCopy = {
-    id: `${activeThread.id}:${createdAtMs}`,
-    workItemId: promptContext.workItemId,
-    promptId: promptContext.promptId,
-    threadId: activeThread.id,
-    content: trimmedContent,
-    seoKeywords: [...promptContext.seoKeywords],
-    marketplace: promptContext.marketplace,
-    asinOrSku: promptContext.asinOrSku,
-    createdAt: new Date().toISOString(),
-    ...(model ? { model } : {}),
-  };
+  const copy = buildListingCopyFromPrompt(trimmedContent, message, promptContext);
 
   try {
     saveListingCopy(copy);

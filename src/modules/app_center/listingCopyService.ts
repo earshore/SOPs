@@ -19,18 +19,13 @@ export interface AppCenterListingCopy {
 
 function isListingCopy(value: unknown): value is AppCenterListingCopy {
   if (!value || typeof value !== 'object') return false;
-  const copy = value as Partial<AppCenterListingCopy>;
-  return (
-    typeof copy.id === 'string' &&
-    typeof copy.workItemId === 'string' &&
-    typeof copy.promptId === 'string' &&
-    typeof copy.threadId === 'string' &&
-    typeof copy.content === 'string' &&
-    Array.isArray(copy.seoKeywords) &&
-    copy.seoKeywords.every(keyword => typeof keyword === 'string') &&
-    typeof copy.createdAt === 'string' &&
-    (copy.model === undefined || typeof copy.model === 'string')
-  );
+  const copy = value as Record<string, unknown>;
+  const requiredStrings = ['id', 'workItemId', 'promptId', 'threadId', 'content', 'createdAt'];
+  if (requiredStrings.some(key => typeof copy[key] !== 'string')) return false;
+  if (!Array.isArray(copy.seoKeywords) || !copy.seoKeywords.every(k => typeof k === 'string')) {
+    return false;
+  }
+  return copy.model === undefined || typeof copy.model === 'string';
 }
 
 function readListingCopies(): AppCenterListingCopy[] {
