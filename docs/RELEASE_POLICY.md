@@ -44,6 +44,7 @@
 - `v3.0.9`（2026-07-19）为历史 GA：落地 release-debt hardening（静态托管合同、质量/浏览器门禁、本地 `release:gate`）并收口构建质量门。
 - `v3.0.10`（2026-07-20）为历史 GA：收口 `v3.0.9` 后热修（数据备份 UX、Vercel 构建、UI 打磨、confirm 弹窗去重）并恢复 package / tag / Release / 生产三者一致。
 - `v3.0.11`（2026-07-27）为当前 GA：定稿 `v3.0.11-rc.1`…`rc.13`（系统设置 pref-list / ≤L3、企业主题 v2、Deep Chat 动态推理与 vision、四路径 LLM 对齐）；Latest 指向 `v3.0.11`，回滚基线 `v3.0.10`。
+- `v3.0.12-rc.2`（2026-07-28）为生产验证候选：应用总览最近作业链路真实摘要、卡片视觉与 Appearance 色调对齐；**Pre-release**，Latest 仍为 `v3.0.11`。
 - `v3.0.12-rc.1`（2026-07-28）为生产验证候选：Deep Chat host vision 上传 UX（`enableVision` 默认关 + Alpha）、系统设置导航 soft 遮罩定位；**Pre-release**，Latest 仍为 `v3.0.11`。
 - `v3.0.11-rc.1`（2026-07-21）为生产验证候选：Amazon Skills 目录 + Deep Chat 技能挂载 / 并发会话体验；**Pre-release**（历史）；当时 Latest 为 `v3.0.10`。
 - `v3.0.11-rc.2`（2026-07-22）为生产验证候选：技能页叙事对齐 + Deep Chat Chip/输入热修；**Pre-release**，Latest 仍为 `v3.0.10`。

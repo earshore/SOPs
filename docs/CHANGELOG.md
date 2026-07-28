@@ -13,6 +13,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [3.0.12-rc.2] - 2026-07-28
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.11`。
+> 收口 `v3.0.12-rc.1` 之后的 **应用总览 · 最近作业** 作业链路真实指标、卡片视觉与 Appearance 色调对齐。
+> 生产回滚目标为 `v3.0.11` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- 最近作业 **作业链路真实摘要**：按阶段展示 metrics（采集来源、分析维度/置信度/ASIN 数、Prompt 策略、文案 SEO 词与模型、关键词命中、评审得分与模型等），优先 artifact metadata，不再用静态 workflow 死文案。
+- 数据采集 / AI 分析 / Listing 评审落库时写入更完整的 summary 与 model 等可索引元数据（新作业生效；旧 envelope 需重跑对应阶段）。
+
+### Changed
+
+- 作业卡片正文：主行突出阶段 facts，次行保留站点/ASIN 作业上下文；左侧类型图标放大。
+- 作业链路配色改为跟随 Appearance `--color-primary*`（与系统设置色调一致），不再跟卡片类型色跑偏。
+- 浅色模式：仅 **置顶** 卡片保留行背景；需复核等 attention 不再整行浅底。
+- 快捷操作 tray：hover 延迟展开 + tooltip 同步延迟，避免误触闪现。
+- 链路文案收敛：`DE · x个ASIN · JSON导入`、`x个ASIN · x个分析维度 · xx%置信度`、`待优化 · xx/100 · 模型名` 等。
+
+### Fixed
+
+- 最近作业 focus/遮罩与左侧伪竖线回归：点击快捷操作不再整卡 focus wash。
+- 采集来源 JSON 导入 vs 采集 可在链路中区分（metadata `data_source`）。
+
 ## [3.0.12-rc.1] - 2026-07-28
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.11`。
