@@ -362,6 +362,54 @@ describe('运行时调度失败策略', () => {
     expect(onTaskComplete).not.toHaveBeenCalled();
     expect(llmMocks.callLLM).toHaveBeenCalledTimes(2);
   });
+
+  it('部分失败时最终进度与 runSummary 保留失败摘要', async () => {
+    const product = createProduct();
+    const onProgress = vi.fn();
+    mockLlmConfig();
+    llmMocks.callLLM
+      .mockRejectedValueOnce(new Error('title failed'))
+      .mockResolvedValueOnce(
+        JSON.stringify({
+          bullet_analysis: [],
+          overall_strategy: {
+            primary_differentiation: 'x',
+            target_positioning: 'y',
+            emotional_hooks: [],
+            missing_elements: [],
+          },
+          function_scene_matrix: { functions: [], scenes: [], pain_points: [] },
+        })
+      );
+
+    const report = await runParallelAIAnalysis(
+      ['title-keywords', 'selling-points'],
+      product,
+      onProgress,
+      'en',
+      {
+        enableCache: false,
+        maxConcurrency: 1,
+        streamResults: false,
+        failureStrategy: 'continue',
+        retryBudget: 0,
+      }
+    );
+
+    expect(report._metadata?.runSummary).toEqual({
+      successCount: 1,
+      failedCount: 1,
+      failedTargetIds: ['title-keywords'],
+    });
+    expect(onProgress).toHaveBeenCalledWith(
+      100,
+      expect.stringContaining('失败 1')
+    );
+    expect(onProgress).toHaveBeenCalledWith(
+      100,
+      expect.stringContaining('title-keywords')
+    );
+  });
 });
 
 describe('并发控制', () => {

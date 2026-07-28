@@ -16,7 +16,10 @@ import { resolveToolTargetModel } from '@/services/toolStrategyService';
 import { resolveToolLlmConfig, type ResolvedToolLlmConfig } from '@/services/llmToolBridge';
 import { BusinessError } from '@/common/errors/AppError';
 import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
-import type { FullAnalysisReport } from '../config/analysisReportData';
+import type {
+  AnalysisReportMetadata,
+  FullAnalysisReport,
+} from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import {
   generateAnalysisPrompt,
@@ -127,6 +130,8 @@ interface AnalysisTaskExecutionOptions {
   skipCacheRead?: boolean;
   retryBudget?: number;
   onFirstResponse?: (task: AnalysisTask, metrics: LLMStreamMetrics) => void;
+  /** Pipeline-level phase labels (Map/Reduce). Progress must stay non-decreasing at caller. */
+  onPhase?: (task: AnalysisTask, message: string) => void;
 }
 
 type TaskProgressCallback = (
@@ -155,6 +160,7 @@ interface AnalysisRunContext {
   totalTasks: number;
   successCount: number;
   failedCount: number;
+  failedTargetIds: string[];
   streamResults: boolean;
   onProgress: (progress: number, step: string) => void;
   onTaskComplete?: (update: ParallelAnalysisResultUpdate) => void;
@@ -185,7 +191,8 @@ function buildReportSnapshot(
   report: Partial<FullAnalysisReport>,
   targetIds: string[],
   language: string,
-  reviewSampling: ReviewSamplingMetadata
+  reviewSampling: ReviewSamplingMetadata,
+  runSummary?: AnalysisReportMetadata['runSummary']
 ): FullAnalysisReport {
   const reportWithoutMetadata = { ...report } as Partial<FullAnalysisReport>;
   delete reportWithoutMetadata._metadata;
@@ -203,6 +210,7 @@ function buildReportSnapshot(
       targetIds: [...targetIds],
       language,
       reviewSampling,
+      ...(runSummary ? { runSummary } : {}),
     },
   } as FullAnalysisReport;
 }
@@ -556,6 +564,7 @@ async function executeAnalysisTask(
           task.streamChunks = update.chunkCount;
           task.streamedChars = update.content.length;
         },
+        onPhase: message => options.onPhase?.(task, message),
       });
       actualResult = pipeline.data;
       task.promptChars = pipeline.promptChars;
@@ -580,6 +589,7 @@ async function executeAnalysisTask(
           task.streamChunks = update.chunkCount;
           task.streamedChars = update.content.length;
         },
+        onPhase: message => options.onPhase?.(task, message),
       });
       actualResult = pipeline.data;
       task.promptChars = pipeline.promptChars;
@@ -817,6 +827,9 @@ function emitFailedTaskUpdate(
   currentTasks: string[]
 ): void {
   context.failedCount++;
+  if (!context.failedTargetIds.includes(task.targetId)) {
+    context.failedTargetIds.push(task.targetId);
+  }
 
   if (!context.streamResults) return;
 
@@ -915,6 +928,7 @@ function createAnalysisRunContext(
     totalTasks: targetIds.length,
     successCount: 0,
     failedCount: 0,
+    failedTargetIds: [],
     streamResults: config.streamResults,
     onProgress,
     onTaskComplete: config.onTaskComplete,
@@ -961,6 +975,17 @@ async function executePendingAnalysisTasks(input: PendingAnalysisExecutionContex
     onTaskFirstResponse: (task, completedCount, _totalCount, currentTasks) => {
       handleFirstAnalysisResponse(context, task, cachedTasks.length + completedCount, currentTasks);
     },
+    onPhase: (_task, message) => {
+      // Keep progress floor at already-settled tasks so phase text never rewinds the bar.
+      const settled = context.successCount + context.failedCount;
+      const settledFloor = Math.round((settled / Math.max(1, context.totalTasks)) * 100);
+      const runningBoost = Math.min(
+        8,
+        Math.max(1, Math.round(100 / Math.max(1, context.totalTasks * 4)))
+      );
+      const progress = Math.min(99, settledFloor + runningBoost);
+      context.onProgress(progress, message);
+    },
   });
 }
 
@@ -984,12 +1009,29 @@ function assertParallelAnalysisSucceeded(
   );
 }
 
+function buildRunSummary(context: AnalysisRunContext): AnalysisReportMetadata['runSummary'] {
+  return {
+    successCount: context.successCount,
+    failedCount: context.failedCount,
+    failedTargetIds: [...context.failedTargetIds],
+  };
+}
+
+function formatFinalProgressStep(context: AnalysisRunContext): string {
+  if (context.failedCount === 0) {
+    return `分析完成：成功 ${context.successCount}/${context.totalTasks}`;
+  }
+  const failedLabels = context.failedTargetIds.join(', ');
+  return `分析完成：成功 ${context.successCount} · 失败 ${context.failedCount}（${failedLabels}）`;
+}
+
 function buildFinalAnalysisReport(context: AnalysisRunContext): FullAnalysisReport {
   return buildReportSnapshot(
     context.report,
     context.targetIds,
     context.language,
-    context.reviewSampling
+    context.reviewSampling,
+    buildRunSummary(context)
   );
 }
 
@@ -1031,7 +1073,7 @@ export async function runParallelAIAnalysis(
 
   const finalReport = buildFinalAnalysisReport(runContext);
   assertParallelAnalysisSucceeded(runContext, analysisConfig.failureStrategy);
-  onProgress(100, `分析完成! 成功: ${runContext.successCount}, 失败: ${runContext.failedCount}`);
+  onProgress(100, formatFinalProgressStep(runContext));
 
   return finalReport;
 }

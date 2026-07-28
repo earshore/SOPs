@@ -471,15 +471,63 @@ async function runPreparedParallelAnalysis(
   return withAnalysisSourceBinding(analysisReport, preparedRun.sourceBinding, preparedRun.language);
 }
 
+function getAnalysisTargetLabel(targetId: string): string {
+  return analysisTargets.find(target => target.id === targetId)?.name || targetId;
+}
+
+function formatAnalysisCompletionSummary(analysisReport: FullAnalysisReport): {
+  step: string;
+  toastMessage: string;
+  toastType: 'success' | 'warning';
+} {
+  const targetIds = analysisReport._metadata?.targetIds || [];
+  const total = targetIds.length || 0;
+  const runSummary = analysisReport._metadata?.runSummary;
+  const successCount =
+    typeof runSummary?.successCount === 'number'
+      ? runSummary.successCount
+      : Math.max(0, total - (runSummary?.failedCount || 0));
+  const failedCount =
+    typeof runSummary?.failedCount === 'number'
+      ? runSummary.failedCount
+      : Math.max(0, total - successCount);
+  const failedTargetIds = Array.isArray(runSummary?.failedTargetIds)
+    ? runSummary.failedTargetIds
+    : [];
+
+  if (failedCount <= 0) {
+    const step =
+      total > 0 ? `分析完成：成功 ${successCount}/${total}` : '分析完成';
+    return {
+      step,
+      toastMessage: total > 0 ? `分析完成：成功 ${successCount}/${total}` : '分析完成！',
+      toastType: 'success',
+    };
+  }
+
+  const failedLabels = failedTargetIds.map(getAnalysisTargetLabel).join('、');
+  const step = failedLabels
+    ? `分析完成：成功 ${successCount} · 失败 ${failedCount}（${failedLabels}）`
+    : `分析完成：成功 ${successCount} · 失败 ${failedCount}`;
+
+  return {
+    step,
+    toastMessage: step,
+    toastType: 'warning',
+  };
+}
+
 async function completeAnalysisAction(
   context: AlpineContext,
   sourceBinding: AnalysisSourceBinding,
   analysisReport: FullAnalysisReport
 ): Promise<void> {
+  const completion = formatAnalysisCompletionSummary(analysisReport);
   syncAnalysisReport(context, analysisReport);
-  syncAnalysisProgress(context, 100, '分析完成');
+  // Preserve meaningful summary; do not clobber with bare "分析完成".
+  syncAnalysisProgress(context, 100, completion.step);
   await persistAnalysisReportToSource(sourceBinding, analysisReport);
-  showToast('分析完成！', { type: 'success' });
+  showToast(completion.toastMessage, { type: completion.toastType });
 }
 
 function handleAnalysisActionError(context: AlpineContext, error: unknown): void {

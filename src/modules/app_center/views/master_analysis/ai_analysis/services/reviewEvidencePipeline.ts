@@ -73,6 +73,8 @@ type CallOptions = {
   retryBudget?: number;
   onFirstResponse?: (metrics: LLMStreamMetrics) => void;
   onStreamUpdate?: (update: { chunkCount: number; content: string }) => void;
+  /** Fine-grained Map–Reduce phase labels for UI progress. */
+  onPhase?: (message: string) => void;
 };
 
 type TargetHandler = {
@@ -848,6 +850,7 @@ async function runOneshot(
   options: CallOptions
 ): Promise<ReviewEvidencePipelineResult> {
   const handler = TARGET_HANDLERS[targetId];
+  options.onPhase?.(`${targetId} · 单次分析中…`);
   const prompt = generateAnalysisPrompt(targetId, options.product, options.language);
   const call = await callAnalysisJson({
     prompt,
@@ -909,7 +912,12 @@ async function runMapReduce(
   let mapFailures = 0;
   const agg = handler.emptyMapAggregate();
 
+  let mapIndex = 0;
   for (const unit of units) {
+    mapIndex += 1;
+    options.onPhase?.(
+      `${targetId} Map ${mapIndex}/${units.length} · ${unit.slice.asin}`
+    );
     const prompt = handler.buildMapPrompt(
       unit.slice,
       options.language,
@@ -955,6 +963,7 @@ async function runMapReduce(
   let finalData = mapped;
   let reduceCalls = 0;
   try {
+    options.onPhase?.(`${targetId} Reduce · 合并证据中…`);
     const reducePrompt = handler.buildReducePrompt(options.product, options.language, mapped);
     promptChars += reducePrompt.length;
     estimatedInputTokens += estimateTokenCount(reducePrompt);

@@ -162,6 +162,12 @@ export interface AnalysisReportMetadata {
   language: string; // 分析语言
   /** LLM model id used for this analysis run (for journey summaries). */
   model?: string;
+  /** Per-run success/failure counts for partial-complete UX. */
+  runSummary?: {
+    successCount: number;
+    failedCount: number;
+    failedTargetIds: string[];
+  };
   reviewSampling?: {
     totalReviews: number;
     lowStar: {

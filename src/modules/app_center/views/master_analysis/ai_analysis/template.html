@@ -723,7 +723,7 @@
                   :class="analysisHeroTitleClass"
                   class="font-extrabold flex items-center gap-3 tracking-tight"
                 >
-                  <span :hidden="!isAnalysisComplete">分析完成</span>
+                  <span :hidden="!isAnalysisComplete" x-text="analysisCompleteTitle"></span>
                   <span :hidden="!isAnalysisRunning">AI 正在分析中</span>
                   <span :hidden="!isAnalysisIdle">执行 AI 分析</span>
                   <template x-if="isAnalysisRunning">
@@ -735,17 +735,28 @@
                   class="text-sm mt-1.5 flex items-center gap-2 transition-colors duration-300"
                 >
                   <template x-if="isAnalyzing">
-                    <span class="flex items-center gap-2">
-                      <span class="relative flex h-2 w-2">
+                    <span class="flex items-center gap-2 min-w-0">
+                      <span class="relative flex h-2 w-2 shrink-0">
                         <span
                           class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"
                         ></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                       </span>
-                      <span x-text="currentStep"></span>
+                      <span class="truncate" x-text="analysisHeroStatusText"></span>
                     </span>
                   </template>
-                  <template x-if="hasAnalysisSelection">
+                  <template x-if="!isAnalyzing && showAnalysisHeroStatus">
+                    <span class="flex items-center gap-2 min-w-0">
+                      <span
+                        class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                        :class="hasPartialAnalysisFailures
+                          ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                          : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
+                        x-text="analysisHeroStatusText"
+                      ></span>
+                    </span>
+                  </template>
+                  <template x-if="showAnalysisSelectionHint">
                     <span>
                       <span
                         :class="analysisHeroMetricPillClass"
@@ -968,8 +979,12 @@
                       个维度，结果会持续追加
                     </span>
                     <span :hidden="!analysisNotRunning">
-                      分析完成于
+                      <span x-show="!hasPartialAnalysisFailures">分析完成于</span>
+                      <span x-show="hasPartialAnalysisFailures">部分完成于</span>
                       <span x-text="reportCompletedAtText"></span>
+                      <template x-if="hasPartialAnalysisFailures && analysisHeroStatusText">
+                        <span class="text-amber-700"> · <span x-text="analysisHeroStatusText"></span></span>
+                      </template>
                     </span>
                   </p>
                 </div>

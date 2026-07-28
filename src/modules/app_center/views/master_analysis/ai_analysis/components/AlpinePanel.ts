@@ -573,12 +573,62 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     return !this.isAnalyzing && !this.analysisHeroIsComplete;
   },
 
+  get analysisRunSummary() {
+    const report = this.analysisReport;
+    if (!report || typeof report === 'string') {
+      return null;
+    }
+    const runSummary = (report as FullAnalysisReport)._metadata?.runSummary;
+    if (!runSummary || typeof runSummary !== 'object') {
+      return null;
+    }
+    return runSummary;
+  },
+
+  get hasPartialAnalysisFailures(): boolean {
+    return (this.analysisRunSummary?.failedCount || 0) > 0;
+  },
+
+  get analysisCompleteTitle(): string {
+    return this.hasPartialAnalysisFailures ? '分析部分完成' : '分析完成';
+  },
+
+  get analysisHeroStatusText(): string {
+    if (this.isAnalyzing) {
+      return this.currentStep || '正在分析…';
+    }
+    if (this.analysisHeroIsComplete && this.currentStep) {
+      return this.currentStep;
+    }
+    const summary = this.analysisRunSummary;
+    if (this.analysisHeroIsComplete && summary) {
+      if (summary.failedCount > 0) {
+        const labels = (summary.failedTargetIds || [])
+          .map(id => this.getTargetName(id))
+          .join('、');
+        return labels
+          ? `成功 ${summary.successCount} · 失败 ${summary.failedCount}（${labels}）`
+          : `成功 ${summary.successCount} · 失败 ${summary.failedCount}`;
+      }
+      return `成功 ${summary.successCount} 个维度`;
+    }
+    return '';
+  },
+
+  get showAnalysisHeroStatus(): boolean {
+    return Boolean(this.analysisHeroStatusText);
+  },
+
   get hasAnalysisSelection(): boolean {
     return this.selectedTargets.length > 0 && this.selectedAsins.length > 0;
   },
 
+  get showAnalysisSelectionHint(): boolean {
+    return !this.isAnalyzing && !this.showAnalysisHeroStatus && this.hasAnalysisSelection;
+  },
+
   get needsAnalysisSelection(): boolean {
-    return !this.isAnalyzing && !this.hasAnalysisSelection;
+    return !this.isAnalyzing && !this.hasAnalysisSelection && !this.showAnalysisHeroStatus;
   },
 
   get canRunAnalysis(): boolean {

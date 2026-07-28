@@ -55,6 +55,8 @@ type CallOptions = {
   retryBudget?: number;
   onFirstResponse?: (metrics: LLMStreamMetrics) => void;
   onStreamUpdate?: (update: { chunkCount: number; content: string }) => void;
+  /** Fine-grained Map–Reduce phase labels for UI progress. */
+  onPhase?: (message: string) => void;
 };
 
 function isSourceProductSlice(value: unknown): value is SourceProductSlice {
@@ -336,6 +338,7 @@ function extractBulletAnalysis(data: Record<string, unknown>): unknown[] {
  * Uses full generateAnalysisPrompt + normalized defaults for missing strategy fields.
  */
 async function runOneshot(options: CallOptions): Promise<SellingPointsPipelineResult> {
+  options.onPhase?.('卖点结构拆解 · 单次分析中…');
   const prompt = generateAnalysisPrompt('selling-points', options.product, options.language);
   const call = await callAnalysisJson({
     prompt,
@@ -395,7 +398,12 @@ async function runMapReduce(options: CallOptions): Promise<SellingPointsPipeline
   const mappedBullets: unknown[] = [];
 
   // Sequential maps keep gateway rate limits predictable; still cheaper than one giant fail.
+  let mapIndex = 0;
   for (const unit of mapUnits) {
+    mapIndex += 1;
+    options.onPhase?.(
+      `卖点 Map ${mapIndex}/${mapUnits.length} · ${unit.slice.asin}`
+    );
     const prompt = buildMapPrompt(unit.slice, options.language, unit.offset);
     promptChars += prompt.length;
     estimatedInputTokens += estimateTokenCount(prompt);
@@ -439,6 +447,9 @@ async function runMapReduce(options: CallOptions): Promise<SellingPointsPipeline
   let reduceCalls = 0;
 
   try {
+    options.onPhase?.(
+      `卖点 Reduce · 合成策略（已映射 ${mappedBullets.length} 条 bullets）`
+    );
     const reducePrompt = buildReducePrompt(options.product, options.language, mappedBullets);
     promptChars += reducePrompt.length;
     estimatedInputTokens += estimateTokenCount(reducePrompt);
