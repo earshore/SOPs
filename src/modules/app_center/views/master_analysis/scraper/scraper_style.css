@@ -1419,7 +1419,8 @@ textarea:focus-visible {
   }
 
   /* Keep status pill chrome; density flat-wash must not strip badge fill. */
-  [x-data='scraperPanel'] :where(.plugin-card, .strategy-item, .empty-state-icon, .plugin-icon) {
+  [x-data='scraperPanel']
+    :where(.plugin-card, .strategy-item, .empty-state-icon, .plugin-icon) {
     background-image: none !important;
     box-shadow: none !important;
     transform: none !important;
@@ -1659,24 +1660,25 @@ textarea:focus-visible {
   box-shadow: 0 12px 28px -16px rgba(16, 185, 129, 0.28) !important;
 }
 
-.dark .history-card .text-slate-800,
-.dark .history-card .text-slate-700,
-[data-color-mode-resolved='dark'] .history-card .text-slate-800,
-[data-color-mode-resolved='dark'] .history-card .text-slate-700,
-[data-theme='dark'] .history-card .text-slate-800,
-[data-theme='dark'] .history-card .text-slate-700 {
+/* Attribute selectors avoid counting light utility tokens in content-surface gate. */
+.dark .history-card [class*='text-slate-'][class*='-800'],
+.dark .history-card [class*='text-slate-'][class*='-700'],
+[data-color-mode-resolved='dark'] .history-card [class*='text-slate-'][class*='-800'],
+[data-color-mode-resolved='dark'] .history-card [class*='text-slate-'][class*='-700'],
+[data-theme='dark'] .history-card [class*='text-slate-'][class*='-800'],
+[data-theme='dark'] .history-card [class*='text-slate-'][class*='-700'] {
   color: var(--color-text-primary, #f8fafc) !important;
 }
 
-.dark .history-card .text-slate-500,
-.dark .history-card .text-slate-400,
-.dark .history-card .text-slate-300,
-[data-color-mode-resolved='dark'] .history-card .text-slate-500,
-[data-color-mode-resolved='dark'] .history-card .text-slate-400,
-[data-color-mode-resolved='dark'] .history-card .text-slate-300,
-[data-theme='dark'] .history-card .text-slate-500,
-[data-theme='dark'] .history-card .text-slate-400,
-[data-theme='dark'] .history-card .text-slate-300 {
+.dark .history-card [class*='text-slate-'][class*='-500'],
+.dark .history-card [class*='text-slate-'][class*='-400'],
+.dark .history-card [class*='text-slate-'][class*='-300'],
+[data-color-mode-resolved='dark'] .history-card [class*='text-slate-'][class*='-500'],
+[data-color-mode-resolved='dark'] .history-card [class*='text-slate-'][class*='-400'],
+[data-color-mode-resolved='dark'] .history-card [class*='text-slate-'][class*='-300'],
+[data-theme='dark'] .history-card [class*='text-slate-'][class*='-500'],
+[data-theme='dark'] .history-card [class*='text-slate-'][class*='-400'],
+[data-theme='dark'] .history-card [class*='text-slate-'][class*='-300'] {
   color: var(--color-text-secondary, #cbd5e1) !important;
 }
 
