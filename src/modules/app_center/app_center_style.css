@@ -914,12 +914,15 @@
   color: var(--color-rose-700, #be123c);
 }
 
+/* Only pinned cards get a row fill; ordinary items stay transparent. */
 .app-overview-recent-item--pinned {
+  background: color-mix(in srgb, var(--app-overview-accent-surface) 72%, var(--app-overview-surface));
   box-shadow: inset 3px 0 0 var(--app-overview-accent-strong);
 }
 
+/* Attention is badge-only — no full-row wash that looks like every card has a fill. */
 .app-overview-recent-item--attention {
-  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 4%, var(--app-overview-surface));
+  background: transparent;
 }
 
 .app-overview-recent-item--missing {
@@ -1101,11 +1104,12 @@
   box-shadow: none;
 }
 
-/* Preserve pinned left rail only for pinned cards (not for focus). */
+/* Preserve pinned fill + left rail only for pinned cards (not for focus / attention). */
 .app-overview-recent-item--pinned,
 .app-overview-recent-item--pinned:focus,
 .app-overview-recent-item--pinned:focus-within,
 .app-overview-recent-item--pinned:active {
+  background: color-mix(in srgb, var(--app-overview-accent-surface) 72%, var(--app-overview-surface));
   box-shadow: inset 3px 0 0 var(--app-overview-accent-strong);
 }
 
@@ -1113,8 +1117,17 @@
 .app-overview-recent-item--attention:focus,
 .app-overview-recent-item--attention:focus-within,
 .app-overview-recent-item--attention:active {
-  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 4%, var(--app-overview-surface));
+  background: transparent;
   box-shadow: none;
+}
+
+/* Pinned + attention: keep pinned fill, never fall back to attention wash. */
+.app-overview-recent-item--pinned.app-overview-recent-item--attention,
+.app-overview-recent-item--pinned.app-overview-recent-item--attention:focus,
+.app-overview-recent-item--pinned.app-overview-recent-item--attention:focus-within,
+.app-overview-recent-item--pinned.app-overview-recent-item--attention:active {
+  background: color-mix(in srgb, var(--app-overview-accent-surface) 72%, var(--app-overview-surface));
+  box-shadow: inset 3px 0 0 var(--app-overview-accent-strong);
 }
 
 /* Journey first node must not paint a vertical left bar on click/focus. */
