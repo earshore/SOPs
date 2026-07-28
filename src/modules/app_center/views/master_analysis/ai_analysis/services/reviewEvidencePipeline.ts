@@ -1,6 +1,9 @@
 /**
- * Review-evidence Map–Reduce for fatal-flaws (1–3★) and wow-moments (5★).
- * Multi-ASIN keeps full review text via metadata.source_products; no global 24-cap drop.
+ * Review-evidence Map–Reduce for all review-driven analysis targets.
+ * Multi-ASIN keeps full review text via metadata.source_products (no 24/40 oneshot drop).
+ *
+ * Star-bucket targets: fatal-flaws (1–3★), wow-moments (5★)
+ * General-review targets: hesitation-points, buyer-profile, vocab-gap, promise-reality
  */
 
 import { callLLM, type ChatMessage, type LLMStreamMetrics } from '@/services/llmService';
@@ -14,11 +17,26 @@ import { parseAnalysisResponse } from './analysisResultParser';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
 import { estimateTokenCount } from '../utils/tokenCounter';
 
-export type ReviewEvidenceTargetId = 'fatal-flaws' | 'wow-moments';
+export type ReviewEvidenceTargetId =
+  | 'fatal-flaws'
+  | 'wow-moments'
+  | 'hesitation-points'
+  | 'buyer-profile'
+  | 'vocab-gap'
+  | 'promise-reality';
+
+const STAR_BUCKET_TARGETS: ReviewEvidenceTargetId[] = ['fatal-flaws', 'wow-moments'];
+const GENERAL_REVIEW_TARGETS: ReviewEvidenceTargetId[] = [
+  'hesitation-points',
+  'buyer-profile',
+  'vocab-gap',
+  'promise-reality',
+];
 
 const REVIEW_CHUNK_SIZE = 16;
-/** Prefer Map–Reduce when more reviews than the old oneshot representativeness cap. */
-const MAP_REDUCE_REVIEW_THRESHOLD = 24;
+/** Old oneshot caps: 24 for star buckets, 40 for general sample. */
+const STAR_MAP_REDUCE_THRESHOLD = 24;
+const GENERAL_MAP_REDUCE_THRESHOLD = 40;
 const BODY_CHARS = 700;
 
 type SourceProductSlice = {
@@ -57,6 +75,30 @@ type CallOptions = {
   onStreamUpdate?: (update: { chunkCount: number; content: string }) => void;
 };
 
+type TargetHandler = {
+  starFilter: (reviews: Review[]) => Review[];
+  mapReduceThreshold: number;
+  emptyMapAggregate: () => Record<string, unknown>;
+  mergeMapShard: (agg: Record<string, unknown>, shard: Record<string, unknown>) => void;
+  hasMapSignal: (mapped: Record<string, unknown>) => boolean;
+  normalize: (partial: Record<string, unknown>) => Record<string, unknown>;
+  buildMapPrompt: (
+    slice: SourceProductSlice,
+    language: string,
+    globalOffset: number,
+    product: Product
+  ) => string;
+  buildReducePrompt: (
+    product: Product,
+    language: string,
+    mapped: Record<string, unknown>
+  ) => string;
+  mergeReduce: (
+    mapped: Record<string, unknown>,
+    reduced: Record<string, unknown>
+  ) => Record<string, unknown>;
+};
+
 function isReview(value: unknown): value is Review {
   if (!value || typeof value !== 'object') return false;
   const r = value as Partial<Review>;
@@ -74,250 +116,6 @@ function isSourceProductSlice(value: unknown): value is SourceProductSlice {
   );
 }
 
-function filterReviewsForTarget(reviews: Review[], targetId: ReviewEvidenceTargetId): Review[] {
-  if (targetId === 'fatal-flaws') {
-    return reviews.filter(r => r.star_rating >= 1 && r.star_rating <= 3);
-  }
-  return reviews.filter(r => r.star_rating === 5);
-}
-
-export function getReviewSourceSlices(
-  product: Product,
-  targetId: ReviewEvidenceTargetId
-): SourceProductSlice[] {
-  const raw = product.metadata?.source_products;
-  if (Array.isArray(raw) && raw.length > 0 && raw.every(isSourceProductSlice)) {
-    return raw
-      .map(slice => ({
-        ...slice,
-        customer_reviews: filterReviewsForTarget(slice.customer_reviews, targetId),
-      }))
-      .filter(slice => slice.customer_reviews.length > 0);
-  }
-
-  const filtered = filterReviewsForTarget(product.customer_reviews, targetId);
-  if (filtered.length === 0) return [];
-  return [
-    {
-      asin: product.asin,
-      productTitle: product.productTitle,
-      customer_reviews: filtered,
-    },
-  ];
-}
-
-export function countReviewsForTarget(product: Product, targetId: ReviewEvidenceTargetId): number {
-  return getReviewSourceSlices(product, targetId).reduce(
-    (sum, slice) => sum + slice.customer_reviews.length,
-    0
-  );
-}
-
-export function shouldUseReviewMapReduce(
-  product: Product,
-  targetId: ReviewEvidenceTargetId
-): boolean {
-  const slices = getReviewSourceSlices(product, targetId);
-  if (slices.length > 1) return true;
-  return countReviewsForTarget(product, targetId) > MAP_REDUCE_REVIEW_THRESHOLD;
-}
-
-function chunkReviews(reviews: Review[], size: number): Review[][] {
-  if (reviews.length <= size) return [reviews];
-  const chunks: Review[][] = [];
-  for (let i = 0; i < reviews.length; i += size) {
-    chunks.push(reviews.slice(i, i + size));
-  }
-  return chunks;
-}
-
-function formatReviewLine(review: Review, index: number, asin: string): string {
-  const body =
-    review.body.length > BODY_CHARS ? `${review.body.slice(0, BODY_CHARS)}…` : review.body;
-  const headline = review.headline?.trim() || '(no headline)';
-  const country = review.origin_country || 'unknown';
-  return `${index}. [ASIN ${sanitizePromptInput(asin)}] [${review.star_rating}★ · ${sanitizePromptInput(country)}] ${sanitizePromptInput(headline)}: ${sanitizePromptInput(body)}`;
-}
-
-function buildFatalFlawsMapPrompt(
-  slice: SourceProductSlice,
-  language: string,
-  globalOffset: number
-): string {
-  const lines = slice.customer_reviews
-    .map((review, i) => formatReviewLine(review, globalOffset + i + 1, slice.asin))
-    .join('\n');
-  return `
-You are a Data Extraction Engine for Amazon low-star review flaws.
-Output ONLY valid JSON (no markdown). Analysis language: **${language}**.
-
-## Task (Map)
-From 1–3★ reviews only: extract product defects / expectation gaps (ignore pure logistics).
-Keep short evidence quotes.
-
-## Inputs
-- ASIN: ${sanitizePromptInput(slice.asin)}
-- Title: ${sanitizePromptInput(slice.productTitle)}
-- Reviews:
-${lines}
-
-## Strict Output Schema
-{
-  "fatal-flaws": {
-    "critical_issues": [
-      {
-        "issue": "string",
-        "frequency": "string",
-        "user_quotes": ["string"],
-        "severity": "critical|major|minor",
-        "category": "quality|performance|value|authenticity|other"
-      }
-    ],
-    "return_triggers": ["string"],
-    "expectation_gaps": [
-      {
-        "expected": "string",
-        "reality": "string",
-        "disappointment_level": "high|medium|low"
-      }
-    ]
-  }
-}
-`;
-}
-
-function buildWowMomentsMapPrompt(
-  slice: SourceProductSlice,
-  language: string,
-  globalOffset: number
-): string {
-  const lines = slice.customer_reviews
-    .map((review, i) => formatReviewLine(review, globalOffset + i + 1, slice.asin))
-    .join('\n');
-  return `
-You are a Data Extraction Engine for Amazon 5★ wow moments.
-Output ONLY valid JSON (no markdown). Analysis language: **${language}**.
-
-## Task (Map)
-Extract specific "exceeded expectations" moments (not generic praise). Keep short quotes.
-
-## Inputs
-- ASIN: ${sanitizePromptInput(slice.asin)}
-- Title: ${sanitizePromptInput(slice.productTitle)}
-- Reviews:
-${lines}
-
-## Strict Output Schema
-{
-  "wow-moments": {
-    "moments": [
-      {
-        "moment_description": "string",
-        "user_quote": "string",
-        "emotion_type": "surprise|delight|relief|amazement",
-        "aspect": "quality|smell|packaging|value|performance",
-        "marketing_potential": "high|medium|low"
-      }
-    ],
-    "emotional_triggers": ["string"],
-    "high_conversion_phrases": ["string"],
-    "unexpected_benefits": ["string"]
-  }
-}
-`;
-}
-
-function buildFatalFlawsReducePrompt(
-  product: Product,
-  language: string,
-  mapped: Record<string, unknown>
-): string {
-  return `
-You are a Data Extraction Engine synthesizing multi-ASIN fatal-flaws maps.
-Output ONLY valid JSON (no markdown). Analysis language: **${language}**.
-
-## Task (Reduce)
-Merge and de-duplicate critical_issues / return_triggers / expectation_gaps.
-Produce overall risk_assessment and actionable_fixes. Do not invent unsupported issues.
-
-## Product
-- ASINs: ${sanitizePromptInput(product.asin)}
-- Titles: ${sanitizePromptInput(product.productTitle)}
-
-## Mapped evidence JSON
-${JSON.stringify(mapped, null, 2)}
-
-## Strict Output Schema
-{
-  "fatal-flaws": {
-    "critical_issues": [
-      {
-        "issue": "string",
-        "frequency": "string",
-        "user_quotes": ["string"],
-        "severity": "critical|major|minor",
-        "category": "quality|performance|value|authenticity|other"
-      }
-    ],
-    "return_triggers": ["string"],
-    "expectation_gaps": [
-      {
-        "expected": "string",
-        "reality": "string",
-        "disappointment_level": "high|medium|low"
-      }
-    ],
-    "actionable_fixes": ["string"],
-    "risk_assessment": {
-      "overall_risk_level": "high|medium|low",
-      "primary_concern": "string"
-    }
-  }
-}
-`;
-}
-
-function buildWowMomentsReducePrompt(
-  product: Product,
-  language: string,
-  mapped: Record<string, unknown>
-): string {
-  return `
-You are a Data Extraction Engine synthesizing multi-ASIN wow-moments maps.
-Output ONLY valid JSON (no markdown). Analysis language: **${language}**.
-
-## Task (Reduce)
-Merge and de-duplicate moments and phrase lists. Prefer specific, marketing-usable items.
-Add copywriting_angles. Do not invent quotes.
-
-## Product
-- ASINs: ${sanitizePromptInput(product.asin)}
-- Titles: ${sanitizePromptInput(product.productTitle)}
-
-## Mapped evidence JSON
-${JSON.stringify(mapped, null, 2)}
-
-## Strict Output Schema
-{
-  "wow-moments": {
-    "moments": [
-      {
-        "moment_description": "string",
-        "user_quote": "string",
-        "emotion_type": "surprise|delight|relief|amazement",
-        "aspect": "quality|smell|packaging|value|performance",
-        "marketing_potential": "high|medium|low"
-      }
-    ],
-    "emotional_triggers": ["string"],
-    "high_conversion_phrases": ["string"],
-    "unexpected_benefits": ["string"],
-    "copywriting_angles": ["string"]
-  }
-}
-`;
-}
-
 function asObjectArray(value: unknown): Record<string, unknown>[] {
   if (!Array.isArray(value)) return [];
   return value.filter(
@@ -329,6 +127,36 @@ function asObjectArray(value: unknown): Record<string, unknown>[] {
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === 'string');
+}
+
+function pushObjects(agg: Record<string, unknown>, key: string, value: unknown): void {
+  const list = agg[key];
+  if (!Array.isArray(list)) {
+    agg[key] = asObjectArray(value);
+    return;
+  }
+  list.push(...asObjectArray(value));
+}
+
+function pushStrings(agg: Record<string, unknown>, key: string, value: unknown): void {
+  const list = agg[key];
+  if (!Array.isArray(list)) {
+    agg[key] = asStringArray(value);
+    return;
+  }
+  list.push(...asStringArray(value));
+}
+
+function preferNonEmptyArray(primary: unknown, fallback: unknown): unknown {
+  if (Array.isArray(primary) && primary.length > 0) return primary;
+  return fallback;
+}
+
+function preferNonEmptyObject(primary: unknown, fallback: unknown): unknown {
+  if (primary && typeof primary === 'object' && !Array.isArray(primary)) {
+    if (Object.keys(primary as object).length > 0) return primary;
+  }
+  return fallback;
 }
 
 export function normalizeFatalFlawsResult(
@@ -364,6 +192,586 @@ export function normalizeWowMomentsResult(
     unexpected_benefits: asStringArray(partial.unexpected_benefits),
     copywriting_angles: asStringArray(partial.copywriting_angles),
   };
+}
+
+export function normalizeHesitationResult(
+  partial: Record<string, unknown>
+): Record<string, unknown> {
+  return {
+    ...partial,
+    hesitations: asObjectArray(partial.hesitations),
+    common_doubts: asStringArray(partial.common_doubts),
+    trust_builders: asStringArray(partial.trust_builders),
+    qa_optimization_items: asObjectArray(partial.qa_optimization_items),
+  };
+}
+
+export function normalizeBuyerProfileResult(
+  partial: Record<string, unknown>
+): Record<string, unknown> {
+  const demographics =
+    partial.demographics &&
+    typeof partial.demographics === 'object' &&
+    !Array.isArray(partial.demographics)
+      ? (partial.demographics as Record<string, unknown>)
+      : {};
+  return {
+    ...partial,
+    demographics: {
+      likely_gender: demographics.likely_gender || 'mixed',
+      age_range_estimate:
+        typeof demographics.age_range_estimate === 'string' ? demographics.age_range_estimate : '',
+      lifestyle_indicators: asStringArray(demographics.lifestyle_indicators),
+    },
+    buyer_types: asObjectArray(partial.buyer_types),
+    usage_scenes: asObjectArray(partial.usage_scenes),
+    purchase_motivations: asStringArray(partial.purchase_motivations),
+    geographic_insights:
+      partial.geographic_insights &&
+      typeof partial.geographic_insights === 'object' &&
+      !Array.isArray(partial.geographic_insights)
+        ? partial.geographic_insights
+        : {},
+  };
+}
+
+export function normalizeVocabGapResult(partial: Record<string, unknown>): Record<string, unknown> {
+  return {
+    ...partial,
+    seller_terms: asStringArray(partial.seller_terms),
+    buyer_terms: asStringArray(partial.buyer_terms),
+    uncovered_buyer_terms: asObjectArray(partial.uncovered_buyer_terms),
+    term_translations: asObjectArray(partial.term_translations),
+    listing_optimization:
+      partial.listing_optimization &&
+      typeof partial.listing_optimization === 'object' &&
+      !Array.isArray(partial.listing_optimization)
+        ? partial.listing_optimization
+        : {},
+  };
+}
+
+export function normalizePromiseRealityResult(
+  partial: Record<string, unknown>
+): Record<string, unknown> {
+  const credibility =
+    partial.overall_credibility &&
+    typeof partial.overall_credibility === 'object' &&
+    !Array.isArray(partial.overall_credibility)
+      ? (partial.overall_credibility as Record<string, unknown>)
+      : {};
+  return {
+    ...partial,
+    gaps: asObjectArray(partial.gaps),
+    verified_claims: asStringArray(partial.verified_claims),
+    unverified_claims: asStringArray(partial.unverified_claims),
+    overall_credibility: {
+      score: credibility.score ?? '',
+      summary: typeof credibility.summary === 'string' ? credibility.summary : '',
+    },
+    listing_revision_suggestions: asStringArray(partial.listing_revision_suggestions),
+  };
+}
+
+function formatBullets(product: Product): string {
+  if (!product.feature_bullets?.length) return '(no bullets)';
+  return product.feature_bullets.map((b, i) => `${i + 1}. ${sanitizePromptInput(b)}`).join('\n');
+}
+
+function formatReviewLine(review: Review, index: number, asin: string): string {
+  const body =
+    review.body.length > BODY_CHARS ? `${review.body.slice(0, BODY_CHARS)}…` : review.body;
+  const headline = review.headline?.trim() || '(no headline)';
+  const country = review.origin_country || 'unknown';
+  return `${index}. [ASIN ${sanitizePromptInput(asin)}] [${review.star_rating}★ · ${sanitizePromptInput(country)}] ${sanitizePromptInput(headline)}: ${sanitizePromptInput(body)}`;
+}
+
+function buildReviewBlock(slice: SourceProductSlice, globalOffset: number): string {
+  return slice.customer_reviews
+    .map((review, i) => formatReviewLine(review, globalOffset + i + 1, slice.asin))
+    .join('\n');
+}
+
+const TARGET_HANDLERS: Record<ReviewEvidenceTargetId, TargetHandler> = {
+  'fatal-flaws': {
+    starFilter: reviews => reviews.filter(r => r.star_rating >= 1 && r.star_rating <= 3),
+    mapReduceThreshold: STAR_MAP_REDUCE_THRESHOLD,
+    emptyMapAggregate: () => ({
+      critical_issues: [],
+      return_triggers: [],
+      expectation_gaps: [],
+    }),
+    mergeMapShard: (agg, shard) => {
+      pushObjects(agg, 'critical_issues', shard.critical_issues);
+      pushStrings(agg, 'return_triggers', shard.return_triggers);
+      pushObjects(agg, 'expectation_gaps', shard.expectation_gaps);
+    },
+    hasMapSignal: mapped =>
+      asObjectArray(mapped.critical_issues).length > 0 ||
+      asStringArray(mapped.return_triggers).length > 0,
+    normalize: normalizeFatalFlawsResult,
+    buildMapPrompt: (slice, language, offset) => `
+You are a Data Extraction Engine for Amazon low-star review flaws.
+Output ONLY valid JSON (no markdown). Analysis language: **${language}**.
+
+## Task (Map)
+From 1–3★ reviews only: extract product defects / expectation gaps (ignore pure logistics).
+
+## Inputs
+- ASIN: ${sanitizePromptInput(slice.asin)}
+- Title: ${sanitizePromptInput(slice.productTitle)}
+- Reviews:
+${buildReviewBlock(slice, offset)}
+
+## Strict Output Schema
+{
+  "fatal-flaws": {
+    "critical_issues": [{"issue":"string","frequency":"string","user_quotes":["string"],"severity":"critical|major|minor","category":"quality|performance|value|authenticity|other"}],
+    "return_triggers": ["string"],
+    "expectation_gaps": [{"expected":"string","reality":"string","disappointment_level":"high|medium|low"}]
+  }
+}
+`,
+    buildReducePrompt: (product, language, mapped) => `
+You synthesize multi-ASIN fatal-flaws maps into one report.
+Output ONLY valid JSON. Language: **${language}**.
+Merge/de-duplicate issues; add risk_assessment + actionable_fixes. Do not invent issues.
+
+## Product
+ASINs: ${sanitizePromptInput(product.asin)}
+Titles: ${sanitizePromptInput(product.productTitle)}
+
+## Mapped evidence
+${JSON.stringify(mapped, null, 2)}
+
+## Strict Output Schema
+{
+  "fatal-flaws": {
+    "critical_issues": [{"issue":"string","frequency":"string","user_quotes":["string"],"severity":"critical|major|minor","category":"quality|performance|value|authenticity|other"}],
+    "return_triggers": ["string"],
+    "expectation_gaps": [{"expected":"string","reality":"string","disappointment_level":"high|medium|low"}],
+    "actionable_fixes": ["string"],
+    "risk_assessment": {"overall_risk_level":"high|medium|low","primary_concern":"string"}
+  }
+}
+`,
+    mergeReduce: (mapped, reduced) =>
+      normalizeFatalFlawsResult({
+        ...mapped,
+        ...reduced,
+        critical_issues: preferNonEmptyArray(reduced.critical_issues, mapped.critical_issues),
+        return_triggers: preferNonEmptyArray(reduced.return_triggers, mapped.return_triggers),
+        expectation_gaps: preferNonEmptyArray(reduced.expectation_gaps, mapped.expectation_gaps),
+      }),
+  },
+
+  'wow-moments': {
+    starFilter: reviews => reviews.filter(r => r.star_rating === 5),
+    mapReduceThreshold: STAR_MAP_REDUCE_THRESHOLD,
+    emptyMapAggregate: () => ({
+      moments: [],
+      emotional_triggers: [],
+      high_conversion_phrases: [],
+      unexpected_benefits: [],
+    }),
+    mergeMapShard: (agg, shard) => {
+      pushObjects(agg, 'moments', shard.moments);
+      pushStrings(agg, 'emotional_triggers', shard.emotional_triggers);
+      pushStrings(agg, 'high_conversion_phrases', shard.high_conversion_phrases);
+      pushStrings(agg, 'unexpected_benefits', shard.unexpected_benefits);
+    },
+    hasMapSignal: mapped => asObjectArray(mapped.moments).length > 0,
+    normalize: normalizeWowMomentsResult,
+    buildMapPrompt: (slice, language, offset) => `
+You extract 5★ wow moments. Output ONLY valid JSON. Language: **${language}**.
+
+## Task (Map)
+Specific "exceeded expectations" moments (not generic praise).
+
+## Inputs
+- ASIN: ${sanitizePromptInput(slice.asin)}
+- Title: ${sanitizePromptInput(slice.productTitle)}
+- Reviews:
+${buildReviewBlock(slice, offset)}
+
+## Strict Output Schema
+{
+  "wow-moments": {
+    "moments": [{"moment_description":"string","user_quote":"string","emotion_type":"surprise|delight|relief|amazement","aspect":"quality|smell|packaging|value|performance","marketing_potential":"high|medium|low"}],
+    "emotional_triggers": ["string"],
+    "high_conversion_phrases": ["string"],
+    "unexpected_benefits": ["string"]
+  }
+}
+`,
+    buildReducePrompt: (product, language, mapped) => `
+You synthesize multi-ASIN wow-moments. Output ONLY valid JSON. Language: **${language}**.
+Merge moments/phrases; add copywriting_angles. Do not invent quotes.
+
+## Product
+ASINs: ${sanitizePromptInput(product.asin)}
+Titles: ${sanitizePromptInput(product.productTitle)}
+
+## Mapped evidence
+${JSON.stringify(mapped, null, 2)}
+
+## Strict Output Schema
+{
+  "wow-moments": {
+    "moments": [{"moment_description":"string","user_quote":"string","emotion_type":"surprise|delight|relief|amazement","aspect":"quality|smell|packaging|value|performance","marketing_potential":"high|medium|low"}],
+    "emotional_triggers": ["string"],
+    "high_conversion_phrases": ["string"],
+    "unexpected_benefits": ["string"],
+    "copywriting_angles": ["string"]
+  }
+}
+`,
+    mergeReduce: (mapped, reduced) =>
+      normalizeWowMomentsResult({
+        ...mapped,
+        ...reduced,
+        moments: preferNonEmptyArray(reduced.moments, mapped.moments),
+      }),
+  },
+
+  'hesitation-points': {
+    starFilter: reviews => reviews,
+    mapReduceThreshold: GENERAL_MAP_REDUCE_THRESHOLD,
+    emptyMapAggregate: () => ({
+      hesitations: [],
+      common_doubts: [],
+      trust_builders: [],
+      qa_optimization_items: [],
+    }),
+    mergeMapShard: (agg, shard) => {
+      pushObjects(agg, 'hesitations', shard.hesitations);
+      pushStrings(agg, 'common_doubts', shard.common_doubts);
+      pushStrings(agg, 'trust_builders', shard.trust_builders);
+      pushObjects(agg, 'qa_optimization_items', shard.qa_optimization_items);
+    },
+    hasMapSignal: mapped =>
+      asObjectArray(mapped.hesitations).length > 0 ||
+      asStringArray(mapped.common_doubts).length > 0,
+    normalize: normalizeHesitationResult,
+    buildMapPrompt: (slice, language, offset) => `
+Extract pre-purchase hesitation patterns from reviews. Output ONLY valid JSON. Language: **${language}**.
+
+## Inputs
+- ASIN: ${sanitizePromptInput(slice.asin)}
+- Title: ${sanitizePromptInput(slice.productTitle)}
+- Reviews:
+${buildReviewBlock(slice, offset)}
+
+## Strict Output Schema
+{
+  "hesitation-points": {
+    "hesitations": [{"pre_purchase_worry":"string","post_purchase_resolution":"string","user_evidence":"string","qa_recommendation":"string"}],
+    "common_doubts": ["string"],
+    "trust_builders": ["string"],
+    "qa_optimization_items": [{"question":"string","suggested_answer":"string"}]
+  }
+}
+`,
+    buildReducePrompt: (product, language, mapped) => `
+Merge multi-ASIN hesitation-points maps. Output ONLY valid JSON. Language: **${language}**.
+De-duplicate; prefer concrete Q&A items.
+
+## Product
+ASINs: ${sanitizePromptInput(product.asin)}
+Titles: ${sanitizePromptInput(product.productTitle)}
+
+## Mapped evidence
+${JSON.stringify(mapped, null, 2)}
+
+## Strict Output Schema
+{
+  "hesitation-points": {
+    "hesitations": [{"pre_purchase_worry":"string","post_purchase_resolution":"string","user_evidence":"string","qa_recommendation":"string"}],
+    "common_doubts": ["string"],
+    "trust_builders": ["string"],
+    "qa_optimization_items": [{"question":"string","suggested_answer":"string"}]
+  }
+}
+`,
+    mergeReduce: (mapped, reduced) =>
+      normalizeHesitationResult({
+        ...mapped,
+        ...reduced,
+        hesitations: preferNonEmptyArray(reduced.hesitations, mapped.hesitations),
+      }),
+  },
+
+  'buyer-profile': {
+    starFilter: reviews => reviews,
+    mapReduceThreshold: GENERAL_MAP_REDUCE_THRESHOLD,
+    emptyMapAggregate: () => ({
+      demographics: {},
+      buyer_types: [],
+      usage_scenes: [],
+      purchase_motivations: [],
+      geographic_insights: {},
+    }),
+    mergeMapShard: (agg, shard) => {
+      if (shard.demographics && typeof shard.demographics === 'object') {
+        agg.demographics = { ...(agg.demographics as object), ...(shard.demographics as object) };
+      }
+      pushObjects(agg, 'buyer_types', shard.buyer_types);
+      pushObjects(agg, 'usage_scenes', shard.usage_scenes);
+      pushStrings(agg, 'purchase_motivations', shard.purchase_motivations);
+      if (shard.geographic_insights && typeof shard.geographic_insights === 'object') {
+        agg.geographic_insights = {
+          ...(agg.geographic_insights as object),
+          ...(shard.geographic_insights as object),
+        };
+      }
+    },
+    hasMapSignal: mapped =>
+      asObjectArray(mapped.buyer_types).length > 0 || asObjectArray(mapped.usage_scenes).length > 0,
+    normalize: normalizeBuyerProfileResult,
+    buildMapPrompt: (slice, language, offset) => `
+Infer buyer profile signals from reviews. Output ONLY valid JSON. Language: **${language}**.
+
+## Inputs
+- ASIN: ${sanitizePromptInput(slice.asin)}
+- Title: ${sanitizePromptInput(slice.productTitle)}
+- Reviews:
+${buildReviewBlock(slice, offset)}
+
+## Strict Output Schema
+{
+  "buyer-profile": {
+    "demographics": {"likely_gender":"male|female|mixed","age_range_estimate":"string","lifestyle_indicators":["string"]},
+    "buyer_types": [{"type":"string","percentage_estimate":"string","evidence":"string"}],
+    "usage_scenes": [{"scene":"string","frequency":"daily|weekly|occasional|special","context":"string"}],
+    "purchase_motivations": ["string"],
+    "geographic_insights": {}
+  }
+}
+`,
+    buildReducePrompt: (product, language, mapped) => `
+Synthesize multi-ASIN buyer-profile maps into one profile. Output ONLY valid JSON. Language: **${language}**.
+Reconcile conflicting demographics carefully; keep evidence-backed types/scenes.
+
+## Product
+ASINs: ${sanitizePromptInput(product.asin)}
+Titles: ${sanitizePromptInput(product.productTitle)}
+
+## Mapped evidence
+${JSON.stringify(mapped, null, 2)}
+
+## Strict Output Schema
+{
+  "buyer-profile": {
+    "demographics": {"likely_gender":"male|female|mixed","age_range_estimate":"string","lifestyle_indicators":["string"]},
+    "buyer_types": [{"type":"string","percentage_estimate":"string","evidence":"string"}],
+    "usage_scenes": [{"scene":"string","frequency":"daily|weekly|occasional|special","context":"string"}],
+    "purchase_motivations": ["string"],
+    "geographic_insights": {}
+  }
+}
+`,
+    mergeReduce: (mapped, reduced) =>
+      normalizeBuyerProfileResult({
+        ...mapped,
+        ...reduced,
+        buyer_types: preferNonEmptyArray(reduced.buyer_types, mapped.buyer_types),
+        usage_scenes: preferNonEmptyArray(reduced.usage_scenes, mapped.usage_scenes),
+        demographics: preferNonEmptyObject(reduced.demographics, mapped.demographics),
+      }),
+  },
+
+  'vocab-gap': {
+    starFilter: reviews => reviews,
+    mapReduceThreshold: GENERAL_MAP_REDUCE_THRESHOLD,
+    emptyMapAggregate: () => ({
+      seller_terms: [],
+      buyer_terms: [],
+      uncovered_buyer_terms: [],
+      term_translations: [],
+    }),
+    mergeMapShard: (agg, shard) => {
+      pushStrings(agg, 'seller_terms', shard.seller_terms);
+      pushStrings(agg, 'buyer_terms', shard.buyer_terms);
+      pushObjects(agg, 'uncovered_buyer_terms', shard.uncovered_buyer_terms);
+      pushObjects(agg, 'term_translations', shard.term_translations);
+    },
+    hasMapSignal: mapped =>
+      asStringArray(mapped.buyer_terms).length > 0 ||
+      asObjectArray(mapped.uncovered_buyer_terms).length > 0,
+    normalize: normalizeVocabGapResult,
+    buildMapPrompt: (slice, language, offset, product) => `
+Compare seller listing vocabulary vs buyer review language. Output ONLY valid JSON. Language: **${language}**.
+
+## Listing bullets (full set)
+${formatBullets(product)}
+
+## Reviews (shard)
+- ASIN: ${sanitizePromptInput(slice.asin)}
+- Title: ${sanitizePromptInput(slice.productTitle)}
+${buildReviewBlock(slice, offset)}
+
+## Strict Output Schema
+{
+  "vocab-gap": {
+    "seller_terms": ["string"],
+    "buyer_terms": ["string"],
+    "uncovered_buyer_terms": [{"term":"string","frequency":"high|medium|low","context":"string","recommendation":"add to title|add to bullets|add to description"}],
+    "term_translations": [{"seller_term":"string","buyer_term":"string"}]
+  }
+}
+`,
+    buildReducePrompt: (product, language, mapped) => `
+Merge multi-ASIN vocab-gap maps. Output ONLY valid JSON. Language: **${language}**.
+De-duplicate terms; keep high-value uncovered buyer terms; add listing_optimization if useful.
+
+## Listing bullets
+${formatBullets(product)}
+
+## Mapped evidence
+${JSON.stringify(mapped, null, 2)}
+
+## Strict Output Schema
+{
+  "vocab-gap": {
+    "seller_terms": ["string"],
+    "buyer_terms": ["string"],
+    "uncovered_buyer_terms": [{"term":"string","frequency":"high|medium|low","context":"string","recommendation":"add to title|add to bullets|add to description"}],
+    "term_translations": [{"seller_term":"string","buyer_term":"string"}],
+    "listing_optimization": {}
+  }
+}
+`,
+    mergeReduce: (mapped, reduced) =>
+      normalizeVocabGapResult({
+        ...mapped,
+        ...reduced,
+        buyer_terms: preferNonEmptyArray(reduced.buyer_terms, mapped.buyer_terms),
+        uncovered_buyer_terms: preferNonEmptyArray(
+          reduced.uncovered_buyer_terms,
+          mapped.uncovered_buyer_terms
+        ),
+      }),
+  },
+
+  'promise-reality': {
+    starFilter: reviews => reviews,
+    mapReduceThreshold: GENERAL_MAP_REDUCE_THRESHOLD,
+    emptyMapAggregate: () => ({
+      gaps: [],
+      verified_claims: [],
+      unverified_claims: [],
+    }),
+    mergeMapShard: (agg, shard) => {
+      pushObjects(agg, 'gaps', shard.gaps);
+      pushStrings(agg, 'verified_claims', shard.verified_claims);
+      pushStrings(agg, 'unverified_claims', shard.unverified_claims);
+    },
+    hasMapSignal: mapped =>
+      asObjectArray(mapped.gaps).length > 0 || asStringArray(mapped.verified_claims).length > 0,
+    normalize: normalizePromiseRealityResult,
+    buildMapPrompt: (slice, language, offset, product) => `
+Find listing promise vs review reality gaps. Output ONLY valid JSON. Language: **${language}**.
+
+## Listing bullets
+${formatBullets(product)}
+
+## Reviews (shard)
+- ASIN: ${sanitizePromptInput(slice.asin)}
+- Title: ${sanitizePromptInput(slice.productTitle)}
+${buildReviewBlock(slice, offset)}
+
+## Strict Output Schema
+{
+  "promise-reality": {
+    "gaps": [{"listing_claim":"string","review_reality":"string","contradiction_severity":"severe|moderate|minor","evidence_quotes":["string"],"false_advertising_risk":"high|medium|low","recommended_action":"string"}],
+    "verified_claims": ["string"],
+    "unverified_claims": ["string"]
+  }
+}
+`,
+    buildReducePrompt: (product, language, mapped) => `
+Merge multi-ASIN promise-reality maps. Output ONLY valid JSON. Language: **${language}**.
+De-duplicate gaps; produce overall_credibility + listing_revision_suggestions.
+
+## Listing bullets
+${formatBullets(product)}
+
+## Mapped evidence
+${JSON.stringify(mapped, null, 2)}
+
+## Strict Output Schema
+{
+  "promise-reality": {
+    "gaps": [{"listing_claim":"string","review_reality":"string","contradiction_severity":"severe|moderate|minor","evidence_quotes":["string"],"false_advertising_risk":"high|medium|low","recommended_action":"string"}],
+    "verified_claims": ["string"],
+    "unverified_claims": ["string"],
+    "overall_credibility": {"score":"1-10","summary":"string"},
+    "listing_revision_suggestions": ["string"]
+  }
+}
+`,
+    mergeReduce: (mapped, reduced) =>
+      normalizePromiseRealityResult({
+        ...mapped,
+        ...reduced,
+        gaps: preferNonEmptyArray(reduced.gaps, mapped.gaps),
+      }),
+  },
+};
+
+export function isReviewEvidenceTargetId(targetId: string): targetId is ReviewEvidenceTargetId {
+  return targetId in TARGET_HANDLERS;
+}
+
+export function getReviewSourceSlices(
+  product: Product,
+  targetId: ReviewEvidenceTargetId
+): SourceProductSlice[] {
+  const handler = TARGET_HANDLERS[targetId];
+  const raw = product.metadata?.source_products;
+  if (Array.isArray(raw) && raw.length > 0 && raw.every(isSourceProductSlice)) {
+    return raw
+      .map(slice => ({
+        ...slice,
+        customer_reviews: handler.starFilter(slice.customer_reviews),
+      }))
+      .filter(slice => slice.customer_reviews.length > 0);
+  }
+
+  const filtered = handler.starFilter(product.customer_reviews);
+  if (filtered.length === 0) return [];
+  return [
+    {
+      asin: product.asin,
+      productTitle: product.productTitle,
+      customer_reviews: filtered,
+    },
+  ];
+}
+
+export function countReviewsForTarget(product: Product, targetId: ReviewEvidenceTargetId): number {
+  return getReviewSourceSlices(product, targetId).reduce(
+    (sum, slice) => sum + slice.customer_reviews.length,
+    0
+  );
+}
+
+export function shouldUseReviewMapReduce(
+  product: Product,
+  targetId: ReviewEvidenceTargetId
+): boolean {
+  const slices = getReviewSourceSlices(product, targetId);
+  if (slices.length > 1) return true;
+  return countReviewsForTarget(product, targetId) > TARGET_HANDLERS[targetId].mapReduceThreshold;
+}
+
+function chunkReviews(reviews: Review[], size: number): Review[][] {
+  if (reviews.length <= size) return [reviews];
+  const chunks: Review[][] = [];
+  for (let i = 0; i < reviews.length; i += size) {
+    chunks.push(reviews.slice(i, i + size));
+  }
+  return chunks;
 }
 
 function resolveRetryBudget(retryBudget: number | undefined): number {
@@ -439,6 +847,7 @@ async function runOneshot(
   targetId: ReviewEvidenceTargetId,
   options: CallOptions
 ): Promise<ReviewEvidencePipelineResult> {
+  const handler = TARGET_HANDLERS[targetId];
   const prompt = generateAnalysisPrompt(targetId, options.product, options.language);
   const call = await callAnalysisJson({
     prompt,
@@ -450,12 +859,8 @@ async function runOneshot(
     onStreamUpdate: options.onStreamUpdate,
   });
   const parsed = parseAnalysisResponse(targetId, call.text).data;
-  const data =
-    targetId === 'fatal-flaws'
-      ? normalizeFatalFlawsResult(parsed)
-      : normalizeWowMomentsResult(parsed);
   return {
-    data,
+    data: handler.normalize(parsed),
     stats: {
       targetId,
       mode: 'oneshot',
@@ -472,27 +877,11 @@ async function runOneshot(
   };
 }
 
-function emptyFatalMapAggregate(): Record<string, unknown> {
-  return {
-    critical_issues: [] as Record<string, unknown>[],
-    return_triggers: [] as string[],
-    expectation_gaps: [] as Record<string, unknown>[],
-  };
-}
-
-function emptyWowMapAggregate(): Record<string, unknown> {
-  return {
-    moments: [] as Record<string, unknown>[],
-    emotional_triggers: [] as string[],
-    high_conversion_phrases: [] as string[],
-    unexpected_benefits: [] as string[],
-  };
-}
-
 async function runMapReduce(
   targetId: ReviewEvidenceTargetId,
   options: CallOptions
 ): Promise<ReviewEvidencePipelineResult> {
+  const handler = TARGET_HANDLERS[targetId];
   const slices = getReviewSourceSlices(options.product, targetId);
   const units: Array<{ slice: SourceProductSlice; offset: number }> = [];
   let offset = 0;
@@ -518,15 +907,15 @@ async function runMapReduce(
   let streamedChars = 0;
   let firstResponseMs: number | undefined;
   let mapFailures = 0;
-
-  const fatalAgg = emptyFatalMapAggregate();
-  const wowAgg = emptyWowMapAggregate();
+  const agg = handler.emptyMapAggregate();
 
   for (const unit of units) {
-    const prompt =
-      targetId === 'fatal-flaws'
-        ? buildFatalFlawsMapPrompt(unit.slice, options.language, unit.offset)
-        : buildWowMomentsMapPrompt(unit.slice, options.language, unit.offset);
+    const prompt = handler.buildMapPrompt(
+      unit.slice,
+      options.language,
+      unit.offset,
+      options.product
+    );
     promptChars += prompt.length;
     estimatedInputTokens += estimateTokenCount(prompt);
     try {
@@ -549,40 +938,15 @@ async function runMapReduce(
         },
       });
       const parsed = parseAnalysisResponse(targetId, call.text, { phase: 'map' }).data;
-      if (targetId === 'fatal-flaws') {
-        (fatalAgg.critical_issues as Record<string, unknown>[]).push(
-          ...asObjectArray(parsed.critical_issues)
-        );
-        (fatalAgg.return_triggers as string[]).push(...asStringArray(parsed.return_triggers));
-        (fatalAgg.expectation_gaps as Record<string, unknown>[]).push(
-          ...asObjectArray(parsed.expectation_gaps)
-        );
-      } else {
-        (wowAgg.moments as Record<string, unknown>[]).push(...asObjectArray(parsed.moments));
-        (wowAgg.emotional_triggers as string[]).push(...asStringArray(parsed.emotional_triggers));
-        (wowAgg.high_conversion_phrases as string[]).push(
-          ...asStringArray(parsed.high_conversion_phrases)
-        );
-        (wowAgg.unexpected_benefits as string[]).push(...asStringArray(parsed.unexpected_benefits));
-      }
+      handler.mergeMapShard(agg, parsed);
     } catch (error) {
       mapFailures += 1;
       console.error(`[${targetId} Map] shard failed:`, error);
     }
   }
 
-  const mapped =
-    targetId === 'fatal-flaws'
-      ? normalizeFatalFlawsResult(fatalAgg)
-      : normalizeWowMomentsResult(wowAgg);
-
-  const hasMapSignal =
-    targetId === 'fatal-flaws'
-      ? asObjectArray(mapped.critical_issues).length > 0 ||
-        asStringArray(mapped.return_triggers).length > 0
-      : asObjectArray(mapped.moments).length > 0;
-
-  if (!hasMapSignal) {
+  const mapped = handler.normalize(agg);
+  if (!handler.hasMapSignal(mapped)) {
     throw new Error(
       `${targetId} Map produced no evidence (mapFailures=${mapFailures}/${units.length})`
     );
@@ -591,10 +955,7 @@ async function runMapReduce(
   let finalData = mapped;
   let reduceCalls = 0;
   try {
-    const reducePrompt =
-      targetId === 'fatal-flaws'
-        ? buildFatalFlawsReducePrompt(options.product, options.language, mapped)
-        : buildWowMomentsReducePrompt(options.product, options.language, mapped);
+    const reducePrompt = handler.buildReducePrompt(options.product, options.language, mapped);
     promptChars += reducePrompt.length;
     estimatedInputTokens += estimateTokenCount(reducePrompt);
     reduceCalls = 1;
@@ -611,30 +972,7 @@ async function runMapReduce(
       },
     });
     const reduced = parseAnalysisResponse(targetId, call.text, { phase: 'reduce' }).data;
-    finalData =
-      targetId === 'fatal-flaws'
-        ? normalizeFatalFlawsResult({
-            ...mapped,
-            ...reduced,
-            // Prefer reduce lists when non-empty; else keep map aggregate.
-            critical_issues:
-              asObjectArray(reduced.critical_issues).length > 0
-                ? reduced.critical_issues
-                : mapped.critical_issues,
-            return_triggers:
-              asStringArray(reduced.return_triggers).length > 0
-                ? reduced.return_triggers
-                : mapped.return_triggers,
-            expectation_gaps:
-              asObjectArray(reduced.expectation_gaps).length > 0
-                ? reduced.expectation_gaps
-                : mapped.expectation_gaps,
-          })
-        : normalizeWowMomentsResult({
-            ...mapped,
-            ...reduced,
-            moments: asObjectArray(reduced.moments).length > 0 ? reduced.moments : mapped.moments,
-          });
+    finalData = handler.mergeReduce(mapped, reduced);
   } catch (error) {
     console.error(`[${targetId} Reduce] failed; keeping mapped evidence:`, error);
   }
@@ -666,3 +1004,8 @@ export async function runReviewEvidencePipeline(
   }
   return runOneshot(targetId, options);
 }
+
+export const REVIEW_EVIDENCE_TARGET_IDS: readonly ReviewEvidenceTargetId[] = [
+  ...STAR_BUCKET_TARGETS,
+  ...GENERAL_REVIEW_TARGETS,
+];

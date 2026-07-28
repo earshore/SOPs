@@ -12,13 +12,9 @@ import { generateAnalysisPrompt, getReviewSamplingMetadata } from '../prompts/an
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse, validateAnalysisResult } from './analysisResultParser';
 import { runSellingPointsPipeline } from './sellingPointsPipeline';
-import { runReviewEvidencePipeline, type ReviewEvidenceTargetId } from './reviewEvidencePipeline';
+import { isReviewEvidenceTargetId, runReviewEvidencePipeline } from './reviewEvidencePipeline';
 import { AppError, ErrorLevel, ErrorCategory } from '@/common/errors/AppError';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
-
-function isReviewEvidenceTarget(targetId: string): targetId is ReviewEvidenceTargetId {
-  return targetId === 'fatal-flaws' || targetId === 'wow-moments';
-}
 
 const nativeLoggerConsole = globalThis.console;
 
@@ -125,7 +121,7 @@ async function analyzeTarget(
       return pipeline.data;
     }
 
-    if (isReviewEvidenceTarget(targetId)) {
+    if (isReviewEvidenceTargetId(targetId)) {
       const pipeline = await runReviewEvidencePipeline(targetId, {
         product,
         config,

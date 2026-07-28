@@ -3,7 +3,12 @@ import type { Product, Review } from '../../config/sampleData';
 import {
   countReviewsForTarget,
   getReviewSourceSlices,
+  isReviewEvidenceTargetId,
+  normalizeBuyerProfileResult,
   normalizeFatalFlawsResult,
+  normalizeHesitationResult,
+  normalizePromiseRealityResult,
+  normalizeVocabGapResult,
   normalizeWowMomentsResult,
   shouldUseReviewMapReduce,
 } from '../reviewEvidencePipeline';
@@ -23,7 +28,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
   return {
     asin: 'B001',
     productTitle: 'Title',
-    feature_bullets: [],
+    feature_bullets: ['bullet a'],
     customer_reviews: [],
     scrape_status: 'success',
     metadata: {},
@@ -32,6 +37,16 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
 }
 
 describe('reviewEvidencePipeline helpers', () => {
+  it('recognizes all six review-evidence targets', () => {
+    expect(isReviewEvidenceTargetId('fatal-flaws')).toBe(true);
+    expect(isReviewEvidenceTargetId('wow-moments')).toBe(true);
+    expect(isReviewEvidenceTargetId('hesitation-points')).toBe(true);
+    expect(isReviewEvidenceTargetId('buyer-profile')).toBe(true);
+    expect(isReviewEvidenceTargetId('vocab-gap')).toBe(true);
+    expect(isReviewEvidenceTargetId('promise-reality')).toBe(true);
+    expect(isReviewEvidenceTargetId('selling-points')).toBe(false);
+  });
+
   it('filters low/high star reviews and uses map-reduce for multi-ASIN sources', () => {
     const product = makeProduct({
       asin: 'B001, B002',
@@ -55,14 +70,12 @@ describe('reviewEvidencePipeline helpers', () => {
       },
     });
 
-    const fatalSlices = getReviewSourceSlices(product, 'fatal-flaws');
-    expect(fatalSlices).toHaveLength(2);
     expect(countReviewsForTarget(product, 'fatal-flaws')).toBe(3);
     expect(shouldUseReviewMapReduce(product, 'fatal-flaws')).toBe(true);
-
-    const wowSlices = getReviewSourceSlices(product, 'wow-moments');
     expect(countReviewsForTarget(product, 'wow-moments')).toBe(2);
-    expect(wowSlices.every(s => s.customer_reviews.every(r => r.star_rating === 5))).toBe(true);
+    // general targets use all stars
+    expect(countReviewsForTarget(product, 'hesitation-points')).toBe(5);
+    expect(shouldUseReviewMapReduce(product, 'buyer-profile')).toBe(true);
   });
 
   it('keeps oneshot for small single-ASIN review sets', () => {
@@ -70,21 +83,40 @@ describe('reviewEvidencePipeline helpers', () => {
       customer_reviews: Array.from({ length: 10 }, (_, i) => makeReview(1, `issue ${i}`)),
     });
     expect(shouldUseReviewMapReduce(product, 'fatal-flaws')).toBe(false);
+    expect(shouldUseReviewMapReduce(product, 'hesitation-points')).toBe(false);
   });
 
-  it('normalizes missing risk / phrase fields for partial map output', () => {
-    const fatal = normalizeFatalFlawsResult({
-      critical_issues: [{ issue: 'leak' }],
+  it('uses map-reduce when general reviews exceed the old 40-sample cap', () => {
+    const product = makeProduct({
+      customer_reviews: Array.from({ length: 45 }, (_, i) => makeReview(4, `review ${i}`)),
     });
-    expect(fatal.critical_issues).toHaveLength(1);
-    expect(fatal.return_triggers).toEqual([]);
-    expect(fatal.risk_assessment).toMatchObject({ overall_risk_level: 'medium' });
+    expect(shouldUseReviewMapReduce(product, 'vocab-gap')).toBe(true);
+    expect(getReviewSourceSlices(product, 'vocab-gap')[0]?.customer_reviews).toHaveLength(45);
+  });
 
-    const wow = normalizeWowMomentsResult({
-      moments: [{ moment_description: 'scent' }],
-    });
-    expect(wow.moments).toHaveLength(1);
-    expect(wow.emotional_triggers).toEqual([]);
-    expect(wow.copywriting_angles).toEqual([]);
+  it('normalizes partial map aggregates for each review target', () => {
+    expect(
+      normalizeFatalFlawsResult({ critical_issues: [{ issue: 'leak' }] }).return_triggers
+    ).toEqual([]);
+    expect(
+      normalizeWowMomentsResult({ moments: [{ moment_description: 'scent' }] }).copywriting_angles
+    ).toEqual([]);
+    expect(
+      normalizeHesitationResult({ hesitations: [{ pre_purchase_worry: 'size' }] }).common_doubts
+    ).toEqual([]);
+    expect(
+      (
+        normalizeBuyerProfileResult({ buyer_types: [{ type: 'gift' }] }).demographics as {
+          likely_gender: string;
+        }
+      ).likely_gender
+    ).toBe('mixed');
+    expect(normalizeVocabGapResult({ buyer_terms: ['shiny'] }).seller_terms).toEqual([]);
+    expect(
+      (
+        normalizePromiseRealityResult({ gaps: [{ listing_claim: 'waterproof' }] })
+          .overall_credibility as { score: unknown }
+      ).score
+    ).toBe('');
   });
 });

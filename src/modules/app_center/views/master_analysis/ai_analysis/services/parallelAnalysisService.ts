@@ -26,17 +26,13 @@ import {
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse } from './analysisResultParser';
 import { runSellingPointsPipeline } from './sellingPointsPipeline';
-import { runReviewEvidencePipeline, type ReviewEvidenceTargetId } from './reviewEvidencePipeline';
+import { isReviewEvidenceTargetId, runReviewEvidencePipeline } from './reviewEvidencePipeline';
 import { estimateTokenCount } from '../utils/tokenCounter';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
 
 const DEFAULT_ANALYSIS_CONCURRENCY = 8;
 const MAX_ANALYSIS_CONCURRENCY = 8;
-const ANALYSIS_CACHE_VERSION = 'v6';
-
-function isReviewEvidenceTarget(targetId: string): targetId is ReviewEvidenceTargetId {
-  return targetId === 'fatal-flaws' || targetId === 'wow-moments';
-}
+const ANALYSIS_CACHE_VERSION = 'v7';
 const LEGACY_ANALYSIS_CACHE_VERSION = 'v2';
 const ANALYSIS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_CACHE_IDENTITY: AnalysisCacheIdentity = {
@@ -569,7 +565,7 @@ async function executeAnalysisTask(
       if (pipeline.firstResponseMs !== undefined) {
         task.firstResponseMs = pipeline.firstResponseMs;
       }
-    } else if (isReviewEvidenceTarget(task.targetId)) {
+    } else if (isReviewEvidenceTargetId(task.targetId)) {
       // Multi-ASIN / long review sets: Map–Reduce keeps full 1–3★ / 5★ evidence text.
       const pipeline = await runReviewEvidencePipeline(task.targetId, {
         product,

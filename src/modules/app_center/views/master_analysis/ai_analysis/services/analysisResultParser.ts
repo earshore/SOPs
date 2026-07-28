@@ -127,6 +127,45 @@ const wowMomentsMapSchema = z
   })
   .passthrough();
 
+const hesitationMapSchema = z
+  .object({
+    hesitations: objectArray,
+    common_doubts: stringArray.optional(),
+    trust_builders: stringArray.optional(),
+    qa_optimization_items: objectArray.optional(),
+  })
+  .passthrough();
+
+const buyerProfileMapSchema = z
+  .object({
+    demographics: looseRecord.optional(),
+    buyer_types: objectArray.optional(),
+    usage_scenes: objectArray.optional(),
+    purchase_motivations: stringArray.optional(),
+    geographic_insights: looseRecord.optional(),
+  })
+  .passthrough();
+
+const vocabGapMapSchema = z
+  .object({
+    seller_terms: stringArray.optional(),
+    buyer_terms: stringArray.optional(),
+    uncovered_buyer_terms: objectArray.optional(),
+    term_translations: objectArray.optional(),
+    listing_optimization: looseRecord.optional(),
+  })
+  .passthrough();
+
+const promiseRealityMapSchema = z
+  .object({
+    gaps: objectArray.optional(),
+    verified_claims: stringArray.optional(),
+    unverified_claims: stringArray.optional(),
+    overall_credibility: looseRecord.optional(),
+    listing_revision_suggestions: stringArray.optional(),
+  })
+  .passthrough();
+
 function resolveAnalysisSchema(
   targetId: string,
   phase: AnalysisParsePhase = 'full'
@@ -136,14 +175,13 @@ function resolveAnalysisSchema(
     if (phase === 'reduce') return sellingPointsReduceSchema;
     return sellingPointsFullSchema;
   }
-  if (targetId === 'fatal-flaws') {
-    // Map shards may omit return_triggers; Reduce enforces fuller synthesis.
-    if (phase === 'map') return fatalFlawsMapSchema;
-    return analysisSchemas['fatal-flaws'];
-  }
-  if (targetId === 'wow-moments') {
-    if (phase === 'map') return wowMomentsMapSchema;
-    return analysisSchemas['wow-moments'];
+  if (phase === 'map') {
+    if (targetId === 'fatal-flaws') return fatalFlawsMapSchema;
+    if (targetId === 'wow-moments') return wowMomentsMapSchema;
+    if (targetId === 'hesitation-points') return hesitationMapSchema;
+    if (targetId === 'buyer-profile') return buyerProfileMapSchema;
+    if (targetId === 'vocab-gap') return vocabGapMapSchema;
+    if (targetId === 'promise-reality') return promiseRealityMapSchema;
   }
   return analysisSchemas[targetId];
 }
