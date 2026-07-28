@@ -450,9 +450,27 @@
     0 4px 8px -4px rgba(16, 185, 129, 0.06);
 }
 
-/* ---- Analyzed Badge Animation ---- */
+/*
+ * Analyzed status badge (outer corner).
+ * Solid fill + explicit color so PC density rules that zero
+ * bg-gradient / box-shadow cannot leave white-on-white text.
+ */
 .analyzed-badge {
+  background-color: var(--color-emerald-500, #10b981) !important;
+  background-image: none !important;
+  color: #fff !important;
+  border: 1px solid color-mix(in srgb, var(--color-emerald-600, #059669) 70%, #fff 10%);
+  box-shadow: 0 6px 14px -6px rgba(16, 185, 129, 0.55);
   animation: badgePulse var(--duration-2s) var(--ease-in-out) infinite;
+}
+
+.dark .analyzed-badge,
+[data-color-mode-resolved='dark'] .analyzed-badge,
+[data-theme='dark'] .analyzed-badge {
+  background-color: var(--color-emerald-500, #10b981) !important;
+  color: #fff !important;
+  border-color: color-mix(in srgb, var(--color-emerald-300, #6ee7b7) 45%, transparent);
+  box-shadow: 0 8px 18px -8px rgba(16, 185, 129, 0.65);
 }
 
 /* ---- Upload Area ---- */
@@ -1377,29 +1395,30 @@ textarea:focus-visible {
       .plugin-icon,
       .rounded-xl,
       .rounded-2xl,
-      .strategy-item,
-      .analyzed-badge
+      .strategy-item
     ) {
     border-radius: var(--workbench-radius, var(--panel-radius, 8px)) !important;
   }
 
+  /* Keep status pill chrome; density flat-wash must not strip badge fill. */
   [x-data='scraperPanel']
-    :where(
-      .history-card,
-      .plugin-card,
-      .strategy-item,
-      .empty-state-icon,
-      .plugin-icon,
-      .analyzed-badge
-    ) {
+    :where(.history-card, .plugin-card, .strategy-item, .empty-state-icon, .plugin-icon) {
     background-image: none !important;
     box-shadow: none !important;
     transform: none !important;
   }
 
-  [x-data='scraperPanel'] [class*='bg-gradient-to-'] {
+  [x-data='scraperPanel'] [class*='bg-gradient-to-']:not(.analyzed-badge) {
     background-image: none !important;
     box-shadow: none !important;
+  }
+
+  [x-data='scraperPanel'] .analyzed-badge {
+    border-radius: 999px !important;
+    background-color: var(--color-emerald-500, #10b981) !important;
+    background-image: none !important;
+    color: #fff !important;
+    box-shadow: 0 6px 14px -6px rgba(16, 185, 129, 0.55) !important;
   }
 
   [x-data='scraperPanel'] :where(.upload-icon) {
