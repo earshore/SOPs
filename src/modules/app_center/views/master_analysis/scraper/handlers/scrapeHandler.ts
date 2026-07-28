@@ -88,6 +88,8 @@ export function handleScrapeComplete(
       domain: siteConfig.domain || 'unknown',
       language: siteConfig.name || 'unknown',
       total_asins: validAsins.length,
+      // Used by 最近作业 journey captions (数据采集 → 数据来源).
+      data_source: 'scrape',
     },
     products: finalProducts,
   };

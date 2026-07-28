@@ -217,16 +217,25 @@ function appendTypeSpecificFacts(
 ): void {
   const meta = artifact.metadata || {};
   const handlers: Partial<Record<AppCenterArtifactType, () => void>> = {
-    scrape_history: () => appendAsinCountFact(facts, workItem, blocked),
+    scrape_history: () => {
+      if (typeof meta.asinCount === 'number' && meta.asinCount > 0) {
+        pushUniqueFact(facts, `${meta.asinCount} ASIN`, blocked);
+      } else {
+        appendAsinCountFact(facts, workItem, blocked);
+      }
+      if (typeof meta.dataSource === 'string' && meta.dataSource.trim()) {
+        pushUniqueFact(facts, meta.dataSource.trim(), blocked);
+      }
+    },
     analysis_report: () => {
       if (typeof meta.dimensionCount === 'number' && meta.dimensionCount > 0) {
-        pushUniqueFact(facts, `${meta.dimensionCount}分析维度`, blocked);
+        pushUniqueFact(facts, `${meta.dimensionCount}个分析维度`, blocked);
       }
       if (
         typeof meta.overallConfidencePercent === 'number' &&
         Number.isFinite(meta.overallConfidencePercent)
       ) {
-        pushUniqueFact(facts, `${Math.round(meta.overallConfidencePercent)}%总体置信度`, blocked);
+        pushUniqueFact(facts, `${Math.round(meta.overallConfidencePercent)}% 置信度`, blocked);
       }
       if (typeof meta.model === 'string' && meta.model.trim()) {
         pushUniqueFact(facts, meta.model.trim(), blocked);
@@ -238,11 +247,11 @@ function appendTypeSpecificFacts(
     },
     listing_prompt: () => {
       if (typeof meta.strategy === 'string' && meta.strategy.trim()) {
-        pushUniqueFact(facts, `生成策略：${meta.strategy.trim()}`, blocked);
+        pushUniqueFact(facts, meta.strategy.trim(), blocked);
       } else {
         pushSummaryParts(facts, artifact.summary, blocked);
       }
-      if (facts.length === 0) pushUniqueFact(facts, '生成策略配置', blocked);
+      if (facts.length === 0) pushUniqueFact(facts, '默认策略', blocked);
     },
     listing_copy: () => {
       if (typeof meta.keywordCount === 'number') {

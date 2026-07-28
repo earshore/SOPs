@@ -734,6 +734,8 @@ function createImportedScrapedData(
       scrape_timestamp: new Date().toISOString(),
       total_asins: finalProducts.length,
       last_action: 'multi_site_import_merge',
+      // Used by 最近作业 journey captions (数据采集 → 数据来源).
+      data_source: 'json_import',
       domain: marketplaceHeader?.domain || 'unknown',
       language: marketplaceHeader?.name || 'unknown',
     },

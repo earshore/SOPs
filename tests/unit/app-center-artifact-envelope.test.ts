@@ -153,6 +153,7 @@ describe('App Center artifact envelope service', () => {
       expect.objectContaining({
         type: 'listing_prompt',
         payloadRef: 'prompt:listing-prompt-001',
+        summary: expect.not.stringContaining('生成策略'),
       }),
       expect.objectContaining({
         type: 'analysis_report',
@@ -161,6 +162,11 @@ describe('App Center artifact envelope service', () => {
       expect.objectContaining({
         type: 'scrape_history',
         payloadRef: 'history:hist-001',
+        summary: expect.stringContaining('采集'),
+        metadata: expect.objectContaining({
+          asinCount: 1,
+          dataSource: '采集',
+        }),
       }),
     ]);
   });

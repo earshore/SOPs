@@ -98,6 +98,7 @@ describe('handleImportFiles', () => {
     expect(result.success).toBe(true);
     expect(result.data?.metadata?.marketplace).toBe('FR');
     expect(result.data?.metadata?.domain).toBe('amazon.fr');
+    expect(result.data?.metadata?.data_source).toBe('json_import');
     expect(result.data?.products).toHaveLength(1);
     expect(HistoryService.saveAsync).toHaveBeenCalledWith(result.data);
     expect(eventBus.emit).toHaveBeenCalledWith(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, result.data);

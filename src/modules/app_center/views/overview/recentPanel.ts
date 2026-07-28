@@ -349,16 +349,26 @@ function formatStageSummaryFromMetadata(stageArtifact: AppCenterArtifactEnvelope
   const meta = stageArtifact.metadata || {};
 
   switch (stageArtifact.type) {
+    case 'scrape_history': {
+      const parts: string[] = [];
+      if (typeof meta.asinCount === 'number' && meta.asinCount > 0) {
+        parts.push(`${meta.asinCount} ASIN`);
+      }
+      if (typeof meta.dataSource === 'string' && meta.dataSource.trim()) {
+        parts.push(meta.dataSource.trim());
+      }
+      return parts.join(' · ');
+    }
     case 'analysis_report': {
       const parts: string[] = [];
       if (typeof meta.dimensionCount === 'number' && meta.dimensionCount > 0) {
-        parts.push(`${meta.dimensionCount}分析维度`);
+        parts.push(`${meta.dimensionCount}个分析维度`);
       }
       if (
         typeof meta.overallConfidencePercent === 'number' &&
         Number.isFinite(meta.overallConfidencePercent)
       ) {
-        parts.push(`${Math.round(meta.overallConfidencePercent)}%总体置信度`);
+        parts.push(`${Math.round(meta.overallConfidencePercent)}% 置信度`);
       }
       if (typeof meta.model === 'string' && meta.model.trim()) {
         parts.push(meta.model.trim());
@@ -367,9 +377,9 @@ function formatStageSummaryFromMetadata(stageArtifact: AppCenterArtifactEnvelope
     }
     case 'listing_prompt': {
       if (typeof meta.strategy === 'string' && meta.strategy.trim()) {
-        return `生成策略：${meta.strategy.trim()}`;
+        return meta.strategy.trim();
       }
-      return '生成策略配置';
+      return '默认策略';
     }
     case 'listing_copy': {
       const parts: string[] = [];
@@ -752,6 +762,10 @@ function createRecentUtilityActions(
 }
 
 const recentToolsAutoCloseTimers = new WeakMap<HTMLElement, number>();
+const recentToolsHoverOpenTimers = new WeakMap<HTMLElement, number>();
+/** Match native tooltip-ish feel; don't flash tray on accidental hover. */
+const RECENT_TOOLS_HOVER_OPEN_DELAY_MS = 320;
+const RECENT_TOOLS_AUTO_CLOSE_MS = 1500;
 
 function clearRecentCardToolsTimer(tools: HTMLElement): void {
   const timer = recentToolsAutoCloseTimers.get(tools);
@@ -761,8 +775,17 @@ function clearRecentCardToolsTimer(tools: HTMLElement): void {
   }
 }
 
+function clearRecentCardToolsHoverOpenTimer(tools: HTMLElement): void {
+  const timer = recentToolsHoverOpenTimers.get(tools);
+  if (timer !== undefined) {
+    window.clearTimeout(timer);
+    recentToolsHoverOpenTimers.delete(tools);
+  }
+}
+
 function closeRecentCardTools(tools: HTMLElement, moreBtn: HTMLButtonElement): void {
   clearRecentCardToolsTimer(tools);
+  clearRecentCardToolsHoverOpenTimer(tools);
   tools.classList.remove('is-open');
   moreBtn.setAttribute('aria-expanded', 'false');
 }
@@ -771,8 +794,23 @@ function scheduleRecentCardToolsAutoClose(tools: HTMLElement, moreBtn: HTMLButto
   clearRecentCardToolsTimer(tools);
   const timer = window.setTimeout(() => {
     closeRecentCardTools(tools, moreBtn);
-  }, 1500);
+  }, RECENT_TOOLS_AUTO_CLOSE_MS);
   recentToolsAutoCloseTimers.set(tools, timer);
+}
+
+function scheduleRecentCardToolsHoverOpen(tools: HTMLElement, moreBtn: HTMLButtonElement): void {
+  clearRecentCardToolsHoverOpenTimer(tools);
+  if (tools.classList.contains('is-open')) {
+    clearRecentCardToolsTimer(tools);
+    return;
+  }
+  const timer = window.setTimeout(() => {
+    recentToolsHoverOpenTimers.delete(tools);
+    // Still hovering when delay elapses.
+    if (!tools.matches(':hover')) return;
+    openRecentCardTools(tools, moreBtn);
+  }, RECENT_TOOLS_HOVER_OPEN_DELAY_MS);
+  recentToolsHoverOpenTimers.set(tools, timer);
 }
 
 function openRecentCardTools(
@@ -780,6 +818,7 @@ function openRecentCardTools(
   moreBtn: HTMLButtonElement,
   options?: { scheduleClose?: boolean }
 ): void {
+  clearRecentCardToolsHoverOpenTimer(tools);
   // Close other open trays so only one reveals at a time.
   document
     .querySelectorAll<HTMLElement>('.app-overview-recent-card-tools.is-open')
@@ -844,11 +883,12 @@ function createRecentCardCorner(
     openRecentCardTools(tools, moreBtn);
   });
 
-  // Hover/click on the three-dots or icon area both reveal pin/copy/remove.
+  // Hover: delayed open (like native tooltips). Click on ··· stays instant.
   tools.addEventListener('pointerenter', () => {
-    openRecentCardTools(tools, moreBtn);
+    scheduleRecentCardToolsHoverOpen(tools, moreBtn);
   });
   tools.addEventListener('pointerleave', () => {
+    clearRecentCardToolsHoverOpenTimer(tools);
     if (!tools.classList.contains('is-open')) return;
     scheduleRecentCardToolsAutoClose(tools, moreBtn);
   });

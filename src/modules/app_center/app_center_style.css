@@ -789,12 +789,15 @@
   transition:
     opacity 140ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     transform 140ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition-delay: 0ms;
 }
 
 .app-overview-recent-card-tools-more:hover::after,
 .app-overview-recent-card-tools-more:focus-visible::after {
   opacity: 1;
   transform: translateY(0);
+  /* Align with tray hover-open delay — don't flash on skim. */
+  transition-delay: 280ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -828,12 +831,14 @@
   transition:
     opacity 140ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     transform 140ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition-delay: 0ms;
 }
 
 .app-overview-recent-card-tool:hover::after,
 .app-overview-recent-card-tool:focus-visible::after {
   opacity: 1;
   transform: translateY(0);
+  transition-delay: 280ms;
 }
 
 .app-overview-recent-card-tool i {

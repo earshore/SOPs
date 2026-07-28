@@ -293,8 +293,37 @@ function createWorkItemFromHistoryItem(historyItem: HistoryItem): AppCenterWorkI
   };
 }
 
+function resolveHistoryDataSourceLabel(historyItem: HistoryItem): 'JSON导入' | '采集' {
+  const meta = asRecord(historyItem.data?.metadata);
+  if (!meta) return '采集';
+
+  const source = meta.data_source ?? meta.dataSource ?? meta.last_action;
+  if (typeof source === 'string') {
+    const normalized = source.trim().toLowerCase();
+    if (
+      normalized === 'json_import' ||
+      normalized === 'import' ||
+      normalized.includes('import')
+    ) {
+      return 'JSON导入';
+    }
+    if (
+      normalized === 'scrape' ||
+      normalized === 'scraper' ||
+      normalized === 'collection' ||
+      normalized === 'plugin'
+    ) {
+      return '采集';
+    }
+  }
+
+  return '采集';
+}
+
 function createHistoryArtifact(historyItem: HistoryItem): AppCenterArtifactEnvelope {
   const workItemId = createWorkItemIdFromHistoryItem(historyItem);
+  const dataSource = resolveHistoryDataSourceLabel(historyItem);
+  const asinCount = historyItem.asins.length;
 
   return {
     id: `${workItemId}:scrape_history`,
@@ -302,9 +331,14 @@ function createHistoryArtifact(historyItem: HistoryItem): AppCenterArtifactEnvel
     type: 'scrape_history',
     sourceRoute: 'scraper',
     title: '采集历史',
-    summary: `${historyItem.site || '站点'} · ${historyItem.asins.length} ASIN`,
+    summary: `${historyItem.site || '站点'} · ${asinCount} ASIN · ${dataSource}`,
     payloadRef: `history:${String(historyItem.id)}`,
     createdAt: historyItem.timestamp,
+    metadata: {
+      asinCount,
+      marketplace: historyItem.site || historyItem.data?.metadata?.marketplace || '',
+      dataSource,
+    },
   };
 }
 
@@ -368,8 +402,8 @@ function buildAnalysisArtifactSummary(historyItem: HistoryItem): {
   const confidencePercent = getAnalysisOverallConfidencePercent(report);
   const model = getAnalysisModelLabel(report);
   const parts: string[] = [];
-  if (dimensionCount > 0) parts.push(`${dimensionCount}分析维度`);
-  if (confidencePercent !== null) parts.push(`${confidencePercent}%总体置信度`);
+  if (dimensionCount > 0) parts.push(`${dimensionCount}个分析维度`);
+  if (confidencePercent !== null) parts.push(`${confidencePercent}% 置信度`);
   if (model) parts.push(model);
 
   return {
@@ -443,7 +477,7 @@ function createPromptArtifact(
     type: 'listing_prompt',
     sourceRoute: 'promptlab',
     title: 'Listing Prompt',
-    summary: strategy ? `生成策略：${strategy}` : '生成策略配置',
+    summary: strategy || '默认策略',
     payloadRef: `prompt:${prompt.id}`,
     createdAt: prompt.generatedAt,
     metadata: {

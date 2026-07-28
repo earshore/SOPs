@@ -123,6 +123,22 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
   });
 
   it('formats analysis / listing / keyword stage facts from metadata', () => {
+    const scrape = buildRecentArtifactPresentation(
+      {
+        id: 'scrape-2',
+        workItemId: 'competitor_listing:hist-001',
+        type: 'scrape_history',
+        sourceRoute: 'scraper',
+        title: '采集历史',
+        summary: 'DE · 2 ASIN · JSON导入',
+        payloadRef: 'history:hist-001',
+        createdAt: '2026-01-01T00:10:00.000Z',
+        metadata: { asinCount: 2, dataSource: 'JSON导入', marketplace: 'DE' },
+      },
+      makeWorkItem({ asinOrSku: 'B000000001, B000000002' })
+    );
+    expect(scrape.facts).toEqual(expect.arrayContaining(['2 ASIN', 'JSON导入']));
+
     const analysis = buildRecentArtifactPresentation(
       {
         id: 'analysis-1',
@@ -130,7 +146,7 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
         type: 'analysis_report',
         sourceRoute: 'ai_analysis',
         title: 'AI 分析报告',
-        summary: '3分析维度 · 82%总体置信度 · grok-4.5',
+        summary: '3个分析维度 · 82% 置信度 · grok-4.5',
         payloadRef: 'history:hist-001#analysis',
         createdAt: '2026-01-01T00:20:00.000Z',
         metadata: {
@@ -141,7 +157,7 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
       },
       makeWorkItem()
     );
-    expect(analysis.facts).toEqual(['3分析维度', '82%总体置信度', 'grok-4.5']);
+    expect(analysis.facts).toEqual(['3个分析维度', '82% 置信度', 'grok-4.5']);
 
     const prompt = buildRecentArtifactPresentation(
       {
@@ -150,14 +166,14 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
         type: 'listing_prompt',
         sourceRoute: 'promptlab',
         title: 'Listing Prompt',
-        summary: '生成策略：专业 · COSMO',
+        summary: '专业 · COSMO',
         payloadRef: 'prompt:p1',
         createdAt: '2026-01-01T00:22:00.000Z',
         metadata: { strategy: '专业 · COSMO', asinCount: 1, marketplace: 'DE' },
       },
       makeWorkItem()
     );
-    expect(prompt.facts).toContain('生成策略：专业 · COSMO');
+    expect(prompt.facts).toContain('专业 · COSMO');
 
     const copy = buildRecentArtifactPresentation(
       {
