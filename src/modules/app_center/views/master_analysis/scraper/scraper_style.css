@@ -412,15 +412,8 @@
     box-shadow var(--duration-normal) var(--ease-smooth),
     transform var(--duration-normal) var(--ease-smooth);
   position: relative;
-  /* Keep corner status badge ("已分析") visible; do not clip absolute badge. */
+  /* Badge sits at -top-2/-right-2 outside the border; do not clip. */
   overflow: visible;
-}
-
-.history-card .analyzed-badge {
-  /* Prefer inset corner so scroll parents never crop the label. */
-  position: absolute;
-  top: 0.45rem;
-  right: 0.45rem;
 }
 .history-card::before {
   content: none;
@@ -1416,6 +1409,12 @@ textarea:focus-visible {
   /* History cards must stay overflow:visible so the analyzed badge is not clipped. */
   [x-data='scraperPanel'] .history-card {
     overflow: visible !important;
+  }
+
+  [x-data='scraperPanel'] .history-card-list {
+    /* Keep outer-corner badges inside the scrollport padding box. */
+    padding-top: 1.15rem !important;
+    padding-right: 1.15rem !important;
   }
 
   [x-data='scraperPanel'] .upload-area::before {

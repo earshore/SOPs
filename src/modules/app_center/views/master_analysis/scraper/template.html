@@ -604,7 +604,7 @@ B0EXAMPLE1"
           </button>
         </div>
         <div
-          class="p-4 space-y-2 max-h-[min(60vh,28rem)] overflow-y-auto custom-scrollbar"
+          class="history-card-list px-4 pt-5 pb-4 space-y-2.5 max-h-[min(60vh,28rem)] overflow-y-auto custom-scrollbar"
           role="region"
           aria-label="历史快照列表"
           tabindex="0"
@@ -630,17 +630,19 @@ B0EXAMPLE1"
               :class="getHistoryCardClass(item)"
               class="history-card group relative p-3 rounded-xl border-2 bg-white"
             >
-              <!-- ✅ 已分析标签徽章（卡片内右上角，避免被 overflow 裁剪） -->
+              <!-- ✅ 已分析：原右上外角位置 (-top-2 -right-2)；overflow:visible 防裁剪 -->
               <template x-if="isHistoryAnalyzed(item)">
-                <div
-                  class="analyzed-badge z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-200 pointer-events-none"
-                >
-                  <i class="fas fa-check-circle text-[8px]" aria-hidden="true"></i>
-                  <span>已分析</span>
+                <div class="absolute -top-2 -right-2 z-10 pointer-events-none">
+                  <div
+                    class="analyzed-badge flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-200"
+                  >
+                    <i class="fas fa-check-circle text-[8px]" aria-hidden="true"></i>
+                    <span>已分析</span>
+                  </div>
                 </div>
               </template>
-              <!-- Header -->
-              <div class="flex items-start justify-between mb-2 gap-2 pr-14">
+              <!-- Header：删除按钮在卡片内原右上角（与徽章错开层级） -->
+              <div class="flex items-start justify-between mb-2 gap-2">
                 <div
                   @click="loadHistoryItem(item)"
                   class="flex items-center gap-2 cursor-pointer min-w-0"
