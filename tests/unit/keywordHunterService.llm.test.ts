@@ -224,9 +224,10 @@ it('uses selected provider settings and falls back to the first model entry', as
     expect.objectContaining({
       temperature: 0.1,
       jsonMode: false,
-      maxTokens: 6000,
+      maxTokens: 12000,
       stream: true,
       onFirstResponse: expect.any(Function),
+      strategyTargetId: 'keyword-hunter-listing-review',
     })
   );
 });

@@ -629,10 +629,17 @@ export function registerKeywordSnapshotArtifact(
   const boundContext: AppCenterWorkspaceContext = { ...context, workItemId };
   upsertWorkItem(createKeywordSnapshotWorkItem(snapshot, boundContext));
 
-  const keywordCount = snapshot.result.keywords.length;
-  const matchedCount = snapshot.derived?.matchedCount ?? snapshot.result.matchedKeywords.length;
+  const keywordCount = Array.isArray(snapshot.result.keywords)
+    ? snapshot.result.keywords.length
+    : 0;
+  const matchedCount =
+    snapshot.derived?.matchedCount ??
+    (Array.isArray(snapshot.result.matchedKeywords) ? snapshot.result.matchedKeywords.length : 0);
   const unmatchedCount =
-    snapshot.derived?.unmatchedCount ?? snapshot.result.unmatchedKeywords.length;
+    snapshot.derived?.unmatchedCount ??
+    (Array.isArray(snapshot.result.unmatchedKeywords)
+      ? snapshot.result.unmatchedKeywords.length
+      : 0);
   const sourceRoute = context.sourceRoute || 'keyword_hunter_analysis';
   const keywordArtifact = upsertArtifact({
     id: `${workItemId}:keyword_snapshot:${snapshot.id}`,

@@ -635,15 +635,15 @@ describe('App Center recent queue service', () => {
     ).toHaveLength(1);
   });
 
-  it('shows multi-ASIN scope, execution time, and a meaningful artifact name', () => {
+  it('keeps multi-ASIN scope compact while retaining activity time separately', () => {
     const presentation = buildRecentArtifactPresentation(
       makeEnvelope({ title: '春季关键词复核' }),
       makeWorkItem({ asinOrSku: 'B000000001, B000000002' }),
       Date.parse('2026-01-01T04:00:00.000Z')
     );
     expect(presentation.primaryTitle).toBe('DE · B000000001 +1 ASIN');
-    expect(presentation.facts).toContain('名称：春季关键词复核');
-    expect(presentation.facts.some(fact => fact.startsWith('执行开始 '))).toBe(true);
+    expect(presentation.facts).toEqual(['2个ASIN']);
+    expect(presentation.absoluteTime).not.toBe('');
   });
 
   it('builds a clipboard summary for resume context', () => {

@@ -1379,8 +1379,9 @@ class KeywordHunterAnalysisModule extends BaseModule {
       );
       const pendingSameCopy =
         activeAnalysisRun?.status === 'pending' && isAnalysisRunForCurrentCopy(activeAnalysisRun);
+      const hasPendingRun = activeAnalysisRun?.status === 'pending';
 
-      if (hasContent && !hasReport && !pendingSameCopy) {
+      if (hasContent && !hasReport && !hasPendingRun) {
         void runLLMAnalysis({ autoStart: true });
       } else if (pendingSameCopy && activeAnalysisRun) {
         attachAnalysisRunToPage(activeAnalysisRun);

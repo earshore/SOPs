@@ -385,9 +385,9 @@ it('does not restore a historical report when the current analysis state is empt
   expect(container.querySelector('#keyword-hunter-llm-analysis-result')?.textContent).not.toContain(
     '88/100'
   );
-  expect(
-    container.querySelector('#keyword-hunter-analyze-btn')?.classList.contains('cursor-pointer')
-  ).toBe(true);
+  await vi.waitFor(() => {
+    expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+  });
 });
 
 it('does not write a stale cached report back after the current input clears analysis', async () => {
@@ -479,9 +479,7 @@ it('shows loading phases, renders successful analysis, and stores raw markdown',
   await vi.advanceTimersByTimeAsync(0);
   await vi.advanceTimersByTimeAsync(16);
 
-  expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe(
-    '报告已生成'
-  );
+  expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe('重新生成');
 
   expect(mockedCallLLM).toHaveBeenCalledWith(
     expect.any(Array),
@@ -492,9 +490,10 @@ it('shows loading phases, renders successful analysis, and stores raw markdown',
     expect.objectContaining({
       temperature: 0.1,
       jsonMode: false,
-      maxTokens: 6000,
+      maxTokens: 12000,
       stream: true,
       onFirstResponse: expect.any(Function),
+      strategyTargetId: 'keyword-hunter-listing-review',
     })
   );
   expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
@@ -550,7 +549,7 @@ it('keeps the pending analysis state visible after leaving and returning', async
     secondContainer.querySelector('#keyword-hunter-llm-analysis-result')?.textContent
   ).toContain('88/100');
   expect(secondContainer.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe(
-    '报告已生成'
+    '重新生成'
   );
   expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
   expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
@@ -588,6 +587,7 @@ it('ignores a pending analysis run after the processed copy changes', async () =
 
   const secondContainer = await mountAnalysis();
   expect(secondContainer.querySelector('#keyword-hunter-loading-state')).toBeNull();
+  expect(mockedCallLLM).toHaveBeenCalledTimes(1);
 
   resolveAnalysis(scoredMarkdown);
   await vi.advanceTimersByTimeAsync(0);
@@ -608,7 +608,7 @@ it('warns when the generated report cannot be archived automatically', async () 
 
   await vi.waitFor(() => {
     expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe(
-      '报告已生成'
+      '重新生成'
     );
   });
   expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
@@ -647,7 +647,7 @@ it('warns on empty copy and renders validation errors without reporting to Error
   expect(container.querySelector('#keyword-hunter-llm-analysis-result')?.textContent).toContain(
     '输入内容过短或不具备 Amazon Listing 特征'
   );
-  expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe('生成报告');
+  expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe('重新生成');
 });
 
 it('reports non-validation failures and supports retrying from the rendered error state', async () => {
@@ -671,9 +671,7 @@ it('reports non-validation failures and supports retrying from the rendered erro
   click(container.querySelector('#keyword-hunter-llm-analysis-result button'));
 
   await vi.waitFor(() => {
-    expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe(
-      '报告已生成'
-    );
+    expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
   });
-  expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
+  expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe('重新生成');
 });

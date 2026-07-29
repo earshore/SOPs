@@ -380,7 +380,11 @@ it('renders the embedded history snapshot panel on the input page', async () => 
   expect(container.querySelector('[data-keyword-hunter-snapshot-filter]')).toBeNull();
   expect(container.querySelector('#keyword-hunter-input-snapshot-open-history')).toBeNull();
 
-  click(container.querySelector('button[title="恢复到输入页"]'));
+  const restoreButton = container.querySelector(
+    '.keyword-hunter-input-snapshot-action.restore'
+  );
+  expect(restoreButton?.getAttribute('title')).toBe('加载快照（恢复到输入页）');
+  click(restoreButton);
   await vi.waitFor(() => {
     expect(KeywordHunterSnapshotService.restore).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'kh-coffee' })
@@ -434,7 +438,7 @@ it('asks before restoring a snapshot over the local draft', async () => {
   container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input')!.value =
     'unsaved copy';
 
-  click(container.querySelector('button[title="恢复到输入页"]'));
+  click(container.querySelector('.keyword-hunter-input-snapshot-action.restore'));
 
   await vi.waitFor(() => {
     expect(inputMocks.confirmWithModal).toHaveBeenCalledWith(

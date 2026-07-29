@@ -204,6 +204,35 @@ describe('App Center artifact envelope service', () => {
     expect(getRecentArtifacts(1)).toEqual([expect.objectContaining({ id: envelope?.id })]);
   });
 
+  it('registers legacy keyword snapshots that omit match-result arrays', () => {
+    const snapshot = createKeywordSnapshot();
+    const legacySnapshot = {
+      ...snapshot,
+      result: {
+        ...snapshot.result,
+        matchedKeywords: undefined,
+        unmatchedKeywords: undefined,
+      },
+      derived: {
+        ...snapshot.derived,
+        matchedCount: undefined,
+        unmatchedCount: undefined,
+      },
+    } as unknown as KeywordHunterSnapshot;
+
+    const envelope = registerKeywordSnapshotArtifact(legacySnapshot, createWorkspaceContext());
+
+    expect(envelope).toMatchObject({
+      type: 'keyword_snapshot',
+      summary: '1个关键词 · 0个命中 · 0个未命中',
+      metadata: {
+        keywordCount: 1,
+        matchedCount: 0,
+        unmatchedCount: 0,
+      },
+    });
+  });
+
   it('registers a distinct listing review artifact for a reported Keyword Hunter snapshot', () => {
     const snapshot = createKeywordSnapshot();
     snapshot.status = 'reported';

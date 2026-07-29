@@ -136,7 +136,7 @@ describe('PerformanceSettings', () => {
     expect(template).not.toContain('scheduleCloseEvidenceDepthMenu()');
     expect(template).not.toContain('evidenceDepthExpanded');
     expect(template).toContain('perfSettings.clearCache()');
-    expect(template).toContain('fa-trash-can');
+    expect(template).toContain('fa-broom');
     expect(template).not.toContain('>清除缓存<');
     expect(template).not.toContain('分析设置');
     expect(template).not.toContain('perfSettings.toggleSettings()');

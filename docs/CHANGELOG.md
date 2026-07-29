@@ -7,13 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.12-rc.3] - 2026-07-29
 
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.11`。
+> 收口 AI 智能分析页面样式可读性与控件适配问题。
+> 生产回滚目标为 `v3.0.11` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Fixed
+
+- AI 智能分析页面：将误用的 Tailwind 语义类（`text-primary`/`text-secondary`/`text-tertiary`/`bg-secondary`/`bg-tertiary`）替换为引用设计令牌的任意值语法，修复浅/深主题下文字与背景对比度不足、辅助文本层次丢失、统计概览栏卡片渲染成深灰蓝块、关键词标签对比度差等问题。
+- 证据深度下拉框：移除外层 `box-shadow` 光圈与内层 `border` 形成的"双层框"；外层退化为布局容器，select 单层边框并按 hero 强对比态切换为半透明白底+白字，与旁边主操作按钮组外观契合。
+- 开始分析/清除缓存按钮：修复 `bg-surface` 死类名（Tailwind 配置无 `surface` 色键）导致加载 ASIN 后按钮在深色渐变 hero 上不可见；`runAnalysisButtonClass` 四状态（分析中/可运行×强对比/可运行×普通/禁用）完整适配浅色/深色主题与 Appearance 色调。
+- AI 分析进度：改用原生 `progress` 的数值绑定取代 Alpine 动态内联 `style` 宽度，保留 ARIA 进度语义并将数值限制在 `0..100`，满足 CSP 与无障碍合约。
+- AI 分析 hero 、状态点和结果徽章：清除剩余 `bg-surface` 死类名，分别改为表面设计令牌或白色透明层，避免非强对比态退化。
+
+- Keyword Hunter：兼容历史快照缺失命中/未命中数组，应用中心同步旧数据时以 `0` 计数；当前文案变更后，挂起分析请求不再在重新进入页面时自动重复发起，用户仍可手动重新生成。
+
 ### Changed
 
-- AI 智能分析页面样式可读性修复 + 控件适配（浅/深主题 + 色调）
-- 模板 HTML 类名替换 ~80 处
-- AlpinePanel.ts 类名 + runAnalysisButtonClass 状态重写
-- ai_analysis_style.css 死代码删除 + 下拉框样式重构
-- 新增 ai-analysis-contrast-audit.md 诊断报告
+- 删除 `ai_analysis_style.css` 中无效的 dark 模式覆盖死代码（覆盖的体系 B 变量 `--text-secondary` 等无任何类引用）。
+- 模板 `template.html` 类名替换约 80 处；`AlpinePanel.ts` 类名替换约 10 处 + `runAnalysisButtonClass` 状态重写。
+- 新增 `ai-analysis-contrast-audit.md` 诊断报告，记录根因与修复对照。
 
 ## [Unreleased]
 

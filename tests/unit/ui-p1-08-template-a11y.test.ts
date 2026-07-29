@@ -47,15 +47,17 @@ describe('UI-P1-08 template semantics', () => {
     const html = readTemplate(path);
     const root = readTemplateFragment(path);
 
+    const progressbar = requireElement(
+      root,
+      'progress.ai-analysis-progress-fill[role="progressbar"][aria-labelledby="ai-analysis-progress-label"]'
+    );
+    expect(progressbar.getAttribute(':aria-valuenow')).toBe('progressAriaValue');
+    expect(progressbar.getAttribute(':value')).toBe('progressAriaValue');
+    expect(progressbar.getAttribute('max')).toBe('100');
     requireElement(root, '[role="status"][aria-live="polite"][aria-atomic="true"]');
     expect(html).not.toContain(':style=');
     expect(html).not.toContain('x-bind:style=');
-
-    const progressbar = requireElement(
-      root,
-      '[role="progressbar"][aria-labelledby="ai-analysis-progress-label"]'
-    );
-    expect(progressbar.getAttribute(':aria-valuenow')).toBe('progressAriaValue');
+    expect(html).not.toContain('bg-surface');
 
     // Scheduling preference moved into system settings (598ebb96); the page keeps
     // only the minimal clear-cache entry — assert that instead of the old radiogroup.

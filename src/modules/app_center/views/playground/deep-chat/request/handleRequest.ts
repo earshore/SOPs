@@ -194,6 +194,7 @@ export async function handleDeepChatRequest(
     const preparedRequest = await prepareDeepChatRequest(body, signals);
     if (!preparedRequest) return;
 
+    pendingThreadId = preparedRequest.activeThread.id;
     hadVisionParts = Boolean(
       preparedRequest.visionUserParts && preparedRequest.visionUserParts.length > 0
     );

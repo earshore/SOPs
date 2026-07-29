@@ -2985,7 +2985,9 @@ describe('deep-chat playground failed responses', () => {
       expect(onClose).toHaveBeenCalled();
     });
 
-    expectStoredAssistantMessage(mocks.localDataStore.set, '请求失败：上游 API 返回格式异常');
+    await vi.waitFor(() => {
+      expectStoredAssistantMessage(mocks.localDataStore.set, '请求失败：上游 API 返回格式异常');
+    });
 
     unmount();
   });
@@ -3024,10 +3026,14 @@ describe('deep-chat playground timeout responses', () => {
 
     expect(onResponse).toHaveBeenCalledWith({ text: '已生成的' });
     expect(onResponse).toHaveBeenCalledWith({ text: '回复内容' });
-    expect(onResponse).not.toHaveBeenCalledWith({
-      text: '请求失败：模型响应超时(90秒)',
+    expect(
+      onResponse.mock.calls.some(
+        ([response]) => (response as { text?: string }).text === '请求失败：模型响应超时(90秒)'
+      )
+    ).toBe(false);
+    await vi.waitFor(() => {
+      expectStoredAssistantMessage(mocks.localDataStore.set, '已生成的回复内容');
     });
-    expectStoredAssistantMessage(mocks.localDataStore.set, '已生成的回复内容');
     expect(JSON.stringify(mocks.localDataStore.set.mock.calls)).not.toContain(
       '请求失败：模型响应超时(90秒)'
     );
@@ -3063,10 +3069,12 @@ describe('deep-chat playground empty responses', () => {
       expect(onClose).toHaveBeenCalled();
     });
 
-    expectStoredAssistantMessage(
-      mocks.localDataStore.set,
-      '请求失败：模型没有返回任何内容，请稍后重试或检查模型/上下文配置。'
-    );
+    await vi.waitFor(() => {
+      expectStoredAssistantMessage(
+        mocks.localDataStore.set,
+        '请求失败：模型没有返回任何内容，请稍后重试或检查模型/上下文配置。'
+      );
+    });
 
     unmount();
   });

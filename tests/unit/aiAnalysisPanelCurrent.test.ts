@@ -302,8 +302,8 @@ it('computes hero, progress, report, JSON, and confidence branches', () => {
   expect(panel.analysisHeroIsComplete).toBe(true);
   expect(panel.analysisHeroIsStrong).toBe(false);
   expect(panel.analysisHeroIsCompact).toBe(true);
-  expect(panel.analysisHeroCardClass).toContain('bg-surface');
-  expect(panel.analysisHeroBackdropClass).toBe('bg-surface');
+  expect(panel.analysisHeroCardClass).toContain('bg-[var(--surface-panel)]');
+  expect(panel.analysisHeroBackdropClass).toBe('bg-[var(--surface-panel)]');
   expect(panel.analysisHeroIconClass).toBe('fa-solid fa-circle-check');
   expect(panel.isAnalysisComplete).toBe(true);
   expect(panel.isAnalysisRunning).toBe(false);
@@ -318,7 +318,7 @@ it('computes hero, progress, report, JSON, and confidence branches', () => {
   expect(panel.showRunDisabledHint).toBe(false);
   expect(panel.progressText).toBe('72%');
   expect(panel.progressAriaValue).toBe(72);
-  expect(panel.progressStyle).toBe('width: 72%;');
+  expect(panel).not.toHaveProperty('progressStyle');
   expect(panel.analysisProgressStages[2]?.state).toBe('active');
   expect(panel.getProgressStageClass(panel.analysisProgressStages[2]?.state)).toBe(
     'text-white font-semibold'
@@ -465,7 +465,7 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   expect(panel.getAsinTextClass('B001')).toBe(
     'text-[var(--color-primary-dark,var(--color-primary))]'
   );
-  expect(panel.getAsinTextClass('B002')).toBe('text-tertiary');
+  expect(panel.getAsinTextClass('B002')).toBe('text-[color:var(--color-text-tertiary)]');
   expect(panel.getListingTargetCardClass('selling-points')).toContain(
     'hover:bg-[var(--surface-card-hover)]'
   );
@@ -489,8 +489,8 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   expect(panel.runAnalysisButtonClass).toContain('cursor-not-allowed');
   expect(panel.analysisHeroAmbientClass).toBe('opacity-0');
   expect(panel.analysisHeroPatternClass).toBe('opacity-0');
-  expect(panel.analysisHeroTextClass).toBe('text-primary');
-  expect(panel.analysisHeroSubtextClass).toBe('text-secondary');
+  expect(panel.analysisHeroTextClass).toBe('text-[color:var(--color-text-primary)]');
+  expect(panel.analysisHeroSubtextClass).toBe('text-[color:var(--color-text-secondary)]');
   expect(panel.analysisHeroMetricPillClass).toContain('bg-slate-100');
   expect(panel.analysisPerfButtonClass).toContain('bg-slate-50');
   expect(panel.analysisHeroIconWrapClass).toContain('bg-slate-100');
@@ -551,6 +551,16 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   );
   panelMocks.helperGetResultColor.mockReturnValueOnce('violet');
   expect(panel.getResultColorEnd('unknown')).toBe('indigo');
+});
+
+it('clamps progress values for the native progress control', () => {
+  const panel = createPanel();
+
+  panel.progress = 120;
+  expect(panel.progressAriaValue).toBe(100);
+
+  panel.progress = -12;
+  expect(panel.progressAriaValue).toBe(0);
 });
 
 it('refreshes report view for empty, success, and parse-failure states', () => {

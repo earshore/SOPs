@@ -1176,8 +1176,79 @@ async function executeTaskWave(
   });
 }
 
+function startSharedGeneralReviewMap(
+  orderedPending: AnalysisTask[],
+  input: PendingAnalysisExecutionContext,
+  llmConfig: LLMConfig
+): Promise<SharedGeneralMapBundle | undefined> | undefined {
+  const { context, product, language, config } = input;
+  const generalPending = orderedPending
+    .map(task => task.targetId)
+    .filter(isGeneralReviewEvidenceTargetId)
+    .filter(targetId => shouldUseReviewMapReduce(product, targetId));
+  if (generalPending.length < 2) {
+    return undefined;
+  }
+
+  return buildSharedGeneralReviewMap(
+    {
+      product,
+      config: llmConfig,
+      language,
+      retryBudget: config.retryBudget,
+      onPhase: message => {
+        const settled = context.successCount + context.failedCount;
+        const settledFloor = Math.round((settled / Math.max(1, context.totalTasks)) * 100);
+        // Soft progress only; do not pretend first result is ready.
+        context.onProgress(
+          Math.min(40, Math.max(settledFloor + 2, 6)),
+          humanizeAnalysisPhaseMessage(message)
+        );
+      },
+    },
+    generalPending
+  ).catch(error => {
+    console.error('[并行分析] shared general map failed; falling back per-target maps:', error);
+    return undefined;
+  });
+}
+
+function createPendingTaskWaveOptions(
+  input: PendingAnalysisExecutionContext,
+  llmConfig: LLMConfig
+): TaskWaveOptions {
+  const { context, cachedTasks, product, language, config } = input;
+  return {
+    product,
+    config: llmConfig,
+    language,
+    enableCache: config.enableCache,
+    skipCacheRead: true as const,
+    retryBudget: config.retryBudget,
+    stopOnFailure: config.stopOnFailure,
+    onTaskSettled: (task, completedCount, _totalCount, currentTasks) => {
+      handleSettledAnalysisTask(context, task, cachedTasks.length + completedCount, currentTasks);
+    },
+    onTaskFirstResponse: (task, completedCount, _totalCount, currentTasks) => {
+      handleFirstAnalysisResponse(context, task, cachedTasks.length + completedCount, currentTasks);
+    },
+    onPhase: (_task, message) => {
+      const settled = context.successCount + context.failedCount;
+      const settledFloor = Math.round((settled / Math.max(1, context.totalTasks)) * 100);
+      const runningBoost = Math.min(
+        8,
+        Math.max(1, Math.round(100 / Math.max(1, context.totalTasks * 4)))
+      );
+      context.onProgress(
+        Math.min(99, settledFloor + runningBoost),
+        humanizeAnalysisPhaseMessage(message)
+      );
+    },
+  };
+}
+
 async function executePendingAnalysisTasks(input: PendingAnalysisExecutionContext): Promise<void> {
-  const { context, tasks, cachedTasks, product, language, config } = input;
+  const { tasks, product, config } = input;
   const pendingTasks = tasks.filter(task => task.status === 'pending');
   if (pendingTasks.length === 0) {
     return;
@@ -1194,80 +1265,8 @@ async function executePendingAnalysisTasks(input: PendingAnalysisExecutionContex
   const llmConfig = await getLLMConfig();
 
   // Prepare shared general-review Map in the background. Never block light targets.
-  const generalPending = orderedPending
-    .map(task => task.targetId)
-    .filter(isGeneralReviewEvidenceTargetId)
-    .filter(targetId => shouldUseReviewMapReduce(product, targetId));
-
-  let sharedGeneralMap: SharedGeneralMapBundle | undefined;
-  let sharedGeneralMapPromise: Promise<SharedGeneralMapBundle | undefined> | undefined;
-  if (generalPending.length >= 2) {
-    sharedGeneralMapPromise = buildSharedGeneralReviewMap(
-      {
-        product,
-        config: llmConfig,
-        language,
-        retryBudget: config.retryBudget,
-        onPhase: message => {
-          const settled = context.successCount + context.failedCount;
-          const settledFloor = Math.round((settled / Math.max(1, context.totalTasks)) * 100);
-          // Soft progress only; do not pretend first result is ready.
-          context.onProgress(
-            Math.min(40, Math.max(settledFloor + 2, 6)),
-            humanizeAnalysisPhaseMessage(message)
-          );
-        },
-      },
-      generalPending
-    )
-      .then(bundle => {
-        sharedGeneralMap = bundle;
-        return bundle;
-      })
-      .catch(error => {
-        console.error('[并行分析] shared general map failed; falling back per-target maps:', error);
-        sharedGeneralMap = undefined;
-        return undefined;
-      });
-  }
-
-  const taskOptionsBase = {
-    product,
-    config: llmConfig,
-    language,
-    enableCache: config.enableCache,
-    skipCacheRead: true as const,
-    retryBudget: config.retryBudget,
-    stopOnFailure: config.stopOnFailure,
-    onTaskSettled: (
-      task: AnalysisTask,
-      completedCount: number,
-      _totalCount: number,
-      currentTasks: string[]
-    ) => {
-      handleSettledAnalysisTask(context, task, cachedTasks.length + completedCount, currentTasks);
-    },
-    onTaskFirstResponse: (
-      task: AnalysisTask,
-      completedCount: number,
-      _totalCount: number,
-      currentTasks: string[]
-    ) => {
-      handleFirstAnalysisResponse(context, task, cachedTasks.length + completedCount, currentTasks);
-    },
-    onPhase: (_task: AnalysisTask, message: string) => {
-      const settled = context.successCount + context.failedCount;
-      const settledFloor = Math.round((settled / Math.max(1, context.totalTasks)) * 100);
-      const runningBoost = Math.min(
-        8,
-        Math.max(1, Math.round(100 / Math.max(1, context.totalTasks * 4)))
-      );
-      context.onProgress(
-        Math.min(99, settledFloor + runningBoost),
-        humanizeAnalysisPhaseMessage(message)
-      );
-    },
-  };
+  const sharedGeneralMapPromise = startSharedGeneralReviewMap(orderedPending, input, llmConfig);
+  const taskOptionsBase = createPendingTaskWaveOptions(input, llmConfig);
 
   // Wave 1: light/oneshot targets for fast first paint.
   const lightTasks = orderedPending.filter(task =>
@@ -1282,9 +1281,7 @@ async function executePendingAnalysisTasks(input: PendingAnalysisExecutionContex
   }
 
   // Wave 2: wait shared map (if any) then heavy targets.
-  if (sharedGeneralMapPromise) {
-    await sharedGeneralMapPromise;
-  }
+  const sharedGeneralMap = sharedGeneralMapPromise ? await sharedGeneralMapPromise : undefined;
 
   if (heavyTasks.length > 0) {
     await executeTaskWave(heavyTasks, maxConcurrency, taskOptionsBase, sharedGeneralMap);

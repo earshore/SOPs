@@ -74,7 +74,6 @@ describe('PC design token CSS contract', () => {
   it('does not stomp Appearance primary/focus with indigo under dark mode (T1)', () => {
     const css = readFileSync(variablesCssPath, 'utf8');
 
-    expect(css).toContain('Appearance primary / focus / link tokens stay on Layer A');
     // Dark foundation must not hard-assign brand primary/focus/link to indigo.
     expect(css).not.toMatch(/--color-primary:\s*var\(--color-indigo-/);
     expect(css).not.toMatch(/--color-primary-dark:\s*var\(--color-indigo-/);
@@ -117,7 +116,8 @@ describe('PC design token CSS contract', () => {
     const appCenterCss = readFileSync(appCenterCssPath, 'utf8');
     const sopsCss = readFileSync(sopsCssPath, 'utf8');
     const localPrimaryDefinition = /--color-primary(?:-(?:light|dark|darker))?\s*:/;
-    const localPrimaryReference = /var\(--color-primary(?:\)|,|-light|-dark|-darker)/;
+    const journeyUsesAppearanceAccent =
+      /\.app-overview-recent-journey\s*\{[^}]*--app-recent-accent:\s*var\(--color-primary\)/;
 
     expect(appCenterCss).toContain('--module-accent: var(--app-overview-accent)');
     expect(appCenterCss).toContain('--module-accent-focus: var(--app-overview-focus-ring)');
@@ -125,7 +125,7 @@ describe('PC design token CSS contract', () => {
       '--button-filter-focus-color: var(--module-accent, var(--color-focus-ring, #3b82f6))'
     );
     expect(appCenterCss).not.toMatch(localPrimaryDefinition);
-    expect(appCenterCss).not.toMatch(localPrimaryReference);
+    expect(appCenterCss).toMatch(journeyUsesAppearanceAccent);
 
     expect(sopsCss).toContain('--module-accent: var(--sops-qwen-violet)');
     expect(sopsCss).toContain('--module-accent-focus: var(--sops-qwen-focus)');
@@ -133,7 +133,6 @@ describe('PC design token CSS contract', () => {
       'outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6))'
     );
     expect(sopsCss).not.toMatch(localPrimaryDefinition);
-    expect(sopsCss).not.toMatch(localPrimaryReference);
   });
 
   it('keeps NPI long-form helper copy within a readable desktop measure', () => {

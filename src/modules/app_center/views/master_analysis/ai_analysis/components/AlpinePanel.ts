@@ -104,7 +104,6 @@ type AiAnalysisPanelThis = AiAnalysisPanelContext &
     analysisHeroStatusText: string;
     showAnalysisHeroStatus: boolean;
     progressAriaValue: number;
-    progressStyle: string;
     analysisProgressStages: AnalysisProgressStage[];
     getProgressStageClass(state: 'pending' | 'active' | 'done'): string;
     evidenceDepthValue: 'fast' | 'balanced' | 'deep';
@@ -663,16 +662,16 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   get analysisHeroCardClass(): string {
     if (this.analysisHeroIsCompact)
-      return 'bg-surface border border-slate-200 shadow-sm shadow-slate-200/60';
+      return 'bg-[var(--surface-panel)] border border-slate-200 shadow-sm shadow-slate-200/60';
     return this.analysisHeroIsStrong
       ? 'shadow-lg shadow-indigo-200/30'
-      : 'bg-surface border border-slate-200 shadow-sm shadow-slate-200/60';
+      : 'bg-[var(--surface-panel)] border border-slate-200 shadow-sm shadow-slate-200/60';
   },
 
   get analysisHeroBackdropClass(): string {
     return this.analysisHeroIsStrong
       ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600'
-      : 'bg-surface';
+      : 'bg-[var(--surface-panel)]';
   },
 
   get analysisHeroAmbientClass(): string {
@@ -693,13 +692,13 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   get analysisHeroMetricPillClass(): string {
     return this.analysisHeroIsStrong
-      ? 'bg-surface/20 text-white'
+      ? 'bg-white/20 text-white'
       : 'bg-slate-100 text-[color:var(--color-text-tertiary)] border border-slate-200';
   },
 
   get analysisPerfButtonClass(): string {
     return this.analysisHeroIsStrong
-      ? 'bg-surface/10 text-white hover:bg-surface/20 border border-white/20 hover:border-white/30'
+      ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:border-white/30'
       : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200 hover:border-slate-300';
   },
 
@@ -709,8 +708,8 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     if (!this.analysisHeroIsStrong)
       return 'w-14 h-14 rounded-xl bg-slate-100 text-[color:var(--color-text-secondary)] border border-slate-200 shadow-sm';
     return this.isAnalyzing
-      ? 'w-16 h-16 rounded-2xl bg-surface/20 text-white border border-white/20 backdrop-blur-sm shadow-lg'
-      : 'w-16 h-16 rounded-2xl bg-surface/10 text-white border border-white/20 backdrop-blur-sm shadow-lg';
+      ? 'w-16 h-16 rounded-2xl bg-white/20 text-white border border-white/20 backdrop-blur-sm shadow-lg'
+      : 'w-16 h-16 rounded-2xl bg-white/10 text-white border border-white/20 backdrop-blur-sm shadow-lg';
   },
 
   get analysisHeroIconClass(): string {
@@ -1000,16 +999,11 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   get progressText(): string {
-    return `${Math.round(this.progress)}%`;
+    return `${Math.round(normalizeAnalysisProgress(this.progress))}%`;
   },
 
   get progressAriaValue(): number {
-    return Math.round(this.progress);
-  },
-
-  get progressStyle(): string {
-    const value = Math.max(0, Math.min(100, Number(this.progress) || 0));
-    return `width: ${value}%;`;
+    return Math.round(normalizeAnalysisProgress(this.progress));
   },
 
   /**

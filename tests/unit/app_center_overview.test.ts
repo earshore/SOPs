@@ -289,9 +289,12 @@ describe('App Center Overview', () => {
     expect(recentItems[0]?.classList.contains('app-overview-recent-item--ppc_action_list')).toBe(
       true
     );
-    // Context-first title; short type once; facts as chips (not raw summary dump)
+    // Live metrics lead; work context remains on the secondary fact line.
     expect(recentItems[0]?.querySelector('.app-overview-recent-type')?.textContent).toBe('PPC');
     expect(recentItems[0]?.querySelector('.app-overview-recent-title')?.textContent).toBe(
+      '2 条建议动作 · 负责人：广告小张'
+    );
+    expect(recentItems[0]?.querySelector('.app-overview-recent-fact')?.textContent).toBe(
       'DE · B000000001'
     );
     expect(recentItems[0]?.textContent).toContain('负责人：广告小张');
