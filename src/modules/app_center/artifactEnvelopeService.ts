@@ -20,10 +20,7 @@ export const APP_CENTER_ARTIFACTS_STORAGE_KEY = 'app_center_artifact_envelopes_v
 export const APP_CENTER_ARTIFACTS_CHANGED = 'app-center:artifacts-changed';
 
 export type AppCenterWorkItemType =
-  | 'competitor_listing'
-  | 'keyword_review'
-  | 'ppc_review'
-  | 'npi_reference';
+  'competitor_listing' | 'keyword_review' | 'ppc_review' | 'npi_reference';
 export type AppCenterWorkItemStatus = 'draft' | 'in_progress' | 'review_required' | 'done';
 export type AppCenterArtifactType =
   | 'scrape_history'

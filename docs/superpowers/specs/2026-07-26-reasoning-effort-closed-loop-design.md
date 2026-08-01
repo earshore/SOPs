@@ -48,7 +48,8 @@
 | 家族 | 代表 id | allowlist | default / control |
 |------|---------|-----------|-------------------|
 | xAI Grok-4.5 | `grok-4.5` | `low\|medium\|high` | high / openai effort |
-| OpenAI GPT-5 / o | `gpt-5.6` 等 | low…max | medium / openai * |
+| OpenAI GPT-5.x | `gpt-5.6` 等 | low…max（含 xhigh/max 透传） | medium / openai * |
+| OpenAI o-series | `o3-mini` 等 | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | medium / openai * |
 | Claude effort 代 | `claude-opus-4.5` | low…max | high / **output_config.effort** |
 | Claude legacy | `claude-sonnet-4.5` | low…max → budget | medium / budget_tokens |
 | Gemini | gemini-* | low…max → budget | medium / thinkingBudget |
@@ -105,8 +106,9 @@ Dev console 示例：
 | # | 输入 | 期望 |
 |---|------|------|
 | A | grok-4.5 + enabled + max | effective `high`；body `reasoning_effort: high` |
-| B | gpt-5.6 + enabled + max | effective `max`；body 含 max |
-| C | gpt-5.6 + enabled + xhigh | effective `xhigh` |
+| B | gpt-5.6 + enabled + max | effective `max`；body 含 max（allowlist 透传） |
+| C | gpt-5.6 + enabled + xhigh | effective `xhigh`；body `xhigh` |
+| C2 | o3-mini + enabled + max | effective `high`（allowlist 封顶）；body `reasoning_effort: high` |
 | D | grok-4.5 allowlist | 不含 xhigh/max；含 high |
 | E | Claude/Gemini + max | effective `max`；mapper 产生 budget/thinking 字段 |
 | F | UI options | ⊆ 当前模型 allowlist |

@@ -37,19 +37,7 @@ export type ModuleRegisterFn = (routeId: string, loader: ModuleLoaderFn) => void
  * 采集站点类型（简短代码）
  */
 export type ScraperSite =
-  | 'US'
-  | 'DE'
-  | 'FR'
-  | 'IT'
-  | 'ES'
-  | 'NL'
-  | 'SE'
-  | 'PL'
-  | 'BE'
-  | 'IE'
-  | 'UK'
-  | 'CA'
-  | 'JP';
+  'US' | 'DE' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'IE' | 'UK' | 'CA' | 'JP';
 
 /**
  * 采集状态
@@ -891,11 +879,7 @@ export interface EmailTemplate {
  * 限制词类别
  */
 export type RestrictedWordCategory =
-  | 'medical'
-  | 'safety'
-  | 'performance'
-  | 'legal'
-  | 'environmental';
+  'medical' | 'safety' | 'performance' | 'legal' | 'environmental';
 
 /**
  * 限制词

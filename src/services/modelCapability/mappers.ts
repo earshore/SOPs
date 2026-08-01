@@ -3,12 +3,14 @@
  * Each mapper is surface-aware in the registry (which surface attaches it).
  */
 
-import type { ReasoningEffort } from './types';
+import { isReasoningEffortLevel } from './types';
+import type { ReasoningEffort, ReasoningEffortLevel } from './types';
 
 /**
- * Official OpenAI `reasoning_effort` only accepts minimal/low/medium/high
- * (gpt-5.1 adds `none`, but product-side off is handled via enabled=false).
- * Product-side xhigh/max are clamped to `high` at the OpenAI egress only.
+ * OpenAI `reasoning_effort` / `reasoning.effort` values are model-dependent:
+ * official docs allow none|minimal|low|medium|high|xhigh|max (flagship tiers).
+ * Pass through tiers the model allowlist declares; clamp only values outside
+ * it (e.g. o-series official enum caps at high — see registry allowlists).
  */
 const OPENAI_EFFORT_BY_PRODUCT_EFFORT: Record<string, string> = {
   low: 'low',
@@ -22,14 +24,29 @@ function clampOpenAiEffort(effort: ReasoningEffort): string {
   return OPENAI_EFFORT_BY_PRODUCT_EFFORT[effort] ?? 'high';
 }
 
+/**
+ * Wire effort for OpenAI surfaces: allowlisted tiers pass through verbatim
+ * (e.g. gpt-5.x xhigh/max), anything outside the allowlist clamps to high.
+ */
+function resolveOpenAiWireEffort(
+  effort: ReasoningEffort,
+  allowed?: readonly ReasoningEffortLevel[]
+): string {
+  if (isReasoningEffortLevel(effort) && allowed?.includes(effort)) {
+    return effort;
+  }
+  return clampOpenAiEffort(effort);
+}
+
 export function mapOpenAiReasoningEffort(prefs: {
   enabled: boolean;
   effort: ReasoningEffort;
+  allowed?: readonly ReasoningEffortLevel[];
 }): Record<string, unknown> {
   if (!prefs.enabled || prefs.effort === 'off') {
     return {};
   }
-  return { reasoning_effort: clampOpenAiEffort(prefs.effort) };
+  return { reasoning_effort: resolveOpenAiWireEffort(prefs.effort, prefs.allowed) };
 }
 
 /**
@@ -40,13 +57,14 @@ export function mapOpenAiReasoningEffort(prefs: {
 export function mapResponsesReasoning(prefs: {
   enabled: boolean;
   effort: ReasoningEffort;
+  allowed?: readonly ReasoningEffortLevel[];
 }): Record<string, unknown> {
   if (!prefs.enabled || prefs.effort === 'off') {
     return {};
   }
   return {
     reasoning: {
-      effort: clampOpenAiEffort(prefs.effort),
+      effort: resolveOpenAiWireEffort(prefs.effort, prefs.allowed),
       summary: 'auto',
     },
   };
@@ -163,7 +181,8 @@ export function mapGeminiThinking(prefs: {
   }
   const budget = GEMINI_THINKING_BUDGET_BY_EFFORT[prefs.effort] ?? 4_096;
   return {
-    reasoning_effort: prefs.effort,
+    // Official thinkingLevel enum caps at high; the budget ladder carries low…max.
+    reasoning_effort: GEMINI_THINKING_LEVEL_BY_EFFORT[prefs.effort],
     extra_body: {
       google: {
         thinking_config: {

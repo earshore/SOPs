@@ -1342,6 +1342,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
       provider: this.llm.provider,
       modelId: this.llm.model,
       modelsEntry: m ?? this.llm.model,
+      // Align with transport resolution: use the effective user-selected path so
+      // the settings UI shows exactly the tiers the request will actually send.
+      preferredSurface: normalizeApiPathId(this.llm.apiPath),
     });
   },
 

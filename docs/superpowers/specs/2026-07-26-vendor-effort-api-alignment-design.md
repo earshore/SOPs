@@ -50,7 +50,8 @@
 
 | 家族 | Allowlist | Control | Default | 文档依据 |
 |------|-----------|---------|---------|----------|
-| GPT-5 / o | low…max | openai_* | medium | OpenAI Reasoning |
+| GPT-5.x | low…max（含 xhigh/max 透传） | openai_* | medium | OpenAI Reasoning |
+| o-series | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | openai_* | medium | OpenAI Reasoning |
 | Grok-4.5 | low\|medium\|high | openai_reasoning_effort | high | xAI Reasoning |
 | Claude adaptive 代 | low…max | **thinking.adaptive + output_config.effort** | **high** | Effort + adaptive thinking docs |
 | Claude legacy | low…max → budget | **thinking.enabled + budget_tokens only** | medium | Extended thinking (legacy) |

@@ -65,7 +65,7 @@ Enterprise closed-loop (product axis + per-model allowlist + nearest clamp + req
 
 | Family          | Patterns (summary)                                  | Effort allowlist (summary) | Probe / basis                |
 | --------------- | --------------------------------------------------- | -------------------------- | ---------------------------- |
-| OpenAI o-series | `o1*`, `o3*`, `o4-mini*` (tight)                    | low…max (flagship)         | OpenAI Reasoning docs        |
+| OpenAI o-series | `o1*`, `o3*`, `o4-mini*` (tight)                    | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | OpenAI Reasoning docs |
 | OpenAI GPT-5    | `gpt-5`, `gpt-5.1`…`gpt-5.6`, `gpt-5-*`             | low…max (flagship)         | OpenAI Reasoning docs        |
 | xAI Grok-4.5    | `grok-4.5*`                                         | low\|medium\|high          | xAI docs + live gateway      |
 | xAI Grok other  | `grok-4*`, `grok-3*`                                | triad / multi-agent xhigh  | **Live** `grok-4.5`          |

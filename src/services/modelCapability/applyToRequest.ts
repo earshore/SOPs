@@ -88,7 +88,7 @@ export function applyReasoningToRequestBody(
   base: ChatCompletionsBodyBase,
   capability: Pick<
     ResolvedModelCapability,
-    'mapRequest' | 'temperatureIgnored' | 'supportsReasoning'
+    'mapRequest' | 'temperatureIgnored' | 'supportsReasoning' | 'reasoningEfforts'
   >,
   reasoning: EffectiveReasoningPrefs,
   options?: { temperature?: number }
@@ -103,6 +103,7 @@ export function applyReasoningToRequestBody(
   const extra = capability.mapRequest({
     enabled: reasoning.enabled,
     effort: reasoning.enabled ? reasoning.effort : 'off',
+    allowed: capability.reasoningEfforts,
   });
   if (extra && typeof extra === 'object') {
     mergeMapperFields(body, extra);
@@ -726,6 +727,7 @@ function applyResponsesReasoningMapper(
   const extra = capability.mapRequest({
     enabled: reasoning.enabled,
     effort: reasoning.enabled ? reasoning.effort : 'off',
+    allowed: capability.reasoningEfforts,
   });
   if (extra && typeof extra === 'object') {
     mergeMapperFields(body, extra);

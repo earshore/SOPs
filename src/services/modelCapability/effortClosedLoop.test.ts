@@ -43,25 +43,27 @@ const CASES: Case[] = [
     expectBodyEffort: 'high',
   },
   {
-    name: 'gpt-5.6 max preserved product-side, clamped to high on wire',
+    name: 'gpt-5.6 max passes through to wire (flagship allowlist)',
     modelId: 'gpt-5.6',
     requested: 'max',
     expectEffective: 'max',
     expectAllowlistIncludes: ['high', 'xhigh', 'max'],
-    expectBodyEffort: 'high',
+    expectBodyEffort: 'max',
   },
   {
-    name: 'gpt-5.6 xhigh preserved product-side, clamped to high on wire',
+    name: 'gpt-5.6 xhigh passes through to wire (flagship allowlist)',
     modelId: 'gpt-5.6',
     requested: 'xhigh',
     expectEffective: 'xhigh',
-    expectBodyEffort: 'high',
+    expectBodyEffort: 'xhigh',
   },
   {
-    name: 'o3-mini max clamped to high on wire (official reasoning_effort enum)',
+    name: 'o3-mini max demotes to high (official enum caps at high)',
     modelId: 'o3-mini',
     requested: 'max',
-    expectEffective: 'max',
+    expectEffective: 'high',
+    expectAllowlistIncludes: ['low', 'medium', 'high'],
+    expectAllowlistExcludes: ['xhigh', 'max'],
     expectBodyEffort: 'high',
   },
   {
@@ -157,6 +159,7 @@ describe('reasoning effort closed loop (registry → resolve → mapRequest)', (
       const fragment = cap.mapRequest!({
         enabled: true,
         effort: effective.effort,
+        allowed: cap.reasoningEfforts,
       });
 
       if (c.expectBodyEffort !== undefined) {
@@ -193,8 +196,7 @@ describe('reasoning effort closed loop (registry → resolve → mapRequest)', (
 
       if (c.expectGeminiBudget) {
         const extra = fragment.extra_body as
-          | { google?: { thinking_config?: { thinking_budget?: number } } }
-          | undefined;
+          { google?: { thinking_config?: { thinking_budget?: number } } } | undefined;
         expect(typeof extra?.google?.thinking_config?.thinking_budget).toBe('number');
       }
     });

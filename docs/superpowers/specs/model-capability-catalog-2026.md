@@ -26,6 +26,10 @@
 
 各模型同时可在另一 surface 上登记备用 mapper。
 
+> **档位差异：** o-series 官方枚举 minimal|low|medium|high → 产品轴 low…high；
+> GPT-5.x 旗舰 allowlist low…max 并按 allowlist 透传 xhigh/max；Gemini `reasoning_effort`
+> 按官方 thinkingLevel 封顶 high，强度由 thinking_budget 档位承载。
+
 ## 头部模型（摘要）
 
 | 厂商       | 示例 id                                   | 有推理开关                                   |

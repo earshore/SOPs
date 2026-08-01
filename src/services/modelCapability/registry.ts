@@ -45,8 +45,9 @@ const GROK_MULTI_AGENT_EFFORTS: readonly ReasoningEffortLevel[] = [
 /** OpenAI-compatible effort triad (conservative default for non-flagship chat models). */
 const OPENAI_TRIAD_EFFORTS: readonly ReasoningEffortLevel[] = ['low', 'medium', 'high'];
 /**
- * OpenAI flagship reasoning (GPT-5.x / o-series): docs allow high + xhigh + max
- * (plus lower tiers). Product L1 still uses low…max without none/minimal this release.
+ * OpenAI flagship reasoning (GPT-5.x): official docs are model-dependent and
+ * this generation can include xhigh/max. Product L1 keeps low…max (no
+ * none/minimal on the product axis this release).
  */
 const OPENAI_FLAGSHIP_EFFORTS: readonly ReasoningEffortLevel[] = [
   'low',
@@ -55,6 +56,11 @@ const OPENAI_FLAGSHIP_EFFORTS: readonly ReasoningEffortLevel[] = [
   'xhigh',
   'max',
 ];
+/**
+ * OpenAI o-series: official reasoning_effort enum is minimal|low|medium|high —
+ * xhigh/max are not supported there, so the product axis caps at high.
+ */
+const OPENAI_O_SERIES_EFFORTS: readonly ReasoningEffortLevel[] = ['low', 'medium', 'high'];
 /** Claude 4.6 generation: low|medium|high|max — xhigh arrived with Opus 4.7. */
 const CLAUDE_46_EFFORTS: readonly ReasoningEffortLevel[] = ['low', 'medium', 'high', 'max'];
 
@@ -199,12 +205,19 @@ function entry(
   };
 }
 
-/** OpenAI o/gpt reasoning: prefer responses when available, completions as fallback. */
-function openaiReasoning(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+/**
+ * OpenAI o/gpt reasoning: prefer responses when available, completions as fallback.
+ * Pass an effort profile to scope the allowlist (o-series caps at high).
+ */
+function openaiReasoning(
+  modelPattern: string,
+  contextWindow: number,
+  effort?: Pick<EffortProfile, 'reasoningEfforts' | 'defaultEffort'>
+): ModelCapabilityRule {
   const profile: EffortProfile = {
     temperatureIgnored: true,
-    reasoningEfforts: OPENAI_FLAGSHIP_EFFORTS,
-    defaultEffort: 'medium',
+    reasoningEfforts: effort?.reasoningEfforts ?? OPENAI_FLAGSHIP_EFFORTS,
+    defaultEffort: effort?.defaultEffort,
   };
   return entry(
     modelPattern,
@@ -216,6 +229,14 @@ function openaiReasoning(modelPattern: string, contextWindow: number): ModelCapa
     },
     ['reasoning', 'max_completion_tokens']
   );
+}
+
+/** o-series: official enum minimal|low|medium|high — product axis caps at high. */
+function openaiOSeries(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+  return openaiReasoning(modelPattern, contextWindow, {
+    reasoningEfforts: OPENAI_O_SERIES_EFFORTS,
+    defaultEffort: 'medium',
+  });
 }
 
 /** Chat-style models verified on completions (Grok / DeepSeek / Hy3). */
@@ -296,19 +317,19 @@ function geminiThinking(modelPattern: string, contextWindow: number): ModelCapab
 
 export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   // OpenAI o-series + GPT-5 flagship
-  openaiReasoning('o1', 200_000),
-  openaiReasoning('o1-mini', 128_000),
-  openaiReasoning('o1-preview', 128_000),
-  openaiReasoning('o1-pro', 200_000),
-  openaiReasoning('o1-mini-*', 128_000),
-  openaiReasoning('o1-pro-*', 200_000),
-  openaiReasoning('o3', 200_000),
-  openaiReasoning('o3-mini', 200_000),
-  openaiReasoning('o3-pro', 200_000),
-  openaiReasoning('o3-mini-*', 200_000),
-  openaiReasoning('o3-pro-*', 200_000),
-  openaiReasoning('o4-mini', 200_000),
-  openaiReasoning('o4-mini-*', 200_000),
+  openaiOSeries('o1', 200_000),
+  openaiOSeries('o1-mini', 128_000),
+  openaiOSeries('o1-preview', 128_000),
+  openaiOSeries('o1-pro', 200_000),
+  openaiOSeries('o1-mini-*', 128_000),
+  openaiOSeries('o1-pro-*', 200_000),
+  openaiOSeries('o3', 200_000),
+  openaiOSeries('o3-mini', 200_000),
+  openaiOSeries('o3-pro', 200_000),
+  openaiOSeries('o3-mini-*', 200_000),
+  openaiOSeries('o3-pro-*', 200_000),
+  openaiOSeries('o4-mini', 200_000),
+  openaiOSeries('o4-mini-*', 200_000),
   openaiReasoning('gpt-5', 256_000),
   openaiReasoning('gpt-5-mini', 128_000),
   openaiReasoning('gpt-5-nano', 128_000),

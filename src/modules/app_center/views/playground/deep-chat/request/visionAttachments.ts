@@ -53,8 +53,7 @@ export type DeepChatMessageFileLike = {
 };
 
 export type ResolveDeepChatVisionResult =
-  | { ok: true; parts: DeepChatVisionUserPart[] }
-  | { ok: false; error: string };
+  { ok: true; parts: DeepChatVisionUserPart[] } | { ok: false; error: string };
 
 type FileCandidate = {
   src?: string;

@@ -36,10 +36,7 @@ export function isReasoningEffortLevel(value: unknown): value is ReasoningEffort
  * - gemini_generate: POST {origin}/v1beta/models/{model}:generateContent
  */
 export type ApiSurface =
-  | 'chat_completions'
-  | 'responses'
-  | 'anthropic_messages'
-  | 'gemini_generate';
+  'chat_completions' | 'responses' | 'anthropic_messages' | 'gemini_generate';
 
 /**
  * Extended surface flags beyond reasoning (OpenAI Responses capability matrix).
@@ -96,8 +93,15 @@ export interface SurfaceCapability extends SurfaceCapabilityFlags {
   /**
    * Map product prefs → request body fragment for THIS surface only.
    * enabled=false / effort=off → {} (omit fields).
+   * llowed is the resolved model allowlist on this surface: mappers must
+   * pass through allowlisted tiers and clamp only values outside it (wire
+   * enums can be narrower than the product axis, e.g. o-series caps at high).
    */
-  mapRequest?: (prefs: { enabled: boolean; effort: ReasoningEffort }) => Record<string, unknown>;
+  mapRequest?: (prefs: {
+    enabled: boolean;
+    effort: ReasoningEffort;
+    allowed?: readonly ReasoningEffortLevel[];
+  }) => Record<string, unknown>;
 }
 
 export interface ModelCapabilityRule {

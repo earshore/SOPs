@@ -81,6 +81,15 @@ describe('multi-protocol flagship catalog', () => {
     expect(gpt.reasoningEfforts).toEqual(['low', 'medium', 'high', 'xhigh', 'max']);
     expect(gpt.defaultEffort).toBe('medium');
 
+    const o3 = resolveModelCapability(
+      { provider: 'new_api', modelId: 'o3-mini' },
+      getModelCapabilityRules()
+    );
+    // o-series official enum minimal|low|medium|high — product axis caps at high.
+    expect(o3.reasoningEfforts).toEqual(['low', 'medium', 'high']);
+    expect(o3.reasoningEfforts).not.toContain('xhigh');
+    expect(o3.reasoningEfforts).not.toContain('max');
+
     const multi = resolveModelCapability(
       { provider: 'new_api', modelId: 'grok-4.20-multi-agent' },
       getModelCapabilityRules()
