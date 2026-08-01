@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.12-rc.4] - 2026-08-02
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.11`。
+> 收口架构审查 P0/P1：修复 Deep Chat 联网搜索在生产被 CSP 拦截的静默失败；统一密钥存储边界文案与显示确认；拆分 LLM 单体并收敛依赖注入。
+> 生产回滚目标为 `v3.0.11` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Fixed
+
+- Deep Chat `web_search` / `search_x`：修复生产环境请求被 CSP `connect-src` 拦截、表现为“搜索总是失败且无任何告警”的问题——`https://r.jina.ai` 已纳入 Cloudflare `_headers` 与 `vercel.json` 两份 CSP，`generateCSPConnectSrc()` 同步生成，并新增「运行时 fetch 域名 ⊆ CSP connect-src」一致性测试；同时为 Jina Reader 读取路径补齐支持。
+
+### Security
+
+- 密钥/凭据存储边界文案统一为「浏览器本地混淆保存（非服务端加密）」：安全边界常量、本地数据导出/导入确认框与设置页提示同步更新，避免“加密存储”误导用户高估安全性。
+- 设置页 LLM Endpoint 新增隐私提示：提示词、输出与 API 密钥会发送至该网关，网关运营方可观测。
+- API Key / 代理凭据「显示」增加二次确认弹窗，取消时保持隐藏，降低共享设备误展示风险。
+
+### Changed
+
+- LLM 服务层按传输/模型列表/流式解析拆分：`llmService.ts` 由 3412 行收敛至 2416 行，新增 `llmTransport.ts`（333 行）、`llmModelList.ts`（276 行）、`llmStreamDelta.ts`（155 行）与 `llmTypes.ts`（311 行），`llmService.ts` 仅保留公共门面。
+- 依赖机制三轨收敛：移除全部遗留 `window.*` 全局（Logger / MonitoringService / ErrorService / EventLogger / showToast 等），`global.d.ts` 陈旧声明清理；DI 容器补齐 Storage / Logger 单例注册与依赖声明。
+- 系统设置纯函数迁入 `domain/localDataCopy.ts`，`systemSettings.ts` 由 3336 行收敛至 3227 行。
+
 ## [3.0.12-rc.3] - 2026-07-29
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.11`。
