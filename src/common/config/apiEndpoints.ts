@@ -74,6 +74,14 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     isDangerous: false,
   },
   ...SCRAPER_PROXY_ENDPOINTS,
+  // Deep Chat web search: browser fetches the r.jina.ai reader proxy only;
+  // the DuckDuckGo lite URL is embedded in the reader path.
+  jina_reader: {
+    domain: 'r.jina.ai',
+    requiresProxy: false,
+    displayName: 'Jina Reader',
+    isDangerous: false,
+  },
 };
 
 /**

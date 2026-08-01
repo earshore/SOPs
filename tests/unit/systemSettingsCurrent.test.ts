@@ -358,7 +358,7 @@ it('computes field state, display labels, and local data text', () => {
   expect(panel.fetchModelsIconClass).toBe('fa-sync-alt');
   expect(panel.testConnectionIconClass).toContain('fa-plug');
   expect(panel.proxyHintText).toContain('商业 API Key');
-  expect(panel.localSecretBoundaryText).toContain('浏览器本地加密保存');
+  expect(panel.localSecretBoundaryText).toContain('浏览器本地混淆保存');
   expect(panel.localSecretBoundaryText).toContain('不是服务端密钥托管');
   expect(panel.localStorageUsedText).toBe('1.0 KB');
   expect(panel.indexedDbKeysText).toBe('3 records');

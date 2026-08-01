@@ -141,6 +141,7 @@ describe('apiEndpoints CSP policy', () => {
       'api.scraperapi.com',
       'api.zenrows.com',
       'api.brightdata.com',
+      'r.jina.ai',
     ]);
     expect(connectSrc).toContain("'self'");
     expect(connectSrc).toContain('https://new.hongecb.store');
@@ -155,6 +156,16 @@ describe('apiEndpoints CSP policy', () => {
 
     expect(extractConnectSrc(readPublicHeadersCsp())).toBe(expectedConnectSrc);
     expect(extractConnectSrc(readVercelCsp())).toBe(expectedConnectSrc);
+  });
+
+  it('allows the Deep Chat web-search reader host in every deployed CSP', () => {
+    for (const connectSrc of [
+      generateCSPConnectSrc(),
+      extractConnectSrc(readPublicHeadersCsp()),
+      extractConnectSrc(readVercelCsp()),
+    ]) {
+      expect(connectSrc).toContain('https://r.jina.ai');
+    }
   });
 
   it('keeps production LLM browser-direct and prevents old proxy routes from returning', () => {

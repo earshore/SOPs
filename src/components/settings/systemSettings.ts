@@ -702,7 +702,7 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
   },
   secrets: {
     label: '密钥与凭据',
-    description: '浏览器本地加密保存的 API Key 与代理凭据',
+    description: '浏览器本地混淆保存的 API Key 与代理凭据（非服务端加密）',
     icon: 'fa-key',
     iconClass: 'bg-amber-50 text-amber-600 ring-amber-100',
     buttonClass: 'border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100',
@@ -1029,7 +1029,7 @@ function buildLocalDataExportConfirm(selectedBuckets: string[] | undefined): {
   }
   return {
     title: '导出本地数据',
-    content: `导出的备份文件可能包含本地加密的 API Key、代理凭据、配置和历史记录等敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`,
+    content: `导出的备份文件可能包含本地混淆保存的 API Key、代理凭据、配置和历史记录等敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`,
   };
 }
 
@@ -1043,7 +1043,7 @@ function buildLocalDataImportChoiceContent(summary: LocalDataExportSummary): str
     `IndexedDB：${summary.indexedDbRecords} 条记录`,
     `预估体积：约 ${formatLocalDataBytes(summary.estimatedBytes)}`,
     summary.includesSecrets
-      ? '包含密钥/凭据：是（备份中可能含本地加密 API Key 或代理凭据）'
+      ? '包含密钥/凭据：是（备份中可能含本地混淆保存的 API Key 或代理凭据）'
       : '包含密钥/凭据：否',
     '',
     '完整恢复：先清空当前本地数据，再写入备份（与备份一致）。',
