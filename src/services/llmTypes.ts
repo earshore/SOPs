@@ -16,7 +16,7 @@ import type {
   ResponsesTransportOptions,
   SessionReasoningOverride,
 } from './modelCapability';
-
+import type { LLMChatCompletionResponse } from '@/types/api';
 
 // ========================
 // 类型定义
@@ -184,7 +184,7 @@ export interface LLMCallRequest extends LLMConfig {
   options?: LLMOptions;
 }
 
-type PositionalLLMCallArgs = [
+export type PositionalLLMCallArgs = [
   messages: ChatMessage[],
   provider: string,
   endpoint: string,
@@ -193,7 +193,7 @@ type PositionalLLMCallArgs = [
   options?: LLMOptions,
 ];
 
-type LLMCallArgs = PositionalLLMCallArgs | [request: LLMCallRequest];
+export type LLMCallArgs = PositionalLLMCallArgs | [request: LLMCallRequest];
 
 /**
  * 模型信息对象
@@ -207,14 +207,14 @@ export interface ModelInfo {
   /** 支持的特性列表 */
   features: string[];
 }
-type OpenAIStreamOptions = Pick<
+export type OpenAIStreamOptions = Pick<
   LLMOptions,
   'onFirstResponse' | 'onStreamUpdate' | 'onResponseId' | 'onUsage'
 > & {
   onStreamActivity?: () => void;
 };
 
-interface OpenAIStreamState {
+export interface OpenAIStreamState {
   content: string;
   reasoningContent: string;
   firstChunkMs?: number;
@@ -236,7 +236,7 @@ interface OpenAIStreamState {
   geminiToolCalls?: ChatFunctionToolCall[];
 }
 
-interface OpenAIStreamLineContext {
+export interface OpenAIStreamLineContext {
   response: Response;
   requestStartedAt: number;
   options: OpenAIStreamOptions;
@@ -244,7 +244,7 @@ interface OpenAIStreamLineContext {
   apiSurface: ApiSurface;
 }
 
-interface OpenAIStreamReadResult {
+export interface OpenAIStreamReadResult {
   content: string;
   fallbackJson: LLMChatCompletionResponse | null;
   firstChunkMs?: number;
@@ -255,7 +255,7 @@ interface OpenAIStreamReadResult {
   reasoningContent?: string;
   usage?: Record<string, unknown>;
 }
-interface ResolvedLLMOptions {
+export interface ResolvedLLMOptions {
   temperature: number;
   jsonMode: boolean;
   timeout: number;

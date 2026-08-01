@@ -6,10 +6,10 @@
 
 import type { ServiceRegistry } from '../ServiceRegistry';
 import { SERVICE_NAMES } from '../ServiceRegistry';
-import type { IStorageService, IConfigService, ILoggerService } from '@/types/services';
+import type { IConfigService, ILoggerService } from '@/types/services';
 
 import { ConfigCenter } from '@/common/config/ConfigCenter';
-import { createStorageService } from '@/services/storageService';
+import { StorageService } from '@/services/storageService';
 import eventBus from '@/common/EventBus';
 import { globalErrorHandler } from '@/common/errors/GlobalErrorHandler';
 import { loadingManager } from '@/common/utils/LoadingManager';
@@ -24,12 +24,10 @@ function registerBaseServices(registry: ServiceRegistry): void {
     dependencies: [],
   });
 
-  // StorageService - 存储服务
+  // StorageService - 存储服务（与应用广泛使用的导出单例保持一致）
   registry.register({
     name: SERVICE_NAMES.STORAGE,
-    factory: () => {
-      return createStorageService();
-    },
+    factory: () => StorageService,
     lifetime: 'singleton',
     dependencies: [],
   });
@@ -48,14 +46,13 @@ function registerBaseServices(registry: ServiceRegistry): void {
 function registerRuntimeServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.LOGGER,
-    factory: async c => {
-      const { createLoggerService } = await import('@/services/loggerService');
-      const storage = c.resolve<IStorageService>(SERVICE_NAMES.STORAGE);
-      const config = c.resolve<IConfigService>(SERVICE_NAMES.CONFIG);
-      return createLoggerService(storage, config);
+    // 动态导入：基础服务注册层不静态依赖 Logger（避免循环依赖 lint 门禁）
+    factory: async () => {
+      const { Logger } = await import('@/services/loggerService');
+      return Logger;
     },
     lifetime: 'singleton',
-    dependencies: [SERVICE_NAMES.STORAGE, SERVICE_NAMES.CONFIG],
+    dependencies: [],
     async: true,
   });
 

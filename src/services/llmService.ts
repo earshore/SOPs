@@ -7,11 +7,7 @@
 // 🎯 P0-4.1.8: 在数据边界使用类型守卫
 // ================================================================
 
-import { ErrorService } from './errorService';
-import { isDangerousEndpoint, getDangerousEndpoints } from '@/common/config/apiEndpoints';
 import { configCenter } from '@/common/config/ConfigCenter';
-import { EnvConfig } from '@/common/config/envConfig';
-import { DEFAULT_LLM_PROVIDER_ID, DEFAULT_NEW_API_ENDPOINT } from '@/common/config/llmProviders';
 import { ApiError, NetworkError, SystemError, ValidationError } from '@/common/errors';
 import { randomFloat } from '@/common/utils/random';
 // 导入统一的 API 响应类型
@@ -19,8 +15,6 @@ import type { LLMChatCompletionResponse } from '@/types/api';
 // 导入类型守卫
 import { isLLMChatCompletionResponse } from '@/common/guards/typeGuards';
 import {
-  buildBodyForApiPath,
-  buildFullApiUrl,
   extractAnthropicMessagesText,
   extractAnthropicStopReason,
   extractAnthropicToolUses,
@@ -53,7 +47,6 @@ import {
   isResponsesInProgressEmpty,
   parseTextEmittedToolCalls,
   processResponsesToolRound,
-  resolveEffectiveReasoning,
   resolveModelCapability,
   synthesizeAnswerFromToolOutputs,
   textEmittedToChatToolCalls,
@@ -65,11 +58,7 @@ import {
   type CollectedToolOutput,
   type GeminiFunctionCall,
   type ModelsListEntry,
-  type ReasoningUserPrefs,
-  type ResponsesJsonSchemaFormat,
   type ResponsesToolExecutor,
-  type ResponsesTransportOptions,
-  type SessionReasoningOverride,
 } from './modelCapability';
 import {
   assertStreamPayloadIsOk,
@@ -83,13 +72,28 @@ import {
   parseStreamPayload,
 } from './llmStreamDelta';
 import { StorageService } from './storageService';
+import {
+  assertSafeLLMEndpoint,
+  buildLLMRequestHeaders,
+  chatContentToPlainText,
+  createLLMTransport,
+  normalizeMessagesForTransport,
+  resolveProviderEndpoint,
+} from './llmTransport';
+
+export { chatContentToPlainText } from './llmTransport';
+export { fetchModelsFromApi } from './llmModelList';
 import type {
+  ChatContentPart,
+  ChatMessage,
   LLMCallArgs,
+  LLMConfig,
+  LLMCallRequest,
+  LLMOptions,
   OpenAIStreamLineContext,
   OpenAIStreamOptions,
   OpenAIStreamReadResult,
   OpenAIStreamState,
-  PositionalLLMCallArgs,
   ResolvedLLMOptions,
 } from './llmTypes';
 
@@ -144,19 +148,6 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
 
     signal.addEventListener('abort', handleAbort, { once: true });
   });
-}
-
-function resolveProviderEndpoint(provider: string, endpoint: string): string {
-  const trimmedEndpoint = (endpoint || '').trim();
-
-  if (
-    provider === DEFAULT_LLM_PROVIDER_ID &&
-    (!trimmedEndpoint || trimmedEndpoint === '/v1' || trimmedEndpoint === '/v1/')
-  ) {
-    return DEFAULT_NEW_API_ENDPOINT;
-  }
-
-  return EnvConfig.api.normalizeEndpoint(trimmedEndpoint);
 }
 
 /** Notify Deep Chat (etc.) of reasoning summary from a completed non-stream Responses body. */
@@ -909,282 +900,6 @@ function resolveLLMOptions(
   };
 }
 
-function assertSafeLLMEndpoint(endpoint: string): void {
-  if (!configCenter.isProduction() || !isDangerousEndpoint(endpoint)) {
-    return;
-  }
-
-  const dangerousEndpoints = getDangerousEndpoints();
-  throw new SystemError(
-    '⛔ 安全限制: 生产环境禁止直接调用外部API\n\n' +
-      '可能的原因:\n' +
-      '1. 未配置代理服务器\n' +
-      '2. API端点配置错误\n\n' +
-      '解决方案:\n' +
-      '- 请在设置中配置企业代理\n' +
-      '- 或联系管理员配置企业服务端网关\n\n' +
-      `检测到的危险端点: ${dangerousEndpoints.join(', ')}\n` +
-      '这是为了保护您的API密钥安全。',
-    'LLM_DANGEROUS_ENDPOINT',
-    {
-      module: 'LLMService',
-      action: 'callLLM',
-      endpoint,
-      dangerousEndpoints: dangerousEndpoints.join(', '),
-      environment: 'production',
-    }
-  );
-}
-
-/** Flatten official chat content (string | parts | null) to plain text for UI/budget. */
-export function chatContentToPlainText(content: ChatMessage['content']): string {
-  if (content == null) return '';
-  if (typeof content === 'string') return content;
-  if (!Array.isArray(content)) return String(content);
-  return content
-    .map(part => (part && part.type === 'text' && typeof part.text === 'string' ? part.text : ''))
-    .filter(Boolean)
-    .join('\n');
-}
-
-function contentToPlainText(content: ChatMessage['content']): string {
-  return chatContentToPlainText(content);
-}
-
-/**
- * Chat path: preserve official message shape (parts, tool_calls, tool role).
- * Other paths: flatten to text roles expected by native body builders.
- */
-function normalizeMessagesForTransport(
-  messages: ChatMessage[],
-  pathId: ApiPathId = 'chat_completions'
-): Array<Record<string, unknown>> {
-  if (pathId === 'chat_completions') {
-    return messages.map(message => {
-      const row: Record<string, unknown> = { role: message.role };
-      if (message.content !== undefined) {
-        row.content = message.content;
-      } else if (!message.tool_calls?.length) {
-        row.content = '';
-      }
-      if (message.name) row.name = message.name;
-      if (message.tool_call_id) row.tool_call_id = message.tool_call_id;
-      if (message.tool_calls?.length) row.tool_calls = message.tool_calls;
-      if (message.refusal !== undefined) row.refusal = message.refusal;
-      return row;
-    });
-  }
-
-  return messages.map(message => {
-    const role =
-      message.role === 'developer'
-        ? 'system'
-        : message.role === 'tool'
-          ? 'user'
-          : message.role === 'assistant'
-            ? 'assistant'
-            : message.role === 'system'
-              ? 'system'
-              : 'user';
-    return {
-      role,
-      content: contentToPlainText(message.content),
-    };
-  });
-}
-
-function extractOutboundReasoningMarker(body: Record<string, unknown>): string | undefined {
-  if (body.reasoning_effort !== undefined) {
-    return String(body.reasoning_effort);
-  }
-  const reasoning = body.reasoning as { effort?: unknown } | undefined;
-  if (reasoning?.effort !== undefined) {
-    return String(reasoning.effort);
-  }
-  // Anthropic Messages official: output_config.effort
-  const outputConfig = body.output_config as { effort?: unknown } | undefined;
-  if (outputConfig?.effort !== undefined) {
-    return String(outputConfig.effort);
-  }
-  const thinking = body.thinking as { budget_tokens?: unknown } | undefined;
-  if (thinking?.budget_tokens !== undefined) {
-    return `budget:${String(thinking.budget_tokens)}`;
-  }
-  // Gemini official: generationConfig.thinkingConfig (top-level kept for legacy bodies)
-  const generationConfig = body.generationConfig as
-    | { thinkingConfig?: { thinkingBudget?: unknown } }
-    | undefined;
-  const thinkingConfig =
-    generationConfig?.thinkingConfig ??
-    (body.thinkingConfig as { thinkingBudget?: unknown } | undefined);
-  if (thinkingConfig?.thinkingBudget !== undefined) {
-    return `geminiBudget:${String(thinkingConfig.thinkingBudget)}`;
-  }
-  return undefined;
-}
-
-function logReasoningTransport(args: {
-  model: string;
-  surface: ApiSurface;
-  body: Record<string, unknown>;
-  capabilitySupports: boolean;
-  globalEnabled: boolean;
-  session: SessionReasoningOverride | undefined;
-  /** Pre-clamp intent; logged when demoted vs body/effective. */
-  requestedEffort?: string;
-  effectiveEffort?: string;
-}): void {
-  const effort = extractOutboundReasoningMarker(args.body);
-  // Production: silent. Dev: console for gateway field verification.
-  const isDev =
-    typeof import.meta !== 'undefined' &&
-    Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV);
-  if (!isDev) {
-    return;
-  }
-  if (effort !== undefined) {
-    const demoted =
-      args.requestedEffort &&
-      args.effectiveEffort &&
-      args.requestedEffort !== 'off' &&
-      args.requestedEffort !== args.effectiveEffort;
-    const demoteSuffix = demoted ? ` requested=${args.requestedEffort}` : '';
-    console.info(
-      `[LLM] 请求将发送推理参数 surface=${args.surface} model=${args.model} effort=${effort}${demoteSuffix}`
-    );
-    return;
-  }
-  if (args.capabilitySupports) {
-    console.info(
-      `[LLM] 推理可用但未启用 surface=${args.surface} model=${args.model} ` +
-        `globalEnabled=${args.globalEnabled} session=${JSON.stringify(args.session ?? null)}`
-    );
-  }
-}
-
-function resolveTransportPathId(
-  options: ResolvedLLMOptions,
-  capabilitySupportsStructuredOutput: boolean,
-  forcePath?: ApiPathId
-): ApiPathId {
-  if (forcePath) return forcePath;
-  const current = options.apiPath ?? 'chat_completions';
-  // jsonMode: keep Gemini/Anthropic native (Anthropic has no response_format — JSON is
-  // prompt-constrained; switching path would 404 on native endpoints); keep Responses when
-  // structured output (text.format) is supported; otherwise force chat_completions + response_format.
-  if (options.jsonMode === true) {
-    if (current === 'gemini_generate' || current === 'anthropic_messages') return current;
-    if (current === 'responses' && capabilitySupportsStructuredOutput) return 'responses';
-    return 'chat_completions';
-  }
-  return current;
-}
-
-function createLLMTransport(args: {
-  messages: ChatMessage[];
-  model: string;
-  options: ResolvedLLMOptions;
-  provider: string;
-  endpoint: string;
-  forcePath?: ApiPathId;
-}): {
-  body: Record<string, unknown>;
-  path: string;
-  requestUrl: string;
-  apiSurface: ApiSurface;
-  apiPath: ApiPathId;
-} {
-  const preferredPath = args.forcePath ?? args.options.apiPath ?? 'chat_completions';
-  const probeCapability = resolveModelCapability({
-    provider: args.provider,
-    modelId: args.model,
-    modelsEntry: args.options.modelsEntry,
-    preferredSurface: preferredPath,
-  });
-  const pathId = resolveTransportPathId(
-    args.options,
-    probeCapability.supportsStructuredOutput,
-    args.forcePath
-  );
-  const capability = resolveModelCapability({
-    provider: args.provider,
-    modelId: args.model,
-    modelsEntry: args.options.modelsEntry,
-    preferredSurface: pathId,
-  });
-  const globalPrefs = normalizeReasoningUserPrefs(args.options.reasoningPrefs);
-  const reasoning = resolveEffectiveReasoning(
-    capability,
-    globalPrefs,
-    args.options.reasoningSessionOverride
-  );
-
-  const body = buildBodyForApiPath({
-    pathId,
-    model: args.model,
-    messages: normalizeMessagesForTransport(args.messages, pathId),
-    temperature: args.options.temperature,
-    maxTokens: args.options.maxTokens,
-    stream: args.options.stream,
-    jsonMode: args.options.jsonMode,
-    serviceTier: args.options.serviceTier,
-    capability,
-    reasoning,
-    previousResponseId: args.options.previousResponseId,
-    store: args.options.store,
-    tools: args.options.tools,
-    toolChoice: args.options.toolChoice,
-    parallelToolCalls: args.options.parallelToolCalls,
-    visionUserParts: args.options.visionUserParts,
-    followUpInputItems: args.options.followUpInputItems,
-    jsonSchema: args.options.jsonSchema,
-    topP: args.options.topP,
-    frequencyPenalty: args.options.frequencyPenalty,
-    presencePenalty: args.options.presencePenalty,
-    stop: args.options.stop,
-    n: args.options.n,
-    seed: args.options.seed,
-    logitBias: args.options.logitBias,
-    logprobs: args.options.logprobs,
-    topLogprobs: args.options.topLogprobs,
-    metadata: args.options.metadata,
-    promptCacheKey: args.options.promptCacheKey,
-    safetyIdentifier: args.options.safetyIdentifier,
-    user: args.options.user,
-    modalities: args.options.modalities,
-    audio: args.options.audio,
-    prediction: args.options.prediction,
-    webSearchOptions: args.options.webSearchOptions,
-    truncation: args.options.truncation,
-    background: args.options.background,
-    maxToolCalls: args.options.maxToolCalls,
-    include: args.options.include,
-  });
-
-  const { fullUrl, pathSuffix } = buildFullApiUrl(args.endpoint, pathId, args.model, {
-    stream: args.options.stream === true,
-  });
-
-  logReasoningTransport({
-    model: args.model,
-    surface: pathId,
-    body,
-    capabilitySupports: Boolean(capability.supportsReasoning && capability.mapRequest),
-    globalEnabled: globalPrefs.enabled,
-    session: args.options.reasoningSessionOverride,
-    requestedEffort: String(reasoning.requestedEffort),
-    effectiveEffort: String(reasoning.effort),
-  });
-
-  return {
-    body,
-    path: pathSuffix,
-    requestUrl: fullUrl,
-    apiSurface: pathId,
-    apiPath: pathId,
-  };
-}
-
 async function waitBeforeLLMRetry(attempt: number, options: ResolvedLLMOptions): Promise<void> {
   if (attempt === 0) {
     return;
@@ -1231,37 +946,6 @@ function createLLMAbortResources(
     options.signal?.addEventListener('abort', abortFromExternalSignal, { once: true });
   }
   return { controller, clearRequestTimeout, resetRequestTimeout };
-}
-
-/**
- * Build request headers for the selected API path.
- * Always sets Content-Type + Bearer when key present (new-api / OpenAI-compatible).
- * Anthropic path also sets anthropic-version + x-api-key (native Anthropic / dual-auth gateways).
- * Gemini path also sets x-goog-api-key (Google AI Studio style).
- *
- * 设计意图(勿"修复"):BYOK 网关依赖 Authorization: Bearer,原生 Anthropic/Gemini 端点
- * 只读各自的 x-api-key / x-goog-api-key 并忽略多余头。双认证头同时下发是刻意兼容策略,
- * 移除 Bearer 会导致网关 401。
- */
-function buildLLMRequestHeaders(
-  apiPath: ApiPathId,
-  apiKey: string | undefined
-): Record<string, string> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  if (!apiKey) {
-    return headers;
-  }
-  headers.Authorization = `Bearer ${apiKey}`;
-  if (apiPath === 'anthropic_messages') {
-    headers['anthropic-version'] = '2023-06-01';
-    headers['x-api-key'] = apiKey;
-  }
-  if (apiPath === 'gemini_generate') {
-    headers['x-goog-api-key'] = apiKey;
-  }
-  return headers;
 }
 
 async function fetchLLMResponse(
@@ -2706,271 +2390,6 @@ async function callLLMWithRetry(
   }
 
   throw lastError || createUnknownLLMFailure(context);
-}
-
-interface FetchModelsContext {
-  provider: string;
-  endpoint: string;
-  normalizedEndpoint: string;
-  apiKey: string;
-}
-
-interface ModelArrayField {
-  key: string;
-  value: unknown[];
-  length: number;
-}
-
-function assertSafeModelsEndpoint(endpoint: string): void {
-  if (!configCenter.isProduction() || !isDangerousEndpoint(endpoint)) {
-    return;
-  }
-
-  throw new SystemError(
-    '⛔ 安全限制: 生产环境禁止直接调用外部API\n' + '请配置企业代理或联系管理员',
-    'LLM_DANGEROUS_ENDPOINT',
-    {
-      module: 'LLMService',
-      action: 'fetchModelsFromApi',
-      endpoint,
-      environment: 'production',
-    }
-  );
-}
-
-function isAbortError(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'name' in error &&
-    (error as { name?: unknown }).name === 'AbortError'
-  );
-}
-
-function createModelsFetchTimeoutError(): Error {
-  const error = new Error('Request timeout');
-  error.name = 'AbortError';
-  return error;
-}
-
-async function fetchModelsRawText(context: FetchModelsContext): Promise<string> {
-  const controller = new AbortController();
-  let timedOut = false;
-  const timeoutId = setTimeout(() => {
-    timedOut = true;
-    // 带 reason，避免浏览器默认 “signal is aborted without reason” 噪音
-    controller.abort(createModelsFetchTimeoutError());
-  }, 10000);
-  const headers: Record<string, string> = {};
-
-  if (context.apiKey) {
-    headers.Authorization = `Bearer ${context.apiKey}`;
-  }
-
-  try {
-    const response = await fetch(`${context.normalizedEndpoint}/models`, {
-      headers,
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new ApiError(
-        `HTTP ${response.status}: ${errorText.substring(0, 200)}`,
-        'LLM_API_ERROR',
-        response.status,
-        errorText,
-        {
-          module: 'LLMService',
-          action: 'fetchModelsFromApi',
-          provider: context.provider,
-          endpoint: context.endpoint,
-        }
-      );
-    }
-
-    return await response.text();
-  } catch (error) {
-    if (timedOut || isAbortError(error)) {
-      throw createModelsFetchTimeoutError();
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-function parseModelsJson(rawText: string, context: FetchModelsContext): unknown {
-  try {
-    return JSON.parse(rawText);
-  } catch (parseError) {
-    throw new ApiError(
-      `API返回的不是有效的JSON格式`,
-      'LLM_JSON_PARSE_ERROR',
-      undefined,
-      rawText.substring(0, 100),
-      {
-        module: 'LLMService',
-        action: 'fetchModelsFromApi',
-        provider: context.provider,
-        endpoint: context.endpoint,
-      },
-      parseError instanceof Error ? parseError : undefined
-    );
-  }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function getNamedModelList(dataObj: Record<string, unknown>): ModelArrayField | null {
-  if (Array.isArray(dataObj.data)) {
-    return { key: 'data', value: dataObj.data, length: dataObj.data.length };
-  }
-
-  if (Array.isArray(dataObj.models)) {
-    return { key: 'models', value: dataObj.models, length: dataObj.models.length };
-  }
-
-  return null;
-}
-
-function getArrayFields(dataObj: Record<string, unknown>): ModelArrayField[] {
-  return Object.entries(dataObj)
-    .filter(([_key, value]) => Array.isArray(value))
-    .map(([key, value]) => {
-      const values = value as unknown[];
-      return { key, value: values, length: values.length };
-    });
-}
-
-function getLongestArrayField(fields: ModelArrayField[]): ModelArrayField | null {
-  if (fields.length === 0) {
-    return null;
-  }
-
-  return fields.reduce((a, b) => (a.length > b.length ? a : b));
-}
-
-function extractModelList(data: unknown): unknown[] {
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  if (!isRecord(data)) {
-    return [];
-  }
-
-  const namedList = getNamedModelList(data);
-  if (namedList) {
-    return namedList.value;
-  }
-
-  const possibleArrays = getArrayFields(data);
-
-  const longest = getLongestArrayField(possibleArrays);
-  if (!longest) {
-    return [];
-  }
-
-  return longest.value;
-}
-
-function assertModelListNotEmpty(
-  list: unknown[],
-  data: unknown,
-  context: FetchModelsContext
-): void {
-  if (list.length > 0) {
-    return;
-  }
-
-  throw new ApiError(
-    'API返回的模型列表为空，请检查API配置是否正确',
-    'API_EMPTY_MODEL_LIST',
-    undefined,
-    JSON.stringify(data),
-    {
-      module: 'LLMService',
-      action: 'fetchModelsFromApi',
-      provider: context.provider,
-      endpoint: context.normalizedEndpoint,
-    }
-  );
-}
-
-function normalizeModelInfo(model: unknown): ModelInfo | null {
-  // Align unknown-model fallback with capability registry (32_768).
-  const defaultContext = 32_768;
-  if (typeof model === 'string') {
-    return { id: model, context: defaultContext, features: [] };
-  }
-
-  if (isRecord(model)) {
-    const id = model.id || model.model || model.name;
-    if (!id) {
-      return null;
-    }
-
-    const context =
-      typeof model.context === 'number' && Number.isFinite(model.context) && model.context > 0
-        ? model.context
-        : defaultContext;
-    const features = Array.isArray(model.features) ? model.features.map(String) : [];
-
-    return {
-      id: String(id),
-      context,
-      features,
-    };
-  }
-
-  return null;
-}
-
-function normalizeModelList(list: unknown[]): ModelInfo[] {
-  const models = list
-    .map(normalizeModelInfo)
-    .filter((model): model is ModelInfo => model !== null)
-    .sort((a, b) => a.id.localeCompare(b.id));
-
-  return models;
-}
-
-function handleFetchModelsFailure(error: unknown): never {
-  // 超时/取消是预期控制流，不上报 ErrorTracker（避免 high 级 “aborted without reason” 噪音）
-  if (!isAbortError(error)) {
-    ErrorService.handle(error as Error, {
-      action: 'fetchModelsFromApi',
-      module: 'llm',
-      notify: false,
-    });
-  }
-  throw error;
-}
-
-/**
- * 获取模型列表
- */
-export async function fetchModelsFromApi(
-  provider: string,
-  endpoint: string,
-  apiKey: string
-): Promise<ModelInfo[]> {
-  try {
-    const normalizedEndpoint = resolveProviderEndpoint(provider, endpoint);
-    assertSafeModelsEndpoint(normalizedEndpoint);
-    const context: FetchModelsContext = { provider, endpoint, normalizedEndpoint, apiKey };
-
-    const rawText = await fetchModelsRawText(context);
-    const data = parseModelsJson(rawText, context);
-    const list = extractModelList(data);
-    assertModelListNotEmpty(list, data, context);
-    return normalizeModelList(list);
-  } catch (error) {
-    handleFetchModelsFailure(error);
-  }
 }
 
 // ========================

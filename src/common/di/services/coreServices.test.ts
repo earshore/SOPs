@@ -13,8 +13,8 @@ const mocks = vi.hoisted(() => ({
   workingStateManager: { id: 'working-state-manager' },
   loggerService: { id: 'logger-service' },
   httpService: { id: 'http-service' },
-  createStorageService: vi.fn(),
-  createLoggerService: vi.fn(),
+  storageServiceSingleton: { id: 'storage-service-singleton' },
+  loggerSingleton: { id: 'logger-singleton' },
   createHttpService: vi.fn(),
   initRouter: vi.fn(),
 }));
@@ -26,7 +26,7 @@ vi.mock('@/common/config/ConfigCenter', () => ({
 }));
 
 vi.mock('@/services/storageService', () => ({
-  createStorageService: mocks.createStorageService,
+  StorageService: mocks.storageServiceSingleton,
 }));
 
 vi.mock('@/common/EventBus', () => ({
@@ -54,7 +54,7 @@ vi.mock('@/common/utils/WorkingStateManager', () => ({
 }));
 
 vi.mock('@/services/loggerService', () => ({
-  createLoggerService: mocks.createLoggerService,
+  Logger: mocks.loggerSingleton,
 }));
 
 vi.mock('@/services/httpService', () => ({
@@ -105,10 +105,7 @@ describe('registerCoreServices', () => {
       SERVICE_NAMES.ROUTER,
       SERVICE_NAMES.LOADING_MANAGER,
     ]);
-    expect(configs.find(config => config.name === SERVICE_NAMES.LOGGER)?.dependencies).toEqual([
-      SERVICE_NAMES.STORAGE,
-      SERVICE_NAMES.CONFIG,
-    ]);
+    expect(configs.find(config => config.name === SERVICE_NAMES.LOGGER)?.dependencies).toEqual([]);
     expect(configs.find(config => config.name === SERVICE_NAMES.HTTP)?.dependencies).toEqual([
       SERVICE_NAMES.LOGGER,
       SERVICE_NAMES.CONFIG,
@@ -135,17 +132,15 @@ describe('registerCoreServices', () => {
       resolve,
       resolveAsync,
     };
-    mocks.createStorageService.mockReturnValue(mocks.storageService);
-    mocks.createLoggerService.mockReturnValue(mocks.loggerService);
     mocks.createHttpService.mockReturnValue(mocks.httpService);
     mocks.initRouter.mockReturnValue(mocks.router);
 
     registerCoreServices(registry);
 
     expect(configs[0]?.factory(container)).toBe(mocks.configCenter);
-    expect(configs[1]?.factory(container)).toBe(mocks.storageService);
+    expect(configs[1]?.factory(container)).toBe(mocks.storageServiceSingleton);
     expect(configs[2]?.factory(container)).toBe(mocks.eventBus);
-    await expect(configs[3]?.factory(container)).resolves.toBe(mocks.loggerService);
+    await expect(configs[3]?.factory(container)).resolves.toBe(mocks.loggerSingleton);
     await expect(configs[4]?.factory(container)).resolves.toBe(mocks.workingStateManager);
     expect(configs[5]?.factory(container)).toBe(mocks.globalErrorHandler);
     await expect(configs[6]?.factory(container)).resolves.toBe(mocks.httpService);
@@ -153,10 +148,6 @@ describe('registerCoreServices', () => {
     expect(configs[8]?.factory(container)).toBe(mocks.router);
     expect(configs[9]?.factory(container)).toBe(mocks.loadingManager);
 
-    expect(mocks.createLoggerService).toHaveBeenCalledWith(
-      mocks.storageService,
-      mocks.configCenter
-    );
     expect(mocks.createHttpService).toHaveBeenCalledWith(mocks.loggerService, mocks.configCenter);
     expect(mocks.initRouter).toHaveBeenCalledTimes(1);
   });

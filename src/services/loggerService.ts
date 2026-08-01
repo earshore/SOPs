@@ -515,23 +515,6 @@ export const Logger = new LoggerService();
 export default Logger;
 
 // ================================================================
-// 🎯 DI容器工厂函数
-// ================================================================
-
-/**
- * 创建LoggerService实例的工厂函数
- * @param storage - StorageService实例（可选）
- * @param config - ConfigService实例（可选）
- * @returns LoggerService实例
- */
-export function createLoggerService(
-  storage?: IStorageService,
-  config?: IConfigService
-): LoggerService {
-  return new LoggerService(storage, config);
-}
-
-// ================================================================
 // 向后兼容：保留旧的单例导出
 // @deprecated 请使用DI容器获取服务实例
 // ================================================================

@@ -34,32 +34,8 @@ declare global {
       [key: string]: unknown;
     };
 
-    // 全局状态
-    state: Record<string, unknown>;
-
-    initRouter: () => void;
-
-    // 设置相关
-    openSettings?: (options?: { sectionId?: string; focus?: string }) => void;
-    closeSettings?: () => void;
-    saveProviderConfig?: () => void;
-    loadProviderConfig?: () => void;
-    fetchModels?: () => void;
-    toggleApiKeyVisibility?: () => void;
-    testConnection?: () => void;
-    saveProxyConfig?: () => void;
-    updateModelStatus?: () => void;
-
     // 调试工具
-    __DIContainer?: import('../common/di/Container').DIContainer;
     __acknowledgeAllAlerts?: () => void;
-
-    // 错误节流
-    _errorThrottle?: number;
-
-    // Promotions 滚动函数
-    amzp_scrollTo?: (target: string) => void;
-    amzp_scrollTo_Name?: (targetName: string) => void;
   }
 }
 

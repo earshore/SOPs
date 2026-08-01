@@ -1169,18 +1169,6 @@ export const StorageService = new StorageServiceClass();
 export default StorageService;
 
 // ================================================================
-// 🎯 DI容器工厂函数
-// ================================================================
-
-/**
- * 创建StorageService实例的工厂函数
- * @returns StorageService实例
- */
-export function createStorageService(): IStorageService {
-  return new StorageServiceClass();
-}
-
-// ================================================================
 // 向后兼容：保留旧的单例导出
 // @deprecated 请使用DI容器获取服务实例
 // ================================================================
