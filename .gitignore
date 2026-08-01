@@ -38,6 +38,7 @@ __pycache__/
 .env.*
 !.env.example
 !.env.*.example
+.envrc
 
 # ==============================================================================
 # 3. Testing & Coverage
@@ -127,6 +128,12 @@ docs/**/*.draft.md
 docs/**/.temp/
 docs/**/temp-*.md
 
+# AI 工作流产物：文档入库，附带截图不入库（本地保留）
+docs/superpowers/**/*.png
+docs/superpowers/**/*.json
+release-review-*.md
+ai-analysis-contrast-audit.md
+
 # ==============================================================================
 # 5. System Files
 # ==============================================================================
@@ -215,6 +222,8 @@ temp/
 # Backup files
 *.bak
 *.backup
+*.orig
+*.rej
 *.backup-*
 *backup-*
 **/*.backup
@@ -246,6 +255,7 @@ tools/patches/
 .opencode/
 .qoder/
 .roo/
+.superpowers/
 .trae/
 .warp/
 .windsurf/
