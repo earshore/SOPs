@@ -15,7 +15,7 @@ import { DEFAULT_LLM_PROVIDER_ID, DEFAULT_NEW_API_ENDPOINT } from '@/common/conf
 import { ApiError, NetworkError, SystemError, ValidationError } from '@/common/errors';
 import { randomFloat } from '@/common/utils/random';
 // 导入统一的 API 响应类型
-import type { LLMChatCompletionResponse, LLMErrorResponse } from '@/types/api';
+import type { LLMChatCompletionResponse } from '@/types/api';
 // 导入类型守卫
 import { isLLMChatCompletionResponse } from '@/common/guards/typeGuards';
 import {
@@ -40,14 +40,10 @@ import {
   extractResponsesIdFromStreamEvent,
   extractResponsesReasoningSummary,
   getAnthropicStreamInputJsonDelta,
-  getAnthropicStreamTextDelta,
   getAnthropicStreamToolUseStart,
-  getGeminiStreamTextDelta,
   getResponsesFailureFromEvent,
   getResponsesFailureFromPayload,
-  getResponsesReasoningStreamDelta,
   getResponsesRefusalDelta,
-  getResponsesStreamTextDelta,
   harvestResponsesReasoningIncrement,
   isResponsesTerminalEvent,
   mergeChatStreamToolCallDeltas,
@@ -75,198 +71,40 @@ import {
   type ResponsesTransportOptions,
   type SessionReasoningOverride,
 } from './modelCapability';
+import {
+  assertStreamPayloadIsOk,
+  getChatCompletionFinishReason,
+  getLLMErrorMessage,
+  getReasoningStreamDelta,
+  getStreamData,
+  getStreamDelta,
+  isToolCallsFinishReason,
+  parseBufferedJsonCompletion,
+  parseStreamPayload,
+} from './llmStreamDelta';
 import { StorageService } from './storageService';
+import type {
+  LLMCallArgs,
+  OpenAIStreamLineContext,
+  OpenAIStreamOptions,
+  OpenAIStreamReadResult,
+  OpenAIStreamState,
+  PositionalLLMCallArgs,
+  ResolvedLLMOptions,
+} from './llmTypes';
 
-// ========================
-// 类型定义
-// ========================
-
-/**
- * Official chat roles (Create chat completion).
- */
-export type MessageRole = 'system' | 'user' | 'assistant' | 'tool' | 'developer';
-
-/** Chat Completions multimodal / text content parts */
-export type ChatContentPart =
-  | { type: 'text'; text: string }
-  | { type: 'image_url'; image_url: { url: string; detail?: 'auto' | 'low' | 'high' } };
-
-export interface ChatToolCall {
-  id: string;
-  type: 'function';
-  function: { name: string; arguments: string };
-}
-
-/**
- * Chat message (official Create shape; content may be string, parts, or null with tool_calls).
- */
-export interface ChatMessage {
-  role: MessageRole;
-  content?: string | ChatContentPart[] | null;
-  name?: string;
-  tool_call_id?: string;
-  tool_calls?: ChatToolCall[];
-  refusal?: string | null;
-}
-
-/**
- * LLM 调用配置选项 — dual-path Create parity extras.
- */
-export interface LLMOptions {
-  /** 温度参数 (0-2)，越低越确定性 */
-  temperature?: number;
-  /** 是否强制 JSON 输出格式 */
-  jsonMode?: boolean;
-  /** 超时时间 (毫秒) */
-  timeout?: number;
-  /** 最大输出 token 数 */
-  maxTokens?: number;
-  /** OpenAI-compatible service tier. Only sent when explicitly configured. */
-  serviceTier?: 'auto' | 'default' | 'flex' | 'priority';
-  /** 最大重试次数 */
-  retries?: number;
-  /** 初始重试延迟 (ms) */
-  retryDelay?: number;
-  /** 请求取消信号 */
-  signal?: AbortSignal;
-  stream?: boolean;
-  onFirstResponse?: (metrics: LLMStreamMetrics) => void;
-  onStreamUpdate?: (update: LLMStreamUpdate) => void;
-  /**
-   * Global or session reasoning prefs (product-level).
-   * Applied only when the model capability registry has a mapRequest.
-   */
-  reasoningPrefs?: ReasoningUserPrefs;
-  /** Session override over reasoningPrefs; omit fields to inherit */
-  reasoningSessionOverride?: SessionReasoningOverride;
-  /** Optional /models list entry for context merge */
-  modelsEntry?: ModelsListEntry | string | null;
-  /**
-   * User-selected API path mode (system settings).
-   * Overrides model preferred surface when set.
-   */
-  apiPath?: ApiPathId;
-  /** Multi-turn / tools / vision (chat + responses) */
-  previousResponseId?: string;
-  store?: boolean;
-  tools?: unknown[];
-  toolChoice?: unknown;
-  parallelToolCalls?: boolean;
-  visionUserParts?: ResponsesTransportOptions['visionUserParts'];
-  /** Called with Responses response.id when available (for chaining). */
-  onResponseId?: (responseId: string) => void;
-  /**
-   * Execute a function tool when the model returns tool_calls / function_call items.
-   * Requires enableToolLoop: true. Works on chat_completions and responses.
-   */
-  executeTool?: ResponsesToolExecutor;
-  /**
-   * Explicit opt-in for tool loop on the active path.
-   */
-  enableToolLoop?: boolean;
-  /** Max tool rounds (default 5). */
-  maxToolRounds?: number;
-  /**
-   * Structured Outputs (json_schema). Takes precedence over jsonMode json_object.
-   */
-  jsonSchema?: ResponsesJsonSchemaFormat;
-  /** Official Create sampling / control */
-  topP?: number;
-  frequencyPenalty?: number;
-  presencePenalty?: number;
-  stop?: string | string[];
-  n?: number;
-  seed?: number;
-  logitBias?: Record<string, number>;
-  logprobs?: boolean;
-  topLogprobs?: number;
-  metadata?: Record<string, string>;
-  promptCacheKey?: string;
-  safetyIdentifier?: string;
-  /** Deprecated OpenAI user; prefer promptCacheKey / safetyIdentifier */
-  user?: string;
-  modalities?: string[];
-  audio?: Record<string, unknown>;
-  prediction?: Record<string, unknown>;
-  webSearchOptions?: Record<string, unknown>;
-  /**
-   * Called with official usage object when present (non-stream body or stream_options.include_usage).
-   */
-  onUsage?: (usage: Record<string, unknown>) => void;
-  /**
-   * Called with full chat.completion (or primary choice payload) after parse.
-   * Does not replace the string return of callLLM.
-   */
-  onCompletion?: (completion: Record<string, unknown>) => void;
-  /** Responses Create pass-through */
-  truncation?: string;
-  background?: boolean;
-  maxToolCalls?: number;
-  include?: string[];
-}
-
-export interface LLMStreamMetrics {
-  elapsedMs: number;
-  firstChunkMs?: number;
-  chunkCount: number;
-}
-
-export interface LLMStreamUpdate extends LLMStreamMetrics {
-  /** Visible assistant text delta (never includes reasoning channel). */
-  delta: string;
-  /** Accumulated visible assistant text. */
-  content: string;
-  /** Optional reasoning / thinking channel delta (display-only; not final answer). */
-  reasoningDelta?: string;
-  /** Accumulated reasoning channel text for this request. */
-  reasoningContent?: string;
-  /** Stream chunk usage when gateway emits it (often final chunk only). */
-  usage?: Record<string, unknown>;
-}
-
-/**
- * LLM 配置对象 (用于跨模块传递)
- */
-export interface LLMConfig {
-  /** 厂商标识 (openai, anthropic, deepseek...) */
-  provider: string;
-  /** API 端点 URL */
-  endpoint: string;
-  /** API 密钥 */
-  apiKey: string;
-  /** 模型名称 */
-  model: string;
-}
-
-export interface LLMCallRequest extends LLMConfig {
-  messages: ChatMessage[];
-  options?: LLMOptions;
-}
-
-type PositionalLLMCallArgs = [
-  messages: ChatMessage[],
-  provider: string,
-  endpoint: string,
-  apiKey: string,
-  model: string,
-  options?: LLMOptions,
-];
-
-type LLMCallArgs = PositionalLLMCallArgs | [request: LLMCallRequest];
-
-/**
- * 模型信息对象
- * @deprecated 使用 LLMModel 类型代替
- */
-export interface ModelInfo {
-  /** 模型 ID */
-  id: string;
-  /** 上下文窗口大小 */
-  context: number;
-  /** 支持的特性列表 */
-  features: string[];
-}
-
+export type {
+  ChatContentPart,
+  ChatMessage,
+  ChatToolCall,
+  LLMConfig,
+  LLMCallRequest,
+  LLMOptions,
+  LLMStreamMetrics,
+  LLMStreamUpdate,
+  MessageRole,
+  ModelInfo,
+} from './llmTypes';
 // ========================
 // 辅助函数
 // ========================
@@ -321,70 +159,6 @@ function resolveProviderEndpoint(provider: string, endpoint: string): string {
   return EnvConfig.api.normalizeEndpoint(trimmedEndpoint);
 }
 
-function getChatCompletionsStreamDelta(payload: Record<string, unknown>): string {
-  const choices = payload.choices;
-  if (!Array.isArray(choices) || choices.length === 0) {
-    return '';
-  }
-
-  const firstChoice = choices[0] as Record<string, unknown>;
-  const delta = firstChoice.delta as Record<string, unknown> | undefined;
-  const message = firstChoice.message as Record<string, unknown> | undefined;
-
-  const content = delta?.content ?? message?.content;
-  return typeof content === 'string' ? content : '';
-}
-
-function getChatCompletionsReasoningDelta(payload: Record<string, unknown>): string {
-  const choices = payload.choices;
-  if (!Array.isArray(choices) || !choices[0]) return '';
-  const first = choices[0] as Record<string, unknown>;
-  const delta = first.delta as Record<string, unknown> | undefined;
-  const message = first.message as Record<string, unknown> | undefined;
-  const fromDelta = delta?.reasoning_content;
-  const fromMessage = message?.reasoning_content;
-  if (typeof fromDelta === 'string') return fromDelta;
-  if (typeof fromMessage === 'string') return fromMessage;
-  return '';
-}
-
-function getAnthropicReasoningDelta(payload: Record<string, unknown>): string {
-  if (payload.type !== 'content_block_delta') return '';
-  const delta = payload.delta as { type?: string; thinking?: string } | undefined;
-  if (delta?.type === 'thinking_delta' && typeof delta.thinking === 'string') {
-    return delta.thinking;
-  }
-  return '';
-}
-
-function getGeminiReasoningDelta(payload: Record<string, unknown>): string {
-  const candidates = payload.candidates;
-  if (!Array.isArray(candidates) || !candidates[0]) return '';
-  const content = (
-    candidates[0] as { content?: { parts?: Array<{ text?: string; thought?: boolean }> } }
-  ).content;
-  const parts = content?.parts;
-  if (!Array.isArray(parts)) return '';
-  const texts: string[] = [];
-  for (const part of parts) {
-    if (part && part.thought === true && typeof part.text === 'string') {
-      texts.push(part.text);
-    }
-  }
-  return texts.join('');
-}
-
-/** Reasoning/thinking channel only — never merged into final assistant text. */
-function getReasoningStreamDelta(payload: Record<string, unknown>, surface: ApiSurface): string {
-  if (surface === 'chat_completions') return getChatCompletionsReasoningDelta(payload);
-  if (surface === 'anthropic_messages') return getAnthropicReasoningDelta(payload);
-  if (surface === 'gemini_generate') return getGeminiReasoningDelta(payload);
-  if (surface === 'responses') {
-    return getResponsesReasoningStreamDelta(payload) || getChatCompletionsReasoningDelta(payload);
-  }
-  return '';
-}
-
 /** Notify Deep Chat (etc.) of reasoning summary from a completed non-stream Responses body. */
 function emitResponsesReasoningFromPayload(
   data: Record<string, unknown>,
@@ -402,95 +176,6 @@ function emitResponsesReasoningFromPayload(
     elapsedMs: Date.now() - requestStartedAt,
     chunkCount: 0,
   });
-}
-
-/**
- * Prefer Responses SSE shapes; fall back to chat/completions deltas.
- * Many OpenAI-compatible gateways accept POST /responses but still stream
- * `choices[].delta.content` (new-api channel quirks).
- */
-function getStreamDelta(payload: Record<string, unknown>, surface: ApiSurface): string {
-  if (surface === 'responses') {
-    return getResponsesStreamTextDelta(payload) || getChatCompletionsStreamDelta(payload);
-  }
-  if (surface === 'anthropic_messages') {
-    return getAnthropicStreamTextDelta(payload);
-  }
-  if (surface === 'gemini_generate') {
-    return getGeminiStreamTextDelta(payload);
-  }
-  return getChatCompletionsStreamDelta(payload);
-}
-
-function parseBufferedJsonCompletion(rawText: string): LLMChatCompletionResponse | null {
-  const trimmed = rawText.trim();
-  if (!trimmed.startsWith('{')) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(trimmed) as LLMChatCompletionResponse;
-  } catch {
-    return null;
-  }
-}
-
-function getLLMErrorMessage(errorText: string, fallback: string): string {
-  try {
-    const errorJson = JSON.parse(errorText) as LLMErrorResponse;
-    return errorJson.error?.message || fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-type OpenAIStreamOptions = Pick<
-  LLMOptions,
-  'onFirstResponse' | 'onStreamUpdate' | 'onResponseId' | 'onUsage'
-> & {
-  onStreamActivity?: () => void;
-};
-
-interface OpenAIStreamState {
-  content: string;
-  reasoningContent: string;
-  firstChunkMs?: number;
-  chunkCount: number;
-  responseIdReported?: boolean;
-  /** Last terminal Responses payload (for tool-call harvest after stream). */
-  lastResponsesPayload?: Record<string, unknown>;
-  /** Accumulated function_call items seen on stream/completed events. */
-  functionCalls?: import('./modelCapability').ResponsesFunctionCall[];
-  /** Chat Completions stream tool_calls (merged deltas). */
-  chatToolCalls?: ChatFunctionToolCall[];
-  /** Last usage object seen on stream (include_usage). */
-  usage?: Record<string, unknown>;
-  /** Anthropic SSE tool_use accumulation: index → partial call. */
-  anthropicToolUses?: Map<number, { id: string; name: string; json: string }>;
-  /** Anthropic prompt tokens from message_start (merged into message_delta usage). */
-  anthropicPromptTokens?: number;
-  /** Gemini stream functionCall parts (converted to chat tool_calls). */
-  geminiToolCalls?: ChatFunctionToolCall[];
-}
-
-interface OpenAIStreamLineContext {
-  response: Response;
-  requestStartedAt: number;
-  options: OpenAIStreamOptions;
-  state: OpenAIStreamState;
-  apiSurface: ApiSurface;
-}
-
-interface OpenAIStreamReadResult {
-  content: string;
-  fallbackJson: LLMChatCompletionResponse | null;
-  firstChunkMs?: number;
-  chunkCount: number;
-  lastResponsesPayload?: Record<string, unknown>;
-  functionCalls?: import('./modelCapability').ResponsesFunctionCall[];
-  chatToolCalls?: ChatFunctionToolCall[];
-  reasoningContent?: string;
-  usage?: Record<string, unknown>;
 }
 
 /**
@@ -515,34 +200,6 @@ function getCompletionContent(
   return defaultContent;
 }
 
-function getChatCompletionFinishReason(
-  completion: LLMChatCompletionResponse | null | undefined
-): string | null | undefined {
-  return completion?.choices?.[0]?.finish_reason;
-}
-
-function isToolCallsFinishReason(reason: string | null | undefined): boolean {
-  return reason === 'tool_calls' || reason === 'function_call';
-}
-
-function getStreamData(line: string): string {
-  const trimmedLine = line.trim();
-  if (!trimmedLine.startsWith('data:')) {
-    return '';
-  }
-
-  const data = trimmedLine.slice(5).trim();
-  return data === '[DONE]' ? '' : data;
-}
-
-function parseStreamPayload(data: string): Record<string, unknown> | null {
-  try {
-    return JSON.parse(data) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
 function notifyFirstStreamChunk(context: OpenAIStreamLineContext): void {
   if (context.state.firstChunkMs !== undefined) {
     return;
@@ -553,22 +210,6 @@ function notifyFirstStreamChunk(context: OpenAIStreamLineContext): void {
     elapsedMs: context.state.firstChunkMs,
     firstChunkMs: context.state.firstChunkMs,
     chunkCount: context.state.chunkCount,
-  });
-}
-
-function assertStreamPayloadIsOk(
-  payload: Record<string, unknown>,
-  data: string,
-  response: Response
-): void {
-  const errorPayload = payload.error as { message?: string } | undefined;
-  if (!errorPayload?.message) {
-    return;
-  }
-
-  throw new ApiError(errorPayload.message, 'API_STREAM_ERROR', response.status, data, {
-    module: 'LLMService',
-    action: 'readOpenAIStream',
   });
 }
 
@@ -1113,61 +754,6 @@ async function readOpenAIStream(
     }
   }
   return result;
-}
-
-interface ResolvedLLMOptions {
-  temperature: number;
-  jsonMode: boolean;
-  timeout: number;
-  maxTokens: number | undefined;
-  serviceTier: LLMOptions['serviceTier'];
-  retries: number;
-  retryDelay: number;
-  signal: AbortSignal | undefined;
-  stream: boolean;
-  onFirstResponse: LLMOptions['onFirstResponse'];
-  onStreamActivity: OpenAIStreamOptions['onStreamActivity'];
-  onStreamUpdate: LLMOptions['onStreamUpdate'];
-  reasoningPrefs: ReasoningUserPrefs | undefined;
-  reasoningSessionOverride: SessionReasoningOverride | undefined;
-  modelsEntry: ModelsListEntry | string | null | undefined;
-  apiPath: ApiPathId;
-  previousResponseId?: string;
-  store?: boolean;
-  tools?: unknown[];
-  toolChoice?: unknown;
-  parallelToolCalls?: boolean;
-  visionUserParts?: ResponsesTransportOptions['visionUserParts'];
-  onResponseId?: LLMOptions['onResponseId'];
-  executeTool?: ResponsesToolExecutor;
-  enableToolLoop?: boolean;
-  maxToolRounds?: number;
-  jsonSchema?: ResponsesJsonSchemaFormat;
-  topP?: number;
-  frequencyPenalty?: number;
-  presencePenalty?: number;
-  stop?: string | string[];
-  n?: number;
-  seed?: number;
-  logitBias?: Record<string, number>;
-  logprobs?: boolean;
-  topLogprobs?: number;
-  metadata?: Record<string, string>;
-  promptCacheKey?: string;
-  safetyIdentifier?: string;
-  user?: string;
-  modalities?: string[];
-  audio?: Record<string, unknown>;
-  prediction?: Record<string, unknown>;
-  webSearchOptions?: Record<string, unknown>;
-  onUsage?: LLMOptions['onUsage'];
-  onCompletion?: LLMOptions['onCompletion'];
-  truncation?: string;
-  background?: boolean;
-  maxToolCalls?: number;
-  include?: string[];
-  /** Internal: function_call_output items for next Responses request */
-  followUpInputItems?: Array<Record<string, unknown>>;
 }
 
 interface LLMCallContext {

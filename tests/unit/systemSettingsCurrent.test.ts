@@ -341,7 +341,7 @@ it('does not stack EventBus or $watch subscriptions when init is called twice', 
   expect(panel.isOpen).toBe(false);
 });
 
-it('computes field state, display labels, and local data text', () => {
+it('computes field state, display labels, and local data text', async () => {
   const panel = createPanel();
   deps.env.isProduction = true;
   panel.llm.endpoint = 'https://api.openai.com/v1';
@@ -369,13 +369,23 @@ it('computes field state, display labels, and local data text', () => {
   expect(panel.getProxyDisplayName('missing')).toBe('默认');
   expect(panel.developerDangerousEndpointText).toContain('危险端点需通过代理或企业网关访问');
 
-  panel.toggleLlmKeyVisibility();
-  panel.toggleProxyKeyVisibility();
+  deps.confirmWithModal.mockResolvedValue(true);
+  await panel.toggleLlmKeyVisibility();
+  await panel.toggleProxyKeyVisibility();
   expect(panel.llmApiKeyInputType).toBe('text');
   expect(panel.proxyInputType).toBe('text');
   expect(panel.activeFeatureBadges).toEqual([
     { key: 'basic', label: '基础能力', icon: 'fa-message' },
   ]);
+});
+
+it('keeps keys hidden when reveal confirmation is declined', async () => {
+  const panel = createPanel();
+  deps.confirmWithModal.mockResolvedValue(false);
+  await panel.toggleLlmKeyVisibility();
+  await panel.toggleProxyKeyVisibility();
+  expect(panel.llmApiKeyInputType).toBe('password');
+  expect(panel.proxyInputType).toBe('password');
 });
 
 it('gates developer diagnostics and saves debug settings', () => {
@@ -1322,7 +1332,9 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).not.toContain('class="settings-coach"');
   // Content order (exclude side-nav secondary labels which may mention the same names)
   const sectionsChunk = template.slice(template.indexOf('settings-panel-sections'));
-  expect(sectionsChunk.indexOf('通用 AI 执行策略')).toBeLessThan(sectionsChunk.indexOf('Master Analysis'));
+  expect(sectionsChunk.indexOf('通用 AI 执行策略')).toBeLessThan(
+    sectionsChunk.indexOf('Master Analysis')
+  );
   expect(sectionsChunk.indexOf('Master Analysis')).toBeLessThan(
     sectionsChunk.indexOf('Playground')
   );

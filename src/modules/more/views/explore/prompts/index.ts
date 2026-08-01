@@ -102,9 +102,9 @@ function handlePromptActionButton(target: HTMLElement): boolean {
   if (!promptId) return true;
 
   if (action === 'view-prompt') {
-    window.viewPrompt?.(promptId);
+    handleViewPrompt(promptId);
   } else if (action === 'copy-prompt') {
-    window.copyPrompt?.(promptId);
+    handleCopyPrompt(promptId);
   }
 
   return true;
@@ -131,7 +131,7 @@ function handlePromptCard(target: HTMLElement): void {
   const promptId = promptCard?.dataset.promptId;
 
   if (promptId) {
-    window.viewPrompt?.(promptId);
+    handleViewPrompt(promptId);
   }
 }
 
@@ -151,9 +151,9 @@ function handlePromptModalAction(target: HTMLElement, modal: HTMLElement): boole
 
   const action = actionBtn.dataset.promptModalAction;
   if (action === 'close') {
-    window.closePromptModal?.();
+    handleClosePromptModal();
   } else if (action === 'copy') {
-    window.copyModalPrompt?.();
+    handleCopyModalPrompt();
   }
 
   return true;
@@ -165,7 +165,7 @@ function handlePromptModalLang(target: HTMLElement, modal: HTMLElement): boolean
 
   const lang = langBtn.dataset.promptLang;
   if (lang === 'zh' || lang === 'en') {
-    window.switchPromptLang?.(lang);
+    handleSwitchPromptLang(lang);
   }
 
   return true;
@@ -180,7 +180,7 @@ function handleModalBackdropClick(e: Event): void {
   if (handlePromptModalLang(target, modal)) return;
 
   if (target === modal) {
-    window.closePromptModal?.();
+    handleClosePromptModal();
   }
 }
 
@@ -195,7 +195,7 @@ function handleDocumentKeydown(e: KeyboardEvent): void {
 
   const modal = getPromptModal();
   if (modal && !modal.classList.contains('hidden')) {
-    window.closePromptModal?.();
+    handleClosePromptModal();
   }
 }
 
@@ -533,33 +533,6 @@ function handleCopyModalPrompt(): void {
   copyPromptText(promptText, `${langName}提示词已复制到剪贴板`);
 }
 
-// 扩展Window接口
-declare global {
-  interface Window {
-    viewPrompt?: (promptId: string) => void;
-    switchPromptLang?: (lang: 'zh' | 'en') => void;
-    closePromptModal?: () => void;
-    copyPrompt?: (promptId: string) => void;
-    copyModalPrompt?: () => void;
-  }
-}
-
-function registerWindowActions(): void {
-  window.viewPrompt = handleViewPrompt;
-  window.switchPromptLang = handleSwitchPromptLang;
-  window.closePromptModal = handleClosePromptModal;
-  window.copyPrompt = handleCopyPrompt;
-  window.copyModalPrompt = handleCopyModalPrompt;
-}
-
-function unregisterWindowActions(): void {
-  delete window.viewPrompt;
-  delete window.switchPromptLang;
-  delete window.closePromptModal;
-  delete window.copyPrompt;
-  delete window.copyModalPrompt;
-}
-
 // Module class
 class PromptsModule extends BaseModule {
   /**
@@ -581,7 +554,6 @@ class PromptsModule extends BaseModule {
     container.classList.add('fade-in');
 
     mountPromptModal(container);
-    registerWindowActions();
     initEventListeners(container);
     renderCategories();
     renderPromptList();
@@ -591,9 +563,8 @@ class PromptsModule extends BaseModule {
    * 卸载模块
    */
   unmount(): void {
-    window.closePromptModal?.();
+    handleClosePromptModal();
     removeEventListeners();
-    unregisterWindowActions();
     removePromptModal();
 
     currentCategory = 'all';

@@ -27,12 +27,6 @@ import {
   toggleSOPGroup,
 } from '@/common/ui/navigation';
 
-type ClearSearchWindow = Window & {
-  clearSOPSearch?: () => void;
-  clearHubSearch?: () => void;
-  clearSidebarSearch?: () => void;
-};
-
 const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
 
 function routeForModule(moduleId: string): [string, { label: string; category?: string }] {
@@ -73,9 +67,6 @@ afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
   HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
-  delete (window as ClearSearchWindow).clearSOPSearch;
-  delete (window as ClearSearchWindow).clearHubSearch;
-  delete (window as ClearSearchWindow).clearSidebarSearch;
   document.body.innerHTML = '';
 });
 
@@ -183,9 +174,6 @@ describe('current UI search helpers', () => {
   it('searches SOP routes, invokes clear callback from result click, and resets the view', () => {
     setupSearchDom();
     const [routeId, route] = routeForModule('sops');
-    const clearSpy = vi.fn();
-    (window as ClearSearchWindow).clearSOPSearch = clearSpy;
-
     searchSOPs(route.label);
 
     const result = getEl('sop-search-results')?.querySelector<HTMLButtonElement>(
@@ -199,7 +187,6 @@ describe('current UI search helpers', () => {
     expect(getEl('sop-nav-container')?.getAttribute('aria-hidden')).toBe('true');
 
     result?.click();
-    expect(clearSpy).toHaveBeenCalled();
 
     clearSOPSearch();
     expect((getEl('sop-search-input') as HTMLInputElement).value).toBe('');
@@ -230,8 +217,6 @@ describe('current UI search helpers', () => {
   it('searches the current sidebar module and clears sidebar search', () => {
     setupSearchDom();
     const [routeId, route] = routeForModule('app_center');
-    const clearSpy = vi.fn();
-    (window as ClearSearchWindow).clearSidebarSearch = clearSpy;
     appStore.getState().setCurrentTab(routeId);
 
     searchSidebar(route.label.slice(0, Math.max(1, Math.min(2, route.label.length))));
@@ -246,7 +231,6 @@ describe('current UI search helpers', () => {
     expect(getEl('sidebar-nav-container')?.getAttribute('aria-hidden')).toBe('true');
 
     result?.click();
-    expect(clearSpy).toHaveBeenCalled();
 
     clearSidebarSearch();
     expect((getEl('sidebar-search-input') as HTMLInputElement).value).toBe('');
@@ -360,7 +344,6 @@ describe('current UI mega menu helpers', () => {
     closeMegaMenus({ blurActive: true });
     expect(group?.classList.contains('is-open')).toBe(false);
   });
-
 });
 
 describe('current UI mega menu sibling and CSS safeguards', () => {
@@ -409,10 +392,7 @@ describe('current UI mega menu sibling and CSS safeguards', () => {
   });
 
   it('keeps mega menu visibility controlled by is-open instead of CSS hover', () => {
-    const cssFiles = [
-      'src/css/critical.css',
-      'src/css/components/header-main.css',
-    ];
+    const cssFiles = ['src/css/critical.css', 'src/css/components/header-main.css'];
 
     cssFiles.forEach(file => {
       const css = readFileSync(file, 'utf8');

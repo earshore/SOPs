@@ -37,23 +37,7 @@ declare global {
     // 全局状态
     state: Record<string, unknown>;
 
-    // 工具函数
-    showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void;
-    renderMegaMenu: () => void;
-    renderSopsMegaMenu: () => void;
-    renderHubMegaMenu: () => void;
-    renderMoreMenu: () => void;
-    initMegaMenuAccessibility: () => void;
-    closeMegaMenus: (options?: { except?: HTMLElement; blurActive?: boolean }) => void;
     initRouter: () => void;
-
-    // 搜索函数
-    searchSOPs?: (query: string) => void;
-    clearSOPSearch?: () => void;
-    searchHub?: (query: string) => void;
-    clearHubSearch?: () => void;
-    searchSidebar?: (query: string) => void;
-    clearSidebarSearch?: () => void;
 
     // 设置相关
     openSettings?: (options?: { sectionId?: string; focus?: string }) => void;

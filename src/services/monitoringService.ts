@@ -400,11 +400,3 @@ export default monitoringService;
 export function createMonitoringService(logger?: ILoggerService): MonitoringService {
   return new MonitoringService(logger);
 }
-
-// ================================================================
-// 🔄 向后兼容：暴露到 window
-// ================================================================
-if (typeof window !== 'undefined') {
-  (window as Window & { MonitoringService?: MonitoringService }).MonitoringService =
-    monitoringService;
-}

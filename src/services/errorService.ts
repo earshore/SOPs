@@ -207,11 +207,3 @@ export const ErrorService = new ErrorServiceClass();
 
 // 默认导出
 export default ErrorService;
-
-// ================================================================
-// 🔄 向后兼容：暴露到 window
-// ================================================================
-if (typeof window !== 'undefined') {
-  (window as unknown as Record<string, unknown>).ErrorService = ErrorService;
-  (window as unknown as Record<string, unknown>).ERROR_TYPES = ERROR_TYPES;
-}

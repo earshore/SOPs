@@ -8,6 +8,7 @@ import eventBus from '../EventBus';
 import { APP_EVENTS } from '../constants/eventConstants';
 import { AppError, ErrorLevel, ErrorContext, isAppError, toAppError } from './AppError';
 import { formatLlmFailureUx, showLlmFailureToast } from './llmFailureUx';
+import { showToast } from '@/common/ui/notifications';
 import { errorTracker } from '@/services/errorTracker';
 
 const nativeLoggerConsole = globalThis.console;
@@ -221,14 +222,7 @@ export class GlobalErrorHandler {
 
     const message = customMessage || error.toUserMessage();
     const toastType = this.resolveToastType(error.level);
-
-    // showToast(title, options) — options object, not a bare type string
-    const windowWithToast = window as unknown as {
-      showToast?: (msg: string, options?: { type?: string }) => void;
-    };
-    if (typeof window !== 'undefined' && typeof windowWithToast.showToast === 'function') {
-      windowWithToast.showToast(message, { type: toastType });
-    }
+    showToast(message, { type: toastType });
   }
 
   /**

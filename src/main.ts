@@ -156,8 +156,6 @@ interface LegacyDebugWindow {
   ActionRegistry?: unknown;
   router?: unknown;
   Router?: unknown;
-  loadingManager?: typeof loadingManager;
-  LoadingManager?: typeof loadingManager;
 }
 
 type ClosableModalElement = HTMLElement & {
@@ -260,8 +258,6 @@ async function exposeCoreServicesForDebug(): Promise<void> {
     legacyWindow['ActionRegistry'] = actionRegistry;
     legacyWindow['router'] = router;
     legacyWindow['Router'] = router;
-    legacyWindow['loadingManager'] = loadingManager;
-    legacyWindow['LoadingManager'] = loadingManager;
 
     mainLogger.info('[Services] Core services exposed to window', {
       eventBus: typeof eventBus,
@@ -721,9 +717,7 @@ registerActionsWithLegacy({
       mainLogger.info('性能报告', report);
       mainLogger.info('性能报告摘要', report.summary);
 
-      if (window.showToast) {
-        window.showToast('性能报告已输出到控制台 (F12)', { type: 'info' });
-      }
+      showToast('性能报告已输出到控制台 (F12)', { type: 'info' });
 
       return report;
     } catch (e) {
@@ -736,10 +730,8 @@ registerActionsWithLegacy({
   switchTheme: async (params: { themeId?: string } = {}) => {
     const { themeId = 'default' } = params;
     ThemeManager.applyTheme(themeId);
-    if (window.showToast) {
-      const theme = ThemeManager.getTheme(themeId);
-      window.showToast(`已切换到${theme?.name || themeId}`, { type: 'success' });
-    }
+    const theme = ThemeManager.getTheme(themeId);
+    showToast(`已切换到${theme?.name || themeId}`, { type: 'success' });
   },
 
   getAllThemes: async () => {
@@ -754,9 +746,7 @@ registerActionsWithLegacy({
   showLogs: async () => {
     mainLogger.info('日志功能已移除，请使用浏览器开发者工具查看控制台日志');
 
-    if (window.showToast) {
-      window.showToast('日志功能已移除，请使用浏览器开发者工具', { type: 'info' });
-    }
+    showToast('日志功能已移除，请使用浏览器开发者工具', { type: 'info' });
 
     return [];
   },
@@ -764,26 +754,20 @@ registerActionsWithLegacy({
   showErrors: async () => {
     mainLogger.info('错误日志功能已移除，请使用浏览器开发者工具查看控制台');
 
-    if (window.showToast) {
-      window.showToast('错误日志功能已移除', { type: 'info' });
-    }
+    showToast('错误日志功能已移除', { type: 'info' });
 
     return [];
   },
 
   clearLogs: async () => {
     mainLogger.info('日志已清除（实际已移除日志存储）');
-    if (window.showToast) {
-      window.showToast('日志已清除', { type: 'success' });
-    }
+    showToast('日志已清除', { type: 'success' });
   },
 
   downloadLogs: async (params?: ActionParams) => {
     const format = (params?.format || 'json') as 'json' | 'csv';
     mainLogger.info('下载日志功能已移除');
-    if (window.showToast) {
-      window.showToast(`日志已导出为 ${format.toUpperCase()} 格式`, { type: 'success' });
-    }
+    showToast(`日志已导出为 ${format.toUpperCase()} 格式`, { type: 'success' });
   },
 
   // Scraper, Data, Analysis actions are now self-registered by their respective modules

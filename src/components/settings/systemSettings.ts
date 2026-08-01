@@ -526,8 +526,8 @@ interface SettingsPanelData {
   setDeveloperDiagnosticLogLevel(event: Event): void;
   setProxyType(event: Event): void;
   setProxyCustomUrl(event: Event): void;
-  toggleLlmKeyVisibility(): void;
-  toggleProxyKeyVisibility(): void;
+  toggleLlmKeyVisibility(): Promise<void>;
+  toggleProxyKeyVisibility(): Promise<void>;
   getModelValue(model: ModelOption): string;
   getModelLabel(model: ModelOption): string;
   /** Tool-strategy select options: Provider:modelId */
@@ -2978,12 +2978,36 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.proxy.customUrl = (event.target as HTMLInputElement).value;
   },
 
-  toggleLlmKeyVisibility(): void {
-    this.llm.showKey = !this.llm.showKey;
+  async toggleLlmKeyVisibility(): Promise<void> {
+    if (this.llm.showKey) {
+      this.llm.showKey = false;
+      return;
+    }
+    const confirmed = await confirmWithModal(
+      '\u663e\u793a API Key',
+      'API Key \u5c06\u4ee5\u660e\u6587\u5c55\u793a\uff1b\u540c\u6e90\u811a\u672c\u4e0e\u6d4f\u89c8\u5668\u6269\u5c55\u5747\u53ef\u8bfb\u53d6\u672c\u673a\u5b58\u50a8\uff0c\u5171\u4eab\u7535\u8111\u8bf7\u52ff\u5c55\u793a\u6216\u590d\u5236\u3002',
+      '',
+      '\u663e\u793a'
+    );
+    if (confirmed) {
+      this.llm.showKey = true;
+    }
   },
 
-  toggleProxyKeyVisibility(): void {
-    this.proxy.showKey = !this.proxy.showKey;
+  async toggleProxyKeyVisibility(): Promise<void> {
+    if (this.proxy.showKey) {
+      this.proxy.showKey = false;
+      return;
+    }
+    const confirmed = await confirmWithModal(
+      '\u663e\u793a\u4ee3\u7406\u51ed\u636e',
+      '\u4ee3\u7406\u51ed\u636e\u5c06\u4ee5\u660e\u6587\u5c55\u793a\uff1b\u540c\u6e90\u811a\u672c\u4e0e\u6d4f\u89c8\u5668\u6269\u5c55\u5747\u53ef\u8bfb\u53d6\u672c\u673a\u5b58\u50a8\uff0c\u5171\u4eab\u7535\u8111\u8bf7\u52ff\u5c55\u793a\u6216\u590d\u5236\u3002',
+      '',
+      '\u663e\u793a'
+    );
+    if (confirmed) {
+      this.proxy.showKey = true;
+    }
   },
 
   getModelValue(model: ModelOption): string {

@@ -88,11 +88,11 @@ function appendSearchMatches(
 
     button.addEventListener('click', () => {
       if (clearSearchKey === 'sop') {
-        window.clearSOPSearch?.();
+        clearSOPSearch();
       } else if (clearSearchKey === 'hub') {
-        window.clearHubSearch?.();
+        clearHubSearch();
       } else {
-        window.clearSidebarSearch?.();
+        clearSidebarSearch();
       }
     });
 

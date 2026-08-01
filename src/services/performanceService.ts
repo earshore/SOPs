@@ -530,11 +530,3 @@ export default performanceService;
 export function createPerformanceService(logger?: ILoggerService): PerformanceService {
   return new PerformanceService(logger);
 }
-
-// ================================================================
-// 🔄 向后兼容：暴露到 window
-// ================================================================
-if (typeof window !== 'undefined') {
-  (window as Window & { PerformanceService?: PerformanceService }).PerformanceService =
-    performanceService;
-}

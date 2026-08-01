@@ -3,19 +3,9 @@ import {
   clearEventHistory,
   getEventHistory,
   initEventLogger,
-  logCustomEvent
+  logCustomEvent,
 } from '@/common/utils/eventLogger';
 import { StorageService } from '@/services/storageService';
-
-type EventLoggerWindow = Window & {
-  EventLogger?: {
-    getHistory: typeof getEventHistory;
-    clear: typeof clearEventHistory;
-    log: typeof logCustomEvent;
-    enable: () => void;
-    disable: () => void;
-  };
-};
 
 describe('EventLogger', () => {
   beforeEach(() => {
@@ -37,9 +27,11 @@ describe('EventLogger', () => {
 
     expect(initEventLogger()).toBe(true);
 
-    window.dispatchEvent(new CustomEvent('app:route-changed', {
-      detail: { routeId: 'test-route' }
-    }));
+    window.dispatchEvent(
+      new CustomEvent('app:route-changed', {
+        detail: { routeId: 'test-route' },
+      })
+    );
 
     const history = getEventHistory();
     expect(history).toHaveLength(1);
@@ -53,9 +45,11 @@ describe('EventLogger', () => {
 
     initEventLogger();
     initEventLogger();
-    window.dispatchEvent(new CustomEvent('app:error', {
-      detail: { message: 'Test error' }
-    }));
+    window.dispatchEvent(
+      new CustomEvent('app:error', {
+        detail: { message: 'Test error' },
+      })
+    );
 
     const history = getEventHistory();
     expect(history).toHaveLength(1);
@@ -80,19 +74,5 @@ describe('EventLogger', () => {
     expect(history).toHaveLength(10);
     expect(history[0]?.detail).toEqual({ index: 20 });
     expect(history[9]?.detail).toEqual({ index: 29 });
-  });
-
-  it('exposes the window EventLogger API', () => {
-    const api = (window as EventLoggerWindow).EventLogger;
-
-    expect(api?.getHistory).toBe(getEventHistory);
-    expect(api?.clear).toBe(clearEventHistory);
-    expect(api?.log).toBe(logCustomEvent);
-
-    api?.enable();
-    expect(StorageService.set).toHaveBeenCalledWith('debug_events', 'true');
-
-    api?.disable();
-    expect(StorageService.set).toHaveBeenCalledWith('debug_events', 'false');
   });
 });

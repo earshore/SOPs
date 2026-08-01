@@ -238,11 +238,5 @@ export class LoadingManager {
  * 全局加载管理器实例
  */
 export const loadingManager = new LoadingManager();
-
-// 向后兼容：暴露到 window
-if (typeof window !== 'undefined') {
-  (window as Window & { loadingManager?: typeof loadingManager }).loadingManager = loadingManager;
-}
-
 // 默认导出
 export default loadingManager;

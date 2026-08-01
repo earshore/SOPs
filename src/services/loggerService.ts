@@ -514,13 +514,6 @@ export const Logger = new LoggerService();
 // 默认导出
 export default Logger;
 
-// 向后兼容：暴露到 window
-if (typeof window !== 'undefined') {
-  (window as Window & { Logger?: LoggerService; LOG_LEVELS?: typeof LOG_LEVELS }).Logger = Logger;
-  (window as Window & { Logger?: LoggerService; LOG_LEVELS?: typeof LOG_LEVELS }).LOG_LEVELS =
-    LOG_LEVELS;
-}
-
 // ================================================================
 // 🎯 DI容器工厂函数
 // ================================================================

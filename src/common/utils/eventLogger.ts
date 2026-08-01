@@ -133,25 +133,3 @@ export function logCustomEvent(eventName: string, detail: unknown = {}): void {
     eventHistory.shift();
   }
 }
-
-// ================================================================
-// 🔄 向后兼容：暴露到 window (调试用)
-// ================================================================
-if (typeof window !== 'undefined') {
-  type EventLoggerWindow = Window & {
-    EventLogger?: {
-      getHistory: typeof getEventHistory;
-      clear: typeof clearEventHistory;
-      log: typeof logCustomEvent;
-      enable: () => void;
-      disable: () => void;
-    };
-  };
-  (window as EventLoggerWindow).EventLogger = {
-    getHistory: getEventHistory,
-    clear: clearEventHistory,
-    log: logCustomEvent,
-    enable: () => StorageService.set(DEBUG_EVENTS_KEY, 'true'),
-    disable: () => StorageService.set(DEBUG_EVENTS_KEY, 'false'),
-  };
-}
