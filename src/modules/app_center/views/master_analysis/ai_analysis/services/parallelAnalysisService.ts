@@ -187,6 +187,7 @@ interface AnalysisRunContext {
   report: Partial<FullAnalysisReport>;
   targetIds: string[];
   language: string;
+  model: string;
   reviewSampling: ReviewSamplingMetadata;
   totalTasks: number;
   successCount: number;
@@ -213,6 +214,7 @@ interface PendingAnalysisExecutionContext {
 interface ReportSnapshotOptions {
   runSummary?: AnalysisReportMetadata['runSummary'];
   qualityWarnings?: AnalysisReportMetadata['qualityWarnings'];
+  model?: string;
 }
 
 const TARGET_TO_FIELD: Record<string, keyof FullAnalysisReport> = {
@@ -312,6 +314,7 @@ function buildReportSnapshot(
       targetIds: [...targetIds],
       language,
       reviewSampling,
+      ...(options.model ? { model: options.model } : {}),
       ...(options.runSummary ? { runSummary: options.runSummary } : {}),
       ...(options.qualityWarnings && options.qualityWarnings.length > 0
         ? { qualityWarnings: options.qualityWarnings }
@@ -945,7 +948,7 @@ function buildTaskProgressUpdate(
       context.targetIds,
       context.language,
       context.reviewSampling,
-      { qualityWarnings: context.qualityWarnings }
+      { qualityWarnings: context.qualityWarnings, model: context.model }
     ),
     fromCache: task.fromCache,
   };
@@ -1118,6 +1121,7 @@ function createAnalysisRunContext(
     report: {},
     targetIds,
     language,
+    model: getConfiguredCacheIdentity()?.model || '',
     reviewSampling: withMapReduceHygieneMetadata(
       getReviewSamplingMetadata(product),
       buildMapReduceHygiene(product)
@@ -1420,6 +1424,7 @@ function buildFinalAnalysisReport(context: AnalysisRunContext): FullAnalysisRepo
     {
       runSummary: buildRunSummary(context),
       qualityWarnings: context.qualityWarnings,
+      model: context.model,
     }
   );
 }

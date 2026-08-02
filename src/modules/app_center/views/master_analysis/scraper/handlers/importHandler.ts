@@ -282,6 +282,13 @@ export function mergeProducts(
 ): ProductData[] {
   const finalProducts: ProductData[] = [];
 
+  // 保留当前已有、但本次导入未覆盖的 ASIN（分批导入时追加拼合，避免覆盖丢失）
+  for (const [asin, product] of currentProductsMap.entries()) {
+    if (!productPool.has(asin)) {
+      finalProducts.push(product);
+    }
+  }
+
   for (const [asin, versions] of productPool.entries()) {
     const mergedProduct = mergeProductVersions(
       versions,

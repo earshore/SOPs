@@ -162,4 +162,23 @@ describe('handleImportFiles', () => {
       'R-DE',
     ]);
   });
+  it('keeps existing ASINs that are not re-imported when merging in batches', () => {
+    const currentA = createProduct('DE', 'Existing A title', [
+      createReview('R-A1', 'Existing A review 1'),
+    ]);
+    const importedB = {
+      ...createProduct('DE', 'Imported B title', [createReview('R-B1', 'Imported B review 1')]),
+      asin: 'B0TEST0002',
+    };
+
+    const result = mergeProducts(
+      new Map([['B0TEST0002', [importedB]]]),
+      'DE',
+      new Map([['B0TEST0001', currentA]])
+    );
+
+    expect(result.map(product => product.asin)).toEqual(['B0TEST0001', 'B0TEST0002']);
+    expect(result[0]?.customer_reviews.map(review => review.id)).toEqual(['R-A1']);
+    expect(result[1]?.customer_reviews.map(review => review.id)).toEqual(['R-B1']);
+  });
 });
