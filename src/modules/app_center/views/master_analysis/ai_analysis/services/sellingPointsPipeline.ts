@@ -47,7 +47,7 @@ const SELLING_POINTS_MAP_BUDGET_BY_DEPTH: Record<MasterAnalysisEvidenceDepth, nu
 };
 const SELLING_POINTS_MAP_CONCURRENCY_BY_DEPTH: Record<MasterAnalysisEvidenceDepth, number> = {
   fast: 4,
-  balanced: 3,
+  balanced: 4,
   deep: 2,
 };
 

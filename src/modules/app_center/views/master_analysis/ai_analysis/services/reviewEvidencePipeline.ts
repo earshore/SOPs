@@ -70,7 +70,7 @@ const GENERAL_MAP_BUDGET_BY_DEPTH: Record<MasterAnalysisEvidenceDepth, number> =
 };
 const MAP_CONCURRENCY_BY_DEPTH: Record<MasterAnalysisEvidenceDepth, number> = {
   fast: 4,
-  balanced: 3,
+  balanced: 4,
   deep: 2,
 };
 const BODY_CHARS = 700;

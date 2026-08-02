@@ -127,7 +127,7 @@ const SCHEDULE_DEFINITIONS: Record<SchedulingPreference, ScheduleDefinition> = {
     preference: 'recommended',
     tier: 'recommended',
     label: '推荐档',
-    baseConcurrency: 4,
+    baseConcurrency: 6,
     failureStrategy: 'continue',
     goalText: '平衡速度与稳定性，适合日常分析',
     detailText: '中等并发执行，单个维度失败时继续收集其他结果。',

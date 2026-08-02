@@ -56,7 +56,7 @@ describe('PerformanceSettings', () => {
   it('resolveAnalysisSchedule maps preference tiers', () => {
     expect(resolveAnalysisSchedule({ schedulingPreference: 'recommended' })).toMatchObject({
       tier: 'recommended',
-      maxConcurrency: 4,
+      maxConcurrency: 6,
       failureStrategy: 'continue',
     });
     expect(resolveAnalysisSchedule({ schedulingPreference: 'reliability' })).toMatchObject({
@@ -72,7 +72,7 @@ describe('PerformanceSettings', () => {
   });
 
   it('formatSchedulePreferenceHint matches page summary style', () => {
-    expect(formatSchedulePreferenceHint('recommended', true)).toBe('并发4 · 缓存开 · 失败继续');
+    expect(formatSchedulePreferenceHint('recommended', true)).toBe('并发6 · 缓存开 · 失败继续');
     expect(formatSchedulePreferenceHint('reliability', false)).toBe('并发2 · 缓存关 · 失败中止');
     expect(formatSchedulePreferenceHint('speed', true)).toBe('并发8 · 缓存开 · 失败继续');
   });

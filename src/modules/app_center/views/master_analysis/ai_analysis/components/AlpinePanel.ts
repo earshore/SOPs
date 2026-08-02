@@ -855,7 +855,11 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     const report = this.analysisReport;
     if (!report || typeof report === 'string') return [];
     const warnings = (report as FullAnalysisReport)._metadata?.qualityWarnings;
-    return Array.isArray(warnings) ? warnings : [];
+    if (!Array.isArray(warnings)) return [];
+    // shared_general_map 是共享抽取的信息性标记，不是质量警告
+    return warnings
+      .map(item => ({ ...item, notes: (item.notes || []).filter(note => note !== 'shared_general_map') }))
+      .filter(item => item.notes.length > 0);
   },
 
   get hasAnalysisQualityWarnings(): boolean {
