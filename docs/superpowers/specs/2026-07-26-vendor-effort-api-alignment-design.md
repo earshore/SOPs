@@ -52,6 +52,10 @@
 |------|-----------|---------|---------|----------|
 | GPT-5.x | low…max（含 xhigh/max 透传） | openai_* | medium | OpenAI Reasoning |
 | o-series | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | openai_* | medium | OpenAI Reasoning |
+| DeepSeek V4 | low\|high\|max + `thinking.type` | openai_thinking_plus_effort | high | DeepSeek Thinking Mode |
+| Kimi K3 | low\|high\|max | openai_reasoning_effort | max | Moonshot 推理强度 |
+| Kimi K2.x | 无档位（`thinking.type` 开关） | openai_thinking_toggle | — | Moonshot 思考模型 |
+| GLM-5.x | max\|xhigh\|high\|medium\|low + `thinking.type` | openai_thinking_plus_effort | max | Zhipu 深度思考 |
 | Grok-4.5 | low\|medium\|high | openai_reasoning_effort | high | xAI Reasoning |
 | Claude adaptive 代 | low…max | **thinking.adaptive + output_config.effort** | **high** | Effort + adaptive thinking docs |
 | Claude legacy | low…max → budget | **thinking.enabled + budget_tokens only** | medium | Extended thinking (legacy) |

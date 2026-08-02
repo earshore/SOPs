@@ -42,7 +42,7 @@ describe('chat Create true-full body parity (shipped builder)', () => {
   it('emits every configured official Create field for chat surface', () => {
     const capability = resolveModelCapability({
       provider: 'new_api',
-      modelId: 'deepseek-v4-flash',
+      modelId: 'glm-5.2',
       preferredSurface: 'chat_completions',
     });
     expect(capability.apiSurface).toBe('chat_completions');
@@ -50,7 +50,7 @@ describe('chat Create true-full body parity (shipped builder)', () => {
     expect(capability.supportsVision).toBe(true);
 
     const body = buildChatCompletionsBody({
-      model: 'deepseek-v4-flash',
+      model: 'glm-5.2',
       messages: [
         { role: 'developer', content: 'sys' },
         { role: 'user', content: 'hi' },

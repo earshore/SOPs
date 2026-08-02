@@ -6,7 +6,9 @@ import {
   mapAnthropicThinking,
   mapGeminiThinking,
   mapOpenAiReasoningEffort,
+  mapOpenAiThinkingToggle,
   mapResponsesReasoning,
+  mapThinkingPlusEffort,
   readThinkingBudgetTokens,
 } from './mappers';
 
@@ -51,6 +53,28 @@ describe('multi-protocol mappers', () => {
       reasoning: { effort: 'low', summary: 'auto' },
     });
     expect(mapResponsesReasoning({ enabled: false, effort: 'high' })).toEqual({});
+  });
+
+  it('openai thinking toggle emits thinking.type enabled only when on', () => {
+    expect(mapOpenAiThinkingToggle({ enabled: true, effort: 'high' })).toEqual({
+      thinking: { type: 'enabled' },
+    });
+    expect(mapOpenAiThinkingToggle({ enabled: false, effort: 'high' })).toEqual({});
+  });
+
+  it('thinking + effort mapper pairs toggle with allowlisted effort (DeepSeek/GLM)', () => {
+    const deepseek = ['low', 'high', 'max'] as const;
+    expect(mapThinkingPlusEffort({ enabled: true, effort: 'max', allowed: deepseek })).toEqual({
+      thinking: { type: 'enabled' },
+      reasoning_effort: 'max',
+    });
+    // Allowlist enforcement lives in prefs.clampEffort before the mapper runs;
+    // the mapper only collapses values outside the OpenAI wire enum (xhigh/max).
+    expect(mapThinkingPlusEffort({ enabled: true, effort: 'xhigh', allowed: deepseek })).toEqual({
+      thinking: { type: 'enabled' },
+      reasoning_effort: 'high',
+    });
+    expect(mapThinkingPlusEffort({ enabled: false, effort: 'high' })).toEqual({});
   });
 
   it('anthropic adaptive thinking + output_config.effort are paired (not effort alone)', () => {

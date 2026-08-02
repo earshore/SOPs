@@ -111,7 +111,10 @@ function pickSurface(
 }
 
 function resolveReasoningEfforts(surface: SurfaceCapability | null): ReasoningEffortLevel[] {
-  if (surface?.reasoningEfforts && surface.reasoningEfforts.length > 0) {
+  // Explicitly-declared allowlist wins, including an EMPTY one (toggle-only
+  // families like Kimi K2.x have no effort tiers). Missing list + supportsReasoning
+  // falls back to the product scale; no reasoning support → fail-closed [].
+  if (surface?.reasoningEfforts !== undefined) {
     return [...surface.reasoningEfforts];
   }
   if (surface?.supportsReasoning) {

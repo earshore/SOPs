@@ -50,6 +50,10 @@
 | xAI Grok-4.5 | `grok-4.5` | `low\|medium\|high` | high / openai effort |
 | OpenAI GPT-5.x | `gpt-5.6` 等 | low…max（含 xhigh/max 透传） | medium / openai * |
 | OpenAI o-series | `o3-mini` 等 | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | medium / openai * |
+| DeepSeek V4 | `deepseek-v4-flash` / `deepseek-v4-pro` | low\|high\|max + `thinking.type` | high / thinking + effort |
+| Kimi K3 | `kimi-k3*` | low\|high\|max（默认 max，始终推理） | max / openai effort |
+| Kimi K2.x | `kimi-k2` / `kimi-k2.5*` / `kimi-k2.6*` | 无档位（`thinking.type` 开关） | — / thinking toggle |
+| GLM-5.x | `glm-5*` | max\|xhigh\|high\|medium\|low（GLM-5.2+） | max / thinking + effort |
 | Claude effort 代 | `claude-opus-4.5` | low…max | high / **output_config.effort** |
 | Claude legacy | `claude-sonnet-4.5` | low…max → budget | medium / budget_tokens |
 | Gemini | gemini-* | low…max → budget | medium / thinkingBudget |
@@ -109,6 +113,9 @@ Dev console 示例：
 | B | gpt-5.6 + enabled + max | effective `max`；body 含 max（allowlist 透传） |
 | C | gpt-5.6 + enabled + xhigh | effective `xhigh`；body `xhigh` |
 | C2 | o3-mini + enabled + max | effective `high`（allowlist 封顶）；body `reasoning_effort: high` |
+| D2 | deepseek-v4-flash + enabled + medium | effective `low`（官方枚举无 medium）；body `reasoning_effort: low` + `thinking.type: enabled` |
+| D3 | kimi-k2.6 + enabled + high | 无档位；body `thinking.type: enabled`（关闭时省略，厂商默认开） |
+| D4 | glm-5.2 + enabled + max | effective `max`；body `reasoning_effort: max` + `thinking.type: enabled` |
 | D | grok-4.5 allowlist | 不含 xhigh/max；含 high |
 | E | Claude/Gemini + max | effective `max`；mapper 产生 budget/thinking 字段 |
 | F | UI options | ⊆ 当前模型 allowlist |

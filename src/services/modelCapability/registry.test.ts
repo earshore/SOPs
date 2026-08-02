@@ -130,6 +130,53 @@ describe('multi-protocol flagship catalog', () => {
       output_config: { effort: 'high' },
     });
 
+    // DeepSeek V4 official Thinking Mode: low|high|max (no medium), default high.
+    const deepseek = resolveModelCapability(
+      { provider: 'new_api', modelId: 'deepseek-v4-flash' },
+      getModelCapabilityRules()
+    );
+    expect(deepseek.reasoningEfforts).toEqual(['low', 'high', 'max']);
+    expect(deepseek.defaultEffort).toBe('high');
+    expect(
+      deepseek.mapRequest?.({ enabled: true, effort: 'max', allowed: deepseek.reasoningEfforts })
+    ).toEqual({
+      thinking: { type: 'enabled' },
+      reasoning_effort: 'max',
+    });
+    expect(deepseek.mapRequest?.({ enabled: false, effort: 'high' })).toEqual({});
+
+    // Kimi K3: low|high|max, default max; K2.x: toggle-only (no tiers).
+    const k3 = resolveModelCapability(
+      { provider: 'new_api', modelId: 'kimi-k3' },
+      getModelCapabilityRules()
+    );
+    expect(k3.reasoningEfforts).toEqual(['low', 'high', 'max']);
+    expect(k3.defaultEffort).toBe('max');
+    const k26 = resolveModelCapability(
+      { provider: 'new_api', modelId: 'kimi-k2.6' },
+      getModelCapabilityRules()
+    );
+    expect(k26.reasoningEfforts).toEqual([]);
+    expect(k26.effortControlKind).toBe('openai_thinking_toggle');
+    expect(k26.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
+      thinking: { type: 'enabled' },
+    });
+    expect(k26.mapRequest?.({ enabled: false, effort: 'high' })).toEqual({});
+
+    // GLM-5.x: official ladder (max default) + thinking toggle.
+    const glm = resolveModelCapability(
+      { provider: 'new_api', modelId: 'glm-5.2' },
+      getModelCapabilityRules()
+    );
+    expect(glm.reasoningEfforts).toEqual(['low', 'medium', 'high', 'xhigh', 'max']);
+    expect(glm.defaultEffort).toBe('max');
+    expect(
+      glm.mapRequest?.({ enabled: true, effort: 'max', allowed: glm.reasoningEfforts })
+    ).toEqual({
+      thinking: { type: 'enabled' },
+      reasoning_effort: 'max',
+    });
+
     expect(MODEL_CAPABILITY_CATALOG_META.productReasoningEfforts).toEqual([
       'low',
       'medium',
@@ -220,7 +267,24 @@ describe('multi-protocol flagship catalog', () => {
 
   it('keeps plain chat models fail-closed', () => {
     // claude-3-5-sonnet never supported extended thinking — no rule, fail-closed.
-    for (const modelId of ['gpt-4o', 'gpt-4.1', 'gpt-4.1-mini', 'claude-3-5-sonnet-20241022']) {
+    for (const modelId of [
+      'gpt-4o',
+      'gpt-4.1',
+      'gpt-4.1-mini',
+      'claude-3-5-sonnet-20241022',
+      // Unverified reasoning controls — fail-closed until gateway probe:
+      'deepseek-r1',
+      'deepseek-reasoner',
+      'qwen3-235b-a22b',
+      'qwq-32b',
+      'hy3-preview',
+      'grok-3',
+      'grok-4-0709',
+      'glm-z1',
+      'glm-4.5',
+      'moonshot-v1-thinking',
+      'kimi-k2.7-code',
+    ]) {
       const cap = resolveModelCapability(
         { provider: 'new_api', modelId },
         getModelCapabilityRules()

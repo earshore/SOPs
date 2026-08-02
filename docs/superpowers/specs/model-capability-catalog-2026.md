@@ -36,10 +36,12 @@
 | ---------- | ----------------------------------------- | -------------------------------------------- |
 | OpenAI     | `o3-mini`, `gpt-5.5`, `gpt-5.6`           | ✅                                           |
 | xAI        | `grok-4.5`, `grok-4*`                     | ✅                                           |
-| DeepSeek   | `deepseek-v4-flash`, `deepseek-r1`        | ✅                                           |
+| DeepSeek   | `deepseek-v4-flash`, `deepseek-v4-pro`    | ✅（thinking + low/high/max）                |
 | Anthropic  | `claude-sonnet-4-5-*`, `claude-opus-4.5*` | ✅（发 thinking；若 channel 未适配可能 400） |
 | Google     | `gemini-3.6-flash*`, `gemini-2.5-pro*`    | ✅（发 Gemini thinking 字段）                |
-| 其它       | kimi / qwen3 / qwq / glm-4.5              | ✅（OpenAI effort）                          |
+| Kimi       | `kimi-k3*`（low/high/max）、`kimi-k2.6`（仅开关） | ✅                                |
+| GLM        | `glm-5*`（thinking + 档位）               | ✅（GLM-5.2+；4.x/Z1 fail-closed）           |
+| 其它       | qwen3 / qwq / hy3 / grok-3 / moonshot-v1-thinking | ⏳ fail-closed（官方依据未验证，待 probe） |
 | 非推理默认 | `gpt-4o`, `gpt-4.1`                       | ❌ fail-closed                               |
 
 ## 网关实测（new.hongecb.store · 本 key）

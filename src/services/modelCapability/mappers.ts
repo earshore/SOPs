@@ -71,6 +71,46 @@ export function mapResponsesReasoning(prefs: {
 }
 
 /**
+ * Anthropic-style thinking.type toggle on OpenAI-compatible surfaces
+ * (Kimi K2.x: thinking.type enabled/disabled).
+ *
+ * Off = omit the field: vendor defaults stay intact (K2.x ships with thinking
+ * ON by default, same cannot-disable precedent as grok-4.5). On = force
+ * thinking on with thinking.type enabled.
+ */
+export function mapOpenAiThinkingToggle(prefs: {
+  enabled: boolean;
+  effort: ReasoningEffort;
+}): Record<string, unknown> {
+  if (!prefs.enabled || prefs.effort === 'off') {
+    return {};
+  }
+  return { thinking: { type: 'enabled' } };
+}
+
+/**
+ * Thinking toggle + OpenAI reasoning_effort on OpenAI-compatible surfaces
+ * (DeepSeek V4 low|high|max; GLM-5.x max|xhigh|high|medium|low).
+ *
+ * DeepSeek/GLM ship with thinking ON by default — off omits the fields so the
+ * vendor default is preserved (same precedent as grok-4.5 cannot-disable).
+ * On = force thinking + send the allowlisted effort tier.
+ */
+export function mapThinkingPlusEffort(prefs: {
+  enabled: boolean;
+  effort: ReasoningEffort;
+  allowed?: readonly ReasoningEffortLevel[];
+}): Record<string, unknown> {
+  if (!prefs.enabled || prefs.effort === 'off') {
+    return {};
+  }
+  return {
+    thinking: { type: 'enabled' },
+    reasoning_effort: resolveOpenAiWireEffort(prefs.effort, prefs.allowed),
+  };
+}
+
+/**
  * Anthropic modern path: THINKING and EFFORT are different API controls.
  *
  * - `thinking: { type: "adaptive" }` — enables adaptive thinking mode (not a depth scale).

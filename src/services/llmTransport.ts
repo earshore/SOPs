@@ -129,6 +129,11 @@ function extractOutboundReasoningMarker(body: Record<string, unknown>): string |
   if (thinking?.budget_tokens !== undefined) {
     return `budget:${String(thinking.budget_tokens)}`;
   }
+  // Toggle-only / thinking+effort families (Kimi K2.x, DeepSeek, GLM-5.x)
+  const thinkingToggle = body.thinking as { type?: unknown } | undefined;
+  if (thinkingToggle?.type === 'enabled') {
+    return 'thinkingToggle:enabled';
+  }
   // Gemini official: generationConfig.thinkingConfig (top-level kept for legacy bodies)
   const generationConfig = body.generationConfig as
     { thinkingConfig?: { thinkingBudget?: unknown } } | undefined;

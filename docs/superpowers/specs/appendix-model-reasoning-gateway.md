@@ -68,9 +68,12 @@ Enterprise closed-loop (product axis + per-model allowlist + nearest clamp + req
 | OpenAI o-series | `o1*`, `o3*`, `o4-mini*` (tight)                    | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | OpenAI Reasoning docs |
 | OpenAI GPT-5    | `gpt-5`, `gpt-5.1`…`gpt-5.6`, `gpt-5-*`             | low…max (flagship)         | OpenAI Reasoning docs        |
 | xAI Grok-4.5    | `grok-4.5*`                                         | low\|medium\|high          | xAI docs + live gateway      |
-| xAI Grok other  | `grok-4*`, `grok-3*`                                | triad / multi-agent xhigh  | **Live** `grok-4.5`          |
-| DeepSeek        | `deepseek-v4*`, `deepseek-r1*`, `deepseek-reasoner` | triad                      | **Live** `deepseek-v4-flash` |
-| Hy3             | `hy3-*`                                             | triad                      | **Live** `hy3-preview`       |
+| xAI Grok other  | `grok-4.3*`, `grok-4.20-multi-agent*`               | 4.3: none\|low\|medium\|high；multi-agent: low…xhigh | xAI docs（grok-3 / 其余 grok-4 别名未验证 → fail-closed） |
+| DeepSeek        | `deepseek-v4-flash`, `deepseek-v4-pro*`, `deepseek-v4-*` | low\|high\|max + `thinking.type` | DeepSeek Thinking Mode docs + live `deepseek-v4-flash` |
+| Kimi            | `kimi-k3*`（effort）；`kimi-k2` / `kimi-k2.5*` / `kimi-k2.6*`（toggle） | K3: low\|high\|max；K2.x: `thinking.type` 开关 | Moonshot 推理强度/思考模型 docs |
+| GLM             | `glm-5*`                                           | max\|xhigh\|high\|medium\|low + `thinking.type` | Zhipu 深度思考 docs（GLM-5.2+；4.x/Z1 无档位 → fail-closed） |
+| Hy3             | —                                                  | —                          | 未验证 → fail-closed（待 probe） |
+| Qwen3 / QwQ     | —                                                  | —                          | 原生 `enable_thinking`；OpenAI 兼容端未验证 → fail-closed（待 probe） |
 
 ### Real mappers (UI on) vs channel risk
 

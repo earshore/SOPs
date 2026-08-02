@@ -15,7 +15,9 @@ import {
   mapAnthropicThinking,
   mapGeminiThinking,
   mapOpenAiReasoningEffort,
+  mapOpenAiThinkingToggle,
   mapResponsesReasoning,
+  mapThinkingPlusEffort,
 } from './mappers';
 import type {
   ApiSurface,
@@ -257,6 +259,101 @@ function chatEffort(
   });
 }
 
+/**
+ * DeepSeek V4 (deepseek-v4-flash/pro): official Thinking Mode — toggle
+ * thinking.type (extra_body) + reasoning_effort low|high|max (no medium),
+ * thinking ON by default with default effort high.
+ * Responses API: reasoning.effort none|low|high|max.
+ */
+function deepseekEffort(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+  const profile: EffortProfile = {
+    temperatureIgnored: true,
+    reasoningEfforts: ['low', 'high', 'max'],
+    defaultEffort: 'high',
+  };
+  return entry(
+    modelPattern,
+    contextWindow,
+    'chat_completions',
+    {
+      chat_completions: {
+        supportsReasoning: true,
+        reasoningEfforts: ['low', 'high', 'max'],
+        defaultEffort: 'high',
+        temperatureIgnored: true,
+        effortControlKind: 'openai_thinking_plus_effort',
+        mapRequest: mapThinkingPlusEffort,
+        supportsStructuredOutput: true,
+        supportsTools: true,
+        supportsVision: true,
+      },
+      responses: surfaceResponses(profile),
+    },
+    ['reasoning', 'deepseek', 'thinking_effort']
+  );
+}
+
+/**
+ * GLM-5.x (Zhipu): 深度思考 — thinking.type + reasoning_effort (GLM-5.2+;
+ * official enum max|xhigh|high|medium|low|minimal|none; low/medium map to
+ * high and xhigh maps to max server-side). Default thinking ON, effort max.
+ * GLM-4.5/4.6/4.7 and GLM-Z1 have no effort tier — fail-closed (no rule).
+ */
+function glmEffort(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+  const profile: EffortProfile = {
+    temperatureIgnored: false,
+    reasoningEfforts: ['low', 'medium', 'high', 'xhigh', 'max'],
+    defaultEffort: 'max',
+  };
+  return entry(
+    modelPattern,
+    contextWindow,
+    'chat_completions',
+    {
+      chat_completions: {
+        supportsReasoning: true,
+        reasoningEfforts: ['low', 'medium', 'high', 'xhigh', 'max'],
+        defaultEffort: 'max',
+        temperatureIgnored: false,
+        effortControlKind: 'openai_thinking_plus_effort',
+        mapRequest: mapThinkingPlusEffort,
+        supportsStructuredOutput: true,
+        supportsTools: true,
+        supportsVision: true,
+      },
+      responses: surfaceResponses(profile),
+    },
+    ['reasoning', 'glm', 'thinking_effort']
+  );
+}
+
+/**
+ * Kimi K2.x thinking toggle (thinking.type enabled/disabled; K2.x ships with
+ * thinking ON by default — off omits the field so vendor default applies).
+ * K3 is a separate effort family (low|high|max) via chatEffort below.
+ */
+function kimiThinkingToggle(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+  return entry(
+    modelPattern,
+    contextWindow,
+    'chat_completions',
+    {
+      chat_completions: {
+        supportsReasoning: true,
+        reasoningEfforts: [],
+        defaultEffort: 'medium',
+        temperatureIgnored: false,
+        effortControlKind: 'openai_thinking_toggle',
+        mapRequest: mapOpenAiThinkingToggle,
+        supportsStructuredOutput: true,
+        supportsTools: true,
+        supportsVision: true,
+      },
+    },
+    ['reasoning', 'kimi', 'thinking_toggle']
+  );
+}
+
 /** Claude with official output_config.effort (adaptive-thinking generations, 4.6+). */
 function claudeOutputEffort(
   modelPattern: string,
@@ -372,38 +469,18 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
     reasoningEfforts: GROK_45_EFFORTS,
     defaultEffort: 'low',
   }),
-  // remaining grok-4* (e.g. grok-4-0709 aliases): triad, default medium
-  chatEffort('grok-4*', 256_000, 'chat_completions', {
-    reasoningEfforts: OPENAI_TRIAD_EFFORTS,
-    defaultEffort: 'medium',
-  }),
-  chatEffort('grok-3-mini', 128_000, 'chat_completions', {
-    reasoningEfforts: OPENAI_TRIAD_EFFORTS,
-    defaultEffort: 'medium',
-  }),
-  chatEffort('grok-3-mini-*', 128_000, 'chat_completions', {
-    reasoningEfforts: OPENAI_TRIAD_EFFORTS,
-    defaultEffort: 'medium',
-  }),
-  chatEffort('grok-3', 128_000, 'chat_completions', {
-    reasoningEfforts: OPENAI_TRIAD_EFFORTS,
-    defaultEffort: 'medium',
-  }),
-  chatEffort('grok-3-*', 128_000, 'chat_completions', {
-    reasoningEfforts: OPENAI_TRIAD_EFFORTS,
-    defaultEffort: 'medium',
-  }),
 
-  // DeepSeek
-  chatEffort('deepseek-v4-flash', 128_000),
-  chatEffort('deepseek-v4-flash-*', 128_000),
-  chatEffort('deepseek-v4-*', 128_000),
-  chatEffort('deepseek-reasoner', 128_000),
-  chatEffort('deepseek-r1', 128_000),
-  chatEffort('deepseek-r1-*', 128_000),
+  // grok-3 / 其余 grok-4 别名（grok-4-0709 等）未在官方文档确认 effort 参数，
+  // 保持 fail-closed（无规则），待 gateway probe 后再收录。
 
-  chatEffort('hy3-preview', 128_000),
-  chatEffort('hy3-*', 128_000),
+  // DeepSeek V4 — official Thinking Mode: thinking.type + reasoning_effort
+  // low|high|max（无 medium）。deepseek-reasoner/r1 无 effort 参数 → fail-closed。
+  deepseekEffort('deepseek-v4-flash', 128_000),
+  deepseekEffort('deepseek-v4-flash-*', 128_000),
+  deepseekEffort('deepseek-v4-*', 128_000),
+
+  // hy3-*（Tencent Hunyuan 通道）未在官方文档确认推理控制字段 → fail-closed，
+  // 待 probe 后再收录。
 
   // Anthropic Claude — official ids are hyphenated (claude-opus-4-8); dotted
   // gateway aliases normalize to hyphens before matching (normalizeModelId).
@@ -472,14 +549,24 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   geminiThinking('gemini-2.5-pro', 1_000_000),
   geminiThinking('gemini-2.5-pro-*', 1_000_000),
 
-  // CN popular reasoning lines — OpenAI effort on completions + responses
-  chatEffort('kimi-k2*', 128_000),
-  chatEffort('moonshot-v1-thinking*', 128_000),
-  chatEffort('qwen3*', 128_000),
-  chatEffort('qwen-qwq*', 128_000),
-  chatEffort('qwq*', 128_000),
-  chatEffort('glm-4.5*', 128_000),
-  chatEffort('glm-z1*', 128_000),
+  // Kimi — K3: reasoning_effort low|high|max（默认 max，始终推理）。
+  // K2.x: thinking.type 开关（默认开；off 省略字段保持厂商默认）。
+  // kimi-k2.7-code 不接受 thinking 参数 → fail-closed。
+  chatEffort('kimi-k3*', 128_000, 'chat_completions', {
+    reasoningEfforts: ['low', 'high', 'max'],
+    defaultEffort: 'max',
+  }),
+  kimiThinkingToggle('kimi-k2', 128_000),
+  kimiThinkingToggle('kimi-k2.5', 128_000),
+  kimiThinkingToggle('kimi-k2.5-*', 128_000),
+  kimiThinkingToggle('kimi-k2.6', 128_000),
+  kimiThinkingToggle('kimi-k2.6-*', 128_000),
+  // moonshot-v1-thinking / qwen3 / qwq：官方无 OpenAI 兼容 effort 依据
+  // （qwen3 原生为 enable_thinking，OpenAI 兼容端未验证）→ fail-closed，待 probe。
+
+  // GLM — 5.x: thinking.type + reasoning_effort（GLM-5.2+ 官方档位）。
+  // GLM-4.5/4.6/4.7 与 GLM-Z1 无档位参数（默认行为各异）→ fail-closed。
+  glmEffort('glm-5*', 128_000),
 ];
 
 export function getModelCapabilityRules(): readonly ModelCapabilityRule[] {
@@ -505,5 +592,7 @@ export {
   mapAnthropicThinking,
   mapGeminiThinking,
   mapOpenAiReasoningEffort,
+  mapOpenAiThinkingToggle,
   mapResponsesReasoning,
+  mapThinkingPlusEffort,
 } from './mappers';

@@ -1356,10 +1356,16 @@ const settingsPanelBehavior: SettingsPanelPart = {
   get reasoningEffortOptions(): ReasoningEffortLevel[] {
     const cap = this.activeModelCapability;
     // Product scale remains low…max; UI lists only what the active model can send.
-    if (!cap || cap.reasoningEfforts.length === 0) {
+    // Toggle-only models (e.g. Kimi K2.x) expose no tiers — empty hides the row.
+    if (!cap) {
       return [...DEFAULT_REASONING_EFFORTS];
     }
-    return cap.reasoningEfforts.filter(isReasoningEffortLevel);
+    if (cap.supportsReasoning) {
+      return cap.reasoningEfforts.filter(isReasoningEffortLevel);
+    }
+    // Unknown / unsupported models keep the full product scale so stored intent
+    // survives a later switch to a reasoning-capable model (UI section is hidden).
+    return [...DEFAULT_REASONING_EFFORTS];
   },
 
   /**

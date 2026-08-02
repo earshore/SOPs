@@ -23,6 +23,8 @@ type Case = {
   expectAdaptiveThinking?: boolean;
   /** Gemini thinking_config present */
   expectGeminiBudget?: boolean;
+  /** thinking.type === enabled on the wire (toggle/plus-effort mappers) */
+  expectThinkingEnabled?: boolean;
 };
 
 const CASES: Case[] = [
@@ -124,6 +126,50 @@ const CASES: Case[] = [
     expectAllowlistIncludes: ['max'],
     expectGeminiBudget: true,
   },
+  {
+    name: 'deepseek-v4 max passes through with thinking toggle (official low|high|max)',
+    modelId: 'deepseek-v4-flash',
+    requested: 'max',
+    expectEffective: 'max',
+    expectAllowlistIncludes: ['low', 'high', 'max'],
+    expectAllowlistExcludes: ['medium'],
+    expectBodyEffort: 'max',
+    expectThinkingEnabled: true,
+  },
+  {
+    name: 'deepseek-v4 medium clamps to low (medium not in official enum)',
+    modelId: 'deepseek-v4-flash',
+    requested: 'medium',
+    expectEffective: 'low',
+    expectBodyEffort: 'low',
+    expectThinkingEnabled: true,
+  },
+  {
+    name: 'kimi-k3 max passes through (official low|high|max, default max)',
+    modelId: 'kimi-k3',
+    requested: 'max',
+    expectEffective: 'max',
+    expectAllowlistIncludes: ['low', 'high', 'max'],
+    expectAllowlistExcludes: ['medium'],
+    expectBodyEffort: 'max',
+  },
+  {
+    name: 'kimi-k2.6 toggle-only: no tiers, thinking enabled on the wire',
+    modelId: 'kimi-k2.6',
+    requested: 'high',
+    expectEffective: 'high',
+    expectAllowlistIncludes: [],
+    expectThinkingEnabled: true,
+  },
+  {
+    name: 'glm-5.2 max passes through with thinking toggle (official ladder)',
+    modelId: 'glm-5.2',
+    requested: 'max',
+    expectEffective: 'max',
+    expectAllowlistIncludes: ['low', 'medium', 'high', 'xhigh', 'max'],
+    expectBodyEffort: 'max',
+    expectThinkingEnabled: true,
+  },
 ];
 
 describe('reasoning effort closed loop (registry → resolve → mapRequest)', () => {
@@ -198,6 +244,11 @@ describe('reasoning effort closed loop (registry → resolve → mapRequest)', (
         const extra = fragment.extra_body as
           { google?: { thinking_config?: { thinking_budget?: number } } } | undefined;
         expect(typeof extra?.google?.thinking_config?.thinking_budget).toBe('number');
+      }
+
+      if (c.expectThinkingEnabled) {
+        const thinking = fragment.thinking as { type?: string } | undefined;
+        expect(thinking?.type, `${c.modelId} thinking.type`).toBe('enabled');
       }
     });
   }

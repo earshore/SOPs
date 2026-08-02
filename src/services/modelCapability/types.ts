@@ -78,6 +78,16 @@ export type EffortControlKind =
   | 'anthropic_budget_tokens'
   /** Gemini generateContent / gateway: thinking budget (+ optional effort string) */
   | 'gemini_thinking_budget'
+  /**
+   * Anthropic-style thinking.type toggle on OpenAI-compatible surfaces
+   * (Kimi K2.x): thinking.type enabled/disabled; product has no effort tiers.
+   */
+  | 'openai_thinking_toggle'
+  /**
+   * Thinking toggle + OpenAI reasoning_effort on OpenAI-compatible surfaces
+   * (DeepSeek V4 low|high|max; GLM-5.x max|xhigh|high|medium|low).
+   */
+  | 'openai_thinking_plus_effort'
   | 'none';
 
 export interface SurfaceCapability extends SurfaceCapabilityFlags {

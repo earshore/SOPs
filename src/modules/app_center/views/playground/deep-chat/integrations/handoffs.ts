@@ -14,7 +14,6 @@ import {
 
 import {
   clampEffort,
-  DEFAULT_REASONING_EFFORTS,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
   resolveModelCapability,
@@ -379,6 +378,10 @@ function applyReasoningEffortLevels(
     renderReasoningEffortOptions(select, levels);
     select.value = clamped;
     select.disabled = !state.enabled;
+    // Toggle-only models (empty allowlist) hide the effort select entirely.
+    if (select.parentElement instanceof HTMLElement) {
+      select.parentElement.hidden = levels.length === 0;
+    }
   }
   if (clamped === state.effort) {
     return;
@@ -427,7 +430,7 @@ export function syncDeepChatReasoningControlsFromThread(container: HTMLElement):
   applyReasoningEffortLevels(
     container,
     reasoningEffort,
-    cap.reasoningEfforts.length > 0 ? cap.reasoningEfforts : DEFAULT_REASONING_EFFORTS,
+    cap.reasoningEfforts.length > 0 ? cap.reasoningEfforts : [],
     state
   );
 }
