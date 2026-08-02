@@ -564,9 +564,24 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   // moonshot-v1-thinking / qwen3 / qwq：官方无 OpenAI 兼容 effort 依据
   // （qwen3 原生为 enable_thinking，OpenAI 兼容端未验证）→ fail-closed，待 probe。
 
-  // GLM — 5.x: thinking.type + reasoning_effort（GLM-5.2+ 官方档位）。
-  // GLM-4.5/4.6/4.7 与 GLM-Z1 无档位参数（默认行为各异）→ fail-closed。
-  glmEffort('glm-5*', 128_000),
+  // GLM — 5.2：thinking.type + reasoning_effort 全档位（官方 + 网关实测 2026-08-02：
+  // low/medium/high/xhigh/max/minimal 均 200；none 与省略字段均关闭思考）。
+  // GLM-5.1 网关实测：reasoning_effort=max → 400（无 effort），默认思考，
+  // 仅 thinking.type 可关 → fail-closed（产品 off 语义为省略字段，暂不收录）。
+  // GLM-4.5/4.6/4.7 与 GLM-Z1 无档位参数 → fail-closed。
+  glmEffort('glm-5.2', 128_000),
+  glmEffort('glm-5.2-*', 128_000),
+
+  // MiniMax M2.7 — 网关实测 2026-08-02：reasoning_effort low|medium|high（max → 400），
+  // 消息始终带 reasoning 字段（默认思考）。M3 无推理输出 → fail-closed。
+  chatEffort('minimax-m2.7', 128_000, 'chat_completions', {
+    reasoningEfforts: ['low', 'medium', 'high'],
+    defaultEffort: 'medium',
+  }),
+  chatEffort('minimax-m2.7-*', 128_000, 'chat_completions', {
+    reasoningEfforts: ['low', 'medium', 'high'],
+    defaultEffort: 'medium',
+  }),
 ];
 
 export function getModelCapabilityRules(): readonly ModelCapabilityRule[] {

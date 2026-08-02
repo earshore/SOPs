@@ -9,38 +9,38 @@
 
 ## 1. 目标
 
-1. **官方 API 对齐**：发出去的字段与厂商文档一致（字符串枚举 / budget 各走其道）。  
-2. **生产可观测**：`effortControlKind` + requested/effective + body marker。  
+1. **官方 API 对齐**：发出去的字段与厂商文档一致（字符串枚举 / budget 各走其道）。
+2. **生产可观测**：`effortControlKind` + requested/effective + body marker。
 3. **长期可演进**：厂商改 API 时只改 **registry 规则 + mapper 种类**，不改业务 UI 与 `callLLM` 主路径。
 
 ---
 
 ## 2. 产品轴 vs 厂商字面量（禁止混淆）
 
-| 层 | 内容 |
-|----|------|
-| L1 产品 | `low \| medium \| high \| xhigh \| max`（**无 extra**；Claude 的 xhigh ≈ 口语 “extra high”） |
-| L2 模型 | `reasoningEfforts` + `defaultEffort` + **`effortControlKind`** + `mapRequest` |
-| L3 运行时 | clamp → mapRequest → body；日志 effective / requested |
+| 层        | 内容                                                                                         |
+| --------- | -------------------------------------------------------------------------------------------- |
+| L1 产品   | `low \| medium \| high \| xhigh \| max`（**无 extra**；Claude 的 xhigh ≈ 口语 “extra high”） |
+| L2 模型   | `reasoningEfforts` + `defaultEffort` + **`effortControlKind`** + `mapRequest`                |
+| L3 运行时 | clamp → mapRequest → body；日志 effective / requested                                        |
 
 **禁止：**
 
-- 全局 UI 假五档对不支持模型可选  
-- 用 Codex 配置枚举代替厂商 HTTP 字段  
+- 全局 UI 假五档对不支持模型可选
+- 用 Codex 配置枚举代替厂商 HTTP 字段
 - 为 Claude 引入非官方字符串 `extra`
 
 ---
 
 ## 3. EffortControlKind（SSOT）
 
-| Kind | 官方形态 | 代表家族 |
-|------|----------|----------|
-| `openai_reasoning_effort` | `reasoning_effort` | Chat Completions（GPT / Grok 网关） |
-| `openai_responses_reasoning` | `reasoning.effort` | Responses |
-| `anthropic_output_effort` | **`thinking: {type:"adaptive"}` + `output_config.effort`**（两者不同：前者开自适应思考模式，后者调深度/花费） | Claude adaptive 代 |
-| `anthropic_budget_tokens` | **仅** `thinking: {type:"enabled", budget_tokens}`（无 output_config.effort） | Claude 旧 extended thinking |
-| `gemini_thinking_budget` | `thinkingConfig.thinkingBudget` + 网关 effort | Gemini |
-| `none` | 不写字段 | 未知 / fail-closed |
+| Kind                         | 官方形态                                                                                                      | 代表家族                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `openai_reasoning_effort`    | `reasoning_effort`                                                                                            | Chat Completions（GPT / Grok 网关） |
+| `openai_responses_reasoning` | `reasoning.effort`                                                                                            | Responses                           |
+| `anthropic_output_effort`    | **`thinking: {type:"adaptive"}` + `output_config.effort`**（两者不同：前者开自适应思考模式，后者调深度/花费） | Claude adaptive 代                  |
+| `anthropic_budget_tokens`    | **仅** `thinking: {type:"enabled", budget_tokens}`（无 output_config.effort）                                 | Claude 旧 extended thinking         |
+| `gemini_thinking_budget`     | `thinkingConfig.thinkingBudget` + 网关 effort                                                                 | Gemini                              |
+| `none`                       | 不写字段                                                                                                      | 未知 / fail-closed                  |
 
 新增厂商控制方式 = **新增 kind + mapper + registry 挂载**，禁止在 `systemSettings` 写厂商 if。
 
@@ -48,18 +48,19 @@
 
 ## 4. 当前对齐矩阵（验收基线）
 
-| 家族 | Allowlist | Control | Default | 文档依据 |
-|------|-----------|---------|---------|----------|
-| GPT-5.x | low…max（含 xhigh/max 透传） | openai_* | medium | OpenAI Reasoning |
-| o-series | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | openai_* | medium | OpenAI Reasoning |
-| DeepSeek V4 | low\|high\|max + `thinking.type` | openai_thinking_plus_effort | high | DeepSeek Thinking Mode |
-| Kimi K3 | low\|high\|max | openai_reasoning_effort | max | Moonshot 推理强度 |
-| Kimi K2.x | 无档位（`thinking.type` 开关） | openai_thinking_toggle | — | Moonshot 思考模型 |
-| GLM-5.x | max\|xhigh\|high\|medium\|low + `thinking.type` | openai_thinking_plus_effort | max | Zhipu 深度思考 |
-| Grok-4.5 | low\|medium\|high | openai_reasoning_effort | high | xAI Reasoning |
-| Claude adaptive 代 | low…max | **thinking.adaptive + output_config.effort** | **high** | Effort + adaptive thinking docs |
-| Claude legacy | low…max → budget | **thinking.enabled + budget_tokens only** | medium | Extended thinking (legacy) |
-| Gemini | low…max → budget | thinkingBudget | medium | Gemini thinking |
+| 家族               | Allowlist                                                | Control                                      | Default  | 文档依据                        |
+| ------------------ | -------------------------------------------------------- | -------------------------------------------- | -------- | ------------------------------- |
+| GPT-5.x            | low…max（含 xhigh/max 透传）                             | openai_*                                     | medium   | OpenAI Reasoning                |
+| o-series           | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | openai_*                                     | medium   | OpenAI Reasoning                |
+| DeepSeek V4        | low\|high\|max + `thinking.type`                         | openai_thinking_plus_effort                  | high     | DeepSeek Thinking Mode          |
+| Kimi K3            | low\|high\|max                                           | openai_reasoning_effort                      | max      | Moonshot 推理强度               |
+| Kimi K2.x          | 无档位（`thinking.type` 开关）                           | openai_thinking_toggle                       | —        | Moonshot 思考模型               |
+| GLM-5.2            | max\|xhigh\|high\|medium\|low + `thinking.type`          | openai_thinking_plus_effort                  | max      | Zhipu 深度思考 + gateway        |
+| MiniMax M2.7       | low\|medium\|high                                        | openai_reasoning_effort                      | medium   | gateway（max → 400）            |
+| Grok-4.5           | low\|medium\|high                                        | openai_reasoning_effort                      | high     | xAI Reasoning                   |
+| Claude adaptive 代 | low…max                                                  | **thinking.adaptive + output_config.effort** | **high** | Effort + adaptive thinking docs |
+| Claude legacy      | low…max → budget                                         | **thinking.enabled + budget_tokens only**    | medium   | Extended thinking (legacy)      |
+| Gemini             | low…max → budget                                         | thinkingBudget                               | medium   | Gemini thinking                 |
 
 Claude **没有** `extra`；产品与 wire 均为 **`xhigh`**。
 
@@ -69,39 +70,39 @@ Claude **没有** `extra`；产品与 wire 均为 **`xhigh`**。
 
 当厂商发布新模型或改 effort 枚举：
 
-1. **读官方文档**（非论坛/配置客户端）→ 记下 allowlist、default、字段路径。  
-2. **Registry**：更具体的 `modelPattern` 放在更前；绑定正确 `effortControlKind` + mapper。  
-3. **Mapper**：仅当出现新字段路径时新增 kind；旧 kind 保留至模型退役。  
-4. **契约测试**：表驱动 `(modelId, requested) → effective + body 片段`。  
-5. **asOf / changelog**：更新 `MODEL_CAPABILITY_CATALOG_META.asOf` 与本 spec。  
+1. **读官方文档**（非论坛/配置客户端）→ 记下 allowlist、default、字段路径。
+2. **Registry**：更具体的 `modelPattern` 放在更前；绑定正确 `effortControlKind` + mapper。
+3. **Mapper**：仅当出现新字段路径时新增 kind；旧 kind 保留至模型退役。
+4. **契约测试**：表驱动 `(modelId, requested) → effective + body 片段`。
+5. **asOf / changelog**：更新 `MODEL_CAPABILITY_CATALOG_META.asOf` 与本 spec。
 6. **网关**：new-api 可能透传或吞字段；以 client allowlist 为准，不靠 HTTP 200 证明支持。
 
 ### 退役与双轨
 
-- 同一产品族可并存两种 kind（例：Claude 4.5 sonnet = budget，Opus 4.5 = output effort）。  
-- 旧 mapper **不删除**，直到 catalog 无引用。  
+- 同一产品族可并存两种 kind（例：Claude 4.5 sonnet = budget，Opus 4.5 = output effort）。
+- 旧 mapper **不删除**，直到 catalog 无引用。
 - 未知 modelId：**fail-closed**（无推理 UI / 无字段）。
 
 ---
 
 ## 6. 实现落点
 
-| 组件 | 文件 |
-|------|------|
-| Kind 类型 | `types.ts` → `EffortControlKind` |
-| Mappers | `mappers.ts` → `mapAnthropicOutputEffort` 等 |
-| Catalog | `registry.ts` |
-| Resolve | `resolve.ts` → `effortControlKind` |
-| 日志 | `llmService.extractOutboundReasoningMarker` 识别 `output_config.effort` |
-| 测试 | `effortClosedLoop.test.ts`、`mappers.test.ts`、`registry.test.ts` |
+| 组件      | 文件                                                                    |
+| --------- | ----------------------------------------------------------------------- |
+| Kind 类型 | `types.ts` → `EffortControlKind`                                        |
+| Mappers   | `mappers.ts` → `mapAnthropicOutputEffort` 等                            |
+| Catalog   | `registry.ts`                                                           |
+| Resolve   | `resolve.ts` → `effortControlKind`                                      |
+| 日志      | `llmService.extractOutboundReasoningMarker` 识别 `output_config.effort` |
+| 测试      | `effortClosedLoop.test.ts`、`mappers.test.ts`、`registry.test.ts`       |
 
 ---
 
 ## 7. 成功标准
 
-1. Claude Opus 4.5 + max → body 同时含 `thinking.type==="adaptive"` 与 `output_config.effort==="max"`（不得只发其一）。  
-2. Claude Sonnet 4.5 + max → body `thinking.type==="enabled"` + `budget_tokens`（无 adaptive / 无混用 effort 字段冒充 thinking）。  
-3. 概念上：**effort ≠ thinking**；产品「推理开关」在不同 kind 下映射到不同字段组合，禁止互相替代。  
-3. 无 `extra` 字符串出现在类型或 mapper 输出。  
-4. GPT/Grok 既有 allowlist 行为保持。  
-5. 表驱动单测 + type-check 通过。
+1. Claude Opus 4.5 + max → body 同时含 `thinking.type==="adaptive"` 与 `output_config.effort==="max"`（不得只发其一）。
+2. Claude Sonnet 4.5 + max → body `thinking.type==="enabled"` + `budget_tokens`（无 adaptive / 无混用 effort 字段冒充 thinking）。
+3. 概念上：**effort ≠ thinking**；产品「推理开关」在不同 kind 下映射到不同字段组合，禁止互相替代。
+4. 无 `extra` 字符串出现在类型或 mapper 输出。
+5. GPT/Grok 既有 allowlist 行为保持。
+6. 表驱动单测 + type-check 通过。

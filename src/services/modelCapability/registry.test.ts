@@ -177,6 +177,17 @@ describe('multi-protocol flagship catalog', () => {
       reasoning_effort: 'max',
     });
 
+    // MiniMax M2.7 — gateway-verified effort enum low|medium|high (max → 400).
+    const minimax = resolveModelCapability(
+      { provider: 'new_api', modelId: 'minimax-m2.7' },
+      getModelCapabilityRules()
+    );
+    expect(minimax.reasoningEfforts).toEqual(['low', 'medium', 'high']);
+    expect(minimax.defaultEffort).toBe('medium');
+    expect(
+      minimax.mapRequest?.({ enabled: true, effort: 'high', allowed: minimax.reasoningEfforts })
+    ).toEqual({ reasoning_effort: 'high' });
+
     expect(MODEL_CAPABILITY_CATALOG_META.productReasoningEfforts).toEqual([
       'low',
       'medium',
@@ -282,8 +293,14 @@ describe('multi-protocol flagship catalog', () => {
       'grok-4-0709',
       'glm-z1',
       'glm-4.5',
+      'glm-5.1',
       'moonshot-v1-thinking',
       'kimi-k2.7-code',
+      // Gateway-verified 2026-08-02: no reasoning output / dead channel.
+      'minimax-m3',
+      'hy3',
+      'qwen3.7-max',
+      'qwen3-coder-next',
     ]) {
       const cap = resolveModelCapability(
         { provider: 'new_api', modelId },

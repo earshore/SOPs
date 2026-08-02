@@ -13,7 +13,7 @@
 5. **jsonMode:true** → 强制 `chat_completions` + `response_format`（分析链路可靠性加固；无 response_format 时 prompt+parseLlmJson 仍可能成功）
 6. **别名：** `5.6-terra` / `openai/gpt-5.5` 等经 `normalizeModelIdForCapability` 匹配
 7. **用户路径：** 系统设置 `apiPath` 覆盖 Registry preferredSurface；四路径见 multi-protocol design
-7. **`/responses` 404** → 降级一次 `chat_completions`
+8. **`/responses` 404** → 降级一次 `chat_completions`
 
 ## 默认 surface
 
@@ -32,17 +32,18 @@
 
 ## 头部模型（摘要）
 
-| 厂商       | 示例 id                                   | 有推理开关                                   |
-| ---------- | ----------------------------------------- | -------------------------------------------- |
-| OpenAI     | `o3-mini`, `gpt-5.5`, `gpt-5.6`           | ✅                                           |
-| xAI        | `grok-4.5`, `grok-4*`                     | ✅                                           |
-| DeepSeek   | `deepseek-v4-flash`, `deepseek-v4-pro`    | ✅（thinking + low/high/max）                |
-| Anthropic  | `claude-sonnet-4-5-*`, `claude-opus-4.5*` | ✅（发 thinking；若 channel 未适配可能 400） |
-| Google     | `gemini-3.6-flash*`, `gemini-2.5-pro*`    | ✅（发 Gemini thinking 字段）                |
-| Kimi       | `kimi-k3*`（low/high/max）、`kimi-k2.6`（仅开关） | ✅                                |
-| GLM        | `glm-5*`（thinking + 档位）               | ✅（GLM-5.2+；4.x/Z1 fail-closed）           |
-| 其它       | qwen3 / qwq / hy3 / grok-3 / moonshot-v1-thinking | ⏳ fail-closed（官方依据未验证，待 probe） |
-| 非推理默认 | `gpt-4o`, `gpt-4.1`                       | ❌ fail-closed                               |
+| 厂商       | 示例 id                                           | 有推理开关                                                     |
+| ---------- | ------------------------------------------------- | -------------------------------------------------------------- |
+| OpenAI     | `o3-mini`, `gpt-5.5`, `gpt-5.6`                   | ✅                                                             |
+| xAI        | `grok-4.5`, `grok-4*`                             | ✅                                                             |
+| DeepSeek   | `deepseek-v4-flash`, `deepseek-v4-pro`            | ✅（thinking + low/high/max）                                  |
+| Anthropic  | `claude-sonnet-4-5-*`, `claude-opus-4.5*`         | ✅（发 thinking；若 channel 未适配可能 400）                   |
+| Google     | `gemini-3.6-flash*`, `gemini-2.5-pro*`            | ✅（发 Gemini thinking 字段）                                  |
+| Kimi       | `kimi-k3*`（low/high/max）、`kimi-k2.6`（仅开关） | ✅                                                             |
+| GLM        | `glm-5.2*`（thinking + 档位）                     | ✅（网关实测 2026-08-02；5.1/4.x/Z1 fail-closed）              |
+| MiniMax    | `minimax-m2.7*`（low/medium/high）                | ✅（网关实测；M3 fail-closed）                                 |
+| 其它       | qwen3 / qwq / hy3 / grok-3 / moonshot-v1-thinking | ⏳ fail-closed（网关实测无推理输出或无 channel，待修复后重测） |
+| 非推理默认 | `gpt-4o`, `gpt-4.1`                               | ❌ fail-closed                                                 |
 
 ## 网关实测（new.hongecb.store · 本 key）
 

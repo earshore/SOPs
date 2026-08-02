@@ -17,10 +17,10 @@ npm run probe:responses   # Responses surface matrix
 Catalog on key: `deepseek-v4-flash`, `claude-sonnet-4-5-20250929`, `grok-4.5`, `hy3-preview`.  
 Probed preferred subset (deepseek / grok):
 
-| Model | plain | max_tokens | max_completion_tokens | json_object | reasoning_effort=low | stream |
-| ----- | ----- | ---------- | --------------------- | ----------- | -------------------- | ------ |
-| deepseek-v4-flash | OK | OK | OK | OK | OK | OK |
-| grok-4.5 | OK | OK | OK | OK | OK | OK |
+| Model             | plain | max_tokens | max_completion_tokens | json_object | reasoning_effort=low | stream |
+| ----------------- | ----- | ---------- | --------------------- | ----------- | -------------------- | ------ |
+| deepseek-v4-flash | OK    | OK         | OK                    | OK          | OK                   | OK     |
+| grok-4.5          | OK    | OK         | OK                    | OK          | OK                   | OK     |
 
 Notes:
 
@@ -63,17 +63,19 @@ Rules source: `src/services/modelCapability/registry.ts`
 Enterprise closed-loop (product axis + per-model allowlist + nearest clamp + requested/effective):  
 → **`docs/superpowers/specs/2026-07-26-reasoning-effort-closed-loop-design.md`**
 
-| Family          | Patterns (summary)                                  | Effort allowlist (summary) | Probe / basis                |
-| --------------- | --------------------------------------------------- | -------------------------- | ---------------------------- |
-| OpenAI o-series | `o1*`, `o3*`, `o4-mini*` (tight)                    | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | OpenAI Reasoning docs |
-| OpenAI GPT-5    | `gpt-5`, `gpt-5.1`…`gpt-5.6`, `gpt-5-*`             | low…max (flagship)         | OpenAI Reasoning docs        |
-| xAI Grok-4.5    | `grok-4.5*`                                         | low\|medium\|high          | xAI docs + live gateway      |
-| xAI Grok other  | `grok-4.3*`, `grok-4.20-multi-agent*`               | 4.3: none\|low\|medium\|high；multi-agent: low…xhigh | xAI docs（grok-3 / 其余 grok-4 别名未验证 → fail-closed） |
-| DeepSeek        | `deepseek-v4-flash`, `deepseek-v4-pro*`, `deepseek-v4-*` | low\|high\|max + `thinking.type` | DeepSeek Thinking Mode docs + live `deepseek-v4-flash` |
-| Kimi            | `kimi-k3*`（effort）；`kimi-k2` / `kimi-k2.5*` / `kimi-k2.6*`（toggle） | K3: low\|high\|max；K2.x: `thinking.type` 开关 | Moonshot 推理强度/思考模型 docs |
-| GLM             | `glm-5*`                                           | max\|xhigh\|high\|medium\|low + `thinking.type` | Zhipu 深度思考 docs（GLM-5.2+；4.x/Z1 无档位 → fail-closed） |
-| Hy3             | —                                                  | —                          | 未验证 → fail-closed（待 probe） |
-| Qwen3 / QwQ     | —                                                  | —                          | 原生 `enable_thinking`；OpenAI 兼容端未验证 → fail-closed（待 probe） |
+| Family          | Patterns (summary)                                                      | Effort allowlist (summary)                               | Probe / basis                                                                       |
+| --------------- | ----------------------------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| OpenAI o-series | `o1*`, `o3*`, `o4-mini*` (tight)                                        | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | OpenAI Reasoning docs                                                               |
+| OpenAI GPT-5    | `gpt-5`, `gpt-5.1`…`gpt-5.6`, `gpt-5-*`                                 | low…max (flagship)                                       | OpenAI Reasoning docs                                                               |
+| xAI Grok-4.5    | `grok-4.5*`                                                             | low\|medium\|high                                        | xAI docs + live gateway                                                             |
+| xAI Grok other  | `grok-4.3*`, `grok-4.20-multi-agent*`                                   | 4.3: none\|low\|medium\|high；multi-agent: low…xhigh     | xAI docs（grok-3 / 其余 grok-4 别名未验证 → fail-closed）                           |
+| DeepSeek        | `deepseek-v4-pro*`, `deepseek-v4-*`                                     | low\|high\|max + `thinking.type`                         | DeepSeek Thinking Mode docs + live `deepseek-v4-pro`                                |
+| Kimi            | `kimi-k3*`（effort）；`kimi-k2` / `kimi-k2.5*` / `kimi-k2.6*`（toggle） | K3: low\|high\|max；K2.x: `thinking.type` 开关           | Moonshot 推理强度/思考模型 docs                                                     |
+| GLM             | `glm-5.2*`                                                              | max\|xhigh\|high\|medium\|low + `thinking.type`          | Zhipu 深度思考 docs + live `glm-5.2`                                                |
+| MiniMax         | `minimax-m2.7*`                                                         | low\|medium\|high                                        | Live `minimax-m2.7`（max → 400；M3 无推理输出）                                     |
+| Hy3             | —                                                                       | —                                                        | Live `hy3` / `hy3-preview`：字段被接受但**无推理输出** → fail-closed                |
+| Qwen3 / QwQ     | —                                                                       | —                                                        | Live：`qwen3.7-*` 无可用 channel（404）、`qwen3-coder-next` 请求 400 → fail-closed  |
+| GLM-5.1         | —                                                                       | —                                                        | Live：默认思考、`reasoning_effort=max` → 400、仅 `thinking.type` 可关 → fail-closed |
 
 ### Real mappers (UI on) vs channel risk
 
@@ -96,13 +98,21 @@ For each production model that should expose reasoning UI:
 
 ### Probe log
 
-| Date       | Model id                   | Endpoint          | Field(s)           | Off behavior                                      | Stream reasoning channel                                           | Result                                                            |
-| ---------- | -------------------------- | ----------------- | ------------------ | ------------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| 2026-07-23 | deepseek-v4-flash          | new.hongecb.store | `reasoning_effort` | omit → 200                                        | `delta.reasoning_content` + non-stream `message.reasoning_content` | **pass**                                                          |
-| 2026-07-23 | grok-4.5                   | new.hongecb.store | `reasoning_effort` | omit → 200; effort raises `reasoning_tokens`      | `reasoning_content` present                                        | **pass**                                                          |
-| 2026-07-23 | claude-sonnet-4-5-20250929 | new.hongecb.store | n/a                | plain chat 400 (auth/catalog, not field-specific) | n/a                                                                | **skip** (not a reasoning allowlist candidate)                    |
-| 2026-07-23 | o3-mini                    | new.hongecb.store | —                  | —                                                 | —                                                                  | **not on key catalog**; keep OpenAI mapRequest for when available |
-| 2026-07-23 | deepseek-r1                | new.hongecb.store | —                  | —                                                 | —                                                                  | **not on key catalog**; no mapRequest                             |
+| Date       | Model id                   | Endpoint          | Field(s)                             | Off behavior                                                                                                                      | Stream reasoning channel                                           | Result                                                            |
+| ---------- | -------------------------- | ----------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| 2026-07-23 | deepseek-v4-flash          | new.hongecb.store | `reasoning_effort`                   | omit → 200                                                                                                                        | `delta.reasoning_content` + non-stream `message.reasoning_content` | **pass**                                                          |
+| 2026-07-23 | grok-4.5                   | new.hongecb.store | `reasoning_effort`                   | omit → 200; effort raises `reasoning_tokens`                                                                                      | `reasoning_content` present                                        | **pass**                                                          |
+| 2026-07-23 | claude-sonnet-4-5-20250929 | new.hongecb.store | n/a                                  | plain chat 400 (auth/catalog, not field-specific)                                                                                 | n/a                                                                | **skip** (not a reasoning allowlist candidate)                    |
+| 2026-07-23 | o3-mini                    | new.hongecb.store | —                                    | —                                                                                                                                 | —                                                                  | **not on key catalog**; keep OpenAI mapRequest for when available |
+| 2026-07-23 | deepseek-r1                | new.hongecb.store | —                                    | —                                                                                                                                 | —                                                                  | **not on key catalog**; no mapRequest                             |
+| 2026-08-02 | glm-5.2                    | new.hongecb.store | `reasoning_effort` + `thinking.type` | omit / effort=none → 无思考；low/medium/high/xhigh/max/minimal → 200 且有 `reasoning_content`；thinking.disabled 被忽略（仍思考） | `reasoning_content` present                                        | **pass**（省略字段即关闭）                                        |
+| 2026-08-02 | glm-5.1                    | new.hongecb.store | `reasoning_effort` / `thinking.type` | omit → 默认思考；effort=low/medium → 200（思考）；effort=max → **400**；thinking.disabled → 关闭思考                              | `reasoning_content` present                                        | **partial**（无 effort；仅 thinking.type 可关）                   |
+| 2026-08-02 | deepseek-v4-pro            | new.hongecb.store | `thinking.type` + `reasoning_effort` | 仅 effort（low/medium/max）→ 200 但无思考；`thinking.type=enabled`（+effort）→ 有 `reasoning_content`                             | `reasoning_content` present                                        | **pass**（需 thinking.type 才生效）                               |
+| 2026-08-02 | deepseek-v4-flash          | new.hongecb.store | `thinking.type` + `reasoning_effort` | 全部 200；无任何字段产生 `reasoning_content`                                                                                      | 无 reasoning 输出                                                  | **watch**（channel 无思考输出，字段被接受）                       |
+| 2026-08-02 | minimax-m2.7               | new.hongecb.store | `reasoning_effort`                   | low/medium/high → 200；max → **400**；消息始终带 `reasoning` 字段                                                                 | `reasoning` key                                                    | **pass**（low\|medium\|high）                                     |
+| 2026-08-02 | minimax-m3 / hy3           | new.hongecb.store | 各字段                               | 全部 200；无任何字段产生推理输出                                                                                                  | 无 reasoning 输出                                                  | **fail**（非推理模型）                                            |
+| 2026-08-02 | qwen3.7-plus / qwen3.7-max | new.hongecb.store | —                                    | 404 No active credentials for provider: openai                                                                                    | n/a                                                                | **skip**（无可用 channel）                                        |
+| 2026-08-02 | qwen3-coder-next           | new.hongecb.store | 各字段                               | 全部 400 Improperly formed request（含 omit）                                                                                     | n/a                                                                | **skip**（channel 异常）                                          |
 
 ### Probe notes
 

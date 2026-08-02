@@ -170,6 +170,15 @@ const CASES: Case[] = [
     expectBodyEffort: 'max',
     expectThinkingEnabled: true,
   },
+  {
+    name: 'minimax-m2.7 max clamps to high (gateway enum low|medium|high)',
+    modelId: 'minimax-m2.7',
+    requested: 'max',
+    expectEffective: 'high',
+    expectAllowlistIncludes: ['low', 'medium', 'high'],
+    expectAllowlistExcludes: ['xhigh', 'max'],
+    expectBodyEffort: 'high',
+  },
 ];
 
 describe('reasoning effort closed loop (registry → resolve → mapRequest)', () => {
