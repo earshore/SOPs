@@ -284,6 +284,8 @@ function deepseekEffort(modelPattern: string, contextWindow: number): ModelCapab
         effortControlKind: 'openai_thinking_plus_effort',
         mapRequest: mapThinkingPlusEffort,
         supportsStructuredOutput: true,
+        // 网关通道（codebuddy-cn）拒绝 thinking + response_format 组合
+        structuredOutputWithReasoning: false,
         supportsTools: true,
         supportsVision: true,
       },

@@ -17,6 +17,7 @@ import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { parseAnalysisResponse } from './analysisResultParser';
 import {
+  getMasterAnalysisReasoningMultiplier,
   getMasterAnalysisReduceMaxTokens,
   getMasterAnalysisTargetMaxTokens,
 } from '../../services/llmOutputBudget';
@@ -476,7 +477,7 @@ function getSellingPointsMapMaxTokens(mapUnits: SellingPointsMapUnit[]): number 
   const firstMapBullets = mapUnits[0]?.bullets.length ?? MAP_CHUNK_BULLETS;
   return Math.min(
     getMasterAnalysisTargetMaxTokens('selling-points'),
-    Math.max(2048, 512 + firstMapBullets * 400)
+    Math.max(2048, 512 + firstMapBullets * 400) * getMasterAnalysisReasoningMultiplier()
   );
 }
 
@@ -487,6 +488,7 @@ async function runSellingPointsMapUnit(
   mapMaxTokens: number,
   state: SellingPointsMapPhaseState
 ): Promise<unknown[]> {
+  options.onPhase?.(`卖点 Map 进行中 ${state.completedMaps + 1}/${totalUnits} · ${unit.slice.asin}`);
   const prompt = buildMapPrompt(unit.slice, options.language, unit.offset);
   state.promptChars += prompt.length;
   state.estimatedInputTokens += estimateTokenCount(prompt);

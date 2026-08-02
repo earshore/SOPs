@@ -38,6 +38,12 @@ import { BusinessError } from '@/common/errors/AppError';
 import { getPerformanceSettings } from './PerformanceSettings';
 import { emitHistoryUpdated } from '../../services/historyEvents';
 import { getScrapedDataFingerprint } from '../../services/reportIdentity';
+import {
+  clearAnalysisSession,
+  loadAnalysisSession,
+  saveAnalysisSession,
+  type AnalysisSessionSnapshot,
+} from '../utils/analysisSession';
 
 type AnalysisSchedulePlan = ReturnType<typeof resolveAnalysisSchedulePlan>;
 type PerformanceSettings = ReturnType<typeof getPerformanceSettings>;
@@ -290,6 +296,31 @@ function isCurrentAnalysisSource(binding: AnalysisSourceBinding): boolean {
   );
 }
 
+let lastSessionSaveAt = 0;
+function persistAnalysisSession(
+  report: Partial<FullAnalysisReport>,
+  targetIds: string[],
+  binding: AnalysisSourceBinding
+): void {
+  const now = Date.now();
+  if (now - lastSessionSaveAt < 1000) return;
+  lastSessionSaveAt = now;
+  const snapshot: AnalysisSessionSnapshot = {
+    version: 1,
+    sourceHistoryId: binding.sourceHistoryId != null ? String(binding.sourceHistoryId) : undefined,
+    sourceAsins: [...binding.sourceAsins],
+    sourceDataFingerprint: binding.sourceDataFingerprint || undefined,
+    targetIds: [...targetIds],
+    completedTargetIds: targetIds.filter(
+      targetId => (report as Record<string, unknown>)[targetId] !== undefined
+    ),
+    report: report as Partial<FullAnalysisReport>,
+    startedAt: new Date(now).toISOString(),
+    updatedAt: new Date(now).toISOString(),
+  };
+  saveAnalysisSession(snapshot);
+}
+
 function withAnalysisSourceBinding(
   report: FullAnalysisReport,
   binding: AnalysisSourceBinding,
@@ -519,6 +550,9 @@ async function runPreparedParallelAnalysis(
         preparedRun.language,
         streamResults
       ),
+      onTaskSettledSnapshot: (report, targetIds) => {
+        persistAnalysisSession(report, targetIds, preparedRun.sourceBinding);
+      },
     }
   );
 
@@ -531,6 +565,68 @@ async function runPreparedParallelAnalysis(
   }
 
   return withAnalysisSourceBinding(analysisReport, preparedRun.sourceBinding, preparedRun.language);
+}
+
+/**
+ * 恢复上次未完成的分析会话（断点续跑）。
+ * 数据源（ASIN 集合/指纹）匹配时恢复已完成报告与选择状态，返回是否恢复。
+ */
+export async function restoreInterruptedAnalysis(context: AlpineContext): Promise<boolean> {
+  const session = loadAnalysisSession();
+  if (!session) return false;
+
+  const state = appStore.getState();
+
+  // 刷新/重进后 store 可能没有产品数据：按数据指纹从历史快照恢复
+  if (!state.scraper?.scrapedData?.products?.length) {
+    const { HistoryService } = await import('../../services/historyService');
+    const history = await HistoryService.getAllAsync();
+    const matched = history.find(
+      item => getScrapedDataFingerprint(item.data) === session.sourceDataFingerprint
+    );
+    if (matched?.data) {
+      state.setScrapedData(matched.data);
+      state.setCurrentHistoryId(matched.id);
+    }
+  }
+
+  // setScrapedData 后需要重新取 store（zustand set 会生成新 state 对象）
+  const refreshedState = appStore.getState();
+  // 直接用恢复的数据源计算 ASIN 集合（刷新后 selectedAsins 尚未设置）
+  const scrapedData = refreshedState.scraper?.scrapedData;
+  const currentAsins = (scrapedData?.products || [])
+    .map(product => product.asin)
+    .filter((asin): asin is string => Boolean(asin));
+  if (
+    session.sourceAsins.length === 0 ||
+    session.sourceAsins.some(asin => !currentAsins.includes(asin))
+  ) {
+    return false;
+  }
+
+  const currentFingerprint = getScrapedDataFingerprint(state.scraper?.scrapedData);
+  if (
+    session.sourceDataFingerprint &&
+    currentFingerprint &&
+    session.sourceDataFingerprint !== currentFingerprint
+  ) {
+    return false;
+  }
+
+  context.selectedAsins = [...session.sourceAsins];
+  context.selectedTargets = [...session.targetIds];
+  refreshedState.setSelectedAsins([...session.sourceAsins]);
+  if (session.report && Object.keys(session.report).length > 0) {
+    context.analysisReport = session.report as FullAnalysisReport;
+    context.hasReport = true;
+    refreshedState.setAnalysisReport(session.report as AnalysisReport);
+  }
+
+  showToast(
+    `已恢复上次未完成的分析（已完成 ${session.completedTargetIds.length}/${session.targetIds.length}），点击“开始分析”将继续剩余目标`,
+    { type: 'info' }
+  );
+  return true;
 }
 
 function getAnalysisTargetLabel(targetId: string): string {
@@ -674,6 +770,8 @@ export async function runAnalysisAction(
   const selectedTargets = [...context.selectedTargets];
   const sourceBinding = createAnalysisSourceBinding(context);
 
+  // 新分析开始：清掉旧断点，避免误恢复
+  clearAnalysisSession();
   startAnalysisAction(context);
 
   try {
@@ -684,6 +782,7 @@ export async function runAnalysisAction(
     }
 
     await completeAnalysisAction(context, sourceBinding, boundAnalysisReport);
+    clearAnalysisSession();
   } catch (error) {
     handleAnalysisActionError(context, error);
   } finally {

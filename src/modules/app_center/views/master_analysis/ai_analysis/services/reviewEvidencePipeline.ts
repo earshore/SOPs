@@ -17,6 +17,7 @@ import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { parseAnalysisResponse } from './analysisResultParser';
 import { parseLlmJson } from '@/common/utils/parseLlmJson';
 import {
+  getMasterAnalysisReasoningMultiplier,
   getMasterAnalysisReduceMaxTokens,
   getMasterAnalysisTargetMaxTokens,
 } from '../../services/llmOutputBudget';
@@ -1051,7 +1052,7 @@ async function runReviewMapPhase(
   const firstChunkLen = units[0]?.slice.customer_reviews.length ?? REVIEW_CHUNK_SIZE;
   const mapMaxTokens = Math.min(
     getMasterAnalysisTargetMaxTokens(targetId),
-    Math.max(2048, 512 + firstChunkLen * 220)
+    Math.max(2048, 512 + firstChunkLen * 220) * getMasterAnalysisReasoningMultiplier()
   );
 
   let promptChars = 0;
@@ -1069,6 +1070,7 @@ async function runReviewMapPhase(
   );
 
   await mapWithConcurrency(units, mapConcurrency, async (unit, mapIndex) => {
+    options.onPhase?.(`${targetId} Map 进行中 ${completedMaps + 1}/${units.length} · ${unit.slice.asin}`);
     const prompt = handler.buildMapPrompt(
       unit.slice,
       options.language,
@@ -1358,6 +1360,7 @@ async function runSharedGeneralMapUnit({
   unit,
   mapIndex,
 }: SharedGeneralMapUnitArgs): Promise<void> {
+  options.onPhase?.(`shared-general Map 进行中 ${state.completedMaps + 1}/${units.length} · ${unit.slice.asin}`);
   const prompt = buildSharedGeneralMapPrompt(
     unit.slice,
     options.language,
@@ -1491,7 +1494,10 @@ export async function buildSharedGeneralReviewMap(
   }
 
   const firstChunkLen = units[0]?.slice.customer_reviews.length ?? REVIEW_CHUNK_SIZE;
-  const mapMaxTokens = Math.min(8192, Math.max(3072, 768 + firstChunkLen * 280));
+  const mapMaxTokens = Math.min(
+    getMasterAnalysisTargetMaxTokens('hesitation-points'),
+    Math.max(3072, 768 + firstChunkLen * 280) * getMasterAnalysisReasoningMultiplier()
+  );
   const mapPhase = await runSharedGeneralMapPhase(options, requested, units, mapMaxTokens);
 
   return {

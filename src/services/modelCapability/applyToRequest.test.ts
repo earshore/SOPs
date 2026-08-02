@@ -706,4 +706,79 @@ describe('verbosity and service_tier normalization', () => {
     });
     expect(body.text).toBeUndefined();
   });
+  it('skips response_format when reasoning enabled and structuredOutputWithReasoning is false', () => {
+    const capability = {
+      modelId: 'deepseek-v4-flash',
+      provider: 'new_api',
+      contextWindow: 128_000,
+      apiSurface: 'chat_completions' as const,
+      supportsReasoning: true,
+      reasoningEfforts: ['low', 'high', 'max'] as const,
+      defaultEffort: 'high' as const,
+      temperatureIgnored: true,
+      features: ['reasoning'],
+      supportsStructuredOutput: true,
+      structuredOutputWithReasoning: false,
+      mapRequest: null,
+      source: { registryMatched: true, preferredSurface: 'chat_completions' as const },
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildChatCompletionsBody({
+      model: 'deepseek-v4-flash',
+      messages: [{ role: 'user', content: 'hi' }],
+      stream: true,
+      jsonMode: true,
+      jsonSchema: {
+        name: 'analysis_result',
+        schema: { type: 'object', additionalProperties: true },
+        strict: false,
+      },
+      capability,
+      reasoning: { enabled: true, effort: 'max', requestedEffort: 'max' },
+    });
+
+    expect(body.response_format).toBeUndefined();
+  });
+
+  it('keeps response_format when reasoning disabled even if structuredOutputWithReasoning is false', () => {
+    const capability = {
+      modelId: 'deepseek-v4-flash',
+      provider: 'new_api',
+      contextWindow: 128_000,
+      apiSurface: 'chat_completions' as const,
+      supportsReasoning: true,
+      reasoningEfforts: ['low', 'high', 'max'] as const,
+      defaultEffort: 'high' as const,
+      temperatureIgnored: true,
+      features: ['reasoning'],
+      supportsStructuredOutput: true,
+      structuredOutputWithReasoning: false,
+      mapRequest: null,
+      source: { registryMatched: true, preferredSurface: 'chat_completions' as const },
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildChatCompletionsBody({
+      model: 'deepseek-v4-flash',
+      messages: [{ role: 'user', content: 'hi' }],
+      stream: true,
+      jsonMode: true,
+      jsonSchema: {
+        name: 'analysis_result',
+        schema: { type: 'object', additionalProperties: true },
+        strict: false,
+      },
+      capability,
+      reasoning: { enabled: false, effort: 'off', requestedEffort: 'off' },
+    });
+
+    expect(body.response_format).toEqual({
+      type: 'json_schema',
+      json_schema: {
+        name: 'analysis_result',
+        schema: { type: 'object', additionalProperties: true },
+        strict: false,
+      },
+    });
+  });
+
 });

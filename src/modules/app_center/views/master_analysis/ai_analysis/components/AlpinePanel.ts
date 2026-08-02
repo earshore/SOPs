@@ -424,6 +424,9 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
     // 检查是否有已加载的历史报告
     checkLoadedReport(this);
+
+    // 恢复上次未完成的分析（断点续跑）
+    void actions.restoreInterruptedAnalysis(this);
     this.refreshReportView();
   },
 

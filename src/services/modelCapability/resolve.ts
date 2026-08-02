@@ -164,6 +164,7 @@ function buildResolvedCapability(args: {
     mapRequest: capability?.mapRequest ?? null,
     effortControlKind: capability?.effortControlKind ?? 'none',
     supportsStructuredOutput: Boolean(capability?.supportsStructuredOutput),
+    structuredOutputWithReasoning: capability?.structuredOutputWithReasoning !== false,
     supportsTools: Boolean(capability?.supportsTools),
     supportsVision: Boolean(capability?.supportsVision),
     supportsPreviousResponseId: Boolean(capability?.supportsPreviousResponseId),

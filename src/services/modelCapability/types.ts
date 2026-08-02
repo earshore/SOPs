@@ -45,6 +45,8 @@ export type ApiSurface =
 export interface SurfaceCapabilityFlags {
   /** Structured Outputs: chat uses response_format; responses uses text.format */
   supportsStructuredOutput?: boolean;
+  /** When false, skip structured output while reasoning is enabled (vendor gateway rejects response_format + thinking). */
+  structuredOutputWithReasoning?: boolean;
   /** Function / custom tools on this surface */
   supportsTools?: boolean;
   /** Multimodal image input parts */
@@ -171,6 +173,8 @@ export interface ResolvedModelCapability {
   effortControlKind: EffortControlKind;
   /** Extended flags for the resolved surface (fail-closed). */
   supportsStructuredOutput: boolean;
+  /** When false, structured output is skipped while reasoning is enabled (vendor gateway rejects response_format + thinking). */
+  structuredOutputWithReasoning: boolean;
   supportsTools: boolean;
   supportsVision: boolean;
   supportsPreviousResponseId: boolean;

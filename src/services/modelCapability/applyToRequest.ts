@@ -126,9 +126,13 @@ function applyChatResponseFormat(
   args: {
     jsonMode?: boolean;
     jsonSchema?: ResponsesJsonSchemaFormat;
-    capability: Pick<ResolvedModelCapability, 'supportsStructuredOutput'>;
+    capability: Pick<ResolvedModelCapability, 'supportsStructuredOutput' | 'structuredOutputWithReasoning'>;
+    reasoningEnabled?: boolean;
   }
 ): void {
+  if (args.reasoningEnabled && args.capability.structuredOutputWithReasoning === false) {
+    return;
+  }
   if (args.jsonSchema?.name && args.jsonSchema.schema && args.capability.supportsStructuredOutput) {
     body.response_format = {
       type: 'json_schema',
@@ -279,7 +283,7 @@ export function buildChatCompletionsBody(
     base.stream = true;
     base.stream_options = { include_usage: true };
   }
-  applyChatResponseFormat(base, args);
+  applyChatResponseFormat(base, { ...args, reasoningEnabled: args.reasoning.enabled });
   applyChatOptionalCreateFields(base, args);
 
   const body = applyReasoningToRequestBody(base, args.capability, args.reasoning, {

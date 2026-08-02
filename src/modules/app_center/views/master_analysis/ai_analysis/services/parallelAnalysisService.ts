@@ -131,6 +131,8 @@ interface ParallelAnalysisConfig {
   stopOnFailure?: boolean; // 失败后停止继续排队新任务
   onTaskComplete?: (update: ParallelAnalysisResultUpdate) => void;
   onTaskFailed?: (update: ParallelAnalysisResultUpdate) => void;
+  /** Called after every settled task with the current partial report (断点续跑). */
+  onTaskSettledSnapshot?: (report: Partial<FullAnalysisReport>, targetIds: string[]) => void;
 }
 
 interface CachedAnalysisEntry {
@@ -1068,6 +1070,7 @@ function resolveParallelAnalysisConfig(
     stopOnFailure: config.stopOnFailure ?? false,
     onTaskComplete: config.onTaskComplete,
     onTaskFailed: config.onTaskFailed,
+    onTaskSettledSnapshot: config.onTaskSettledSnapshot,
   };
 }
 
@@ -1232,6 +1235,7 @@ function createPendingTaskWaveOptions(
     stopOnFailure: config.stopOnFailure,
     onTaskSettled: (task, completedCount, _totalCount, currentTasks) => {
       handleSettledAnalysisTask(context, task, cachedTasks.length + completedCount, currentTasks);
+      config.onTaskSettledSnapshot?.(context.report, context.targetIds);
     },
     onTaskFirstResponse: (task, completedCount, _totalCount, currentTasks) => {
       handleFirstAnalysisResponse(context, task, cachedTasks.length + completedCount, currentTasks);
