@@ -185,7 +185,7 @@ describe('v3.0.12-rc.3 release metadata', () => {
 
   it('places current RC notes before the prior candidate section', () => {
     const changelog = readRepoFile('docs/CHANGELOG.md');
-    const rcStart = changelog.indexOf(`## [${CURRENT_VERSION}] - 2026-07-29`);
+    const rcStart = changelog.indexOf(`## [${CURRENT_VERSION}] - `);
     const priorCandidateStart = changelog.indexOf('## [3.0.12-rc.2] - 2026-07-28');
     const nextReleaseStart = changelog.indexOf('\n## [', rcStart + 1);
 

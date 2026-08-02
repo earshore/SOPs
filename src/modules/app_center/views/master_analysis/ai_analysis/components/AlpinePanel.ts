@@ -858,7 +858,10 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     if (!Array.isArray(warnings)) return [];
     // shared_general_map 是共享抽取的信息性标记，不是质量警告
     return warnings
-      .map(item => ({ ...item, notes: (item.notes || []).filter(note => note !== 'shared_general_map') }))
+      .map(item => ({
+        ...item,
+        notes: (item.notes || []).filter(note => note !== 'shared_general_map'),
+      }))
       .filter(item => item.notes.length > 0);
   },
 

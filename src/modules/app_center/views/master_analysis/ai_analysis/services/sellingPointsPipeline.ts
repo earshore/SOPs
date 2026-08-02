@@ -488,7 +488,9 @@ async function runSellingPointsMapUnit(
   mapMaxTokens: number,
   state: SellingPointsMapPhaseState
 ): Promise<unknown[]> {
-  options.onPhase?.(`卖点 Map 进行中 ${state.completedMaps + 1}/${totalUnits} · ${unit.slice.asin}`);
+  options.onPhase?.(
+    `卖点 Map 进行中 ${state.completedMaps + 1}/${totalUnits} · ${unit.slice.asin}`
+  );
   const prompt = buildMapPrompt(unit.slice, options.language, unit.offset);
   state.promptChars += prompt.length;
   state.estimatedInputTokens += estimateTokenCount(prompt);

@@ -26,10 +26,12 @@ import {
   copyMarkdown,
   downloadJson,
   rerunAnalysisTargetsAction,
-  runAnalysisAction
+  runAnalysisAction,
+  restoreInterruptedAnalysis
 } from '../../src/modules/app_center/views/master_analysis/ai_analysis/components/actions';
 import { AlpineContext } from '../../src/modules/app_center/views/master_analysis/ai_analysis/types';
 import type { Product } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/sampleData';
+import { getScrapedDataFingerprint } from '../../src/modules/app_center/views/master_analysis/services/reportIdentity';
 
 // Mock 依赖
 vi.mock('@/common/ui/index', () => ({
@@ -40,12 +42,31 @@ const mockAppStoreState = vi.hoisted(() => ({
   setSelectedAsins: vi.fn(),
   setAnalysisReport: vi.fn(),
   updateAnalysis: vi.fn(),
+  setScrapedData: vi.fn((data: unknown) => {
+    mockAppStoreState.scraper = { ...(mockAppStoreState.scraper || {}), scrapedData: data };
+  }),
+  setCurrentHistoryId: vi.fn(),
   scraper: undefined as any
 }));
+
+const mockLoadAnalysisSession = vi.hoisted(() => vi.fn());
+const mockSaveAnalysisSession = vi.hoisted(() => vi.fn());
+const mockClearAnalysisSession = vi.hoisted(() => vi.fn());
+const mockHistoryGetAll = vi.hoisted(() => vi.fn());
 
 const mockRunParallelAIAnalysis = vi.hoisted(() => vi.fn());
 const mockGetCachedAnalysisResults = vi.hoisted(() => vi.fn());
 const mockResolveAnalysisSchedulePlan = vi.hoisted(() => vi.fn());
+
+vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/utils/analysisSession', () => ({
+  loadAnalysisSession: mockLoadAnalysisSession,
+  saveAnalysisSession: mockSaveAnalysisSession,
+  clearAnalysisSession: mockClearAnalysisSession,
+}));
+
+vi.mock('../../src/modules/app_center/views/master_analysis/services/historyService', () => ({
+  HistoryService: { getAllAsync: mockHistoryGetAll },
+}));
 
 vi.mock('@/stores/useAppStore', () => ({
   appStore: {
@@ -725,4 +746,89 @@ describe('actions - 执行分析', () => {
     );
     expect(mockContext.selectedTargets).toEqual(['title-keywords']);
   });
+
+describe('restoreInterruptedAnalysis', () => {
+  const makeScrapedData = () => ({
+    metadata: { marketplace: 'DE', scrape_timestamp: '2026-01-01T00:00:00.000Z', total_asins: 1 },
+    products: [
+      {
+        asin: "B001",
+        feature_bullets: ["Feature 1"],
+        customer_reviews: [],
+        scrape_status: "success",
+      },
+    ],
+  });
+
+  const makeSession = (overrides: Record<string, unknown> = {}) => {
+    const data = makeScrapedData();
+    return {
+      version: 1 as const,
+      sourceHistoryId: "h1",
+      sourceAsins: ["B001"],
+      sourceDataFingerprint: getScrapedDataFingerprint(data) || undefined,
+      targetIds: ["title-keywords", "selling-points"],
+      completedTargetIds: ["title-keywords"],
+      report: { title: {} },
+      startedAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      ...overrides,
+    };
+  };
+
+  let restoredContext: AlpineContext;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockLoadAnalysisSession.mockReturnValue(null);
+    mockHistoryGetAll.mockResolvedValue([]);
+    mockAppStoreState.scraper = undefined;
+    restoredContext = {
+      selectedAsins: [],
+      selectedTargets: [],
+      analysisReport: null,
+      hasReport: false,
+      syncFromModuleState: vi.fn(),
+      syncToModuleState: vi.fn(),
+      $nextTick: vi.fn((cb: () => void) => cb()),
+    } as AlpineContext;
+  });
+
+  it("returns false when no session exists", async () => {
+    const restored = await restoreInterruptedAnalysis(restoredContext);
+    expect(restored).toBe(false);
+  });
+
+  it("restores from history when store has no data and fingerprint matches", async () => {
+    const data = makeScrapedData();
+    const session = makeSession();
+    mockLoadAnalysisSession.mockReturnValue(session);
+    mockHistoryGetAll.mockResolvedValue([{ id: "h1", data }]);
+    mockAppStoreState.scraper = undefined;
+
+    const restored = await restoreInterruptedAnalysis(restoredContext);
+    expect(restored).toBe(true);
+    expect(mockAppStoreState.setScrapedData).toHaveBeenCalledWith(data);
+    expect(mockAppStoreState.setCurrentHistoryId).toHaveBeenCalledWith("h1");
+    expect(restoredContext.selectedAsins).toEqual(["B001"]);
+  });
+
+  it("returns false when fingerprint does not match current data", async () => {
+    const otherData = makeScrapedData();
+    otherData.products = [{ ...otherData.products[0], asin: "B999" }];
+    mockAppStoreState.scraper = { scrapedData: otherData };
+    mockLoadAnalysisSession.mockReturnValue(makeSession());
+
+    const restored = await restoreInterruptedAnalysis(restoredContext);
+    expect(restored).toBe(false);
+  });
+
+  it("restores when store already has matching data", async () => {
+    const data = makeScrapedData();
+    mockAppStoreState.scraper = { scrapedData: data };
+    mockLoadAnalysisSession.mockReturnValue(makeSession());
+    const restored = await restoreInterruptedAnalysis(restoredContext);
+    expect(restored).toBe(true);
+  });
+});
 });

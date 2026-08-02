@@ -571,29 +571,10 @@ async function runPreparedParallelAnalysis(
  * 恢复上次未完成的分析会话（断点续跑）。
  * 数据源（ASIN 集合/指纹）匹配时恢复已完成报告与选择状态，返回是否恢复。
  */
-export async function restoreInterruptedAnalysis(context: AlpineContext): Promise<boolean> {
-  const session = loadAnalysisSession();
-  if (!session) return false;
-
-  const state = appStore.getState();
-
-  // 刷新/重进后 store 可能没有产品数据：按数据指纹从历史快照恢复
-  if (!state.scraper?.scrapedData?.products?.length) {
-    const { HistoryService } = await import('../../services/historyService');
-    const history = await HistoryService.getAllAsync();
-    const matched = history.find(
-      item => getScrapedDataFingerprint(item.data) === session.sourceDataFingerprint
-    );
-    if (matched?.data) {
-      state.setScrapedData(matched.data);
-      state.setCurrentHistoryId(matched.id);
-    }
-  }
-
-  // setScrapedData 后需要重新取 store（zustand set 会生成新 state 对象）
-  const refreshedState = appStore.getState();
-  // 直接用恢复的数据源计算 ASIN 集合（刷新后 selectedAsins 尚未设置）
-  const scrapedData = refreshedState.scraper?.scrapedData;
+function sessionSourceMatches(
+  session: AnalysisSessionSnapshot,
+  scrapedData: { products?: Array<{ asin?: string }> } | null | undefined
+): boolean {
   const currentAsins = (scrapedData?.products || [])
     .map(product => product.asin)
     .filter((asin): asin is string => Boolean(asin));
@@ -604,12 +585,46 @@ export async function restoreInterruptedAnalysis(context: AlpineContext): Promis
     return false;
   }
 
-  const currentFingerprint = getScrapedDataFingerprint(state.scraper?.scrapedData);
+  const currentFingerprint = getScrapedDataFingerprint(scrapedData);
   if (
     session.sourceDataFingerprint &&
     currentFingerprint &&
     session.sourceDataFingerprint !== currentFingerprint
   ) {
+    return false;
+  }
+
+  return true;
+}
+
+async function restoreScrapedDataFromHistory(
+  state: ReturnType<typeof appStore.getState>,
+  session: AnalysisSessionSnapshot
+): Promise<void> {
+  const { HistoryService } = await import('../../services/historyService');
+  const history = await HistoryService.getAllAsync();
+  const matched = history.find(
+    item => getScrapedDataFingerprint(item.data) === session.sourceDataFingerprint
+  );
+  if (matched?.data) {
+    state.setScrapedData(matched.data);
+    state.setCurrentHistoryId(matched.id);
+  }
+}
+
+async function restoreScopedData(
+  context: AlpineContext,
+  session: AnalysisSessionSnapshot
+): Promise<boolean> {
+  const state = appStore.getState();
+
+  // 刷新/重进后 store 可能没有产品数据：按数据指纹从历史快照恢复
+  if (!state.scraper?.scrapedData?.products?.length) {
+    await restoreScrapedDataFromHistory(state, session);
+  }
+
+  const refreshedState = appStore.getState();
+  if (!sessionSourceMatches(session, refreshedState.scraper?.scrapedData)) {
     return false;
   }
 
@@ -621,6 +636,14 @@ export async function restoreInterruptedAnalysis(context: AlpineContext): Promis
     context.hasReport = true;
     refreshedState.setAnalysisReport(session.report as AnalysisReport);
   }
+  return true;
+}
+export async function restoreInterruptedAnalysis(context: AlpineContext): Promise<boolean> {
+  const session = loadAnalysisSession();
+  if (!session) return false;
+
+  const restored = await restoreScopedData(context, session);
+  if (!restored) return false;
 
   showToast(
     `已恢复上次未完成的分析（已完成 ${session.completedTargetIds.length}/${session.targetIds.length}），点击“开始分析”将继续剩余目标`,

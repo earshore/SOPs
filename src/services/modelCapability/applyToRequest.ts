@@ -126,7 +126,10 @@ function applyChatResponseFormat(
   args: {
     jsonMode?: boolean;
     jsonSchema?: ResponsesJsonSchemaFormat;
-    capability: Pick<ResolvedModelCapability, 'supportsStructuredOutput' | 'structuredOutputWithReasoning'>;
+    capability: Pick<
+      ResolvedModelCapability,
+      'supportsStructuredOutput' | 'structuredOutputWithReasoning'
+    >;
     reasoningEnabled?: boolean;
   }
 ): void {

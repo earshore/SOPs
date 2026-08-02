@@ -116,6 +116,7 @@ const panelMocks = vi.hoisted(() => {
     downloadJson: vi.fn(),
     navigateToRouteId: vi.fn(async () => true),
     runAnalysisAction: vi.fn(async () => undefined),
+    restoreInterruptedAnalysis: vi.fn(async () => false),
   };
 });
 
@@ -170,6 +171,7 @@ vi.mock('@/modules/app_center/views/master_analysis/ai_analysis/components/actio
   copyMarkdown: panelMocks.copyMarkdown,
   downloadJson: panelMocks.downloadJson,
   runAnalysisAction: panelMocks.runAnalysisAction,
+  restoreInterruptedAnalysis: panelMocks.restoreInterruptedAnalysis,
 }));
 
 vi.mock(

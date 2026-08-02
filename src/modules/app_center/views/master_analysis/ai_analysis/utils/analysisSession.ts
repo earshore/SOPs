@@ -4,6 +4,7 @@
  */
 
 import type { FullAnalysisReport } from '../config/analysisReportData';
+import { StorageService } from '@/services/storageService';
 
 const SESSION_STORAGE_KEY = 'ai_analysis_in_progress_v1';
 const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
@@ -22,7 +23,7 @@ export interface AnalysisSessionSnapshot {
 
 export function saveAnalysisSession(snapshot: AnalysisSessionSnapshot): void {
   try {
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(snapshot));
+    StorageService.set(SESSION_STORAGE_KEY, snapshot);
   } catch (error) {
     console.warn('[AI分析] 保存断点会话失败:', error);
   }
@@ -30,10 +31,16 @@ export function saveAnalysisSession(snapshot: AnalysisSessionSnapshot): void {
 
 export function loadAnalysisSession(): AnalysisSessionSnapshot | null {
   try {
-    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<AnalysisSessionSnapshot>;
-    if (parsed.version !== 1 || !Array.isArray(parsed.targetIds) || !Array.isArray(parsed.sourceAsins)) {
+    const parsed = StorageService.get<Partial<AnalysisSessionSnapshot> | null>(
+      SESSION_STORAGE_KEY,
+      null
+    );
+    if (!parsed) return null;
+    if (
+      parsed.version !== 1 ||
+      !Array.isArray(parsed.targetIds) ||
+      !Array.isArray(parsed.sourceAsins)
+    ) {
       return null;
     }
     const updatedAt = typeof parsed.updatedAt === 'string' ? Date.parse(parsed.updatedAt) : NaN;
@@ -49,14 +56,12 @@ export function loadAnalysisSession(): AnalysisSessionSnapshot | null {
 
 export function clearAnalysisSession(): void {
   try {
-    localStorage.removeItem(SESSION_STORAGE_KEY);
+    StorageService.remove(SESSION_STORAGE_KEY);
   } catch {
     // ignore
   }
 }
 
-export function getSessionCompletedTargetIds(
-  snapshot: AnalysisSessionSnapshot
-): string[] {
+export function getSessionCompletedTargetIds(snapshot: AnalysisSessionSnapshot): string[] {
   return snapshot.targetIds.filter(targetId => snapshot.completedTargetIds.includes(targetId));
 }

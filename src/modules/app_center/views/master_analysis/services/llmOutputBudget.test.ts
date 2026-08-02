@@ -3,15 +3,24 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getMasterAnalysisReduceMaxTokens, getMasterAnalysisTargetMaxTokens } from './llmOutputBudget';
+import {
+  getMasterAnalysisReduceMaxTokens,
+  getMasterAnalysisTargetMaxTokens,
+} from './llmOutputBudget';
 
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; },
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
   };
 })();
 
@@ -26,7 +35,14 @@ function seedProvider(model: string, reasoningPrefs?: { enabled: boolean; effort
   localStorageMock.setItem('llm_active_provider', JSON.stringify('new_api'));
   localStorageMock.setItem(
     'llm_new_api',
-    JSON.stringify({ provider: 'new_api', endpoint: 'https://example.com/v1', model, apiKey: '', enabled: true, reasoningPrefs })
+    JSON.stringify({
+      provider: 'new_api',
+      endpoint: 'https://example.com/v1',
+      model,
+      apiKey: '',
+      enabled: true,
+      reasoningPrefs,
+    })
   );
 }
 

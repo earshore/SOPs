@@ -1070,7 +1070,9 @@ async function runReviewMapPhase(
   );
 
   await mapWithConcurrency(units, mapConcurrency, async (unit, mapIndex) => {
-    options.onPhase?.(`${targetId} Map 进行中 ${completedMaps + 1}/${units.length} · ${unit.slice.asin}`);
+    options.onPhase?.(
+      `${targetId} Map 进行中 ${completedMaps + 1}/${units.length} · ${unit.slice.asin}`
+    );
     const prompt = handler.buildMapPrompt(
       unit.slice,
       options.language,
@@ -1360,7 +1362,9 @@ async function runSharedGeneralMapUnit({
   unit,
   mapIndex,
 }: SharedGeneralMapUnitArgs): Promise<void> {
-  options.onPhase?.(`shared-general Map 进行中 ${state.completedMaps + 1}/${units.length} · ${unit.slice.asin}`);
+  options.onPhase?.(
+    `shared-general Map 进行中 ${state.completedMaps + 1}/${units.length} · ${unit.slice.asin}`
+  );
   const prompt = buildSharedGeneralMapPrompt(
     unit.slice,
     options.language,

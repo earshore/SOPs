@@ -28,14 +28,22 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本           | 说明                                               |
 | ---------------------------- | -------------- | -------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.0.11`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.12-rc.3` | AI 智能分析页面样式可读性修复、Keyword Hunter 旧快照兼容与挂起任务去重；**非** Latest |
-| package.json                 | `3.0.12-rc.3`  | 与当前 RC tag / Release 一致                       |
+| **当前 Pre-release 候选**    | `v3.0.12-rc.5` | Master Analysis AI 分析可靠性（推理模型兼容、输出预算、断点续跑、分批导入合并）；**非** Latest |
+| package.json                 | `3.0.12-rc.5`  | 与当前 RC tag / Release 一致                       |
 | 上一 GA                      | `v3.0.11`      | 回滚参考                                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.3` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.5` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.3`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.5`。
+
+`v3.0.12-rc.5`（2026-08-02，Pre-release）收口 Master Analysis AI 分析可靠性与模型能力：
+
+- **分批导入合并保留既有 ASIN**：多次导入不再互相覆盖，合并集合正确进入 AI 分析。
+- **推理模型兼容与预算**：deepseek-v4-flash 等开启推理时跳过冲突的结构化输出字段（修复全目标 400）；输出预算按推理档位放大（max ×3 封顶 32000），消除“空正文 / 部分字段不完整”。
+- **断点续跑**：分析中断后刷新可恢复已完成目标并从缓存继续，不用整轮重跑。
+- **体验**：证据深度下拉标注参考耗时；质量警告不再误报共享抽取；推荐并发 4→6。
+- GitHub Latest **仍指向** `v3.0.11`；回滚基线为 `v3.0.11`；生产目标 `https://sops.hongecb.store`。
 
 `v3.0.12-rc.3`（2026-07-29，Pre-release）收口 AI 分析页面样式与主题色调对齐：
 

@@ -780,5 +780,4 @@ describe('verbosity and service_tier normalization', () => {
       },
     });
   });
-
 });

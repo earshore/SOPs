@@ -39,7 +39,9 @@ function createSnapshot(overrides: Partial<AnalysisSessionSnapshot> = {}): Analy
     sourceDataFingerprint: 'fp-1',
     targetIds: ['title-keywords', 'selling-points'],
     completedTargetIds: ['title-keywords'],
-    report: { 'title-keywords': { primary_keywords: ['a'] } },
+    report: {
+      'title-keywords': { primary_keywords: ['a'] },
+    } as unknown as import('./analysisSession').AnalysisSessionSnapshot['report'],
     startedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...overrides,

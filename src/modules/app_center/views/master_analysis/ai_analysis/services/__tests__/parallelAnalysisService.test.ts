@@ -501,32 +501,33 @@ describe('性能设置', () => {
     expect(customConfig.enableCache).toBe(false);
     expect(customConfig.failureStrategy).toBe('abort');
   });
-describe('断点续跑快照', () => {
-  it('应该在每个任务落定后回调部分报告快照', async () => {
-    mockLlmConfig();
-    mockSuccessfulLlmResponses();
+  describe('断点续跑快照', () => {
+    it('应该在每个任务落定后回调部分报告快照', async () => {
+      mockLlmConfig();
+      mockSuccessfulLlmResponses();
 
-    const snapshots: Array<{ targetIds: string[]; reportKeys: number }> = [];
-    const report = await runParallelAIAnalysis(
-      ['title-keywords'],
-      createProduct(),
-      () => {},
-      'en',
-      {
-        maxConcurrency: 1,
-        enableCache: false,
-        failureStrategy: 'continue',
-        onTaskSettledSnapshot: (partialReport, targetIds) => {
-          snapshots.push({ targetIds, reportKeys: Object.keys(partialReport).length });
-        },
-      }
-    );
+      const snapshots: Array<{ targetIds: string[]; reportKeys: number }> = [];
+      const report = await runParallelAIAnalysis(
+        ['title-keywords'],
+        createProduct(),
+        () => {},
+        'en',
+        {
+          maxConcurrency: 1,
+          enableCache: false,
+          failureStrategy: 'continue',
+          onTaskSettledSnapshot: (partialReport, targetIds) => {
+            snapshots.push({ targetIds, reportKeys: Object.keys(partialReport).length });
+          },
+        }
+      );
 
-    expect(snapshots.length).toBe(1);
-    expect(snapshots[0].targetIds).toEqual(['title-keywords']);
-    expect(snapshots[0].reportKeys).toBeGreaterThan(0);
-    expect(report['title-keywords']).toBeDefined();
+      expect(snapshots.length).toBe(1);
+      const firstSnapshot = snapshots[0];
+      expect(firstSnapshot).toBeDefined();
+      expect(firstSnapshot?.targetIds).toEqual(['title-keywords']);
+      expect(firstSnapshot?.reportKeys).toBeGreaterThan(0);
+      expect(report['title-keywords']).toBeDefined();
+    });
   });
-});
-
 });
