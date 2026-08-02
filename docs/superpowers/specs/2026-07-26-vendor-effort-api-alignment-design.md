@@ -48,19 +48,22 @@
 
 ## 4. 当前对齐矩阵（验收基线）
 
-| 家族               | Allowlist                                                | Control                                      | Default  | 文档依据                        |
-| ------------------ | -------------------------------------------------------- | -------------------------------------------- | -------- | ------------------------------- |
-| GPT-5.x            | low…max（含 xhigh/max 透传）                             | openai_*                                     | medium   | OpenAI Reasoning                |
-| o-series           | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | openai_*                                     | medium   | OpenAI Reasoning                |
-| DeepSeek V4        | low\|high\|max + `thinking.type`                         | openai_thinking_plus_effort                  | high     | DeepSeek Thinking Mode          |
-| Kimi K3            | low\|high\|max                                           | openai_reasoning_effort                      | max      | Moonshot 推理强度               |
-| Kimi K2.x          | 无档位（`thinking.type` 开关）                           | openai_thinking_toggle                       | —        | Moonshot 思考模型               |
-| GLM-5.2            | max\|xhigh\|high\|medium\|low + `thinking.type`          | openai_thinking_plus_effort                  | max      | Zhipu 深度思考 + gateway        |
-| MiniMax M2.7       | low\|medium\|high                                        | openai_reasoning_effort                      | medium   | gateway（max → 400）            |
-| Grok-4.5           | low\|medium\|high                                        | openai_reasoning_effort                      | high     | xAI Reasoning                   |
-| Claude adaptive 代 | low…max                                                  | **thinking.adaptive + output_config.effort** | **high** | Effort + adaptive thinking docs |
-| Claude legacy      | low…max → budget                                         | **thinking.enabled + budget_tokens only**    | medium   | Extended thinking (legacy)      |
-| Gemini             | low…max → budget                                         | thinkingBudget                               | medium   | Gemini thinking                 |
+| 家族               | Allowlist                                                | Control                                      | Default  | 文档依据                               |
+| ------------------ | -------------------------------------------------------- | -------------------------------------------- | -------- | -------------------------------------- |
+| GPT-5.x            | low…max（含 xhigh/max 透传）                             | openai_*                                     | medium   | OpenAI Reasoning                       |
+| o-series           | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | openai_*                                     | medium   | OpenAI Reasoning                       |
+| DeepSeek V4        | low\|high\|max + `thinking.type`                         | openai_thinking_plus_effort                  | high     | DeepSeek Thinking Mode                 |
+| Kimi K3            | low\|high\|max                                           | openai_reasoning_effort                      | max      | Moonshot 推理强度                      |
+| Kimi K2.x          | 无档位（`thinking.type` 开关，默认开）                   | openai_thinking_toggle                       | on       | Moonshot 思考模型                      |
+| GLM-4.x / 5.1      | 无档位（`thinking.type` 开关，默认开）                   | openai_thinking_toggle                       | on       | Zhipu 深度思考/思考模式                |
+| Qwen3              | 无档位（`thinking.type` 开关，默认开）                   | openai_thinking_toggle                       | on       | Qwen3 混合思考（原生 enable_thinking） |
+| DeepSeek chat      | 无档位（`thinking.type` 开关，默认关）                   | openai_thinking_toggle                       | off      | DeepSeek V3.2+ thinking                |
+| GLM-5.2            | max\|xhigh\|high\|medium\|low + `thinking.type`          | openai_thinking_plus_effort                  | max      | Zhipu 深度思考 + gateway               |
+| MiniMax M2.7       | low\|medium\|high                                        | openai_reasoning_effort                      | medium   | gateway（max → 400）                   |
+| Grok-4.5           | low\|medium\|high                                        | openai_reasoning_effort                      | high     | xAI Reasoning                          |
+| Claude adaptive 代 | low…max                                                  | **thinking.adaptive + output_config.effort** | **high** | Effort + adaptive thinking docs        |
+| Claude legacy      | low…max → budget                                         | **thinking.enabled + budget_tokens only**    | medium   | Extended thinking (legacy)             |
+| Gemini             | low…max → budget                                         | thinkingBudget                               | medium   | Gemini thinking                        |
 
 Claude **没有** `extra`；产品与 wire 均为 **`xhigh`**。
 

@@ -94,6 +94,13 @@ export interface SurfaceCapability extends SurfaceCapabilityFlags {
   supportsReasoning: boolean;
   reasoningEfforts?: ReasoningEffortLevel[];
   defaultEffort?: ReasoningEffortLevel;
+  /**
+   * Product default for the reasoning toggle when the user has no stored
+   * preference. Mirrors the vendor default (e.g. GLM-4.7 / Qwen3 ship with
+   * thinking ON; DeepSeek V4 on this gateway ships OFF). Off (explicit) then
+   * sends the vendor disable field instead of omitting.
+   */
+  defaultEnabled?: boolean;
   temperatureIgnored?: boolean;
   /**
    * Official control channel for this surface generation.
@@ -111,6 +118,12 @@ export interface SurfaceCapability extends SurfaceCapabilityFlags {
     enabled: boolean;
     effort: ReasoningEffort;
     allowed?: readonly ReasoningEffortLevel[];
+    /**
+     * Capability default for the toggle; lets mappers decide whether an
+     * explicit off must send the vendor disable field (default-on families)
+     * or can omit (default-off families).
+     */
+    defaultEnabled?: boolean;
   }) => Record<string, unknown>;
 }
 
@@ -149,6 +162,7 @@ export interface ResolvedModelCapability {
   supportsReasoning: boolean;
   reasoningEfforts: ReasoningEffortLevel[];
   defaultEffort: ReasoningEffortLevel;
+  defaultEnabled: boolean;
   temperatureIgnored: boolean;
   features: string[];
   /** null when this surface has no mapRequest — never write reasoning fields */

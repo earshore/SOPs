@@ -2394,6 +2394,14 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.llm.model = getInitialModel(savedConfig?.model, this.llm.models);
     this.llm.serviceTier = savedConfig?.serviceTier;
     this.llm.reasoningPrefs = normalizeReasoningUserPrefs(savedConfig?.reasoningPrefs);
+    // No stored preference: reflect the model capability default (vendor default
+    // semantics, e.g. GLM-4.7/Qwen3 ship with thinking ON) in the toggle UI.
+    if (savedConfig?.reasoningPrefs === undefined) {
+      const cap = this.activeModelCapability;
+      if (cap?.defaultEnabled) {
+        this.llm.reasoningPrefs = { ...this.llm.reasoningPrefs, enabled: true };
+      }
+    }
     this.llm.apiPath = normalizeApiPathId(savedConfig?.apiPath);
     // Clamp + persist demotion so next open does not re-toast (AC3 once-only).
     this.clampReasoningPrefsToActiveModel({ announce: true, persist: true });

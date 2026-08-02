@@ -158,6 +158,7 @@ function buildResolvedCapability(args: {
     supportsReasoning,
     reasoningEfforts,
     defaultEffort: resolveDefaultEffort(capability, reasoningEfforts),
+    defaultEnabled: Boolean(capability?.defaultEnabled),
     temperatureIgnored: Boolean(capability?.temperatureIgnored),
     features: mergeFeatureLists(args.rule?.features, modelsFeatures),
     mapRequest: capability?.mapRequest ?? null,

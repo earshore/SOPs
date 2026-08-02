@@ -71,12 +71,26 @@ export function normalizeReasoningUserPrefs(
  * Session explicit fields beat global; capability fail-closes when unsupported.
  * Always returns requestedEffort (pre-clamp) for observability.
  */
+function resolveUserEnabled(
+  session: SessionReasoningOverride | null | undefined,
+  global: ReasoningUserPrefs | null | undefined,
+  defaultEnabled: boolean | undefined
+): boolean {
+  if (session?.enabled !== undefined) return Boolean(session.enabled);
+  if (global?.enabled !== undefined) return Boolean(global.enabled);
+  return Boolean(defaultEnabled);
+}
+
 export function resolveEffectiveReasoning(
   capability: Pick<
     ResolvedModelCapability,
-    'supportsReasoning' | 'reasoningEfforts' | 'defaultEffort' | 'mapRequest'
+    'supportsReasoning' | 'reasoningEfforts' | 'defaultEffort' | 'defaultEnabled' | 'mapRequest'
   >,
-  global: ReasoningUserPrefs,
+  /**
+   * Stored user prefs; undefined means the user never expressed a preference,
+   * in which case the capability default applies (vendor default semantics).
+   */
+  global: ReasoningUserPrefs | null | undefined,
   session?: SessionReasoningOverride | null
 ): EffectiveReasoningPrefs {
   if (!capability.supportsReasoning || !capability.mapRequest) {
@@ -88,13 +102,12 @@ export function resolveEffectiveReasoning(
       ? capability.reasoningEfforts
       : (['low', 'medium', 'high'] as ReasoningEffortLevel[]);
 
-  const enabled =
-    session?.enabled !== undefined ? Boolean(session.enabled) : Boolean(global.enabled);
+  const enabled = resolveUserEnabled(session, global, capability.defaultEnabled);
 
   const rawEffort: ReasoningEffort =
     session?.effort !== undefined
       ? session.effort
-      : (global.effort ?? capability.defaultEffort ?? 'medium');
+      : (global?.effort ?? capability.defaultEffort ?? 'medium');
 
   const clamped = clampEffort(rawEffort, efforts);
 

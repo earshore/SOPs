@@ -59,7 +59,14 @@ describe('multi-protocol mappers', () => {
     expect(mapOpenAiThinkingToggle({ enabled: true, effort: 'high' })).toEqual({
       thinking: { type: 'enabled' },
     });
-    expect(mapOpenAiThinkingToggle({ enabled: false, effort: 'high' })).toEqual({});
+    // Default-on families (Kimi K2.x / GLM-4.x / Qwen3): explicit off disables.
+    expect(mapOpenAiThinkingToggle({ enabled: false, effort: 'high' })).toEqual({
+      thinking: { type: 'disabled' },
+    });
+    // Default-off families (deepseek-chat): omit keeps the vendor default.
+    expect(
+      mapOpenAiThinkingToggle({ enabled: false, effort: 'high', defaultEnabled: false })
+    ).toEqual({});
   });
 
   it('thinking + effort mapper pairs toggle with allowlisted effort (DeepSeek/GLM)', () => {

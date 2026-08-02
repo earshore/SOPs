@@ -13,7 +13,6 @@ import type { ApiPathId, ApiSurface, SessionReasoningOverride } from './modelCap
 import {
   buildBodyForApiPath,
   buildFullApiUrl,
-  normalizeReasoningUserPrefs,
   resolveEffectiveReasoning,
   resolveModelCapability,
 } from './modelCapability';
@@ -233,10 +232,9 @@ export function createLLMTransport(args: {
     modelsEntry: args.options.modelsEntry,
     preferredSurface: pathId,
   });
-  const globalPrefs = normalizeReasoningUserPrefs(args.options.reasoningPrefs);
   const reasoning = resolveEffectiveReasoning(
     capability,
-    globalPrefs,
+    args.options.reasoningPrefs,
     args.options.reasoningSessionOverride
   );
 
@@ -291,7 +289,7 @@ export function createLLMTransport(args: {
     surface: pathId,
     body,
     capabilitySupports: Boolean(capability.supportsReasoning && capability.mapRequest),
-    globalEnabled: globalPrefs.enabled,
+    globalEnabled: Boolean(args.options.reasoningPrefs?.enabled),
     session: args.options.reasoningSessionOverride,
     requestedEffort: String(reasoning.requestedEffort),
     effectiveEffort: String(reasoning.effort),

@@ -15,7 +15,6 @@ import {
 import {
   clampEffort,
   normalizeApiPathId,
-  normalizeReasoningUserPrefs,
   resolveModelCapability,
   shouldShowReasoningControls,
   type ReasoningEffortLevel,
@@ -324,15 +323,21 @@ export function applyThreadTuningToSession(container: HTMLElement | null): void 
   syncDeepChatReasoningControlsFromThread(container);
 }
 
-export function resolveSessionReasoningUiState(provider: string): {
+export function resolveSessionReasoningUiState(
+  provider: string,
+  defaultEnabled?: boolean
+): {
   enabled: boolean;
   effort: ReasoningEffortLevel;
 } {
   const override = getActiveThread().reasoning;
-  const global = normalizeReasoningUserPrefs(StorageService.getLLMConfig(provider)?.reasoningPrefs);
+  const stored = StorageService.getLLMConfig(provider)?.reasoningPrefs;
   return {
-    enabled: override?.enabled !== undefined ? Boolean(override.enabled) : global.enabled,
-    effort: parseReasoningEffortValue(override?.effort ?? global.effort),
+    enabled:
+      override?.enabled !== undefined
+        ? Boolean(override.enabled)
+        : (stored?.enabled ?? defaultEnabled ?? false),
+    effort: parseReasoningEffortValue(override?.effort ?? stored?.effort ?? 'medium'),
   };
 }
 
@@ -422,7 +427,7 @@ export function syncDeepChatReasoningControlsFromThread(container: HTMLElement):
   });
   reasoningRoot.hidden = !shouldShowReasoningControls(cap);
 
-  const state = resolveSessionReasoningUiState(config.provider);
+  const state = resolveSessionReasoningUiState(config.provider, cap.defaultEnabled);
   if (reasoningEnabled) {
     reasoningEnabled.checked = state.enabled;
   }

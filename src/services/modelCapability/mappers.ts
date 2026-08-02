@@ -74,18 +74,21 @@ export function mapResponsesReasoning(prefs: {
  * Anthropic-style thinking.type toggle on OpenAI-compatible surfaces
  * (Kimi K2.x: thinking.type enabled/disabled).
  *
- * Off = omit the field: vendor defaults stay intact (K2.x ships with thinking
- * ON by default, same cannot-disable precedent as grok-4.5). On = force
- * thinking on with thinking.type enabled.
+ * On = thinking.type enabled. Off = thinking.type disabled — these families
+ * ship with thinking ON by default (capability.defaultEnabled), so an explicit
+ * off must send the vendor disable field instead of omitting (omitting would
+ * leave the vendor default intact and make the toggle a no-op).
  */
 export function mapOpenAiThinkingToggle(prefs: {
   enabled: boolean;
   effort: ReasoningEffort;
+  defaultEnabled?: boolean;
 }): Record<string, unknown> {
-  if (!prefs.enabled || prefs.effort === 'off') {
+  if (!prefs.enabled && prefs.defaultEnabled === false) {
+    // Default-off family (e.g. deepseek-chat): omit keeps the vendor default.
     return {};
   }
-  return { thinking: { type: 'enabled' } };
+  return { thinking: { type: prefs.enabled ? 'enabled' : 'disabled' } };
 }
 
 /**

@@ -328,11 +328,16 @@ function glmEffort(modelPattern: string, contextWindow: number): ModelCapability
 }
 
 /**
- * Kimi K2.x thinking toggle (thinking.type enabled/disabled; K2.x ships with
- * thinking ON by default — off omits the field so vendor default applies).
- * K3 is a separate effort family (low|high|max) via chatEffort below.
+ * Generic thinking.type toggle family (thinking.type enabled/disabled) for
+ * models whose only official control is the toggle and which ship with
+ * thinking ON by default (Kimi K2.x, GLM-4.5/4.6/4.7, Qwen3). defaultEnabled
+ * mirrors the vendor default so an explicit off sends thinking.type disabled.
  */
-function kimiThinkingToggle(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+function thinkingToggleFamily(
+  modelPattern: string,
+  contextWindow: number,
+  opts?: { defaultEnabled?: boolean; features?: string[] }
+): ModelCapabilityRule {
   return entry(
     modelPattern,
     contextWindow,
@@ -342,6 +347,7 @@ function kimiThinkingToggle(modelPattern: string, contextWindow: number): ModelC
         supportsReasoning: true,
         reasoningEfforts: [],
         defaultEffort: 'medium',
+        defaultEnabled: opts?.defaultEnabled ?? true,
         temperatureIgnored: false,
         effortControlKind: 'openai_thinking_toggle',
         mapRequest: mapOpenAiThinkingToggle,
@@ -350,7 +356,7 @@ function kimiThinkingToggle(modelPattern: string, contextWindow: number): ModelC
         supportsVision: true,
       },
     },
-    ['reasoning', 'kimi', 'thinking_toggle']
+    opts?.features ?? ['reasoning', 'thinking_toggle']
   );
 }
 
@@ -469,6 +475,23 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
     reasoningEfforts: GROK_45_EFFORTS,
     defaultEffort: 'low',
   }),
+  // xAI grok-4.1: low|medium|high; grok-4 (base): official enum caps at high.
+  chatEffort('grok-4.1', 256_000, 'chat_completions', {
+    reasoningEfforts: GROK_45_EFFORTS,
+    defaultEffort: 'medium',
+  }),
+  chatEffort('grok-4.1-*', 256_000, 'chat_completions', {
+    reasoningEfforts: GROK_45_EFFORTS,
+    defaultEffort: 'medium',
+  }),
+  chatEffort('grok-4', 256_000, 'chat_completions', {
+    reasoningEfforts: ['high'],
+    defaultEffort: 'high',
+  }),
+  chatEffort('grok-4-*', 256_000, 'chat_completions', {
+    reasoningEfforts: ['high'],
+    defaultEffort: 'high',
+  }),
 
   // grok-3 / 其余 grok-4 别名（grok-4-0709 等）未在官方文档确认 effort 参数，
   // 保持 fail-closed（无规则），待 gateway probe 后再收录。
@@ -478,6 +501,11 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   deepseekEffort('deepseek-v4-flash', 128_000),
   deepseekEffort('deepseek-v4-flash-*', 128_000),
   deepseekEffort('deepseek-v4-*', 128_000),
+  // deepseek-chat / V3.x：官方 V3.2+ 提供 thinking 开关（无 effort 档位），
+  // 默认不思考 → defaultEnabled=false，off 省略字段。
+  thinkingToggleFamily('deepseek-chat', 128_000, { defaultEnabled: false }),
+  thinkingToggleFamily('deepseek-chat-*', 128_000, { defaultEnabled: false }),
+  thinkingToggleFamily('deepseek-v3*', 128_000, { defaultEnabled: false }),
 
   // hy3-*（Tencent Hunyuan 通道）未在官方文档确认推理控制字段 → fail-closed，
   // 待 probe 后再收录。
@@ -542,12 +570,24 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   geminiThinking('gemini-3.5-flash-*', 1_000_000),
   geminiThinking('gemini-3.5-pro', 1_000_000),
   geminiThinking('gemini-3.5-pro-*', 1_000_000),
+  geminiThinking('gemini-3.1-flash', 1_000_000),
+  geminiThinking('gemini-3.1-flash-*', 1_000_000),
+  geminiThinking('gemini-3.1-pro', 1_000_000),
+  geminiThinking('gemini-3.1-pro-*', 1_000_000),
+  geminiThinking('gemini-3.0-flash', 1_000_000),
+  geminiThinking('gemini-3.0-flash-*', 1_000_000),
+  geminiThinking('gemini-3.0-pro', 1_000_000),
+  geminiThinking('gemini-3.0-pro-*', 1_000_000),
   geminiThinking('gemini-3-flash*', 1_000_000),
   geminiThinking('gemini-3-pro*', 1_000_000),
   geminiThinking('gemini-2.5-flash', 1_000_000),
   geminiThinking('gemini-2.5-flash-*', 1_000_000),
   geminiThinking('gemini-2.5-pro', 1_000_000),
   geminiThinking('gemini-2.5-pro-*', 1_000_000),
+  geminiThinking('gemini-2.0-flash', 1_000_000),
+  geminiThinking('gemini-2.0-flash-*', 1_000_000),
+  geminiThinking('gemini-2.0-pro', 1_000_000),
+  geminiThinking('gemini-2.0-pro-*', 1_000_000),
 
   // Kimi — K3: reasoning_effort low|high|max（默认 max，始终推理）。
   // K2.x: thinking.type 开关（默认开；off 省略字段保持厂商默认）。
@@ -556,21 +596,34 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
     reasoningEfforts: ['low', 'high', 'max'],
     defaultEffort: 'max',
   }),
-  kimiThinkingToggle('kimi-k2', 128_000),
-  kimiThinkingToggle('kimi-k2.5', 128_000),
-  kimiThinkingToggle('kimi-k2.5-*', 128_000),
-  kimiThinkingToggle('kimi-k2.6', 128_000),
-  kimiThinkingToggle('kimi-k2.6-*', 128_000),
-  // moonshot-v1-thinking / qwen3 / qwq：官方无 OpenAI 兼容 effort 依据
-  // （qwen3 原生为 enable_thinking，OpenAI 兼容端未验证）→ fail-closed，待 probe。
+  thinkingToggleFamily('kimi-k2', 128_000),
+  thinkingToggleFamily('kimi-k2.5', 128_000),
+  thinkingToggleFamily('kimi-k2.5-*', 128_000),
+  thinkingToggleFamily('kimi-k2.6', 128_000),
+  thinkingToggleFamily('kimi-k2.6-*', 128_000),
+  // moonshot-v1-thinking / qwq：无官方 OpenAI 兼容控制依据 → fail-closed。
+
+  // Qwen3 — 官方混合思考（原生 enable_thinking；OpenAI 兼容端经 thinking.type
+  // 发送）。默认思考 → defaultEnabled=true；off 发 thinking.type disabled。
+  // Qwen3-Instruct-2507 为非思考版（无法开启），由网关/渠道自行忽略。
+  thinkingToggleFamily('qwen3', 128_000),
+  thinkingToggleFamily('qwen3-*', 128_000),
 
   // GLM — 5.2：thinking.type + reasoning_effort 全档位（官方 + 网关实测 2026-08-02：
   // low/medium/high/xhigh/max/minimal 均 200；none 与省略字段均关闭思考）。
   // GLM-5.1 网关实测：reasoning_effort=max → 400（无 effort），默认思考，
-  // 仅 thinking.type 可关 → fail-closed（产品 off 语义为省略字段，暂不收录）。
-  // GLM-4.5/4.6/4.7 与 GLM-Z1 无档位参数 → fail-closed。
+  // 仅 thinking.type 可关 → 以 toggle 收录（默认开）。
+  // GLM-4.5/4.6/4.7：thinking.type 开关（官方默认思考）；GLM-Z1 无控制 → fail-closed。
   glmEffort('glm-5.2', 128_000),
   glmEffort('glm-5.2-*', 128_000),
+  thinkingToggleFamily('glm-5.1', 128_000),
+  thinkingToggleFamily('glm-5.1-*', 128_000),
+  thinkingToggleFamily('glm-4.7', 128_000),
+  thinkingToggleFamily('glm-4.7-*', 128_000),
+  thinkingToggleFamily('glm-4.6', 128_000),
+  thinkingToggleFamily('glm-4.6-*', 128_000),
+  thinkingToggleFamily('glm-4.5', 128_000),
+  thinkingToggleFamily('glm-4.5-*', 128_000),
 
   // MiniMax M2.7 — 网关实测 2026-08-02：reasoning_effort low|medium|high（max → 400），
   // 消息始终带 reasoning 字段（默认思考）。M3 无推理输出 → fail-closed。

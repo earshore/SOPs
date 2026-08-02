@@ -12,6 +12,7 @@ const baseCap = {
   mapRequest: null as ResolvedModelCapability['mapRequest'],
   supportsReasoning: true,
   reasoningEfforts: [] as ResolvedModelCapability['reasoningEfforts'],
+  defaultEnabled: false,
 };
 
 describe('applyReasoningToRequestBody', () => {
@@ -52,6 +53,7 @@ describe('applyReasoningToRequestBody', () => {
           enabled && effort !== 'off' ? { reasoning_effort: effort } : {},
         supportsReasoning: true,
         reasoningEfforts: [] as ResolvedModelCapability['reasoningEfforts'],
+        defaultEnabled: false,
       },
       { enabled: true, effort: 'low', requestedEffort: 'low' },
       { temperature: 0.7 }
@@ -70,6 +72,7 @@ describe('applyReasoningToRequestBody', () => {
         }),
         supportsReasoning: true,
         reasoningEfforts: [] as ResolvedModelCapability['reasoningEfforts'],
+        defaultEnabled: false,
       },
       { enabled: true, effort: 'high', requestedEffort: 'high' }
     );

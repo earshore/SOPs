@@ -45,19 +45,22 @@
 
 **代表矩阵（验收基线）：**
 
-| 家族             | 代表 id                                 | allowlist                                                | default / control               |
-| ---------------- | --------------------------------------- | -------------------------------------------------------- | ------------------------------- |
-| xAI Grok-4.5     | `grok-4.5`                              | `low\|medium\|high`                                      | high / openai effort            |
-| OpenAI GPT-5.x   | `gpt-5.6` 等                            | low…max（含 xhigh/max 透传）                             | medium / openai *               |
-| OpenAI o-series  | `o3-mini` 等                            | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | medium / openai *               |
-| DeepSeek V4      | `deepseek-v4-flash` / `deepseek-v4-pro` | low\|high\|max + `thinking.type`                         | high / thinking + effort        |
-| Kimi K3          | `kimi-k3*`                              | low\|high\|max（默认 max，始终推理）                     | max / openai effort             |
-| Kimi K2.x        | `kimi-k2` / `kimi-k2.5*` / `kimi-k2.6*` | 无档位（`thinking.type` 开关）                           | — / thinking toggle             |
-| GLM-5.2          | `glm-5.2*`                              | max\|xhigh\|high\|medium\|low（网关实测）                | max / thinking + effort         |
-| MiniMax M2.7     | `minimax-m2.7*`                         | low\|medium\|high（网关实测；max → 400）                 | medium / openai effort          |
-| Claude effort 代 | `claude-opus-4.5`                       | low…max                                                  | high / **output_config.effort** |
-| Claude legacy    | `claude-sonnet-4.5`                     | low…max → budget                                         | medium / budget_tokens          |
-| Gemini           | gemini-*                                | low…max → budget                                         | medium / thinkingBudget         |
+| 家族             | 代表 id                                           | allowlist                                                | default / control                     |
+| ---------------- | ------------------------------------------------- | -------------------------------------------------------- | ------------------------------------- |
+| xAI Grok-4.5     | `grok-4.5`                                        | `low\|medium\|high`                                      | high / openai effort                  |
+| OpenAI GPT-5.x   | `gpt-5.6` 等                                      | low…max（含 xhigh/max 透传）                             | medium / openai *                     |
+| OpenAI o-series  | `o3-mini` 等                                      | low\|medium\|high（官方枚举 minimal\|low\|medium\|high） | medium / openai *                     |
+| DeepSeek V4      | `deepseek-v4-flash` / `deepseek-v4-pro`           | low\|high\|max + `thinking.type`                         | high / thinking + effort              |
+| Kimi K3          | `kimi-k3*`                                        | low\|high\|max（默认 max，始终推理）                     | max / openai effort                   |
+| Kimi K2.x        | `kimi-k2` / `kimi-k2.5*` / `kimi-k2.6*`           | 无档位（`thinking.type` 开关，默认开）                   | — / thinking toggle（defaultEnabled） |
+| GLM-5.2          | `glm-5.2*`                                        | max\|xhigh\|high\|medium\|low（网关实测）                | max / thinking + effort               |
+| GLM-4.x / 5.1    | `glm-4.5*` / `glm-4.6*` / `glm-4.7*` / `glm-5.1*` | 无档位（`thinking.type` 开关，默认开）                   | — / thinking toggle（defaultEnabled） |
+| Qwen3            | `qwen3*`                                          | 无档位（`thinking.type` 开关，默认开）                   | — / thinking toggle（defaultEnabled） |
+| DeepSeek chat    | `deepseek-chat*` / `deepseek-v3*`                 | 无档位（`thinking.type` 开关，默认关）                   | — / thinking toggle                   |
+| MiniMax M2.7     | `minimax-m2.7*`                                   | low\|medium\|high（网关实测；max → 400）                 | medium / openai effort                |
+| Claude effort 代 | `claude-opus-4.5`                                 | low…max                                                  | high / **output_config.effort**       |
+| Claude legacy    | `claude-sonnet-4.5`                               | low…max → budget                                         | medium / budget_tokens                |
+| Gemini           | gemini-*                                          | low…max → budget                                         | medium / thinkingBudget               |
 
 依据：
 
@@ -115,9 +118,11 @@ Dev console 示例：
 | C   | gpt-5.6 + enabled + xhigh            | effective `xhigh`；body `xhigh`                                                               |
 | C2  | o3-mini + enabled + max              | effective `high`（allowlist 封顶）；body `reasoning_effort: high`                             |
 | D2  | deepseek-v4-flash + enabled + medium | effective `low`（官方枚举无 medium）；body `reasoning_effort: low` + `thinking.type: enabled` |
-| D3  | kimi-k2.6 + enabled + high           | 无档位；body `thinking.type: enabled`（关闭时省略，厂商默认开）                               |
+| D3  | kimi-k2.6 + enabled + high           | 无档位；body `thinking.type: enabled`；显式关闭 → `thinking.type: disabled`                   |
 | D4  | glm-5.2 + enabled + max              | effective `max`；body `reasoning_effort: max` + `thinking.type: enabled`                      |
 | D5  | minimax-m2.7 + enabled + max         | effective `high`（网关枚举 low\|medium\|high）；body `reasoning_effort: high`                 |
+| D6  | glm-4.7（默认开）+ 无存储偏好        | effective `enabled=true`（capability.defaultEnabled）；body `thinking.type: enabled`          |
+| D7  | glm-4.7 + 显式关闭                   | body `thinking.type: disabled`（default-on 家族发 disable 而非省略）                          |
 | D   | grok-4.5 allowlist                   | 不含 xhigh/max；含 high                                                                       |
 | E   | Claude/Gemini + max                  | effective `max`；mapper 产生 budget/thinking 字段                                             |
 | F   | UI options                           | ⊆ 当前模型 allowlist                                                                          |

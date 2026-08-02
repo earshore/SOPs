@@ -161,7 +161,60 @@ describe('multi-protocol flagship catalog', () => {
     expect(k26.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
       thinking: { type: 'enabled' },
     });
-    expect(k26.mapRequest?.({ enabled: false, effort: 'high' })).toEqual({});
+    // Default-on family: explicit off sends thinking.type disabled.
+    expect(k26.mapRequest?.({ enabled: false, effort: 'high' })).toEqual({
+      thinking: { type: 'disabled' },
+    });
+    expect(k26.defaultEnabled).toBe(true);
+
+    // Default-on toggle families: GLM-4.x / Qwen3 ship with thinking on.
+    const glm47 = resolveModelCapability(
+      { provider: 'new_api', modelId: 'glm-4.7' },
+      getModelCapabilityRules()
+    );
+    expect(glm47.reasoningEfforts).toEqual([]);
+    expect(glm47.defaultEnabled).toBe(true);
+    expect(glm47.mapRequest?.({ enabled: false, effort: 'medium' })).toEqual({
+      thinking: { type: 'disabled' },
+    });
+    const qwen3 = resolveModelCapability(
+      { provider: 'new_api', modelId: 'qwen3-235b-a22b' },
+      getModelCapabilityRules()
+    );
+    expect(qwen3.reasoningEfforts).toEqual([]);
+    expect(qwen3.defaultEnabled).toBe(true);
+
+    // deepseek-chat / V3.x toggle: default off → omit keeps vendor default.
+    const dsChat = resolveModelCapability(
+      { provider: 'new_api', modelId: 'deepseek-chat' },
+      getModelCapabilityRules()
+    );
+    expect(dsChat.defaultEnabled).toBe(false);
+    expect(dsChat.mapRequest?.({ enabled: false, effort: 'high', defaultEnabled: false })).toEqual(
+      {}
+    );
+    expect(dsChat.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
+      thinking: { type: 'enabled' },
+    });
+
+    // grok-4.1 triad; gemini-3.1 / 2.0 covered via family patterns.
+    const grok41 = resolveModelCapability(
+      { provider: 'new_api', modelId: 'grok-4.1' },
+      getModelCapabilityRules()
+    );
+    expect(grok41.reasoningEfforts).toEqual(['low', 'medium', 'high']);
+    expect(
+      resolveModelCapability(
+        { provider: 'new_api', modelId: 'gemini-3.1-pro' },
+        getModelCapabilityRules()
+      ).supportsReasoning
+    ).toBe(true);
+    expect(
+      resolveModelCapability(
+        { provider: 'new_api', modelId: 'gemini-2.0-flash' },
+        getModelCapabilityRules()
+      ).supportsReasoning
+    ).toBe(true);
 
     // GLM-5.x: official ladder (max default) + thinking toggle.
     const glm = resolveModelCapability(
@@ -286,21 +339,15 @@ describe('multi-protocol flagship catalog', () => {
       // Unverified reasoning controls — fail-closed until gateway probe:
       'deepseek-r1',
       'deepseek-reasoner',
-      'qwen3-235b-a22b',
       'qwq-32b',
       'hy3-preview',
       'grok-3',
-      'grok-4-0709',
       'glm-z1',
-      'glm-4.5',
-      'glm-5.1',
       'moonshot-v1-thinking',
       'kimi-k2.7-code',
       // Gateway-verified 2026-08-02: no reasoning output / dead channel.
       'minimax-m3',
       'hy3',
-      'qwen3.7-max',
-      'qwen3-coder-next',
     ]) {
       const cap = resolveModelCapability(
         { provider: 'new_api', modelId },

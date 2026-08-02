@@ -11,12 +11,13 @@ function capable(
   overrides: Partial<ResolvedModelCapability> = {}
 ): Pick<
   ResolvedModelCapability,
-  'supportsReasoning' | 'reasoningEfforts' | 'defaultEffort' | 'mapRequest'
+  'supportsReasoning' | 'reasoningEfforts' | 'defaultEffort' | 'defaultEnabled' | 'mapRequest'
 > {
   return {
     supportsReasoning: true,
     reasoningEfforts: ['low', 'medium', 'high'],
     defaultEffort: 'medium',
+    defaultEnabled: false,
     mapRequest: ({ enabled, effort }) =>
       enabled && effort !== 'off' ? { reasoning_effort: effort } : {},
     ...overrides,
@@ -138,5 +139,31 @@ describe('resolveEffectiveReasoning', () => {
       { enabled: true, effort: 'high' }
     );
     expect(r).toEqual({ enabled: false, effort: 'off', requestedEffort: 'off' });
+  });
+
+  it('uses capability default when the user never stored a preference', () => {
+    // Default-on family (GLM-4.7 / Qwen3): no stored prefs -> enabled.
+    const on = resolveEffectiveReasoning(capable({ defaultEnabled: true }), undefined, null);
+    expect(on.enabled).toBe(true);
+    // Default-off family (DeepSeek V4 on this gateway): no stored prefs -> disabled.
+    const off = resolveEffectiveReasoning(capable({ defaultEnabled: false }), undefined, null);
+    expect(off.enabled).toBe(false);
+    expect(off.effort).toBe('off');
+  });
+
+  it('explicit stored false beats capability default (user turned it off)', () => {
+    const r = resolveEffectiveReasoning(
+      capable({ defaultEnabled: true }),
+      { enabled: false, effort: 'high' },
+      null
+    );
+    expect(r.enabled).toBe(false);
+  });
+
+  it('session override still wins over capability default', () => {
+    const r = resolveEffectiveReasoning(capable({ defaultEnabled: true }), undefined, {
+      enabled: false,
+    });
+    expect(r.enabled).toBe(false);
   });
 });
