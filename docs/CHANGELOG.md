@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.12-rc.5] - 2026-08-02
+
+> 生产验证候选版本。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.11`。
+> 收录 rc.4 之后：Master Analysis AI 分析可靠性与推理模型兼容修复（分批导入合并、断点续跑、输出预算/结构化输出兼容），以及模型能力推理档位按厂商官方能力适配。
+> 生产回滚目标为 `v3.0.11` 对应的上一次 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- AI 智能分析证据深度下拉（快速/均衡/深入）旁标注参考耗时区间，便于执行前设定预期。
+- 模型能力推理档位按厂商官方枚举适配：GLM-5.2 / MiniMax M2.7 网关实测档位、主流厂商家族（defaultEnabled 语义）、o 系列最高档允许值收缩。
+
+### Fixed
+
+- Master Analysis 分批导入拼合：合并时保留既有、未在本批导入的 ASIN，避免多次导入互相覆盖导致分析集合缩水。
+- 推理模型网关兼容（如 deepseek-v4-flash）：开启推理时跳过与 Reasoning 冲突的结构化输出字段，消除全目标 400 失败；输出预算按推理档位放大（low/medium ×2、high ×2.5、max ×3，封顶 32000），修复“模型返回空正文 / 部分字段不完整”。
+- AI 分析报告 `_metadata.model` 现写入实际调用的模型，方便审计。
+- 分析中断断点续跑：中途刷新/切页后可恢复已完成目标并从缓存继续，不需整轮重跑。
+- “部分字段可能不完整”误报：质量警告面板不再把共享评论抽取（shared_general_map）信息性标记显示为质量警告，仅保留真实警告（reduce 降级 / 字段稀疏）。
+
+### Changed
+
+- 分析调度默认并发 4→6、均衡证据深度 Map 并发 3→4，降低长轮次墙钟时间（受模型生成速度制约，提升有限）。
+
 ## [3.0.12-rc.4] - 2026-08-02
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.11`。
