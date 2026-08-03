@@ -28,6 +28,7 @@ export const UserProductProfileSchema = z.object({
   audience: z.string(),
   usps: z.string(),
   specs: z.string(),
+  specsAuthority: z.enum(['user-confirmed', 'report-derived', 'unconfirmed']).optional(),
   socialHook: z.string(),
   negative: z.string(),
   tone: z.enum(['professional', 'casual', 'friendly', 'formal', 'enthusiastic', 'persuasive', '']),

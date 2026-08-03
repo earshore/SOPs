@@ -654,7 +654,7 @@ function isEmptyRecord(value: unknown): boolean {
 
 function formatMarketContextSection(markdownSections: string[]): string {
   if (markdownSections.length === 0) return '';
-  return `\n## Market Context\n### Competitor Insights Report\n\n${markdownSections.join('\n\n')}\n`;
+  return `\n## Market Context\n- **Boundary:** Retain this competitor report as market insight only. It may inform positioning, objections, vocabulary, and risk avoidance, but it never establishes facts about this SKU.\n### Competitor Insights Report\n\n${markdownSections.join('\n\n')}\n`;
 }
 
 function getSelectedReportDimensions(
@@ -831,6 +831,45 @@ const buildProductSection = (
     : '';
 };
 
+const getConfirmedDetailedSpecs = (inputs: PromptInputs): string => {
+  return inputs.specsAuthority === 'user-confirmed' ? inputs.specs.trim() : '';
+};
+
+const buildListingProductSection = (inputs: PromptInputs, contextText = ''): string => {
+  const { audience = '', usps = '' } = inputs;
+  const dnaParts: string[] = [];
+  const dedupedAudience = (
+    contextText ? filterDuplicateInlineParts(audience, contextText) : audience
+  ).trim();
+  const dedupedUsps = (contextText ? filterDuplicateListLines(usps, contextText) : usps).trim();
+  const confirmedSpecs = getConfirmedDetailedSpecs(inputs);
+
+  if (dedupedAudience) {
+    dnaParts.push(`- **Target Audience**: ${sanitizePromptInput(dedupedAudience)}`);
+  }
+  if (dedupedUsps) {
+    dnaParts.push(`- **Core USPs**: \n${sanitizePromptInput(dedupedUsps)}`);
+  }
+
+  if (dnaParts.length === 0 && !confirmedSpecs) {
+    dnaParts.push(
+      '- **Manual Product Facts**: Not provided. Use only the SEO Mandate and Market Context below; do not invent product specs, materials, dimensions, certifications, warranty terms, performance proof, or compatibility claims.'
+    );
+  }
+
+  if (confirmedSpecs) {
+    dnaParts.push(
+      `- **Confirmed SKU Detailed Parameters (authoritative)**: \n${sanitizePromptInput(confirmedSpecs)}`
+    );
+  } else {
+    dnaParts.push(
+      '- **Confirmed SKU Detailed Parameters (authoritative)**: Not provided. Do not derive capacity/volume, weight, dimensions, quantity/bundle, variants, or package accessories from report-derived data or keywords.'
+    );
+  }
+
+  return `\n## Product DNA Supplement\n${dnaParts.join('\n')}\n`;
+};
+
 const buildListingSeoSection = (
   inputs: PromptInputs,
   analysisReport: AnalysisReport | null
@@ -867,6 +906,7 @@ const buildListingSeoSection = (
     '',
     '### SEO Usage Rules',
     '- Use the first Primary Keyword Target in the first 5 words of the title unless it is grammatically impossible.',
+    '- Tier 1 and Tier 2 keyword inputs are SEO vocabulary only and never establish SKU facts.',
     '- Blend additional competitor-derived primary and secondary terms only when they match Product DNA or buyer intent; do not convert competitor vocabulary into unsupported product claims.',
     '- Use scene and audience terms to shape bullet scenarios, description phrasing, and backend search terms.',
     '- Put non-duplicative long-tail terms in Backend Search Terms; never include Negative / Excluded Terms there.'
@@ -1134,7 +1174,7 @@ function buildListingInputContext(
   marketProfile: PromptMarketProfile
 ): string {
   const contextSection = buildContextSection(inputs, analysisReport);
-  const productSection = buildProductSection(inputs, contextSection, true);
+  const productSection = buildListingProductSection(inputs, contextSection);
   const seoSection = buildListingSeoSection(inputs, analysisReport);
   const briefSection = buildContextBriefSection(
     inputs,
@@ -1160,6 +1200,8 @@ function buildContextBriefSection(
     `- **Output Language:** ${marketProfile.languageName}`,
     `- **Available Sources:** ${formatInputSourceCoverage(inputs, analysisReport, contextSection)}`,
     '- **Source Priority:** Treat Product DNA as product facts. Treat competitor insights as market positioning, objections, vocabulary, and risk-avoidance signals, not as facts about this product.',
+    '- **SKU Fact Authority:** Only Confirmed SKU Detailed Parameters may establish capacity/volume, weight, dimensions, quantity/bundle, variants, or package accessories.',
+    '- **Conflict Resolution:** If a competitor report, Tier 1/Tier 2 keyword, or other market context conflicts with those parameters, use the confirmed parameters. Do not combine, average, or infer substitute values.',
     '- **Missing Data Rule:** If a product fact, proof, certification, dimension, warranty, compatibility, or performance result is not present below, do not invent it; list it under Evidence & Compliance Notes.',
   ];
 
@@ -1204,7 +1246,7 @@ function formatSelectedReportDimensionNames(inputs: PromptInputs): string {
 }
 
 function hasManualProductFacts(inputs: PromptInputs): boolean {
-  return [inputs.audience, inputs.usps, inputs.specs].some(hasText);
+  return [inputs.audience, inputs.usps, getConfirmedDetailedSpecs(inputs)].some(hasText);
 }
 
 function hasSeoInputs(inputs: PromptInputs): boolean {
@@ -1217,7 +1259,7 @@ function getMissingManualProductFields(inputs: PromptInputs): string[] {
   const missingFields: string[] = [];
   if (!hasText(inputs.audience)) missingFields.push('Target Audience');
   if (!hasText(inputs.usps)) missingFields.push('Core USPs');
-  if (!hasText(inputs.specs)) missingFields.push('Technical Specs');
+  if (!hasText(getConfirmedDetailedSpecs(inputs))) missingFields.push('Technical Specs');
   return missingFields;
 }
 

@@ -220,6 +220,7 @@ const EMPTY_PROFILE: UserProductProfile = {
   audience: '',
   usps: '',
   specs: '',
+  specsAuthority: 'unconfirmed',
   socialHook: '',
   negative: '',
   tone: 'professional',

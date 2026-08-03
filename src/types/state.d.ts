@@ -11,7 +11,12 @@ import type {
   KeywordHunterSnapshotSource,
   ScrapedData,
 } from './modules-business';
-import type { TargetMarket, ToneStyle, UserProductDnaField } from './prompt-profile';
+import type {
+  DetailedSpecsAuthority,
+  TargetMarket,
+  ToneStyle,
+  UserProductDnaField,
+} from './prompt-profile';
 
 // ==================== UI状态 ====================
 
@@ -277,6 +282,12 @@ export interface UserProductProfile {
    * @example 'Bluetooth 5.3, IPX7 waterproof, USB-C charging'
    */
   specs: string;
+
+  /**
+   * 详细参数用于 Listing SKU 事实时的来源状态。
+   * 报告提取和历史未知值都必须由用户确认后才可作为 SKU 事实使用。
+   */
+  specsAuthority?: DetailedSpecsAuthority;
 
   /**
    * 社交钩子

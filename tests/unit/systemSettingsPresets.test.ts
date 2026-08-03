@@ -187,7 +187,7 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(appearanceTs).toContain('ThemeManager.applyTheme');
     // Implementation body (not the interface signature)
     const themeFn = appearanceTs.match(
-      /setAppearanceTheme\(themeId: string\): void \{\n[\s\S]*?\n {2}\},/
+      /setAppearanceTheme\(themeId: string\): void \{\r?\n[\s\S]*?\r?\n {2}\},/
     );
     expect(themeFn?.[0] ?? '').toContain('ThemeManager.applyTheme');
     expect(themeFn?.[0] ?? '').not.toContain('saveRuntimeStrategySettings');
@@ -229,13 +229,15 @@ describe('UT-P1-06 appearance theme contracts', () => {
     expect(appearanceTs).toContain('ThemeManager.getCurrentColorMode');
     expect(appearanceTs).toContain('appearanceColorMode');
     const colorFn = appearanceTs.match(
-      /setAppearanceColorMode\(mode: ColorMode\): void \{\n[\s\S]*?\n {2}\},/
+      /setAppearanceColorMode\(mode: ColorMode\): void \{\r?\n[\s\S]*?\r?\n {2}\},/
     );
     expect(colorFn?.[0] ?? '').toContain('ThemeManager.applyColorMode');
     expect(colorFn?.[0] ?? '').not.toContain('ThemeManager.applyTheme');
     expect(colorFn?.[0] ?? '').not.toContain('saveRuntimeStrategySettings');
     // load reflects preference (getCurrentColorMode), not only resolved
-    const loadFn = appearanceTs.match(/loadAppearanceSettings\(\): void \{\n[\s\S]*?\n {2}\},/);
+    const loadFn = appearanceTs.match(
+      /loadAppearanceSettings\(\): void \{\r?\n[\s\S]*?\r?\n {2}\},/
+    );
     expect(loadFn?.[0] ?? '').toContain('ThemeManager.getCurrentColorMode');
   });
 

@@ -1,5 +1,5 @@
 // src/types/modules-business.d.ts
-import type { UserProductProfile } from './prompt-profile';
+import type { DetailedSpecsAuthority, UserProductProfile } from './prompt-profile';
 import type { ScraperProxyType } from '@/common/config/scraperProxies';
 // ================================================================
 // 业务模块类型定义
@@ -529,6 +529,7 @@ export interface GeneratedPromptProfileSnapshot {
   audience?: string;
   usps?: string;
   specs?: string;
+  specsAuthority?: DetailedSpecsAuthority;
   socialHook?: string;
   negative?: string;
   tone?: string;

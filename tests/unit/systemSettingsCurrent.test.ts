@@ -1240,6 +1240,49 @@ it('UT-P2-01 panel partial export passes selected buckets to exportAll', async (
   expect(panel.isPartialLocalDataExport).toBe(true);
 });
 
+it('UT-P2-01 full bucket selection keeps full backup export semantics', async () => {
+  const panel = createPanel();
+  panel.localData.selectedExportBuckets = [
+    'config',
+    'secrets',
+    'workspace-state',
+    'scrape-history',
+    'chat-history',
+    'keyword-history',
+    'cache',
+    'other',
+  ];
+  deps.confirmWithModal.mockResolvedValueOnce(true);
+
+  const createElement = document.createElement.bind(document);
+  const link = document.createElement('a');
+  vi.spyOn(link, 'click').mockImplementation(() => undefined);
+  vi.spyOn(document, 'createElement').mockImplementation((tagName: string) =>
+    tagName === 'a' ? link : createElement(tagName)
+  );
+  vi.stubGlobal('URL', {
+    createObjectURL: vi.fn(() => 'blob:export'),
+    revokeObjectURL: vi.fn(),
+  });
+
+  await panel.exportLocalData();
+
+  expect(panel.isPartialLocalDataExport).toBe(false);
+  expect(panel.exportLocalDataButtonText).toBe('导出全部备份');
+  expect(LocalDataStore.exportAll).toHaveBeenCalledWith({});
+});
+
+it('binds an active export action only for partial bucket selections', () => {
+  const template = readSettingsTemplate();
+  const styles = readSettingsStyles();
+
+  expect(template).toContain(
+    ":class=\"{ 'settings-data-io-actions__btn--active': isPartialLocalDataExport }\""
+  );
+  expect(template).toContain(':disabled="localData.isBusy"');
+  expect(styles).toContain('.settings-data-io-actions__btn--active:not(:disabled)');
+});
+
 it('updates model status safely for configured, pending, and missing DOM states', async () => {
   document.body.innerHTML = '<div id="model-status"></div>';
   deps.values.set(STORAGE_KEYS.LLM_ACTIVE_PROVIDER, 'new_api');

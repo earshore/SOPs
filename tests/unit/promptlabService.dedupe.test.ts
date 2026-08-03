@@ -22,6 +22,7 @@ const makeInputs = (overrides: Partial<PromptInputs> = {}): PromptInputs => ({
   audience: '',
   usps: '',
   specs: '',
+  specsAuthority: 'user-confirmed',
   socialHook: '',
   negative: '',
   tone: 'professional',
@@ -132,6 +133,73 @@ const getSection = (prompt: string, start: string, end: string): string => {
     expect(prompt).toContain('Manual Product Facts**: Not provided');
     expect(prompt).toContain('Missing Manual Product Fields:** Target Audience, Core USPs, Technical Specs');
     expect(prompt).toContain('do not invent product specs');
+  });
+
+  it('uses confirmed detailed parameters as the only SKU-spec authority while retaining conflicting competitor context', () => {
+    const competitorCapacity = 'Competitor model: 1 L capacity with two straws included.';
+    const prompt = promptlabService.generateMasterPrompt(
+      makeInputs({
+        specs: 'Capacity: 500 ml\nPackage contents: 1 bottle',
+        specsAuthority: 'user-confirmed',
+      }),
+      makeReport(competitorCapacity, 'Competitor bundle is promoted as a two-straw set.'),
+    );
+    const productSection = getSection(prompt, '## Product DNA Supplement', '## SEO Mandate');
+    const marketSection = getSection(prompt, '## Market Context', '# CRITICAL GUIDELINES');
+
+    expect(productSection).toContain('Confirmed SKU Detailed Parameters (authoritative)');
+    expect(productSection).toContain('500 ml');
+    expect(productSection).toContain('1 bottle');
+    expect(productSection).not.toContain('Manual Product Facts');
+    expect(productSection).not.toContain('1 L');
+    expect(productSection).not.toContain('two straws');
+    expect(marketSection).toContain('1 L');
+    expect(marketSection).toContain('two straws');
+    expect(prompt).toContain(
+      'Only Confirmed SKU Detailed Parameters may establish capacity/volume, weight, dimensions, quantity/bundle, variants, or package accessories.'
+    );
+    expect(prompt).toContain(
+      'If a competitor report, Tier 1/Tier 2 keyword, or other market context conflicts with those parameters, use the confirmed parameters.'
+    );
+    expect(prompt).toContain(
+      'Tier 1 and Tier 2 keyword inputs are SEO vocabulary only and never establish SKU facts.'
+    );
+  });
+
+  it('does not promote report-derived detailed parameters into Listing SKU facts', () => {
+    const prompt = promptlabService.generateMasterPrompt(
+      makeInputs({
+        specs: 'Capacity: 1 L\nPackage contents: two straws',
+        specsAuthority: 'report-derived',
+        selectedReportSections: [],
+      }),
+      null
+    );
+    const productSection = getSection(prompt, '## Product DNA Supplement', '## SEO Mandate');
+
+    expect(productSection).toContain(
+      'Confirmed SKU Detailed Parameters (authoritative)**: Not provided'
+    );
+    expect(productSection).not.toContain('Capacity: 1 L');
+    expect(productSection).not.toContain('two straws');
+  });
+
+  it('keeps legacy detailed parameters without authority out of Listing SKU facts', () => {
+    const prompt = promptlabService.generateMasterPrompt(
+      makeInputs({
+        specs: 'Capacity: 1 L\nPackage contents: two straws',
+        specsAuthority: undefined,
+        selectedReportSections: [],
+      }),
+      null
+    );
+    const productSection = getSection(prompt, '## Product DNA Supplement', '## SEO Mandate');
+
+    expect(productSection).toContain(
+      'Confirmed SKU Detailed Parameters (authoritative)**: Not provided'
+    );
+    expect(productSection).not.toContain('Capacity: 1 L');
+    expect(productSection).not.toContain('two straws');
   });
 
   it('falls back to selectedReportSections when selectedReportItems is empty', () => {

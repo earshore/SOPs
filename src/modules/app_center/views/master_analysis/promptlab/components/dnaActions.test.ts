@@ -210,6 +210,7 @@ it('normalizes PromptLab target market names before localized spec extraction', 
   await extractSingleField(ctx, 'specs');
 
   expect(ctx.profile.specs).toContain('Kapazität: 50ml');
+  expect(ctx.profile.specsAuthority).toBe('report-derived');
 });
 
 it('checks extractability against the unwrapped report payload', () => {

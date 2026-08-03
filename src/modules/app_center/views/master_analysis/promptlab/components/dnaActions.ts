@@ -102,6 +102,7 @@ const FIELD_CONFIG: Record<
     label: '技术参数',
     apply: (ctx, normalized) => {
       ctx.profile.specs = normalized.fields.specs;
+      ctx.profile.specsAuthority = 'report-derived';
       ctx.dnaConfidence.specs = normalized.confidence.specs;
     },
   },

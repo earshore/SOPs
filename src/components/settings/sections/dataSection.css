@@ -82,6 +82,22 @@
   border-color: var(--color-border-strong, #cbd5e1);
 }
 
+.settings-data-io-actions__btn--active:not(:disabled) {
+  background: var(--settings-accent);
+  border-color: var(--settings-accent);
+  color: #fff;
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--settings-accent) 24%, transparent);
+}
+
+.settings-data-io-actions__btn--active:hover:not(:disabled) {
+  background: var(--settings-accent-strong);
+  border-color: var(--settings-accent-strong);
+}
+
+.settings-data-io-actions__btn--active:not(:disabled) .settings-text-accent {
+  color: currentColor;
+}
+
 .settings-data-io-actions__btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;

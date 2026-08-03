@@ -305,6 +305,76 @@ test.describe('system settings', () => {
     // Scroll-spy class wiring is covered by settingsNavScroll unit tests + :class binding in HTML.
   });
 
+  test('E2E-P1-nav tool third-level links open their matching modules', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+
+    const nav = page.locator('nav.settings-panel-nav');
+    await nav.getByRole('button', { name: '工具策略', exact: true }).click();
+
+    const masterScrapeNav = page.getByTestId('settings-nav-master-analysis-scrape');
+    await expect(masterScrapeNav).toHaveClass(/settings-panel-nav-link--tertiary/);
+    await masterScrapeNav.click();
+    await expect(page.locator('[data-settings-nav-id="master-analysis-scrape"]')).toBeVisible({
+      timeout: 5000,
+    });
+    await expect(page.getByTestId('settings-nav-master-analysis-scrape')).toHaveClass(/is-current/);
+
+    const keywordSeoNav = page.getByTestId('settings-nav-keyword-hunter-seo-process');
+    await expect(keywordSeoNav).toHaveClass(/settings-panel-nav-link--tertiary/);
+    await keywordSeoNav.click();
+    await expect(page.locator('[data-settings-nav-id="keyword-hunter-seo-process"]')).toBeVisible({
+      timeout: 5000,
+    });
+    await expect(page.getByTestId('settings-keyword-hunter')).toHaveJSProperty('open', true);
+    await expect(page.getByTestId('settings-nav-keyword-hunter-seo-process')).toHaveClass(
+      /is-current/
+    );
+  });
+
+  test('E2E-P1-nav appearance leaves highlight only their own preference row', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+
+    const nav = page.locator('nav.settings-panel-nav');
+    await nav.getByRole('button', { name: '外观与体验', exact: true }).click();
+
+    await nav.getByRole('button', { name: '色调', exact: true }).click();
+    const tone = page.getByTestId('settings-appearance-theme');
+    await expect(tone).toHaveClass(/settings-deep-link-highlight/);
+    await expect(tone.locator('xpath=..')).not.toHaveClass(/settings-deep-link-highlight/);
+
+    await nav.getByRole('button', { name: '跟随系统动效偏好', exact: true }).click();
+    await expect(page.getByTestId('settings-appearance-reduced-motion')).toHaveClass(
+      /settings-deep-link-highlight/
+    );
+
+    await nav.getByRole('button', { name: '动画速度', exact: true }).click();
+    await expect(page.getByTestId('settings-appearance-animation-speed')).toHaveClass(
+      /settings-deep-link-highlight/
+    );
+  });
+
+  test('E2E-P1-data partial export selection highlights the export action', async ({ page }) => {
+    const settings = new SystemSettingsPage(page);
+    await settings.openFromNav();
+    await settings.goToSection('数据与备份');
+
+    const exportBuckets = page.getByTestId('settings-export-buckets');
+    await exportBuckets.locator('summary').click();
+
+    const firstBucket = exportBuckets.locator('input[data-export-bucket]').first();
+    const exportAction = exportBuckets.locator('button.settings-data-io-actions__btn').first();
+    if (await firstBucket.isChecked()) {
+      await firstBucket.uncheck();
+    } else {
+      await firstBucket.check();
+    }
+
+    await expect(exportAction).toHaveClass(/settings-data-io-actions__btn--active/);
+    await expect(exportAction).toContainText('导出选中分类');
+  });
+
   test('E2E-P1-data strategy explicit save toast (TD-SET-03)', async ({ page }) => {
     const settings = new SystemSettingsPage(page);
     await settings.openFromNav();

@@ -232,6 +232,7 @@ describe('Alpine Component Initialization', () => {
       audience: 'test audience',
       usps: 'test usps',
       specs: 'test specs',
+      specsAuthority: 'user-confirmed',
       socialHook: '',
       negative: '',
       tone: 'exciting',
@@ -254,6 +255,7 @@ describe('Alpine Component Initialization', () => {
     expect(component.profile.tone).toBe('exciting');
     expect(component.profile.useCosmo).toBe(true);
     expect(component.profile.charLimit).toBe(3000);
+    expect(component.profile.specsAuthority).toBe('user-confirmed');
   });
 });
 
@@ -606,6 +608,18 @@ describe('Alpine Component State Persistence', () => {
     const savedProfile = appStore.getState().promptlab.userProductProfile;
     expect(savedProfile?.targetMarket).toBe('German');
     expect(savedProfile?.keywordsTier1).toBe('new keyword');
+  });
+
+  it('marks directly edited detailed parameters as user-confirmed SKU facts', () => {
+    component.profile.specsAuthority = 'report-derived';
+
+    component.setProfileField(
+      'specs',
+      { target: { value: 'Capacity: 500 ml\nPackage contents: 1 bottle' } } as unknown as Event
+    );
+
+    expect(component.profile.specs).toBe('Capacity: 500 ml\nPackage contents: 1 bottle');
+    expect(component.profile.specsAuthority).toBe('user-confirmed');
   });
 
   it('should persist saved state to the current snapshot', () => {

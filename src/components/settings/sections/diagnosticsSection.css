@@ -191,6 +191,29 @@
     color: var(--settings-text-muted);
   }
 
+  .settings-panel-nav-subgroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+  }
+
+  .settings-panel-nav-subgroup-children {
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    margin: 0 0 0.125rem 0.75rem;
+    padding: 0.0625rem 0 0.0625rem 0.25rem;
+    border-left: 1px solid color-mix(in srgb, var(--settings-border) 82%, transparent);
+  }
+
+  .settings-panel-nav-link--tertiary {
+    min-height: 1.75rem;
+    padding: 0.1875rem 0.5rem 0.1875rem 0.625rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--settings-text-muted);
+  }
+
   .settings-panel-nav-link:hover,
   .settings-panel-nav-link:focus-visible {
     background: var(--color-bg-tertiary, var(--settings-surface-muted));
@@ -199,7 +222,9 @@
   }
 
   .settings-panel-nav-link--secondary:hover,
-  .settings-panel-nav-link--secondary:focus-visible {
+  .settings-panel-nav-link--secondary:focus-visible,
+  .settings-panel-nav-link--tertiary:hover,
+  .settings-panel-nav-link--tertiary:focus-visible {
     background: var(--settings-surface-muted);
     color: var(--settings-accent);
   }
@@ -211,6 +236,12 @@
 
   .settings-panel-nav-link--secondary.is-current {
     background: color-mix(in srgb, var(--settings-accent-soft) 85%, var(--settings-surface));
+    color: var(--settings-accent);
+    font-weight: 600;
+  }
+
+  .settings-panel-nav-link--tertiary.is-current {
+    background: color-mix(in srgb, var(--settings-accent-soft) 72%, var(--settings-surface));
     color: var(--settings-accent);
     font-weight: 600;
   }

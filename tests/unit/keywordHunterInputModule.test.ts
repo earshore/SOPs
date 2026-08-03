@@ -429,6 +429,26 @@ it('renders the embedded history snapshot panel on the input page', async () => 
   });
 });
 
+it('renders every persisted input snapshot in the scrollable list', async () => {
+  const [seed] = inputMocks.snapshots;
+  expect(seed).toBeDefined();
+  const snapshots = Array.from({ length: 7 }, (_, index) => ({
+    ...seed,
+    id: `kh-snapshot-${index + 1}`,
+    title: `Snapshot ${index + 1}`,
+  }));
+  inputMocks.snapshots.splice(0, inputMocks.snapshots.length, ...snapshots);
+
+  const container = await mountInput();
+  const list = container.querySelector('#keyword-hunter-input-snapshot-list');
+
+  expect(container.querySelector('#keyword-hunter-input-snapshot-count')?.textContent).toBe(
+    '7 个快照'
+  );
+  expect(list?.querySelectorAll('.keyword-hunter-input-snapshot-item')).toHaveLength(7);
+  expect(list?.textContent).toContain('Snapshot 7');
+});
+
 it('asks before restoring a snapshot over the local draft', async () => {
   inputMocks.confirmWithModal.mockResolvedValueOnce(false);
   const container = await mountInput();

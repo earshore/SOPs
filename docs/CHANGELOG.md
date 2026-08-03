@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.12-rc.7] - 2026-08-04
+
+> Release Candidate. GitHub Release remains a **Pre-release**; Latest continues to point to stable GA `v3.0.11`.
+> This candidate closes the settings navigation and data-export interaction corrections, PromptLab SKU fact authority, and Keyword Hunter input snapshot visibility.
+> Rollback target remains the Pages deployment for `v3.0.11`.
+> Deployment target: https://sops.hongecb.store
+
+### Added
+
+- PromptLab Detailed Parameters now persist `specsAuthority` (`user-confirmed`, `report-derived`, or `unconfirmed`) and validate it at the Profile import/recovery boundary.
+- Regression coverage for profile authority validation, legacy snapshots, full-bucket export semantics, settings navigation, and complete Keyword Hunter snapshot rendering.
+
+### Changed
+
+- System Settings now renders `数据采集` / `AI 智能分析` below `Master Analysis`, and `SEO 处理` / `Listing 评审` below `Keyword Hunter`, as third-level navigation targets. Appearance navigation is split into `界面动画`, `跟随系统动效偏好`, and `动画速度`.
+- PromptLab Tier 1 core terms, restricted terms, and target audience use the same collapsed-and-expandable textarea behavior as Tier 2 functional terms.
+
+### Fixed
+
+- Selecting an individual data bucket makes `导出选中分类` visually active. Selecting every bucket intentionally retains the existing `导出全部备份` behavior and full-backup payload.
+- Selecting `色调` now highlights only the tone control rather than the whole Appearance preferences list.
+- Listing prompts accept capacity, weight, dimensions, quantities, variants, and package accessories only from user-confirmed Detailed Parameters. Competitor-report values remain market context and cannot be combined with or override SKU facts.
+- Keyword Hunter input history now renders every persisted snapshot instead of truncating the list after six entries.
+
 ## [3.0.12-rc.5] - 2026-08-02
 
 ## [3.0.12-rc.6] - 2026-08-03

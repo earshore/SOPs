@@ -128,14 +128,17 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'keyword-hunter',
     sectionId: 'settings-section-tool-strategy',
-    labels: [
-      'Keyword Hunter',
-      'keyword-hunter',
-      'SEO 处理',
-      'Listing 评审',
-      '词干匹配',
-      '复数匹配',
-    ],
+    labels: ['Keyword Hunter', 'keyword-hunter'],
+  },
+  {
+    id: 'keyword-hunter-seo-process',
+    sectionId: 'settings-section-tool-strategy',
+    labels: ['SEO 处理', 'Keyword Hunter SEO', '逐行翻译', '词干匹配', '复数匹配'],
+  },
+  {
+    id: 'keyword-hunter-listing-review',
+    sectionId: 'settings-section-tool-strategy',
+    labels: ['Listing 评审', 'Keyword Hunter Listing', '评审报告', '缓存'],
   },
   {
     id: 'ppc-analysis-flags',
@@ -205,7 +208,7 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'settings-section-appearance',
     sectionId: 'settings-section-appearance',
-    labels: ['外观与体验', '主题', '色调', '动画', '减少动效', '动效', '动画速度'],
+    labels: ['外观与体验', '外观', '体验'],
   },
   {
     id: 'settings-appearance-color-mode',
@@ -220,7 +223,17 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'settings-appearance-animation',
     sectionId: 'settings-section-appearance',
-    labels: ['动画与动效', '动画', '减少动效', '动效速度', 'animation'],
+    labels: ['界面动画', '动画与动效', '动画', '启用动画', 'animation'],
+  },
+  {
+    id: 'settings-appearance-reduced-motion',
+    sectionId: 'settings-section-appearance',
+    labels: ['跟随系统动效偏好', '减少动效', '系统动效', 'prefers-reduced-motion'],
+  },
+  {
+    id: 'settings-appearance-animation-speed',
+    sectionId: 'settings-section-appearance',
+    labels: ['动画速度', '动效速度', '快', '标准', '慢', 'animation speed'],
   },
   {
     id: 'settings-section-performance',

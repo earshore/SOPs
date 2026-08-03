@@ -82,12 +82,16 @@ function parseArgs(argv: string[]): { command: string; flags: Record<string, str
   return { command, flags };
 }
 
-function git(args: readonly string[]): string {
+function gitRaw(args: readonly string[]): string {
   return execFileSync('git', args, {
     cwd: ROOT,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim();
+  });
+}
+
+function git(args: readonly string[]): string {
+  return gitRaw(args).trim();
 }
 
 function gitSucceeds(args: readonly string[]): boolean {
@@ -121,7 +125,7 @@ export function resolveCleanReleaseCommit(status: string, headSha: string): stri
 
 function resolveReleaseCommit(): string {
   return resolveCleanReleaseCommit(
-    git(['status', '--porcelain=v1', '--untracked-files=all']),
+    gitRaw(['status', '--porcelain=v1', '--untracked-files=all']),
     git(['rev-parse', 'HEAD'])
   );
 }

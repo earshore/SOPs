@@ -114,6 +114,10 @@ describe('基础类型守卫', () => {
       };
 
       expect(isUserProductProfile(valid)).toBe(true);
+      for (const specsAuthority of ['user-confirmed', 'report-derived', 'unconfirmed']) {
+        expect(isUserProductProfile({ ...valid, specsAuthority })).toBe(true);
+      }
+      expect(isUserProductProfile({ ...valid, specsAuthority: 'invalid' })).toBe(false);
     });
 
     it('应该拒绝无效的 UserProductProfile', () => {

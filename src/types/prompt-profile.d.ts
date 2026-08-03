@@ -13,6 +13,8 @@ export type ToneStyle =
   | 'minimalist'
   | '';
 
+export type DetailedSpecsAuthority = 'user-confirmed' | 'report-derived' | 'unconfirmed';
+
 export type UserProductDnaField =
   'keywordsTier1' | 'keywordsTier2' | 'negative' | 'audience' | 'usps' | 'specs' | 'socialHook';
 
@@ -23,6 +25,7 @@ export interface UserProductProfile {
   audience: string;
   usps: string;
   specs: string;
+  specsAuthority?: DetailedSpecsAuthority;
   socialHook: string;
   negative: string;
   tone: ToneStyle;

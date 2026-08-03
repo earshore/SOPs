@@ -60,6 +60,19 @@ describe('settingsSearch', () => {
     expect(ids).toContain('settings-appearance-color-mode');
     expect(ids).toContain('master-analysis-scrape');
   });
+
+  it('routes tool and appearance leaf searches to their own navigation targets', () => {
+    expect(findFirstSettingsSearchMatch('SEO 处理')?.id).toBe('keyword-hunter-seo-process');
+    expect(findFirstSettingsSearchMatch('Listing 评审')?.id).toBe('keyword-hunter-listing-review');
+    expect(findFirstSettingsSearchMatch('界面动画')?.id).toBe('settings-appearance-animation');
+    expect(findFirstSettingsSearchMatch('动画与动效')?.id).toBe(
+      'settings-appearance-animation'
+    );
+    expect(findFirstSettingsSearchMatch('减少动效')?.id).toBe('settings-appearance-reduced-motion');
+    expect(findFirstSettingsSearchMatch('动画速度')?.id).toBe(
+      'settings-appearance-animation-speed'
+    );
+  });
 });
 
 describe('settings deep-link target resolve', () => {
@@ -73,9 +86,9 @@ describe('settings deep-link target resolve', () => {
     document.body.innerHTML = `
       <div data-settings-nav-id="settings-appearance-theme" data-settings-nav-group="appearance"></div>
     `;
-    expect(findSettingsNavTarget('settings-appearance-theme')?.getAttribute('data-settings-nav-id')).toBe(
-      'settings-appearance-theme'
-    );
+    expect(
+      findSettingsNavTarget('settings-appearance-theme')?.getAttribute('data-settings-nav-id')
+    ).toBe('settings-appearance-theme');
   });
 });
 
@@ -93,6 +106,12 @@ describe('deep link helper (no density)', () => {
 describe('CT-P1-02 / CT-P1-03 template contracts', () => {
   const html = readSettingsTemplate();
   const css = readSettingsStyles();
+
+  function readTemplateFragment(): DocumentFragment {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    return template.content;
+  }
 
   it('CT-P1-02 has search toolbar without density mode', () => {
     expect(html).toContain('settings-search');
@@ -116,5 +135,65 @@ describe('CT-P1-02 / CT-P1-03 template contracts', () => {
     expect(html).toContain('即时生效');
     expect(html).toContain('settings-badge');
     expect(css).toContain('.settings-badge--ai-cost');
+  });
+
+  it('nests Master Analysis and Keyword Hunter leaves as third-level navigation', () => {
+    const fragment = readTemplateFragment();
+    const master = fragment.querySelector('[data-testid="settings-nav-master-analysis"]');
+    const masterScrape = fragment.querySelector(
+      '[data-testid="settings-nav-master-analysis-scrape"]'
+    );
+    const masterAi = fragment.querySelector('[data-testid="settings-nav-master-analysis-ai"]');
+    const keywordHunter = fragment.querySelector('[data-testid="settings-nav-keyword-hunter"]');
+    const keywordSeo = fragment.querySelector(
+      '[data-testid="settings-nav-keyword-hunter-seo-process"]'
+    );
+    const keywordListing = fragment.querySelector(
+      '[data-testid="settings-nav-keyword-hunter-listing-review"]'
+    );
+
+    for (const target of [
+      master,
+      masterScrape,
+      masterAi,
+      keywordHunter,
+      keywordSeo,
+      keywordListing,
+    ]) {
+      expect(target).not.toBeNull();
+    }
+    expect(masterScrape?.classList.contains('settings-panel-nav-link--tertiary')).toBe(true);
+    expect(masterAi?.classList.contains('settings-panel-nav-link--tertiary')).toBe(true);
+    expect(keywordSeo?.classList.contains('settings-panel-nav-link--tertiary')).toBe(true);
+    expect(keywordListing?.classList.contains('settings-panel-nav-link--tertiary')).toBe(true);
+    expect(
+      masterScrape?.parentElement?.classList.contains('settings-panel-nav-subgroup-children')
+    ).toBe(true);
+    expect(
+      keywordSeo?.parentElement?.classList.contains('settings-panel-nav-subgroup-children')
+    ).toBe(true);
+
+    for (const id of [
+      'keyword-hunter-seo-process',
+      'keyword-hunter-listing-review',
+      'settings-appearance-animation',
+      'settings-appearance-reduced-motion',
+      'settings-appearance-animation-speed',
+    ]) {
+      expect(fragment.querySelector(`[data-settings-nav-id="${id}"]`)).not.toBeNull();
+    }
+    expect(css).toContain('.settings-panel-nav-link--tertiary');
+  });
+
+  it('uses the tone row itself as the appearance theme deep-link surface', () => {
+    const fragment = readTemplateFragment();
+    const tone = fragment.querySelector('#settings-appearance-theme');
+    const preferenceList = tone?.closest('.settings-pref-list');
+
+    expect(tone?.classList.contains('settings-pref-row')).toBe(true);
+    expect(tone?.getAttribute('data-testid')).toBe('settings-appearance-theme');
+    expect(tone?.getAttribute('data-settings-nav-id')).toBe('settings-appearance-theme');
+    expect(preferenceList?.id).toBe('');
+    expect(preferenceList?.getAttribute('data-settings-nav-id')).toBeNull();
   });
 });

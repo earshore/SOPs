@@ -438,7 +438,7 @@ function getSnapshotCompetitorLabel(snapshot: KeywordHunterSnapshot): string {
 }
 
 function getVisibleInputSnapshots(): KeywordHunterSnapshot[] {
-  return inputSnapshots.slice(0, 6);
+  return inputSnapshots;
 }
 
 function createSnapshotActionButton(

@@ -90,6 +90,7 @@ const DEFAULT_PROFILE: UserProductProfile = {
   audience: '',
   usps: '',
   specs: '',
+  specsAuthority: 'unconfirmed',
   socialHook: '',
   negative: '',
   tone: 'professional',
@@ -124,6 +125,7 @@ function withoutReportDna(profile: UserProductProfile): UserProductProfile {
     audience: '',
     usps: '',
     specs: '',
+    specsAuthority: 'unconfirmed',
     socialHook: '',
     negative: '',
     selectedReportSections: [],
@@ -514,10 +516,24 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   },
 
   showDnaSource(field: DnaExtractionFieldName): boolean {
+    if (field === 'specs' && this.profile.specs.trim()) {
+      return true;
+    }
     return !!this.getDnaFieldSummary(field)?.hasValue;
   },
 
   getDnaFieldSourceText(field: DnaExtractionFieldName): string {
+    if (field === 'specs') {
+      switch (this.profile.specsAuthority ?? 'unconfirmed') {
+        case 'user-confirmed':
+          return 'SKU 事实：已由用户确认；Listing 将以此为准';
+        case 'report-derived':
+          return 'SKU 事实：报告提取，仅作待确认建议，不会写入 Listing 事实';
+        default:
+          return 'SKU 事实：待用户确认，不会写入 Listing 事实';
+      }
+    }
+
     const summary = this.getDnaFieldSummary(field);
     if (!summary) return '';
     return `来源：${summary.source} · 置信度：${summary.confidence}%`;
@@ -820,10 +836,14 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
   setProfileField(field: keyof UserProductProfile, event: Event) {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
-    this.profile = {
+    const nextProfile: UserProductProfile = {
       ...this.profile,
       [field]: target.value,
     };
+    if (field === 'specs') {
+      nextProfile.specsAuthority = target.value.trim() ? 'user-confirmed' : 'unconfirmed';
+    }
+    this.profile = nextProfile;
     this.onInputChange();
     if (field === 'targetMarket') {
       this.refreshDnaExtractionSummary();

@@ -28,14 +28,22 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本           | 说明                                               |
 | ---------------------------- | -------------- | -------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.0.11`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.12-rc.6` | 系统设置拆分收口（6 sections + SettingsDomain 门面）；**非** Latest |
-| package.json                 | `3.0.12-rc.6`  | 与当前 RC tag / Release 一致                       |
+| **当前 Pre-release 候选**    | `v3.0.12-rc.7` | 设置交互与 PromptLab SKU 事实校正；**非** Latest |
+| package.json                 | `3.0.12-rc.7`  | 与当前 RC tag / Release 一致                       |
 | 上一 GA                      | `v3.0.11`      | 回滚参考                                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.6` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.7` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.6`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.7`。
+
+`v3.0.12-rc.7`（2026-08-04，Pre-release）收口系统设置交互、PromptLab SKU 事实校正与 Keyword Hunter 历史快照：
+
+- **系统设置**：Master Analysis / Keyword Hunter 补齐三级导航与深链；色调定位仅覆盖色调控件；动效拆分为界面动画、跟随系统动效偏好和动画速度。
+- **数据导出**：部分分桶选择时高亮“导出选中分类”；全选保持完整备份语义和原有导出 payload。
+- **PromptLab**：用户确认的详细参数成为 SKU 事实唯一来源；竞品报告参数仅保留为市场洞察，避免容量、重量、配件等冲突信息写入 Listing；Tier 1、限制词、目标受众均可展开编辑。
+- **历史快照**：Keyword Hunter 输入页显示全部已保存快照，并校验 PromptLab 详细参数来源状态。
+- GitHub Latest **仍指向** `v3.0.11`；回滚基线为 `v3.0.11`；生产目标 `https://sops.hongecb.store`。
 
 `v3.0.12-rc.6`（2026-08-03，Pre-release）收口系统设置拆分（TD-SET-01）：
 

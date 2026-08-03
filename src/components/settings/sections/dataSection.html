@@ -99,6 +99,7 @@
                           @click="exportLocalData()"
                           :disabled="localData.isBusy"
                           class="settings-data-io-actions__btn"
+                          :class="{ 'settings-data-io-actions__btn--active': isPartialLocalDataExport }"
                         >
                           <i class="fas fa-file-export settings-text-accent" aria-hidden="true"></i>
                           <span x-text="exportLocalDataButtonText"></span>

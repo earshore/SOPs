@@ -34,8 +34,8 @@ describe('release clean-commit guard', () => {
     expect(resolveCleanReleaseCommit?.('!! dist/\n!! release-artifacts/', HEAD_SHA)).toBe(HEAD_SHA);
   });
 
-  it('accepts the XSS scanner modified-report status entry', () => {
-    expect(resolveCleanReleaseCommit?.(' M docs/XSS_SCAN_REPORT.md', HEAD_SHA)).toBe(HEAD_SHA);
+  it('accepts raw porcelain output for the XSS scanner modified-report entry', () => {
+    expect(resolveCleanReleaseCommit?.(' M docs/XSS_SCAN_REPORT.md\r\n', HEAD_SHA)).toBe(HEAD_SHA);
   });
 
   it('uses the resolved SHA in release notes', () => {

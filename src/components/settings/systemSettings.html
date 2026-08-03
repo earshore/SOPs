@@ -253,30 +253,37 @@
               >
                 通用 AI 执行策略
               </button>
-              <button
-                type="button"
-                class="settings-panel-nav-link settings-panel-nav-link--secondary"
-                :class="{ 'is-current': isNavTargetCurrent('master-analysis') }"
-                @click="navigateToNavTarget('master-analysis', 'tool')"
-              >
-                Master Analysis
-              </button>
-              <button
-                type="button"
-                class="settings-panel-nav-link settings-panel-nav-link--secondary"
-                :class="{ 'is-current': isNavTargetCurrent('master-analysis-scrape') }"
-                @click="navigateToNavTarget('master-analysis-scrape', 'tool')"
-              >
-                数据采集
-              </button>
-              <button
-                type="button"
-                class="settings-panel-nav-link settings-panel-nav-link--secondary"
-                :class="{ 'is-current': isNavTargetCurrent('master-analysis-ai') }"
-                @click="navigateToNavTarget('master-analysis-ai', 'tool')"
-              >
-                AI 智能分析
-              </button>
+              <div class="settings-panel-nav-subgroup">
+                <button
+                  type="button"
+                  class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                  :class="{ 'is-current': isNavTargetCurrent('master-analysis') }"
+                  data-testid="settings-nav-master-analysis"
+                  @click="navigateToNavTarget('master-analysis', 'tool')"
+                >
+                  Master Analysis
+                </button>
+                <div class="settings-panel-nav-subgroup-children">
+                  <button
+                    type="button"
+                    class="settings-panel-nav-link settings-panel-nav-link--tertiary"
+                    :class="{ 'is-current': isNavTargetCurrent('master-analysis-scrape') }"
+                    data-testid="settings-nav-master-analysis-scrape"
+                    @click="navigateToNavTarget('master-analysis-scrape', 'tool')"
+                  >
+                    数据采集
+                  </button>
+                  <button
+                    type="button"
+                    class="settings-panel-nav-link settings-panel-nav-link--tertiary"
+                    :class="{ 'is-current': isNavTargetCurrent('master-analysis-ai') }"
+                    data-testid="settings-nav-master-analysis-ai"
+                    @click="navigateToNavTarget('master-analysis-ai', 'tool')"
+                  >
+                    AI 智能分析
+                  </button>
+                </div>
+              </div>
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
@@ -285,15 +292,37 @@
               >
                 Deep Chat
               </button>
-              <button
-                type="button"
-                class="settings-panel-nav-link settings-panel-nav-link--secondary"
-                :class="{ 'is-current': isNavTargetCurrent('keyword-hunter') }"
-                data-testid="settings-nav-keyword-hunter"
-                @click="navigateToNavTarget('keyword-hunter', 'tool')"
-              >
-                Keyword Hunter
-              </button>
+              <div class="settings-panel-nav-subgroup">
+                <button
+                  type="button"
+                  class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                  :class="{ 'is-current': isNavTargetCurrent('keyword-hunter') }"
+                  data-testid="settings-nav-keyword-hunter"
+                  @click="navigateToNavTarget('keyword-hunter', 'tool')"
+                >
+                  Keyword Hunter
+                </button>
+                <div class="settings-panel-nav-subgroup-children">
+                  <button
+                    type="button"
+                    class="settings-panel-nav-link settings-panel-nav-link--tertiary"
+                    :class="{ 'is-current': isNavTargetCurrent('keyword-hunter-seo-process') }"
+                    data-testid="settings-nav-keyword-hunter-seo-process"
+                    @click="navigateToNavTarget('keyword-hunter-seo-process', 'tool')"
+                  >
+                    SEO 处理
+                  </button>
+                  <button
+                    type="button"
+                    class="settings-panel-nav-link settings-panel-nav-link--tertiary"
+                    :class="{ 'is-current': isNavTargetCurrent('keyword-hunter-listing-review') }"
+                    data-testid="settings-nav-keyword-hunter-listing-review"
+                    @click="navigateToNavTarget('keyword-hunter-listing-review', 'tool')"
+                  >
+                    Listing 评审
+                  </button>
+                </div>
+              </div>
               <button
                 type="button"
                 class="settings-panel-nav-link settings-panel-nav-link--secondary"
@@ -395,7 +424,23 @@
                 :class="{ 'is-current': isNavTargetCurrent('settings-appearance-animation') }"
                 @click="navigateToNavTarget('settings-appearance-animation', 'appearance')"
               >
-                动画与动效
+                界面动画
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-appearance-reduced-motion') }"
+                @click="navigateToNavTarget('settings-appearance-reduced-motion', 'appearance')"
+              >
+                跟随系统动效偏好
+              </button>
+              <button
+                type="button"
+                class="settings-panel-nav-link settings-panel-nav-link--secondary"
+                :class="{ 'is-current': isNavTargetCurrent('settings-appearance-animation-speed') }"
+                @click="navigateToNavTarget('settings-appearance-animation-speed', 'appearance')"
+              >
+                动画速度
               </button>
             </div>
           </div>

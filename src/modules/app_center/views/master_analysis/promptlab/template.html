@@ -259,17 +259,19 @@
                     <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
                   </button>
                 </label>
-                <input
+                <textarea
                   @input="setProfileField('keywordsTier1', $event)"
-                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition duration-200 placeholder:text-slate-400 font-mono"
+                  @focus="expandInput($event)"
+                  @blur="restoreInput($event)"
+                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition duration-200 resize-none placeholder:text-slate-400 font-mono"
                   id="lab-keywords-tier1"
                   placeholder="humidifiers for bedroom, cool mist humidifier"
-                  type="text"
+                  rows="1"
                   aria-label="Tier 1 核心词"
                   aria-labelledby="lab-keywords-tier1-label"
                   aria-describedby="lab-keywords-tier1-source"
                   :value="profile.keywordsTier1"
-                />
+                ></textarea>
                 <p
                   id="lab-keywords-tier1-source"
                   :class="showDnaSource('keywordsTier1') ? '' : 'hidden'"
@@ -306,17 +308,19 @@
                     <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
                   </button>
                 </label>
-                <input
+                <textarea
                   @input="setProfileField('negative', $event)"
-                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition duration-200 placeholder:text-slate-400"
+                  @focus="expandInput($event)"
+                  @blur="restoreInput($event)"
+                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition duration-200 resize-none placeholder:text-slate-400"
                   id="negative-keywords"
                   placeholder="例如: bestseller / cure"
-                  type="text"
+                  rows="1"
                   aria-label="限制词"
                   aria-labelledby="negative-keywords-label"
                   aria-describedby="negative-keywords-source"
                   :value="profile.negative"
-                />
+                ></textarea>
                 <p
                   id="negative-keywords-source"
                   :class="showDnaSource('negative') ? '' : 'hidden'"
@@ -405,17 +409,19 @@
                     <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
                   </button>
                 </label>
-                <input
+                <textarea
                   @input="setProfileField('audience', $event)"
-                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition duration-200 placeholder:text-slate-400"
+                  @focus="expandInput($event)"
+                  @blur="restoreInput($event)"
+                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition duration-200 resize-none placeholder:text-slate-400"
                   id="lab-audience"
                   placeholder="e.g. Busy moms, Tech enthusiasts"
-                  type="text"
+                  rows="1"
                   aria-label="目标受众"
                   aria-labelledby="lab-audience-label"
                   aria-describedby="lab-audience-source"
                   :value="profile.audience"
-                />
+                ></textarea>
                 <p
                   id="lab-audience-source"
                   :class="showDnaSource('audience') ? '' : 'hidden'"
