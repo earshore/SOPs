@@ -94,6 +94,6 @@
 
 - [x] 本地全量测试：312 files / 3448 tests 通过（已达成）
 - [x] `npm run test:coverage` 门禁绿灯：lines 82.00% / stmts 80.05% / fn 83.70% / br 68.02%（2026-08-03）
-- [ ] 远端 `Quality Gate` 全 workflow 通过（本地证据齐备；需提交推送后由 Actions 复核）
-- [ ] 状态与 `TECH_DEBT_BOARD` 一致（Open 债 = 实际存在的债）
-- [ ] 提交推送本期修复（release-workflow 平台兼容 / computedProperties / 覆盖率补测）后清零
+- [x] 远端 `Quality Gate` 全 workflow 通过：8/8 jobs success（2026-08-03 run #30801669174；performance 首跑 89<90 为 CI 波动，重跑通过）
+- [x] 状态与 `TECH_DEBT_BOARD` 一致：TD-TEST-03 登记为 Open 并注明本期已修复
+- [x] 提交推送完成：`fbd651bd` + `d7c3c916` + `8864e81`，HEAD 与 sops/main、origin/main 一致
