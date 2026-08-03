@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.12-rc.5] - 2026-08-02
 
+## [3.0.12-rc.6] - 2026-08-03
+
+> 生产验证候选版本。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.11`。
+> 收录 rc.5 之后：TD-SET-01 系统设置巨型单体拆分收口（TS/HTML/CSS 三件套按 section 拆分 + `SettingsDomain` 门面 + 门禁固化），以及设置模板运行时组装链路修复。
+> 生产回滚目标为 `v3.0.11` 对应的上一次 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- 契约测试 `systemSettingsContract.test.ts`：锁定 `settingsPanel` 数据键集合与对外 3 个 API 签名（`initAlpineSettings` / `openSettings` / `closeSettings`），拆分前后比对。
+- `SettingsDomain` 门面单测 `settingsDomain.test.ts`：load / savePartition / diff / validate / snapshot 5 方法各 ≥1 用例；专项单测收敛至 12 files / 153 tests。
+
+### Changed
+
+- 系统设置拆分（TD-SET-01 收口）：`systemSettings.ts` 3248 → 651 行，拆为 6 个 `sections/*`（llm / toolStrategy / network / data / appearance / diagnostics，单文件 ≤456 行）+ `panelTypes.ts` 类型聚合；`systemSettings.html` 3499 → 壳 478 行 + 11 个片段，经 `loader.ts` 复用 viewLoader `?raw` 机制按固定顺序组装，装配结果与拆分前模板等值；`systemSettings.css` 2293 → 壳 1138 行 + 7 个分片（顺序切片，cascade 顺序保持）。
+- 新增 `SettingsDomain` 门面（load / savePartition / diff / validate / snapshot 5 纯函数）：UI 直写全局策略存储归零，`StorageService` 写入路径全部收敛到门面；删除 8 个空 stub 导出（`saveProviderConfig` / `loadProviderConfig` / `fetchModels` / `toggleApiKeyVisibility` / `testConnection` / `saveProxyConfig` / `renderProxyInputUI` / `initSettingsListeners`）。
+- 新增 `settings-scale` audit（文件行数 / 依赖方向 / 模板片段完整性 / UI 直写存储 / 死 stub 引用）并固化进 `ci:quality`；`circular:check` 归一化 `?raw` 导入查询。
+
+### Fixed
+
+- 设置模板运行时组装：settings 视图由 viewLoader 在 Alpine 注册后注入，壳内 section 占位符此前未展开导致面板空白；现于注入点完成 `assembleSettingsTemplate()`，e2e settings 17 用例全绿。
+
 > 生产验证候选版本。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.11`。
 > 收录 rc.4 之后：Master Analysis AI 分析可靠性与推理模型兼容修复（分批导入合并、断点续跑、输出预算/结构化输出兼容），以及模型能力推理档位按厂商官方能力适配。
 > 生产回滚目标为 `v3.0.11` 对应的上一次 Pages 部署。

@@ -28,14 +28,22 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本           | 说明                                               |
 | ---------------------------- | -------------- | -------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.0.11`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.12-rc.5` | Master Analysis AI 分析可靠性（推理模型兼容、输出预算、断点续跑、分批导入合并）；**非** Latest |
-| package.json                 | `3.0.12-rc.5`  | 与当前 RC tag / Release 一致                       |
+| **当前 Pre-release 候选**    | `v3.0.12-rc.6` | 系统设置拆分收口（6 sections + SettingsDomain 门面）；**非** Latest |
+| package.json                 | `3.0.12-rc.6`  | 与当前 RC tag / Release 一致                       |
 | 上一 GA                      | `v3.0.11`      | 回滚参考                                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.5` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.6` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.5`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.6`。
+
+`v3.0.12-rc.6`（2026-08-03，Pre-release）收口系统设置拆分（TD-SET-01）：
+
+- **TS/HTML/CSS 三件套拆分**：`systemSettings.ts` 3248 → 651 行、`systemSettings.html` 3499 → 壳 478 行 + 11 片段、`systemSettings.css` 2293 → 壳 1138 行 + 7 分片；6 个 `sections/*` 单文件 ≤456 行。
+- **SettingsDomain 门面**：load / savePartition / diff / validate / snapshot 5 方法统一读写路径，UI 直写存储归零；8 个空 stub 导出删除。
+- **门禁固化**：`settings-scale` audit 入 `ci:quality`；契约测试 + 门面单测（专项 12 files / 153 tests）；coverage 四阈值 ≥ 基线（80.09 / 68.08 / 83.81 / 82.05）。
+- **修复**：设置模板注入时未组装导致面板空白，viewLoader 注入点完成装配，e2e settings 17/17 恢复。
+- GitHub Latest **仍指向** `v3.0.11`；回滚基线为 `v3.0.11`；生产目标 `https://sops.hongecb.store`。
 
 `v3.0.12-rc.5`（2026-08-02，Pre-release）收口 Master Analysis AI 分析可靠性与模型能力：
 
