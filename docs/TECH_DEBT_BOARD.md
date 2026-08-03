@@ -28,6 +28,7 @@
 | **TD-THM-02** | 主题 | 大量 Tailwind `blue-*` 硬编码（D6） | 换肤面窄 | 分期迁语义 token + 门禁 | P1 |
 | **TD-CMP-01** | 组件 | 业务页仍可自由拼按钮/表单 | 视觉孤岛 | 执行 COMPONENT_GUIDELINES；后续加 lint/示例 | P1 |
 | **TD-TEST-01** | 测试 | 视觉回归未进默认 CI | 主题/壳层回归靠人 | 发版 checklist 强制关键截图或 CI 抽样 | P2 |
+| **TD-TEST-03** | 测试 | 全量覆盖率跌破 ratchet（2026-08-03 实测 main 基线 lines 81.36% < 82%） | CI Quality Gate unit job 红；Release 通道受影响 | 补测试至门禁（本期已修复：lines 82.00%）；提交后由 CI 复核 | P0 |
 | **TD-OPS-02** | 可观测 | Sentry 默认关（产品决策） | 无线上聚合错误 | 保持关闭；Runbook 最低信号包已覆盖无 Sentry 值班 | P2 |
 | **TD-REL-01** | 发布 | main 提交粒过度碎时 review 成本高 | 审计成本 | RC 前按主题整理 notes（已有 CHANGELOG） | P3 |
 
