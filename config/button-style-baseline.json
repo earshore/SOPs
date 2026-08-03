@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "scope": "buttons",
+  "total": 29,
+  "filesScanned": 548,
+  "filesWithHits": 13,
+  "updatedAt": "2026-08-03T10:16:31.082Z",
+  "files": {
+    "common/BaseModule.ts": 1,
+    "common/devtools/MemoryDevTools.ts": 3,
+    "common/devtools/PerformanceMonitor.ts": 1,
+    "components/modal/confirmModal.ts": 3,
+    "modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts": 2,
+    "modules/more/views/business_scenarios/ad_acos_diagnosis/template.html": 2,
+    "modules/more/views/business_scenarios/amazon_daily_report/template.html": 2,
+    "modules/more/views/business_scenarios/bad_review_response/template.html": 2,
+    "modules/more/views/business_scenarios/review_monitor/template.html": 2,
+    "modules/more/views/business_scenarios/usage_notice/template.html": 4,
+    "modules/sops/views/growth/listing_seo/template.html": 3,
+    "modules/sops/views/growth/npi_tracker/index.ts": 1,
+    "modules/sops/views/growth/promotion_submission/template.html": 3
+  }
+}
