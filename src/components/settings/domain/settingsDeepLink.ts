@@ -1,19 +1,8 @@
 // src/components/settings/domain/settingsDeepLink.ts
 // Deep-link options for system settings open (section scroll + focus expand).
 
-export type SettingsSectionId =
-  | 'settings-section-llm'
-  | 'settings-section-tool-strategy'
-  | 'settings-section-network'
-  | 'settings-section-data'
-  | 'settings-section-appearance'
-  | 'settings-section-performance';
-
-export interface SettingsOpenOptions {
-  sectionId?: SettingsSectionId;
-  /** Expand details / highlight card, e.g. 'ppc-thresholds' | 'master-analysis' | 'ppc-analysis-flags' */
-  focus?: string;
-}
+import type { SettingsOpenOptions, SettingsSectionId } from '../settingsOpenOptions';
+export type { SettingsOpenOptions, SettingsSectionId } from '../settingsOpenOptions';
 
 export const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = [
   'settings-section-llm',

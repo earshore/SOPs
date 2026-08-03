@@ -1,3 +1,4 @@
+import { readSettingsTemplate } from './settingsTemplateAssembly';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -62,10 +63,7 @@ describe('settingsNavScroll helpers (TD-SET-04)', () => {
   });
 
   it('shipped settings HTML wires is-current + markers for every nav target group', () => {
-    const html = readFileSync(
-      resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
-      'utf8'
-    );
+    const html = readSettingsTemplate();
     const targets = [
       'settings-section-llm',
       'llm-step-1-title',

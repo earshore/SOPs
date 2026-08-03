@@ -1,0 +1,112 @@
+                <details
+                  class="settings-pref-fold"
+                  data-settings-focus="general-ai-runtime"
+                  data-settings-nav-id="general-ai-runtime"
+                  data-settings-nav-group="tool"
+                >
+                  <summary class="settings-pref-row settings-pref-row--fold">
+                    <div class="settings-pref-row__meta">
+                      <span class="settings-pref-row__icon" aria-hidden="true">
+                        <i class="fas fa-microchip"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <h4 class="settings-pref-row__title">通用 AI 执行策略</h4>
+                        <p class="settings-pref-row__hint">超时与重试</p>
+                      </div>
+                    </div>
+                    <i
+                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      aria-hidden="true"
+                    ></i>
+                  </summary>
+                  <div class="settings-pref-fold__body">
+                    <div class="settings-tool-page mt-3">
+                      <div class="settings-pref-list">
+                        <label class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">AI / 工具请求超时</span>
+                              <p class="settings-pref-row__hint">秒</p>
+                            </div>
+                          </div>
+                          <div class="settings-pref-row__control">
+                            <input
+                              type="number"
+                              min="30"
+                              max="300"
+                              step="5"
+                              :value="runtimeAnalysisTimeoutSeconds"
+                              @input="setRuntimeNumber('llm.analysisTimeoutMs', $event, 1000)"
+                              class="settings-control settings-control--sm"
+                            />
+                          </div>
+                        </label>
+
+                        <div class="settings-pref-divider" role="separator"></div>
+
+                        <label class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">模型重试次数</span>
+                            </div>
+                          </div>
+                          <div class="settings-pref-row__control">
+                            <input
+                              type="number"
+                              min="0"
+                              max="5"
+                              step="1"
+                              :value="runtimeStrategy.settings.llm.maxRetries"
+                              @input="setRuntimeNumber('llm.maxRetries', $event)"
+                              class="settings-control settings-control--sm"
+                            />
+                          </div>
+                        </label>
+
+                        <div class="settings-pref-divider" role="separator"></div>
+
+                        <label class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">重试间隔</span>
+                              <p class="settings-pref-row__hint">秒</p>
+                            </div>
+                          </div>
+                          <div class="settings-pref-row__control">
+                            <input
+                              type="number"
+                              min="0.25"
+                              max="30"
+                              step="0.25"
+                              :value="getRuntimeNumber('llm.retryDelayMs', 1000)"
+                              @input="setRuntimeNumber('llm.retryDelayMs', $event, 1000)"
+                              class="settings-control settings-control--sm"
+                            />
+                          </div>
+                        </label>
+
+                        <div class="settings-pref-divider" role="separator"></div>
+
+                        <label class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">连接测试超时</span>
+                              <p class="settings-pref-row__hint">秒</p>
+                            </div>
+                          </div>
+                          <div class="settings-pref-row__control">
+                            <input
+                              type="number"
+                              min="5"
+                              max="60"
+                              step="5"
+                              :value="runtimeTestConnectionTimeoutSeconds"
+                              @input="setRuntimeNumber('llm.testConnectionTimeoutMs', $event, 1000)"
+                              class="settings-control settings-control--sm"
+                            />
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </details>

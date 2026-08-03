@@ -1,0 +1,288 @@
+/* Title cluster + model select (or action) on one row when space allows */
+.settings-tool-page__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+}
+
+.settings-tool-page__head-main {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 10rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.settings-tool-page__model {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.settings-tool-page__model-select,
+.settings-tool-page__model .settings-control {
+  width: 100%;
+  min-height: 2.125rem;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  padding-right: 2rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--settings-text, #334155);
+  background-color: var(--settings-surface, #fff);
+}
+
+.settings-tool-page__model-select:disabled,
+.settings-tool-page__model .settings-control:disabled {
+  color: var(--settings-text-muted, #64748b);
+  opacity: 0.85;
+}
+
+.settings-tool-page__model-chevron {
+  pointer-events: none;
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  display: flex;
+  height: 1.15rem;
+  width: 1.15rem;
+  transform: translateY(-50%);
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.3rem;
+  background: transparent;
+  color: var(--color-text-tertiary, #94a3b8);
+  font-size: 0.5rem;
+}
+
+.settings-tool-page__hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.settings-tool-page__hint-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--settings-text);
+}
+
+.settings-pref-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.75rem 1rem;
+  min-height: 3.25rem;
+}
+
+/* Segmented / 宽 control 才允许换行；开关行强制左右并排 */
+.settings-pref-row:has(.settings-segmented),
+.settings-pref-row:has(.settings-pref-row__control) {
+  flex-wrap: wrap;
+}
+
+.settings-pref-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.settings-pref-row:has(.settings-switch) .settings-pref-row__meta {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.settings-pref-row .settings-switch {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.settings-pref-row__action {
+  flex-shrink: 0;
+  margin-left: auto;
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--settings-border, #e2e8f0);
+  border-radius: calc(var(--settings-radius-control, 0.75rem) - 0.125rem);
+  background: var(--settings-surface, #fff);
+  color: var(--settings-text, #334155);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-pref-row__action:hover {
+  border-color: color-mix(in srgb, var(--settings-accent) 35%, var(--settings-border, #e2e8f0));
+  color: var(--settings-accent);
+}
+
+.settings-pref-row__action:focus-visible {
+  outline: none;
+  box-shadow: var(--settings-focus-ring);
+}
+
+.settings-pref-row__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--settings-text-muted) 12%, var(--settings-surface));
+  color: var(--settings-text-muted);
+  font-size: 0.6875rem;
+  align-self: center;
+}
+
+.settings-pref-row__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
+  min-width: 0;
+}
+
+.settings-pref-row__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--settings-text);
+  line-height: 1.3;
+}
+
+.settings-pref-row__hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--color-text-tertiary, #94a3b8);
+  line-height: 1.4;
+}
+
+.settings-pref-row__control {
+  flex: 0 1 14rem;
+  min-width: 10rem;
+  max-width: 16rem;
+  margin: 0;
+}
+
+/* Credential row: label left, secret field right (wider than default control) */
+.settings-pref-row--secret {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.settings-pref-row__control--secret {
+  flex: 1 1 18rem;
+  min-width: 16rem;
+  max-width: min(36rem, 100%);
+  margin-left: auto;
+}
+
+@media (min-width: 640px) {
+  .settings-pref-row--secret {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .settings-pref-row--secret .settings-pref-row__meta {
+    flex: 0 1 8.5rem;
+  }
+
+  .settings-pref-row__control--secret {
+    flex: 1 1 auto;
+    min-width: 18rem;
+    max-width: none;
+  }
+}
+
+.settings-pref-divider {
+  height: 1px;
+  background: var(--color-border-light, var(--settings-border));
+  margin: 0;
+}
+
+/* Compact switch for appearance toggles */
+.settings-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.settings-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.settings-switch__track {
+  width: 2.5rem;
+  height: 1.375rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--settings-text-muted) 24%, var(--settings-surface));
+  transition: background 150ms ease;
+  position: relative;
+}
+
+.settings-switch__track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 9999px;
+  background: var(--settings-surface);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+  transition: transform 150ms ease;
+}
+
+.settings-switch input:checked + .settings-switch__track {
+  background: var(--settings-text);
+}
+
+.settings-switch input:checked + .settings-switch__track::after {
+  transform: translateX(1.125rem);
+}
+
+.settings-switch input:focus-visible + .settings-switch__track {
+  box-shadow: var(--settings-focus-ring);
+}
+
+/* Side-by-side with appearance row meta (animation speed) */
+.settings-segmented--inline {
+  flex: 0 1 14rem;
+  min-width: 11rem;
+  max-width: 16rem;
+  width: auto;
+  margin-left: 0;
+}
+
+.settings-segmented--inline .settings-segmented__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1 1 0;
+  min-height: 1.875rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Color mode: three labels including 跟随系统 — same effort chrome, slightly wider */
+.settings-segmented--color-mode {
+  flex: 1 1 15rem;
+  min-width: 13.5rem;
+  max-width: 20rem;
+  margin-left: auto;
+}

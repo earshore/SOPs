@@ -1,5 +1,6 @@
 // UT-P2-04..06 — rollback ring buffer, multi-tab notice, quota warning
 import { beforeEach, describe, expect, it } from 'vitest';
+import { readSettingsTemplate } from './settingsTemplateAssembly';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
@@ -125,10 +126,14 @@ describe('multi-tab storage notice (P2-4)', () => {
     );
     expect(src).toContain("window.addEventListener('storage'");
     expect(src).toContain('handleStorageEvent');
-    expect(src).toContain('externalChangeNotice = true');
-    expect(src).toContain('externalChangeConflict');
+    const diagnosticsSrc = readFileSync(
+      resolve(process.cwd(), 'src/components/settings/sections/diagnosticsSection.ts'),
+      'utf8'
+    );
+    expect(diagnosticsSrc).toContain('externalChangeNotice = true');
+    expect(diagnosticsSrc).toContain('externalChangeConflict');
     // handleStorageEvent body must not call reload (only sets flags)
-    const handler = src.match(
+    const handler = diagnosticsSrc.match(
       /handleStorageEvent\(event: StorageEvent\):\s*void\s*\{([\s\S]*?)\n {2}\},/
     )?.[1];
     expect(handler).toBeTruthy();
@@ -149,10 +154,7 @@ describe('quota warning (P2-5)', () => {
   });
 
   it('UT-P2-06b template exposes quota status bar', () => {
-    const template = readFileSync(
-      resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
-      'utf8'
-    );
+    const template = readSettingsTemplate();
     expect(template).toContain('data-testid="settings-quota-warning"');
     expect(template).toContain('quotaWarningVisible');
     expect(template).toContain('settings-status-bar--warning');

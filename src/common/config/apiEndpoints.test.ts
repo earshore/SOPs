@@ -59,7 +59,33 @@ function readMarketingCalendarEntry(): string {
 }
 
 function readSettingsTemplate(): string {
-  return readFileSync(join(process.cwd(), 'src/components/settings/systemSettings.html'), 'utf8');
+  // TD-SET-01 Phase 2: shell + section fragments, assembled like the runtime loader.
+  let html = readFileSync(
+    join(process.cwd(), 'src/components/settings/systemSettings.html'),
+    'utf8'
+  );
+  const sectionOrder = [
+    'llmSection',
+    'toolStrategySection',
+    'toolStrategyGeneralAi',
+    'toolStrategyMasterAnalysis',
+    'toolStrategyDeepChat',
+    'toolStrategyKeywordHunter',
+    'toolStrategyPpcFlags',
+    'networkSection',
+    'dataSection',
+    'appearanceSection',
+    'diagnosticsSection',
+  ];
+  for (const name of sectionOrder) {
+    const slot = `<!--settings-slot:${name}-->`;
+    if (!html.includes(slot)) continue;
+    html = html.replace(
+      slot,
+      readFileSync(join(process.cwd(), `src/components/settings/sections/${name}.html`), 'utf8')
+    );
+  }
+  return html;
 }
 
 function readAiAnalysisTemplate(): string {

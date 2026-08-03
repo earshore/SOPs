@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { readSettingsTemplate } from './settingsTemplateAssembly';
 
 const transitionsCssPath = resolve(process.cwd(), 'src/css/utilities/transitions.css');
 const variablesCssPath = resolve(process.cwd(), 'src/css/foundation/variables.css');
@@ -121,6 +122,15 @@ describe('PC motion CSS contract', () => {
       expect(template).not.toMatch(/\bhover:rotate/);
       expect(template).toContain('focus-visible:ring-2');
     });
+
+    // TD-SET-01 Phase 2: settings template is now shell + fragments; the assembled
+    // template (not just the shell) must keep the same motion contract as the old
+    // single-file template.
+    const settingsTemplate = readSettingsTemplate();
+    expect(settingsTemplate).not.toContain('transition-all');
+    expect(settingsTemplate).not.toMatch(/\b(?:hover|active|group-hover):scale/);
+    expect(settingsTemplate).not.toMatch(/\bhover:rotate/);
+    expect(settingsTemplate).toContain('focus-visible:ring-2');
   });
 
   it('keeps converged deep PC templates from using broad or scaling hover feedback', () => {

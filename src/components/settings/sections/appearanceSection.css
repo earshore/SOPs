@@ -1,0 +1,185 @@
+/* App group label under tool strategy (if used) */
+.settings-app-group-label {
+  padding: 0.25rem 0.15rem 0;
+}
+
+.settings-toolbar--search-only {
+  justify-content: stretch;
+}
+
+.settings-toolbar--search-only .settings-search {
+  flex: 1 1 auto;
+  max-width: none;
+}
+
+/* Master Analysis schedule preference custom select */
+.settings-schedule-select__trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-schedule-select__value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.settings-schedule-select__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--settings-text);
+  line-height: 1.25;
+}
+
+.settings-schedule-select__hint {
+  font-size: 0.625rem;
+  font-weight: 400;
+  color: var(--color-text-tertiary, #94a3b8);
+  line-height: 1.3;
+}
+
+.settings-schedule-select__menu {
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.25rem);
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  border: 1px solid var(--settings-border, #e2e8f0);
+  border-radius: var(--settings-radius-control, 0.75rem);
+  background: var(--settings-surface);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+  max-height: 16rem;
+  overflow: auto;
+}
+
+.settings-schedule-select__option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.settings-schedule-select__option:hover,
+.settings-schedule-select__option:focus-visible {
+  background: var(--settings-surface-muted);
+  outline: none;
+}
+
+.settings-schedule-select__option.is-active {
+  background: var(--settings-accent-soft);
+}
+
+.settings-schedule-select__option.is-active .settings-schedule-select__label {
+  color: var(--settings-accent-strong);
+}
+
+/* L3 modules under multi-module app folds: always open; frame body only */
+.settings-tool-l3-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+.settings-tool-l3--static {
+  border: none;
+  background: transparent;
+  overflow: visible;
+}
+
+.settings-tool-l3__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  list-style: none;
+  cursor: default;
+  user-select: none;
+  padding: 0.15rem 0.1rem 0.45rem;
+  border: none;
+  background: transparent;
+}
+
+.settings-tool-l3__summary .settings-card__title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--settings-text);
+}
+
+.settings-tool-l3__summary .settings-tool-page__hint {
+  margin: 0.1rem 0 0;
+}
+
+/* Border / surface only on content panel under the title strip */
+.settings-tool-l3--static > .settings-tool-page.settings-tool-l3__body {
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--settings-border) 92%, transparent);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--settings-surface-muted) 72%, var(--settings-surface));
+  padding: 0.75rem;
+}
+
+/* Tool default-model picker: true pref-row, wider select */
+.settings-pref-row__control--model {
+  flex: 1 1 16rem;
+  min-width: 14rem;
+  max-width: min(24rem, 100%);
+  margin-left: auto;
+}
+
+.settings-tool-page > .settings-pref-list:first-child,
+.settings-tool-page .settings-pref-list:has(.settings-pref-row__control--model):first-child {
+  margin-top: 0;
+}
+
+/* Data section: pref-list folds (appearance family) */
+.settings-pref-fold {
+  margin: 0;
+}
+
+.settings-pref-fold > summary.settings-pref-row--fold {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.settings-pref-fold > summary.settings-pref-row--fold::-webkit-details-marker {
+  display: none;
+}
+
+.settings-pref-fold > summary.settings-pref-row--fold:hover,
+.settings-pref-fold > summary.settings-pref-row--fold:focus-visible {
+  background: color-mix(in srgb, var(--settings-surface-muted) 88%, transparent);
+  outline: none;
+}
+
+.settings-pref-fold__chevron {
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: transform 160ms ease;
+}
+
+details.settings-pref-fold[open] > summary .settings-pref-fold__chevron {
+  transform: rotate(180deg);
+}
+
+.settings-pref-fold__body {
+  padding: 0 1rem 0.85rem;
+}

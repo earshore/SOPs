@@ -1,0 +1,155 @@
+          <section
+            id="settings-section-tool-strategy"
+            class="settings-panel-section space-y-4"
+            data-settings-nav-id="settings-section-tool-strategy"
+            data-settings-nav-group="tool"
+          >
+            <div class="settings-section-head">
+              <div
+                class="settings-section-head__icon settings-section-head__icon--indigo"
+                aria-hidden="true"
+              >
+                <i class="fas fa-sliders"></i>
+              </div>
+              <div class="settings-section-head__main">
+                <div class="settings-section-head__title-row">
+                  <h3 class="settings-section-head__title">工具策略</h3>
+                  <span class="settings-badge settings-badge--global">需保存</span>
+                </div>
+                <p class="settings-section-head__desc">默认模型与限额</p>
+              </div>
+            </div>
+
+            <div class="settings-section-frame settings-section-frame--strategy space-y-4">
+              <div class="settings-pref-list" data-testid="settings-tool-pref-list">
+                <div
+                  class="settings-pref-row"
+                  id="settings-runtime-presets"
+                  data-settings-focus="settings-runtime-presets"
+                  data-testid="settings-runtime-presets"
+                  data-settings-nav-id="settings-runtime-presets"
+                  data-settings-nav-group="tool"
+                >
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-sliders"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">应用策略预案</h4>
+                      <p class="settings-pref-row__hint">LLM / 采集 / 分析 / Deep Chat / PPC</p>
+                    </div>
+                  </div>
+                  <div
+                    class="settings-segmented settings-segmented--inline settings-segmented--effort"
+                    role="radiogroup"
+                    aria-label="应用策略预案"
+                  >
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
+                      data-testid="settings-preset-default"
+                      :class="{ 'is-active': activeRuntimePresetId === 'default' }"
+                      :aria-checked="(activeRuntimePresetId === 'default').toString()"
+                      @click="applyRuntimePresetById('default')"
+                    >
+                      默认
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
+                      data-testid="settings-preset-reliability"
+                      :class="{ 'is-active': activeRuntimePresetId === 'reliability' }"
+                      :aria-checked="(activeRuntimePresetId === 'reliability').toString()"
+                      @click="applyRuntimePresetById('reliability')"
+                    >
+                      稳定
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
+                      data-testid="settings-preset-speed"
+                      :class="{ 'is-active': activeRuntimePresetId === 'speed' }"
+                      :aria-checked="(activeRuntimePresetId === 'speed').toString()"
+                      @click="applyRuntimePresetById('speed')"
+                    >
+                      速度
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
+                      data-testid="settings-preset-cost"
+                      :class="{ 'is-active': activeRuntimePresetId === 'cost' }"
+                      :aria-checked="(activeRuntimePresetId === 'cost').toString()"
+                      @click="applyRuntimePresetById('cost')"
+                    >
+                      成本
+                    </button>
+                  </div>
+                </div>
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+<!--settings-slot:toolStrategyGeneralAi-->
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+<!--settings-slot:toolStrategyMasterAnalysis-->
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+<!--settings-slot:toolStrategyDeepChat-->
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+<!--settings-slot:toolStrategyKeywordHunter-->
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+<!--settings-slot:toolStrategyPpcFlags-->
+
+                <!-- 底部操作：与 AI 连接区同层级 — 次要等宽 + 主保存更宽 -->
+              </div>
+              <div class="settings-strategy-footer">
+                <div class="settings-strategy-footer__row">
+                  <button
+                    type="button"
+                    @click="resetRuntimeStrategy()"
+                    class="settings-strategy-footer__btn settings-strategy-footer__btn--secondary"
+                  >
+                    恢复默认
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="settings-undo-runtime-save"
+                    :hidden="!canUndoRuntimeSave"
+                    @click="undoLastSettingsSave('runtime')"
+                    class="settings-strategy-footer__btn settings-strategy-footer__btn--secondary"
+                  >
+                    撤销上次
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="settings-save-tool-strategy"
+                    @click="saveToolStrategy()"
+                    :disabled="toolStrategy.isSaving"
+                    class="settings-strategy-footer__btn settings-strategy-footer__btn--primary"
+                  >
+                    <i
+                      class="fas text-xs"
+                      :class="toolStrategySaveIconClass"
+                      aria-hidden="true"
+                    ></i>
+                    <span x-text="toolStrategySaveText"></span>
+                  </button>
+                </div>
+                <p class="settings-strategy-footer__hint">
+                  含采集运行策略。恢复默认：仅表单，需再保存。
+                </p>
+              </div>
+            </div>
+          </section>
+

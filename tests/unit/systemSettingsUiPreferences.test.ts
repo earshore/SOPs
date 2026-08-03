@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readSettingsStyles, readSettingsTemplate } from './settingsTemplateAssembly';
 import {
   findFirstSettingsSearchMatch,
   findSettingsSearchMatches,
@@ -92,14 +91,8 @@ describe('deep link helper (no density)', () => {
 });
 
 describe('CT-P1-02 / CT-P1-03 template contracts', () => {
-  const html = readFileSync(
-    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
-    'utf8'
-  );
-  const css = readFileSync(
-    resolve(process.cwd(), 'src/components/settings/systemSettings.css'),
-    'utf8'
-  );
+  const html = readSettingsTemplate();
+  const css = readSettingsStyles();
 
   it('CT-P1-02 has search toolbar without density mode', () => {
     expect(html).toContain('settings-search');

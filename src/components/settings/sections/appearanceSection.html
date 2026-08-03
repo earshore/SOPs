@@ -1,0 +1,233 @@
+          <section
+            id="settings-section-appearance"
+            class="settings-panel-section space-y-4"
+            data-settings-nav-id="settings-section-appearance"
+            data-settings-nav-group="appearance"
+          >
+            <div class="settings-section-head">
+              <div
+                class="settings-section-head__icon settings-section-head__icon--slate"
+                aria-hidden="true"
+              >
+                <i class="fas fa-palette"></i>
+              </div>
+              <div class="settings-section-head__main">
+                <div class="settings-section-head__title-row">
+                  <h3 class="settings-section-head__title">外观与体验</h3>
+                  <span class="settings-badge settings-badge--instant">即时生效</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section-frame settings-section-frame--appearance">
+              <div
+                id="settings-appearance-theme"
+                class="settings-pref-list"
+                data-testid="settings-appearance-theme"
+                data-settings-nav-id="settings-appearance-theme"
+                data-settings-nav-group="appearance"
+              >
+                <!-- Theme = light / dark / system (primary enterprise control) -->
+                <div
+                  class="settings-pref-row"
+                  data-testid="settings-appearance-color-mode"
+                  data-settings-nav-id="settings-appearance-color-mode"
+                  data-settings-nav-group="appearance"
+                >
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-circle-half-stroke"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">主题</h4>
+                      <p class="settings-pref-row__hint">
+                        工作台明暗：浅色 / 深色 / 跟随系统<span
+                          hidden
+                          :hidden="!appearanceColorModeIsSystem"
+                          data-testid="settings-color-mode-resolved-hint"
+                          x-text="appearanceColorModeSystemHint"
+                        ></span>
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="settings-segmented settings-segmented--inline settings-segmented--effort settings-segmented--color-mode"
+                    role="radiogroup"
+                    aria-label="主题"
+                    data-testid="settings-color-mode"
+                  >
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
+                      data-testid="settings-color-mode-light"
+                      :class="{ 'is-active': appearanceColorMode === 'light' }"
+                      :aria-checked="(appearanceColorMode === 'light').toString()"
+                      @click="setAppearanceColorMode('light')"
+                    >
+                      浅色
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
+                      data-testid="settings-color-mode-dark"
+                      :class="{ 'is-active': appearanceColorMode === 'dark' }"
+                      :aria-checked="(appearanceColorMode === 'dark').toString()"
+                      @click="setAppearanceColorMode('dark')"
+                    >
+                      深色
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
+                      data-testid="settings-color-mode-system"
+                      :class="{ 'is-active': appearanceColorMode === 'system' }"
+                      :aria-checked="(appearanceColorMode === 'system').toString()"
+                      @click="setAppearanceColorMode('system')"
+                    >
+                      跟随系统
+                    </button>
+                  </div>
+                </div>
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <!-- Accent / tone (global primary only; not ownership) -->
+                <div class="settings-pref-row" data-testid="settings-appearance-accent">
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-swatchbook"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">色调</h4>
+                      <p class="settings-pref-row__hint">全局强调色；不改变模块归属色</p>
+                    </div>
+                  </div>
+                  <label class="settings-pref-row__control">
+                    <span class="sr-only">当前色调</span>
+                    <select
+                      class="settings-control settings-control--sm"
+                      data-testid="settings-theme-select"
+                      :value="appearanceThemeId"
+                      @change="setAppearanceThemeFromEvent($event)"
+                    >
+                      <template x-for="theme in appearanceThemeOptions" :key="theme.id">
+                        <option
+                          :value="theme.id"
+                          :selected="theme.id === appearanceThemeId"
+                          x-text="theme.name"
+                        ></option>
+                      </template>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <!-- Motion toggles -->
+                <div
+                  id="settings-appearance-animation"
+                  class="settings-pref-row"
+                  data-testid="settings-appearance-animation"
+                  data-settings-nav-id="settings-appearance-animation"
+                  data-settings-nav-group="appearance"
+                >
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-film"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">界面动画</h4>
+                      <p class="settings-pref-row__hint">关闭则减少动效</p>
+                    </div>
+                  </div>
+                  <label class="settings-switch">
+                    <span class="sr-only">启用界面动画</span>
+                    <input
+                      type="checkbox"
+                      data-testid="settings-animations-enabled"
+                      :checked="appearanceAnimationsEnabled"
+                      @change="setAppearanceAnimationsEnabled($event)"
+                    />
+                    <span class="settings-switch__track" aria-hidden="true"></span>
+                  </label>
+                </div>
+
+                <div class="settings-pref-row">
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-universal-access"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">遵循系统「减少动效」</h4>
+                      <p class="settings-pref-row__hint">跟随系统</p>
+                    </div>
+                  </div>
+                  <label class="settings-switch">
+                    <span class="sr-only">遵循系统减少动效</span>
+                    <input
+                      type="checkbox"
+                      data-testid="settings-respect-reduced-motion"
+                      :checked="appearanceRespectSystemPreference"
+                      @change="setAppearanceRespectSystemPreference($event)"
+                    />
+                    <span class="settings-switch__track" aria-hidden="true"></span>
+                  </label>
+                </div>
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <!-- Speed: meta + segmented side by side -->
+                <div class="settings-pref-row">
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-gauge-high"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="settings-pref-row__title">动画速度</h4>
+                      <p class="settings-pref-row__hint">过渡快慢</p>
+                    </div>
+                  </div>
+                  <div
+                    class="settings-segmented settings-segmented--inline settings-segmented--effort"
+                    role="radiogroup"
+                    aria-label="动画速度"
+                    data-testid="settings-animation-speed"
+                  >
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
+                      :class="{ 'is-active': appearanceAnimationSpeed === 'fast' }"
+                      :aria-checked="(appearanceAnimationSpeed === 'fast').toString()"
+                      @click="setAppearanceAnimationSpeed('fast')"
+                    >
+                      快
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
+                      :class="{ 'is-active': appearanceAnimationSpeed === 'normal' }"
+                      :aria-checked="(appearanceAnimationSpeed === 'normal').toString()"
+                      @click="setAppearanceAnimationSpeed('normal')"
+                    >
+                      标准
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      class="settings-segmented__btn"
+                      :class="{ 'is-active': appearanceAnimationSpeed === 'slow' }"
+                      :aria-checked="(appearanceAnimationSpeed === 'slow').toString()"
+                      @click="setAppearanceAnimationSpeed('slow')"
+                    >
+                      慢
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>

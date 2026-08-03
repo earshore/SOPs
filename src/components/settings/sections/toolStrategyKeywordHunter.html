@@ -1,0 +1,385 @@
+                <details
+                  class="settings-pref-fold"
+                  data-settings-focus="keyword-hunter"
+                  data-settings-nav-id="keyword-hunter"
+                  data-settings-nav-group="tool"
+                  data-testid="settings-keyword-hunter"
+                >
+                  <summary class="settings-pref-row settings-pref-row--fold">
+                    <div class="settings-pref-row__meta">
+                      <span class="settings-pref-row__icon" aria-hidden="true">
+                        <i class="fas fa-magnifying-glass"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <h4 class="settings-pref-row__title">Keyword Hunter</h4>
+                        <p class="settings-pref-row__hint">SEO 与 Listing 默认模型</p>
+                      </div>
+                    </div>
+                    <i
+                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      aria-hidden="true"
+                    ></i>
+                  </summary>
+                  <div class="settings-pref-fold__body">
+                    <div class="settings-tool-l3-stack">
+                      <div class="settings-tool-l3 settings-tool-l3--static">
+                        <div class="settings-tool-l3__summary">
+                          <div class="min-w-0">
+                            <h5 class="settings-card__title">SEO 处理</h5>
+                          </div>
+                        </div>
+                        <div class="settings-tool-page settings-tool-l3__body">
+                          <div
+                            class="settings-pref-list"
+                            data-testid="settings-kh-seo-bool-pref-list"
+                          >
+                            <template
+                              x-for="item in toolStrategyTargetItemsByIds(['keyword-hunter-seo-process'])"
+                              :key="item.id"
+                            >
+                              <div class="settings-pref-row">
+                                <div class="settings-pref-row__meta">
+                                  <div class="min-w-0">
+                                    <label
+                                      class="settings-pref-row__title"
+                                      :for="'tool-strategy-model-' + item.id"
+                                      >默认模型</label
+                                    >
+                                    <p
+                                      class="settings-pref-row__hint"
+                                      x-text="item.model ? '覆盖全局模型' : '跟随全局模型'"
+                                    ></p>
+                                  </div>
+                                </div>
+                                <div
+                                  class="settings-pref-row__control settings-pref-row__control--model"
+                                >
+                                  <div class="settings-tool-page__model">
+                                    <select
+                                      :id="'tool-strategy-model-' + item.id"
+                                      :name="'tool-strategy-model-' + item.id"
+                                      :value="item.model"
+                                      @change="setToolTargetModel(item.id, $event)"
+                                      :disabled="toolStrategyModelSelectDisabled"
+                                      class="settings-control settings-control--sm settings-tool-page__model-select"
+                                    >
+                                      <option
+                                        value=""
+                                        x-text="item.followGlobalOptionLabel"
+                                      ></option>
+                                      <template
+                                        x-for="model in llm.models"
+                                        :key="getModelValue(model)"
+                                      >
+                                        <option
+                                          :value="getModelValue(model)"
+                                          x-text="getToolStrategyModelOptionLabel(model)"
+                                        ></option>
+                                      </template>
+                                    </select>
+                                    <span
+                                      class="settings-tool-page__model-chevron"
+                                      aria-hidden="true"
+                                    >
+                                      <i class="fas fa-chevron-down"></i>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </template>
+
+                            <div class="settings-pref-divider" role="separator"></div>
+
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <label class="settings-pref-row__title" for="kh-seo-cache-ttl"
+                                    >SEO 缓存 TTL</label
+                                  >
+                                  <p class="settings-pref-row__hint">小时</p>
+                                </div>
+                              </div>
+                              <div class="settings-pref-row__control">
+                                <input
+                                  id="kh-seo-cache-ttl"
+                                  type="number"
+                                  min="1"
+                                  max="720"
+                                  step="1"
+                                  :value="getRuntimeNumber('keywordHunterSeoProcess.cacheTtlMs', 3600000)"
+                                  @input="setRuntimeNumber('keywordHunterSeoProcess.cacheTtlMs', $event, 3600000)"
+                                  class="settings-control settings-control--sm"
+                                />
+                              </div>
+                            </div>
+
+                            <div class="settings-pref-divider" role="separator"></div>
+
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <label
+                                    class="settings-pref-row__title"
+                                    for="kh-seo-translation-tokens"
+                                    >翻译最大 Token</label
+                                  >
+                                  <p class="settings-pref-row__hint">单次输出上限</p>
+                                </div>
+                              </div>
+                              <div class="settings-pref-row__control">
+                                <input
+                                  id="kh-seo-translation-tokens"
+                                  type="number"
+                                  min="1024"
+                                  max="64000"
+                                  step="1024"
+                                  :value="runtimeStrategy.settings.keywordHunterSeoProcess.translationMaxTokens"
+                                  @input="setRuntimeNumber('keywordHunterSeoProcess.translationMaxTokens', $event)"
+                                  class="settings-control settings-control--sm"
+                                />
+                              </div>
+                            </div>
+
+                            <div class="settings-pref-divider" role="separator"></div>
+
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <h4 class="settings-pref-row__title">SEO 处理缓存</h4>
+                                  <p class="settings-pref-row__hint">分析结果缓存</p>
+                                </div>
+                              </div>
+                              <label class="settings-switch">
+                                <span class="sr-only">SEO 处理缓存</span>
+                                <input
+                                  type="checkbox"
+                                  :checked="runtimeStrategy.settings.keywordHunterSeoProcess.enableLlmCache"
+                                  @change="setRuntimeBoolean('keywordHunterSeoProcess.enableLlmCache', $event)"
+                                />
+                                <span class="settings-switch__track" aria-hidden="true"></span>
+                              </label>
+                            </div>
+
+                            <div class="settings-pref-divider" role="separator"></div>
+
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <h4 class="settings-pref-row__title">允许部分匹配</h4>
+                                  <p class="settings-pref-row__hint">匹配部分关键词</p>
+                                </div>
+                              </div>
+                              <label class="settings-switch">
+                                <span class="sr-only">允许部分匹配</span>
+                                <input
+                                  type="checkbox"
+                                  :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchPartial"
+                                  @change="setRuntimeBoolean('keywordHunterSeoProcess.matchPartial', $event)"
+                                />
+                                <span class="settings-switch__track" aria-hidden="true"></span>
+                              </label>
+                            </div>
+
+                            <div class="settings-pref-divider" role="separator"></div>
+
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <h4 class="settings-pref-row__title">复数匹配</h4>
+                                  <p class="settings-pref-row__hint">单复数形式对齐</p>
+                                </div>
+                              </div>
+                              <label class="settings-switch">
+                                <span class="sr-only">复数匹配</span>
+                                <input
+                                  type="checkbox"
+                                  :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchPlural"
+                                  @change="setRuntimeBoolean('keywordHunterSeoProcess.matchPlural', $event)"
+                                />
+                                <span class="settings-switch__track" aria-hidden="true"></span>
+                              </label>
+                            </div>
+
+                            <div class="settings-pref-divider" role="separator"></div>
+
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <h4 class="settings-pref-row__title">词干匹配</h4>
+                                  <p class="settings-pref-row__hint">词干归一后匹配</p>
+                                </div>
+                              </div>
+                              <label class="settings-switch">
+                                <span class="sr-only">词干匹配</span>
+                                <input
+                                  type="checkbox"
+                                  :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchStem"
+                                  @change="setRuntimeBoolean('keywordHunterSeoProcess.matchStem', $event)"
+                                />
+                                <span class="settings-switch__track" aria-hidden="true"></span>
+                              </label>
+                            </div>
+
+                            <div class="settings-pref-divider" role="separator"></div>
+
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <h4 class="settings-pref-row__title">区分大小写</h4>
+                                  <p class="settings-pref-row__hint">匹配时区分大小写</p>
+                                </div>
+                              </div>
+                              <label class="settings-switch">
+                                <span class="sr-only">区分大小写</span>
+                                <input
+                                  type="checkbox"
+                                  :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchCase"
+                                  @change="setRuntimeBoolean('keywordHunterSeoProcess.matchCase', $event)"
+                                />
+                                <span class="settings-switch__track" aria-hidden="true"></span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="settings-tool-l3 settings-tool-l3--static">
+                        <div class="settings-tool-l3__summary">
+                          <div class="min-w-0">
+                            <h5 class="settings-card__title">Listing 评审</h5>
+                          </div>
+                        </div>
+                        <div class="settings-tool-page settings-tool-l3__body">
+                          <div
+                            class="settings-pref-list"
+                            data-testid="settings-kh-listing-cache-pref-list"
+                          >
+                            <template
+                              x-for="item in toolStrategyTargetItemsByIds(['keyword-hunter-listing-review'])"
+                              :key="item.id"
+                            >
+                              <div class="settings-pref-row">
+                                <div class="settings-pref-row__meta">
+                                  <div class="min-w-0">
+                                    <label
+                                      class="settings-pref-row__title"
+                                      :for="'tool-strategy-model-' + item.id"
+                                      >默认模型</label
+                                    >
+                                    <p
+                                      class="settings-pref-row__hint"
+                                      x-text="item.model ? '覆盖全局模型' : '跟随全局模型'"
+                                    ></p>
+                                  </div>
+                                </div>
+                                <div
+                                  class="settings-pref-row__control settings-pref-row__control--model"
+                                >
+                                  <div class="settings-tool-page__model">
+                                    <select
+                                      :id="'tool-strategy-model-' + item.id"
+                                      :name="'tool-strategy-model-' + item.id"
+                                      :value="item.model"
+                                      @change="setToolTargetModel(item.id, $event)"
+                                      :disabled="toolStrategyModelSelectDisabled"
+                                      class="settings-control settings-control--sm settings-tool-page__model-select"
+                                    >
+                                      <option
+                                        value=""
+                                        x-text="item.followGlobalOptionLabel"
+                                      ></option>
+                                      <template
+                                        x-for="model in llm.models"
+                                        :key="getModelValue(model)"
+                                      >
+                                        <option
+                                          :value="getModelValue(model)"
+                                          x-text="getToolStrategyModelOptionLabel(model)"
+                                        ></option>
+                                      </template>
+                                    </select>
+                                    <span
+                                      class="settings-tool-page__model-chevron"
+                                      aria-hidden="true"
+                                    >
+                                      <i class="fas fa-chevron-down"></i>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </template>
+
+                            <div class="settings-pref-divider" role="separator"></div>
+
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <label class="settings-pref-row__title" for="kh-listing-cache-ttl"
+                                    >Listing 缓存 TTL</label
+                                  >
+                                  <p class="settings-pref-row__hint">小时</p>
+                                </div>
+                              </div>
+                              <div class="settings-pref-row__control">
+                                <input
+                                  id="kh-listing-cache-ttl"
+                                  type="number"
+                                  min="1"
+                                  max="720"
+                                  step="1"
+                                  :value="getRuntimeNumber('keywordHunterListingReview.cacheTtlMs', 3600000)"
+                                  @input="setRuntimeNumber('keywordHunterListingReview.cacheTtlMs', $event, 3600000)"
+                                  class="settings-control settings-control--sm"
+                                />
+                              </div>
+                            </div>
+
+                            <div class="settings-pref-divider" role="separator"></div>
+
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <label class="settings-pref-row__title" for="kh-listing-tokens"
+                                    >Listing 评审 Token</label
+                                  >
+                                  <p class="settings-pref-row__hint">单次输出上限</p>
+                                </div>
+                              </div>
+                              <div class="settings-pref-row__control">
+                                <input
+                                  id="kh-listing-tokens"
+                                  type="number"
+                                  min="1024"
+                                  max="64000"
+                                  step="1024"
+                                  :value="runtimeStrategy.settings.keywordHunterListingReview.listingAnalysisMaxTokens"
+                                  @input="setRuntimeNumber('keywordHunterListingReview.listingAnalysisMaxTokens', $event)"
+                                  class="settings-control settings-control--sm"
+                                />
+                              </div>
+                            </div>
+
+                            <div class="settings-pref-divider" role="separator"></div>
+
+                            <div class="settings-pref-row">
+                              <div class="settings-pref-row__meta">
+                                <div class="min-w-0">
+                                  <h4 class="settings-pref-row__title">AI 评审报告缓存</h4>
+                                  <p class="settings-pref-row__hint">评审 Listing 文案报告缓存</p>
+                                </div>
+                              </div>
+                              <label class="settings-switch">
+                                <span class="sr-only">AI 评审报告缓存</span>
+                                <input
+                                  type="checkbox"
+                                  :checked="runtimeStrategy.settings.keywordHunterListingReview.enableLlmCache"
+                                  @change="setRuntimeBoolean('keywordHunterListingReview.enableLlmCache', $event)"
+                                />
+                                <span class="settings-switch__track" aria-hidden="true"></span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </details>

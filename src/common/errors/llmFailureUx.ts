@@ -4,7 +4,7 @@
 import eventBus from '@/common/EventBus';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { showToast, type ToastType } from '@/common/ui/notifications';
-import type { SettingsOpenOptions } from '@/components/settings/domain/settingsDeepLink';
+import type { SettingsOpenOptions } from '@/components/settings/settingsOpenOptions';
 import { isAppError } from './AppError';
 
 export interface LlmFailureUx {

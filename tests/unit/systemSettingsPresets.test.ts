@@ -1,4 +1,5 @@
 // tests/unit/systemSettingsPresets.test.ts
+import { readSettingsTemplate } from './settingsTemplateAssembly';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -171,22 +172,27 @@ describe('UT-P1-06 appearance theme contracts', () => {
     resolve(process.cwd(), 'src/components/settings/systemSettings.ts'),
     'utf8'
   );
-  const html = readFileSync(
-    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
+  const appearanceTs = readFileSync(
+    resolve(process.cwd(), 'src/components/settings/sections/appearanceSection.ts'),
     'utf8'
   );
+  const diagnosticsTs = readFileSync(
+    resolve(process.cwd(), 'src/components/settings/sections/diagnosticsSection.ts'),
+    'utf8'
+  );
+  const html = readSettingsTemplate();
 
   it('UT-P1-06 setAppearanceTheme uses ThemeManager; appearance not dirty-saved via runtime', () => {
-    expect(panelTs).toContain("from '@/common/config/themeConfig'");
-    expect(panelTs).toContain('ThemeManager.applyTheme');
+    expect(appearanceTs).toContain("from '@/common/config/themeConfig'");
+    expect(appearanceTs).toContain('ThemeManager.applyTheme');
     // Implementation body (not the interface signature)
-    const themeFn = panelTs.match(
+    const themeFn = appearanceTs.match(
       /setAppearanceTheme\(themeId: string\): void \{\n[\s\S]*?\n {2}\},/
     );
     expect(themeFn?.[0] ?? '').toContain('ThemeManager.applyTheme');
     expect(themeFn?.[0] ?? '').not.toContain('saveRuntimeStrategySettings');
     // Dirty partition stays empty for appearance (Spec §5.5)
-    expect(panelTs).toMatch(/appearance:\s*\{\s*\}/);
+    expect(diagnosticsTs).toMatch(/appearance:\s*\{\s*\}/);
   });
 
   it('UT-P1-06 appearance section and instant badge present in template', () => {
@@ -219,17 +225,17 @@ describe('UT-P1-06 appearance theme contracts', () => {
   });
 
   it('UT-P1-06 color mode uses applyColorMode and stays independent of applyTheme', () => {
-    expect(panelTs).toContain('ThemeManager.applyColorMode');
-    expect(panelTs).toContain('ThemeManager.getCurrentColorMode');
-    expect(panelTs).toContain('appearanceColorMode');
-    const colorFn = panelTs.match(
+    expect(appearanceTs).toContain('ThemeManager.applyColorMode');
+    expect(appearanceTs).toContain('ThemeManager.getCurrentColorMode');
+    expect(appearanceTs).toContain('appearanceColorMode');
+    const colorFn = appearanceTs.match(
       /setAppearanceColorMode\(mode: ColorMode\): void \{\n[\s\S]*?\n {2}\},/
     );
     expect(colorFn?.[0] ?? '').toContain('ThemeManager.applyColorMode');
     expect(colorFn?.[0] ?? '').not.toContain('ThemeManager.applyTheme');
     expect(colorFn?.[0] ?? '').not.toContain('saveRuntimeStrategySettings');
     // load reflects preference (getCurrentColorMode), not only resolved
-    const loadFn = panelTs.match(/loadAppearanceSettings\(\): void \{\n[\s\S]*?\n {2}\},/);
+    const loadFn = appearanceTs.match(/loadAppearanceSettings\(\): void \{\n[\s\S]*?\n {2}\},/);
     expect(loadFn?.[0] ?? '').toContain('ThemeManager.getCurrentColorMode');
   });
 

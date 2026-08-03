@@ -700,12 +700,6 @@ registerActionsWithLegacy({
     closeMegaMenus({ blurActive: true });
     openAmazonInsightPluginDownload();
   },
-  saveProviderConfig: async () => withSystemSettings(s => s.saveProviderConfig()),
-  loadProviderConfig: async () => withSystemSettings(s => s.loadProviderConfig()),
-  fetchModels: async () => withSystemSettings(s => s.fetchModels()),
-  toggleApiKeyVisibility: async () => withSystemSettings(s => s.toggleApiKeyVisibility()),
-  testConnection: async () => withSystemSettings(s => s.testConnection()),
-  saveProxyConfig: async () => withSystemSettings(s => s.saveProxyConfig()),
   openPerformanceMonitor: async () => withSystemSettings(s => s.openPerformanceMonitor()),
 
   // 🎯 阶段1: 性能监控

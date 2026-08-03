@@ -1,0 +1,516 @@
+          <section
+            id="settings-section-llm"
+            class="settings-panel-section space-y-4"
+            data-settings-nav-id="settings-section-llm"
+            data-settings-nav-group="llm"
+          >
+            <div class="settings-section-head">
+              <div
+                class="settings-section-head__icon settings-section-head__icon--violet"
+                aria-hidden="true"
+              >
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="settings-section-head__main">
+                <div class="settings-section-head__title-row">
+                  <h3 class="settings-section-head__title">AI 模型与连接</h3>
+                  <span class="settings-badge settings-badge--ai-cost">影响 AI 成本</span>
+                  <div
+                    class="settings-section-tip"
+                    :class="{ 'is-warn': healthMessages.length > 0 }"
+                  >
+                    <button type="button" class="settings-section-tip__btn" aria-label="查看说明">
+                      <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    </button>
+                    <div class="settings-section-tip__popover" role="tooltip">
+                      <p x-text="llmSetupReadinessText"></p>
+                      <ul hidden :hidden="healthMessages.length === 0" role="list">
+                        <template x-for="msg in healthMessages" :key="msg">
+                          <li x-text="msg"></li>
+                        </template>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <p class="settings-section-head__desc">Endpoint、密钥与默认模型</p>
+              </div>
+            </div>
+
+            <div class="settings-section-frame settings-section-frame--llm space-y-4">
+              <div
+                class="settings-note settings-note--warn"
+                role="alert"
+                :hidden="!showDangerousEndpointWarning"
+              >
+                <span class="settings-note__icon" aria-hidden="true">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </span>
+                <div class="settings-note__body">
+                  <p class="settings-note__title">安全提示</p>
+                  <p class="settings-note__text">
+                    浏览器直连公有云有密钥暴露风险，优先走中转/网关。
+                  </p>
+                  <div class="settings-note__chips">
+                    <span class="settings-note__chip">
+                      <i class="fas fa-server" aria-hidden="true"></i>
+                      官方 API 或兼容网关
+                    </span>
+                    <span class="settings-note__chip">
+                      <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                      密钥仅存本机
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-pref-list" data-testid="settings-llm-pref-list">
+                <!-- L2 基本信息 -->
+                <details
+                  class="settings-pref-fold"
+                  aria-labelledby="llm-step-1-title"
+                  data-settings-focus="llm-step-1-title"
+                >
+                  <summary class="settings-pref-row settings-pref-row--fold">
+                    <div class="settings-pref-row__meta">
+                      <span class="settings-pref-row__icon" aria-hidden="true">
+                        <i class="fas fa-plug"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <h4
+                          id="llm-step-1-title"
+                          class="settings-pref-row__title"
+                          data-settings-nav-id="llm-step-1-title"
+                          data-settings-nav-group="llm"
+                        >
+                          基本信息
+                        </h4>
+                        <p class="settings-pref-row__hint">厂商、协议类型与 Endpoint</p>
+                      </div>
+                    </div>
+                    <i
+                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      aria-hidden="true"
+                    ></i>
+                  </summary>
+                  <div class="settings-pref-fold__body">
+                    <div class="settings-tool-page">
+                      <div class="settings-provider-type-row">
+                        <div class="group settings-provider-type-row__provider">
+                          <label
+                            for="llm-provider"
+                            class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
+                            >AI 厂商 / 配置档</label
+                          >
+                          <div class="relative">
+                            <select
+                              id="llm-provider"
+                              name="llm-provider"
+                              :value="llm.provider"
+                              @change="setLlmProvider($event)"
+                              class="settings-control w-full pl-4 pr-10 py-2.5 appearance-none text-sm transition duration-200 cursor-pointer"
+                            >
+                              <template x-for="option in llmProviderOptions" :key="option.id">
+                                <option :value="option.id" x-text="option.label"></option>
+                              </template>
+                            </select>
+                            <div
+                              class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                              aria-hidden="true"
+                            >
+                              <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="group settings-provider-type-row__type">
+                          <label
+                            for="llm-api-family"
+                            class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
+                            >类型</label
+                          >
+                          <div class="relative">
+                            <select
+                              id="llm-api-family"
+                              name="llm-api-family"
+                              data-testid="settings-llm-api-family"
+                              :value="llmApiFamily"
+                              @change="setLlmApiFamily($event)"
+                              class="settings-control w-full pl-4 pr-10 py-2.5 appearance-none text-sm transition duration-200 cursor-pointer"
+                            >
+                              <template x-for="option in llmApiFamilyOptions" :key="option.id">
+                                <option :value="option.id" x-text="option.label"></option>
+                              </template>
+                            </select>
+                            <div
+                              class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                              aria-hidden="true"
+                            >
+                              <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="group settings-api-path-group mt-3.5">
+                        <!-- Side-by-side: Endpoint + path; path is type-driven, not a dropdown -->
+                        <div class="settings-endpoint-path-row">
+                          <div class="settings-endpoint-field">
+                            <label
+                              for="llm-endpoint"
+                              class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
+                              >API Endpoint</label
+                            >
+                            <input
+                              type="url"
+                              id="llm-endpoint"
+                              name="llm-endpoint"
+                              autocomplete="off"
+                              :value="llm.endpoint"
+                              @input="setLlmEndpoint($event)"
+                              class="settings-control settings-endpoint-input w-full px-3 py-2.5 text-sm font-mono text-slate-600 transition duration-200 placeholder:text-slate-300"
+                              :placeholder="defaultLlmEndpoint"
+                            />
+                          </div>
+
+                          <div class="settings-api-path-field">
+                            <label
+                              id="llm-api-path-label"
+                              class="block text-xs font-semibold text-slate-600 mb-2"
+                              >API 路径</label
+                            >
+                            <div
+                              id="llm-api-path"
+                              class="settings-api-path-trigger settings-api-path-trigger--readonly"
+                              aria-labelledby="llm-api-path-label"
+                              aria-live="polite"
+                            >
+                              <span
+                                class="settings-api-path-trigger__path font-mono"
+                                x-text="selectedApiPathPathLabel"
+                              ></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <p
+                          class="settings-field-help settings-field-help--mono"
+                          x-text="'完整 URL：' + fullApiUrlPreview"
+                        ></p>
+                        <p
+                          class="settings-field-help"
+                          :hidden="!selectedApiPathDescription"
+                          x-text="selectedApiPathDescription"
+                        ></p>
+                        <p
+                          class="settings-field-help settings-field-help--hint"
+                          :hidden="!apiPathCapabilityHint"
+                          role="status"
+                          x-text="apiPathCapabilityHint"
+                        ></p>
+                        <p class="settings-field-help settings-field-help--hint" role="note">
+                          隐私提示：提示词、输出与 API 密钥会发送至该 Endpoint
+                          网关，网关运营方可观测。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <!-- L2 凭证（static row） -->
+                <div
+                  class="settings-pref-row settings-pref-row--secret"
+                  aria-labelledby="llm-step-2-title"
+                  data-settings-focus="llm-step-2-title"
+                >
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-key"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4
+                        id="llm-step-2-title"
+                        class="settings-pref-row__title"
+                        data-settings-nav-id="llm-step-2-title"
+                        data-settings-nav-group="llm"
+                      >
+                        凭证
+                      </h4>
+                      <p class="settings-pref-row__hint">API Key · 本机混淆保存</p>
+                    </div>
+                  </div>
+                  <div class="settings-pref-row__control settings-pref-row__control--secret">
+                    <label class="sr-only" for="llm-api-key">API Key</label>
+                    <div class="relative">
+                      <div
+                        class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center"
+                        aria-hidden="true"
+                      >
+                        <i class="fas fa-key text-amber-500 text-[9px]"></i>
+                      </div>
+                      <input
+                        :type="llmApiKeyInputType"
+                        id="llm-api-key"
+                        name="llm-api-key"
+                        autocomplete="off"
+                        spellcheck="false"
+                        :value="llm.apiKey"
+                        @input="setLlmApiKey($event)"
+                        class="settings-control settings-secret-input w-full pl-11 pr-11 py-2 text-sm font-mono text-slate-600 transition duration-200 placeholder:text-slate-300"
+                        placeholder="sk-..."
+                      />
+                      <button
+                        type="button"
+                        @click="toggleLlmKeyVisibility()"
+                        :aria-label="llmApiKeyVisibilityLabel"
+                        :title="llmApiKeyVisibilityLabel"
+                        class="settings-focus-ring absolute right-2 top-1/2 -translate-y-1/2 min-h-[28px] min-w-[28px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 cursor-pointer"
+                      >
+                        <i class="fas text-xs" :class="llmApiKeyIconClass" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <!-- L2 模型与能力 -->
+                <details
+                  class="settings-pref-fold"
+                  aria-labelledby="llm-step-3-title"
+                  data-settings-focus="llm-step-3-title"
+                >
+                  <summary class="settings-pref-row settings-pref-row--fold">
+                    <div class="settings-pref-row__meta">
+                      <span class="settings-pref-row__icon" aria-hidden="true">
+                        <i class="fas fa-brain"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <h4
+                          id="llm-step-3-title"
+                          class="settings-pref-row__title"
+                          data-settings-nav-id="llm-step-3-title"
+                          data-settings-nav-group="llm"
+                        >
+                          模型与能力
+                        </h4>
+                        <p class="settings-pref-row__hint">默认模型与推理</p>
+                      </div>
+                    </div>
+                    <i
+                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      aria-hidden="true"
+                    ></i>
+                  </summary>
+                  <div class="settings-pref-fold__body">
+                    <div class="settings-tool-page">
+                      <div class="group">
+                        <label
+                          for="llm-model"
+                          class="block text-xs font-semibold text-slate-600 mb-2 settings-label--focus-accent"
+                          >默认模型</label
+                        >
+                        <div class="flex gap-2">
+                          <div class="relative flex-1 min-w-0">
+                            <select
+                              id="llm-model"
+                              name="llm-model"
+                              :value="llm.model"
+                              @change="setLlmModel($event)"
+                              class="settings-control w-full pl-4 pr-10 py-2.5 appearance-none text-sm transition duration-200 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer"
+                              :disabled="modelSelectDisabled"
+                            >
+                              <option value="">— 请选择 —</option>
+                              <template x-for="m in llm.models" :key="getModelValue(m)">
+                                <option
+                                  :value="getModelValue(m)"
+                                  :selected="isModelSelected(m)"
+                                  x-text="getModelLabel(m)"
+                                ></option>
+                              </template>
+                            </select>
+                            <div
+                              class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                              aria-hidden="true"
+                            >
+                              <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            :aria-label="fetchModelsText"
+                            @click="fetchModels()"
+                            :disabled="llm.isFetching"
+                            class="settings-btn-secondary"
+                          >
+                            <i
+                              class="fas text-xs"
+                              :class="fetchModelsIconClass"
+                              aria-hidden="true"
+                            ></i>
+                            <span x-text="fetchModelsText"></span>
+                          </button>
+                        </div>
+                        <p class="settings-field-help">工具未单独指定时使用此模型。</p>
+                        <div
+                          class="settings-capability-badges"
+                          :hidden="modelCapabilityBadges.length === 0"
+                          aria-label="当前路径能力摘要"
+                        >
+                          <template x-for="badge in modelCapabilityBadges" :key="badge.id">
+                            <span
+                              class="settings-capability-badge"
+                              :class="badge.active ? 'is-on' : 'is-off'"
+                              :title="badge.title"
+                              x-text="badge.label"
+                            ></span>
+                          </template>
+                        </div>
+                      </div>
+
+                      <!-- Reasoning: segmented effort, model-paired (pref-list) -->
+                      <div
+                        class="settings-pref-list"
+                        data-testid="settings-llm-reasoning-pref-list"
+                        :hidden="!showReasoningControls"
+                        role="group"
+                        aria-labelledby="llm-reasoning-heading"
+                      >
+                        <div class="settings-pref-row">
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <h5 id="llm-reasoning-heading" class="settings-pref-row__title">
+                                推理
+                              </h5>
+                              <p
+                                class="settings-pref-row__hint"
+                                x-text="reasoningEffortOptions.length ? '启用后可调推理等级（按模型能力）' : '启用后强制开启推理（该模型无档位）'"
+                              ></p>
+                            </div>
+                          </div>
+                          <label class="settings-switch">
+                            <input
+                              id="llm-reasoning-enabled"
+                              name="llm-reasoning-enabled"
+                              type="checkbox"
+                              class="sr-only"
+                              :checked="llm.reasoningPrefs.enabled"
+                              @change="setReasoningEnabled($event)"
+                            />
+                            <span class="settings-switch__track" aria-hidden="true"></span>
+                            <span class="sr-only">启用推理</span>
+                          </label>
+                        </div>
+                        <div
+                          class="settings-pref-divider"
+                          role="separator"
+                          :hidden="!llm.reasoningPrefs.enabled || reasoningEffortOptions.length === 0"
+                        ></div>
+                        <div
+                          class="settings-pref-row"
+                          :hidden="!llm.reasoningPrefs.enabled || reasoningEffortOptions.length === 0"
+                        >
+                          <div class="settings-pref-row__meta">
+                            <div class="min-w-0">
+                              <span class="settings-pref-row__title">推理等级</span>
+                              <p
+                                class="settings-pref-row__hint"
+                                x-text="reasoningEffortOptions.length ? '仅列出当前模型可用档位' : '该模型仅支持开关'"
+                              ></p>
+                            </div>
+                          </div>
+                          <div
+                            class="settings-segmented settings-segmented--inline settings-segmented--effort"
+                            role="radiogroup"
+                            aria-label="推理等级"
+                            data-testid="settings-reasoning-effort"
+                          >
+                            <template x-for="level in reasoningEffortOptions" :key="level">
+                              <button
+                                type="button"
+                                role="radio"
+                                class="settings-segmented__btn"
+                                :class="{ 'is-active': llm.reasoningPrefs.effort === level }"
+                                :aria-checked="(llm.reasoningPrefs.effort === level).toString()"
+                                @click="setReasoningEffortLevel(level)"
+                                x-text="reasoningEffortButtonLabel(level)"
+                              ></button>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+                <div class="settings-pref-divider" role="separator"></div>
+
+                <!-- L2 服务层级（static row） -->
+                <div
+                  class="settings-pref-row"
+                  aria-labelledby="llm-step-4-title"
+                  data-settings-focus="llm-step-4-title"
+                  data-testid="settings-llm-service-tier-pref-list"
+                >
+                  <div class="settings-pref-row__meta">
+                    <span class="settings-pref-row__icon" aria-hidden="true">
+                      <i class="fas fa-layer-group"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <h4
+                        id="llm-step-4-title"
+                        class="settings-pref-row__title"
+                        data-settings-nav-id="llm-step-4-title"
+                        data-settings-nav-group="llm"
+                      >
+                        服务层级
+                      </h4>
+                      <p class="settings-pref-row__hint">service_tier · 多数保持不发送</p>
+                    </div>
+                  </div>
+                  <div class="settings-pref-row__control">
+                    <label class="sr-only" for="llm-service-tier">服务层级</label>
+                    <select
+                      id="llm-service-tier"
+                      name="llm-service-tier"
+                      :value="llm.serviceTier || ''"
+                      @change="setLlmServiceTier($event)"
+                      class="settings-control settings-control--sm"
+                    >
+                      <option value="">不发送（默认）</option>
+                      <option value="auto">auto</option>
+                      <option value="default">default</option>
+                      <option value="flex">flex</option>
+                      <option value="priority">priority</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-strategy-footer">
+                <div class="settings-strategy-footer__row">
+                  <button
+                    type="button"
+                    :aria-label="testConnectionText"
+                    @click="testConnection()"
+                    :disabled="llm.isTesting"
+                    class="settings-strategy-footer__btn settings-strategy-footer__btn--secondary"
+                  >
+                    <i class="fas text-xs" :class="testConnectionIconClass" aria-hidden="true"></i>
+                    <span x-text="testConnectionText"></span>
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="settings-save-provider"
+                    @click="saveProviderConfig()"
+                    class="settings-strategy-footer__btn settings-strategy-footer__btn--primary"
+                  >
+                    <i class="fas fa-check text-xs" aria-hidden="true"></i>
+                    <span>保存配置</span>
+                  </button>
+                </div>
+                <p class="settings-strategy-footer__hint">测试不改配置；保存后生效。</p>
+              </div>
+            </div>
+          </section>

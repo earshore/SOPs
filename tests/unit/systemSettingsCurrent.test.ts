@@ -1,9 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readSettingsStyles, readSettingsTemplate } from './settingsTemplateAssembly';
 import {
   closeSettings,
-  fetchModels,
   initAlpineSettings,
   openPerformanceMonitor,
   openSettings,
@@ -463,6 +461,85 @@ it('loads and saves LLM provider configuration', async () => {
   expect(panel.isOpen).toBe(true);
 });
 
+it('handles LLM family/path/tier/reasoning setters and autosave guard paths', async () => {
+  const panel = createPanel();
+
+  panel.llm.endpoint = '';
+  panel.llm.model = '';
+  await panel.autoSaveProviderConfig('推理设置已保存');
+  expect(showToast).toHaveBeenCalledWith('请先配置 Endpoint 与模型后再保存推理设置', { type: 'warning' });
+
+  panel.llm.endpoint = 'https://example.com/v1';
+  panel.llm.model = 'model-a';
+  panel.llm.models = [{ id: 'model-a', name: 'Model A' }];
+  panel.llm.apiPath = '/responses';
+
+  panel.setLlmApiFamily({ target: { value: 'anthropic' } } as any);
+  expect(panel.llm.apiPath).toBe('anthropic_messages');
+  expect(panel.llmApiPathMenuOpen).toBe(false);
+
+  panel.setLlmApiFamily({ target: { value: 'unknown' } } as any);
+  expect(panel.llm.apiPath).toBe('responses');
+
+  panel.setLlmApiPath({ target: { value: '/chat/completions' } } as any);
+  expect(panel.llm.apiPath).toBe('chat_completions');
+  expect(panel.llmApiPathMenuOpen).toBe(false);
+
+  panel.setLlmApiPathId('gemini_generate');
+  expect(panel.llm.apiPath).toBe('gemini_generate');
+  expect(panel.llmApiPathMenuOpen).toBe(false);
+
+  panel.setLlmServiceTier({ target: { value: 'standard' } } as any);
+  expect(panel.llm.serviceTier).toBe('standard');
+  panel.setLlmServiceTier({ target: { value: '' } } as any);
+  expect(panel.llm.serviceTier).toBeUndefined();
+
+  panel.setReasoningEffort({ target: { value: 'high' } } as any);
+  expect(panel.llm.reasoningPrefs.effort).toBe('high');
+  panel.setReasoningEffortLevel('invalid-level');
+  expect(panel.llm.reasoningPrefs.effort).toBe('medium');
+
+  panel.llm.showKey = true;
+  await panel.toggleLlmKeyVisibility();
+  expect(panel.llm.showKey).toBe(false);
+});
+
+it('routes LLM save failures through ErrorService', async () => {
+  const panel = createPanel();
+  panel.llm.endpoint = 'https://example.com/v1';
+  panel.llm.model = 'model-a';
+  panel.llm.apiKey = 'key';
+
+  const originalLlmSet = deps.llmConfigs.set.bind(deps.llmConfigs);
+  deps.llmConfigs.set = (() => {
+    throw new Error('storage boom');
+  }) as any;
+  try {
+    await panel.autoSaveProviderConfig('已保存');
+  } finally {
+    deps.llmConfigs.set = originalLlmSet;
+  }
+  expect(deps.errorHandle).toHaveBeenCalledWith(
+    expect.any(Error),
+    expect.objectContaining({ action: 'autoSaveProviderConfig', module: 'settings' })
+  );
+
+  deps.errorHandle.mockClear();
+  const originalSecureSet = deps.secureValues.set.bind(deps.secureValues);
+  deps.secureValues.set = (() => {
+    throw new Error('storage boom');
+  }) as any;
+  try {
+    await panel.saveProviderConfig();
+  } finally {
+    deps.secureValues.set = originalSecureSet;
+  }
+  expect(deps.errorHandle).toHaveBeenCalledWith(
+    expect.any(Error),
+    expect.objectContaining({ action: 'saveProviderConfig', module: 'settings' })
+  );
+});
+
 it('saves and reloads tool strategy target default models', async () => {
   const panel = createPanel();
   panel.llm.provider = 'new_api';
@@ -565,10 +642,7 @@ it('saves editable runtime strategy settings', async () => {
 });
 
 it('exposes deepChat business tools toggle binding in settings template', () => {
-  const template = readFileSync(
-    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
-    'utf8'
-  );
+  const template = readSettingsTemplate();
   expect(template).toContain("setRuntimeBoolean('deepChat.enableBusinessTools'");
   expect(template).toContain('runtimeStrategy.settings.deepChat.enableBusinessTools');
   // Peer pref-row title (flattened; no nested "启用业务工具" section)
@@ -579,10 +653,7 @@ it('exposes deepChat business tools toggle binding in settings template', () => 
 });
 
 it('exposes deepChat enableVision toggle under Prompt draft count', () => {
-  const template = readFileSync(
-    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
-    'utf8'
-  );
+  const template = readSettingsTemplate();
   expect(template).toContain('Prompt 草稿数');
   expect(template).toContain("setRuntimeBoolean('deepChat.enableVision'");
   expect(template).toContain('runtimeStrategy.settings.deepChat.enableVision');
@@ -1199,7 +1270,6 @@ it('emits settings bridge events through EventBus', () => {
 
   openSettings();
   closeSettings();
-  fetchModels();
 
   expect(open).toHaveBeenCalledTimes(1);
   expect(open.mock.calls[0][0]).toMatchObject({ timestamp: expect.any(Number) });
@@ -1273,23 +1343,14 @@ it('scrolls settings sections without changing the URL hash', () => {
 });
 
 it('CT-P1-00 settings css defines surface token mapping', () => {
-  const css = readFileSync(
-    resolve(process.cwd(), 'src/components/settings/systemSettings.css'),
-    'utf8'
-  );
+  const css = readSettingsStyles();
   expect(css).toMatch(/--settings-surface/);
   expect(css).toMatch(/--settings-accent/);
 });
 
 it('keeps the real settings template optimized for PC category scanning', () => {
-  const template = readFileSync(
-    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
-    'utf8'
-  );
-  const styles = readFileSync(
-    resolve(process.cwd(), 'src/components/settings/systemSettings.css'),
-    'utf8'
-  );
+  const template = readSettingsTemplate();
+  const styles = readSettingsStyles();
 
   expect(template).toContain('max-w-[min(860px,calc(100vw-48px))]');
   expect(template).toContain('aria-label="系统设置分类"');
@@ -1596,19 +1657,13 @@ it('UT-P0-10b proxy test success clears error state without closing panel', asyn
 });
 
 it('CT-P0-05 network section exposes proxy test entry', () => {
-  const template = readFileSync(
-    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
-    'utf8'
-  );
+  const template = readSettingsTemplate();
   expect(template).toContain('data-testid="settings-test-proxy"');
   expect(template).toContain('testProxyConnection()');
 });
 
 it('CT-P0-01 tool strategy save copy mentions runtime strategy', () => {
-  const template = readFileSync(
-    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
-    'utf8'
-  );
+  const template = readSettingsTemplate();
   expect(template).toMatch(/运行时策略|运行策略|采集运行策略/);
   expect(template).toContain('settings-save-tool-strategy');
   expect(template).toContain('含采集运行策略');

@@ -23,7 +23,6 @@
 
 | ID | 领域 | 描述 | 影响 | 建议 | 优先级 |
 | --- | --- | --- | --- | --- | --- |
-| **TD-SET-01** | 架构 | `systemSettings.ts/html/css` 巨型单体（~2.5k+ 行级） | 评审难、冲突多、回归面大 | 按 section 拆分 + Domain 门面（Spec P3） | P1 |
 | **TD-THM-01** | 主题 | generated token 被手写 variables 覆盖（D1） | Appearance 漂移 | 见主题路线图 Phase token 收口 | P1 |
 | **TD-THM-02** | 主题 | 大量 Tailwind `blue-*` 硬编码（D6） | 换肤面窄 | 分期迁语义 token + 门禁 | P1 |
 | **TD-CMP-01** | 组件 | 业务页仍可自由拼按钮/表单（存量 29 处裸色按钮） | 视觉孤岛 | 已加 `button-ui:gate`（禁新增 + confirm 禁用）；存量迁移仍待做 | P1 |
@@ -48,6 +47,7 @@
 
 | ID | 关闭日期 | 说明 |
 | --- | --- | --- |
+| TD-SET-01 | 2026-08-03 | systemSettings 拆分收口：TS 壳 651 行（≤900）+ 6 `sections/*`（各 ≤456 行）+ `SettingsDomain` 门面（load/savePartition/diff/validate/snapshot）+ `loader.ts` 组装 + `settings-scale` audit 入 `ci:quality`；8 空 stub 清零、UI 直写存储归零。本地 Gate（基 `3bf0d476`）：unit 153 passed / e2e settings 17 + smoke 29 / coverage 80.09·68.08·83.81·82.05（四阈值 ≥ 基线）/ circular 0 / ci:quality 全绿 / build 绿。commit `0093e3c9` |
 | TD-SET-05 | 2026-07-26 | 工具策略侧栏二级 Keyword Hunter + deep-link `keyword-hunter` + e2e |
 | TD-SET-03 | 2026-07-26 | 数据区「保存数据策略」明确为 runtime.storage 显式保存（同 saveRuntimeStrategySettings）；Toast/矩阵对齐 |
 | TD-SET-04 | 2026-07-26 | 设置侧栏滚动联动高亮（settingsNavScroll + is-current）；点击导航不回归 |

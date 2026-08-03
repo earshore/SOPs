@@ -11,6 +11,7 @@ import { getViewPathByRoute } from '../config/menuConfig';
 import { SystemError } from '@/common/errors/AppError';
 import { createSafeFragment, escapeHtml } from '@/common/utils/security';
 import { wrapWithPageEnterAnimation } from '@/common/utils/pageEnterAnimation';
+import { assembleSettingsTemplate } from '@/components/settings/loader';
 
 const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
 const LEGACY_CACHE_PREFIX = 'view_cache_';
@@ -374,6 +375,13 @@ async function loadHtml(key: string): Promise<HTMLElement | null> {
       html = await loader();
       // 3. Set Cache
       setCache(path, html);
+    }
+
+    // TD-SET-01 Phase 2: settings shell carries section-slot markers; inline the
+    // fragments here so the injected template is complete before Alpine evaluates
+    // x-data (initAlpineSettings runs before the deferred view is injected).
+    if (path === '/src/components/settings/systemSettings.html') {
+      html = assembleSettingsTemplate(html);
     }
 
     // ✅ 安全: html来自Vite raw导入的本地静态模板，不包含用户输入

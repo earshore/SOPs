@@ -4,7 +4,7 @@ import madge from 'madge';
 
 const SOURCE_DIR = 'src';
 const TEMP_PREFIX = '.madge-scan-';
-const VITE_URL_QUERY_PATTERN = /\?url(?=['"])/g;
+const VITE_QUERY_PATTERN = /\?(?:url|raw)(?=['"])/g;
 
 async function collectTypeScriptFiles(directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -29,7 +29,7 @@ async function normalizeViteAssetImports(directory: string): Promise<void> {
   await Promise.all(
     files.map(async file => {
       const source = await readFile(file, 'utf8');
-      const normalizedSource = source.replace(VITE_URL_QUERY_PATTERN, '');
+      const normalizedSource = source.replace(VITE_QUERY_PATTERN, '');
 
       if (normalizedSource !== source) {
         await writeFile(file, normalizedSource);
