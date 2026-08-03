@@ -10,6 +10,9 @@ const releaseWorkflow = readFileSync(
 );
 const qualityWorkflow = readFileSync(resolve(process.cwd(), '.github/workflows/test.yml'), 'utf8');
 
+// CI runners use pwsh on ubuntu; Windows dev machines may only ship powershell.exe.
+const powerShellExecutable = process.platform === 'win32' ? 'powershell.exe' : 'pwsh';
+
 function extractReleaseStep(name: string): string {
   const marker = `      - name: ${name}`;
   const start = releaseWorkflow.indexOf(marker);
@@ -85,7 +88,7 @@ function runReleaseLookupWithHttpError(statusCode: number) {
 
   try {
     return spawnSync(
-      'powershell.exe',
+      powerShellExecutable,
       [
         '-NoProfile',
         '-NonInteractive',
@@ -124,7 +127,7 @@ function runResolveReleaseTag(environmentOverrides: Record<string, string>) {
 
   try {
     const result = spawnSync(
-      'powershell.exe',
+      powerShellExecutable,
       [
         '-NoProfile',
         '-NonInteractive',
