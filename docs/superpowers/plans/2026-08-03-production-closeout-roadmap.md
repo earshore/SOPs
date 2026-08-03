@@ -79,8 +79,8 @@
 ## 4. P1 进入企业级打磨
 
 - TD-SET-01：按 section 拆分 `systemSettings.*`（P1 拆 5~6 个模块 + 域门面）。
-- TD-CMP-01：为按钮/表单加最小 lint 规则 + 组件示例站，约束「自由拼装」。
-- TD-TEST-01：在 CI 引入视觉回归抽样（关键页面 3~5 张截图对比）或发布前人工截图 checklist，纳入 release gate。
+- TD-CMP-01：✅ 已加最小门禁 `button-ui:gate`（`scripts/quality/audit-shared-ui.ts`，基线 29 处存量裸色按钮 + 禁新增 + `confirm(` 禁用，挂入 `ci:quality`）；存量迁移 + 组件示例站仍待做。
+- TD-TEST-01：✅ 视觉回归已进默认 CI（`test.yml` visual job：ubuntu 环境 mint + 提交基线漂移门禁，36 用例/32 张 linux 快照入库 `daad7e5f`，9/9 jobs 绿 run #30807154543）。
 - Security runbook 小结已具备，无需改动。
 
 ## 5. P2 可持续
@@ -95,5 +95,7 @@
 - [x] 本地全量测试：312 files / 3448 tests 通过（已达成）
 - [x] `npm run test:coverage` 门禁绿灯：lines 82.00% / stmts 80.05% / fn 83.70% / br 68.02%（2026-08-03）
 - [x] 远端 `Quality Gate` 全 workflow 通过：8/8 jobs success（2026-08-03 run #30801669174；performance 首跑 89<90 为 CI 波动，重跑通过）
-- [x] 状态与 `TECH_DEBT_BOARD` 一致：TD-TEST-03 登记为 Open 并注明本期已修复
+- [x] 视觉回归入 CI 后 Gate 9/9 jobs 绿（含 `visual regression` 基线比对 + `button-ui:gate`）：2026-08-03 run #30807154543
+- [x] `TECH_DEBT_BOARD` 状态一致：TD-TEST-01 / TD-TEST-03 已关；TD-CMP-01 开门禁后仍 Open（存量迁移）
+- [x] `TECH_DEBT_BOARD` 已核对：TD-TEST-03 修复复核后关闭（2026-08-03）
 - [x] 提交推送完成：`fbd651bd` + `d7c3c916` + `8864e81`，HEAD 与 sops/main、origin/main 一致

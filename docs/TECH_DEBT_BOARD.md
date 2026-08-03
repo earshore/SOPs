@@ -1,7 +1,7 @@
 # 技术债务看板（Living Tech Debt Board）
 
 **Status:** active · **活** SSOT（open 项）  
-**Updated:** 2026-07-26  
+**Updated:** 2026-08-03  
 **Owner:** 工程负责人  
 
 > **用法：** 只维护 **Open** 债务。已关闭项写 CHANGELOG 或移入历史段落，**禁止**用长篇「已完成荣誉榜」冒充当前债。  
@@ -26,9 +26,7 @@
 | **TD-SET-01** | 架构 | `systemSettings.ts/html/css` 巨型单体（~2.5k+ 行级） | 评审难、冲突多、回归面大 | 按 section 拆分 + Domain 门面（Spec P3） | P1 |
 | **TD-THM-01** | 主题 | generated token 被手写 variables 覆盖（D1） | Appearance 漂移 | 见主题路线图 Phase token 收口 | P1 |
 | **TD-THM-02** | 主题 | 大量 Tailwind `blue-*` 硬编码（D6） | 换肤面窄 | 分期迁语义 token + 门禁 | P1 |
-| **TD-CMP-01** | 组件 | 业务页仍可自由拼按钮/表单 | 视觉孤岛 | 执行 COMPONENT_GUIDELINES；后续加 lint/示例 | P1 |
-| **TD-TEST-01** | 测试 | 视觉回归未进默认 CI | 主题/壳层回归靠人 | 发版 checklist 强制关键截图或 CI 抽样 | P2 |
-| **TD-TEST-03** | 测试 | 全量覆盖率跌破 ratchet（2026-08-03 实测 main 基线 lines 81.36% < 82%） | CI Quality Gate unit job 红；Release 通道受影响 | 补测试至门禁（本期已修复：lines 82.00%）；提交后由 CI 复核 | P0 |
+| **TD-CMP-01** | 组件 | 业务页仍可自由拼按钮/表单（存量 29 处裸色按钮） | 视觉孤岛 | 已加 `button-ui:gate`（禁新增 + confirm 禁用）；存量迁移仍待做 | P1 |
 | **TD-OPS-02** | 可观测 | Sentry 默认关（产品决策） | 无线上聚合错误 | 保持关闭；Runbook 最低信号包已覆盖无 Sentry 值班 | P2 |
 | **TD-REL-01** | 发布 | main 提交粒过度碎时 review 成本高 | 审计成本 | RC 前按主题整理 notes（已有 CHANGELOG） | P3 |
 
@@ -57,6 +55,8 @@
 | TD-SET-02 | 2026-07-26 | COMPONENT_GUIDELINES §10 即时 vs 显式保存矩阵 + TESTING_STRATEGY 交叉引用 |
 | TD-TEST-02 | 2026-07-26 | system-settings e2e：二级 nav「数据采集」跳转 + 运行策略预设即时保存不脏关 |
 | TD-DOC-STACK | 2026-07-26 | 企业规范栈落地：PRODUCT / COMPONENT / TESTING / CONTENT / A11Y / OPS / SECURITY_PLAYBOOK + INDEX 决策树 |
+| TD-TEST-01 | 2026-08-03 | 视觉回归进默认 CI：`test.yml` visual job（ubuntu mint + 基线漂移门禁）；32 张 linux 快照入库 `daad7e5f`；Gate 9/9 绿 run #30807154543 |
+| TD-TEST-03 | 2026-08-03 | 覆盖率 ratchet 修复复核：lines 82.01% 门禁绿，CI unit 连续通过（run #30807154543） |
 | TD-DOC-02 | 2026-07-26 | CONTENT_DESIGN / ACCESSIBILITY / OPS_RUNBOOK |
 | TD-OPS-01 | 2026-07-26 | OPS_RUNBOOK（白屏/LLM/设置/回滚 + 最低信号包）— **仅此 Closed，勿再列入 Open** |
 | TD-SET-DENSITY | 2026-07-26 | 移除 density 模式死代码 |
