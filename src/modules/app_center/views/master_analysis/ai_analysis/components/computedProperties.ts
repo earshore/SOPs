@@ -66,7 +66,9 @@ function getCurrentProducts(context: AlpineContext): Product[] {
   const scrapedData = getScrapedData();
   if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
     for (const asin of context.selectedAsins) {
-      const matchedProduct = scrapedData.products.find(p => p.asin === asin);
+      const matchedProduct = scrapedData.products.find(
+        p => !!p && typeof p === 'object' && p.asin === asin
+      );
       if (matchedProduct) {
         const product = convertScraperDataToProduct(matchedProduct);
         if (product) {
@@ -101,7 +103,10 @@ function createProductComputedProperties(
     get availableAsins(): string[] {
       const scrapedData = getScrapedData();
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        return scrapedData.products.map(p => p.asin).filter((asin): asin is string => !!asin);
+        return scrapedData.products
+          .filter(p => !!p && typeof p === 'object' && typeof p.asin === 'string')
+          .map(p => p.asin)
+          .filter((asin): asin is string => !!asin);
       }
       return [];
     },
