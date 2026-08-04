@@ -131,6 +131,10 @@ export interface SettingsPanelData {
   apiPathOptions: readonly ApiPathOption[];
   llmApiFamilyOptions: readonly LlmApiFamilyOption[];
   llmApiFamily: LlmApiFamilyId;
+  /** Fold summary meta: complete endpoint URL shown on the Basic Info row. */
+  basicInfoMetaText: string;
+  /** Fold summary meta: active model + reasoning level on the Model & Capability row. */
+  modelMetaText: string;
   apiPathCapabilityHint: string;
   selectedApiPathDescription: string;
   selectedApiPathOption: ApiPathOption | undefined;
