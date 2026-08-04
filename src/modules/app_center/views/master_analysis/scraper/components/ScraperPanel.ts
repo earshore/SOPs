@@ -50,7 +50,6 @@ type ScraperPanelState = {
   isScraping: boolean;
   currentDataTab: DataTab;
   configExpanded: boolean;
-  historyLockedHeight: number | null;
   importStatus: string;
   importStatusTone: 'status' | 'error';
   tasks: Task[];
@@ -97,7 +96,6 @@ function createScraperPanelState(): ScraperPanelState {
     isScraping: false,
     currentDataTab: 'preview' as DataTab,
     configExpanded: false,
-    historyLockedHeight: null,
     importStatus: '',
     importStatusTone: 'status',
     tasks: [] as Task[],
@@ -420,7 +418,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
     if (!this.configExpanded) {
       const card = document.querySelector<HTMLElement>('[data-history-card-sync]');
       if (card?.offsetHeight) {
-        this.historyLockedHeight = card.offsetHeight;
+        card.style.height = `${card.offsetHeight}px`;
       }
     }
     this.configExpanded = !this.configExpanded;
