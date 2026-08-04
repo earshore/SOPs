@@ -28,14 +28,21 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本           | 说明                                               |
 | ---------------------------- | -------------- | -------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.0.11`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.12-rc.7` | 设置交互与 PromptLab SKU 事实校正；**非** Latest |
-| package.json                 | `3.0.12-rc.7`  | 与当前 RC tag / Release 一致                       |
+| **当前 Pre-release 候选**    | `v3.0.12-rc.8` | 系统设置 LLM 元信息/文案校正与应用中心交互优化；**非** Latest |
+| package.json                 | `3.0.12-rc.8`  | 与当前 RC tag / Release 一致                       |
 | 上一 GA                      | `v3.0.11`      | 回滚参考                                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.7` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.8` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.7`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.8`。
+
+`v3.0.12-rc.8`（2026-08-04，Pre-release）收口系统设置 LLM 详情元信息与文案校正、应用中心最近作业交互优化与数据采集布局对齐：
+
+- **系统设置**：基本信息行展示含 API 路径的完整 URL，模型与能力行展示“模型 · 推理等级”；无凭证时默认模型为“未选择”，模型列表仅显示“— 请选择 —”；目录菜单“Deep Chat”更名为“Playground”；API 路径稳定显示（OpenAI → /responses）；隐私提示并入“查看说明”；API Key 标签精简；`SettingsPanelData` 类型契约补齐（type-check 恢复）。
+- **应用中心**：最近作业“已移除记录”纳入作业状态筛选；列数切换移至工具栏最右；任务路径收起仅保留图标。
+- **数据采集**：历史快照初始高度与左侧产品导入/手动采集配置齐平，手动配置展开不撑高右侧快照。
+- GitHub Latest **仍指向** `v3.0.11`；回滚基线为 `v3.0.11`；生产目标 `https://sops.hongecb.store`。
 
 `v3.0.12-rc.7`（2026-08-04，Pre-release）收口系统设置交互、PromptLab SKU 事实校正与 Keyword Hunter 历史快照：
 

@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.12-rc.8] - 2026-08-04
+
+> Release Candidate. GitHub Release remains a **Pre-release**; Latest continues to point to stable GA `v3.0.11`.
+> This candidate closes the settings LLM detail meta/copy corrections and panel type contract fix, App Center recent-jobs interaction tweaks, and data-collection history snapshot layout alignment.
+> Rollback target remains the Pages deployment for `v3.0.11`.
+> Deployment target: https://sops.hongecb.store
+
+### Added
+
+- Basic Info row now shows the complete endpoint URL including the API call path, and the Model & Capability row shows `模型 · 推理等级` — the reasoning level appears only while reasoning is enabled.
+- With no saved credentials, the model list shows only `— 请选择 —` instead of preset models that cannot be called yet; the default model resolves to `未选择`.
+
+### Changed
+
+- System Settings category menu renames `Deep Chat` to `Playground`; the tool strategy `恢复默认` button now carries a leading reset icon.
+- Data & Backup renames `清理项` → `项目清理` and `危险操作` → `本地数据清空`; Appearance renames `跟随系统动效偏好` → `动效偏好` and the animation speed `标准` → `默认`.
+- LLM credential row shows `API Key` without the `本机混淆保存` suffix; the privacy hint moves into the `查看说明` tip button.
+- App Center recent jobs: `已移除记录` becomes a job status filter choice; the columns toggle moves to the far right of the toolbar; the task path collapse control shows its icon only.
+
+### Fixed
+
+- API path display is stable: selecting OpenAI shows `/responses` consistently instead of flipping back to `/chat/completions` after re-selecting another path.
+- Restored `basicInfoMetaText` / `modelMetaText` to the `SettingsPanelData` type contract so `npm run type-check` passes.
+- Data collection history snapshot height aligns with the left product-import/manual-collection column and no longer stretches when the manual config expands.
+
 ## [3.0.12-rc.7] - 2026-08-04
 
 > Release Candidate. GitHub Release remains a **Pre-release**; Latest continues to point to stable GA `v3.0.11`.
