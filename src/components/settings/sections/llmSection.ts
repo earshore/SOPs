@@ -166,9 +166,7 @@ export const llmSectionBehavior: SettingsPanelPart = {
   get modelMetaText(): string {
     const model = (this.llm.model || '').trim();
     if (!model) return '未选择';
-    return this.llm.reasoningPrefs?.enabled
-      ? `${model} · ${this.reasoningEffortLabel}`
-      : model;
+    return this.llm.reasoningPrefs?.enabled ? `${model} · ${this.reasoningEffortLabel}` : model;
   },
 
   /**
@@ -347,9 +345,7 @@ export const llmSectionBehavior: SettingsPanelPart = {
     // empty so only "— 请选择 —" is shown instead of preset models that cannot
     // actually be called yet.
     const hasCredentials = Boolean(savedConfig) || Boolean((this.llm.apiKey || '').trim());
-    this.llm.models = hasCredentials
-      ? dedupeModels(getRawProviderModels(savedConfig, config))
-      : [];
+    this.llm.models = hasCredentials ? dedupeModels(getRawProviderModels(savedConfig, config)) : [];
     this.llm.model = hasCredentials ? getInitialModel(savedConfig?.model, this.llm.models) : '';
     this.llm.serviceTier = savedConfig?.serviceTier;
     this.llm.reasoningPrefs = normalizeReasoningUserPrefs(savedConfig?.reasoningPrefs);

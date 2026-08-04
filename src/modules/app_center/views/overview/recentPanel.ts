@@ -1418,7 +1418,6 @@ export async function renderRecentPanel(
     }, 160);
   });
 
-
   container
     .querySelector<HTMLButtonElement>('[data-recent-load-more]')
     ?.addEventListener('click', () => {
