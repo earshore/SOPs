@@ -48,18 +48,17 @@ const overviewTemplate = `
     <div class="app-overview-flow-grid app-overview-flow-grid--tasks"></div>
     <div class="app-overview-recent-heading-actions">
       <button class="app-overview-recent-group-btn hidden" type="button" data-recent-undo-remove></button>
-      <button class="app-overview-recent-group-btn" type="button" data-recent-removed-toggle aria-pressed="false"></button>
-      <div class="app-overview-recent-columns-toggle" role="group" aria-label="最近继续列数">
-        <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="1" aria-pressed="false"></button>
-        <button class="app-overview-recent-columns-btn active" type="button" data-recent-columns="2" aria-pressed="true"></button>
-        <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="3" aria-pressed="false"></button>
-      </div>
       <span class="app-overview-mini-badge app-overview-recent-count-badge">显示 0 项</span>
     </div>
     <div class="app-overview-recent-toolbar">
       <input id="app-overview-recent-search" type="search">
       <div class="app-overview-recent-type-filters"></div>
       <div class="app-overview-recent-status-filters"></div>
+      <div class="app-overview-recent-columns-toggle" role="group" aria-label="最近继续列数">
+        <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="1" aria-pressed="false"></button>
+        <button class="app-overview-recent-columns-btn active" type="button" data-recent-columns="2" aria-pressed="true"></button>
+        <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="3" aria-pressed="false"></button>
+      </div>
     </div>
     <div class="app-overview-recent-shell" data-recent-columns="2">
       <div class="app-overview-recent-list"></div>
@@ -318,7 +317,7 @@ describe('App Center Overview', () => {
     expect(pinButton?.getAttribute('aria-pressed')).toBe('false');
     expect(recentItems[0]?.classList.contains('app-overview-recent-item--attention')).toBe(true);
     expect(typeSelect?.options).toHaveLength(9);
-    expect(statusSelect?.options).toHaveLength(4);
+    expect(statusSelect?.options).toHaveLength(5);
     expect(container.querySelectorAll('.app-overview-recent-type-filter')).toHaveLength(0);
     expect(container.querySelector('.app-overview-recent-empty')?.classList).toContain('hidden');
 
@@ -908,5 +907,78 @@ describe('App Center Overview', () => {
     expect(inputEntry?.textContent).not.toContain('输入模块');
     expect(processEntry?.textContent).not.toContain('处理模块');
     expect(analysisEntry?.textContent).not.toContain('分析统计');
+  });
+  it('lists removed records as a job status option and filters to dismissed-only', async () => {
+    registerRecentPpcArtifact();
+    const container = document.createElement('div');
+    await overviewModule.mount(container);
+
+    const statusSelect = container.querySelector<HTMLSelectElement>(
+      '.app-overview-recent-status-filters select'
+    );
+    expect(statusSelect).not.toBeNull();
+    const dismissedOption = statusSelect
+      ? [...statusSelect.options].find(option => option.value === 'dismissed')
+      : undefined;
+    expect(dismissedOption?.textContent).toBe('已移除记录');
+
+    container.querySelector<HTMLButtonElement>('[aria-label="从列表移除"]')?.click();
+    await vi.waitFor(() => {
+      expect(container.querySelectorAll('.app-overview-recent-item')).toHaveLength(0);
+    });
+
+    if (!statusSelect) throw new Error('Status select was not rendered');
+    statusSelect.value = 'dismissed';
+    statusSelect.dispatchEvent(new Event('change'));
+    await vi.waitFor(() => {
+      expect(container.querySelectorAll('.app-overview-recent-item')).toHaveLength(1);
+      expect(container.querySelector('[data-recent-empty-title]')?.textContent).not.toBe(
+        '没有已移除记录'
+      );
+    });
+
+    statusSelect.value = 'all';
+    statusSelect.dispatchEvent(new Event('change'));
+    await vi.waitFor(() => {
+      expect(container.querySelectorAll('.app-overview-recent-item')).toHaveLength(0);
+    });
+  });
+
+  it('shows removed-records guidance when no dismissed records exist', async () => {
+    registerRecentPpcArtifact();
+    const container = document.createElement('div');
+    await overviewModule.mount(container);
+
+    const statusSelect = container.querySelector<HTMLSelectElement>(
+      '.app-overview-recent-status-filters select'
+    );
+    if (!statusSelect) throw new Error('Status select was not rendered');
+    statusSelect.value = 'dismissed';
+    statusSelect.dispatchEvent(new Event('change'));
+    await vi.waitFor(() => {
+      expect(container.querySelector('[data-recent-empty-title]')?.textContent).toBe(
+        '没有已移除记录'
+      );
+    });
+  });
+
+  it('keeps the columns toggle at the toolbar end without the standalone removed toggle', () => {
+    const html = readFileSync(realOverviewTemplatePath, 'utf8');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+
+    const toolbar = wrapper.querySelector('.app-overview-recent-toolbar');
+    const columnsToggle = toolbar?.querySelector('.app-overview-recent-columns-toggle');
+    expect(columnsToggle).not.toBeNull();
+    expect(
+      columnsToggle?.previousElementSibling?.classList.contains('app-overview-recent-sort')
+    ).toBe(true);
+    expect(
+      wrapper.querySelector(
+        '.app-overview-recent-heading-actions .app-overview-recent-columns-toggle'
+      )
+    ).toBeNull();
+    expect(wrapper.querySelector('[data-recent-removed-toggle]')).toBeNull();
+    expect(wrapper.querySelector('.app-overview-collapsible-action-text')).toBeNull();
   });
 });

@@ -105,6 +105,7 @@ const STATUS_FILTERS: Array<{
   { id: 'actionable', label: '可查看' },
   { id: 'review', label: '需人工复核' },
   { id: 'missing', label: '数据不可用' },
+  { id: 'dismissed', label: '已移除记录' },
 ];
 
 const SORT_OPTIONS: Array<{ id: RecentQueueSortMode; label: string }> = [
@@ -114,7 +115,7 @@ const SORT_OPTIONS: Array<{ id: RecentQueueSortMode; label: string }> = [
 
 interface RecentPanelState {
   typeFilter: AppCenterArtifactType | 'all';
-  statusFilter: 'all' | 'actionable' | 'review' | 'missing';
+  statusFilter: 'all' | 'actionable' | 'review' | 'missing' | 'dismissed';
   query: string;
   sortMode: RecentQueueSortMode;
   visibleLimit: number;
@@ -1220,6 +1221,7 @@ function renderStatusFilters(
       value: state.statusFilter,
       onChange: value => {
         state.statusFilter = value;
+        state.showDismissed = value === 'dismissed';
         state.visibleLimit = RECENT_ARTIFACT_LIMIT;
         onChange();
       },
@@ -1359,9 +1361,6 @@ async function renderRecentList(container: HTMLElement, state: RecentPanelState)
 
 function updateRecentPanelControls(container: HTMLElement, state: RecentPanelState): void {
   applyRecentColumns(container, state.columns, false);
-  const removedBtn = container.querySelector<HTMLButtonElement>('[data-recent-removed-toggle]');
-  removedBtn?.classList.toggle('active', state.showDismissed);
-  removedBtn?.setAttribute('aria-pressed', String(state.showDismissed));
   container
     .querySelector<HTMLButtonElement>('[data-recent-undo-remove]')
     ?.classList.toggle('hidden', !state.lastRemovedQueueId);
@@ -1419,12 +1418,6 @@ export async function renderRecentPanel(
     }, 160);
   });
 
-  const removedBtn = container.querySelector<HTMLButtonElement>('[data-recent-removed-toggle]');
-  removedBtn?.addEventListener('click', () => {
-    state.showDismissed = !state.showDismissed;
-    state.visibleLimit = RECENT_ARTIFACT_LIMIT;
-    void refresh();
-  });
 
   container
     .querySelector<HTMLButtonElement>('[data-recent-load-more]')

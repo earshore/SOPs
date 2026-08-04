@@ -384,24 +384,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  min-height: 2.75rem;
-  padding: 0 0.75rem;
-  border: 1px solid var(--app-overview-border-strong);
-  border-radius: var(--rounded-md, 0.375rem);
-  background: var(--app-overview-surface-muted);
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--app-overview-text-secondary);
   font-size: 0.8125rem;
-  font-weight: 800;
   line-height: 1;
-}
-
-.app-overview-collapsible-action-text::before {
-  content: '展开';
-}
-
-.app-overview-collapsible[open] .app-overview-collapsible-action-text::before {
-  content: '收起';
 }
 
 .app-overview-collapsible-action i {
@@ -937,6 +925,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.125rem;
+  margin-left: auto;
   padding: 0.125rem;
   border: 1px solid var(--app-overview-border);
   border-radius: var(--rounded-md, 8px);

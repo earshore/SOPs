@@ -52,7 +52,6 @@
         <span class="app-overview-collapsible-controls">
           <span class="app-overview-mini-badge">作业系统</span>
           <span class="app-overview-collapsible-action" aria-hidden="true">
-            <span class="app-overview-collapsible-action-text"></span>
             <i class="fas fa-chevron-down"></i>
           </span>
         </span>
@@ -79,47 +78,6 @@
           <i class="fas fa-rotate-left" aria-hidden="true"></i>
           <span>撤销移除</span>
         </button>
-        <button
-          class="app-overview-recent-group-btn"
-          type="button"
-          data-recent-removed-toggle
-          aria-pressed="false"
-        >
-          <i class="fas fa-box-archive" aria-hidden="true"></i>
-          <span>已移除记录</span>
-        </button>
-        <div class="app-overview-recent-columns-toggle" role="group" aria-label="最近作业列数">
-          <button
-            class="app-overview-recent-columns-btn"
-            type="button"
-            data-recent-columns="1"
-            aria-pressed="false"
-            title="单列"
-          >
-            <i class="fas fa-bars" aria-hidden="true"></i>
-            <span>1 列</span>
-          </button>
-          <button
-            class="app-overview-recent-columns-btn"
-            type="button"
-            data-recent-columns="2"
-            aria-pressed="true"
-            title="双列"
-          >
-            <i class="fas fa-table-columns" aria-hidden="true"></i>
-            <span>2 列</span>
-          </button>
-          <button
-            class="app-overview-recent-columns-btn"
-            type="button"
-            data-recent-columns="3"
-            aria-pressed="false"
-            title="三列"
-          >
-            <i class="fas fa-table-cells" aria-hidden="true"></i>
-            <span>3 列</span>
-          </button>
-        </div>
         <span class="app-overview-mini-badge app-overview-recent-count-badge">显示 0 项</span>
       </div>
     </div>
@@ -143,6 +101,38 @@
         aria-label="按作业状态筛选"
       ></div>
       <div class="app-overview-recent-sort" role="group" aria-label="最近作业排序"></div>
+      <div class="app-overview-recent-columns-toggle" role="group" aria-label="最近作业列数">
+        <button
+          class="app-overview-recent-columns-btn"
+          type="button"
+          data-recent-columns="1"
+          aria-pressed="false"
+          title="单列"
+        >
+          <i class="fas fa-bars" aria-hidden="true"></i>
+          <span>1 列</span>
+        </button>
+        <button
+          class="app-overview-recent-columns-btn"
+          type="button"
+          data-recent-columns="2"
+          aria-pressed="true"
+          title="双列"
+        >
+          <i class="fas fa-table-columns" aria-hidden="true"></i>
+          <span>2 列</span>
+        </button>
+        <button
+          class="app-overview-recent-columns-btn"
+          type="button"
+          data-recent-columns="3"
+          aria-pressed="false"
+          title="三列"
+        >
+          <i class="fas fa-table-cells" aria-hidden="true"></i>
+          <span>3 列</span>
+        </button>
+      </div>
     </div>
 
     <div class="app-overview-recent-shell" data-recent-columns="2">

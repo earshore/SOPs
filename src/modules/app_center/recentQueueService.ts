@@ -27,7 +27,7 @@ export interface RecentQueueViewOptions {
   collapseStagesByWorkItem?: boolean;
   includeDismissed?: boolean;
   dismissedOnly?: boolean;
-  statusFilter?: 'all' | 'actionable' | 'review' | 'missing';
+  statusFilter?: 'all' | 'actionable' | 'review' | 'missing' | 'dismissed';
   payloadStatuses?: Readonly<Record<string, 'available' | 'missing' | 'unknown'>>;
   now?: number;
   limit?: number;
