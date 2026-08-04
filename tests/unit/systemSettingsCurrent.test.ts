@@ -360,7 +360,7 @@ it('computes field state, display labels, and local data text', async () => {
   expect(panel.localSecretBoundaryText).toContain('不是服务端密钥托管');
   expect(panel.localStorageUsedText).toBe('1.0 KB');
   expect(panel.indexedDbKeysText).toBe('3 records');
-  expect(panel.localDataCleanupToggleText).toBe('展开清理项');
+  expect(panel.localDataCleanupToggleText).toBe('展开项目清理');
   expect(panel.formatBytes(0)).toBe('0 B');
   expect(panel.formatBytes(1536)).toBe('1.5 KB');
   expect(panel.getProxyDisplayName('custom_proxy')).toBe('HTTP 代理');
@@ -459,6 +459,71 @@ it('loads and saves LLM provider configuration', async () => {
   );
   // Unified save: panel stays open after save
   expect(panel.isOpen).toBe(true);
+});
+
+
+it('P-1: loadProviderConfig keeps the vendor-family default API path without a saved path', async () => {
+  const panel = createPanel();
+  expect(panel.llm.apiPath).toBe('responses');
+
+  await panel.loadProviderConfig('new_api');
+
+  expect(panel.llm.apiPath).toBe('responses');
+});
+
+it('P-1: loadProviderConfig restores a saved API path when present', async () => {
+  deps.llmConfigs.set('new_api', {
+    endpoint: 'https://gateway.example/v1',
+    apiPath: 'gemini_generate',
+  });
+  const panel = createPanel();
+
+  await panel.loadProviderConfig('new_api');
+
+  expect(panel.llm.apiPath).toBe('gemini_generate');
+});
+it('P-1: loadProviderConfig keeps the model list empty without credentials', async () => {
+  const panel = createPanel();
+
+  await panel.loadProviderConfig('new_api');
+
+  expect(panel.llm.models).toEqual([]);
+  expect(panel.llm.model).toBe('');
+  expect(panel.modelSelectDisabled).toBe(true);
+});
+
+it('P-1: loadProviderConfig exposes preset models once an API key exists', async () => {
+  deps.secureValues.set('llm_key_new_api', 'key');
+  const panel = createPanel();
+
+  await panel.loadProviderConfig('new_api');
+
+  expect(panel.llm.models.length).toBeGreaterThan(0);
+  expect(panel.llm.model).toBe('gpt-5.5');
+});
+
+it('R-1/R-2: fold summary meta getters reflect endpoint and model state', async () => {
+  deps.llmConfigs.set('new_api', {
+    endpoint: 'https://gateway.example/v1',
+    model: 'gpt-5.5',
+    models: ['gpt-5.5'],
+    reasoningPrefs: { enabled: true, effort: 'high' },
+  });
+  deps.secureValues.set('llm_key_new_api', 'key');
+  const panel = createPanel();
+  await panel.loadProviderConfig('new_api');
+
+  expect(panel.basicInfoMetaText).toBe('https://gateway.example/v1/responses');
+  expect(panel.modelMetaText).toBe('gpt-5.5 · high');
+
+  panel.llm.reasoningPrefs = { ...panel.llm.reasoningPrefs, enabled: false };
+  expect(panel.modelMetaText).toBe('gpt-5.5');
+
+  panel.llm.model = '';
+  expect(panel.modelMetaText).toBe('未选择');
+
+  panel.llm.endpoint = '';
+  expect(panel.basicInfoMetaText).toBe('https://new.hongecb.store/v1/responses');
 });
 
 it('handles LLM family/path/tier/reasoning setters and autosave guard paths', async () => {
@@ -1474,7 +1539,7 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('settings-note settings-note--warn');
   expect(template).toContain('只读提示：不属于调试开关。');
   expect(template).not.toContain('diagnosticStatusItems');
-  expect(template).toContain('危险操作');
+  expect(template).toContain('本地数据清空');
   expect(template).toContain('清空全部本地数据');
   expect(template).toContain(':aria-label="fetchModelsText"');
   expect(template).toContain(':aria-label="testConnectionText"');

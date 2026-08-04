@@ -198,12 +198,12 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'settings-data-cleanup-items',
     sectionId: 'settings-section-data',
-    labels: ['清理项', '清理本地数据', '分桶清理'],
+    labels: ['项目清理', '清理项', '清理本地数据', '分桶清理'],
   },
   {
     id: 'settings-data-danger',
     sectionId: 'settings-section-data',
-    labels: ['清空全部本地数据', '破坏性', '清空'],
+    labels: ['本地数据清空', '清空全部本地数据', '破坏性', '清空'],
   },
   {
     id: 'settings-section-appearance',
@@ -228,12 +228,12 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = [
   {
     id: 'settings-appearance-reduced-motion',
     sectionId: 'settings-section-appearance',
-    labels: ['跟随系统动效偏好', '减少动效', '系统动效', 'prefers-reduced-motion'],
+    labels: ['动效偏好', '跟随系统动效偏好', '减少动效', '系统动效', 'prefers-reduced-motion'],
   },
   {
     id: 'settings-appearance-animation-speed',
     sectionId: 'settings-section-appearance',
-    labels: ['动画速度', '动效速度', '快', '标准', '慢', 'animation speed'],
+    labels: ['动画速度', '动效速度', '快', '默认', '标准', '慢', 'animation speed'],
   },
   {
     id: 'settings-section-performance',

@@ -131,9 +131,7 @@ export interface SettingsPanelData {
   apiPathOptions: readonly ApiPathOption[];
   llmApiFamilyOptions: readonly LlmApiFamilyOption[];
   llmApiFamily: LlmApiFamilyId;
-  fullApiUrlPreview: string;
   apiPathCapabilityHint: string;
-  llmSetupReadinessText: string;
   selectedApiPathDescription: string;
   selectedApiPathOption: ApiPathOption | undefined;
   selectedApiPathPathLabel: string;

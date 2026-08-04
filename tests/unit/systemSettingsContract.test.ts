@@ -1,4 +1,4 @@
-﻿import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readSettingsTemplate } from './settingsTemplateAssembly';
 import {
   initAlpineSettings,
@@ -228,6 +228,7 @@ const PANEL_DATA_KEYS: string[] = [
   'appearanceThemeOptions',
   'applyRuntimePresetById',
   'autoSaveProviderConfig',
+  'basicInfoMetaText',
   'bindSettingsNavScrollSpy',
   'canUndoRuntimeSave',
   'captureSettingsBaseline',
@@ -254,7 +255,6 @@ const PANEL_DATA_KEYS: string[] = [
   'fetchModelsIconClass',
   'fetchModelsText',
   'formatBytes',
-  'fullApiUrlPreview',
   'getModelLabel',
   'getModelValue',
   'getProxyDisplayName',
@@ -283,7 +283,6 @@ const PANEL_DATA_KEYS: string[] = [
   'llmApiKeyVisibilityLabel',
   'llmApiPathMenuOpen',
   'llmProviderOptions',
-  'llmSetupReadinessText',
   'loadAppearanceSettings',
   'loadProviderConfig',
   'loadProxyConfig',
@@ -305,6 +304,7 @@ const PANEL_DATA_KEYS: string[] = [
   'masterAnalysisScheduleSelectedHint',
   'masterAnalysisScheduleSelectedLabel',
   'modelCapabilityBadges',
+  'modelMetaText',
   'modelSelectDisabled',
   'navOpenGroup',
   'navigateToNavTarget',

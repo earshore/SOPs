@@ -23,6 +23,7 @@ import { type ModelMetadata } from '../domain/localDataCopy';
 import {
   LLM_API_FAMILY_OPTIONS,
   apiFamilyFromPathId,
+  apiPathIdForFamily,
   applyFetchedModels,
   assertFetchedModels,
   buildApiPathCapabilityHint,
@@ -34,7 +35,6 @@ import {
   getInitialModel,
   getModelFeatureBadges,
   getRawProviderModels,
-  isLLMApiKeyRequired,
   loadProviderApiKey,
   mergeModelMetadata,
   notifyModelFetchFailure,
@@ -152,13 +152,23 @@ export const llmSectionBehavior: SettingsPanelPart = {
     return apiFamilyFromPathId(this.llm.apiPath);
   },
 
-  get fullApiUrlPreview(): string {
+  /** Fold summary meta: complete endpoint URL shown on the Basic Info row. */
+  get basicInfoMetaText(): string {
     const { fullUrl } = buildFullApiUrl(
       this.llm.endpoint || this.defaultLlmEndpoint,
       normalizeApiPathId(this.llm.apiPath),
       this.llm.model || '{model}'
     );
-    return fullUrl || '—';
+    return fullUrl || '尚未配置 Endpoint';
+  },
+
+  /** Fold summary meta: active model + reasoning level on the Model & Capability row. */
+  get modelMetaText(): string {
+    const model = (this.llm.model || '').trim();
+    if (!model) return '未选择';
+    return this.llm.reasoningPrefs?.enabled
+      ? `${model} · ${this.reasoningEffortLabel}`
+      : model;
   },
 
   /**
@@ -177,18 +187,6 @@ export const llmSectionBehavior: SettingsPanelPart = {
       modelsEntry,
     });
     return buildApiPathCapabilityHint(pathId, registryCap);
-  },
-
-  /** Soft readiness line under the section intro (status only). */
-  get llmSetupReadinessText(): string {
-    const hasEndpoint = Boolean((this.llm.endpoint || '').trim());
-    const needsKey = isLLMApiKeyRequired(this.llm);
-    const hasKey = Boolean((this.llm.apiKey || '').trim());
-    const hasModel = Boolean((this.llm.model || '').trim());
-    if (!hasEndpoint) return '缺 Endpoint';
-    if (needsKey && !hasKey) return '缺 API Key';
-    if (!hasModel) return '未选模型';
-    return '可测试连接';
   },
 
   get selectedApiPathDescription(): string {
@@ -345,8 +343,14 @@ export const llmSectionBehavior: SettingsPanelPart = {
     const savedConfig = StorageService.getLLMConfig(provider);
     this.llm.endpoint = resolveProviderEndpoint(provider, config, savedConfig?.endpoint || '');
     this.llm.apiKey = await loadProviderApiKey(provider, savedConfig);
-    this.llm.models = dedupeModels(getRawProviderModels(savedConfig, config));
-    this.llm.model = getInitialModel(savedConfig?.model, this.llm.models);
+    // Without any credentials (no saved config, no API key), keep the model list
+    // empty so only "— 请选择 —" is shown instead of preset models that cannot
+    // actually be called yet.
+    const hasCredentials = Boolean(savedConfig) || Boolean((this.llm.apiKey || '').trim());
+    this.llm.models = hasCredentials
+      ? dedupeModels(getRawProviderModels(savedConfig, config))
+      : [];
+    this.llm.model = hasCredentials ? getInitialModel(savedConfig?.model, this.llm.models) : '';
     this.llm.serviceTier = savedConfig?.serviceTier;
     this.llm.reasoningPrefs = normalizeReasoningUserPrefs(savedConfig?.reasoningPrefs);
     // No stored preference: reflect the model capability default (vendor default
@@ -357,7 +361,13 @@ export const llmSectionBehavior: SettingsPanelPart = {
         this.llm.reasoningPrefs = { ...this.llm.reasoningPrefs, enabled: true };
       }
     }
-    this.llm.apiPath = normalizeApiPathId(savedConfig?.apiPath);
+    // No stored path: keep the vendor-family default (OpenAI → /responses) instead of
+    // the global fallback /chat/completions, so first-open and family re-select show the
+    // same path. normalizeApiPathId still guards invalid legacy saved values.
+    this.llm.apiPath =
+      savedConfig?.apiPath !== undefined
+        ? normalizeApiPathId(savedConfig.apiPath)
+        : apiPathIdForFamily(apiFamilyFromPathId(this.llm.apiPath));
     // Clamp + persist demotion so next open does not re-toast (AC3 once-only).
     this.clampReasoningPrefsToActiveModel({ announce: true, persist: true });
     this.loadToolStrategyDefaults();

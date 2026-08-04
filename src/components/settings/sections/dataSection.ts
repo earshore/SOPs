@@ -154,7 +154,7 @@ export const dataSectionBehavior: SettingsPanelPart = {
   },
 
   get localDataCleanupToggleText(): string {
-    return this.localData.cleanupItemsExpanded ? '收起清理项' : '展开清理项';
+    return this.localData.cleanupItemsExpanded ? '收起项目清理' : '展开项目清理';
   },
 
   get localDataCleanupToggleIconClass(): string {

@@ -146,7 +146,7 @@ test.describe('system settings', () => {
     await nav.getByRole('button', { name: '应用策略预案', exact: true }).click();
     await expect(page.getByTestId('settings-runtime-presets')).toBeVisible({ timeout: 5000 });
 
-    await nav.getByRole('button', { name: 'Deep Chat', exact: true }).click();
+    await nav.getByRole('button', { name: 'Playground', exact: true }).click();
     const deepChat = page.locator(
       '#settings-section-tool-strategy details[data-settings-focus="playground-deep-chat"]'
     );
@@ -248,10 +248,10 @@ test.describe('system settings', () => {
     await expect(nav.getByRole('button', { name: '应用策略预案', exact: true })).toBeVisible();
     await expect(nav.getByRole('button', { name: '数据采集', exact: true })).toBeVisible();
     await expect(nav.getByRole('button', { name: 'Master Analysis', exact: true })).toBeVisible();
-    await expect(nav.getByRole('button', { name: 'Deep Chat', exact: true })).toBeVisible();
+    await expect(nav.getByRole('button', { name: 'Playground', exact: true })).toBeVisible();
 
     await nav.getByRole('button', { name: '数据与备份', exact: true }).click();
-    await expect(nav.getByRole('button', { name: '清理项', exact: true })).toBeVisible();
+    await expect(nav.getByRole('button', { name: '项目清理', exact: true })).toBeVisible();
   });
 
   test('E2E-P1-nav secondary jump opens target submodule (数据采集)', async ({ page }) => {
@@ -344,7 +344,7 @@ test.describe('system settings', () => {
     await expect(tone).toHaveClass(/settings-deep-link-highlight/);
     await expect(tone.locator('xpath=..')).not.toHaveClass(/settings-deep-link-highlight/);
 
-    await nav.getByRole('button', { name: '跟随系统动效偏好', exact: true }).click();
+    await nav.getByRole('button', { name: '动效偏好', exact: true }).click();
     await expect(page.getByTestId('settings-appearance-reduced-motion')).toHaveClass(
       /settings-deep-link-highlight/
     );

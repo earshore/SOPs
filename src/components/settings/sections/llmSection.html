@@ -23,12 +23,7 @@
                       <i class="fas fa-circle-info" aria-hidden="true"></i>
                     </button>
                     <div class="settings-section-tip__popover" role="tooltip">
-                      <p x-text="llmSetupReadinessText"></p>
-                      <ul hidden :hidden="healthMessages.length === 0" role="list">
-                        <template x-for="msg in healthMessages" :key="msg">
-                          <li x-text="msg"></li>
-                        </template>
-                      </ul>
+                      <p>隐私提示：提示词、输出与 API 密钥会发送至该 Endpoint 网关，网关运营方可观测。</p>
                     </div>
                   </div>
                 </div>
@@ -84,7 +79,7 @@
                         >
                           基本信息
                         </h4>
-                        <p class="settings-pref-row__hint">厂商、协议类型与 Endpoint</p>
+                        <p class="settings-pref-row__hint" x-text="basicInfoMetaText"></p>
                       </div>
                     </div>
                     <i
@@ -193,10 +188,6 @@
                         </div>
 
                         <p
-                          class="settings-field-help settings-field-help--mono"
-                          x-text="'完整 URL：' + fullApiUrlPreview"
-                        ></p>
-                        <p
                           class="settings-field-help"
                           :hidden="!selectedApiPathDescription"
                           x-text="selectedApiPathDescription"
@@ -207,10 +198,6 @@
                           role="status"
                           x-text="apiPathCapabilityHint"
                         ></p>
-                        <p class="settings-field-help settings-field-help--hint" role="note">
-                          隐私提示：提示词、输出与 API 密钥会发送至该 Endpoint
-                          网关，网关运营方可观测。
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -237,7 +224,7 @@
                       >
                         凭证
                       </h4>
-                      <p class="settings-pref-row__hint">API Key · 本机混淆保存</p>
+                      <p class="settings-pref-row__hint">API Key</p>
                     </div>
                   </div>
                   <div class="settings-pref-row__control settings-pref-row__control--secret">
@@ -295,7 +282,7 @@
                         >
                           模型与能力
                         </h4>
-                        <p class="settings-pref-row__hint">默认模型与推理</p>
+                        <p class="settings-pref-row__hint" x-text="modelMetaText"></p>
                       </div>
                     </div>
                     <i
