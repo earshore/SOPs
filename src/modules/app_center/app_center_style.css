@@ -349,17 +349,6 @@
   margin-bottom: 1rem;
 }
 
-.app-overview-section-lead {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.625rem;
-  min-width: 0;
-}
-
-.app-overview-section-lead .app-overview-section-icon {
-  margin-top: 0.3rem;
-}
-
 .app-overview-collapsible {
   border: 1px solid var(--app-overview-border);
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
