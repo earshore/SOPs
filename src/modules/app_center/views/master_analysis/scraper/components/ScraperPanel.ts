@@ -50,6 +50,7 @@ type ScraperPanelState = {
   isScraping: boolean;
   currentDataTab: DataTab;
   configExpanded: boolean;
+  historyLockedHeight: number | null;
   importStatus: string;
   importStatusTone: 'status' | 'error';
   tasks: Task[];
@@ -96,6 +97,7 @@ function createScraperPanelState(): ScraperPanelState {
     isScraping: false,
     currentDataTab: 'preview' as DataTab,
     configExpanded: false,
+    historyLockedHeight: null,
     importStatus: '',
     importStatusTone: 'status',
     tasks: [] as Task[],
@@ -414,6 +416,13 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
   },
 
   toggleConfigExpanded(): void {
+    // 展开前锁定历史快照卡片高度，避免左侧手动配置撑高后历史面板被 grid 行高拉长
+    if (!this.configExpanded) {
+      const card = document.querySelector<HTMLElement>('[data-history-card-sync]');
+      if (card?.offsetHeight) {
+        this.historyLockedHeight = card.offsetHeight;
+      }
+    }
     this.configExpanded = !this.configExpanded;
   },
 
