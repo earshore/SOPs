@@ -189,8 +189,7 @@
               >
                 <span class="deep-chat-reasoning-label">推理（本会话）</span>
                 <label class="deep-chat-reasoning-toggle" for="deep-chat-reasoning-enabled">
-                  <input id="deep-chat-reasoning-enabled" type="checkbox" />
-                  <span>启用推理</span>
+                  <input id="deep-chat-reasoning-enabled" type="checkbox" aria-label="启用推理" />
                 </label>
                 <label class="deep-chat-reasoning-effort-wrap" for="deep-chat-reasoning-effort">
                   <span>思考强度</span>
@@ -198,7 +197,7 @@
                   <select id="deep-chat-reasoning-effort" aria-label="思考强度"></select>
                 </label>
                 <p class="deep-chat-reasoning-hint">
-                  档位越高，模型思考越深入，但响应更慢、消耗更多。仅对支持推理的模型生效，可选档位随模型能力变化。
+                  档位越高思考越深入，但响应更慢、消耗更多；可选档位随模型能力变化。
                 </p>
               </div>
               <button id="deep-chat-reset-tuning" class="deep-chat-reset-tuning" type="button">
