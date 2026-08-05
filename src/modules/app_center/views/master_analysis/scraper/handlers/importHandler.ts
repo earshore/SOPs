@@ -378,7 +378,7 @@ function createMarketplaceBackdrop(modalId: string): HTMLDivElement {
   const backdrop = document.createElement('div');
   backdrop.id = modalId;
   backdrop.className =
-    'ma-marketplace-modal-backdrop fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in';
+    'ma-marketplace-modal-backdrop fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center fade-in';
   return backdrop;
 }
 

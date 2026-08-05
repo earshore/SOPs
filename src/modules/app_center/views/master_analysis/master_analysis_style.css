@@ -183,6 +183,7 @@
 }
 
 .ma-marketplace-modal-backdrop {
+  z-index: var(--z-modal-backdrop, 55);
   background: rgba(15, 23, 42, 0.5) !important;
 }
 
@@ -749,8 +750,9 @@
 }
 
 /* === GridStack 调整模式 === */
-.grid-stack-item-resizing {
-  z-index: 100 !important;
+.grid-stack-item.ui-draggable-dragging,
+.grid-stack-item.ui-resizable-resizing {
+  z-index: var(--z-header, 40);
 }
 
 .grid-stack-item-resizing .widget-card-container {

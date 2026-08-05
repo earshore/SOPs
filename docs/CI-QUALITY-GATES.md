@@ -1,8 +1,8 @@
 # CI质量门禁文档
 
 **Status:** active · SSOT（门禁命令清单）  
-**Updated:** 2026-07-26  
-**版本**: 1.2.0  
+**Updated:** 2026-08-05  
+**版本**: 1.3.0  
 **维护团队**: DevOps & Security Team  
 
 > 测试**策略**见 [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)；活债务见 [TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)。  
@@ -36,7 +36,7 @@ npm run prebuild
    - 循环依赖检查
 
 2. **代码质量检查** (`npm run ci:quality`，顺序以 `package.json` 为准)
-   - `architecture:audit` / `css:audit`
+   - `architecture:audit` / `css:audit` / `z-index:audit`（层级越界与 `!important` 回归门禁，规范见 [Z_INDEX_LAYERING_GUIDELINES.md](./Z_INDEX_LAYERING_GUIDELINES.md)）
    - 壳层 `blue-*` 硬编码基线门禁：`theme:hardcode-baseline:gate` (D6)
    - D1 原子 token 覆盖 allowlist：`token:override-audit:gate`
    - `action-names:audit` / `import-paths:audit` / `source-names:audit`

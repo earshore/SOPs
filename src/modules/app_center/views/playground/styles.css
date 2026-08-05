@@ -637,7 +637,7 @@
 .deep-chat-thread-menu {
   position: absolute;
   right: var(--spacing-1, 0.25rem);
-  z-index: 160;
+  z-index: var(--z-dropdown, 30);
   width: 148px;
   padding: var(--spacing-2, 0.5rem);
   border: 1px solid rgba(var(--deep-chat-accent-rgb), 0.18);
@@ -844,7 +844,7 @@
   position: fixed;
   top: 118px;
   left: 280px;
-  z-index: 80;
+  z-index: var(--z-popover, 70);
   display: none;
   width: min(520px, calc(100vw - 304px));
   max-height: min(520px, calc(100vh - 160px));
@@ -1012,7 +1012,7 @@
 .deep-chat-search-modal {
   position: fixed;
   inset: 0;
-  z-index: 120;
+  z-index: var(--z-modal, 60);
   display: block;
 }
 
@@ -1430,7 +1430,7 @@
   position: absolute;
   top: 40px;
   right: 0;
-  z-index: 1000;
+  z-index: var(--z-popover, 70);
   width: min(420px, calc(100vw - 48px));
   padding: var(--spacing-3-5, 0.875rem);
   border: 1px solid rgba(var(--deep-chat-accent-rgb), 0.2);
@@ -2503,7 +2503,7 @@
 .deep-chat-skill-library-modal {
   position: fixed;
   inset: 0;
-  z-index: 130;
+  z-index: var(--z-modal, 60);
   display: block;
 }
 

@@ -20,7 +20,7 @@
 :root {
   --duration-normal: var(--duration-300, 300ms);
   --z-header: var(--z-40, 40);
-  --z-mega-menu: 60;
+  --z-mega-menu: calc(var(--z-overlay, 50) - 1);
   --z-loading: 300;
   --color-critical-surface: var(--color-bg-secondary, var(--bg-secondary, var(--color-slate-50)));
   --color-critical-text: var(--color-text-primary, var(--text-primary, var(--color-slate-700)));

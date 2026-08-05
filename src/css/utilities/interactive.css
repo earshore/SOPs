@@ -346,7 +346,7 @@
   opacity: 0.85;
   box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.2);
   transform: scale(1.02) rotate(1deg);
-  z-index: 100;
+  z-index: var(--z-popover, 70);
   transition: none;
 }
 

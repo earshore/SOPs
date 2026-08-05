@@ -1037,7 +1037,7 @@
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   border: 1px solid var(--border-muted, var(--color-slate-200));
   box-shadow: var(--shadow-panel, 0 12px 30px -28px rgba(15, 23, 42, 0.45));
-  z-index: 9999;
+  z-index: 40;
   transition:
     opacity var(--duration-normal) var(--ease-smooth),
     box-shadow var(--duration-normal) var(--ease-smooth),
@@ -1128,7 +1128,7 @@
   position: fixed;
   bottom: 1.25rem;
   right: 1.25rem;
-  z-index: 9999;
+  z-index: 40;
   display: none;
   align-items: center;
   gap: 0.625rem;

@@ -607,7 +607,7 @@ export class SidebarRenderer {
           aria-hidden="true"
           class="sidebar-scrollbar-thin hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-sm
             border border-slate-200 shadow-xl shadow-slate-200/50
-            rounded-xl mt-1.5 max-h-60 overflow-y-auto z-50 p-1">
+            rounded-xl mt-1.5 max-h-60 overflow-y-auto z-30 p-1">
         </div>
       </div>
     `;

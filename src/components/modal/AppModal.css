@@ -1,7 +1,7 @@
 /* ===== HOST ===== */
 :host {
   display: block;
-  z-index: 1000;
+  z-index: var(--z-modal, 60);
   position: relative;
   /* T2 modal shell: surface/text/border tokens — dual-theme safe */
   --modal-bg: var(--surface-panel, #ffffff);
@@ -33,7 +33,7 @@
 :host([open]) {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: var(--z-modal, 60);
 }
 
 .hidden {
@@ -65,7 +65,7 @@
 .modal-container {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: var(--z-modal, 60);
   display: flex;
   align-items: center;
   justify-content: center;

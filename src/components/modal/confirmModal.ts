@@ -38,7 +38,7 @@ function createBackdrop(modalId: string): HTMLDivElement {
   const backdrop = document.createElement('div');
   backdrop.id = modalId;
   backdrop.className =
-    'app-confirm-modal-backdrop fixed inset-0 backdrop-blur-sm z-[60] flex items-center justify-center fade-in';
+    'app-confirm-modal-backdrop fixed inset-0 backdrop-blur-sm flex items-center justify-center fade-in';
   return backdrop;
 }
 

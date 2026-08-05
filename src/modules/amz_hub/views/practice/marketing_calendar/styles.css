@@ -356,7 +356,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(102, 126, 234, 0.1);
   padding: 8px 0;
-  z-index: 99999;
+  z-index: var(--z-popover, 70);
   /* 提升层级确保在最上层 */
   opacity: 0;
   overflow: hidden;

@@ -17,6 +17,7 @@
 | 改页面布局、Banner、视觉风格 | **[VISUAL_DESIGN_GUIDELINES.md](./VISUAL_DESIGN_GUIDELINES.md)** |
 | 改按钮/表单/Toast/空状态/卡片 | **[COMPONENT_GUIDELINES.md](./COMPONENT_GUIDELINES.md)** |
 | 改弹窗/确认/抽屉 | **[MODAL_DEVELOPMENT_GUIDELINES.md](./MODAL_DEVELOPMENT_GUIDELINES.md)** |
+| 改浮层 / z-index / 遮挡问题 | **[Z_INDEX_LAYERING_GUIDELINES.md](./Z_INDEX_LAYERING_GUIDELINES.md)** |
 | 键盘焦点 / a11y 底线 | **[ACCESSIBILITY.md](./ACCESSIBILITY.md)** |
 | 改 CSS 变量 / token / Tailwind 色 | **[guides/css/CSS-ARCHITECTURE-README.md](./guides/css/CSS-ARCHITECTURE-README.md)** + 主题宪法 |
 | 写/改测试、问测什么 | **[TESTING_STRATEGY.md](./TESTING_STRATEGY.md)** |
@@ -53,6 +54,7 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTE
 - [项目结构审查](./PROJECT_STRUCTURE.md) — 目录职责、清理规则、归档边界。
 - [CSS 架构快速开始](./guides/css/CSS-ARCHITECTURE-README.md)
 - [CSS 架构完整指南](./guides/css/css-architecture-guide.md)
+- [Z-index 层叠层级规范](./Z_INDEX_LAYERING_GUIDELINES.md) — 层级表 / 铁律 / 冲突清单。
 - [页面实现模板规范](./guides/modules/page-implementation-templates.md)
 - [Superpowers 计划与规格](./superpowers/README.md) — **功能** plans / specs（非长期宪法）。
 

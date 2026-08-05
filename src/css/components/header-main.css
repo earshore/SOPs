@@ -299,7 +299,7 @@
   max-height: calc(100dvh - 64px);
   overflow-y: auto;
   background: transparent;
-  z-index: var(--z-mega-menu, 60);
+  z-index: var(--z-mega-menu, calc(var(--z-overlay, 50) - 1));
 
   /* 隐藏状态 */
   opacity: 0;
