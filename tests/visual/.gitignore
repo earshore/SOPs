@@ -24,7 +24,4 @@ theme-appearance-scaffold.test.ts-snapshots/
 # 日志文件
 *.log
 
-# TD-TEST-01: visual regression baselines ARE committed (CI comparison).
-# Root rule `tests/**/*.png` is re-included only for this snapshot dir.
-!visual.test.ts-snapshots/
-!visual.test.ts-snapshots/*.png
+# 视觉回归基准图：仅本地保留，不入库（根 .gitignore 的 tests/**/*.png 与 snapshots 目录规则已覆盖）

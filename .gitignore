@@ -70,6 +70,10 @@ playwright/.cache/
 /output/
 /preview-shots/
 
+# Playwright 视觉回归快照（CI 临时生成，不入库；本地保留）
+tests/visual/visual.test.ts-snapshots/
+ci-visual-artifacts/
+
 # Screenshots (保留目录结构，忽略截图文件)
 tests/screenshots/**/*.png
 tests/screenshots/**/*.jpg
