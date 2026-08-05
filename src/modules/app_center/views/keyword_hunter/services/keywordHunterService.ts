@@ -43,6 +43,7 @@ interface KeywordHunterLlmOptions {
   maxTokens?: number;
   serviceTier?: LLMProviderConfig['serviceTier'];
   strategyTargetId?: ToolStrategyTargetId;
+  bypassCache?: boolean;
   onStatus?: (status: KeywordHunterLlmStatus) => void;
 }
 
@@ -401,7 +402,7 @@ async function bridgeCallLLM(
   userPrompt: string,
   options: KeywordHunterLlmOptions = {}
 ): Promise<string> {
-  const { onStatus, ...requestOptions } = options;
+  const { onStatus, bypassCache, ...requestOptions } = options;
   const strategyTargetId = requestOptions.strategyTargetId || 'keyword-hunter-seo-process';
   const publicConfig = resolveToolLlmPublicConfig(strategyTargetId, {
     module: 'KeywordHunterService',
@@ -429,7 +430,7 @@ async function bridgeCallLLM(
     options: finalOptions,
   });
   const runtimeOptions = getKeywordHunterRuntimeOptions(strategyTargetId);
-  if (runtimeOptions.enableLlmCache) {
+  if (runtimeOptions.enableLlmCache && !bypassCache) {
     const cachedResponse = await getTimedLocalCacheValue(
       cacheKey,
       runtimeOptions.cacheTtlMs,
@@ -549,7 +550,10 @@ export async function fetchListingAnalysis(
   _keywords: string[],
   matchedKeywords: KeywordMatchResult[],
   unmatchedKeywords: string[],
-  options: { onLlmStatus?: (status: KeywordHunterLlmStatus) => void } = {}
+  options: {
+    onLlmStatus?: (status: KeywordHunterLlmStatus) => void;
+    bypassCache?: boolean;
+  } = {}
 ): Promise<string> {
   // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
   if (!copyText || !copyText.trim()) {
@@ -586,6 +590,7 @@ export async function fetchListingAnalysis(
     maxTokens: getRuntimeKeywordHunterListingReviewOptions().listingAnalysisMaxTokens,
     strategyTargetId: 'keyword-hunter-listing-review',
     onStatus: options.onLlmStatus,
+    bypassCache: options.bypassCache,
   });
 }
 

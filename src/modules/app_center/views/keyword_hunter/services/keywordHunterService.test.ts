@@ -153,3 +153,44 @@ it('does not read or write Keyword Hunter LLM cache when runtime cache is disabl
   expect(mocks.localDataSet).not.toHaveBeenCalled();
   expect(mocks.callLLM).toHaveBeenCalledTimes(1);
 });
+
+it('serves the cached Listing review report when bypassCache is not set', async () => {
+  mocks.localDataGet.mockResolvedValue({
+    timestamp: Date.now(),
+    response: 'CACHED-REPORT',
+  });
+
+  const result = await fetchListingAnalysis(
+    'Title: Waterproof travel earbuds with compact charging case and long battery life.',
+    ['waterproof earbuds'],
+    [{ keyword: 'waterproof earbuds', count: 1 }],
+    []
+  );
+
+  expect(result).toBe('CACHED-REPORT');
+  expect(mocks.callLLM).not.toHaveBeenCalled();
+});
+
+it('bypasses the cached report and refreshes the cache when bypassCache is set', async () => {
+  mocks.localDataGet.mockResolvedValue({
+    timestamp: Date.now(),
+    response: 'CACHED-REPORT',
+  });
+  mocks.callLLM.mockResolvedValueOnce('FRESH-REPORT');
+
+  const result = await fetchListingAnalysis(
+    'Title: Waterproof travel earbuds with compact charging case and long battery life.',
+    ['waterproof earbuds'],
+    [{ keyword: 'waterproof earbuds', count: 1 }],
+    [],
+    { bypassCache: true }
+  );
+
+  expect(result).toBe('FRESH-REPORT');
+  expect(mocks.callLLM).toHaveBeenCalledTimes(1);
+  expect(mocks.localDataSet).toHaveBeenCalledWith(
+    expect.stringContaining('cache:keyword-hunter-llm:'),
+    expect.objectContaining({ response: 'FRESH-REPORT' }),
+    'cache'
+  );
+});

@@ -342,18 +342,25 @@ function applyAnalysisStreamUpdate(
   }
 }
 
-function startAnalysisRun(processedCopy: string): ActiveAnalysisRun {
+function startAnalysisRun(
+  processedCopy: string,
+  options: { bypassCache?: boolean } = {}
+): ActiveAnalysisRun {
   const run: ActiveAnalysisRun = {
     processedCopy,
     promise: Promise.resolve(''),
     status: 'pending',
   };
 
-  run.promise = fetchListingAnalysis(processedCopy, status => {
-    run.llmStatus = status;
-    renderAnalysisLlmStatus(run, status);
-    applyAnalysisStreamUpdate(run, status);
-  })
+  run.promise = fetchListingAnalysis(
+    processedCopy,
+    status => {
+      run.llmStatus = status;
+      renderAnalysisLlmStatus(run, status);
+      applyAnalysisStreamUpdate(run, status);
+    },
+    { bypassCache: options.bypassCache }
+  )
     .then(response => finalizeAnalysisSuccess(run, response))
     .catch(error => finalizeAnalysisFailure(run, error))
     .finally(() => {
@@ -669,7 +676,8 @@ function getProcessedCopy(): string {
 
 async function fetchListingAnalysis(
   processedCopy: string,
-  onLlmStatus?: (status: KeywordHunterService.KeywordHunterLlmStatus) => void
+  onLlmStatus?: (status: KeywordHunterService.KeywordHunterLlmStatus) => void,
+  options: { bypassCache?: boolean } = {}
 ): Promise<string> {
   const keywordTracker = appStore.getState().keywordTracker;
 
@@ -678,7 +686,7 @@ async function fetchListingAnalysis(
     keywordTracker?.keywords ?? [],
     keywordTracker?.matchedKeywords ?? [],
     keywordTracker?.unmatchedKeywords ?? [],
-    { onLlmStatus }
+    { onLlmStatus, bypassCache: options.bypassCache }
   );
 }
 
@@ -711,7 +719,7 @@ function createAnalysisRetryButton(colorScheme: 'yellow' | 'red'): HTMLButtonEle
   // ✅ 安全: 静态HTML模板，无用户输入
   setSafeHtml(retryBtn, '<i class="fas fa-redo text-[10px]"></i> 重试');
   addEventListener(retryBtn, 'click', () => {
-    void runLLMAnalysis();
+    void runLLMAnalysis({ bypassCache: true });
   });
 
   return retryBtn;
@@ -1210,6 +1218,7 @@ function highlightScores(container: HTMLElement): void {
  * 运行 LLM 分析
  * @param options.forceConfirm - 用户主动点「重新生成」时，已有报告需确认清空
  * @param options.autoStart - 来自 SEO「进入分析」自动触发；有报告时不自动覆盖
+ * @param options.bypassCache - 用户主动触发时绕过 LLM 缓存，强制发起新的模型调用
  */
 async function confirmRegenerateListingReportIfNeeded(
   hasExistingReport: boolean,
@@ -1235,6 +1244,7 @@ async function runLLMAnalysis(
   options: {
     forceConfirm?: boolean;
     autoStart?: boolean;
+    bypassCache?: boolean;
   } = {}
 ): Promise<void> {
   const processedCopy = getProcessedCopy();
@@ -1259,7 +1269,12 @@ async function runLLMAnalysis(
   }
 
   if (!(await confirmRegenerateListingReportIfNeeded(hasExistingReport, options))) return;
-  attachAnalysisRunToPage(startAnalysisRun(processedCopy));
+
+  const bypassCache = options.bypassCache === true;
+  if (bypassCache && hasExistingReport) {
+    showToast('正在重新生成评审报告…', { type: 'info' });
+  }
+  attachAnalysisRunToPage(startAnalysisRun(processedCopy, { bypassCache }));
 }
 
 // ==========================================
@@ -1275,7 +1290,10 @@ function setupEventListeners(container: HTMLElement): void {
       btnAnalyze as HTMLElement,
       'click',
       (async () =>
-        await runLLMAnalysis({ forceConfirm: true })) as EventListenerOrEventListenerObject
+        await runLLMAnalysis({
+          forceConfirm: true,
+          bypassCache: true,
+        })) as EventListenerOrEventListenerObject
     );
   }
 }

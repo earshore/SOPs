@@ -42,6 +42,9 @@ const analysisMocks = vi.hoisted(() => {
     localDataGet: vi.fn(),
     localDataSet: vi.fn(),
     localDataRemove: vi.fn(),
+    llmCacheGet: vi.fn(),
+    llmCacheSet: vi.fn(),
+    confirmWithModal: vi.fn(async () => true),
     saveCurrentAsync: vi.fn(async () => ({
       id: 'kh-test',
     })),
@@ -85,6 +88,19 @@ vi.mock('@/services/errorService', () => ({
 
 vi.mock('@/services/llmService', () => ({
   callLLM: vi.fn(),
+}));
+
+vi.mock('@/services/llmRequestCache', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/services/llmRequestCache')>();
+  return {
+    ...actual,
+    getTimedLocalCacheValue: analysisMocks.llmCacheGet,
+    setTimedLocalCacheValue: analysisMocks.llmCacheSet,
+  };
+});
+
+vi.mock('@/modules/app_center/views/keyword_hunter/utils/confirmModal', () => ({
+  confirmWithModal: analysisMocks.confirmWithModal,
 }));
 
 vi.mock('@/services/localDataStore', () => ({
@@ -210,6 +226,9 @@ beforeEach(() => {
   analysisMocks.localDataGet.mockResolvedValue(null);
   analysisMocks.localDataSet.mockResolvedValue(true);
   analysisMocks.localDataRemove.mockResolvedValue(undefined);
+  analysisMocks.llmCacheGet.mockResolvedValue(null);
+  analysisMocks.llmCacheSet.mockResolvedValue(undefined);
+  analysisMocks.confirmWithModal.mockResolvedValue(true);
   mockedStorage.get.mockReturnValue('openai');
   mockedStorage.getLLMConfig.mockReturnValue({
     endpoint: 'https://api.example.test',
@@ -674,4 +693,52 @@ it('reports non-validation failures and supports retrying from the rendered erro
     expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
   });
   expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe('重新生成');
+});
+
+it('regenerates the report with a fresh LLM call even when a cached report exists', async () => {
+  analysisMocks.state.keywordTracker.processedCopy = validListing;
+  analysisMocks.state.keywordTracker.llmAnalysisResult = scoredMarkdown;
+  analysisMocks.llmCacheGet.mockResolvedValue('STALE-CACHED-REPORT');
+
+  const container = await mountAnalysis();
+  click(container.querySelector('#keyword-hunter-analyze-btn'));
+
+  await vi.waitFor(() => {
+    expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+  });
+  expect(analysisMocks.confirmWithModal).toHaveBeenCalled();
+  expect(showToast).toHaveBeenCalledWith('正在重新生成评审报告…', { type: 'info' });
+
+  await vi.waitFor(() => {
+    expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe(
+      '重新生成'
+    );
+  });
+  expect(container.querySelector('#keyword-hunter-llm-analysis-result')?.textContent).toContain(
+    '88/100'
+  );
+  expect(container.querySelector('#keyword-hunter-llm-analysis-result')?.textContent).not.toContain(
+    'STALE-CACHED-REPORT'
+  );
+  expect(analysisMocks.llmCacheSet).toHaveBeenCalledWith(
+    expect.stringContaining('cache:keyword-hunter-llm:'),
+    expect.objectContaining({ response: scoredMarkdown })
+  );
+});
+
+it('serves the cached report on the auto-start path without calling the model', async () => {
+  analysisMocks.state.keywordTracker.processedCopy = validListing;
+  analysisMocks.llmCacheGet.mockResolvedValue(scoredMarkdown);
+
+  const container = await mountAnalysis();
+
+  await vi.waitFor(() => {
+    expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe(
+      '重新生成'
+    );
+  });
+  expect(mockedCallLLM).not.toHaveBeenCalled();
+  expect(container.querySelector('#keyword-hunter-llm-analysis-result')?.textContent).toContain(
+    '88/100'
+  );
 });
