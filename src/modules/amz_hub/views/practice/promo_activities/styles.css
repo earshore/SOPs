@@ -887,3 +887,430 @@
 [data-color-mode-resolved='dark'] .amzpa_nav_step::after {
   background: var(--surface-card);
 }
+
+/* ========================================
+   主题收口二：模板内容区 token 化
+   促销面板 / 组合卡 / 关键动作清单 / 常见误区 → Theme surface + hue tint。
+   ======================================== */
+.amzpa_panel {
+  background: var(--surface-card, #ffffff);
+  border-color: var(--color-slate-200, #e2e8f0);
+}
+
+.amzpa_panel_title {
+  color: var(--color-text-primary, #1e293b);
+}
+
+.amzpa_panel--success {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 8%,
+    var(--surface-card, #ffffff)
+  );
+  border-color: color-mix(in srgb, var(--color-emerald-500, #10b981) 26%, transparent);
+}
+
+.amzpa_panel--success .amzpa_panel_title {
+  color: var(--color-emerald-800, #065f46);
+}
+
+.amzpa_panel--success .amzpa_panel_title i {
+  color: var(--color-emerald-500, #10b981);
+}
+
+.amzpa_panel--danger {
+  background: color-mix(in srgb, var(--color-rose-500, #f43f5e) 8%, var(--surface-card, #ffffff));
+  border-color: color-mix(in srgb, var(--color-rose-500, #f43f5e) 26%, transparent);
+}
+
+.amzpa_panel--danger .amzpa_panel_title {
+  color: var(--color-rose-800, #9f1239);
+}
+
+.amzpa_panel--danger .amzpa_panel_title i {
+  color: var(--color-rose-500, #f43f5e);
+}
+
+.amzpa_combo_card {
+  color: var(--color-text-primary, #1e293b);
+  border: 1px solid color-mix(in srgb, var(--color-slate-500, #64748b) 26%, transparent);
+}
+
+.amzpa_combo_title {
+  color: var(--color-text-primary, #1e293b);
+}
+
+.amzpa_combo_desc {
+  color: var(--color-text-secondary, #64748b);
+}
+
+.amzpa_combo_card--slate {
+  background: color-mix(in srgb, var(--color-slate-500, #64748b) 8%, var(--surface-card, #ffffff));
+  border-color: color-mix(in srgb, var(--color-slate-500, #64748b) 26%, transparent);
+}
+
+.amzpa_combo_card--slate .amzpa_combo_title {
+  color: var(--color-slate-700, #334155);
+}
+
+.amzpa_combo_card--slate .amzpa_combo_desc {
+  color: var(--color-slate-500, #64748b);
+}
+
+.amzpa_combo_card--emerald {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 8%,
+    var(--surface-card, #ffffff)
+  );
+  border-color: color-mix(in srgb, var(--color-emerald-500, #10b981) 26%, transparent);
+}
+
+.amzpa_combo_card--emerald .amzpa_combo_title {
+  color: var(--color-emerald-800, #065f46);
+}
+
+.amzpa_combo_card--emerald .amzpa_combo_desc {
+  color: var(--color-emerald-700, #047857);
+}
+
+.amzpa_combo_card--indigo {
+  background: color-mix(in srgb, var(--color-indigo-500, #6366f1) 8%, var(--surface-card, #ffffff));
+  border-color: color-mix(in srgb, var(--color-indigo-500, #6366f1) 26%, transparent);
+}
+
+.amzpa_combo_card--indigo .amzpa_combo_title {
+  color: var(--color-indigo-800, #3730a3);
+}
+
+.amzpa_combo_card--indigo .amzpa_combo_desc {
+  color: var(--color-indigo-700, #4338ca);
+}
+
+.amzpa_combo_card--amber {
+  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 8%, var(--surface-card, #ffffff));
+  border-color: color-mix(in srgb, var(--color-amber-500, #f59e0b) 26%, transparent);
+}
+
+.amzpa_combo_card--amber .amzpa_combo_title {
+  color: var(--color-amber-800, #92400e);
+}
+
+.amzpa_combo_card--amber .amzpa_combo_desc {
+  color: var(--color-amber-700, #b45309);
+}
+
+.amzpa_checklist_section {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--color-emerald-500, #10b981) 26%, transparent);
+}
+
+.amzpa_checklist_title {
+  color: var(--color-text-primary, #1e293b);
+}
+
+.amzpa_checklist_section label {
+  color: var(--color-text-secondary, #475569);
+}
+
+.amzpa_myth_section {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-red-500, #ef4444) 6%, var(--surface-card, #ffffff)) 0%,
+    color-mix(in srgb, var(--color-rose-500, #f43f5e) 6%, var(--surface-card, #ffffff)) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--color-red-500, #ef4444) 22%, transparent);
+}
+
+.amzpa_myth_title {
+  color: var(--color-red-700, #b91c1c);
+}
+
+.amzpa_myth_card {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--color-red-500, #ef4444) 20%, transparent);
+}
+
+.amzpa_myth_card .fa-xmark {
+  color: var(--color-red-600, #dc2626);
+}
+
+.amzpa_myth_card_title {
+  color: var(--color-text-primary, #1e293b);
+}
+
+.amzpa_myth_card_desc {
+  color: var(--color-text-secondary, #64748b);
+}
+
+/* ========================================
+   主题收口三：深色模式全量适配
+   促销面板 / 组合卡 / 清单 / 误区 + 既有遗漏文字色补丁。
+   ======================================== */
+
+/* ---- 促销面板 ---- */
+.dark .amzpa_panel,
+[data-color-mode-resolved='dark'] .amzpa_panel {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .amzpa_panel_title,
+[data-color-mode-resolved='dark'] .amzpa_panel_title {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .amzpa_panel--success,
+[data-color-mode-resolved='dark'] .amzpa_panel--success {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-400, #34d399) 16%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 30%, transparent);
+}
+
+.dark .amzpa_panel--success .amzpa_panel_title,
+[data-color-mode-resolved='dark'] .amzpa_panel--success .amzpa_panel_title {
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .amzpa_panel--success .amzpa_panel_title i,
+[data-color-mode-resolved='dark'] .amzpa_panel--success .amzpa_panel_title i {
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .amzpa_panel--danger,
+[data-color-mode-resolved='dark'] .amzpa_panel--danger {
+  background: color-mix(in srgb, var(--color-rose-400, #fb7185) 16%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-rose-400, #fb7185) 30%, transparent);
+}
+
+.dark .amzpa_panel--danger .amzpa_panel_title,
+[data-color-mode-resolved='dark'] .amzpa_panel--danger .amzpa_panel_title {
+  color: var(--color-rose-300, #fda4af);
+}
+
+.dark .amzpa_panel--danger .amzpa_panel_title i,
+[data-color-mode-resolved='dark'] .amzpa_panel--danger .amzpa_panel_title i {
+  color: var(--color-rose-300, #fda4af);
+}
+
+/* ---- 组合卡 ---- */
+.dark .amzpa_combo_card,
+[data-color-mode-resolved='dark'] .amzpa_combo_card {
+  color: var(--color-text-primary, #f1f5f9);
+  border-color: color-mix(in srgb, var(--color-slate-400, #94a3b8) 30%, transparent);
+}
+
+.dark .amzpa_combo_card--slate,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--slate {
+  background: color-mix(in srgb, var(--color-slate-400, #94a3b8) 14%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-slate-400, #94a3b8) 30%, transparent);
+}
+
+.dark .amzpa_combo_card--slate .amzpa_combo_title,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--slate .amzpa_combo_title {
+  color: var(--color-slate-300, #cbd5e1);
+}
+
+.dark .amzpa_combo_card--slate .amzpa_combo_desc,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--slate .amzpa_combo_desc {
+  color: var(--color-slate-400, #94a3b8);
+}
+
+.dark .amzpa_combo_card--emerald,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--emerald {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-400, #34d399) 14%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 30%, transparent);
+}
+
+.dark .amzpa_combo_card--emerald .amzpa_combo_title,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--emerald .amzpa_combo_title {
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .amzpa_combo_card--emerald .amzpa_combo_desc,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--emerald .amzpa_combo_desc {
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .amzpa_combo_card--indigo,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--indigo {
+  background: color-mix(
+    in srgb,
+    var(--color-indigo-400, #818cf8) 14%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-indigo-400, #818cf8) 30%, transparent);
+}
+
+.dark .amzpa_combo_card--indigo .amzpa_combo_title,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--indigo .amzpa_combo_title {
+  color: var(--color-indigo-300, #a5b4fc);
+}
+
+.dark .amzpa_combo_card--indigo .amzpa_combo_desc,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--indigo .amzpa_combo_desc {
+  color: var(--color-indigo-300, #a5b4fc);
+}
+
+.dark .amzpa_combo_card--amber,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--amber {
+  background: color-mix(in srgb, var(--color-amber-400, #fbbf24) 14%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-amber-400, #fbbf24) 30%, transparent);
+}
+
+.dark .amzpa_combo_card--amber .amzpa_combo_title,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--amber .amzpa_combo_title {
+  color: var(--color-amber-300, #fcd34d);
+}
+
+.dark .amzpa_combo_card--amber .amzpa_combo_desc,
+[data-color-mode-resolved='dark'] .amzpa_combo_card--amber .amzpa_combo_desc {
+  color: var(--color-amber-300, #fcd34d);
+}
+
+/* ---- 关键动作清单 / 常见误区 ---- */
+.dark .amzpa_checklist_section,
+[data-color-mode-resolved='dark'] .amzpa_checklist_section {
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 30%, transparent);
+}
+
+.dark .amzpa_checklist_title,
+[data-color-mode-resolved='dark'] .amzpa_checklist_title {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .amzpa_checklist_section label,
+[data-color-mode-resolved='dark'] .amzpa_checklist_section label {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .amzpa_checklist_section .fa-list-check,
+[data-color-mode-resolved='dark'] .amzpa_checklist_section .fa-list-check {
+  color: var(--color-emerald-400, #34d399);
+}
+
+.dark .amzpa_myth_section,
+[data-color-mode-resolved='dark'] .amzpa_myth_section {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-red-500, #ef4444) 12%, var(--surface-card, #1e293b)) 0%,
+    color-mix(in srgb, var(--color-rose-500, #f43f5e) 12%, var(--surface-card, #1e293b)) 100%
+  );
+  border-color: color-mix(in srgb, var(--color-red-500, #ef4444) 32%, transparent);
+}
+
+.dark .amzpa_myth_title,
+[data-color-mode-resolved='dark'] .amzpa_myth_title {
+  color: var(--color-red-400, #f87171);
+}
+
+.dark .amzpa_myth_card,
+[data-color-mode-resolved='dark'] .amzpa_myth_card {
+  border-color: color-mix(in srgb, var(--color-red-500, #ef4444) 28%, transparent);
+}
+
+.dark .amzpa_myth_card .fa-xmark,
+[data-color-mode-resolved='dark'] .amzpa_myth_card .fa-xmark {
+  color: var(--color-red-400, #f87171);
+}
+
+.dark .amzpa_myth_card_title,
+[data-color-mode-resolved='dark'] .amzpa_myth_card_title {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .amzpa_myth_card_desc,
+[data-color-mode-resolved='dark'] .amzpa_myth_card_desc {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+/* ---- 既有遗漏补丁（原浅色硬编码，深色下无覆盖） ---- */
+.dark .amzpa_anchor_desc,
+[data-color-mode-resolved='dark'] .amzpa_anchor_desc {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .amzpa_dual_cta,
+[data-color-mode-resolved='dark'] .amzpa_dual_cta {
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .amzpa_dual_eyebrow,
+[data-color-mode-resolved='dark'] .amzpa_dual_eyebrow {
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .amzpa_anchor_eyebrow,
+[data-color-mode-resolved='dark'] .amzpa_anchor_eyebrow {
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .amzpa_nav_step::after,
+[data-color-mode-resolved='dark'] .amzpa_nav_step::after {
+  color: var(--color-text-secondary, #cbd5e1);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .amzpa_nav_step:hover::after,
+[data-color-mode-resolved='dark'] .amzpa_nav_step:hover::after {
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .amzpa_nav_step_meta,
+[data-color-mode-resolved='dark'] .amzpa_nav_step_meta {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .amzpa_metric_label,
+[data-color-mode-resolved='dark'] .amzpa_metric_label,
+.dark .amzpa_metric_desc,
+[data-color-mode-resolved='dark'] .amzpa_metric_desc {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .amzpa_sub_desc,
+[data-color-mode-resolved='dark'] .amzpa_sub_desc {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .amzpa_timeline_step p,
+[data-color-mode-resolved='dark'] .amzpa_timeline_step p {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .amzpa_tag,
+[data-color-mode-resolved='dark'] .amzpa_tag {
+  background: color-mix(in srgb, var(--color-blue-400, #60a5fa) 16%, transparent);
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .amzpa_timeline_tag,
+[data-color-mode-resolved='dark'] .amzpa_timeline_tag {
+  background: color-mix(in srgb, var(--color-orange-400, #fb923c) 16%, transparent);
+  color: var(--color-orange-300, #fdba74);
+}
+
+.dark .amzpa_callout,
+[data-color-mode-resolved='dark'] .amzpa_callout {
+  background: color-mix(in srgb, var(--color-cyan-400, #22d3ee) 10%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-cyan-400, #22d3ee) 30%, transparent);
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .amzpa_stats_box,
+[data-color-mode-resolved='dark'] .amzpa_stats_box {
+  background: var(--surface-card-hover, #1e293b);
+  border-color: var(--border-subtle);
+}
+
+.dark .amzpa_stats_text,
+[data-color-mode-resolved='dark'] .amzpa_stats_text {
+  color: var(--color-text-secondary, #cbd5e1);
+}

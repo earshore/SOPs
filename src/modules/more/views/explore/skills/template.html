@@ -40,7 +40,7 @@
   >
     <article class="ui-card p-5">
       <div
-        class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center mb-4"
+        class="skill-icon-tile skill-icon-tile--violet w-10 h-10 rounded-lg flex items-center justify-center mb-4"
       >
         <i class="fa-solid fa-compass" aria-hidden="true"></i>
       </div>
@@ -51,7 +51,7 @@
     </article>
     <article class="ui-card p-5">
       <div
-        class="w-10 h-10 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center mb-4"
+        class="skill-icon-tile skill-icon-tile--cyan w-10 h-10 rounded-lg flex items-center justify-center mb-4"
       >
         <i class="fa-solid fa-book-open" aria-hidden="true"></i>
       </div>
@@ -62,7 +62,7 @@
     </article>
     <article class="ui-card p-5">
       <div
-        class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-4"
+        class="skill-icon-tile skill-icon-tile--amber w-10 h-10 rounded-lg flex items-center justify-center mb-4"
       >
         <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
       </div>
@@ -73,7 +73,7 @@
     </article>
     <article class="ui-card p-5">
       <div
-        class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4"
+        class="skill-icon-tile skill-icon-tile--indigo w-10 h-10 rounded-lg flex items-center justify-center mb-4"
       >
         <i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
       </div>
@@ -125,9 +125,9 @@
         </ol>
       </div>
       <div class="lg:col-span-2 grid grid-cols-1 gap-3">
-        <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
-          <h3 class="font-semibold text-slate-900 mb-2">上线前五问</h3>
-          <ul class="text-sm text-slate-600 space-y-2">
+        <div class="skill-panel rounded-lg p-4">
+          <h3 class="skill-panel-title font-semibold mb-2">上线前五问</h3>
+          <ul class="skill-panel-text text-sm space-y-2">
             <li>是否用了真实数据，而不是让模型编市场事实？</li>
             <li>技能边界是否覆盖本轮问题，而不是万能套用？</li>
             <li>输出是否能被运营直接执行或审稿？</li>
@@ -135,9 +135,9 @@
             <li>是否有合规、费用、政策的人工复核点？</li>
           </ul>
         </div>
-        <div class="border border-violet-100 rounded-lg p-4 bg-violet-50">
-          <h3 class="font-semibold text-violet-900 mb-2">不要这样用</h3>
-          <p class="text-sm text-violet-800 leading-6">
+        <div class="skill-panel skill-panel--violet rounded-lg p-4">
+          <h3 class="skill-panel-title font-semibold mb-2">不要这样用</h3>
+          <p class="skill-panel-text text-sm leading-6">
             不要「随便挂一个技能帮我写爆款 Listing」。应先选 Listing
             场景技能，读清输入与输出，再粘贴关键词、竞品与评论证据，按可审稿结构产出。
           </p>
@@ -161,7 +161,7 @@
 
     <p
       id="skills-library-empty-hint"
-      class="skills-library-empty-hint text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4"
+      class="skills-library-empty-hint text-sm rounded-lg px-3 py-2 mb-4"
       hidden
     >
       技能库未接入时统计为「—」。接入 submodule 后刷新页面即可浏览目录并试用。
@@ -196,7 +196,7 @@
   <section class="mb-6" aria-label="高频实战路径">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
       <div>
-        <p class="text-xs font-semibold text-slate-500 uppercase">Seller Playbooks</p>
+        <p class="skill-eyebrow text-xs font-semibold uppercase">Seller Playbooks</p>
         <h2 class="ui-card__title text-xl font-bold mt-1">四条高频实战路径</h2>
       </div>
       <p class="ui-card__muted text-sm">从场景到技能：方法论负责判断与组织，你负责数据与拍板。</p>
@@ -206,7 +206,7 @@
       <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0"
+            class="skill-icon-tile skill-icon-tile--blue w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
           >
             <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
           </div>
@@ -218,22 +218,16 @@
           </div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输入：关键词、竞品、评论痛点
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            处理：意图分组、卖点排序
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输出：可审稿文案和风险项
-          </div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">输入：关键词、竞品、评论痛点</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">处理：意图分组、卖点排序</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">输出：可审稿文案和风险项</div>
         </div>
       </article>
 
       <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0"
+            class="skill-icon-tile skill-icon-tile--orange w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
           >
             <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
           </div>
@@ -245,20 +239,16 @@
           </div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输入：点击、花费、订单、ACOS
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            处理：样本量与目标分桶
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">输出：保守/激进动作表</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">输入：点击、花费、订单、ACOS</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">处理：样本量与目标分桶</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">输出：保守/激进动作表</div>
         </div>
       </article>
 
       <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0"
+            class="skill-icon-tile skill-icon-tile--emerald w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
           >
             <i class="fa-solid fa-calculator" aria-hidden="true"></i>
           </div>
@@ -270,20 +260,16 @@
           </div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输入：成本、费用、售价、退货
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            处理：利润结构与敏感点
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">输出：可执行价格带</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">输入：成本、费用、售价、退货</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">处理：利润结构与敏感点</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">输出：可执行价格带</div>
         </div>
       </article>
 
       <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0"
+            class="skill-icon-tile skill-icon-tile--purple w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
           >
             <i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i>
           </div>
@@ -295,26 +281,19 @@
           </div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输入：关键词、竞品、评论
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            处理：机会聚类与证据检查
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">输出：行动优先级清单</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">输入：关键词、竞品、评论</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">处理：机会聚类与证据检查</div>
+          <div class="skill-flow-step rounded-lg p-3 text-sm">输出：行动优先级清单</div>
         </div>
       </article>
     </div>
   </section>
 
   <!-- 业务规则如何进入技能 -->
-  <section
-    class="ui-card p-6 mb-8"
-    aria-label="业务规则如何进入技能"
-  >
+  <section class="ui-card p-6 mb-8" aria-label="业务规则如何进入技能">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
       <div>
-        <p class="text-xs font-semibold text-slate-500 uppercase">Business Operating Rules</p>
+        <p class="skill-eyebrow text-xs font-semibold uppercase">Business Operating Rules</p>
         <h2 class="ui-card__title text-xl font-bold mt-1">业务规则如何进入技能</h2>
       </div>
       <p class="ui-card__muted text-sm">
@@ -411,7 +390,7 @@
         <div class="ui-card__muted text-xs mt-0.5">试用版技能</div>
       </div>
     </div>
-    <p class="text-xs text-slate-500 leading-6">
+    <p class="skills-page-footer__note text-xs leading-6">
       技能正文来自
       <a
         class="text-violet-700 hover:text-violet-800"
@@ -429,7 +408,7 @@
 <app-modal id="skill-detail-modal" class="hidden" title="技能详情" size="2xl" no-header>
   <div
     slot="body"
-    class="skill-detail-modal__dialog bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
+    class="skill-detail-modal__dialog rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
   >
     <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 p-6 text-white pr-14">
       <div class="flex items-start justify-between mb-3 gap-4">
@@ -445,23 +424,21 @@
 
     <div class="flex-1 overflow-y-auto p-6 space-y-4">
       <div id="modal-skill-structured" class="space-y-3" hidden></div>
-      <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
+      <div class="skill-modal-raw rounded-xl p-6">
         <details id="modal-skill-raw-details" open>
-          <summary
-            class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2 cursor-pointer list-none"
-          >
+          <summary class="text-sm font-bold mb-3 flex items-center gap-2 cursor-pointer list-none">
             <i class="fas fa-file-lines" aria-hidden="true"></i>
             技能全文（复制后贴到 AI 对话）
           </summary>
           <pre
             id="modal-skill-content"
-            class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-mono"
+            class="text-sm whitespace-pre-wrap leading-relaxed font-mono"
           ></pre>
         </details>
       </div>
     </div>
 
-    <div class="border-t border-slate-200 p-4 flex flex-wrap gap-2 justify-end bg-white">
+    <div class="skill-modal-footer p-4 flex flex-wrap gap-2 justify-end">
       <button type="button" data-skill-modal-action="close" class="skill-action-secondary">
         <i class="fas fa-xmark" aria-hidden="true"></i>
         <span>关闭</span>

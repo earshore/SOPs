@@ -1,108 +1,158 @@
 <div class="module-container">
-    <div class="wb-container wb-container--simple wb-theme-hub-promo-tools">
-        <div class="wb-content">
-            <div class="wb-icon">
-                <i class="fas fa-toolbox"></i>
-            </div>
-            <div class="wb-title-row">
-                <h1 class="wb-title">促销工具</h1>
-                <span aria-label="欧洲站促销工具全景" class="wb-badge wb-badge-hub">
-                    <i class="fas fa-screwdriver-wrench"></i>欧洲站运营工具全景
-                </span>
-            </div>
-            <p class="wb-description">
-                这页只聚焦一件事：把亚马逊欧洲站所有和促销相关的后台运营工具一次讲清，帮助团队快速判断
-                “该用什么工具、什么时候用、怎么组合、哪些不要乱叠”。
+  <div class="wb-container wb-container--simple wb-theme-hub-promo-tools">
+    <div class="wb-content">
+      <div class="wb-icon">
+        <i class="fas fa-toolbox"></i>
+      </div>
+      <div class="wb-title-row">
+        <h1 class="wb-title">促销工具</h1>
+        <span aria-label="欧洲站促销工具全景" class="wb-badge wb-badge-hub">
+          <i class="fas fa-screwdriver-wrench"></i>欧洲站运营工具全景
+        </span>
+      </div>
+      <p class="wb-description">
+        这页只聚焦一件事：把亚马逊欧洲站所有和促销相关的后台运营工具一次讲清，帮助团队快速判断
+        “该用什么工具、什么时候用、怎么组合、哪些不要乱叠”。
+      </p>
+      <div class="wb-meta">
+        <span><i class="fas fa-globe-europe mr-1"></i>欧洲站视角</span>
+        <span><i class="fas fa-bullseye mr-1"></i>聚焦促销工具</span>
+        <span><i class="fas fa-store mr-1"></i>适合中小卖家执行</span>
+        <span><i class="fas fa-clock mr-1"></i>更新时间：2026-06</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="amzpt_dual_guide">
+    <div class="amzpt_dual_header">
+      <div>
+        <span class="amzpt_dual_eyebrow">PAGE POSITIONING</span>
+        <h2 class="amzpt_dual_title">促销专题双页分工</h2>
+        <p class="amzpt_dual_desc">
+          现在把“工具选择”和“活动打法”拆开：本页负责把所有促销工具讲清楚；配套页负责讲大促节奏、提报排期、执行监控与复盘。
+        </p>
+      </div>
+    </div>
+    <div class="amzpt_dual_grid">
+      <div class="amzpt_dual_card is-current">
+        <span class="amzpt_dual_badge">当前页</span>
+        <h3 class="amzpt_dual_card_title">促销工具：讲工具选择与使用边界</h3>
+        <p class="amzpt_dual_card_desc">
+          适合回答“这次该用什么工具、入口在哪、费用逻辑是什么、能不能叠加、适合什么目标”。
+        </p>
+        <div class="amzpt_dual_points">
+          <span>Deals / Coupons / PED</span>
+          <span>Promotions / Outlet</span>
+          <span>组合与筛选逻辑</span>
+        </div>
+      </div>
+      <button
+        class="amzpt_dual_card amzpt_dual_card--link"
+        type="button"
+        data-action="switch-tab"
+        data-tab="amz_promo_activities"
+      >
+        <span class="amzpt_dual_badge amzpt_dual_badge--soft">配套页</span>
+        <h3 class="amzpt_dual_card_title">促销活动：讲战役节奏与执行 SOP</h3>
+        <p class="amzpt_dual_card_desc">
+          如果你要看 Prime Day、BFCM、节日季如何倒排推进，以及活动当天监控和活动后复盘，请切到这页。
+        </p>
+        <span class="amzpt_dual_cta"><i class="fas fa-arrow-right"></i>切换到“促销活动”</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="amzpt_nav"></div>
+  <main class="amzpt_content" id="amzpt_main"></main>
+
+  <!-- 实操指引：关键动作清单 + 常见误区 -->
+  <section class="amzpt_checklist_section rounded-xl p-6 mt-8 mb-6">
+    <h2 class="amzpt_checklist_title text-lg font-bold mb-4 flex items-center gap-2">
+      <i class="fas fa-list-check text-emerald-500"></i>关键动作清单
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+      <label class="flex items-start gap-2"
+        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
+          >设置 Coupon 前先核算折后利润（含平台佣金、FBA费、广告成本）。</span
+        ></label
+      >
+      <label class="flex items-start gap-2"
+        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
+          >LD/7DD 提报前确认库存可覆盖整个促销周期（建议1.5倍安全库存）。</span
+        ></label
+      >
+      <label class="flex items-start gap-2"
+        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
+          >BOGO 类促销需确认系统配置正确，避免被薅羊毛。</span
+        ></label
+      >
+      <label class="flex items-start gap-2"
+        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
+          >促销期间加大 PPC 预算，抢占促销流量入口。</span
+        ></label
+      >
+      <label class="flex items-start gap-2"
+        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
+          >促销结束后复核价格历史和参考价展示，不把30天最低价机制当成固定不变的单一规则。</span
+        ></label
+      >
+      <label class="flex items-start gap-2"
+        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
+          >每个促销活动单独命名（如 ASIN_LD_20260715），便于复盘追踪。</span
+        ></label
+      >
+    </div>
+  </section>
+  <section class="amzpt_myth_section rounded-xl p-6 mb-6">
+    <h2 class="amzpt_myth_title text-lg font-bold mb-4 flex items-center gap-2">
+      <i class="fas fa-triangle-exclamation"></i>常见误区
+    </h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div class="amzpt_myth_card p-3 rounded-lg">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-xmark text-lg mt-0.5"></i>
+          <div>
+            <h4 class="amzpt_myth_card_title font-bold text-sm mb-1">Coupon 叠加导致亏损</h4>
+            <p class="amzpt_myth_card_desc text-xs">
+              → Coupon 与 LD/7DD 可能叠加，设置前务必检查是否与其他促销冲突。
             </p>
-            <div class="wb-meta">
-                <span><i class="fas fa-globe-europe mr-1"></i>欧洲站视角</span>
-                <span><i class="fas fa-bullseye mr-1"></i>聚焦促销工具</span>
-                <span><i class="fas fa-store mr-1"></i>适合中小卖家执行</span>
-                <span><i class="fas fa-clock mr-1"></i>更新时间：2026-06</span>
-            </div>
+          </div>
         </div>
+      </div>
+      <div class="amzpt_myth_card p-3 rounded-lg">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-xmark text-lg mt-0.5"></i>
+          <div>
+            <h4 class="amzpt_myth_card_title font-bold text-sm mb-1">为冲销量接亏本促销</h4>
+            <p class="amzpt_myth_card_desc text-xs">
+              → 促销 ranking 提升不等于长期利润，折后毛利率必须≥0。
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="amzpt_myth_card p-3 rounded-lg">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-xmark text-lg mt-0.5"></i>
+          <div>
+            <h4 class="amzpt_myth_card_title font-bold text-sm mb-1">促销期间断货</h4>
+            <p class="amzpt_myth_card_desc text-xs">
+              → 断货会清零促销排名积累，备货必须1.5倍覆盖。
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="amzpt_myth_card p-3 rounded-lg">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-xmark text-lg mt-0.5"></i>
+          <div>
+            <h4 class="amzpt_myth_card_title font-bold text-sm mb-1">忽视 Prime 专属折扣合规</h4>
+            <p class="amzpt_myth_card_desc text-xs">
+              → PED
+              折扣门槛、最低价口径和叠加限制会随站点、活动和后台资格变化，违规会被取消；提报前以后台提示为准。
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div class="amzpt_dual_guide">
-        <div class="amzpt_dual_header">
-            <div>
-                <span class="amzpt_dual_eyebrow">PAGE POSITIONING</span>
-                <h2 class="amzpt_dual_title">促销专题双页分工</h2>
-                <p class="amzpt_dual_desc">
-                    现在把“工具选择”和“活动打法”拆开：本页负责把所有促销工具讲清楚；配套页负责讲大促节奏、提报排期、执行监控与复盘。
-                </p>
-            </div>
-        </div>
-        <div class="amzpt_dual_grid">
-            <div class="amzpt_dual_card is-current">
-                <span class="amzpt_dual_badge">当前页</span>
-                <h3 class="amzpt_dual_card_title">促销工具：讲工具选择与使用边界</h3>
-                <p class="amzpt_dual_card_desc">
-                    适合回答“这次该用什么工具、入口在哪、费用逻辑是什么、能不能叠加、适合什么目标”。
-                </p>
-                <div class="amzpt_dual_points">
-                    <span>Deals / Coupons / PED</span>
-                    <span>Promotions / Outlet</span>
-                    <span>组合与筛选逻辑</span>
-                </div>
-            </div>
-            <button class="amzpt_dual_card amzpt_dual_card--link" type="button" data-action="switch-tab" data-tab="amz_promo_activities">
-                <span class="amzpt_dual_badge amzpt_dual_badge--soft">配套页</span>
-                <h3 class="amzpt_dual_card_title">促销活动：讲战役节奏与执行 SOP</h3>
-                <p class="amzpt_dual_card_desc">
-                    如果你要看 Prime Day、BFCM、节日季如何倒排推进，以及活动当天监控和活动后复盘，请切到这页。
-                </p>
-                <span class="amzpt_dual_cta"><i class="fas fa-arrow-right"></i>切换到“促销活动”</span>
-            </button>
-        </div>
-    </div>
-
-    <div id="amzpt_nav"></div>
-    <main class="amzpt_content" id="amzpt_main"></main>
-
-    <!-- 实操指引：关键动作清单 + 常见误区 -->
-    <section class="bg-white rounded-xl border border-emerald-200 p-6 mt-8 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-list-check text-emerald-500"></i>关键动作清单
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-700">
-            <label class="flex items-start gap-2"><input type="checkbox" class="mt-1 accent-emerald-600"><span>设置 Coupon 前先核算折后利润（含平台佣金、FBA费、广告成本）。</span></label>
-            <label class="flex items-start gap-2"><input type="checkbox" class="mt-1 accent-emerald-600"><span>LD/7DD 提报前确认库存可覆盖整个促销周期（建议1.5倍安全库存）。</span></label>
-            <label class="flex items-start gap-2"><input type="checkbox" class="mt-1 accent-emerald-600"><span>BOGO 类促销需确认系统配置正确，避免被薅羊毛。</span></label>
-            <label class="flex items-start gap-2"><input type="checkbox" class="mt-1 accent-emerald-600"><span>促销期间加大 PPC 预算，抢占促销流量入口。</span></label>
-            <label class="flex items-start gap-2"><input type="checkbox" class="mt-1 accent-emerald-600"><span>促销结束后复核价格历史和参考价展示，不把30天最低价机制当成固定不变的单一规则。</span></label>
-            <label class="flex items-start gap-2"><input type="checkbox" class="mt-1 accent-emerald-600"><span>每个促销活动单独命名（如 ASIN_LD_20260715），便于复盘追踪。</span></label>
-        </div>
-    </section>
-    <section class="bg-gradient-to-r from-red-50 to-rose-50 rounded-xl border border-red-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-red-900 mb-4 flex items-center gap-2">
-            <i class="fas fa-triangle-exclamation"></i>常见误区
-        </h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div class="bg-white p-3 rounded-lg border border-red-200">
-                <div class="flex items-start gap-2">
-                    <i class="fas fa-xmark text-red-600 text-lg mt-0.5"></i>
-                    <div><h4 class="font-bold text-slate-800 text-sm mb-1">Coupon 叠加导致亏损</h4><p class="text-xs text-slate-600">→ Coupon 与 LD/7DD 可能叠加，设置前务必检查是否与其他促销冲突。</p></div>
-                </div>
-            </div>
-            <div class="bg-white p-3 rounded-lg border border-red-200">
-                <div class="flex items-start gap-2">
-                    <i class="fas fa-xmark text-red-600 text-lg mt-0.5"></i>
-                    <div><h4 class="font-bold text-slate-800 text-sm mb-1">为冲销量接亏本促销</h4><p class="text-xs text-slate-600">→ 促销 ranking 提升不等于长期利润，折后毛利率必须≥0。</p></div>
-                </div>
-            </div>
-            <div class="bg-white p-3 rounded-lg border border-red-200">
-                <div class="flex items-start gap-2">
-                    <i class="fas fa-xmark text-red-600 text-lg mt-0.5"></i>
-                    <div><h4 class="font-bold text-slate-800 text-sm mb-1">促销期间断货</h4><p class="text-xs text-slate-600">→ 断货会清零促销排名积累，备货必须1.5倍覆盖。</p></div>
-                </div>
-            </div>
-            <div class="bg-white p-3 rounded-lg border border-red-200">
-                <div class="flex items-start gap-2">
-                    <i class="fas fa-xmark text-red-600 text-lg mt-0.5"></i>
-                    <div><h4 class="font-bold text-slate-800 text-sm mb-1">忽视 Prime 专属折扣合规</h4><p class="text-xs text-slate-600">→ PED 折扣门槛、最低价口径和叠加限制会随站点、活动和后台资格变化，违规会被取消；提报前以后台提示为准。</p></div>
-                </div>
-            </div>
-        </div>
-    </section>
+  </section>
 </div>

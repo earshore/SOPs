@@ -272,7 +272,7 @@
 .skill-action-secondary:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 2px #fff,
+    0 0 0 2px var(--surface-card, #fff),
     0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 
@@ -319,7 +319,7 @@
 .skill-cta-primary:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 2px #fff,
+    0 0 0 2px var(--surface-card, #fff),
     0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
 }
 
@@ -391,4 +391,470 @@
   border: 1px solid var(--color-slate-200);
   border-radius: var(--rounded-md);
   padding: 0.125rem 0.5rem;
+}
+
+/* ========================================
+   主题收口一：模板内容区浅色 token 化
+   skill-icon-tile / skill-panel / skill-flow-step / skill-modal-raw
+   + eyebrow / 空库提示 / 模态外壳。
+   ======================================== */
+
+/* ---- 彩色 icon 方块 ---- */
+.skill-icon-tile {
+  border: 1px solid var(--border-subtle, var(--color-slate-200, #e2e8f0));
+  background: var(--surface-card, #ffffff);
+}
+
+.skill-icon-tile--violet {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-500, #8b5cf6) 12%,
+    var(--surface-card, #ffffff)
+  );
+  color: var(--color-violet-600, #7c3aed);
+}
+
+.skill-icon-tile--cyan {
+  background: color-mix(in srgb, var(--color-cyan-500, #06b6d4) 12%, var(--surface-card, #ffffff));
+  color: var(--color-cyan-600, #0891b2);
+}
+
+.skill-icon-tile--amber {
+  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 12%, var(--surface-card, #ffffff));
+  color: var(--color-amber-600, #d97706);
+}
+
+.skill-icon-tile--indigo {
+  background: color-mix(
+    in srgb,
+    var(--color-indigo-500, #6366f1) 12%,
+    var(--surface-card, #ffffff)
+  );
+  color: var(--color-indigo-600, #4f46e5);
+}
+
+.skill-icon-tile--blue {
+  background: color-mix(in srgb, var(--color-blue-500, #3b82f6) 12%, var(--surface-card, #ffffff));
+  color: var(--color-blue-600, #2563eb);
+}
+
+.skill-icon-tile--orange {
+  background: color-mix(
+    in srgb,
+    var(--color-orange-500, #f97316) 12%,
+    var(--surface-card, #ffffff)
+  );
+  color: var(--color-orange-600, #ea580c);
+}
+
+.skill-icon-tile--emerald {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 12%,
+    var(--surface-card, #ffffff)
+  );
+  color: var(--color-emerald-600, #059669);
+}
+
+.skill-icon-tile--purple {
+  background: color-mix(
+    in srgb,
+    var(--color-purple-500, #a855f7) 12%,
+    var(--surface-card, #ffffff)
+  );
+  color: var(--color-purple-600, #9333ea);
+}
+
+/* ---- 业务面板（五问 / 不要这样用） ---- */
+.skill-panel {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--color-slate-200, #e2e8f0);
+  color: var(--color-text-secondary, #475569);
+}
+
+.skill-panel-title {
+  color: var(--color-text-primary, #1e293b);
+}
+
+.skill-panel--violet {
+  background: color-mix(in srgb, var(--color-violet-500, #8b5cf6) 8%, var(--surface-card, #ffffff));
+  border-color: var(--color-violet-100, #ede9fe);
+}
+
+.skill-panel--violet .skill-panel-title {
+  color: var(--color-violet-900, #4c1d95);
+}
+
+.skill-panel--violet .skill-panel-text {
+  color: var(--color-violet-800, #5b21b6);
+}
+
+/* ---- 流程格（输入/处理/输出） ---- */
+.skill-flow-step {
+  background: color-mix(in srgb, var(--color-slate-500, #64748b) 8%, var(--surface-card, #ffffff));
+  border: 1px solid color-mix(in srgb, var(--color-slate-500, #64748b) 26%, transparent);
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- 模态原始内容区 / 模态底栏 ---- */
+.skill-modal-raw {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--color-slate-200, #e2e8f0);
+}
+
+.skill-modal-raw summary {
+  color: var(--color-text-primary, #1e293b);
+}
+
+.skill-modal-raw pre {
+  color: var(--color-text-secondary, #475569);
+}
+
+.skill-modal-footer {
+  background: var(--surface-card, #ffffff);
+  border-top: 1px solid var(--color-slate-200, #e2e8f0);
+}
+
+.skill-detail-modal__dialog {
+  background: var(--surface-card, #ffffff);
+}
+
+/* ---- 空库提示 / 眉标 / 页脚注 ---- */
+.skills-library-empty-hint {
+  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 10%, var(--surface-card, #ffffff));
+  border: 1px solid color-mix(in srgb, var(--color-amber-500, #f59e0b) 26%, transparent);
+  color: var(--color-amber-800, #92400e);
+}
+
+.skill-eyebrow {
+  color: var(--color-text-secondary, #64748b);
+}
+
+.skills-page-footer__note {
+  color: var(--color-text-secondary, #64748b);
+}
+
+/* ========================================
+   主题收口二：深色模式全量适配
+   （.dark + [data-color-mode-resolved='dark'] 双前缀）
+   ======================================== */
+
+/* ---- 彩色 icon 方块 ---- */
+.dark .skill-icon-tile,
+[data-color-mode-resolved='dark'] .skill-icon-tile {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .skill-icon-tile--violet,
+[data-color-mode-resolved='dark'] .skill-icon-tile--violet {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .skill-icon-tile--cyan,
+[data-color-mode-resolved='dark'] .skill-icon-tile--cyan {
+  background: color-mix(in srgb, var(--color-cyan-400, #22d3ee) 16%, var(--surface-card, #1e293b));
+  color: var(--color-cyan-300, #67e8f9);
+}
+
+.dark .skill-icon-tile--amber,
+[data-color-mode-resolved='dark'] .skill-icon-tile--amber {
+  background: color-mix(in srgb, var(--color-amber-400, #fbbf24) 16%, var(--surface-card, #1e293b));
+  color: var(--color-amber-300, #fcd34d);
+}
+
+.dark .skill-icon-tile--indigo,
+[data-color-mode-resolved='dark'] .skill-icon-tile--indigo {
+  background: color-mix(
+    in srgb,
+    var(--color-indigo-400, #818cf8) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-indigo-300, #a5b4fc);
+}
+
+.dark .skill-icon-tile--blue,
+[data-color-mode-resolved='dark'] .skill-icon-tile--blue {
+  background: color-mix(in srgb, var(--color-blue-400, #60a5fa) 16%, var(--surface-card, #1e293b));
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .skill-icon-tile--orange,
+[data-color-mode-resolved='dark'] .skill-icon-tile--orange {
+  background: color-mix(
+    in srgb,
+    var(--color-orange-400, #fb923c) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-orange-300, #fdba74);
+}
+
+.dark .skill-icon-tile--emerald,
+[data-color-mode-resolved='dark'] .skill-icon-tile--emerald {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-400, #34d399) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .skill-icon-tile--purple,
+[data-color-mode-resolved='dark'] .skill-icon-tile--purple {
+  background: color-mix(
+    in srgb,
+    var(--color-purple-400, #c084fc) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-purple-300, #d8b4fe);
+}
+
+/* ---- 业务面板 ---- */
+.dark .skill-panel,
+[data-color-mode-resolved='dark'] .skill-panel {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .skill-panel-title,
+[data-color-mode-resolved='dark'] .skill-panel-title {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .skill-panel--violet,
+[data-color-mode-resolved='dark'] .skill-panel--violet {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 10%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
+}
+
+.dark .skill-panel--violet .skill-panel-title,
+[data-color-mode-resolved='dark'] .skill-panel--violet .skill-panel-title,
+.dark .skill-panel--violet .skill-panel-text,
+[data-color-mode-resolved='dark'] .skill-panel--violet .skill-panel-text {
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+/* ---- 流程格 ---- */
+.dark .skill-flow-step,
+[data-color-mode-resolved='dark'] .skill-flow-step {
+  background: color-mix(in srgb, var(--color-slate-500, #64748b) 12%, var(--surface-card, #1e293b));
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+/* ---- 模态 ---- */
+.dark .skill-modal-raw,
+[data-color-mode-resolved='dark'] .skill-modal-raw {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .skill-modal-raw summary,
+[data-color-mode-resolved='dark'] .skill-modal-raw summary {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .skill-modal-raw pre,
+[data-color-mode-resolved='dark'] .skill-modal-raw pre {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .skill-modal-footer,
+[data-color-mode-resolved='dark'] .skill-modal-footer {
+  background: var(--surface-card, #1e293b);
+  border-top-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .skill-detail-modal__dialog,
+[data-color-mode-resolved='dark'] .skill-detail-modal__dialog {
+  background: var(--surface-card, #1e293b);
+}
+
+/* ---- 空库提示 / 眉标 / 页脚注 ---- */
+.dark .skills-library-empty-hint,
+[data-color-mode-resolved='dark'] .skills-library-empty-hint {
+  background: color-mix(in srgb, var(--color-amber-400, #fbbf24) 16%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-amber-400, #fbbf24) 30%, transparent);
+  color: var(--color-amber-300, #fcd34d);
+}
+
+.dark .skill-eyebrow,
+[data-color-mode-resolved='dark'] .skill-eyebrow,
+.dark .skills-page-footer__note,
+[data-color-mode-resolved='dark'] .skills-page-footer__note {
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+/* ========================================
+   主题收口三：既有规则深色遗漏补丁
+   category-btn / catalog-search / source-card / 卡片区 / 状态徽标。
+   ======================================== */
+
+/* ---- 目录筛选按钮 ---- */
+.dark .category-btn,
+[data-color-mode-resolved='dark'] .category-btn {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .category-btn:hover,
+[data-color-mode-resolved='dark'] .category-btn:hover {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 14%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+/* .category-btn.active 实心 violet-600 + 白字，深浅色通用，无需覆盖 */
+
+/* ---- 搜索框 ---- */
+.dark .catalog-search-field,
+[data-color-mode-resolved='dark'] .catalog-search-field {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .catalog-search-icon,
+[data-color-mode-resolved='dark'] .catalog-search-icon {
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.dark .catalog-search-input,
+[data-color-mode-resolved='dark'] .catalog-search-input {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .catalog-search-input::placeholder,
+[data-color-mode-resolved='dark'] .catalog-search-input::placeholder {
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+/* ---- 业务规则卡 ---- */
+.dark .skill-source-card,
+[data-color-mode-resolved='dark'] .skill-source-card {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .skill-source-card strong,
+[data-color-mode-resolved='dark'] .skill-source-card strong {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .skill-source-card > p,
+[data-color-mode-resolved='dark'] .skill-source-card > p {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .skill-source-card__label,
+[data-color-mode-resolved='dark'] .skill-source-card__label {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 14%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 28%, transparent);
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .skill-business-rule,
+[data-color-mode-resolved='dark'] .skill-business-rule {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 10%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
+}
+
+.dark .skill-business-rule span,
+[data-color-mode-resolved='dark'] .skill-business-rule span,
+.dark .skill-business-rule p,
+[data-color-mode-resolved='dark'] .skill-business-rule p {
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+/* ---- 目录卡片区 ---- */
+.dark .skill-card:hover .skill-title,
+[data-color-mode-resolved='dark'] .skill-card:hover .skill-title {
+  color: var(--color-violet-400, #a78bfa);
+}
+
+.dark .btn-icon,
+[data-color-mode-resolved='dark'] .btn-icon {
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.dark .btn-icon:hover,
+[data-color-mode-resolved='dark'] .btn-icon:hover {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 14%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+/* ---- 模态次要按钮 hover（基础已 token 化） ---- */
+.dark .skill-action-secondary:hover,
+[data-color-mode-resolved='dark'] .skill-action-secondary:hover {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 14%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+/* ---- 吸顶筛选区边框 ---- */
+.dark .skills-catalog-sticky,
+[data-color-mode-resolved='dark'] .skills-catalog-sticky {
+  border-bottom-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+/* ---- 状态徽标（JS 渲染的技能卡片） ---- */
+.dark .skill-status-available,
+[data-color-mode-resolved='dark'] .skill-status-available {
+  color: var(--color-emerald-300, #6ee7b7);
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-400, #34d399) 14%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 30%, transparent);
+}
+
+.dark .skill-status-beta,
+[data-color-mode-resolved='dark'] .skill-status-beta {
+  color: var(--color-amber-300, #fcd34d);
+  background: color-mix(in srgb, var(--color-amber-400, #fbbf24) 14%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-amber-400, #fbbf24) 30%, transparent);
+}
+
+.dark .skill-status-unknown,
+[data-color-mode-resolved='dark'] .skill-status-unknown {
+  color: var(--color-slate-300, #cbd5e1);
+  background: color-mix(in srgb, var(--color-slate-400, #94a3b8) 14%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-slate-400, #94a3b8) 30%, transparent);
+}
+
+/* ---- 空库态 banner 数量 ---- */
+.dark .skills-page--empty-library #skill-banner-total,
+[data-color-mode-resolved='dark'] .skills-page--empty-library #skill-banner-total {
+  color: var(--color-amber-400, #fbbf24);
 }

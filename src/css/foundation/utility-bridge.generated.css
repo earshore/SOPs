@@ -167,7 +167,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-rose-600:not(.twb-keep):hover { color: var(--color-rose-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-slate-600:not(.twb-keep):hover { color: var(--color-slate-300); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-slate-700:not(.twb-keep):hover { color: var(--color-slate-200); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-slate-800:not(.twb-keep):hover { color: var(--color-slate-100); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-violet-800:not(.twb-keep):hover { color: var(--color-violet-300); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-amber-500:not(.twb-keep) { color: var(--color-amber-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-amber-600:not(.twb-keep) { color: var(--color-amber-400); }
@@ -269,8 +268,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .text-violet-600:not(.twb-keep) { color: var(--color-violet-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-violet-600\/80:not(.twb-keep) { color: color-mix(in srgb, var(--color-violet-400) 80%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-violet-700:not(.twb-keep) { color: var(--color-violet-300); }
-:is(.dark, [data-color-mode-resolved="dark"]) .text-violet-800:not(.twb-keep) { color: var(--color-violet-300); }
-:is(.dark, [data-color-mode-resolved="dark"]) .text-violet-900:not(.twb-keep) { color: var(--color-violet-200); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-yellow-500:not(.twb-keep) { color: var(--color-yellow-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-yellow-600:not(.twb-keep) { color: var(--color-yellow-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-yellow-700:not(.twb-keep) { color: var(--color-yellow-300); }
@@ -345,7 +342,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .border-teal-200:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-teal-400) 32%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-teal-200\/40:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-teal-400) 13%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-violet-100:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-violet-400) 22%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .border-violet-200:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-violet-400) 32%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-violet-200\/40:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-violet-400) 13%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-yellow-200:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-yellow-400) 32%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-yellow-300:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-yellow-400) 42%, transparent); }

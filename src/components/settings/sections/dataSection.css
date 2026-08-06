@@ -4,7 +4,24 @@
     var(--color-primary-darker, var(--settings-accent-strong)),
     var(--settings-accent-strong)
   );
-  box-shadow: 0 10px 22px color-mix(in srgb, var(--settings-accent) 28%, transparent);
+  box-shadow: 0 10px 22px
+    color-mix(in srgb, var(--settings-accent) 28%, transparent);
+}
+
+/* Dark theme: --settings-accent-strong is re-derived brighter (mix 60% white) while
+ * --color-primary-darker stays on the light-mode ladder, so the hover gradient's dark
+ * left stop would break against the bright right stop (visible vertical band on hover).
+ * Re-derive both stops from the accent hue instead. */
+.dark .settings-strategy-footer__btn--primary:hover:not(:disabled),
+[data-color-mode-resolved="dark"]
+  .settings-strategy-footer__btn--primary:hover:not(:disabled),
+[data-theme="dark"]
+  .settings-strategy-footer__btn--primary:hover:not(:disabled) {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--settings-accent) 78%, #ffffff),
+    var(--settings-accent-strong)
+  );
 }
 
 .settings-strategy-footer__btn--primary:disabled {
@@ -42,7 +59,8 @@
   margin-top: 0.65rem;
   padding-top: 0.75rem;
   /* Single separator only — do not also trail a pref-list divider above */
-  border-top: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
+  border-top: 1px solid
+    color-mix(in srgb, var(--settings-border) 88%, transparent);
 }
 
 .settings-data-io-actions--single {
@@ -55,7 +73,8 @@
   > .settings-pref-list
   > .settings-pref-row--check
   + .settings-pref-row--check {
-  border-top: 1px solid color-mix(in srgb, var(--settings-border) 88%, transparent);
+  border-top: 1px solid
+    color-mix(in srgb, var(--settings-border) 88%, transparent);
 }
 
 .settings-data-io-actions__btn {
@@ -86,7 +105,8 @@
   background: var(--settings-accent);
   border-color: var(--settings-accent);
   color: #fff;
-  box-shadow: 0 6px 14px color-mix(in srgb, var(--settings-accent) 24%, transparent);
+  box-shadow: 0 6px 14px
+    color-mix(in srgb, var(--settings-accent) 24%, transparent);
 }
 
 .settings-data-io-actions__btn--active:hover:not(:disabled) {
@@ -174,7 +194,8 @@
   width: 100%;
   padding: 0.875rem 1.25rem;
   background: color-mix(in srgb, var(--settings-surface) 92%, transparent);
-  border-top: 1px solid color-mix(in srgb, var(--settings-border) 70%, transparent);
+  border-top: 1px solid
+    color-mix(in srgb, var(--settings-border) 70%, transparent);
   backdrop-filter: blur(8px);
 }
 

@@ -272,3 +272,448 @@
     transform: none;
   }
 }
+
+/* ========================================
+   主题收口：提示词页语义类浅色 token 化 + 深色全量适配
+   基准：marketing_calendar / promo_activities 收口模式，双前缀覆盖。
+   ======================================== */
+
+/* ---- 图标方块（浅色 token 化） ---- */
+.prompt-icon-tile {
+  background-color: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-subtle, var(--color-slate-200));
+}
+
+.prompt-icon-tile--violet {
+  background-color: color-mix(in srgb, var(--color-violet-500) 12%, var(--surface-card));
+  color: var(--color-violet-600);
+}
+
+.prompt-icon-tile--cyan {
+  background-color: color-mix(in srgb, var(--color-cyan-500) 12%, var(--surface-card));
+  color: var(--color-cyan-600);
+}
+
+.prompt-icon-tile--amber {
+  background-color: color-mix(in srgb, var(--color-amber-500) 12%, var(--surface-card));
+  color: var(--color-amber-600);
+}
+
+.prompt-icon-tile--indigo {
+  background-color: color-mix(in srgb, var(--color-indigo-500) 12%, var(--surface-card));
+  color: var(--color-indigo-600);
+}
+
+.prompt-icon-tile--blue {
+  background-color: color-mix(in srgb, var(--color-blue-500) 12%, var(--surface-card));
+  color: var(--color-blue-600);
+}
+
+.prompt-icon-tile--orange {
+  background-color: color-mix(in srgb, var(--color-orange-500) 12%, var(--surface-card));
+  color: var(--color-orange-600);
+}
+
+.prompt-icon-tile--purple {
+  background-color: color-mix(in srgb, var(--color-purple-500) 12%, var(--surface-card));
+  color: var(--color-purple-600);
+}
+
+/* ---- 面板（上线前五问 / 不再做的事 / modal 使用建议） ---- */
+.prompt-panel {
+  background-color: var(--surface-card, #ffffff);
+  border-color: var(--color-slate-200, #e2e8f0);
+}
+
+.prompt-panel-title {
+  color: var(--color-slate-900, #0f172a);
+}
+
+.prompt-panel ul {
+  color: var(--color-slate-600, #475569);
+}
+
+.prompt-panel--violet {
+  background-color: color-mix(in srgb, var(--color-violet-500) 8%, var(--surface-card));
+  border-color: var(--color-violet-100, #ede9fe);
+}
+
+.prompt-panel--violet .prompt-panel-title {
+  color: var(--color-violet-900, #4c1d95);
+}
+
+.prompt-panel--violet p,
+.prompt-panel--violet ul {
+  color: var(--color-violet-800, #5b21b6);
+}
+
+/* ---- 实战路径输入/处理/输出格 ---- */
+.prompt-flow-step {
+  background-color: color-mix(in srgb, var(--color-slate-500) 8%, var(--surface-card, #ffffff));
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- 区块 eyebrow ---- */
+.prompt-eyebrow {
+  color: var(--color-slate-500, #64748b);
+}
+
+.prompt-eyebrow--violet {
+  color: var(--color-violet-600, #7c3aed);
+}
+
+/* ---- 业务规则四列表格 ---- */
+.prompt-rule-grid {
+  border-color: var(--color-slate-200, #e2e8f0);
+}
+
+.prompt-rule-head {
+  background-color: color-mix(in srgb, var(--color-slate-500) 8%, var(--surface-card, #ffffff));
+}
+
+.prompt-rule-cell {
+  border-color: var(--color-slate-200, #e2e8f0);
+}
+
+.prompt-rule-label {
+  color: var(--color-slate-500, #64748b);
+}
+
+.prompt-rule-text {
+  color: var(--color-slate-700, #334155);
+}
+
+/* ---- 口径来源 ---- */
+.prompt-source-note {
+  color: var(--color-slate-500, #64748b);
+}
+
+.prompt-source-note a {
+  color: var(--color-violet-700, #6d28d9);
+}
+
+.prompt-source-note a:hover {
+  color: var(--color-violet-800, #5b21b6);
+}
+
+/* ---- 详情 modal ---- */
+.prompt-detail-modal__dialog {
+  color: var(--color-text-primary, var(--color-slate-900));
+  background-color: var(--surface-card, #ffffff);
+}
+
+.prompt-modal-raw {
+  background-color: var(--surface-card, #ffffff);
+  border-color: var(--color-slate-200, #e2e8f0);
+}
+
+.prompt-modal-raw h3,
+.prompt-modal-raw pre {
+  color: var(--color-slate-700, #334155);
+}
+
+.prompt-lang-toggle {
+  background-color: var(--color-slate-200, #e2e8f0);
+}
+
+.prompt-modal-footer {
+  background-color: var(--surface-card, #ffffff);
+  border-color: var(--color-slate-200, #e2e8f0);
+}
+
+.prompt-modal-close {
+  color: var(--color-slate-600, #475569);
+}
+
+.prompt-modal-close:hover {
+  color: var(--color-slate-800, #1e293b);
+  background-color: var(--color-slate-100, #f1f5f9);
+}
+
+/* ---- 深色适配（双前缀） ---- */
+.dark .prompt-icon-tile,
+[data-color-mode-resolved='dark'] .prompt-icon-tile {
+  background-color: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .prompt-icon-tile--violet,
+[data-color-mode-resolved='dark'] .prompt-icon-tile--violet {
+  background-color: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .prompt-icon-tile--cyan,
+[data-color-mode-resolved='dark'] .prompt-icon-tile--cyan {
+  background-color: color-mix(
+    in srgb,
+    var(--color-cyan-400, #22d3ee) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-cyan-300, #67e8f9);
+}
+
+.dark .prompt-icon-tile--amber,
+[data-color-mode-resolved='dark'] .prompt-icon-tile--amber {
+  background-color: color-mix(
+    in srgb,
+    var(--color-amber-400, #fbbf24) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-amber-300, #fcd34d);
+}
+
+.dark .prompt-icon-tile--indigo,
+[data-color-mode-resolved='dark'] .prompt-icon-tile--indigo {
+  background-color: color-mix(
+    in srgb,
+    var(--color-indigo-400, #818cf8) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-indigo-300, #a5b4fc);
+}
+
+.dark .prompt-icon-tile--blue,
+[data-color-mode-resolved='dark'] .prompt-icon-tile--blue {
+  background-color: color-mix(
+    in srgb,
+    var(--color-blue-400, #60a5fa) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .prompt-icon-tile--orange,
+[data-color-mode-resolved='dark'] .prompt-icon-tile--orange {
+  background-color: color-mix(
+    in srgb,
+    var(--color-orange-400, #fb923c) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-orange-300, #fdba74);
+}
+
+.dark .prompt-icon-tile--purple,
+[data-color-mode-resolved='dark'] .prompt-icon-tile--purple {
+  background-color: color-mix(
+    in srgb,
+    var(--color-purple-400, #c084fc) 16%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-purple-300, #d8b4fe);
+}
+
+.dark .prompt-panel,
+[data-color-mode-resolved='dark'] .prompt-panel {
+  background-color: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .prompt-panel-title,
+[data-color-mode-resolved='dark'] .prompt-panel-title {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .prompt-panel ul,
+[data-color-mode-resolved='dark'] .prompt-panel ul {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .prompt-panel--violet,
+[data-color-mode-resolved='dark'] .prompt-panel--violet {
+  background-color: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 16%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
+}
+
+.dark .prompt-panel--violet .prompt-panel-title,
+[data-color-mode-resolved='dark'] .prompt-panel--violet .prompt-panel-title {
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .prompt-panel--violet p,
+.dark .prompt-panel--violet ul,
+[data-color-mode-resolved='dark'] .prompt-panel--violet p,
+[data-color-mode-resolved='dark'] .prompt-panel--violet ul {
+  color: var(--color-violet-200, #ddd6fe);
+}
+
+.dark .prompt-flow-step,
+[data-color-mode-resolved='dark'] .prompt-flow-step {
+  background-color: color-mix(
+    in srgb,
+    var(--color-slate-500, #64748b) 14%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .prompt-eyebrow,
+[data-color-mode-resolved='dark'] .prompt-eyebrow {
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.dark .prompt-eyebrow--violet,
+[data-color-mode-resolved='dark'] .prompt-eyebrow--violet {
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .prompt-rule-grid,
+[data-color-mode-resolved='dark'] .prompt-rule-grid {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .prompt-rule-head,
+[data-color-mode-resolved='dark'] .prompt-rule-head {
+  background-color: color-mix(
+    in srgb,
+    var(--color-slate-500, #64748b) 12%,
+    var(--surface-card, #1e293b)
+  );
+}
+
+.dark .prompt-rule-cell,
+[data-color-mode-resolved='dark'] .prompt-rule-cell {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .prompt-rule-label,
+[data-color-mode-resolved='dark'] .prompt-rule-label {
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.dark .prompt-rule-text,
+[data-color-mode-resolved='dark'] .prompt-rule-text {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .prompt-source-note,
+[data-color-mode-resolved='dark'] .prompt-source-note {
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.dark .prompt-source-note a,
+[data-color-mode-resolved='dark'] .prompt-source-note a {
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .prompt-source-note a:hover,
+[data-color-mode-resolved='dark'] .prompt-source-note a:hover {
+  color: var(--color-violet-200, #ddd6fe);
+}
+
+.dark .prompt-detail-modal__dialog,
+[data-color-mode-resolved='dark'] .prompt-detail-modal__dialog {
+  color: var(--color-text-primary, #f1f5f9);
+  background-color: var(--surface-card, #1e293b);
+}
+
+.dark .prompt-modal-raw,
+[data-color-mode-resolved='dark'] .prompt-modal-raw {
+  background-color: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .prompt-modal-raw h3,
+.dark .prompt-modal-raw pre,
+[data-color-mode-resolved='dark'] .prompt-modal-raw h3,
+[data-color-mode-resolved='dark'] .prompt-modal-raw pre {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .prompt-lang-toggle,
+[data-color-mode-resolved='dark'] .prompt-lang-toggle {
+  background-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .prompt-modal-footer,
+[data-color-mode-resolved='dark'] .prompt-modal-footer {
+  background-color: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .prompt-modal-close,
+[data-color-mode-resolved='dark'] .prompt-modal-close {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .prompt-modal-close:hover,
+[data-color-mode-resolved='dark'] .prompt-modal-close:hover {
+  color: var(--color-text-primary, #f1f5f9);
+  background-color: var(--color-bg-hover, rgba(255, 255, 255, 0.06));
+}
+
+/* ---- 既有遗漏补丁（原浅色硬编码，深色下无覆盖） ---- */
+.dark .lang-btn.active,
+[data-color-mode-resolved='dark'] .lang-btn.active {
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .category-btn:hover,
+[data-color-mode-resolved='dark'] .category-btn:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 14%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .prompt-card:hover .prompt-title,
+[data-color-mode-resolved='dark'] .prompt-card:hover .prompt-title {
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .btn-icon:hover,
+[data-color-mode-resolved='dark'] .btn-icon:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 14%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .prompt-source-card strong,
+[data-color-mode-resolved='dark'] .prompt-source-card strong {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .prompt-source-card__label,
+[data-color-mode-resolved='dark'] .prompt-source-card__label {
+  background-color: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 16%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .prompt-business-rule,
+[data-color-mode-resolved='dark'] .prompt-business-rule {
+  background-color: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 16%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
+}
+
+.dark .prompt-business-rule span,
+[data-color-mode-resolved='dark'] .prompt-business-rule span {
+  color: var(--color-violet-300, #c4b5fd);
+}
+
+.dark .prompt-business-rule p,
+[data-color-mode-resolved='dark'] .prompt-business-rule p {
+  color: var(--color-violet-200, #ddd6fe);
+}

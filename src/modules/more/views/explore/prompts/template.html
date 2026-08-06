@@ -36,7 +36,7 @@
   <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 mb-6">
     <article class="ui-card p-5">
       <div
-        class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center mb-4"
+        class="w-10 h-10 rounded-lg flex items-center justify-center mb-4 prompt-icon-tile prompt-icon-tile--violet"
       >
         <i class="fa-solid fa-database" aria-hidden="true"></i>
       </div>
@@ -47,7 +47,7 @@
     </article>
     <article class="ui-card p-5">
       <div
-        class="w-10 h-10 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center mb-4"
+        class="w-10 h-10 rounded-lg flex items-center justify-center mb-4 prompt-icon-tile prompt-icon-tile--cyan"
       >
         <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
       </div>
@@ -58,7 +58,7 @@
     </article>
     <article class="ui-card p-5">
       <div
-        class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-4"
+        class="w-10 h-10 rounded-lg flex items-center justify-center mb-4 prompt-icon-tile prompt-icon-tile--amber"
       >
         <i class="fa-solid fa-table-list" aria-hidden="true"></i>
       </div>
@@ -69,7 +69,7 @@
     </article>
     <article class="ui-card p-5">
       <div
-        class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4"
+        class="w-10 h-10 rounded-lg flex items-center justify-center mb-4 prompt-icon-tile prompt-icon-tile--indigo"
       >
         <i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
       </div>
@@ -84,7 +84,9 @@
   <section class="ui-card p-6 mb-6">
     <div class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between mb-5">
       <div>
-        <p class="text-xs font-semibold text-violet-600 uppercase">Prompt Formula</p>
+        <p class="text-xs font-semibold uppercase prompt-eyebrow prompt-eyebrow--violet">
+          Prompt Formula
+        </p>
         <h2 class="ui-card__title text-xl font-bold mt-1">运营提示词公式</h2>
       </div>
       <p class="ui-card__muted text-sm">先把业务问题工程化，再让模型生成内容。</p>
@@ -124,9 +126,9 @@
         </ol>
       </div>
       <div class="lg:col-span-2 grid grid-cols-1 gap-3">
-        <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
-          <h3 class="font-semibold text-slate-900 mb-2">上线前五问</h3>
-          <ul class="text-sm text-slate-600 space-y-2">
+        <div class="prompt-panel border rounded-lg p-4">
+          <h3 class="prompt-panel-title font-semibold mb-2">上线前五问</h3>
+          <ul class="text-sm space-y-2">
             <li>是否用了真实数据，而不是让模型编市场事实？</li>
             <li>输出是否能被运营直接执行？</li>
             <li>是否有合规、费用、政策的人工复核点？</li>
@@ -134,9 +136,9 @@
             <li>是否有小样本评估和复查标准？</li>
           </ul>
         </div>
-        <div class="border border-violet-100 rounded-lg p-4 bg-violet-50">
-          <h3 class="font-semibold text-violet-900 mb-2">不再做的事</h3>
-          <p class="text-sm text-violet-800 leading-6">
+        <div class="prompt-panel prompt-panel--violet border rounded-lg p-4">
+          <h3 class="prompt-panel-title font-semibold mb-2">不再做的事</h3>
+          <p class="text-sm leading-6">
             不要让模型“帮我写一个爆款Listing”。改成：基于关键词库、竞品页、评论痛点和产品证据，按指定输出结构生成可审稿初稿。
           </p>
         </div>
@@ -148,7 +150,7 @@
   <section class="mb-6">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
       <div>
-        <p class="text-xs font-semibold text-slate-500 uppercase">Seller Playbooks</p>
+        <p class="text-xs font-semibold uppercase prompt-eyebrow">Seller Playbooks</p>
         <h2 class="ui-card__title text-xl font-bold mt-1">四条高频实战路径</h2>
       </div>
       <p class="ui-card__muted text-sm">从数据到动作，提示词只负责中间的判断与组织。</p>
@@ -158,7 +160,7 @@
       <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0"
+            class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 prompt-icon-tile prompt-icon-tile--blue"
           >
             <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
           </div>
@@ -170,22 +172,16 @@
           </div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输入：关键词、竞品、评论痛点
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            处理：意图分组、卖点排序
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输出：可审稿文案和风险项
-          </div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">输入：关键词、竞品、评论痛点</div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">处理：意图分组、卖点排序</div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">输出：可审稿文案和风险项</div>
         </div>
       </article>
 
       <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0"
+            class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 prompt-icon-tile prompt-icon-tile--orange"
           >
             <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
           </div>
@@ -197,20 +193,16 @@
           </div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输入：点击、花费、订单、ACOS
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            处理：样本量和目标分桶
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">输出：保守/激进动作表</div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">输入：点击、花费、订单、ACOS</div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">处理：样本量和目标分桶</div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">输出：保守/激进动作表</div>
         </div>
       </article>
 
       <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0"
+            class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 prompt-icon-tile prompt-icon-tile--purple"
           >
             <i class="fa-solid fa-comments" aria-hidden="true"></i>
           </div>
@@ -222,20 +214,16 @@
           </div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输入：原始评价和时间范围
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            处理：主题聚类和严重度
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">输出：责任方行动地图</div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">输入：原始评价和时间范围</div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">处理：主题聚类和严重度</div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">输出：责任方行动地图</div>
         </div>
       </article>
 
       <article class="ui-card p-5">
         <div class="flex items-start gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0"
+            class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 prompt-icon-tile prompt-icon-tile--indigo"
           >
             <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
           </div>
@@ -247,15 +235,9 @@
           </div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输入：文案、证书、类目规则
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            处理：声明分级和证据检查
-          </div>
-          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-            输出：风险表和替代表达
-          </div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">输入：文案、证书、类目规则</div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">处理：声明分级和证据检查</div>
+          <div class="prompt-flow-step rounded-lg p-3 text-sm">输出：风险表和替代表达</div>
         </div>
       </article>
     </div>
@@ -265,7 +247,9 @@
   <section class="ui-card p-6 mb-6">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
       <div>
-        <p class="text-xs font-semibold text-violet-600 uppercase">Prompt Library</p>
+        <p class="text-xs font-semibold uppercase prompt-eyebrow prompt-eyebrow--violet">
+          Prompt Library
+        </p>
         <h2 class="ui-card__title text-xl font-bold mt-1">可复制实战模板</h2>
       </div>
       <p class="ui-card__muted text-sm">先补齐双花括号中的真实数据，再复制使用。</p>
@@ -303,7 +287,7 @@
   <section class="ui-card p-6 mb-8">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
       <div>
-        <p class="text-xs font-semibold text-slate-500 uppercase">Business Operating Rules</p>
+        <p class="text-xs font-semibold uppercase prompt-eyebrow">Business Operating Rules</p>
         <h2 class="ui-card__title text-xl font-bold mt-1">业务规则如何进入提示词</h2>
       </div>
       <p class="ui-card__muted text-sm">
@@ -426,74 +410,68 @@
       </article>
     </div>
 
-    <div class="mt-6 border border-slate-200 rounded-lg overflow-hidden">
-      <div class="grid grid-cols-1 md:grid-cols-4 bg-slate-50">
-        <div class="p-4 border-b md:border-b-0 md:border-r border-slate-200">
-          <div class="text-xs font-semibold text-slate-500 mb-1">01 数据包</div>
-          <p class="text-sm text-slate-700 leading-6">
+    <div class="prompt-rule-grid mt-6 border rounded-lg overflow-hidden">
+      <div class="prompt-rule-head grid grid-cols-1 md:grid-cols-4">
+        <div class="prompt-rule-cell p-4 border-b md:border-b-0 md:border-r">
+          <div class="prompt-rule-label text-xs font-semibold mb-1">01 数据包</div>
+          <p class="prompt-rule-text text-sm leading-6">
             关键词库、广告报表、评论原文、竞品页、证书、成本和库存约束。
           </p>
         </div>
-        <div class="p-4 border-b md:border-b-0 md:border-r border-slate-200">
-          <div class="text-xs font-semibold text-slate-500 mb-1">02 模型任务</div>
-          <p class="text-sm text-slate-700 leading-6">
+        <div class="prompt-rule-cell p-4 border-b md:border-b-0 md:border-r">
+          <div class="prompt-rule-label text-xs font-semibold mb-1">02 模型任务</div>
+          <p class="prompt-rule-text text-sm leading-6">
             分类、诊断、草拟、风险标注、行动排序，不负责凭空补市场事实。
           </p>
         </div>
-        <div class="p-4 border-b md:border-b-0 md:border-r border-slate-200">
-          <div class="text-xs font-semibold text-slate-500 mb-1">03 人工复核</div>
-          <p class="text-sm text-slate-700 leading-6">
+        <div class="prompt-rule-cell p-4 border-b md:border-b-0 md:border-r">
+          <div class="prompt-rule-label text-xs font-semibold mb-1">03 人工复核</div>
+          <p class="prompt-rule-text text-sm leading-6">
             运营、广告、产品、客服、合规按责任边界确认是否执行。
           </p>
         </div>
-        <div class="p-4">
-          <div class="text-xs font-semibold text-slate-500 mb-1">04 业务回写</div>
-          <p class="text-sm text-slate-700 leading-6">
+        <div class="prompt-rule-cell p-4">
+          <div class="prompt-rule-label text-xs font-semibold mb-1">04 业务回写</div>
+          <p class="prompt-rule-text text-sm leading-6">
             把动作、指标、复查时间和结论沉淀回模板，形成下一轮提示词迭代。
           </p>
         </div>
       </div>
     </div>
 
-    <div class="mt-4 text-xs text-slate-500 leading-6">
+    <div class="prompt-source-note mt-4 text-xs leading-6">
       口径来源：
       <a
-        class="text-violet-700 hover:text-violet-800"
         href="https://sellercentral.amazon.com/help/hub/reference/external/G200390640?locale=en-US"
         target="_blank"
         rel="noopener noreferrer"
         >Amazon详情页规则</a
       >、
       <a
-        class="text-violet-700 hover:text-violet-800"
         href="https://sellercentral.amazon.com/help/hub/reference/external/G8J4CB5ZBF3NX7TP?locale=en-US"
         target="_blank"
         rel="noopener noreferrer"
         >Search Query Performance</a
       >、
       <a
-        class="text-violet-700 hover:text-violet-800"
         href="https://advertising.amazon.com/help/G3HEFZYWZF84NPS9"
         target="_blank"
         rel="noopener noreferrer"
         >Amazon Ads搜索词报表</a
       >、
       <a
-        class="text-violet-700 hover:text-violet-800"
         href="https://sell.amazon.com/tools/manage-your-experiments"
         target="_blank"
         rel="noopener noreferrer"
         >Manage Your Experiments</a
       >、
       <a
-        class="text-violet-700 hover:text-violet-800"
         href="https://support.junglescout.com/hc/en-us/articles/14125467234583-AI-Assist-in-Listing-Builder"
         target="_blank"
         rel="noopener noreferrer"
         >Jungle Scout AI Assist</a
       >、
       <a
-        class="text-violet-700 hover:text-violet-800"
         href="https://www.helium10.com/tools/listing-optimization/listing-builder/"
         target="_blank"
         rel="noopener noreferrer"
@@ -506,7 +484,7 @@
   <app-modal id="prompt-detail-modal" class="hidden" title="提示词详情" size="full" no-header>
     <div
       slot="body"
-      class="prompt-detail-modal__dialog bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col"
+      class="prompt-detail-modal__dialog rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col"
     >
       <!-- Modal Header -->
       <!-- no-header 时关闭 X 由 AppModal 浮动按钮提供，此处勿再放 X 避免双图标 -->
@@ -530,13 +508,13 @@
 
       <!-- Modal Body -->
       <div class="flex-1 overflow-y-auto p-6">
-        <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
+        <div class="prompt-modal-raw rounded-xl p-6 border">
           <div class="flex items-center justify-between gap-3 mb-4">
-            <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+            <h3 class="text-sm font-bold flex items-center gap-2">
               <i class="fas fa-code" aria-hidden="true"></i>
               提示词内容
             </h3>
-            <div class="flex bg-slate-200 rounded-lg p-0.5">
+            <div class="prompt-lang-toggle flex rounded-lg p-0.5">
               <button
                 type="button"
                 data-prompt-lang="zh"
@@ -557,17 +535,17 @@
           </div>
           <pre
             id="modal-prompt-content"
-            class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-mono"
+            class="text-sm whitespace-pre-wrap leading-relaxed font-mono"
           ></pre>
         </div>
 
         <!-- Usage Tips -->
-        <div class="mt-6 bg-violet-50 border border-violet-200 rounded-xl p-4">
-          <h4 class="text-sm font-bold text-violet-900 mb-2 flex items-center gap-2">
+        <div class="prompt-panel prompt-panel--violet mt-6 border rounded-xl p-4">
+          <h4 class="prompt-panel-title text-sm font-bold mb-2 flex items-center gap-2">
             <i class="fas fa-lightbulb" aria-hidden="true"></i>
             使用建议
           </h4>
-          <ul class="text-sm text-violet-800 space-y-1.5">
+          <ul class="text-sm space-y-1.5">
             <li class="flex items-start gap-2">
               <i class="fas fa-check-circle mt-0.5" aria-hidden="true"></i>
               <span>把双花括号中的字段替换为真实数据，并保留来源和时间范围。</span>
@@ -589,11 +567,11 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="border-t border-slate-200 p-4 bg-slate-50 flex justify-end gap-3">
+      <div class="prompt-modal-footer border-t p-4 flex justify-end gap-3">
         <button
           type="button"
           data-prompt-modal-action="close"
-          class="px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+          class="prompt-modal-close px-4 py-2 rounded-lg transition-colors"
         >
           关闭
         </button>

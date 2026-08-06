@@ -956,3 +956,261 @@
   border-color: color-mix(in srgb, var(--color-blue-400) 32%, transparent);
   color: var(--color-blue-200);
 }
+
+/* ========================================
+   主题收口二：模板内容区（关键动作清单 / 常见误区）
+   浅色 token 化 + 深色适配。
+   ======================================== */
+.amzpt_checklist_section {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--color-emerald-500, #10b981) 26%, transparent);
+}
+
+.amzpt_checklist_title {
+  color: var(--color-text-primary, #1e293b);
+}
+
+.amzpt_checklist_section label {
+  color: var(--color-text-secondary, #475569);
+}
+
+.amzpt_myth_section {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-red-500, #ef4444) 6%, var(--surface-card, #ffffff)) 0%,
+    color-mix(in srgb, var(--color-rose-500, #f43f5e) 6%, var(--surface-card, #ffffff)) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--color-red-500, #ef4444) 22%, transparent);
+}
+
+.amzpt_myth_title {
+  color: var(--color-red-700, #b91c1c);
+}
+
+.amzpt_myth_card {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--color-red-500, #ef4444) 20%, transparent);
+}
+
+.amzpt_myth_card .fa-xmark {
+  color: var(--color-red-600, #dc2626);
+}
+
+.amzpt_myth_card_title {
+  color: var(--color-text-primary, #1e293b);
+}
+
+.amzpt_myth_card_desc {
+  color: var(--color-text-secondary, #64748b);
+}
+
+/* ========================================
+   主题收口三：深色模式全量适配
+   覆盖：模板内容区（关键动作清单 / 常见误区）。
+   ======================================== */
+
+/* ---- 模板内容区：关键动作清单 ---- */
+.dark .amzpt_checklist_section,
+[data-color-mode-resolved='dark'] .amzpt_checklist_section {
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 30%, transparent);
+}
+
+.dark .amzpt_checklist_title,
+[data-color-mode-resolved='dark'] .amzpt_checklist_title {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .amzpt_checklist_section label,
+[data-color-mode-resolved='dark'] .amzpt_checklist_section label {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .amzpt_checklist_section .fa-list-check,
+[data-color-mode-resolved='dark'] .amzpt_checklist_section .fa-list-check {
+  color: var(--color-emerald-400, #34d399);
+}
+
+/* ---- 模板内容区：常见误区 ---- */
+.dark .amzpt_myth_section,
+[data-color-mode-resolved='dark'] .amzpt_myth_section {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-red-500, #ef4444) 12%, var(--surface-card, #1e293b)) 0%,
+    color-mix(in srgb, var(--color-rose-500, #f43f5e) 12%, var(--surface-card, #1e293b)) 100%
+  );
+  border-color: color-mix(in srgb, var(--color-red-500, #ef4444) 30%, transparent);
+}
+
+.dark .amzpt_myth_title,
+[data-color-mode-resolved='dark'] .amzpt_myth_title {
+  color: var(--color-red-400, #f87171);
+}
+
+.dark .amzpt_myth_card,
+[data-color-mode-resolved='dark'] .amzpt_myth_card {
+  border-color: color-mix(in srgb, var(--color-red-500, #ef4444) 28%, transparent);
+}
+
+.dark .amzpt_myth_card .fa-xmark,
+[data-color-mode-resolved='dark'] .amzpt_myth_card .fa-xmark {
+  color: var(--color-red-400, #f87171);
+}
+
+.dark .amzpt_myth_card_title,
+[data-color-mode-resolved='dark'] .amzpt_myth_card_title {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .amzpt_myth_card_desc,
+[data-color-mode-resolved='dark'] .amzpt_myth_card_desc {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+/* ========================================
+   主题收口四：既有遗漏补丁
+   硬编码浅色 → 深色适配（eyebrow / meta / cta / card_header /
+   stats / table / tag / tip / kv / check 列表）。
+   ======================================== */
+
+/* ---- eyebrow / meta / cta 文字 ---- */
+.dark .amzpt_dual_eyebrow,
+[data-color-mode-resolved='dark'] .amzpt_dual_eyebrow {
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .amzpt_anchor_eyebrow,
+[data-color-mode-resolved='dark'] .amzpt_anchor_eyebrow,
+.dark .amzpt_card_icon,
+[data-color-mode-resolved='dark'] .amzpt_card_icon,
+.dark .amzpt_section_header i,
+[data-color-mode-resolved='dark'] .amzpt_section_header i {
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .amzpt_nav_step_meta,
+[data-color-mode-resolved='dark'] .amzpt_nav_step_meta {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .amzpt_dual_cta,
+[data-color-mode-resolved='dark'] .amzpt_dual_cta {
+  color: var(--color-blue-300, #93c5fd);
+}
+
+/* ---- nav_step 箭头圆点 ---- */
+.dark .amzpt_nav_step::after,
+[data-color-mode-resolved='dark'] .amzpt_nav_step::after {
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .amzpt_nav_step:hover::after,
+[data-color-mode-resolved='dark'] .amzpt_nav_step:hover::after {
+  color: var(--color-blue-300, #93c5fd);
+}
+
+/* ---- card_header 分隔线 ---- */
+.dark .amzpt_card_header,
+[data-color-mode-resolved='dark'] .amzpt_card_header {
+  border-bottom-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+/* ---- stats ---- */
+.dark .amzpt_stats_box,
+[data-color-mode-resolved='dark'] .amzpt_stats_box {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .amzpt_stats_icon,
+[data-color-mode-resolved='dark'] .amzpt_stats_icon {
+  background: color-mix(in srgb, var(--color-blue-400, #60a5fa) 16%, var(--surface-card, #1e293b));
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .amzpt_stats_text,
+[data-color-mode-resolved='dark'] .amzpt_stats_text {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+/* ---- comparison table ---- */
+.dark .amzpt_table,
+[data-color-mode-resolved='dark'] .amzpt_table {
+  background: var(--surface-card, #1e293b);
+}
+
+.dark .amzpt_table tbody tr:nth-child(even),
+[data-color-mode-resolved='dark'] .amzpt_table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--color-slate-500, #64748b) 12%, var(--surface-card, #1e293b));
+}
+
+.dark .amzpt_table tbody tr + tr,
+[data-color-mode-resolved='dark'] .amzpt_table tbody tr + tr {
+  border-top-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+/* ---- tag ---- */
+.dark .amzpt_tag,
+[data-color-mode-resolved='dark'] .amzpt_tag {
+  background: color-mix(in srgb, var(--color-slate-500, #64748b) 14%, var(--surface-card, #1e293b));
+}
+
+/* ---- tip / kv / check 列表 ---- */
+.dark .amzpt_tip_item,
+[data-color-mode-resolved='dark'] .amzpt_tip_item,
+.dark .amzpt_kv_row,
+[data-color-mode-resolved='dark'] .amzpt_kv_row,
+.dark .amzpt_check_item,
+[data-color-mode-resolved='dark'] .amzpt_check_item {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
+}
+
+.dark .amzpt_tip_item--success,
+[data-color-mode-resolved='dark'] .amzpt_tip_item--success,
+.dark .amzpt_check_item--done,
+[data-color-mode-resolved='dark'] .amzpt_check_item--done {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-400, #34d399) 16%,
+    var(--surface-card, #1e293b)
+  );
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 32%, transparent);
+}
+
+.dark .amzpt_tip_item--danger,
+[data-color-mode-resolved='dark'] .amzpt_tip_item--danger {
+  background: color-mix(in srgb, var(--color-rose-400, #fb7185) 16%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-rose-400, #fb7185) 32%, transparent);
+}
+
+.dark .amzpt_tip_item--success .amzpt_tip_icon,
+[data-color-mode-resolved='dark'] .amzpt_tip_item--success .amzpt_tip_icon,
+.dark .amzpt_check_item--done .amzpt_check_icon,
+[data-color-mode-resolved='dark'] .amzpt_check_item--done .amzpt_check_icon {
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .amzpt_tip_item--danger .amzpt_tip_icon,
+[data-color-mode-resolved='dark'] .amzpt_tip_item--danger .amzpt_tip_icon {
+  color: var(--color-rose-300, #fda4af);
+}
+
+.dark .amzpt_tip_text,
+[data-color-mode-resolved='dark'] .amzpt_tip_text,
+.dark .amzpt_check_text,
+[data-color-mode-resolved='dark'] .amzpt_check_text,
+.dark .amzpt_kv_value,
+[data-color-mode-resolved='dark'] .amzpt_kv_value {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.dark .amzpt_kv_key,
+[data-color-mode-resolved='dark'] .amzpt_kv_key {
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .amzpt_check_item--done .amzpt_check_text,
+[data-color-mode-resolved='dark'] .amzpt_check_item--done .amzpt_check_text {
+  color: var(--color-emerald-300, #6ee7b7);
+}
