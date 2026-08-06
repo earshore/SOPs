@@ -24,24 +24,25 @@
         </p>
 
         <div class="home-primary-actions" aria-label="首页主入口">
-          <button
+            <button
+              type="button"
+              class="home-primary-action home-primary-action--main"
+              data-action="switch-tab"
+              data-tab="app_center_overview"
+            >
+              <i class="fas fa-cubes" aria-hidden="true"></i>
+              <span>打开运营工作台</span>
+            </button>
+            <button
             type="button"
-            class="home-primary-action home-primary-action--main"
+            class="home-primary-action"
             data-action="switch-tab"
             data-tab="sops_overview"
           >
             <i class="fas fa-diagram-project" aria-hidden="true"></i>
             <span>进入 SOP 流程中心</span>
           </button>
-          <button
-            type="button"
-            class="home-primary-action"
-            data-action="switch-tab"
-            data-tab="app_center_overview"
-          >
-            <i class="fas fa-cubes" aria-hidden="true"></i>
-            <span>打开工作台</span>
-          </button>
+
         </div>
 
         <div class="ai-status">
@@ -51,22 +52,22 @@
       </div>
     </main>
 
-    <aside class="floating-workbench" aria-label="工作台快捷入口">
+    <aside class="floating-workbench" aria-label="运营工作台快捷入口">
       <button
         type="button"
         class="floating-workbench__trigger"
         aria-expanded="false"
         aria-controls="home-floating-workbench-actions"
-        aria-label="展开工作台快捷入口"
-        title="工作台"
+        aria-label="展开运营工作台快捷入口"
+        title="运营工作台"
       >
         <i class="fas fa-cubes" aria-hidden="true"></i>
-        <span class="sr-only">工作台</span>
+        <span class="sr-only">运营工作台</span>
       </button>
       <div
         id="home-floating-workbench-actions"
         class="floating-workbench__actions"
-        aria-label="工作台应用快捷入口"
+        aria-label="运营工作台应用快捷入口"
         aria-hidden="true"
         inert
       >

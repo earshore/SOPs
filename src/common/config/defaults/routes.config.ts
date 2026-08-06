@@ -38,10 +38,10 @@ export const defaultRoutesConfig: Partial<MenuConfig> = {
     app_center: {
       id: 'app_center',
       contextId: 'app_center',
-      title: '工作台',
+      title: '运营工作台',
       version: '1.0',
       icon: 'fa-th-large',
-      description: '工具工作台',
+      description: '运营工作台应用管理',
     },
   },
   routes: {

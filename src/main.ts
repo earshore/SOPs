@@ -311,7 +311,7 @@ function redirectFailedDomainRoute(domainModuleResults: DomainModuleResults): bo
   window.history.replaceState(null, '', '#/home');
   showToast(
     domainModuleId === 'app_center'
-      ? '工作台暂时无法加载，已返回首页，请刷新后重试'
+      ? '运营工作台暂时无法加载，已返回首页，请刷新后重试'
       : '当前页面所需模块暂时无法加载，已返回首页，请刷新后重试',
     { type: 'error' }
   );
@@ -330,7 +330,7 @@ function guardFailedDomainRoutes(domainModuleResults: DomainModuleResults): void
 
       showToast(
         domainModuleId === 'app_center'
-          ? '工作台暂时无法加载，已返回首页，请刷新后重试'
+          ? '运营工作台暂时无法加载，已返回首页，请刷新后重试'
           : '当前页面所需模块暂时无法加载，已返回首页，请刷新后重试',
         { type: 'error' }
       );
