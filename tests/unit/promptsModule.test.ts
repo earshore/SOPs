@@ -88,7 +88,7 @@ beforeEach(() => {
     );
     expect(container.classList.contains('fade-in')).toBe(true);
     expect(container.querySelector('#category-container')?.textContent).toContain('全部');
-    expect(container.querySelectorAll('.category-btn').length).toBeGreaterThan(1);
+    expect(container.querySelectorAll('.category-filter-btn').length).toBeGreaterThan(1);
     expect(container.querySelectorAll('.prompt-card').length).toBeGreaterThan(0);
     expect(container.querySelector('.prompt-card .btn-icon[title="查看详情"]')).not.toBeNull();
   });
@@ -117,13 +117,13 @@ beforeEach(() => {
 
   it('switches categories and updates active button state', async () => {
     const container = await mountPrompts();
-    const category = container.querySelector<HTMLElement>('.category-btn:not([data-category="all"])');
+    const category = container.querySelector<HTMLElement>('.category-filter-btn:not([data-category="all"])');
 
     click(category);
 
     expect(category?.classList.contains('active')).toBe(true);
     expect(category?.getAttribute('aria-pressed')).toBe('true');
-    expect(container.querySelector('.category-btn[data-category="all"]')?.getAttribute('aria-pressed')).toBe('false');
+    expect(container.querySelector('.category-filter-btn[data-category="all"]')?.getAttribute('aria-pressed')).toBe('false');
   });
 
   it('opens, updates, copies, and closes the prompt detail modal', async () => {

@@ -935,3 +935,50 @@
 [data-theme='dark'] .zn-notice-card--warning {
   color: var(--color-amber-300, #fcd34d);
 }
+
+/* ==================== 共享：探索页行内紧凑图标按钮（prompts/skills 两页共用） ==================== */
+/* 36px（2.25rem）紧凑档：卡片行内 查看/复制 等 icon-only 按钮。
+   触控 44px 档用共享 .action-btn-icon；本档面向行内密度场景，
+   两页原先同名不同实现（2rem / 2.25rem），统一于此处一份定义 */
+.btn-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rounded-md);
+  color: var(--color-slate-400);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast);
+}
+
+.btn-icon:hover {
+  color: var(--color-violet-600);
+  background-color: var(--color-violet-50);
+}
+
+.btn-icon:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-primary));
+  outline-offset: 2px;
+}
+
+.dark .btn-icon,
+[data-color-mode-resolved='dark'] .btn-icon,
+[data-theme='dark'] .btn-icon {
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.dark .btn-icon:hover,
+[data-color-mode-resolved='dark'] .btn-icon:hover,
+[data-theme='dark'] .btn-icon:hover {
+  background: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 14%,
+    var(--surface-card, #1e293b)
+  );
+  color: var(--color-violet-300, #c4b5fd);
+}

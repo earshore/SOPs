@@ -277,17 +277,17 @@ class MarketingCalendarModule extends BaseModule {
   selectCountry(code: string): void {
     this.state.selectedCountry = code;
 
-    // Update Tabs UI
-    const tabs = this.container?.querySelectorAll('.amzf_country_tab') ?? [];
+    // Update Tabs UI（仅国家 tab 按钮，避免波及视图切换/快捷标签的 active）
+    const tabs = this.container?.querySelectorAll('[data-amzf-country]') ?? [];
     tabs.forEach(tab => {
-      tab.classList.remove('amzf_active');
+      tab.classList.remove('active');
       const tabText = (tab as HTMLElement).innerText || (tab as HTMLElement).textContent;
       const targetName =
         code === 'ALL'
           ? '全部'
           : (AMZF_COUNTRIES as CountryInfo[]).find(c => c.code === code)?.name;
       if (tabText && tabText.includes(targetName || '')) {
-        tab.classList.add('amzf_active');
+        tab.classList.add('active');
       }
     });
 
@@ -297,10 +297,8 @@ class MarketingCalendarModule extends BaseModule {
 
   switchView(view: string): void {
     this.state.currentView = view as 'country' | 'event';
-    document
-      .getElementById('amzf_btn_country')
-      ?.classList.toggle('amzf_active', view === 'country');
-    document.getElementById('amzf_btn_event')?.classList.toggle('amzf_active', view === 'event');
+    document.getElementById('amzf_btn_country')?.classList.toggle('active', view === 'country');
+    document.getElementById('amzf_btn_event')?.classList.toggle('active', view === 'event');
 
     this.state.expandedSections.clear();
     this.renderContent();
@@ -642,12 +640,12 @@ class MarketingCalendarModule extends BaseModule {
     const container = document.getElementById('amzf_country_tabs');
     if (!container) return;
 
-    let html = `<button class="amzf_country_tab amzf_active" data-amzf-country="ALL">
+    let html = `<button class="category-filter-btn active" data-amzf-country="ALL">
             <span class="amzf_country_flag"><i class="fas fa-globe"></i></span> 全部
         </button>`;
 
     (AMZF_COUNTRIES as CountryInfo[]).forEach(c => {
-      html += `<button class="amzf_country_tab" data-amzf-country="${escapeHtml(c.code)}">
+      html += `<button class="category-filter-btn" data-amzf-country="${escapeHtml(c.code)}">
                 <span class="amzf_country_flag">${c.flag}</span> ${c.name}
             </button>`;
     });
@@ -695,7 +693,7 @@ class MarketingCalendarModule extends BaseModule {
             <div class="amzf_quick_tags">
                 ${AMZF_QUICK_TAGS.map(
                   tag => `
-                    <button type="button" class="amzf_quick_tag" data-amzf-quick-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</button>
+                    <button type="button" class="category-filter-btn" data-amzf-quick-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</button>
                 `
                 ).join('')}
             </div>
@@ -732,7 +730,7 @@ class MarketingCalendarModule extends BaseModule {
           <span>${escapeHtml(selectedCountry)}</span>
           <span>${escapeHtml(filteredCount.toString())} 个节点</span>
         </div>
-        <button type="button" class="amzf_search_status_clear" data-action="amzf_clearSearch">
+        <button type="button" class="action-btn action-btn-secondary" data-action="amzf_clearSearch">
           清除搜索
         </button>
       `
@@ -793,7 +791,7 @@ class MarketingCalendarModule extends BaseModule {
                     <div class="amzf_empty_icon"><i class="fas fa-search"></i></div>
                     <div class="amzf_empty_text">未找到${term ? ` “${escapeHtml(term)}” ` : ''}匹配的活动</div>
                     <p class="amzf_empty_hint">可尝试国家名/代码、月份、活动类型或品类词，例如“德国”“3月”“电商大促”“玩具”。</p>
-                    ${term ? '<button type="button" class="amzf_empty_action" data-action="amzf_clearSearch">清除搜索</button>' : ''}
+                    ${term ? '<button type="button" class="action-btn action-btn-secondary" data-action="amzf_clearSearch">清除搜索</button>' : ''}
                 </div>
             `
       );

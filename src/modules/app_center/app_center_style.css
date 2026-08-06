@@ -123,6 +123,24 @@
   --module-accent-text: var(--app-overview-accent-strong);
   --module-accent-focus: var(--app-overview-focus-ring);
   --focus-ring-soft: var(--app-overview-focus-ring);
+
+  /* 共享筛选胶囊（category-filter-btn）--button-filter-* 映射：
+     总览平行按钮（view/columns/undo-group）统一走共享按钮体系；
+     active 保持浅色选中（accent-surface 底 + accent-strong 字），
+     dark 由下方 dark-aware 的 --app-overview-* 值自动生效 */
+  --button-filter-accent: var(--app-overview-accent);
+  --button-filter-bg: var(--app-overview-surface);
+  --button-filter-border: var(--app-overview-border-strong);
+  --button-filter-color: var(--app-overview-text-secondary);
+  --button-filter-hover-bg: var(--app-overview-surface-muted);
+  --button-filter-hover-border: var(--app-overview-border-strong);
+  --button-filter-hover-color: var(--app-overview-text-primary);
+  --button-filter-active-bg: var(--app-overview-accent-surface);
+  --button-filter-active-border: var(--app-overview-accent-border);
+  --button-filter-active-color: var(--app-overview-accent-strong);
+  --button-filter-active-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --button-filter-focus-color: var(--module-accent, var(--color-focus-ring, #3b82f6));
+  --button-filter-focus-ring: var(--app-overview-focus-ring);
 }
 
 .app-overview-hero {
@@ -627,37 +645,6 @@
   box-shadow: 0 0 0 2px var(--app-overview-accent-surface);
 }
 
-.app-overview-recent-group-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  min-height: 2.75rem;
-  padding: 0.4rem 0.75rem;
-  border: 1px solid var(--app-overview-border);
-  border-radius: var(--rounded-md, 8px);
-  background: var(--app-overview-surface);
-  color: var(--app-overview-text-muted);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background-color 160ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    border-color 160ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    color 160ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
-}
-
-.app-overview-recent-group-btn:hover {
-  background: var(--app-overview-surface-muted);
-  color: var(--app-overview-text-primary);
-}
-
-.app-overview-recent-group-btn.active,
-.app-overview-recent-group-btn[aria-pressed='true'] {
-  border-color: var(--app-overview-accent-border);
-  background: var(--app-overview-accent-surface);
-  color: var(--app-overview-accent-strong);
-}
-
 .app-overview-recent-icon-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -930,50 +917,6 @@
   border: 1px solid var(--app-overview-border);
   border-radius: var(--rounded-md, 8px);
   background: var(--app-overview-surface);
-}
-
-.app-overview-recent-columns-btn {
-  display: inline-flex;
-  min-height: 2.75rem;
-  min-width: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  padding: 0 0.45rem;
-  border: 1px solid transparent;
-  border-radius: calc(var(--rounded-md, 8px) - 2px);
-  background: transparent;
-  color: var(--app-overview-text-muted);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  line-height: 1.2;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background-color 160ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    border-color 160ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    color 160ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
-}
-
-.app-overview-recent-columns-btn i {
-  font-size: 0.6875rem;
-}
-
-.app-overview-recent-columns-btn:hover {
-  background: var(--app-overview-surface-muted);
-  color: var(--app-overview-text-primary);
-}
-
-.app-overview-recent-columns-btn.active,
-.app-overview-recent-columns-btn[aria-pressed='true'] {
-  border-color: var(--app-overview-accent-border);
-  background: var(--app-overview-accent-surface);
-  color: var(--app-overview-accent-strong);
-}
-
-.app-overview-recent-columns-btn:focus-visible {
-  outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
-  outline-offset: 2px;
 }
 
 .app-overview-recent-shell {
@@ -1899,6 +1842,14 @@
 }
 
 .app-overview-view-toggle {
+  /* 位于 filter-panel 内会继承其实心 active 映射，此处覆盖回总览浅色选中，
+     与 recent 面板同组按钮一致；hover 保持原 view-btn 的文字转 accent */
+  --button-filter-active-bg: var(--app-overview-accent-surface);
+  --button-filter-active-border: var(--app-overview-accent-border);
+  --button-filter-active-color: var(--app-overview-accent-strong);
+  --button-filter-active-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --button-filter-hover-color: var(--app-overview-accent);
+
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -1909,42 +1860,7 @@
   background: var(--app-overview-surface-muted);
 }
 
-.app-overview-view-btn {
-  display: inline-flex;
-  min-height: var(--pc-data-row-height-compact, 36px);
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  padding: 0 0.75rem;
-  border: 1px solid transparent;
-  border-radius: var(--rounded-md, 8px);
-  background: transparent;
-  color: var(--app-overview-text-secondary);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  line-height: 1.2;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    border-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    box-shadow 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
-}
-
-.app-overview-view-btn:hover {
-  color: var(--app-overview-accent);
-}
-
-.app-overview-view-btn.active {
-  border-color: var(--app-overview-accent-border);
-  background: var(--app-overview-surface);
-  color: var(--app-overview-accent-strong);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-}
-
 .app-overview-filter-panel .category-filter-btn:focus-visible,
-.app-overview-view-btn:focus-visible,
 .app-card-primary-link:focus-visible,
 .app-child-link:focus-visible {
   outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
@@ -2551,7 +2467,6 @@
   .app-overview-list-row,
   .app-overview-recent-item,
   .app-card-icon,
-  .app-overview-view-btn,
   .app-card-primary-link,
   .app-card-primary-link i,
   .app-child-link,

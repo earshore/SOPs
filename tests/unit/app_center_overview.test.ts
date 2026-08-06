@@ -43,11 +43,11 @@ const overviewTemplate = `
     <button id="app-overview-clear-search" class="hidden" type="button"></button>
     <p id="app-overview-visible-count"></p>
     <div class="app-overview-filter-row" role="group" aria-label="应用分类"></div>
-    <button class="app-overview-view-btn active" data-view-mode="grid" aria-pressed="true"></button>
-    <button class="app-overview-view-btn" data-view-mode="list" aria-pressed="false"></button>
+    <button class="category-filter-btn active" data-view-mode="grid" aria-pressed="true"></button>
+    <button class="category-filter-btn" data-view-mode="list" aria-pressed="false"></button>
     <div class="app-overview-flow-grid app-overview-flow-grid--tasks"></div>
     <div class="app-overview-recent-heading-actions">
-      <button class="app-overview-recent-group-btn hidden" type="button" data-recent-undo-remove></button>
+      <button class="category-filter-btn hidden" type="button" data-recent-undo-remove></button>
       <span class="app-overview-mini-badge app-overview-recent-count-badge">显示 0 项</span>
     </div>
     <div class="app-overview-recent-toolbar">
@@ -55,9 +55,9 @@ const overviewTemplate = `
       <div class="app-overview-recent-type-filters"></div>
       <div class="app-overview-recent-status-filters"></div>
       <div class="app-overview-recent-columns-toggle" role="group" aria-label="最近继续列数">
-        <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="1" aria-pressed="false"></button>
-        <button class="app-overview-recent-columns-btn active" type="button" data-recent-columns="2" aria-pressed="true"></button>
-        <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="3" aria-pressed="false"></button>
+        <button class="category-filter-btn" type="button" data-recent-columns="1" aria-pressed="false"></button>
+        <button class="category-filter-btn active" type="button" data-recent-columns="2" aria-pressed="true"></button>
+        <button class="category-filter-btn" type="button" data-recent-columns="3" aria-pressed="false"></button>
       </div>
     </div>
     <div class="app-overview-recent-shell" data-recent-columns="2">
@@ -209,12 +209,16 @@ describe('App Center Overview', () => {
       secondMount = overviewModule.mount(container);
       await secondMount;
 
-      expect(container.querySelector('.app-overview-recent-shell')?.dataset.recentColumns).toBe('3');
+      expect(container.querySelector('.app-overview-recent-shell')?.dataset.recentColumns).toBe(
+        '3'
+      );
 
       resolveFirstSnapshot?.(null);
       await firstMount;
 
-      expect(container.querySelector('.app-overview-recent-shell')?.dataset.recentColumns).toBe('3');
+      expect(container.querySelector('.app-overview-recent-shell')?.dataset.recentColumns).toBe(
+        '3'
+      );
     } finally {
       resolveFirstSnapshot?.(null);
       await Promise.allSettled([firstMount, ...(secondMount ? [secondMount] : [])]);
@@ -571,16 +575,16 @@ describe('App Center Overview', () => {
 
     const shell = container.querySelector<HTMLElement>('.app-overview-recent-shell');
     const oneColBtn = container.querySelector<HTMLButtonElement>(
-      '.app-overview-recent-columns-btn[data-recent-columns="1"]'
+      '.category-filter-btn[data-recent-columns="1"]'
     );
     const threeColBtn = container.querySelector<HTMLButtonElement>(
-      '.app-overview-recent-columns-btn[data-recent-columns="3"]'
+      '.category-filter-btn[data-recent-columns="3"]'
     );
 
     expect(shell?.getAttribute('data-recent-columns')).toBe('2');
     expect(
       container
-        .querySelector('.app-overview-recent-columns-btn[data-recent-columns="2"]')
+        .querySelector('.category-filter-btn[data-recent-columns="2"]')
         ?.getAttribute('aria-pressed')
     ).toBe('true');
 
@@ -611,7 +615,7 @@ describe('App Center Overview', () => {
     ).toBe('3');
     expect(
       container
-        .querySelector('.app-overview-recent-columns-btn[data-recent-columns="3"]')
+        .querySelector('.category-filter-btn[data-recent-columns="3"]')
         ?.getAttribute('aria-pressed')
     ).toBe('true');
   });
@@ -867,7 +871,7 @@ describe('App Center Overview', () => {
 
     await overviewModule.mount(wrapper);
 
-    const viewModeButtons = wrapper.querySelectorAll('.app-overview-view-btn[data-view-mode]');
+    const viewModeButtons = wrapper.querySelectorAll('.category-filter-btn[data-view-mode]');
     const list = wrapper.querySelector('.app-overview-list');
     const rows = wrapper.querySelectorAll('.app-overview-list-row[data-category]');
 

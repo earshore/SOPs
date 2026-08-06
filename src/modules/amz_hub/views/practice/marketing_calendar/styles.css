@@ -393,6 +393,11 @@
   color: white;
 }
 
+.amzf_history_clear_all:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .amzf_history_row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 36px;
@@ -424,9 +429,8 @@
 
 .amzf_history_item:focus-visible,
 .amzf_history_item_delete:focus-visible,
-.amzf_quick_tag:focus-visible,
-.amzf_search_status_clear:focus-visible,
-.amzf_empty_action:focus-visible {
+.amzf_history_clear_all:focus-visible,
+.amzf_search_clear:focus-visible {
   outline: 2px solid rgba(37, 99, 235, 0.45);
   outline-offset: 2px;
 }
@@ -490,6 +494,14 @@
 
 /* Quick search suggestions */
 .amzf_quick_tags {
+  /* 快捷标签：category-filter-btn 定制（无边框胶囊，hover 用模块渐变） */
+  --button-filter-border: transparent;
+  --button-filter-bg: var(--amzf-filter-gradient-soft);
+  --button-filter-color: var(--color-indigo-500);
+  --button-filter-hover-border: transparent;
+  --button-filter-hover-bg: var(--amzf-filter-gradient);
+  --button-filter-hover-color: #ffffff;
+
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -497,26 +509,14 @@
   border-top: 1px solid var(--color-slate-200);
 }
 
-.amzf_quick_tag {
-  font-size: 0.75rem;
+.amzf_quick_tags .category-filter-btn {
   min-height: 32px;
   padding: 6px 12px;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-  color: var(--color-indigo-500);
-  border: 0;
-  border-radius: 20px;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-  font-weight: 500;
+  font-size: 0.75rem;
+  border-radius: 20px !important;
 }
 
-.amzf_quick_tag:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+.amzf_quick_tags .category-filter-btn:hover {
   transform: translateY(-1px);
 }
 
@@ -551,23 +551,23 @@
   font-weight: 700;
 }
 
-.amzf_search_status_clear,
-.amzf_empty_action {
+.amzf_search_status .action-btn-secondary,
+.amzf_empty .action-btn-secondary {
   min-height: 36px;
   padding: 6px 12px;
-  border: 1px solid rgba(37, 99, 235, 0.24);
-  border-radius: 6px;
-  background: #ffffff;
-  color: #1d4ed8;
+  border-color: color-mix(in srgb, var(--color-blue-600, #2563eb) 24%, transparent);
+  background: var(--surface-card, #ffffff);
+  color: var(--color-blue-700, #1d4ed8);
   font-size: 0.82rem;
   font-weight: 700;
-  cursor: pointer;
 }
 
-.amzf_search_status_clear:hover,
-.amzf_empty_action:hover {
-  border-color: #1d4ed8;
-  background: #dbeafe;
+.amzf_search_status .action-btn-secondary:hover:not(:disabled),
+.amzf_empty .action-btn-secondary:hover:not(:disabled) {
+  border-color: var(--color-blue-700, #1d4ed8);
+  background: var(--color-blue-100, #dbeafe);
+  box-shadow: none;
+  transform: none;
 }
 
 @media (max-width: 768px) {
@@ -596,13 +596,23 @@
     flex-direction: column;
   }
 
-  .amzf_search_status_clear {
+  .amzf_search_status .action-btn-secondary {
     width: 100%;
   }
 }
 
 /* View Toggle */
 .amzf_controls {
+  /* 模块 accent 渐变（视觉保持：原 #667eea→#764ba2 双色，不做色相统一；
+     供视图切换 active 与快捷标签 hover 复用） */
+  --amzf-filter-gradient-soft: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.1) 0%,
+    rgba(118, 75, 162, 0.1) 100%
+  );
+  --amzf-filter-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --amzf-filter-gradient-dark: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
@@ -612,6 +622,18 @@
 }
 
 .amzf_view_toggle {
+  /* 视图切换：category-filter-btn 定制
+     （active 保留原 indigo→purple 渐变，与下方国家 tab 的 indigo-500 并存，不统一色相） */
+  --button-filter-border: transparent;
+  --button-filter-bg: transparent;
+  --button-filter-color: var(--color-slate-500);
+  --button-filter-hover-border: transparent;
+  --button-filter-hover-bg: var(--color-slate-50);
+  --button-filter-active-border: transparent;
+  --button-filter-active-bg: var(--amzf-filter-gradient);
+  --button-filter-active-color: #ffffff;
+  --button-filter-active-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+
   display: flex;
   background: var(--color-white);
   border-radius: 50px;
@@ -621,70 +643,39 @@
     0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
-.amzf_view_btn {
+.amzf_view_toggle .category-filter-btn {
   padding: 12px 24px;
-  border: none;
-  background: transparent;
-  border-radius: 50px;
   font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--color-slate-500);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
-    color var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
-    box-shadow var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
-    transform var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.amzf_view_btn.amzf_active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-
-.amzf_view_btn:hover:not(.amzf_active) {
-  background: var(--color-slate-50);
+  border-radius: 50px !important;
 }
 
 /* Country Tabs */
 .amzf_country_tabs {
+  /* 国家筛选：category-filter-btn 定制
+     （active 用 indigo-500，与视图切换的渐变并存，不统一色相） */
+  --button-filter-border: var(--color-slate-200);
+  --button-filter-bg: var(--color-white);
+  --button-filter-color: var(--color-text-primary, var(--color-slate-900));
+  --button-filter-hover-border: var(--color-indigo-500);
+  --button-filter-hover-bg: var(--color-white);
+  --button-filter-active-border: var(--color-indigo-500);
+  --button-filter-active-bg: var(--color-indigo-500);
+  --button-filter-active-color: #ffffff;
+
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.amzf_country_tab {
+.amzf_country_tabs .category-filter-btn {
   padding: 10px 18px;
-  border: 2px solid var(--color-slate-200);
-  background: var(--color-white);
-  border-radius: 50px;
   font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background-color var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
-    border-color var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
-    color var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
-    box-shadow var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
-    transform var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  border-width: 2px !important;
+  border-radius: 50px !important;
 }
 
-.amzf_country_tab:hover {
-  border-color: var(--color-indigo-500);
+.amzf_country_tabs .category-filter-btn:hover {
   transform: translateY(-2px);
-}
-
-.amzf_country_tab.amzf_active {
-  background: var(--color-indigo-500);
-  border-color: var(--color-indigo-500);
-  color: white;
 }
 
 /* ✅ 优化点 2：增强国旗图标效果 */
@@ -1319,7 +1310,7 @@
   line-height: 1.7;
 }
 
-.amzf_empty_action {
+.amzf_empty .action-btn-secondary {
   margin-top: 18px;
 }
 
@@ -1456,7 +1447,6 @@
   .amzf_search_box,
   .amzf_search_history,
   .amzf_view_toggle,
-  .amzf_country_tab,
   .amzf_month_section,
   .amzf_event_comparison,
   .amzf_event_card,
@@ -1469,7 +1459,6 @@
 
   .amzf_search_box,
   .amzf_view_toggle,
-  .amzf_country_tab,
   .amzf_month_section,
   .amzf_event_comparison,
   .amzf_event_card,
@@ -1502,26 +1491,32 @@
 
   .amzf_view_toggle {
     border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32));
+    /* 桌面：active 从移动端 indigo/渐变统一为 Hub primary（既有行为，迁移保留） */
+    --button-filter-active-bg: var(--color-primary, var(--color-blue-500));
+    --button-filter-active-border: var(--color-primary, var(--color-blue-500));
+    --button-filter-active-color: var(--color-primary-contrast, #ffffff);
+    --button-filter-active-shadow: none;
   }
 
-  .amzf_view_btn {
-    border-radius: calc(var(--rounded-card, var(--rounded-md)) - 2px);
+  .amzf_view_toggle .category-filter-btn {
+    border-radius: calc(var(--rounded-card, var(--rounded-md)) - 2px) !important;
   }
 
-  .amzf_view_btn.amzf_active,
-  .amzf_country_tab.amzf_active {
-    background: var(--color-primary, var(--color-blue-500));
-    border-color: var(--color-primary, var(--color-blue-500));
-    box-shadow: none;
-    color: var(--color-primary-contrast, #ffffff);
+  .amzf_country_tabs {
+    --button-filter-border: var(--color-border-default, rgba(148, 163, 184, 0.32));
+    --button-filter-active-bg: var(--color-primary, var(--color-blue-500));
+    --button-filter-active-border: var(--color-primary, var(--color-blue-500));
+    --button-filter-active-color: var(--color-primary-contrast, #ffffff);
   }
 
-  .amzf_country_tab {
-    border-width: 1px;
+  .amzf_country_tabs .category-filter-btn {
+    border-width: 1px !important;
+    border-radius: var(--rounded-card, var(--rounded-md)) !important;
+    box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
   }
 
-  .amzf_country_tab:hover,
-  .amzf_quick_tag:hover,
+  .amzf_country_tabs .category-filter-btn:hover,
+  .amzf_quick_tags .category-filter-btn:hover,
   .amzf_event_card:hover,
   .amzf_event_card:hover .amzf_event_emoji {
     transform: none;
@@ -1590,10 +1585,13 @@
     color: #92400e;
   }
 
-  .amzf_quick_tag {
-    background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
-    border-radius: var(--rounded-card, var(--rounded-md));
-    color: var(--color-primary-dark, var(--color-blue-600));
+  .amzf_quick_tags {
+    --button-filter-bg: var(--color-primary-light, rgba(59, 130, 246, 0.1));
+    --button-filter-color: var(--color-primary-dark, var(--color-blue-600));
+  }
+
+  .amzf_quick_tags .category-filter-btn {
+    border-radius: var(--rounded-card, var(--rounded-md)) !important;
   }
 
   .amzf_history_item:hover,
@@ -1825,30 +1823,34 @@
   color: var(--color-text-tertiary, #94a3b8);
 }
 
+.dark .amzf_history_item_delete:hover,
+[data-color-mode-resolved='dark'] .amzf_history_item_delete:hover {
+  background: color-mix(in srgb, var(--color-red-400, #f87171) 16%, transparent);
+  color: var(--color-red-300, #fca5a5);
+}
+
 /* ---- 视图切换 / 国家标签 ---- */
-.dark .amzf_view_toggle {
+.dark .amzf_view_toggle,
+[data-color-mode-resolved='dark'] .amzf_view_toggle {
+  --button-filter-color: var(--color-text-secondary, #cbd5e1);
+  --button-filter-hover-bg: color-mix(
+    in srgb,
+    var(--color-slate-500) 18%,
+    var(--surface-card, #1e293b)
+  );
+
   background: color-mix(in srgb, var(--surface-card, #1e293b) 80%, transparent);
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
 }
 
-.dark .amzf_view_btn {
-  color: var(--color-text-secondary, #cbd5e1);
-}
-
-.dark .amzf_view_btn:hover:not(.amzf_active) {
-  background: color-mix(in srgb, var(--color-slate-500) 18%, var(--surface-card, #1e293b));
-}
-
-.dark .amzf_country_tab {
-  background: var(--surface-card, #1e293b);
-  border-color: var(--color-border-default, rgba(255, 255, 255, 0.14));
-  color: var(--color-text-secondary, #cbd5e1);
-}
-
-.dark .amzf_country_tab.amzf_active {
-  background: var(--color-primary, #3b82f6);
-  border-color: var(--color-primary, #3b82f6);
-  color: var(--color-primary-contrast, #ffffff);
+.dark .amzf_country_tabs,
+[data-color-mode-resolved='dark'] .amzf_country_tabs {
+  /* active 仍走 --color-primary（dark 由共享规则再加深一档保证白字 AA） */
+  --button-filter-bg: var(--surface-card, #1e293b);
+  --button-filter-color: var(--color-text-secondary, #cbd5e1);
+  --button-filter-hover-bg: var(--surface-card, #1e293b);
+  --button-filter-active-bg: var(--color-primary, #3b82f6);
+  --button-filter-active-border: var(--color-primary, #3b82f6);
 }
 
 /* ---- 月份卡片 ---- */
@@ -2040,16 +2042,21 @@
   color: var(--color-blue-200, #bfdbfe);
 }
 
-.dark .amzf_search_status_clear,
-.dark .amzf_empty_action {
+.dark .amzf_search_status .action-btn-secondary,
+[data-color-mode-resolved='dark'] .amzf_search_status .action-btn-secondary,
+.dark .amzf_empty .action-btn-secondary,
+[data-color-mode-resolved='dark'] .amzf_empty .action-btn-secondary {
   background: var(--surface-card, #1e293b);
   border-color: color-mix(in srgb, var(--color-blue-400, #60a5fa) 30%, transparent);
   color: var(--color-blue-300, #93c5fd);
 }
 
-.dark .amzf_search_status_clear:hover,
-.dark .amzf_empty_action:hover {
+.dark .amzf_search_status .action-btn-secondary:hover:not(:disabled),
+[data-color-mode-resolved='dark'] .amzf_search_status .action-btn-secondary:hover:not(:disabled),
+.dark .amzf_empty .action-btn-secondary:hover:not(:disabled),
+[data-color-mode-resolved='dark'] .amzf_empty .action-btn-secondary:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-blue-400, #60a5fa) 14%, var(--surface-card, #1e293b));
+  border-color: color-mix(in srgb, var(--color-blue-400, #60a5fa) 30%, transparent);
 }
 
 .dark .amzf_empty {
@@ -2064,12 +2071,17 @@
   color: var(--color-text-secondary, #cbd5e1);
 }
 
-.dark .amzf_quick_tag {
-  color: var(--color-indigo-300, #a5b4fc);
+.dark .amzf_quick_tags,
+[data-color-mode-resolved='dark'] .amzf_quick_tags {
+  --button-filter-color: var(--color-indigo-300, #a5b4fc);
+  --button-filter-hover-bg: var(--amzf-filter-gradient-dark);
+  --button-filter-hover-color: var(--color-indigo-300, #a5b4fc);
 }
 
-.dark .amzf_quick_tag:hover {
-  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+.dark .amzf_history_clear_all,
+[data-color-mode-resolved='dark'] .amzf_history_clear_all {
+  background: color-mix(in srgb, var(--color-red-400, #f87171) 14%, var(--surface-card, #1e293b));
+  color: var(--color-red-300, #fca5a5);
 }
 
 .dark .amzf_history_row:hover,

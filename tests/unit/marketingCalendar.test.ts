@@ -102,10 +102,10 @@ beforeEach(() => {
     const germany = container.querySelector('[data-amzf-country="DE"]');
     click(germany);
 
-    expect(germany?.classList.contains('amzf_active')).toBe(true);
+    expect(germany?.classList.contains('active')).toBe(true);
 
     click(container.querySelector('[data-action="amzf_switchView"][data-param="event"]'));
-    expect(container.querySelector('#amzf_btn_event')?.classList.contains('amzf_active')).toBe(true);
+    expect(container.querySelector('#amzf_btn_event')?.classList.contains('active')).toBe(true);
     expect(container.querySelector('#amzf_main')?.innerHTML).toContain('amzf_event_view');
 
     const sectionToggle = container.querySelector('[data-amzf-toggle-section]');

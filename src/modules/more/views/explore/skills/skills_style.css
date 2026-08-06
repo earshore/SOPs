@@ -139,41 +139,42 @@
   color: var(--color-slate-400);
 }
 
-.category-btn {
-  padding: 0.5rem 1rem;
-  border-radius: var(--rounded-md);
-  border: 1px solid var(--color-slate-200);
-  background-color: white;
-  color: var(--color-slate-500);
-  transition:
-    background-color var(--duration-fast),
-    border-color var(--duration-fast),
-    color var(--duration-fast);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
+/* 分类筛选胶囊：共享 .category-filter-btn（src/css/components/buttons.css），
+   模块色经页面根容器 --button-filter-* 变量定制（模式同 more-overview emerald） */
+.skills-page {
+  --button-filter-accent: var(--color-violet-600, #7c3aed);
+  --button-filter-border: var(--border-subtle, var(--color-slate-200));
+  --button-filter-hover-bg: var(--color-violet-50, #f5f3ff);
+  --button-filter-hover-border: var(--color-violet-300, #c4b5fd);
+  --button-filter-hover-color: var(--color-violet-600, #7c3aed);
+  --button-filter-focus-ring: rgba(124, 58, 237, 0.16);
 }
 
-.category-btn:hover {
-  border-color: var(--color-violet-300);
-  background-color: var(--color-violet-50);
-  color: var(--color-violet-600);
+/* 共享胶囊未提供 active:hover（选中加深），与 prompts 页一致补回 violet-700 语义 */
+.skills-page .category-filter-btn.active:hover {
+  background: var(--color-violet-700, #6d28d9) !important;
+  border-color: var(--color-violet-700, #6d28d9) !important;
 }
 
-.category-btn.active {
-  background-color: var(--color-violet-600);
-  color: white;
-  border-color: var(--color-violet-600);
+.dark .skills-page,
+[data-color-mode-resolved='dark'] .skills-page {
+  --button-filter-hover-bg: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 14%,
+    var(--surface-card, #1e293b)
+  );
+  --button-filter-hover-border: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 30%,
+    transparent
+  );
+  --button-filter-hover-color: var(--color-violet-300, #c4b5fd);
 }
 
-.category-btn:focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 2px var(--surface-card, white),
-    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
+.dark .skills-page .category-filter-btn.active:hover,
+[data-color-mode-resolved='dark'] .skills-page .category-filter-btn.active:hover {
+  background: color-mix(in srgb, var(--color-violet-700, #6d28d9) 76%, #000) !important;
+  border-color: color-mix(in srgb, var(--color-violet-700, #6d28d9) 76%, #000) !important;
 }
 
 .skill-card {
@@ -221,60 +222,8 @@
   overflow: hidden;
 }
 
-.btn-icon {
-  width: 2.25rem;
-  height: 2.25rem;
-  min-width: 2.25rem;
-  min-height: 2.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--rounded-md);
-  color: var(--color-slate-400);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast),
-    color var(--duration-fast);
-}
-
-.btn-icon:hover {
-  color: var(--color-violet-600);
-  background-color: var(--color-violet-50);
-}
-
-/* L3：模态次要操作 = 图标 + 文字，与卡片次要语义对齐 */
-.skill-action-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  min-height: 2.5rem;
-  padding: 0.5rem 0.9rem;
-  border: 1px solid var(--color-border-default, #e2e8f0);
-  border-radius: var(--rounded-lg, 0.5rem);
-  background: var(--surface-card, #fff);
-  color: var(--color-text-primary, #334155);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast, 150ms),
-    color var(--duration-fast, 150ms),
-    border-color var(--duration-fast, 150ms);
-}
-
-.skill-action-secondary:hover {
-  color: var(--color-violet-700);
-  background: var(--color-violet-50);
-  border-color: var(--color-violet-200);
-}
-
-.skill-action-secondary:focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 2px var(--surface-card, #fff),
-    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
-}
+/* 行内图标按钮（.btn-icon）迁移至 more_style.css 共享定义（36px 紧凑档，prompts/skills 共用）；
+   模态次要操作迁移至共享 .action-btn.action-btn-secondary（40px 档，同组同高） */
 
 /* FB4：技能库为空 — 隐藏筛选、突出目录空态 */
 .skills-page--empty-library .skills-catalog-sticky[hidden] {
@@ -289,75 +238,8 @@
   opacity: 0.72;
 }
 
-/* F3/C1 + D6：主操作「在 Deep Chat 试用」绑 Appearance primary（保留分类/状态多色） */
-.skill-cta-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  min-height: 2.25rem;
-  padding: 0.4rem 0.85rem;
-  border: 1px solid transparent;
-  border-radius: var(--rounded-md, 0.375rem);
-  background: var(--color-primary, #3b82f6);
-  color: #fff;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1.25;
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast, 150ms),
-    box-shadow var(--duration-fast, 150ms),
-    opacity var(--duration-fast, 150ms);
-}
-
-.skill-cta-primary:hover:not(:disabled) {
-  background: var(--color-primary-dark, #1d4ed8);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary, #3b82f6) 35%, transparent);
-}
-
-.skill-cta-primary:focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 2px var(--surface-card, #fff),
-    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
-}
-
-.skill-cta-primary:disabled,
-.skill-cta-primary.is-loading {
-  opacity: 0.72;
-  cursor: wait;
-}
-
-.skill-cta-primary.is-loading::after {
-  content: '';
-  width: 0.75rem;
-  height: 0.75rem;
-  margin-left: 0.15rem;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: skill-cta-spin 0.7s linear infinite;
-}
-
-@keyframes skill-cta-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.skill-cta-primary--modal {
-  min-height: 2.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-}
-
-.btn-icon:focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 2px var(--surface-card, white),
-    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
-}
+/* F3/C1 + D6：主操作「在 Deep Chat 试用」= 共享 .action-btn.action-btn-primary
+   （绑 Appearance primary，dark 加深由共享 .dark .action-btn-primary 接管） */
 
 /* 与上游仓库 Available / Beta 标注对齐 */
 .skill-status-available {
@@ -697,29 +579,11 @@
 
 /* ========================================
    主题收口三：既有规则深色遗漏补丁
-   category-btn / catalog-search / source-card / 卡片区 / 状态徽标。
+   catalog-search / source-card / 卡片区 / 状态徽标。
    ======================================== */
 
-/* ---- 目录筛选按钮 ---- */
-.dark .category-btn,
-[data-color-mode-resolved='dark'] .category-btn {
-  background: var(--surface-card, #1e293b);
-  border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
-  color: var(--color-text-secondary, #cbd5e1);
-}
-
-.dark .category-btn:hover,
-[data-color-mode-resolved='dark'] .category-btn:hover {
-  background: color-mix(
-    in srgb,
-    var(--color-violet-400, #a78bfa) 14%,
-    var(--surface-card, #1e293b)
-  );
-  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
-  color: var(--color-violet-300, #c4b5fd);
-}
-
-/* .category-btn.active 实心 violet-600 + 白字，深浅色通用，无需覆盖 */
+/* ---- 目录筛选按钮（已迁移共享 .category-filter-btn；
+   dark 变量覆盖见页面根容器 .skills-page 的 --button-filter-*） ---- */
 
 /* ---- 搜索框 ---- */
 .dark .catalog-search-field,
@@ -792,45 +656,6 @@
 .dark .skill-card:hover .skill-title,
 [data-color-mode-resolved='dark'] .skill-card:hover .skill-title {
   color: var(--color-violet-400, #a78bfa);
-}
-
-.dark .btn-icon,
-[data-color-mode-resolved='dark'] .btn-icon {
-  color: var(--color-text-tertiary, #94a3b8);
-}
-
-.dark .btn-icon:hover,
-[data-color-mode-resolved='dark'] .btn-icon:hover {
-  background: color-mix(
-    in srgb,
-    var(--color-violet-400, #a78bfa) 14%,
-    var(--surface-card, #1e293b)
-  );
-  color: var(--color-violet-300, #c4b5fd);
-}
-
-/* ---- 模态次要按钮 hover（基础已 token 化） ---- */
-.dark .skill-action-secondary:hover,
-[data-color-mode-resolved='dark'] .skill-action-secondary:hover {
-  background: color-mix(
-    in srgb,
-    var(--color-violet-400, #a78bfa) 14%,
-    var(--surface-card, #1e293b)
-  );
-  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
-  color: var(--color-violet-300, #c4b5fd);
-}
-
-/* ---- 主 CTA 按钮：dark 下 --color-primary 仍为 blue-500（白字 ≈3.7:1），
-   加深到 primary-dark/-darker 清 AA（≈5.2:1 / ≈6.7:1） ---- */
-.dark .skill-cta-primary,
-[data-color-mode-resolved='dark'] .skill-cta-primary {
-  background: var(--color-primary-dark, var(--color-primary));
-}
-
-.dark .skill-cta-primary:hover:not(:disabled),
-[data-color-mode-resolved='dark'] .skill-cta-primary:hover:not(:disabled) {
-  background: var(--color-primary-darker, var(--color-primary-dark));
 }
 
 /* ---- 吸顶筛选区边框 ---- */

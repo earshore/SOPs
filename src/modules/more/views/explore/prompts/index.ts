@@ -113,7 +113,7 @@ function handlePromptActionButton(target: HTMLElement): boolean {
 function handleCategoryButton(target: HTMLElement): boolean {
   if (!moduleRoot) return false;
 
-  const categoryBtn = findContainedTarget(target, '.category-btn', moduleRoot);
+  const categoryBtn = findContainedTarget(target, '.category-filter-btn', moduleRoot);
   if (!categoryBtn) return false;
 
   const category = categoryBtn.dataset.category;
@@ -153,7 +153,7 @@ function handlePromptModalAction(target: HTMLElement, modal: HTMLElement): boole
   if (action === 'close') {
     handleClosePromptModal();
   } else if (action === 'copy') {
-    handleCopyModalPrompt();
+    void handleCopyModalPrompt();
   }
 
   return true;
@@ -239,7 +239,7 @@ function handleSearch(e: Event): void {
 function handleCategoryChange(category: string): void {
   currentCategory = category as PromptCategoryId | 'all';
 
-  moduleRoot?.querySelectorAll('.category-btn').forEach(btn => {
+  moduleRoot?.querySelectorAll('.category-filter-btn').forEach(btn => {
     if ((btn as HTMLElement).dataset.category === category) {
       btn.classList.add('active');
       btn.setAttribute('aria-pressed', 'true');
@@ -265,7 +265,7 @@ function renderCategories(): void {
   const createButton = (category: 'all' | PromptCategory): HTMLButtonElement => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = category === 'all' ? 'category-btn active' : 'category-btn';
+    button.className = category === 'all' ? 'category-filter-btn active' : 'category-filter-btn';
     button.dataset.category = category === 'all' ? 'all' : category.id;
     button.setAttribute('aria-pressed', category === 'all' ? 'true' : 'false');
 
@@ -525,12 +525,23 @@ function getCurrentPromptText(): string | null {
     : currentPrompt.promptEn || currentPrompt.prompt;
 }
 
-function handleCopyModalPrompt(): void {
+async function handleCopyModalPrompt(): Promise<void> {
   const promptText = getCurrentPromptText();
   if (!promptText) return;
 
+  // 复制防重复：动作期间禁用按钮（视觉由共享 .action-btn:disabled 提供）
+  const copyBtn = getPromptModal()?.querySelector<HTMLButtonElement>(
+    '[data-prompt-modal-action="copy"]'
+  );
+  if (copyBtn?.disabled) return;
+  if (copyBtn) copyBtn.disabled = true;
+
   const langName = currentLang === 'zh' ? '中文' : '英文';
-  copyPromptText(promptText, `${langName}提示词已复制到剪贴板`);
+  try {
+    await copyPromptText(promptText, `${langName}提示词已复制到剪贴板`);
+  } finally {
+    if (copyBtn) copyBtn.disabled = false;
+  }
 }
 
 // Module class

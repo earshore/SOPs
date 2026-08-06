@@ -184,7 +184,7 @@ function renderCategories(): void {
   const makeBtn = (id: SkillCategoryId | 'all', label: string, active: boolean) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = active ? 'category-btn active' : 'category-btn';
+    button.className = active ? 'category-filter-btn active' : 'category-filter-btn';
     button.dataset.category = id;
     button.setAttribute('aria-pressed', active ? 'true' : 'false');
     appendIcon(button, id === 'all' ? 'fas fa-th' : 'fas fa-folder');
@@ -250,7 +250,7 @@ function createTryDeepChatButton(skillId: string, skillTitle: string): HTMLButto
   btn.type = 'button';
   btn.dataset.skillAction = 'try-deep-chat';
   btn.dataset.skillId = skillId;
-  btn.className = 'skill-cta-primary';
+  btn.className = 'action-btn action-btn-primary';
   btn.setAttribute('aria-label', `在 Deep Chat 试用：${skillTitle}`);
   appendIcon(btn, SKILL_TRIAL_ICON);
   const text = document.createElement('span');
@@ -393,7 +393,7 @@ function createNoMatchEmptyState(): HTMLElement {
   }
   const clearBtn = document.createElement('button');
   clearBtn.type = 'button';
-  clearBtn.className = 'skill-cta-primary mt-4';
+  clearBtn.className = 'action-btn action-btn-primary mt-4';
   clearBtn.textContent = '清空筛选';
   clearBtn.addEventListener('click', () => {
     currentCategory = 'all';
@@ -620,7 +620,7 @@ function handleModuleClick(e: Event): void {
   const target = e.target as HTMLElement | null;
   if (!target || !moduleRoot) return;
 
-  const categoryBtn = target.closest('.category-btn') as HTMLElement | null;
+  const categoryBtn = target.closest('.category-filter-btn') as HTMLElement | null;
   if (categoryBtn && moduleRoot.contains(categoryBtn)) {
     handleCategoryClick(categoryBtn);
     return;

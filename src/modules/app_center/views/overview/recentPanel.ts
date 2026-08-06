@@ -155,7 +155,7 @@ function applyRecentColumns(
 ): void {
   const shell = container.querySelector<HTMLElement>('.app-overview-recent-shell');
   const buttons = container.querySelectorAll<HTMLButtonElement>(
-    '.app-overview-recent-columns-btn[data-recent-columns]'
+    '.category-filter-btn[data-recent-columns]'
   );
 
   shell?.setAttribute('data-recent-columns', String(columns));
@@ -1397,7 +1397,7 @@ export async function renderRecentPanel(
   };
 
   container
-    .querySelectorAll<HTMLButtonElement>('.app-overview-recent-columns-btn[data-recent-columns]')
+    .querySelectorAll<HTMLButtonElement>('.category-filter-btn[data-recent-columns]')
     .forEach(btn => {
       btn.addEventListener('click', () => {
         const columns = parseRecentColumns(btn.dataset.recentColumns);

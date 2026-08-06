@@ -81,7 +81,7 @@ function initOverviewEvents(container: HTMLElement): void {
 
   const filterRow = container.querySelector<HTMLElement>('.app-overview-filter-row');
   const viewModeBtns = container.querySelectorAll<HTMLButtonElement>(
-    '.app-overview-view-btn[data-view-mode]'
+    '.category-filter-btn[data-view-mode]'
   );
   // Event delegation: category buttons are rendered into the filter row at mount time.
   filterRow?.addEventListener('click', event => {

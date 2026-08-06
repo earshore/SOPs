@@ -82,43 +82,42 @@
   }
 }
 
-/* 分类按钮样式 */
-
-.category-btn {
-  padding: 0.5rem 1rem;
-  border-radius: var(--rounded-md);
-  border: 1px solid var(--border-subtle, var(--color-slate-200));
-  background-color: var(--surface-card, #ffffff);
-  color: var(--color-text-secondary, var(--color-slate-500));
-  transition:
-    background-color var(--duration-fast),
-    border-color var(--duration-fast),
-    color var(--duration-fast),
-    box-shadow var(--duration-fast),
-    transform var(--duration-fast);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
+/* 分类筛选胶囊：共享 .category-filter-btn（src/css/components/buttons.css），
+   模块色经页面根容器 --button-filter-* 变量定制（模式同 more-overview emerald） */
+.prompts-page {
+  --button-filter-accent: var(--color-violet-600, #7c3aed);
+  --button-filter-border: var(--border-subtle, var(--color-slate-200));
+  --button-filter-hover-bg: var(--color-violet-50, #f5f3ff);
+  --button-filter-hover-border: var(--color-violet-300, #c4b5fd);
+  --button-filter-hover-color: var(--color-violet-600, #7c3aed);
+  --button-filter-focus-ring: rgba(124, 58, 237, 0.16);
 }
 
-.category-btn:hover {
-  border-color: var(--color-violet-300);
-  background-color: var(--color-violet-50);
-  color: var(--color-violet-600);
+/* 共享胶囊未提供 active:hover（选中加深），此处补回原 violet-700 语义 */
+.prompts-page .category-filter-btn.active:hover {
+  background: var(--color-violet-700, #6d28d9) !important;
+  border-color: var(--color-violet-700, #6d28d9) !important;
 }
 
-.category-btn.active {
-  background-color: var(--color-violet-600);
-  color: white;
-  border-color: var(--color-violet-600);
+.dark .prompts-page,
+[data-color-mode-resolved='dark'] .prompts-page {
+  --button-filter-hover-bg: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 14%,
+    var(--surface-card, #1e293b)
+  );
+  --button-filter-hover-border: color-mix(
+    in srgb,
+    var(--color-violet-400, #a78bfa) 30%,
+    transparent
+  );
+  --button-filter-hover-color: var(--color-violet-300, #c4b5fd);
 }
 
-.category-btn.active:hover {
-  background-color: var(--color-violet-700);
-  border-color: var(--color-violet-700);
+.dark .prompts-page .category-filter-btn.active:hover,
+[data-color-mode-resolved='dark'] .prompts-page .category-filter-btn.active:hover {
+  background: color-mix(in srgb, var(--color-violet-700, #6d28d9) 76%, #000) !important;
+  border-color: color-mix(in srgb, var(--color-violet-700, #6d28d9) 76%, #000) !important;
 }
 
 /* 提示词卡片样式 */
@@ -162,26 +161,7 @@
   overflow: hidden;
 }
 
-/* 按钮图标样式 */
-.btn-icon {
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--rounded-md);
-  color: var(--color-slate-400);
-  transition:
-    background-color var(--duration-fast),
-    color var(--duration-fast),
-    box-shadow var(--duration-fast),
-    transform var(--duration-fast);
-}
-
-.btn-icon:hover {
-  color: var(--color-violet-600);
-  background-color: var(--color-violet-50);
-}
+/* 按钮图标样式：迁移至 more_style.css 共享定义（36px 紧凑档，prompts/skills 共用） */
 
 /* 语言切换按钮样式 */
 .lang-btn {
@@ -260,9 +240,7 @@
 @media (min-width: 1024px) {
   .prompt-card,
   .prompt-source-card,
-  .prompt-business-rule,
-  .category-btn,
-  .btn-icon {
+  .prompt-business-rule {
     border-radius: var(--workbench-radius, 8px);
   }
 
@@ -400,6 +378,18 @@
 .prompt-detail-modal__dialog {
   color: var(--color-text-primary, var(--color-slate-900));
   background-color: var(--surface-card, #ffffff);
+  /* 模态主按钮：复制提示词 = 共享 .action-btn.action-btn-primary，
+     色走页面 violet（容器级 --button-primary-*，模式同按钮体系变量约定） */
+  --button-primary-bg: var(--color-violet-600, #7c3aed);
+  --button-primary-hover-bg: var(--color-violet-700, #6d28d9);
+  --button-primary-active-bg: var(--color-violet-800, #5b21b6);
+}
+
+/* dark：共享 .dark .action-btn-primary 会把 --button-primary-bg 指回 primary-dark（蓝），
+   此处以更高优先级把 violet 钉回（violet-600 + 白字 ≈6.3:1 已过 AA，无需再加深） */
+.dark .prompt-detail-modal__dialog .action-btn-primary,
+[data-color-mode-resolved='dark'] .prompt-detail-modal__dialog .action-btn-primary {
+  --button-primary-bg: var(--color-violet-600, #7c3aed);
 }
 
 .prompt-modal-raw {
@@ -419,15 +409,6 @@
 .prompt-modal-footer {
   background-color: var(--surface-card, #ffffff);
   border-color: var(--color-slate-200, #e2e8f0);
-}
-
-.prompt-modal-close {
-  color: var(--color-slate-600, #475569);
-}
-
-.prompt-modal-close:hover {
-  color: var(--color-slate-800, #1e293b);
-  background-color: var(--color-slate-100, #f1f5f9);
 }
 
 /* ---- 深色适配（双前缀） ---- */
@@ -639,46 +620,14 @@
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
 }
 
-.dark .prompt-modal-close,
-[data-color-mode-resolved='dark'] .prompt-modal-close {
-  color: var(--color-text-secondary, #cbd5e1);
-}
-
-.dark .prompt-modal-close:hover,
-[data-color-mode-resolved='dark'] .prompt-modal-close:hover {
-  color: var(--color-text-primary, #f1f5f9);
-  background-color: var(--color-bg-hover, rgba(255, 255, 255, 0.06));
-}
-
 /* ---- 既有遗漏补丁（原浅色硬编码，深色下无覆盖） ---- */
 .dark .lang-btn.active,
 [data-color-mode-resolved='dark'] .lang-btn.active {
   color: var(--color-violet-300, #c4b5fd);
 }
 
-.dark .category-btn:hover,
-[data-color-mode-resolved='dark'] .category-btn:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--color-violet-400, #a78bfa) 14%,
-    var(--surface-card, #1e293b)
-  );
-  border-color: color-mix(in srgb, var(--color-violet-400, #a78bfa) 30%, transparent);
-  color: var(--color-violet-300, #c4b5fd);
-}
-
 .dark .prompt-card:hover .prompt-title,
 [data-color-mode-resolved='dark'] .prompt-card:hover .prompt-title {
-  color: var(--color-violet-300, #c4b5fd);
-}
-
-.dark .btn-icon:hover,
-[data-color-mode-resolved='dark'] .btn-icon:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--color-violet-400, #a78bfa) 14%,
-    var(--surface-card, #1e293b)
-  );
   color: var(--color-violet-300, #c4b5fd);
 }
 
