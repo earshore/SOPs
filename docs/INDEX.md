@@ -80,7 +80,7 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTE
 - [Release Notes 模板](./templates/RELEASE_NOTES_TEMPLATE.md)
 - [安全策略](../SECURITY.md)
 - [安全 Playbook](./SECURITY_PLAYBOOK.md) — BYOK 威胁模型 + PR/RC 验收清单。
-- [贡献指南（历史 Kiro 路径）](../docs/archive/kiro-2026-h1/CONTRIBUTING.md) — 若与 README/`docs/` 冲突，以现行 `docs/` 与根 README 为准。
+- [贡献指南（历史 Kiro 路径）](./archive/kiro-2026-h1/CONTRIBUTING.md) — 若与 README/`docs/` 冲突，以现行 `docs/` 与根 README 为准。
 
 ### 开发实践（注意日期）
 

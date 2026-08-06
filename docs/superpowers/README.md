@@ -12,7 +12,7 @@ This directory is the **active** home for agent-driven design specs and implemen
 1. New multi-step work: write or update a **spec** under `specs/`, then a **plan** under `plans/`.  
 2. Prefer dated filenames: `YYYY-MM-DD-<topic>-design.md` / `YYYY-MM-DD-<topic>.md`.  
 3. Theme, visual, and UI constitution docs stay in top-level `docs/` — **must** declare which constitutions the change touches (checklist below).  
-4. **Not** the same as `docs/archive/kiro-2026-h1/` (archived Kiro-era material). See [`docs/archive/kiro-2026-h1/README.md`](../../archive/kiro-2026-h1/README.md).
+4. **Not** the same as `docs/archive/kiro-2026-h1/` (archived Kiro-era material). See [`docs/archive/kiro-2026-h1/README.md`](../archive/kiro-2026-h1/README.md).
 
 ## Constitution-touch checklist (required on every new/updated spec or plan)
 

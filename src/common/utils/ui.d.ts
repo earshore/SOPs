@@ -126,13 +126,13 @@ declare global {
     clearSOPSearch?: () => void;
 
     /**
-     * 搜索应用中心
+     * 搜索工作台
      * @deprecated 将在 Phase 7 重构时移除
      */
     searchAppCenter?: (query: string) => void;
 
     /**
-     * 清空应用中心搜索
+     * 清空工作台搜索
      * @deprecated 将在 Phase 7 重构时移除
      */
     clearAppCenterSearch?: () => void;

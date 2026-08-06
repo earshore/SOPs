@@ -246,7 +246,7 @@ class HomeModule extends BaseModule {
     elements.trigger.setAttribute('aria-expanded', String(expanded));
     elements.trigger.setAttribute(
       'aria-label',
-      expanded ? '收起应用中心快捷入口' : '展开应用中心快捷入口'
+      expanded ? '收起工作台快捷入口' : '展开工作台快捷入口'
     );
     elements.actions.setAttribute('aria-hidden', String(!expanded));
     elements.actions.toggleAttribute('inert', !expanded);

@@ -467,7 +467,7 @@ export const SOP_COLORS = {
 } as const;
 
 /**
- * 应用中心颜色映射
+ * 工作台颜色映射
  */
 export const APP_COLORS = {
   masterPrompt: 'blue' as ColorSchemeName,

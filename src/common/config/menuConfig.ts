@@ -95,7 +95,7 @@ export const MENU_CONFIG: MenuConfig = {
   // ==========================================
   contexts: {
     sops: { id: 'sops', label: 'SOPs 流程中心' },
-    apps: { id: 'apps', label: '应用中心' },
+    apps: { id: 'apps', label: '工作台' },
     hub: { id: 'hub', label: 'Amazon 智库' },
     more: { id: 'more', label: '更多' },
     sys: { id: 'sys', label: '系统设置' },
@@ -128,15 +128,15 @@ export const MENU_CONFIG: MenuConfig = {
       themeColor: 'indigo', // ✅ 通义千问感紫蓝系 - 流程管理主题
     },
 
-    // [应用中心] App Center 容器模块
+    // [工作台] App Center 容器模块
     app_center: {
       id: 'app_center',
       contextId: 'apps',
-      title: '应用中心',
+      title: '工作台',
       version: 'v1.0',
       icon: 'fas fa-cubes',
-      description: '集成多个专业工具的应用中心，提供数据采集、分析与优化功能。',
-      themeColor: 'rose', // ✅ MiniMax 感玫红系 - 应用中心容器主题
+      description: '集成多个专业工具的工作台，提供数据采集、分析与优化功能。',
+      themeColor: 'rose', // ✅ MiniMax 感玫红系 - 工作台容器主题
     },
 
     // [应用 A] Master Analysis
@@ -310,7 +310,7 @@ export const MENU_CONFIG: MenuConfig = {
   },
 
   // ==========================================
-  // App Center Categories (用于应用中心模块的侧边栏分组)
+  // App Center Categories (用于工作台模块的侧边栏分组)
   // 按应用分组，而非功能分类
   // ==========================================
   appCategories: {

@@ -73,10 +73,10 @@
 | SOPs 流程中心 | 供应链与物流体系 | `amber` | `wb-theme-supply` |
 | SOPs 流程中心 | 账号安全与风控体系 | `red` | `wb-theme-safety` |
 | SOPs 流程中心 | 客服与客户体验体系 | `teal` | `wb-theme-service` / `wb-theme-teal` |
-| 应用中心 | Master Analysis | `indigo` | `wb-theme-indigo` |
-| 应用中心 | Keyword Hunter | `fuchsia` | `wb-theme-fuchsia` |
-| 应用中心 | PPC Tools | `emerald` | PPC hero 使用 emerald / teal |
-| 应用中心 | Playground | **配置** `orange`（`menuConfig` 的 `themeColor` / category `color`） | **实现例外**（模板/CSS 现状）：Deep Chat 使用 terracotta + `wb-theme-supply` / `wb-container--hidden` 等；**本轮不新增** `wb-theme-orange` 作为唯一 banner class。归属**不是** indigo / cyan |
+| 工作台 | Master Analysis | `indigo` | `wb-theme-indigo` |
+| 工作台 | Keyword Hunter | `fuchsia` | `wb-theme-fuchsia` |
+| 工作台 | PPC Tools | `emerald` | PPC hero 使用 emerald / teal |
+| 工作台 | Playground | **配置** `orange`（`menuConfig` 的 `themeColor` / category `color`） | **实现例外**（模板/CSS 现状）：Deep Chat 使用 terracotta + `wb-theme-supply` / `wb-container--hidden` 等；**本轮不新增** `wb-theme-orange` 作为唯一 banner class。归属**不是** indigo / cyan |
 | Amazon 智库 | Amazon知识早知道 | `indigo` | `wb-theme-indigo` |
 | Amazon 智库 | 入门实操宝典 | `green` | `wb-theme-growth` |
 | Amazon 智库 | 运营提升全攻略 | `violet` | `wb-theme-violet` |
@@ -88,7 +88,7 @@
 | 模块总览 | 模块 themeColor | 总览主色 |
 | --- | --- | --- |
 | SOPs 总览 | `blue` | blue / indigo |
-| 应用中心总览 | `purple` | purple / pink |
+| 工作台总览 | `purple` | purple / pink |
 | Amazon 智库总览 | `orange` | orange / red |
 | 更多总览 | `green` | green / emerald |
 
@@ -183,7 +183,7 @@
 </div>
 ```
 
-应用中心 card 型页面使用：
+工作台 card 型页面使用：
 
 ```html
 <div class="wb-container wb-container--card wb-theme-fuchsia mb-8">
@@ -202,7 +202,7 @@
 | 类型 | 使用场景 | 约束 |
 | --- | --- | --- |
 | `wb-container--simple` | SOPs、AMZ、More 普通内容页 | 横向轻量，背景淡，图标 52px 左右 |
-| `wb-container--card` | 应用中心工具页 | 信息密度更高，允许 `.wb-card` 背景层 |
+| `wb-container--card` | 工作台工具页 | 信息密度更高，允许 `.wb-card` 背景层 |
 | 模块总览 hero | 模块入口页 | 可以更强，但仍使用模块主题色 |
 | 自定义 hero | PPC、紫鸟业务场景等特殊页 | 必须遵守目录色映射和字体规格 |
 | `wb-container--hidden` | Deep Chat 等首屏不适合展示 banner 的页面 | 保留 DOM 语义，但视觉隐藏，不占布局 |
@@ -474,7 +474,7 @@ PPC 使用自定义 `.ppc-hero` 是允许的，但必须满足：
 
 ### 7.4 Deep Chat 工作台
 
-Deep Chat（`src/modules/app_center/views/playground/deep-chat/`）是应用中心 Playground 下的对话工作台。它使用独立的 terracotta 品牌 token，但必须服从本文的工具优先与层级克制原则。
+Deep Chat（`src/modules/app_center/views/playground/deep-chat/`）是工作台 Playground 下的对话工作台。它使用独立的 terracotta 品牌 token，但必须服从本文的工具优先与层级克制原则。
 
 #### 品牌色（Terracotta）
 

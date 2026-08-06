@@ -562,7 +562,11 @@
 }
 
 .quick-access-item:hover .quick-access-icon {
-  background: color-mix(in srgb, var(--color-green-500, #22c55e) 14%, var(--surface-panel, #ffffff));
+  background: color-mix(
+    in srgb,
+    var(--color-green-500, #22c55e) 14%,
+    var(--surface-panel, #ffffff)
+  );
   color: var(--color-green-600, #16a34a);
   transform: scale(1.05);
 }

@@ -1761,8 +1761,8 @@ class UserFactory {
 - [SafeRenderer API 文档](../api/SafeRenderer.md)
 - [Zustand 迁移指南](./zustand-migration-guide.md)
 - [状态同步最佳实践](./state-sync-best-practices.md)
-- [系统稳定性优化 - 设计文档](../../archive/kiro-2026-h1/specs/system-stability-optimization/design.md)
-- [系统稳定性优化 - 需求文档](../../archive/kiro-2026-h1/specs/system-stability-optimization/requirements.md)
+- [系统稳定性优化 - 设计文档](../archive/kiro-2026-h1/specs/system-stability-optimization/design.md)
+- [系统稳定性优化 - 需求文档](../archive/kiro-2026-h1/specs/system-stability-optimization/requirements.md)
 
 ---
 

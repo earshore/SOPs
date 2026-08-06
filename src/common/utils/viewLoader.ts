@@ -221,7 +221,7 @@ const VIEW_REGISTRY: ViewRegistry = {
   amz_hub: { path: '/src/modules/amz_hub/amz_hub.html', target: 'main', isLoaded: false },
   more: { path: '/src/modules/more/more.html', target: 'main', isLoaded: false },
 
-  // App Center 统一 Shell HTML
+  // 工作台 统一 Shell HTML
   app_center: { path: '/src/modules/app_center/app_center.html', target: 'main', isLoaded: false },
 };
 

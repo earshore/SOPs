@@ -14,7 +14,7 @@ export const defaultRoutesConfig: Partial<MenuConfig> = {
   contexts: {
     home: { id: 'home', label: '首页' },
     sops: { id: 'sops', label: 'SOPs 流程中心' },
-    app_center: { id: 'app_center', label: '应用中心' },
+    app_center: { id: 'app_center', label: '工作台' },
     hub: { id: 'hub', label: 'Amazon 智库' },
     more: { id: 'more', label: '更多' },
   },
@@ -38,10 +38,10 @@ export const defaultRoutesConfig: Partial<MenuConfig> = {
     app_center: {
       id: 'app_center',
       contextId: 'app_center',
-      title: '应用中心',
+      title: '工作台',
       version: '1.0',
       icon: 'fa-th-large',
-      description: '应用管理中心',
+      description: '工具工作台',
     },
   },
   routes: {
@@ -61,7 +61,7 @@ export const defaultRoutesConfig: Partial<MenuConfig> = {
     },
     app_center: {
       moduleId: 'app_center',
-      label: '应用中心',
+      label: '工作台',
       icon: 'fa-th-large',
       panelId: 'app_center',
       viewPath: '/modules/app_center/app_center.html',

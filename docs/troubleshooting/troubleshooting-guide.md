@@ -2086,8 +2086,8 @@ grep -r "error message" tests/
 - [Zustand 迁移指南](../development/zustand-migration-guide.md)
 - [状态同步最佳实践](../development/state-sync-best-practices.md)
 - [系统稳定性最佳实践](../development/best-practices.md)
-- [系统稳定性优化 - 设计文档](../../archive/kiro-2026-h1/specs/system-stability-optimization/design.md)
-- [系统稳定性优化 - 需求文档](../../archive/kiro-2026-h1/specs/system-stability-optimization/requirements.md)
+- [系统稳定性优化 - 设计文档](../archive/kiro-2026-h1/specs/system-stability-optimization/design.md)
+- [系统稳定性优化 - 需求文档](../archive/kiro-2026-h1/specs/system-stability-optimization/requirements.md)
 
 ---
 

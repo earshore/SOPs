@@ -1,6 +1,6 @@
 // tests/manual/app-center-manual-test.ts
 // ================================================================
-// 🧪 应用中心手动测试脚本
+// 🧪 工作台手动测试脚本
 // 模拟真实用户访问，检查控制台错误
 // ================================================================
 
@@ -24,7 +24,7 @@ const EXAMPLE_JSON_PATH = path.resolve(process.cwd(), 'examples/Amz_B01KYRUBT8_2
 
 // 测试模块列表
 const TEST_MODULES = [
-  { name: '应用中心概览', path: '/#/app-center' },
+  { name: '工作台概览', path: '/#/app-center' },
   { name: 'Scraper - 数据采集', path: '/#/app-center/master-analysis/scraper' },
   { name: 'AI Analysis - 智能分析', path: '/#/app-center/master-analysis/ai-analysis' },
   { name: 'Promptlab - 提示词实验室', path: '/#/app-center/master-analysis/promptlab' },

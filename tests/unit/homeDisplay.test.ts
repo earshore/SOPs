@@ -9,16 +9,16 @@ const homeTemplate = `
       <div class="slogan-line outline">无限可能</div>
       <div class="home-primary-actions" aria-label="首页主入口">
         <button type="button" class="home-primary-action" data-action="switch-tab" data-tab="sops_overview">进入 SOP 流程中心</button>
-        <button type="button" class="home-primary-action" data-action="switch-tab" data-tab="app_center_overview">打开应用中心</button>
+        <button type="button" class="home-primary-action" data-action="switch-tab" data-tab="app_center_overview">打开工作台</button>
       </div>
     </div>
-    <aside class="floating-workbench" aria-label="应用中心快捷入口">
+    <aside class="floating-workbench" aria-label="工作台快捷入口">
       <button type="button" class="floating-workbench__trigger" aria-expanded="false"
-        aria-controls="home-floating-workbench-actions" aria-label="展开应用中心快捷入口" title="应用中心">
+        aria-controls="home-floating-workbench-actions" aria-label="展开工作台快捷入口" title="工作台">
         <i class="fas fa-cubes" aria-hidden="true"></i>
-        <span class="sr-only">应用中心</span>
+        <span class="sr-only">工作台</span>
       </button>
-      <div id="home-floating-workbench-actions" class="floating-workbench__actions" aria-label="应用中心应用快捷入口"
+      <div id="home-floating-workbench-actions" class="floating-workbench__actions" aria-label="工作台应用快捷入口"
         aria-hidden="true" inert>
         <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="scraper" aria-label="打开 Master Analysis">Master Analysis</button>
         <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="playground_deep_chat" aria-label="打开 Playground">Playground</button>
@@ -127,7 +127,7 @@ it('mounts the full home splash with particles, hero copy, app center shortcuts,
   expect(container.textContent).toContain('无限可能');
   expect(container.querySelector('.floating-workbench')).not.toBeNull();
   expect(container.querySelector('.floating-workbench__trigger')?.textContent).toContain(
-    '应用中心'
+    '工作台'
   );
   expect(container.querySelector('.floating-workbench__trigger')).toBeInstanceOf(HTMLButtonElement);
   expect(

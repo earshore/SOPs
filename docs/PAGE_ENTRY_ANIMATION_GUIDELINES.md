@@ -2,7 +2,7 @@
 
 **适用范围**: 所有通过路由访问的页面、主模块子页面和静态模板页面  
 **更新时间**: 2026-06-12  
-**参考实现**: 应用中心 / PPC Tools / PPC 搜索词分析器页面进入动画
+**参考实现**: 工作台 / PPC Tools / PPC 搜索词分析器页面进入动画
 
 ---
 
@@ -12,7 +12,7 @@
 
 1. `loadTemplate()` 默认把静态模板包进 `view-fade-in-initial view-fade-in`，PPC 搜索词分析器就是这一类参考实现。
 2. `SafeModuleLoader.loadTemplate()` 会禁用模板包装，页面通常在挂载后手动加旧的 `fade-in`，因此效果和 PPC 页面不完全一致。
-3. `ModuleLoader` 负责 SOPs、应用中心、Amazon 智库、更多模块的子页面加载；统一入口动画应在子页面 `mount()` 完成后由内容容器触发。
+3. `ModuleLoader` 负责 SOPs、工作台、Amazon 智库、更多模块的子页面加载；统一入口动画应在子页面 `mount()` 完成后由内容容器触发。
 
 本次统一后的结论：
 
@@ -91,7 +91,7 @@ createModuleLoader({
 | --- | --- |
 | 首页 | `navigation.ts` 显示 `panel-home` 后触发 |
 | SOPs 子页面 | `sops.ts` 的 `ModuleLoader.contentEnterAnimation` |
-| 应用中心子页面 | `app_center.ts` 的 `ModuleLoader.contentEnterAnimation` |
+| 工作台子页面 | `app_center.ts` 的 `ModuleLoader.contentEnterAnimation` |
 | Amazon 智库子页面 | `amz_hub.ts` 的 `ModuleLoader.contentEnterAnimation` |
 | 更多子页面 | `more.ts` 的 `ModuleLoader.contentEnterAnimation` |
 | 独立静态模板 | `loadTemplate()` 默认包装 |

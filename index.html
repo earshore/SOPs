@@ -73,6 +73,46 @@
 
         <!-- ===== Navigation ===== -->
         <nav class="nav-wrapper" aria-label="主导航">
+          <!-- 工作台 -->
+          <div class="nav-group" data-nav-palette="rose">
+            <button
+              id="nav-apps"
+              class="nav-trigger"
+              type="button"
+              aria-expanded="false"
+              aria-controls="apps-mega-menu"
+            >
+              <i class="fas fa-th-large nav-icon"></i>
+              工作台
+              <i class="fas fa-chevron-down nav-chevron"></i>
+            </button>
+
+            <div
+              id="apps-mega-menu"
+              class="mega-menu"
+              aria-labelledby="nav-apps"
+              aria-hidden="true"
+            >
+              <div class="mega-menu-inner">
+                <div class="mega-menu-header">
+                  <div class="mega-menu-icon mega-menu-icon--apps">
+                    <i class="fas fa-rocket"></i>
+                  </div>
+                  <h3 id="apps-mega-menu-title" class="mega-menu-title">核心工作台模块</h3>
+                </div>
+                <div
+                  id="mega-menu-content"
+                  class="mega-menu-grid mega-menu-grid--5"
+                  aria-labelledby="apps-mega-menu-title"
+                >
+                  <div class="skeleton skeleton--h-128"></div>
+                  <div class="skeleton skeleton--h-128 skeleton--delay-100"></div>
+                  <div class="skeleton skeleton--h-128 skeleton--delay-200"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- SOPs 流程中心 -->
           <div class="nav-group" data-nav-palette="indigo">
             <button
@@ -110,46 +150,6 @@
                   <div class="skeleton skeleton--h-96 skeleton--delay-200"></div>
                   <div class="skeleton skeleton--h-96 skeleton--delay-300"></div>
                   <div class="skeleton skeleton--h-96 skeleton--delay-400"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 应用中心 -->
-          <div class="nav-group" data-nav-palette="rose">
-            <button
-              id="nav-apps"
-              class="nav-trigger"
-              type="button"
-              aria-expanded="false"
-              aria-controls="apps-mega-menu"
-            >
-              <i class="fas fa-th-large nav-icon"></i>
-              应用中心
-              <i class="fas fa-chevron-down nav-chevron"></i>
-            </button>
-
-            <div
-              id="apps-mega-menu"
-              class="mega-menu"
-              aria-labelledby="nav-apps"
-              aria-hidden="true"
-            >
-              <div class="mega-menu-inner">
-                <div class="mega-menu-header">
-                  <div class="mega-menu-icon mega-menu-icon--apps">
-                    <i class="fas fa-rocket"></i>
-                  </div>
-                  <h3 id="apps-mega-menu-title" class="mega-menu-title">核心应用模块</h3>
-                </div>
-                <div
-                  id="mega-menu-content"
-                  class="mega-menu-grid mega-menu-grid--5"
-                  aria-labelledby="apps-mega-menu-title"
-                >
-                  <div class="skeleton skeleton--h-128"></div>
-                  <div class="skeleton skeleton--h-128 skeleton--delay-100"></div>
-                  <div class="skeleton skeleton--h-128 skeleton--delay-200"></div>
                 </div>
               </div>
             </div>

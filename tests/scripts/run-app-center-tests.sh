@@ -1,13 +1,13 @@
 #!/bin/bash
 # tests/scripts/run-app-center-tests.sh
 # ================================================================
-# 🧪 应用中心完整测试套件执行脚本
+# 🧪 工作台完整测试套件执行脚本
 # 按照测试优先级顺序执行所有测试
 # ================================================================
 
 set -e
 
-echo "🎯 应用中心测试套件"
+echo "🎯 工作台测试套件"
 echo "════════════════════════════════════════════════════════════"
 echo ""
 
@@ -53,7 +53,7 @@ run_test() {
 echo -e "${YELLOW}📋 第一阶段: 基础功能测试${NC}"
 echo ""
 
-run_test "应用中心概览" "tests/e2e/app-center-overview.spec.ts"
+run_test "工作台概览" "tests/e2e/app-center-overview.spec.ts"
 run_test "Scraper 模块" "tests/e2e/scraper.spec.ts"
 run_test "AI Analysis 模块" "tests/e2e/ai-analysis.spec.ts"
 run_test "Promptlab 模块" "tests/e2e/promptlab.spec.ts"

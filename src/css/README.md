@@ -72,7 +72,7 @@ src/css/
 ```
 src/modules/
 ├── app_center/
-│   └── app_center_style.css  # 仅应用中心特有样式
+│   └── app_center_style.css  # 仅工作台特有样式
 ├── sops/
 │   └── sops_style.css         # 仅SOPs特有样式
 └── more/

@@ -731,8 +731,8 @@ renderer.renderList(
 
 - [SafeModuleLoader API 文档](./SafeModuleLoader.md)
 - [AlpineRegistry API 文档](./AlpineRegistry.md)
-- [系统稳定性优化 - 设计文档](../../archive/kiro-2026-h1/specs/system-stability-optimization/design.md)
-- [系统稳定性优化 - 需求文档](../../archive/kiro-2026-h1/specs/system-stability-optimization/requirements.md)
+- [系统稳定性优化 - 设计文档](../archive/kiro-2026-h1/specs/system-stability-optimization/design.md)
+- [系统稳定性优化 - 需求文档](../archive/kiro-2026-h1/specs/system-stability-optimization/requirements.md)
 
 ---
 
