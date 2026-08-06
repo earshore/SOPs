@@ -36,7 +36,11 @@
 }
 
 .app-confirm-modal--danger .app-confirm-modal-header {
-  background: linear-gradient(135deg, #dc2626, #f97316);
+  background: linear-gradient(
+    135deg,
+    var(--color-error-dark, #b91c1c),
+    var(--color-error, #ef4444)
+  );
 }
 
 .app-confirm-modal--theme .app-confirm-modal-confirm {
@@ -56,18 +60,19 @@
 }
 
 .app-confirm-modal--danger .app-confirm-modal-confirm {
-  background: #dc2626;
-  --tw-ring-color: rgba(220, 38, 38, 0.32);
+  background: var(--color-error, #ef4444);
+  color: var(--color-error-contrast, #ffffff);
+  --tw-ring-color: color-mix(in srgb, var(--color-error, #ef4444) 32%, transparent);
 }
 
 .app-confirm-modal--danger .app-confirm-modal-confirm:hover {
-  background: #b91c1c;
+  background: var(--color-error-dark, #b91c1c);
 }
 
 .app-confirm-modal--danger .app-confirm-modal-confirm:focus-visible {
   box-shadow:
     0 0 0 2px var(--surface-panel, #ffffff),
-    0 0 0 4px rgba(220, 38, 38, 0.35);
+    0 0 0 4px color-mix(in srgb, var(--color-error, #ef4444) 35%, transparent);
 }
 
 .app-confirm-modal-checkbox {
@@ -78,4 +83,27 @@
   outline: 2px solid
     color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #6257f5)) 45%, transparent);
   outline-offset: 2px;
+}
+
+/* ---- Dark: danger confirm 深覆盖 ----
+   Header: dark 下 --color-error 为 red-400，白字对比 ~2.8:1 < 3:1，
+   收窄到 --color-error-dark（red-500，白字 ~3.8:1）保证大标题对比。
+   按钮: 对齐共享 .action-btn-danger dark 档（默认 error-dark，hover red-600）。 */
+.dark .app-confirm-modal--danger .app-confirm-modal-header,
+[data-color-mode-resolved='dark'] .app-confirm-modal--danger .app-confirm-modal-header {
+  background: linear-gradient(
+    135deg,
+    var(--color-error-dark, #b91c1c),
+    var(--color-error-dark, #b91c1c)
+  );
+}
+
+.dark .app-confirm-modal--danger .app-confirm-modal-confirm,
+[data-color-mode-resolved='dark'] .app-confirm-modal--danger .app-confirm-modal-confirm {
+  background: var(--color-error-dark, #b91c1c);
+}
+
+.dark .app-confirm-modal--danger .app-confirm-modal-confirm:hover,
+[data-color-mode-resolved='dark'] .app-confirm-modal--danger .app-confirm-modal-confirm:hover {
+  background: var(--color-red-600, #dc2626);
 }

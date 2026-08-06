@@ -2,7 +2,7 @@
 
 **Status:** active · **活** SSOT（open 项）  
 **Updated:** 2026-08-03  
-**Owner:** 工程负责人  
+**Owner:** 工程负责人
 
 > **用法：** 只维护 **Open** 债务。已关闭项写 CHANGELOG 或移入历史段落，**禁止**用长篇「已完成荣誉榜」冒充当前债。  
 > 历史快照：`docs/TECH_DEBT_AUDIT.md`（2026-07-15 及更早叙事）、`docs/archive/kiro-2026-h1/arch-debt/*`（historical）。
@@ -12,22 +12,27 @@
 
 ## 如何更新
 
-1. 发现债 → 新增一行 Open（含 ID、领域、影响、建议、证据）。  
-2. 修复 → 移到 Closed（日期 + PR/commit）。  
-3. 发版前扫一眼 P0/P1。  
+1. 发现债 → 新增一行 Open（含 ID、领域、影响、建议、证据）。
+2. 修复 → 移到 Closed（日期 + PR/commit）。
+3. 发版前扫一眼 P0/P1。
 4. 与规范冲突时：**先改规范或先改板，禁止双真相。**
 
 ---
 
 ## Open
 
-| ID | 领域 | 描述 | 影响 | 建议 | 优先级 |
-| --- | --- | --- | --- | --- | --- |
-| **TD-THM-01** | 主题 | generated token 被手写 variables 覆盖（D1） | Appearance 漂移 | 见主题路线图 Phase token 收口 | P1 |
-| **TD-THM-02** | 主题 | 大量 Tailwind `blue-*` 硬编码（D6） | 换肤面窄 | 分期迁语义 token + 门禁 | P1 |
-| **TD-CMP-01** | 组件 | 业务页仍可自由拼按钮/表单（存量 29 处裸色按钮） | 视觉孤岛 | 已加 `button-ui:gate`（禁新增 + confirm 禁用）；存量迁移仍待做 | P1 |
-| **TD-OPS-02** | 可观测 | Sentry 默认关（产品决策） | 无线上聚合错误 | 保持关闭；Runbook 最低信号包已覆盖无 Sentry 值班 | P2 |
-| **TD-REL-01** | 发布 | main 提交粒过度碎时 review 成本高 | 审计成本 | RC 前按主题整理 notes（已有 CHANGELOG） | P3 |
+| ID            | 领域      | 描述                                                                                                                                                                                                                                                                              | 影响                     | 建议                                                                                                                | 优先级 |
+| ------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------- | ------ |
+| **TD-THM-01** | 主题      | generated token 被手写 variables 覆盖（D1）：26 个冲突（20 受控 allowlist + **6 非原子语义漂移**为门禁盲区，如 `--border-light` 同名不同型、`--color-primary-light` 写死 blue 10% 不随 Appearance）                                                                               | Appearance 漂移          | 路线图 Phase A：6 冲突归零 + 断点修复（B1 amz_nav-btn 橙 fallback、B2 marketing 渐变、B4 accent 静态），~5-8 文件   | P1     |
+| **TD-THM-02** | 主题      | Tailwind `blue-*` 硬编码（D6）：**1,193 处**（五色合计 ~6,047），90% 在业务页且零门禁（gate 仅锁 shell 13 处）                                                                                                                                                                    | 换肤面窄                 | 路线图 Phase B：top10 文件 589 处迁移 + `--scope modules` 模块基线门禁；Phase C：slate/accent 长期战                | P1     |
+| **TD-CMP-01** | 组件      | 业务页仍可自由拼按钮/表单（存量裸色按钮）                                                                                                                                                                                                                                         | 视觉孤岛                 | 已加 `button-ui:gate`；存量迁移完成：ppc/prompts/skills/overview/calendar/keyword_hunter/settings 已收敛（2026-08） | P1     |
+| **TD-CMP-03** | 弹层      | confirm 系曾缺 Tab 陷阱（**已修** 2026-08）；残留：`ma-marketplace-modal` 自写弹层缺 trap/scroll lock；`sharedModals.html` 双弹窗（import-conflict/delete-confirm）**0 接线方** + `modals.css` 四变体（danger/success/info/warning）0 引用；弹层内按钮未统一接 `.action-btn` 契约 | A5 未全覆盖、dark 白按钮 | ma-marketplace 收敛到共享；sharedModals/modals.css 死样式处置（接线或移除）                                         | P1     |
+| **TD-CMP-04** | Badge     | 生态四分天下（sop-status-badge 45 / wb-badge 38 / stage-badge 12 / 业务自建 8）+ 共享层 30+ 休眠类 + `wb-badge` 归属错位（定义于 welcome-banner.css 被 38 处跨模块引用）+ `status.css` 全文件 0 深色规则                                                                          | 双套维护                 | 收敛到 wb-badge/sop-status 两族；休眠类清理；wb-badge 迁移归属                                                      | P2     |
+| **TD-CMP-05** | 卡片/空态 | `.card` 共享体系 **2000 行 0 引用**；`empty-state.css` 半套 0 引用；空状态 9 套自建 vs 2 共享；arbitrary hex 类（text-[#15803d]）深色不翻转                                                                                                                                       | 建而不用                 | 激活或归档决策（CARD_UI_DEBT_REDUCTION_PLAN Phase 5 配套）                                                          | P2     |
+| **TD-CMP-06** | 审计      | `ui:audit` 三连（card/callout/workbench）依赖 dev server、不在 `ci:quality`；`card-ui:audit` 红 3 处（app_center 工作流 5-7 步强调色失配）                                                                                                                                        | 手动门禁与 CI 脱节       | 修强调色 + audit 基建评估（preview/无头）                                                                           | P2     |
+| **TD-CMP-02** | 表单      | 三套并行表单体系：settings-control（0 采用共享 form-*）、npi 内联 Tailwind（<768px 无状态基线）、forms 9.1 兼容层；`--field-focus-ring` 3px 与文档 2px 不一致                                                                                                                     | 双套维护、深色盲区       | settings 变体化 + 共享 token 下沉；focus-ring 文档裁决；表单豁免登记表                                              | P2     |
+| **TD-OPS-02** | 可观测    | Sentry 默认关（产品决策）                                                                                                                                                                                                                                                         | 无线上聚合错误           | 保持关闭；Runbook 最低信号包已覆盖无 Sentry 值班                                                                    | P2     |
+| **TD-REL-01** | 发布      | main 提交粒过度碎时 review 成本高                                                                                                                                                                                                                                                 | 审计成本                 | RC 前按主题整理 notes（已有 CHANGELOG）                                                                             | P3     |
 
 ---
 
@@ -37,32 +42,34 @@
 
 详见主题企业审计 Spec。本板只跟踪「仍 open 的工程影响」：
 
-- D1 token 覆盖 → **TD-THM-01**  
-- D6 blue 硬编码 → **TD-THM-02**  
-- 其余 D* 以主题 playbook / landing-status 为准  
+- D1 token 覆盖 → **TD-THM-01**
+- D6 blue 硬编码 → **TD-THM-02**
+- 其余 D* 以主题 playbook / landing-status 为准
 
 ---
 
 ## Closed（近期，摘要）
 
-| ID | 关闭日期 | 说明 |
-| --- | --- | --- |
-| TD-SET-01 | 2026-08-03 | systemSettings 拆分收口：TS 壳 651 行（≤900）+ 6 `sections/*`（各 ≤456 行）+ `SettingsDomain` 门面（load/savePartition/diff/validate/snapshot）+ `loader.ts` 组装 + `settings-scale` audit 入 `ci:quality`；8 空 stub 清零、UI 直写存储归零。本地 Gate（基 `3bf0d476`）：unit 153 passed / e2e settings 17 + smoke 29 / coverage 80.09·68.08·83.81·82.05（四阈值 ≥ 基线）/ circular 0 / ci:quality 全绿 / build 绿。commit `0093e3c9` |
-| TD-SET-05 | 2026-07-26 | 工具策略侧栏二级 Keyword Hunter + deep-link `keyword-hunter` + e2e |
-| TD-SET-03 | 2026-07-26 | 数据区「保存数据策略」明确为 runtime.storage 显式保存（同 saveRuntimeStrategySettings）；Toast/矩阵对齐 |
-| TD-SET-04 | 2026-07-26 | 设置侧栏滚动联动高亮（settingsNavScroll + is-current）；点击导航不回归 |
-| TD-DOC-01 | 2026-07-26 | CI-QUALITY-GATES 与 package.json `ci:quality` 对齐；best-practices 降级 StateManager、标 Status |
-| TD-SET-02 | 2026-07-26 | COMPONENT_GUIDELINES §10 即时 vs 显式保存矩阵 + TESTING_STRATEGY 交叉引用 |
-| TD-TEST-02 | 2026-07-26 | system-settings e2e：二级 nav「数据采集」跳转 + 运行策略预设即时保存不脏关 |
-| TD-DOC-STACK | 2026-07-26 | 企业规范栈落地：PRODUCT / COMPONENT / TESTING / CONTENT / A11Y / OPS / SECURITY_PLAYBOOK + INDEX 决策树 |
-| TD-TEST-01 | 2026-08-03 | 视觉回归进默认 CI：`test.yml` visual job（ubuntu mint + 基线漂移门禁）；32 张 linux 快照入库 `daad7e5f`；Gate 9/9 绿 run #30807154543 |
-| TD-TEST-03 | 2026-08-03 | 覆盖率 ratchet 修复复核：lines 82.01% 门禁绿，CI unit 连续通过（run #30807154543） |
-| TD-DOC-02 | 2026-07-26 | CONTENT_DESIGN / ACCESSIBILITY / OPS_RUNBOOK |
-| TD-OPS-01 | 2026-07-26 | OPS_RUNBOOK（白屏/LLM/设置/回滚 + 最低信号包）— **仅此 Closed，勿再列入 Open** |
-| TD-SET-DENSITY | 2026-07-26 | 移除 density 模式死代码 |
-| TD-SET-LINT-AUTO | 2026-07-26 | `autoSaveProviderConfig` complexity 降到 warning-gate 内 |
-| TD-SET-REASONING-ZOD | 2026-07-25 | Zod 支持 xhigh/max，修复推理无法持久化 |
-| TD-SET-SEARCH-PAD | 2026-07-25 | 搜索框 icon/placeholder 重叠 |
+| ID                   | 关闭日期   | 说明                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TD-SET-01            | 2026-08-03 | systemSettings 拆分收口：TS 壳 651 行（≤900）+ 6 `sections/*`（各 ≤456 行）+ `SettingsDomain` 门面（load/savePartition/diff/validate/snapshot）+ `loader.ts` 组装 + `settings-scale` audit 入 `ci:quality`；8 空 stub 清零、UI 直写存储归零。本地 Gate（基 `3bf0d476`）：unit 153 passed / e2e settings 17 + smoke 29 / coverage 80.09·68.08·83.81·82.05（四阈值 ≥ 基线）/ circular 0 / ci:quality 全绿 / build 绿。commit `0093e3c9` |
+| TD-SET-05            | 2026-07-26 | 工具策略侧栏二级 Keyword Hunter + deep-link `keyword-hunter` + e2e                                                                                                                                                                                                                                                                                                                                                                    |
+| TD-SET-03            | 2026-07-26 | 数据区「保存数据策略」明确为 runtime.storage 显式保存（同 saveRuntimeStrategySettings）；Toast/矩阵对齐                                                                                                                                                                                                                                                                                                                               |
+| TD-SET-04            | 2026-07-26 | 设置侧栏滚动联动高亮（settingsNavScroll + is-current）；点击导航不回归                                                                                                                                                                                                                                                                                                                                                                |
+| TD-DOC-01            | 2026-07-26 | CI-QUALITY-GATES 与 package.json `ci:quality` 对齐；best-practices 降级 StateManager、标 Status                                                                                                                                                                                                                                                                                                                                       |
+| TD-SET-02            | 2026-07-26 | COMPONENT_GUIDELINES §10 即时 vs 显式保存矩阵 + TESTING_STRATEGY 交叉引用                                                                                                                                                                                                                                                                                                                                                             |
+| TD-TEST-02           | 2026-07-26 | system-settings e2e：二级 nav「数据采集」跳转 + 运行策略预设即时保存不脏关                                                                                                                                                                                                                                                                                                                                                            |
+| TD-DOC-STACK         | 2026-07-26 | 企业规范栈落地：PRODUCT / COMPONENT / TESTING / CONTENT / A11Y / OPS / SECURITY_PLAYBOOK + INDEX 决策树                                                                                                                                                                                                                                                                                                                               |
+| TD-TEST-01           | 2026-08-03 | 视觉回归进默认 CI：`test.yml` visual job（ubuntu mint + 基线漂移门禁）；32 张 linux 快照入库 `daad7e5f`；Gate 9/9 绿 run #30807154543                                                                                                                                                                                                                                                                                                 |
+| TD-TEST-03           | 2026-08-03 | 覆盖率 ratchet 修复复核：lines 82.01% 门禁绿，CI unit 连续通过（run #30807154543）                                                                                                                                                                                                                                                                                                                                                    |
+| TD-DOC-02            | 2026-07-26 | CONTENT_DESIGN / ACCESSIBILITY / OPS_RUNBOOK                                                                                                                                                                                                                                                                                                                                                                                          |
+| TD-OPS-01            | 2026-07-26 | OPS_RUNBOOK（白屏/LLM/设置/回滚 + 最低信号包）— **仅此 Closed，勿再列入 Open**                                                                                                                                                                                                                                                                                                                                                        |
+| TD-SET-DENSITY       | 2026-07-26 | 移除 density 模式死代码                                                                                                                                                                                                                                                                                                                                                                                                               |
+| TD-SET-LINT-AUTO     | 2026-07-26 | `autoSaveProviderConfig` complexity 降到 warning-gate 内                                                                                                                                                                                                                                                                                                                                                                              |
+| TD-SET-REASONING-ZOD | 2026-07-25 | Zod 支持 xhigh/max，修复推理无法持久化                                                                                                                                                                                                                                                                                                                                                                                                |
+| TD-SET-SEARCH-PAD    | 2026-07-25 | 搜索框 icon/placeholder 重叠                                                                                                                                                                                                                                                                                                                                                                                                          |
+| TD-CMP-BTN           | 2026-08-07 | 按钮体系收口（5 批次）：规范文档 14 缺口落地 + 共享层补课（focus-visible/danger/ghost/icon/loading/disabled）+ ppc/prompts/skills/overview/calendar/keyword_hunter 迁移 + settings 体系收敛 + 死代码清理（净删 ~800 行）；契约测试同步                                                                                                                                                                                                |
+| TD-CMP-MDL           | 2026-08-07 | 弹层活路径修复：chooseWithModal 次按钮 token 化、confirm 系补 Tab 焦点陷阱（A5）、confirmModal danger 硬编码 token 化、npi next-step / scraper ma-marketplace 弹窗深色化；badge solid 对比度 + 浅底徽章 dark 防御；forms error/success 状态色 token 化；keyword_hunter/app_center 深色徽章修复                                                                                                                                        |
 
 更早大批量清理见 `TECH_DEBT_AUDIT.md`（**勿**把其「0 issue」当作 2026-07-26 现状）。
 
@@ -70,7 +77,7 @@
 
 ## 相关
 
-- [PRODUCT_PRINCIPLES.md](./PRODUCT_PRINCIPLES.md)  
-- [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)  
-- [CI-QUALITY-GATES.md](./CI-QUALITY-GATES.md)  
-- [THEME 审计路线图](./superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md)  
+- [PRODUCT_PRINCIPLES.md](./PRODUCT_PRINCIPLES.md)
+- [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)
+- [CI-QUALITY-GATES.md](./CI-QUALITY-GATES.md)
+- [THEME 审计路线图](./superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md)

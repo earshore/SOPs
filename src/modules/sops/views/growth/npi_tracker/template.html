@@ -994,16 +994,16 @@
   <app-modal id="next-step-modal" class="hidden" title="编辑 Next Step" size="md" no-header>
     <div
       slot="body"
-      class="bg-white rounded-xl border border-slate-200 shadow-xl w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-hidden flex flex-col"
+      class="npi-next-step-modal-body rounded-xl shadow-xl w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-hidden flex flex-col"
     >
-      <div class="px-5 py-4 border-b border-slate-100">
-        <h3 class="text-base font-bold text-slate-800">编辑 Next Step</h3>
+      <div class="npi-next-step-modal-divider px-5 py-4 border-b">
+        <h3 class="npi-next-step-modal-title text-base font-bold">编辑 Next Step</h3>
       </div>
       <div id="next-step-checkboxes" class="p-4 space-y-1 overflow-y-auto"></div>
-      <div class="px-5 py-4 border-t border-slate-100 flex justify-end gap-2">
+      <div class="npi-next-step-modal-divider px-5 py-4 border-t flex justify-end gap-2">
         <button
           type="button"
-          class="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+          class="action-btn action-btn-secondary"
           data-action="closeNextStepModal"
         >
           取消

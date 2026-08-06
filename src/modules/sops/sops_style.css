@@ -271,6 +271,21 @@
   max-width: min(100%, 64rem);
 }
 
+/* Next Step modal body: token surfaces (static style attributes are banned
+ * on migrated templates, so the slate lives here). */
+.npi-next-step-modal-body {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
+}
+
+.npi-next-step-modal-divider {
+  border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));
+}
+
+.npi-next-step-modal-title {
+  color: var(--color-text-primary, #0f172a);
+}
+
 .npi-lifecycle-table-card {
   background: var(--surface-card, #ffffff);
 }

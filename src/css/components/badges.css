@@ -80,8 +80,9 @@
 }
 
 .badge-warning-solid {
+  /* amber-500 + white ≈ 2.2:1 不达标；--color-warning-contrast = slate-900（§2.1） */
   background: var(--color-warning);
-  color: white;
+  color: var(--color-warning-contrast, #0f172a);
 }
 
 /* ========================================
@@ -121,8 +122,9 @@
 }
 
 .badge-primary-solid {
+  /* primary 底深色下加深（见暗色模式段），白字 --color-primary-contrast 达标 */
   background: var(--color-primary);
-  color: white;
+  color: var(--color-primary-contrast, #fff);
 }
 
 /* ========================================
@@ -737,4 +739,125 @@
     var(--surface-card, #1e293b)
   );
   color: var(--color-red-300, #fca5a5);
+}
+
+/* 浅底语义徽章 dark 双色：与上方 sop-status/stage/category 深色段同一惯例——
+   同色相低明度 chip（-500 底 18% + --surface-card）+ -300 亮字。
+   scale 裸档（-100 底 / -700 字）深色不翻转，故语义变体显式补三前缀。 */
+.dark .badge-success,
+[data-color-mode-resolved='dark'] .badge-success,
+[data-theme='dark'] .badge-success {
+  background: color-mix(in srgb, var(--color-green-500, #22c55e) 18%, var(--surface-card, #1e293b));
+  color: var(--color-green-300, #86efac);
+}
+
+.dark .badge-warning,
+[data-color-mode-resolved='dark'] .badge-warning,
+[data-theme='dark'] .badge-warning {
+  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 18%, var(--surface-card, #1e293b));
+  color: var(--color-amber-300, #fcd34d);
+}
+
+.dark .badge-error,
+.dark .badge-danger,
+[data-color-mode-resolved='dark'] .badge-error,
+[data-color-mode-resolved='dark'] .badge-danger,
+[data-theme='dark'] .badge-error,
+[data-theme='dark'] .badge-danger {
+  background: color-mix(in srgb, var(--color-red-500, #ef4444) 18%, var(--surface-card, #1e293b));
+  color: var(--color-red-300, #fca5a5);
+}
+
+.dark .badge-info,
+[data-color-mode-resolved='dark'] .badge-info,
+[data-theme='dark'] .badge-info {
+  background: color-mix(in srgb, var(--color-blue-500, #3b82f6) 18%, var(--surface-card, #1e293b));
+  color: var(--color-blue-300, #93c5fd);
+}
+
+/* badge-primary：--color-primary 为 Appearance 动态色（无固定 -300 scale），亮字用同色相提亮 */
+.dark .badge-primary,
+[data-color-mode-resolved='dark'] .badge-primary,
+[data-theme='dark'] .badge-primary {
+  background: color-mix(in srgb, var(--color-primary) 18%, var(--surface-card, #1e293b));
+  color: color-mix(in srgb, var(--color-primary) 55%, #ffffff);
+}
+
+/* primary-solid：深色下加深底色（--color-primary-dark = Appearance scheme-700 档，
+   blue-700 ≈ 7.1:1 / amber-700 ≈ 4.8:1），白字维持 --color-primary-contrast */
+.dark .badge-primary-solid,
+[data-color-mode-resolved='dark'] .badge-primary-solid,
+[data-theme='dark'] .badge-primary-solid {
+  background: var(--color-primary-dark, #2563eb);
+}
+
+/* Status 圆点：点色保留 -500（§2.1 图标/描边档），外圈 shadow 同步深色 chip 底 */
+.dark .badge-status--active,
+[data-color-mode-resolved='dark'] .badge-status--active,
+[data-theme='dark'] .badge-status--active {
+  background: color-mix(in srgb, var(--color-green-500, #22c55e) 18%, var(--surface-card, #1e293b));
+  color: var(--color-green-300, #86efac);
+}
+
+.dark .badge-status--active::before,
+[data-color-mode-resolved='dark'] .badge-status--active::before,
+[data-theme='dark'] .badge-status--active::before {
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-green-500, #22c55e) 18%, var(--surface-card, #1e293b));
+}
+
+.dark .badge-status--pending,
+[data-color-mode-resolved='dark'] .badge-status--pending,
+[data-theme='dark'] .badge-status--pending {
+  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 18%, var(--surface-card, #1e293b));
+  color: var(--color-amber-300, #fcd34d);
+}
+
+.dark .badge-status--pending::before,
+[data-color-mode-resolved='dark'] .badge-status--pending::before,
+[data-theme='dark'] .badge-status--pending::before {
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-amber-500, #f59e0b) 18%, var(--surface-card, #1e293b));
+}
+
+.dark .badge-status--draft,
+[data-color-mode-resolved='dark'] .badge-status--draft,
+[data-theme='dark'] .badge-status--draft {
+  background: color-mix(in srgb, var(--color-slate-500, #64748b) 18%, var(--surface-card, #1e293b));
+  color: var(--color-slate-300, #cbd5e1);
+}
+
+.dark .badge-status--draft::before,
+[data-color-mode-resolved='dark'] .badge-status--draft::before,
+[data-theme='dark'] .badge-status--draft::before {
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-slate-500, #64748b) 18%, var(--surface-card, #1e293b));
+}
+
+.dark .badge-status--inactive,
+[data-color-mode-resolved='dark'] .badge-status--inactive,
+[data-theme='dark'] .badge-status--inactive {
+  background: color-mix(in srgb, var(--color-slate-500, #64748b) 18%, var(--surface-card, #1e293b));
+  color: var(--color-slate-400, #94a3b8);
+}
+
+.dark .badge-status--inactive::before,
+[data-color-mode-resolved='dark'] .badge-status--inactive::before,
+[data-theme='dark'] .badge-status--inactive::before {
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-slate-500, #64748b) 18%, var(--surface-card, #1e293b));
+}
+
+.dark .badge-status--error,
+[data-color-mode-resolved='dark'] .badge-status--error,
+[data-theme='dark'] .badge-status--error {
+  background: color-mix(in srgb, var(--color-red-500, #ef4444) 18%, var(--surface-card, #1e293b));
+  color: var(--color-red-300, #fca5a5);
+}
+
+.dark .badge-status--error::before,
+[data-color-mode-resolved='dark'] .badge-status--error::before,
+[data-theme='dark'] .badge-status--error::before {
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-red-500, #ef4444) 18%, var(--surface-card, #1e293b));
 }

@@ -23,6 +23,7 @@ interface ConfirmModalHandlers {
   handleCancel: (event: Event) => void;
   handleBackdropClick: (event: MouseEvent) => void;
   handleEscape: (event: KeyboardEvent) => void;
+  handleTabTrap: (event: KeyboardEvent) => void;
 }
 
 function getIgnoreKey(storageKey: string): string {
@@ -32,6 +33,51 @@ function getIgnoreKey(storageKey: string): string {
 
 function getPreviousActiveElement(): HTMLElement | null {
   return document.activeElement instanceof HTMLElement ? document.activeElement : null;
+}
+
+// Focusable selector mirrors AppModal.ts getFocusableElements (single-container, no shadow DOM).
+const FOCUSABLE_SELECTOR = [
+  'button:not([disabled])',
+  'a[href]',
+  'area[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+function getFocusableElements(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(element => {
+    if (element.hasAttribute('disabled')) return false;
+    if (element.getAttribute('aria-hidden') === 'true') return false;
+    return true;
+  });
+}
+
+// Tab trap: wraps focus between the first and last focusable element of the dialog.
+// Registered only while the modal is open; removed by removeListeners / finish cleanup.
+function createTabTrapHandler(container: HTMLElement): (event: KeyboardEvent) => void {
+  return event => {
+    if (event.key !== 'Tab') return;
+    const focusable = getFocusableElements(container);
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+    if (!first || !last) return;
+
+    if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+      return;
+    }
+
+    if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 }
 
 function createBackdrop(modalId: string): HTMLDivElement {
@@ -156,6 +202,7 @@ function addListeners(elements: ConfirmModalElements, handlers: ConfirmModalHand
   elements.btnCancel?.addEventListener('click', handlers.handleCancel, { once: true });
   elements.backdrop.addEventListener('click', handlers.handleBackdropClick);
   document.addEventListener('keydown', handlers.handleEscape);
+  document.addEventListener('keydown', handlers.handleTabTrap);
 }
 
 function removeListeners(elements: ConfirmModalElements, handlers: ConfirmModalHandlers): void {
@@ -163,6 +210,7 @@ function removeListeners(elements: ConfirmModalElements, handlers: ConfirmModalH
   elements.btnCancel?.removeEventListener('click', handlers.handleCancel);
   elements.backdrop.removeEventListener('click', handlers.handleBackdropClick);
   document.removeEventListener('keydown', handlers.handleEscape);
+  document.removeEventListener('keydown', handlers.handleTabTrap);
 }
 
 function cleanupModal(
@@ -230,6 +278,7 @@ function mountConfirmModal(request: ConfirmModalRequest): void {
       event.stopPropagation();
       finish(false);
     },
+    handleTabTrap: createTabTrapHandler(backdrop),
   };
 
   if (!elements.btnConfirm || !elements.btnCancel) {
@@ -298,7 +347,7 @@ function buildChoiceModalContent(
 ): string {
   const safeContent = renderer.escapeHtml(request.content).replace(/\r\n|\n|\r/g, '<br>');
   const secondaryButton = `
-                    <button type="button" id="btn-secondary-${modalId}" class="min-h-10 px-4 py-2 border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2">
+                    <button type="button" id="btn-secondary-${modalId}" class="action-btn action-btn-secondary">
                         ${renderer.escapeHtml(request.secondaryLabel)}
                     </button>`;
 
@@ -361,6 +410,7 @@ function mountChoiceModal(request: ChoiceModalRequest): void {
       event.stopPropagation();
       finish('cancel');
     },
+    handleTabTrap: createTabTrapHandler(backdrop),
   };
 
   const finish = (result: ModalChoice) => {
@@ -371,6 +421,7 @@ function mountChoiceModal(request: ChoiceModalRequest): void {
     elements.btnCancel?.removeEventListener('click', handlers.handleCancel);
     elements.backdrop.removeEventListener('click', handlers.handleBackdropClick);
     document.removeEventListener('keydown', handlers.handleEscape);
+    document.removeEventListener('keydown', handlers.handleTabTrap);
     try {
       if (document.body.contains(elements.backdrop)) {
         document.body.removeChild(elements.backdrop);

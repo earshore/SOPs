@@ -188,10 +188,31 @@
 }
 
 .ma-marketplace-modal {
+  /* T2 dual-theme shell: no light-only bg-white (token flips with Appearance) */
+  background: var(--surface-card, #ffffff);
   border: 1px solid var(--ma-accent-border);
   box-shadow:
     0 24px 64px -32px rgba(var(--ma-accent-rgb), 0.42),
     0 18px 48px -34px rgba(15, 23, 42, 0.5) !important;
+}
+
+.ma-marketplace-modal .ma-marketplace-option {
+  border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));
+}
+
+.ma-marketplace-modal .ma-marketplace-option-label {
+  color: var(--color-text-primary, var(--color-slate-700, #334155));
+}
+
+/* Cancel: token colors (hover must stay styleable, so CSS-owned, mirrors
+   .app-confirm-modal [id^='btn-cancel-'] in components/modal/confirmModal.css) */
+.ma-marketplace-modal [id^='btn-cancel-'] {
+  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
+}
+
+.ma-marketplace-modal [id^='btn-cancel-']:hover {
+  color: var(--color-text-primary, var(--color-slate-700, #334155));
+  background: var(--color-bg-hover, var(--color-slate-100, #f1f5f9));
 }
 
 .ma-marketplace-modal-header {

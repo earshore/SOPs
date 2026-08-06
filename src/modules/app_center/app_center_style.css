@@ -889,6 +889,20 @@
   color: var(--color-rose-700, #be123c);
 }
 
+/* Dark: light-mode 700-level ink on a translucent tint drops to ~2.5:1;
+ * switch to the semantic 400-level text color. */
+.dark .app-overview-recent-attention-badge,
+[data-color-mode-resolved='dark'] .app-overview-recent-attention-badge,
+[data-theme='dark'] .app-overview-recent-attention-badge {
+  color: var(--color-warning, #fbbf24);
+}
+
+.dark .app-overview-recent-missing-badge,
+[data-color-mode-resolved='dark'] .app-overview-recent-missing-badge,
+[data-theme='dark'] .app-overview-recent-missing-badge {
+  color: var(--color-error, #f87171);
+}
+
 /* Only pinned cards get a row fill; ordinary items stay transparent. */
 .app-overview-recent-item--pinned {
   background: color-mix(
@@ -2539,6 +2553,51 @@
 .dark .app-overview-container,
 [data-color-mode-resolved='dark'] .app-overview-container,
 [data-theme='dark'] .app-overview-container {
+  --app-recent-accent-strong: color-mix(in srgb, var(--app-recent-accent) 45%, #ffffff);
+}
+
+/* Dark: recent 行 per-app 徽章 token 在浅色下硬编码 -50/-100 档（如 #f5f3ff），不随主题翻转
+   → 按共享 badge 深色惯例（同色相低明度 chip：accent 18% + surface-card；亮字 45% + white）
+   显式翻转；compliance_check（neutral）由上方容器级覆盖接管，无需 per-app 块。 */
+.dark
+  .app-overview-container
+  :is(
+    .app-overview-recent-item--scrape_history,
+    .app-overview-recent-item--analysis_report,
+    .app-overview-recent-item--listing_prompt,
+    .app-overview-recent-item--listing_copy,
+    .app-overview-recent-item--keyword_snapshot,
+    .app-overview-recent-item--listing_review,
+    .app-overview-recent-item--ppc_action_list
+  ),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  :is(
+    .app-overview-recent-item--scrape_history,
+    .app-overview-recent-item--analysis_report,
+    .app-overview-recent-item--listing_prompt,
+    .app-overview-recent-item--listing_copy,
+    .app-overview-recent-item--keyword_snapshot,
+    .app-overview-recent-item--listing_review,
+    .app-overview-recent-item--ppc_action_list
+  ),
+[data-theme='dark']
+  .app-overview-container
+  :is(
+    .app-overview-recent-item--scrape_history,
+    .app-overview-recent-item--analysis_report,
+    .app-overview-recent-item--listing_prompt,
+    .app-overview-recent-item--listing_copy,
+    .app-overview-recent-item--keyword_snapshot,
+    .app-overview-recent-item--listing_review,
+    .app-overview-recent-item--ppc_action_list
+  ) {
+  --app-recent-accent-soft: color-mix(
+    in srgb,
+    var(--app-recent-accent) 18%,
+    var(--surface-card, #1e293b)
+  );
+  --app-recent-accent-border: color-mix(in srgb, var(--app-recent-accent) 22%, transparent);
   --app-recent-accent-strong: color-mix(in srgb, var(--app-recent-accent) 45%, #ffffff);
 }
 

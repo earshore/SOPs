@@ -141,6 +141,23 @@
 }
 
 /* ========================================
+   3b. 模块工作区输入面（Keyword Hunter 等）
+   ======================================== */
+/* 模板内联 Tailwind 浅底类（bg-slate-50/50 focus:bg-white）深色下不翻转（utility 不映射，E3），
+   改由类接管：背景/文字走 surface/text token；
+   focus 反馈由 editor-shell 的 focus-within ring（模块 CSS）承担，无需重复焦点环。 */
+.keyword-hunter-input-workspace input,
+.keyword-hunter-input-workspace textarea {
+  background: var(--surface-card, #ffffff);
+  color: var(--color-text-primary, #334155);
+}
+
+.keyword-hunter-input-workspace input:focus,
+.keyword-hunter-input-workspace textarea:focus {
+  background: var(--surface-card, #ffffff);
+}
+
+/* ========================================
    4. Textarea 容器（带统计信息）
    ======================================== */
 .textarea-wrapper {
@@ -230,13 +247,15 @@
 /* --- Error --- */
 .form-input.error,
 .form-textarea.error {
-  border-color: var(--color-red-500);
+  /* --color-error 浅色 = red-500 / 深色自动翻 400 档（§5.1） */
+  border-color: var(--color-error);
 }
 
 .form-input.error:focus,
 .form-textarea.error:focus {
-  border-color: var(--color-red-500);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  border-color: var(--color-error);
+  /* 对齐 --field-focus-ring 的 color-mix 手法 */
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 18%, transparent);
 }
 
 /* Requirements 6.3: 输入验证失败时的抖动动画 */
@@ -248,7 +267,8 @@
 
 .form-error {
   font-size: 0.8125rem;
-  color: var(--color-red-600);
+  /* --color-error-dark = red-600（浅）/ red-500（深），深色面板 ≥4.5:1（§2.1） */
+  color: var(--color-error-dark);
   margin-top: 0.375rem;
   display: flex;
   align-items: center;
@@ -262,14 +282,15 @@
 /* --- Success --- */
 .form-input.success,
 .form-textarea.success {
-  border-color: var(--color-green-500);
+  /* --color-success 浅色 = green-500 / 深色自动翻 400 档 */
+  border-color: var(--color-success);
   position: relative;
 }
 
 .form-input.success:focus,
 .form-textarea.success:focus {
-  border-color: var(--color-green-500);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-success) 18%, transparent);
 }
 
 /* Requirements 6.4: 输入验证成功时的勾选图标动画 */
@@ -281,7 +302,7 @@
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
-  color: var(--color-green-500);
+  color: var(--color-success);
   opacity: 1;
 }
 
