@@ -12,6 +12,16 @@
   overflow: visible !important;
 }
 
+/* B1 修复 (TD-THM-01): Hub 归属橙（themeColor orange）。
+   全局 :root 的 --module-accent 是 indigo（--color-accent），导致
+   .amz_nav-btn 的 orange fallback 永不触发；此处按 app_center/sops
+   同模式在模块根容器覆写为 Hub 橙。 */
+#amz_hub_content_area {
+  --module-accent: var(--color-orange-500);
+  --module-accent-soft: color-mix(in srgb, var(--color-orange-500) 12%, transparent);
+  --module-accent-text: var(--color-orange-600);
+}
+
 .amz-hub-overview .wb-tag-dot--knowledge {
   --wb-tag-dot-color: var(--wb-tag-dot-2, #6178d3);
 }

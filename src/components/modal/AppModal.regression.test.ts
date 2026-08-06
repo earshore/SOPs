@@ -223,46 +223,6 @@ describe('AppModal regression accessibility', () => {
     expect(noHeaderPanel.getAttribute('aria-label')).toBe('快速预览');
   });
 
-  it('keeps shared no-header modals explicitly named', () => {
-    const template = readFileSync('src/components/modal/sharedModals.html', 'utf8');
-    const noHeaderModals = template.match(/<app-modal\b[^>]*\bno-header\b[^>]*>/g) ?? [];
-
-    expect(template).toContain(
-      '<app-modal id="import-conflict-modal" size="lg" title="数据冲突确认" no-header>'
-    );
-    expect(template).toContain(
-      '<app-modal id="delete-confirm-modal" size="sm" title="确认删除" no-header>'
-    );
-    expect(noHeaderModals.length).toBeGreaterThan(0);
-    noHeaderModals.forEach(modalTag => {
-      expect(modalTag).toMatch(/\btitle="[^"]+"/);
-    });
-  });
-
-  it('keeps shared modal action buttons explicit about non-submit behavior', () => {
-    const template = readFileSync('src/components/modal/sharedModals.html', 'utf8');
-    const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
-    const implicitButtons = buttonOpenings.filter(
-      button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
-    );
-
-    expect(buttonOpenings).toHaveLength(5);
-    expect(implicitButtons).toEqual([]);
-  });
-
-  it('tracks Appearance primary for shared import-conflict recommended chrome', () => {
-    const template = readFileSync('src/components/modal/sharedModals.html', 'utf8');
-    const mergeButton = template.match(/id="btn-resolve-merge"[\s\S]*?<\/button>/)?.[0] ?? '';
-
-    expect(mergeButton).toContain('from-[var(--color-primary)]');
-    expect(mergeButton).toContain('to-[var(--color-primary-dark)]');
-    expect(mergeButton).toContain('from-[var(--color-primary-light)]');
-    expect(mergeButton).toContain('to-[color-mix(in_srgb,var(--color-primary)_16%,transparent)]');
-    expect(mergeButton).not.toContain('to-indigo-500');
-    expect(mergeButton).not.toContain('to-indigo-100');
-    expect(mergeButton).not.toContain('group-hover:to-indigo-500');
-  });
-
   it('keeps AppModal generated and documented buttons explicit about non-submit behavior', () => {
     const source = readFileSync('src/components/modal/AppModal.ts', 'utf8');
     const buttonOpenings = source.match(/<button\b[^>]*>/g) ?? [];

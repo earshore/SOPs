@@ -43,7 +43,6 @@ const explicitMotionModulePaths = [
 ];
 const explicitMotionTemplatePaths = [
   resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
-  resolve(process.cwd(), 'src/components/modal/sharedModals.html'),
   resolve(process.cwd(), 'src/common/ui/navigation.ts'),
   resolve(process.cwd(), 'src/common/ui/megaMenu.ts'),
   resolve(process.cwd(), 'src/common/ui/search.ts'),
@@ -103,7 +102,7 @@ describe('PC motion CSS contract', () => {
     expect(badgesCss).toContain('opacity var(--duration-fast) var(--ease-smooth)');
     expect(badgesCss).toContain('transform var(--duration-fast) var(--ease-smooth)');
     expect(cardsCss).toContain('transform var(--duration-slow) var(--ease-spring)');
-    expect(cardsCss).toContain('box-shadow var(--duration-normal) ease');
+    expect(cardsCss).toContain('box-shadow var(--duration-slow) var(--ease-spring)');
     expect(buttonsCss).toContain(
       'transform var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease)'
     );

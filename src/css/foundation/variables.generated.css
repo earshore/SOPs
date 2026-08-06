@@ -2,11 +2,10 @@
  * CSS 变量 - 自动生成文件
  * ⚠️ 请勿手动编辑此文件！
  * 修改 src/common/config/design-tokens.ts 后运行 npm run generate:tokens
- * 生成时间: 2026-08-06T08:35:00.169Z
+ * 生成时间: 2026-08-06T18:26:19.315Z
  */
 
 :root {
-
   /* ========================================
      颜色系统 - 基础色板
      ======================================== */
@@ -434,7 +433,6 @@
   --container-padding-md: 2rem;
   --container-padding-lg: 2.5rem;
   --container-padding-xl: 3rem;
-
 }
 
 /* ========================================
@@ -443,16 +441,16 @@
 
 :root {
   --color-primary: var(--color-blue-500);
-  --color-primary-light: var(--color-blue-400);
+  --color-primary-light: color-mix(in srgb, var(--color-primary) 12%, transparent);
   --color-primary-dark: var(--color-blue-600);
   --color-primary-darker: var(--color-blue-700);
 
-  --color-secondary: var(--color-slate-500);
-  --color-secondary-light: var(--color-slate-400);
-  --color-secondary-dark: var(--color-slate-600);
+  --color-secondary: var(--color-slate-600);
+  --color-secondary-light: rgba(100, 116, 139, 0.1);
+  --color-secondary-dark: var(--color-slate-700);
 
   --color-accent: var(--color-indigo-500);
-  --color-accent-light: var(--color-indigo-400);
+  --color-accent-light: color-mix(in srgb, var(--color-accent) 12%, transparent);
   --color-accent-dark: var(--color-indigo-600);
 
   --color-success: var(--color-green-500);
@@ -477,7 +475,6 @@
   --border-dark: var(--color-slate-300);
   --border-focus: var(--color-blue-500);
 
-
   /* 置信度色系 */
   --confidence-high-bg: var(--color-green-100);
   --confidence-high-bg-alpha: var(--color-green-500);
@@ -494,5 +491,4 @@
   --confidence-low-text: var(--color-orange-700);
   --confidence-low-text-light: var(--color-orange-400);
   --confidence-low-border: var(--color-orange-300);
-
 }

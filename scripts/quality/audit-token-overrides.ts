@@ -88,7 +88,13 @@ interface AuditReport {
   conflictAtomicAllowlisted: Array<TokenPair & { reason: string }>;
   /** Atomic conflicts not listed in allowlist (action needed). */
   conflictAtomicUnallowlisted: TokenPair[];
-  /** Allowlist token names with no current atomic conflict (stale entries). */
+  /** Non-atomic semantic-brand (primary/secondary/accent family) conflicts. */
+  conflictSemanticBrand: TokenPair[];
+  /** Semantic-brand conflicts present in config allowlist (intentional). */
+  conflictSemanticBrandAllowlisted: Array<TokenPair & { reason: string }>;
+  /** Semantic-brand conflicts not listed in allowlist (action needed). */
+  conflictSemanticBrandUnallowlisted: TokenPair[];
+  /** Allowlist token names with no current conflict (stale entries). */
   allowlistUnused: string[];
   allowlistSize: number;
 }
@@ -515,9 +521,21 @@ function buildReport(): AuditReport {
     }
   }
 
-  const conflictAtomicNames = new Set(conflictAtomic.map(p => p.name));
+  const conflictSemanticBrand = conflicts.filter(p => !p.atomic && p.category === 'semantic-brand');
+  const conflictSemanticBrandAllowlisted: AuditReport['conflictSemanticBrandAllowlisted'] = [];
+  const conflictSemanticBrandUnallowlisted: TokenPair[] = [];
+  for (const p of conflictSemanticBrand) {
+    const entry = allowlist.entries.get(p.name);
+    if (entry) {
+      conflictSemanticBrandAllowlisted.push({ ...p, reason: entry.reason });
+    } else {
+      conflictSemanticBrandUnallowlisted.push(p);
+    }
+  }
+
+  const conflictNames = new Set([...conflictAtomic, ...conflictSemanticBrand].map(p => p.name));
   const allowlistUnused = [...allowlist.entries.keys()]
-    .filter(name => !conflictAtomicNames.has(name))
+    .filter(name => !conflictNames.has(name))
     .sort((a, b) => a.localeCompare(b));
 
   return {
@@ -535,6 +553,9 @@ function buildReport(): AuditReport {
     conflictAtomic,
     conflictAtomicAllowlisted,
     conflictAtomicUnallowlisted,
+    conflictSemanticBrand,
+    conflictSemanticBrandAllowlisted,
+    conflictSemanticBrandUnallowlisted,
     allowlistUnused,
     allowlistSize: allowlist.entries.size,
   };
@@ -591,6 +612,24 @@ function toMarkdown(report: AuditReport): string {
     formatTableRow([
       '↳ atomic conflicts **unallowlisted**',
       String(report.conflictAtomicUnallowlisted.length),
+    ])
+  );
+  lines.push(
+    formatTableRow([
+      '↳ non-atomic **semantic-brand** conflicts',
+      String(report.conflictSemanticBrand.length),
+    ])
+  );
+  lines.push(
+    formatTableRow([
+      '↳ semantic-brand **allowlisted**',
+      String(report.conflictSemanticBrandAllowlisted.length),
+    ])
+  );
+  lines.push(
+    formatTableRow([
+      '↳ semantic-brand **unallowlisted**',
+      String(report.conflictSemanticBrandUnallowlisted.length),
     ])
   );
   lines.push(formatTableRow(['Allowlist entries', String(report.allowlistSize)]));
@@ -651,10 +690,34 @@ function toMarkdown(report: AuditReport): string {
   }
   if (report.allowlistUnused.length > 0) {
     lines.push('');
-    lines.push('### Stale allowlist entries (no current atomic conflict)');
+    lines.push('### Stale allowlist entries (no current conflict)');
     lines.push('');
     for (const name of report.allowlistUnused) {
       lines.push(`- \`${name}\``);
+    }
+  }
+  lines.push('');
+  lines.push('## Semantic-brand conflicts (0 tolerance / allowlist)');
+  lines.push('');
+  lines.push(
+    'Non-atomic same-name conflicts in the primary/secondary/accent family are real drift, not scale overrides. `--fail-on-semantic-brand` fails on any of them; `--fail-on-unallowlisted-atomic` also fails unless the token is explicitly allowlisted with a reason.'
+  );
+  lines.push('');
+  if (report.conflictSemanticBrand.length === 0) {
+    lines.push('_None found — generated and handwritten are aligned._');
+  } else {
+    lines.push(formatTableRow(['Token', 'Generated', 'Handwritten', 'Allowlisted']));
+    lines.push(formatTableRow(['---', '---', '---', '---']));
+    for (const p of report.conflictSemanticBrand) {
+      const allowed = report.conflictSemanticBrandAllowlisted.some(a => a.name === p.name);
+      lines.push(
+        formatTableRow([
+          '`' + p.name + '`',
+          '`' + normalizeValue(p.generated) + '`',
+          '`' + normalizeValue(p.handwritten) + '`',
+          allowed ? 'yes' : '**no**',
+        ])
+      );
     }
   }
   lines.push('');
@@ -784,6 +847,7 @@ function toMarkdown(report: AuditReport): string {
   lines.push('npm run token:override-audit');
   lines.push('npx tsx scripts/quality/audit-token-overrides.ts --markdown');
   lines.push('npx tsx scripts/quality/audit-token-overrides.ts --fail-on-unallowlisted-atomic');
+  lines.push('npx tsx scripts/quality/audit-token-overrides.ts --fail-on-semantic-brand');
   lines.push('npx tsx scripts/quality/audit-token-overrides.ts --fail-on-atomic-override');
   lines.push('```');
   lines.push('');
@@ -801,6 +865,9 @@ function printHuman(report: AuditReport): void {
   console.log(`    atomic conflicts: ${report.conflictAtomic.length}`);
   console.log(`      allowlisted: ${report.conflictAtomicAllowlisted.length}`);
   console.log(`      unallowlisted: ${report.conflictAtomicUnallowlisted.length}`);
+  console.log(`    semantic-brand conflicts: ${report.conflictSemanticBrand.length}`);
+  console.log(`      allowlisted: ${report.conflictSemanticBrandAllowlisted.length}`);
+  console.log(`      unallowlisted: ${report.conflictSemanticBrandUnallowlisted.length}`);
   console.log(`  allowlist entries: ${report.allowlistSize} (${report.allowlistPath})`);
   if (report.allowlistUnused.length > 0) {
     console.log(`  allowlist unused (stale): ${report.allowlistUnused.length}`);
@@ -820,6 +887,19 @@ function printHuman(report: AuditReport): void {
       console.log(`  ${p.name} (${p.category}): ${p.reason}`);
     }
   }
+  if (report.conflictSemanticBrandUnallowlisted.length > 0) {
+    console.log('\nUnallowlisted semantic-brand conflicts:');
+    for (const p of report.conflictSemanticBrandUnallowlisted.slice(0, 20)) {
+      console.log(
+        `  ${p.name}: gen=${normalizeValue(p.generated)} | hand=${normalizeValue(p.handwritten)}`
+      );
+    }
+  } else if (report.conflictSemanticBrandAllowlisted.length > 0) {
+    console.log('\nAllowlisted semantic-brand conflicts (sample):');
+    for (const p of report.conflictSemanticBrandAllowlisted.slice(0, 8)) {
+      console.log(`  ${p.name}: ${p.reason}`);
+    }
+  }
   if (report.identicalAtomic.length > 0) {
     console.log(`\nAtomic identical sample (${Math.min(8, report.identicalAtomic.length)}):`);
     for (const p of report.identicalAtomic.slice(0, 8)) {
@@ -834,6 +914,7 @@ function parseArgs(argv: string[]) {
     markdown: argv.includes('--markdown'),
     failOnAtomicOverride: argv.includes('--fail-on-atomic-override'),
     failOnUnallowlistedAtomic: argv.includes('--fail-on-unallowlisted-atomic'),
+    failOnSemanticBrand: argv.includes('--fail-on-semantic-brand'),
     write: (() => {
       const i = argv.indexOf('--write');
       return i >= 0 ? argv[i + 1] : null;
@@ -873,6 +954,20 @@ function main(): void {
   if (args.failOnUnallowlistedAtomic && report.conflictAtomicUnallowlisted.length > 0) {
     console.error(
       `\n[fail-on-unallowlisted-atomic] ${report.conflictAtomicUnallowlisted.length} atomic conflicts not in allowlist`
+    );
+    failed = true;
+  }
+  if (args.failOnSemanticBrand && report.conflictSemanticBrand.length > 0) {
+    console.error(
+      `\n[fail-on-semantic-brand] ${report.conflictSemanticBrand.length} semantic-brand conflicts (0 tolerance)`
+    );
+    failed = true;
+  }
+  // TD-THM-01: the CI gate flag also covers non-atomic semantic-brand drift that is not
+  // explicitly allowlisted (atomic allowlist semantics unchanged).
+  if (args.failOnUnallowlistedAtomic && report.conflictSemanticBrandUnallowlisted.length > 0) {
+    console.error(
+      `\n[fail-on-unallowlisted-atomic] ${report.conflictSemanticBrandUnallowlisted.length} semantic-brand conflicts not in allowlist`
     );
     failed = true;
   }

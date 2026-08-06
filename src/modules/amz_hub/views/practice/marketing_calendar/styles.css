@@ -30,8 +30,10 @@
   z-index: 0;
   /* 在最底层 */
 
-  /* 原本 header 的背景样式移到这里 */
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* 原本 header 的背景样式移到这里
+     B2 (TD-THM-01): 引用模块变量 --amzf-filter-gradient（D10 迁移后的单一来源），
+     不再裸写 #667eea→#764ba2 渐变 */
+  background: var(--amzf-filter-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
   border-radius: 16px;
 
   /* ✅ 关键：只在背景层裁切，不影响内容层 */

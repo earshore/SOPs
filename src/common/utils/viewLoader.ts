@@ -210,11 +210,6 @@ const VIEW_REGISTRY: ViewRegistry = {
     target: '#modal-container',
     isLoaded: false,
   },
-  modals: {
-    path: '/src/components/modal/sharedModals.html',
-    target: '#modal-container',
-    isLoaded: false,
-  },
 
   // === 业务视图 (Lazy) ===
   sops: { path: '/src/modules/sops/sops.html', target: 'main', isLoaded: false },
@@ -398,12 +393,12 @@ async function loadHtml(key: string): Promise<HTMLElement | null> {
 
 /**
  * 初始化核心视图
- * 只加载 Home 和 全局模态框
+ * 只加载 Home 和 设置
  */
 export async function initViews(): Promise<void> {
   clearOldCacheOnce();
 
-  await Promise.all([loadHtml('home'), loadHtml('settings'), loadHtml('modals')]);
+  await Promise.all([loadHtml('home'), loadHtml('settings')]);
 }
 
 /**
@@ -420,7 +415,7 @@ export async function initHomeView(): Promise<void> {
  * 后台预热非首屏但常用的全局视图。
  */
 export async function initDeferredViews(): Promise<void> {
-  await Promise.all([loadHtml('settings'), loadHtml('modals')]);
+  await loadHtml('settings');
 }
 
 /**

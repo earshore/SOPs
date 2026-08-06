@@ -223,54 +223,6 @@
 }
 
 /* ========================================
-   模态框变体 - 危险操作
-   ======================================== */
-.modal-danger .modal-header {
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-  border-bottom-color: #fecaca;
-}
-
-.modal-danger .modal-title {
-  color: var(--color-red-700);
-}
-
-/* ========================================
-   模态框变体 - 成功提示
-   ======================================== */
-.modal-success .modal-header {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border-bottom-color: #bbf7d0;
-}
-
-.modal-success .modal-title {
-  color: var(--color-green-700);
-}
-
-/* ========================================
-   模态框变体 - 信息提示
-   ======================================== */
-.modal-info .modal-header {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-bottom-color: #bfdbfe;
-}
-
-.modal-info .modal-title {
-  color: var(--color-blue-700);
-}
-
-/* ========================================
-   模态框变体 - 警告提示
-   ======================================== */
-.modal-warning .modal-header {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border-bottom-color: #fde68a;
-}
-
-.modal-warning .modal-title {
-  color: var(--color-amber-700);
-}
-
-/* ========================================
    Zoom Modal (全屏模态框)
    ======================================== */
 .modal-zoom {

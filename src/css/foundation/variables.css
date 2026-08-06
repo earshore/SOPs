@@ -64,20 +64,15 @@
 
   /* ---- 主色 (Primary) ---- */
   --color-primary: var(--color-blue-500);
-  --color-primary-light: rgba(59, 130, 246, 0.1);
   --color-primary-dark: var(--color-blue-600);
   --color-primary-darker: var(--color-blue-700);
   --color-primary-contrast: #ffffff; /* 主色上的文字色 */
 
   /* ---- 次要色 (Secondary) ---- */
-  --color-secondary: var(--color-slate-600);
-  --color-secondary-light: rgba(100, 116, 139, 0.1);
-  --color-secondary-dark: var(--color-slate-700);
   --color-secondary-contrast: #ffffff;
 
   /* ---- 强调色 (Accent) ---- */
   --color-accent: var(--color-indigo-500);
-  --color-accent-light: rgba(99, 102, 241, 0.1);
   --color-accent-dark: var(--color-indigo-600);
 
   /* ---- 文字 ---- */
@@ -250,8 +245,7 @@
   --border-width-thick: 2px;
   --border-width-heavy: 3px;
 
-  /* 预设边框 */
-  --border-light: var(--border-width-thin) solid var(--color-border-light);
+  /* 预设边框（--border-light 为纯色 token，由 generated 输出，不再手写简写） */
   --border-default: var(--border-width-thin) solid var(--color-border-default);
   --border-strong: var(--border-width-thin) solid var(--color-border-strong);
 

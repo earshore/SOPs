@@ -273,18 +273,21 @@ export const SEMANTIC_COLORS = {
   // 主色系
   primary: {
     DEFAULT: 'var(--color-blue-500)',
-    light: 'var(--color-blue-400)',
+    // wash 语义：跟随 Appearance primary（TD-THM-01），不再写死 blue-400
+    light: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
     dark: 'var(--color-blue-600)',
     darker: 'var(--color-blue-700)',
   },
   secondary: {
-    DEFAULT: 'var(--color-slate-500)',
-    light: 'var(--color-slate-400)',
-    dark: 'var(--color-slate-600)',
+    // 中性灰，不随 Appearance；设计值以原手写为准（slate-600 / alpha / slate-700）
+    DEFAULT: 'var(--color-slate-600)',
+    light: 'rgba(100, 116, 139, 0.1)',
+    dark: 'var(--color-slate-700)',
   },
   accent: {
     DEFAULT: 'var(--color-indigo-500)',
-    light: 'var(--color-indigo-400)',
+    // wash 语义：跟随 Appearance accent（TD-THM-01），不再写死 indigo-400
+    light: 'color-mix(in srgb, var(--color-accent) 12%, transparent)',
     dark: 'var(--color-indigo-600)',
   },
 

@@ -7,24 +7,3 @@
   text-align: center;
   padding: var(--spacing-3xl) var(--spacing-lg);
 }
-
-.empty-icon {
-  font-size: var(--text-5xl);
-  color: var(--color-text-placeholder);
-  margin-bottom: var(--spacing-md);
-  opacity: 0.4;
-}
-
-.empty-title {
-  font-size: var(--text-lg);
-  font-weight: var(--font-bold);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-xs);
-}
-
-.empty-desc {
-  font-size: var(--text-sm);
-  color: var(--color-text-tertiary);
-  max-width: 400px;
-  margin: 0 auto;
-}
