@@ -110,23 +110,16 @@
   margin-left: auto;
   min-height: 2rem;
   padding: 0.25rem 0.75rem;
-  border: 1px solid var(--settings-border, #e2e8f0);
   border-radius: calc(var(--settings-radius-control, 0.75rem) - 0.125rem);
-  background: var(--settings-surface, #fff);
-  color: var(--settings-text, #334155);
   font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
 }
 
-.settings-pref-row__action:hover {
+/* Accent-tinted hover is a deliberate specialization: equal specificity to
+ * the shared hover in systemSettings.css, wins by loading after it
+ * (llmSection.css follows the panel base). Background stays shared. */
+.settings-pref-row__action:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--settings-accent) 35%, var(--settings-border, #e2e8f0));
   color: var(--settings-accent);
-}
-
-.settings-pref-row__action:focus-visible {
-  outline: none;
-  box-shadow: var(--settings-focus-ring);
 }
 
 .settings-pref-row__icon {

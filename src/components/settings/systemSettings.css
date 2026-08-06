@@ -27,6 +27,66 @@
   --settings-accent-strong: color-mix(in srgb, var(--settings-accent) 60%, #ffffff);
 }
 
+/* Shared button base — the six settings button families converge on one
+ * contract (§3.2): border/background, hover, disabled (opacity 0.5), focus
+ * ring. Variants keep size/layout/radius and their accent/danger
+ * specializations locally. :hover/:focus-visible carry :not(:disabled) so a
+ * local specialization can override them with equal specificity instead of
+ * relying on cascade position. */
+.settings-strategy-footer__btn,
+.settings-data-io-actions__btn,
+.settings-proxy-form__btn,
+.settings-pref-row__action,
+.settings-status-bar__btn,
+.settings-data-bucket-row__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border: 1px solid var(--settings-border);
+  background: var(--settings-surface);
+  color: var(--settings-text);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease,
+    opacity 150ms ease,
+    transform 100ms ease;
+}
+
+.settings-strategy-footer__btn:hover:not(:disabled),
+.settings-data-io-actions__btn:hover:not(:disabled),
+.settings-proxy-form__btn:hover:not(:disabled),
+.settings-pref-row__action:hover:not(:disabled),
+.settings-status-bar__btn:hover:not(:disabled),
+.settings-data-bucket-row__action:hover:not(:disabled) {
+  background: var(--settings-surface-muted);
+  border-color: var(--color-border-strong, #cbd5e1);
+}
+
+.settings-strategy-footer__btn:disabled,
+.settings-data-io-actions__btn:disabled,
+.settings-proxy-form__btn:disabled,
+.settings-pref-row__action:disabled,
+.settings-status-bar__btn:disabled,
+.settings-data-bucket-row__action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-strategy-footer__btn:focus-visible:not(:disabled),
+.settings-data-io-actions__btn:focus-visible:not(:disabled),
+.settings-proxy-form__btn:focus-visible:not(:disabled),
+.settings-pref-row__action:focus-visible:not(:disabled),
+.settings-status-bar__btn:focus-visible:not(:disabled),
+.settings-data-bucket-row__action:focus-visible:not(:disabled) {
+  outline: none;
+  box-shadow: var(--settings-focus-ring);
+}
+
 /* Drawer shell: panel elevation + soft footer gradient (not hard white). */
 .settings-panel-shell {
   background: linear-gradient(
@@ -525,17 +585,8 @@
 .settings-status-bar__btn {
   min-height: 2rem;
   padding: 0.25rem 0.625rem;
-  border: 1px solid var(--settings-border, #e2e8f0);
   border-radius: calc(var(--settings-radius-control, 0.75rem) - 0.125rem);
-  background: var(--settings-surface, #fff);
-  color: var(--settings-text, #334155);
   font-size: 0.6875rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.settings-status-bar__btn:hover {
-  background: var(--settings-surface-muted, #f8fafc);
 }
 
 .settings-status-bar__btn--primary {
@@ -544,9 +595,12 @@
   color: var(--settings-accent);
 }
 
-.settings-status-bar__btn:focus-visible {
-  outline: none;
-  box-shadow: var(--settings-focus-ring);
+/* Accent emphasis must survive the shared hover (surface-muted background):
+ * equal specificity to the shared rule, wins by being later in this file. */
+.settings-status-bar__btn--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--settings-accent-soft) 88%, var(--settings-surface));
+  border-color: color-mix(in srgb, var(--settings-accent) 35%, var(--settings-border, #e2e8f0));
+  color: var(--settings-accent-strong);
 }
 
 .settings-segmented {

@@ -4,6 +4,9 @@
     var(--color-primary-darker, var(--settings-accent-strong)),
     var(--settings-accent-strong)
   );
+  /* keep the base transparent border — the shared hover must not paint a
+   * gray outline over the primary gradient */
+  border-color: transparent;
   box-shadow: 0 10px 22px color-mix(in srgb, var(--settings-accent) 28%, transparent);
 }
 
@@ -22,8 +25,7 @@
 }
 
 .settings-strategy-footer__btn--primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  /* opacity / cursor come from the shared :disabled; just drop the accent shadow */
   box-shadow: none;
 }
 
@@ -73,53 +75,37 @@
 }
 
 .settings-data-io-actions__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
   min-height: 2.5rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--settings-border);
   border-radius: 0.75rem;
-  background: var(--settings-surface);
-  color: var(--settings-text);
   font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background 150ms ease,
-    border-color 150ms ease;
 }
 
-.settings-data-io-actions__btn:hover:not(:disabled) {
-  background: var(--settings-surface-muted);
-  border-color: var(--color-border-strong, #cbd5e1);
-}
-
+/* Selected (segmented) state: soft accent chip, not a solid primary — keeps
+ * the adjacent 导出/保存 primary pair hierarchy distinct. Same selector
+ * weight as the shared hover, wins by loading last (dataSection.css). */
 .settings-data-io-actions__btn--active:not(:disabled) {
-  background: var(--settings-accent);
-  border-color: var(--settings-accent);
-  color: #fff;
-  box-shadow: 0 6px 14px color-mix(in srgb, var(--settings-accent) 24%, transparent);
+  background: var(--settings-accent-soft);
+  border-color: color-mix(in srgb, var(--settings-accent) 50%, var(--settings-border));
+  color: var(--settings-accent);
+  box-shadow: none;
 }
 
 .settings-data-io-actions__btn--active:hover:not(:disabled) {
-  background: var(--settings-accent-strong);
-  border-color: var(--settings-accent-strong);
+  background: color-mix(in srgb, var(--settings-accent-soft) 88%, var(--settings-surface));
+  border-color: color-mix(in srgb, var(--settings-accent) 50%, var(--settings-border));
+  color: var(--settings-accent-strong);
 }
 
+/* Active overrides the shared focus rule (same weight, later in cascade), so
+ * restore the focus ring explicitly at one higher specificity. */
+.settings-data-io-actions__btn--active:focus-visible:not(:disabled) {
+  box-shadow: var(--settings-focus-ring);
+}
+
+/* Child accent glyph inherits the active accent text color (soft background). */
 .settings-data-io-actions__btn--active:not(:disabled) .settings-text-accent {
   color: currentColor;
-}
-
-.settings-data-io-actions__btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.settings-data-io-actions__btn:focus-visible {
-  outline: none;
-  box-shadow: var(--settings-focus-ring);
 }
 
 .settings-stat-tile {
