@@ -128,15 +128,15 @@ export const MENU_CONFIG: MenuConfig = {
       themeColor: 'indigo', // ✅ 通义千问感紫蓝系 - 流程管理主题
     },
 
-    // [工作台] App Center 容器模块
+    // [运营工作台] App Center 容器模块
     app_center: {
       id: 'app_center',
       contextId: 'apps',
-      title: '工作台',
+      title: '运营工作台',
       version: 'v1.0',
       icon: 'fas fa-cubes',
       description: '集成多个专业工具的工作台，提供数据采集、分析与优化功能。',
-      themeColor: 'rose', // ✅ MiniMax 感玫红系 - 工作台容器主题
+      themeColor: 'rose', // ✅ MiniMax 感玫红系 - 运营工作台容器主题
     },
 
     // [应用 A] Master Analysis
@@ -172,7 +172,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0 Pro',
       icon: 'fas fa-search',
       description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。',
-      themeColor: 'cyan', // ✅ 青蓝色系 - 与示例业务场景同款蓝色，区分工作台 rose
+      themeColor: 'cyan', // ✅ 青蓝色系 - 与示例业务场景同款蓝色，区分运营工作台 rose
     },
 
     // PPC Tools 模块配置
