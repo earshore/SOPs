@@ -134,24 +134,30 @@
           </button>
           <select
             id="deep-chat-model-select"
+            data-model-select
             class="deep-chat-select"
             aria-label="模型选择"
-            disabled
-          >
-            <option value="">默认</option>
-          </select>
+          ></select>
           <button
             id="deep-chat-refresh-config"
+            data-model-select-refresh
             class="deep-chat-top-icon"
             type="button"
-            title="刷新模型配置"
-            aria-label="刷新模型配置"
+            title="重新获取可用模型"
+            aria-label="重新获取可用模型"
           >
-            <i class="fas fa-rotate" aria-hidden="true"></i>
+            <i class="fas fa-sync-alt" aria-hidden="true"></i>
           </button>
           <button id="deep-chat-open-settings" class="deep-chat-config-link" type="button" hidden>
             配置模型
           </button>
+          <span
+            data-model-select-status
+            class="sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          ></span>
         </div>
 
         <div class="deep-chat-top-actions">

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2026-08-06
+
+### Added
+
+- New shared `src/components/modelSelect/` component family (state / service / ui / controller) as the single implementation for “select LLM model + re-fetch model list”; documented in `docs/guides/model-select-component-guide.md`.
+
+### Changed
+
+- Keyword Hunter SEO process page and Playground Deep Chat now use the shared ModelSelect component instead of their own model selector / refresh implementations; duplicated model option builders (`dedupeTranslationModels`, `normalizeModels`, …) are removed.
+- System Settings converges its model helpers onto the component service layer: `dedupeModels` and `getModelId` re-export from `modelSelectService`; LLM form and tool-strategy UI semantics are unchanged.
+
+### Fixed
+
+- Playground Deep Chat “refresh model config” now truly re-fetches `/models` instead of only re-reading the local config; refresh failure surfaces the unified LLM failure toast with loading/error states and `aria-live` status.
+
 ## [3.0.12-rc.8] - 2026-08-04
 
 > Release Candidate. GitHub Release remains a **Pre-release**; Latest continues to point to stable GA `v3.0.11`.

@@ -189,18 +189,15 @@ describe('UI-P1-08 template semantics', () => {
 
     const progress = requireElement(processRoot, '#keyword-hunter-translate-progress');
     expect(progress.getAttribute('role')).toBe('progressbar');
-    requireElement(processRoot, 'label[for="keyword-hunter-translation-model-select"]');
+    requireElement(processRoot, 'label[for="keyword-hunter-model-select"]');
     requireElement(
       processRoot,
-      '#keyword-hunter-translation-model-select[aria-describedby="keyword-hunter-translation-model-status"]'
+      '#keyword-hunter-model-select[data-model-select][aria-describedby="keyword-hunter-model-status"]'
     );
+    requireElement(processRoot, '[data-model-select-refresh][aria-label="重新获取可用模型"]');
     requireElement(
       processRoot,
-      '#keyword-hunter-refresh-models-btn[aria-label="重新获取 AI 翻译可用模型"]'
-    );
-    requireElement(
-      processRoot,
-      '#keyword-hunter-translation-model-status[role="status"][aria-live="polite"][aria-atomic="true"]'
+      '#keyword-hunter-model-status[data-model-select-status][role="status"][aria-live="polite"][aria-atomic="true"]'
     );
     requireElement(
       processRoot,

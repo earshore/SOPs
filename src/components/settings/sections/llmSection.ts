@@ -19,6 +19,7 @@ import {
   type ProviderConfig,
 } from '@/common/config/llmProviders';
 import { EnvConfig } from '@/common/config/envConfig';
+import { getModelId } from '@/common/utils/modelOptions';
 import { type ModelMetadata } from '../domain/localDataCopy';
 import {
   LLM_API_FAMILY_OPTIONS,
@@ -75,14 +76,14 @@ export const llmSectionBehavior: SettingsPanelPart = {
 
   get activeModelInfo(): ModelMetadata | null {
     if (!this.llm.model) return null;
-    const m = this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model);
+    const m = this.llm.models.find(x => getModelId(x) === this.llm.model);
     const model = m && typeof m !== 'string' ? m : null;
     return mergeModelMetadata(model, findPresetModelInfo(this.llm.provider, this.llm.model));
   },
 
   get activeModelCapability() {
     if (!this.llm.model) return null;
-    const m = this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model);
+    const m = this.llm.models.find(x => getModelId(x) === this.llm.model);
     return resolveModelCapability({
       provider: this.llm.provider,
       modelId: this.llm.model,
@@ -177,8 +178,7 @@ export const llmSectionBehavior: SettingsPanelPart = {
     const model = (this.llm.model || '').trim();
     if (!model) return '';
     const pathId = normalizeApiPathId(this.llm.apiPath);
-    const modelsEntry =
-      this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === model) ?? model;
+    const modelsEntry = this.llm.models.find(x => getModelId(x) === model) ?? model;
     const registryCap = resolveModelCapability({
       provider: this.llm.provider,
       modelId: model,
@@ -232,8 +232,7 @@ export const llmSectionBehavior: SettingsPanelPart = {
     const model = (this.llm.model || '').trim();
     if (!model) return [];
     const pathId = normalizeApiPathId(this.llm.apiPath);
-    const modelsEntry =
-      this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === model) ?? model;
+    const modelsEntry = this.llm.models.find(x => getModelId(x) === model) ?? model;
     const cap = resolveModelCapability({
       provider: this.llm.provider,
       modelId: model,

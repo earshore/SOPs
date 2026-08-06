@@ -1,3 +1,4 @@
+import { getModelId } from '@/components/modelSelect/modelSelectService';
 import type { ChatMessage } from '@/services/llmService';
 import type { LLMProviderConfig } from '@/types/state';
 import { randomBase36 } from '@/common/utils/random';
@@ -99,18 +100,14 @@ export function getMessageText(message: DeepChatMessage): string {
   return getDeepChatMessageText(message);
 }
 
-export function normalizeModels(config: LLMProviderConfig | null): string[] {
-  if (!config?.models) {
-    return [];
-  }
-
-  return config.models
-    .map(model => (typeof model === 'string' ? model : model.id))
-    .filter((model): model is string => Boolean(model));
-}
-
+/**
+ * 取配置 models 中的首个模型 id。
+ * 兼容导出（request/handleRequest.ts 仍按 LLMProviderConfig 形态取首模型）：
+ * 实现委托给 ModelSelect 组件 service 的 getModelId，避免页面重复实现。
+ */
 export function getFirstModel(config: LLMProviderConfig | null): string {
-  return normalizeModels(config)[0] || '';
+  const first = config?.models?.[0];
+  return first ? getModelId(first) : '';
 }
 
 export function normalizeTemperature(value: string | undefined): number {

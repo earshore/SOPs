@@ -32,9 +32,10 @@ const deepChatTemplate = `
       </aside>
       <section class="deep-chat-main">
         <button id="deep-chat-toggle-rail" type="button" aria-expanded="true" aria-label="收起最近会话"></button>
-        <select id="deep-chat-model-select"></select>
-        <button id="deep-chat-refresh-config" type="button"></button>
+        <select id="deep-chat-model-select" data-model-select></select>
+        <button id="deep-chat-refresh-config" data-model-select-refresh type="button"></button>
         <button id="deep-chat-open-settings" type="button" hidden>配置模型</button>
+        <span data-model-select-status class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span>
         <div class="deep-chat-top-actions">
           <details class="deep-chat-tuning-panel">
             <summary>Settings</summary>
@@ -301,21 +302,35 @@ const deepChatStorageKeys = {
 } as const;
 
 function createDeepChatStorageService(options: ImportOptions) {
+  const initialConfig = options.config === undefined ? defaultConfig : options.config;
+  let llmConfig: Record<string, unknown> | null = initialConfig;
+  let strategySettings = options.toolStrategySettings ?? null;
   return {
     get: vi.fn((key: string, fallback?: unknown) => {
       if (key === deepChatStorageKeys.TOOL_STRATEGY_SETTINGS) {
-        return options.toolStrategySettings ?? null;
+        return strategySettings;
       }
       return fallback ?? null;
     }),
-    getLLMConfigWithKey: vi.fn(async () =>
-      options.config === undefined ? defaultConfig : options.config
-    ),
+    getLLMConfigWithKey: vi.fn(async () => llmConfig),
     getLLMConfig: vi.fn(() => {
-      const config = options.config === undefined ? defaultConfig : options.config;
-      if (!config) return null;
-      const { apiKey: _apiKey, ...rest } = config as { apiKey?: string };
+      if (!llmConfig) return null;
+      const { apiKey: _apiKey, ...rest } = llmConfig as { apiKey?: string };
       return rest;
+    }),
+    setLLMConfig: vi.fn((_provider: string, next: Record<string, unknown>) => {
+      // 生产实现密钥走 secure 存储、getLLMConfigWithKey 读回；此处保留上一次
+      // apiKey，模拟「写盘后重读含 key 配置」的语义。
+      const previousKey = (llmConfig as { apiKey?: string } | null)?.apiKey ?? '';
+      llmConfig = { ...(next ?? {}), apiKey: next.apiKey || previousKey } as Record<
+        string,
+        unknown
+      >;
+    }),
+    set: vi.fn((key: string, value: unknown) => {
+      if (key === deepChatStorageKeys.TOOL_STRATEGY_SETTINGS) {
+        strategySettings = value as typeof strategySettings;
+      }
     }),
     remove: vi.fn(),
   };
@@ -412,6 +427,7 @@ function createDeepChatTestRuntime(options: ImportOptions) {
   return {
     localDataStore: createLocalDataStoreMock(options),
     storageService: createDeepChatStorageService(options),
+    fetchModelsFromApi: vi.fn(),
     toast: vi.fn(),
     callLLM: vi.fn(options.callLLM || createDefaultDeepChatCall()),
     state,
@@ -462,6 +478,7 @@ async function importDeepChat(options: ImportOptions = {}) {
   const {
     localDataStore,
     storageService,
+    fetchModelsFromApi,
     toast,
     callLLM,
     state,
@@ -478,6 +495,11 @@ async function importDeepChat(options: ImportOptions = {}) {
   installDeepChatTemplateMocks();
   vi.doMock('@/services/storageService', () => ({
     STORAGE_KEYS: deepChatStorageKeys,
+    CACHE_PREFIXES: {
+      VIEW: 'cache:view:',
+      HTTP: 'cache:http:',
+      AI_ANALYSIS: 'cache:ai-analysis:',
+    },
     StorageService: storageService,
   }));
   vi.doMock('@/services/localDataStore', () => ({
@@ -500,6 +522,10 @@ async function importDeepChat(options: ImportOptions = {}) {
       }
       return String(content);
     },
+  }));
+  vi.doMock('@/services/llmModelList', () => ({
+    // ModelSelect 组件 service 刷新时真调 /models 的入口。
+    fetchModelsFromApi,
   }));
   vi.doMock('@/services/skillRegistry', () => ({
     skillRegistry: {
@@ -565,6 +591,7 @@ async function importDeepChat(options: ImportOptions = {}) {
       confirmWithModal,
       chooseWithModal,
       eventBus,
+      fetchModelsFromApi,
       historyService,
       localDataStore,
       listingWorkflowHandoff,
@@ -705,6 +732,7 @@ afterEach(() => {
   vi.doUnmock('@/services/storageService');
   vi.doUnmock('@/services/localDataStore');
   vi.doUnmock('@/services/llmService');
+  vi.doUnmock('@/services/llmModelList');
   vi.doUnmock('@/common/ui/notifications');
   vi.doUnmock('@/stores/useAppStore');
   vi.doUnmock('@/common/EventBus');
@@ -741,6 +769,10 @@ describe('deep-chat playground template copy', () => {
     expect(template).toContain('id="deep-chat-open-settings"');
     expect(template).not.toContain('id="deep-chat-open-promptlab"');
     expect(template).not.toContain('deep-chat-provider-status');
+    expect(template).toContain('data-model-select');
+    expect(template).toContain('data-model-select-refresh');
+    expect(template).toContain('data-model-select-status');
+    expect(template).toContain('aria-label="重新获取可用模型"');
     expect(template.indexOf('id="deep-chat-model-select"')).toBeLessThan(
       template.indexOf('id="deep-chat-refresh-config"')
     );
@@ -885,11 +917,13 @@ describe('deep-chat playground module', () => {
     expect(queryRequired<HTMLButtonElement>(container, '#deep-chat-open-settings').hidden).toBe(
       true
     );
-    expect(
-      [...container.querySelectorAll<HTMLOptionElement>('#deep-chat-model-select option')].map(
-        option => option.value
-      )
-    ).toEqual(['gpt-4.1', 'gpt-4.1-mini']);
+    await vi.waitFor(() => {
+      expect(
+        [...container.querySelectorAll<HTMLOptionElement>('[data-model-select] option')].map(
+          option => option.value
+        )
+      ).toEqual(['gpt-4.1', 'gpt-4.1-mini']);
+    });
     expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
       'Existing thread'
     );
@@ -1635,9 +1669,11 @@ describe('deep-chat playground thread history', () => {
 
     await mount(container);
 
-    expect(queryRequired<HTMLSelectElement>(container, '#deep-chat-model-select').value).toBe(
-      'gpt-4.1-mini'
-    );
+    await vi.waitFor(() => {
+      expect(queryRequired<HTMLSelectElement>(container, '[data-model-select]').value).toBe(
+        'gpt-4.1-mini'
+      );
+    });
 
     const onResponse = vi.fn();
     const onClose = vi.fn();
@@ -2170,7 +2206,10 @@ describe('deep-chat playground reasoning prefs', () => {
     const reasoningRoot = queryRequired<HTMLElement>(container, '#deep-chat-reasoning-controls');
     expect(reasoningRoot.hidden).toBe(false);
 
-    const modelSelect = queryRequired<HTMLSelectElement>(container, '#deep-chat-model-select');
+    const modelSelect = queryRequired<HTMLSelectElement>(container, '[data-model-select]');
+    await vi.waitFor(() => {
+      expect(modelSelect.options.length).toBeGreaterThan(0);
+    });
     modelSelect.value = 'gpt-4.1';
     modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
     expect(reasoningRoot.hidden).toBe(true);
@@ -2952,7 +2991,93 @@ describe('deep-chat playground request errors', () => {
       expect(onClose).toHaveBeenCalled();
     });
     expect(mocks.callLLM).not.toHaveBeenCalled();
-    expect(queryRequired<HTMLSelectElement>(container, '#deep-chat-model-select').value).toBe('');
+    await vi.waitFor(() => {
+      expect(queryRequired<HTMLSelectElement>(container, '[data-model-select]').value).toBe('');
+    });
+
+    unmount();
+  });
+});
+
+describe('deep-chat playground model refresh', () => {
+  it('refetches the model list from the API and syncs the selected model', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat();
+
+    await mount(container);
+
+    mocks.fetchModelsFromApi.mockResolvedValue([{ id: 'gpt-4o' }, { id: 'gpt-4.1-mini' }]);
+
+    queryRequired<HTMLButtonElement>(container, '[data-model-select-refresh]').click();
+
+    await vi.waitFor(() => {
+      expect(mocks.fetchModelsFromApi).toHaveBeenCalledWith(
+        'openai',
+        'https://llm-proxy.example/v1',
+        'test-key'
+      );
+      expect(
+        [...container.querySelectorAll<HTMLOptionElement>('[data-model-select] option')].map(
+          option => option.value
+        )
+      ).toEqual(['gpt-4o', 'gpt-4.1-mini']);
+    });
+
+    expect(queryRequired<HTMLSelectElement>(container, '[data-model-select]').value).toBe('gpt-4o');
+    // 组件刷新写盘：provider config + 工具策略默认模型。
+    expect(mocks.storageService.setLLMConfig).toHaveBeenCalled();
+    expect(mocks.storageService.set).toHaveBeenCalledWith(
+      'tool_strategy_settings',
+      expect.objectContaining({
+        targets: expect.objectContaining({
+          'playground-deep-chat': expect.objectContaining({
+            defaultModelsByProvider: expect.objectContaining({ openai: 'gpt-4o' }),
+          }),
+        }),
+      })
+    );
+    expect(mocks.toast).toHaveBeenCalledWith('成功同步 2 个模型', { type: 'success' });
+
+    // 刷新后 sessionState.selectedModel 已同步：新请求使用刷新返回的模型。
+    const onResponse = vi.fn();
+    const onClose = vi.fn();
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Use refreshed model' }] },
+      { onResponse, onClose }
+    );
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+    expect(mocks.callLLM.mock.calls[0]?.[4]).toBe('gpt-4o');
+
+    unmount();
+  });
+
+  it('keeps the previous options and shows a failure toast when refresh fails', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat();
+
+    await mount(container);
+
+    mocks.fetchModelsFromApi.mockRejectedValue(new Error('网络异常'));
+
+    queryRequired<HTMLButtonElement>(container, '[data-model-select-refresh]').click();
+
+    await vi.waitFor(() => {
+      expect(mocks.toast).toHaveBeenCalledWith(
+        '获取模型失败: 网络异常',
+        expect.objectContaining({ type: 'error' })
+      );
+    });
+    // error 态保留上一可用选项（组件契约：不置空）。
+    await vi.waitFor(() => {
+      expect(queryRequired<HTMLSelectElement>(container, '[data-model-select]').value).toBe(
+        'gpt-4.1'
+      );
+    });
 
     unmount();
   });

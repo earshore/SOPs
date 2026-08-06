@@ -56,7 +56,9 @@ import {
 
 import { resolveModelCapability, shouldShowReasoningControls } from '@/services/modelCapability';
 
-import { StorageService } from '@/services/storageService';
+import { createModelSelect, type ModelSelectController } from '@/components/modelSelect';
+
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { resolveToolTargetModel } from '@/services/toolStrategyService';
 
 import { appStore } from '@/stores/useAppStore';
@@ -87,7 +89,6 @@ import {
   getFirstModel,
   getMessageText,
   getThreadTitle,
-  normalizeModels,
   normalizeTemperature,
   updateTemperatureTrack,
 } from '../infra/utils';
@@ -114,8 +115,6 @@ type ChatSearchResult = {
 };
 
 export function bindControls(container: HTMLElement): void {
-  const modelSelect = container.querySelector<HTMLSelectElement>('#deep-chat-model-select');
-  const refreshButton = container.querySelector<HTMLButtonElement>('#deep-chat-refresh-config');
   const clearButton = container.querySelector<HTMLButtonElement>('#deep-chat-clear-chat');
   const railToggleButton = container.querySelector<HTMLButtonElement>('#deep-chat-toggle-rail');
   const stopButton = container.querySelector<HTMLButtonElement>('#deep-chat-stop-generation');
@@ -134,8 +133,6 @@ export function bindControls(container: HTMLElement): void {
 
   bindModelControls({
     container,
-    modelSelect,
-    refreshButton,
     clearButton,
     railToggleButton,
     settingsButton,
@@ -177,19 +174,41 @@ export function bindStopOverlayControl(
 
 interface ModelControlRefs {
   container: HTMLElement;
-  modelSelect: HTMLSelectElement | null;
-  refreshButton: HTMLButtonElement | null;
   clearButton: HTMLButtonElement | null;
   railToggleButton: HTMLButtonElement | null;
   settingsButton: HTMLButtonElement | null;
 }
 
-export function bindModelControls(refs: ModelControlRefs): void {
-  const { clearButton, container, modelSelect, railToggleButton, refreshButton, settingsButton } =
-    refs;
+/** 每个挂载容器的 ModelSelect 组件实例（bindControls 可能跨容器/重挂载调用）。 */
+const modelSelectControllers = new WeakMap<
+  HTMLElement,
+  { controller: ModelSelectController; provider: string }
+>();
 
-  const onModelChange = (): void => {
-    const nextModel = modelSelect?.value || sessionState.selectedModel;
+function resolveActiveModelProvider(): string {
+  return (
+    sessionState.currentConfig?.provider ||
+    StorageService.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) ||
+    ''
+  );
+}
+
+/** 配置切换（如设置页改过 provider）后，把组件内部 provider 同步为当前配置。 */
+function syncModelSelectProvider(container: HTMLElement): void {
+  const tracked = modelSelectControllers.get(container);
+  if (!tracked) return;
+  const provider = resolveActiveModelProvider();
+  if (tracked.provider === provider) return;
+  tracked.provider = provider;
+  void tracked.controller.setProvider(provider).catch(error => {
+    console.warn('[deep-chat] 模型选择组件 provider 同步失败', error);
+  });
+}
+
+export function bindModelControls(refs: ModelControlRefs): void {
+  const { clearButton, container, railToggleButton, settingsButton } = refs;
+
+  const onModelChange = (nextModel: string): void => {
     if (nextModel !== sessionState.selectedModel) {
       // Invalidate Responses multi-turn chain when model changes mid-thread.
       updateActiveThreadFields(container, {
@@ -204,19 +223,37 @@ export function bindModelControls(refs: ModelControlRefs): void {
     syncDeepChatReasoningControlsFromThread(container);
     applyDeepChatVisionUploadConfig(chat);
   };
-  modelSelect?.addEventListener('change', onModelChange);
-  sessionState.cleanupCallbacks.push(() =>
-    modelSelect?.removeEventListener('change', onModelChange)
-  );
 
   // Image paste is handled by host visionComposer (stage when vision; toast when not).
 
-  const onRefresh = async (): Promise<void> => {
-    await refreshLLMConfig(container);
-    showToast('Deep Chat 模型配置已刷新', { type: 'success' });
+  // 刷新成功（组件已真调 /models 并写盘）后：同步会话状态与能力控件。
+  const onRefresh = async ({
+    selectedModel,
+  }: {
+    models: unknown[];
+    selectedModel: string;
+  }): Promise<void> => {
+    sessionState.selectedModel = selectedModel;
+    // 重读含 key 的完整配置（组件写盘时密钥走 secure 存储），供后续请求使用。
+    sessionState.currentConfig = await StorageService.getLLMConfigWithKey();
+    renderLLMConfigState(container);
+    syncDeepChatReasoningControlsFromThread(container);
+    applyDeepChatVisionUploadConfig(getChat(container));
   };
-  refreshButton?.addEventListener('click', onRefresh);
-  sessionState.cleanupCallbacks.push(() => refreshButton?.removeEventListener('click', onRefresh));
+
+  const tracked = {
+    controller: createModelSelect(
+      container,
+      { targetId: 'playground-deep-chat', provider: resolveActiveModelProvider() },
+      { onModelChange, onRefresh }
+    ),
+    provider: resolveActiveModelProvider(),
+  };
+  modelSelectControllers.set(container, tracked);
+  sessionState.cleanupCallbacks.push(() => {
+    modelSelectControllers.delete(container);
+    tracked.controller.destroy();
+  });
 
   syncThreadRailState(container);
   const onRailToggle = (): void => {
@@ -986,8 +1023,6 @@ export async function refreshLLMConfig(
   container: HTMLElement,
   isCurrent: () => boolean = () => true
 ): Promise<void> {
-  const modelSelect = container.querySelector<HTMLSelectElement>('#deep-chat-model-select');
-
   const config = await StorageService.getLLMConfigWithKey();
   if (!isCurrent()) return;
 
@@ -997,48 +1032,24 @@ export async function refreshLLMConfig(
     getFirstModel(sessionState.currentConfig) ||
     '';
 
-  if (!modelSelect) {
-    syncDeepChatReasoningControlsFromThread(container);
-    applyDeepChatVisionUploadConfig(getChat(container));
-    return;
-  }
+  // select 的渲染由 ModelSelect 组件负责；这里同步组件内部 provider（配置切换后）。
+  syncModelSelectProvider(container);
 
-  renderLLMConfigState(modelSelect);
+  renderLLMConfigState(container);
   syncDeepChatReasoningControlsFromThread(container);
   applyDeepChatVisionUploadConfig(getChat(container));
 }
 
-export function renderLLMConfigState(modelSelect: HTMLSelectElement): void {
-  modelSelect.replaceChildren();
-  const settingsButton =
-    modelSelect
-      .closest('.deep-chat-main')
-      ?.querySelector<HTMLButtonElement>('#deep-chat-open-settings') ??
-    modelSelect.ownerDocument.querySelector<HTMLButtonElement>('#deep-chat-open-settings');
+/**
+ * 「配置模型」按钮显隐：有可用配置（key + 已选中模型）时隐藏，否则显示引导进设置。
+ * select 的渲染已交由 ModelSelect 组件，不再操作 select。
+ */
+export function renderLLMConfigState(container: HTMLElement): void {
+  const settingsButton = container.querySelector<HTMLButtonElement>('#deep-chat-open-settings');
+  if (!settingsButton) return;
   const config = sessionState.currentConfig;
   const hasUsableConfig = !!config?.apiKey && !!sessionState.selectedModel;
-  if (settingsButton) {
-    settingsButton.hidden = hasUsableConfig;
-  }
-
-  if (!hasUsableConfig) {
-    modelSelect.disabled = true;
-    modelSelect.appendChild(new Option('未配置模型', ''));
-    return;
-  }
-
-  const models = normalizeModels(config);
-  const visibleModels = models.length > 0 ? models : [sessionState.selectedModel];
-
-  visibleModels.forEach(model => {
-    modelSelect.appendChild(new Option(model, model));
-  });
-
-  modelSelect.value = visibleModels.includes(sessionState.selectedModel)
-    ? sessionState.selectedModel
-    : visibleModels[0] || '';
-  sessionState.selectedModel = modelSelect.value;
-  modelSelect.disabled = visibleModels.length <= 1;
+  settingsButton.hidden = hasUsableConfig;
 }
 
 export function initDeepChat(container: HTMLElement): void {

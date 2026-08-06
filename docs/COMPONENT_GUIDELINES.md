@@ -33,6 +33,7 @@
 | Toast | `src/css/components/toast.css` + `showToast` | 禁止业务自建 snackbar |
 | Modal | `src/css/components/modals.css` + `app-modal` / `confirmWithModal` | 见 Modal 规范 |
 | Tabs / Loading / Status | 同目录对应文件 | 优先复用 |
+| 模型选择 + 刷新 | `src/components/modelSelect/` + `docs/guides/model-select-component-guide.md` | 「选择 LLM 模型 + 重新获取模型列表」唯一实现；Settings 区只复用其 service 纯函数 |
 | 入口 Banner | `welcome-banner.css` | 模块归属色，**不受** Appearance 换肤覆盖 |
 | 设置面板专用 | `src/components/settings/systemSettings.css` | 仅设置抽屉；新页面**不要**复制为业务 SSOT |
 
@@ -256,6 +257,7 @@
 | v1.0 | 初版：按钮/表单/反馈/卡片/弹层/清单 |
 | v1.1 | §10 系统设置即时 vs 显式保存矩阵（TD-SET-02） |
 | v1.2 | 补充数据表规范（§6.1）、状态 token 对照表（§5.1）、按钮 hover 边界（§3.2） |
+| v1.3 | 登记 ModelSelect 共享组件（模型选择 + 刷新，见 `docs/guides/model-select-component-guide.md`） |
 | 后续 | 补 DatePicker、虚拟列表；可加示意截图 |
 
 变更走 [PRODUCT_PRINCIPLES §5](./PRODUCT_PRINCIPLES.md#5-规范变更流程)。

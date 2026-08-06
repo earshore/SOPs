@@ -1,0 +1,9 @@
+/*
+ * ModelSelect 组件样式。
+ *
+ * 样式复用 forms.css / buttons.css 语义类与 design tokens（--field-height、--color-* 等），
+ * 页面骨架在宿主模板中直接引用这些类即可；本文件仅放组件专属微调，
+ * 禁止新增裸 hex 色值或第三套按钮体系。
+ *
+ * 骨架约定见 docs/guides/model-select-component-guide.md §3 / §5。
+ */

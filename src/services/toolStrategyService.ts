@@ -1,4 +1,5 @@
 import type { LLMProviderConfig } from '@/types/state';
+import { getModelId } from '@/common/utils/modelOptions';
 import { StorageService, STORAGE_KEYS } from './storageService';
 
 export const TOOL_STRATEGY_TARGETS = [
@@ -56,8 +57,6 @@ export interface ToolStrategySettings {
   version: 2;
   targets: Record<ToolStrategyTargetId, ToolStrategyTargetSettings>;
 }
-
-type ModelOption = NonNullable<LLMProviderConfig['models']>[number];
 
 const TOOL_STRATEGY_VERSION = 2;
 
@@ -152,10 +151,6 @@ function normalizeToolStrategySettings(value: unknown): ToolStrategySettings {
   migrateLegacyModules(defaults, rawModules);
 
   return defaults;
-}
-
-function getModelId(model: ModelOption): string {
-  return typeof model === 'string' ? model : model.id;
 }
 
 function hasModel(models: LLMProviderConfig['models'] | undefined, model: string): boolean {

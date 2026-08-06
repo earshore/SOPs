@@ -13,6 +13,7 @@ import { pushSettingsRollbackSnapshot } from '@/components/settings/domain/setti
 import { ErrorService } from '@/services/errorService';
 import { StorageService } from '@/services/storageService';
 import { showToast } from '@/common/ui';
+import { getModelId } from '@/common/utils/modelOptions';
 import type { LLMProviderConfig } from '@/types/state';
 import {
   LLM_TEST_CONNECTION_MAX_TOKENS,
@@ -43,8 +44,7 @@ export const llmSectionRichBehavior: SettingsPanelPart = {
       const messages = [{ role: 'user' as const, content: "Hello! Reply 'OK'." }];
 
       const modelsEntry =
-        this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model) ??
-        this.llm.model;
+        this.llm.models.find(x => getModelId(x) === this.llm.model) ?? this.llm.model;
       await callLLM(
         messages,
         this.llm.provider,
@@ -239,7 +239,7 @@ export const llmSectionRichBehavior: SettingsPanelPart = {
   },
 
   getModelValue(model: ModelOption): string {
-    return typeof model === 'string' ? model : model.id;
+    return getModelId(model);
   },
 
   getModelLabel(model: ModelOption): string {

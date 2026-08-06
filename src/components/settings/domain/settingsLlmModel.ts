@@ -21,6 +21,7 @@ import { LLMProviderConfig } from '@/types/state';
 import { StorageService } from '@/services/storageService';
 import { formatLlmFailureUx, showLlmFailureToast } from '@/common/errors/llmFailureUx';
 import { getModelId, type ModelMetadata, type ModelOption } from '../domain/localDataCopy';
+import { dedupeModels } from '@/components/modelSelect/modelSelectService';
 import {
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
@@ -180,15 +181,9 @@ export function buildAutoSaveLlmConfig(
   };
 }
 
-export function dedupeModels(models: ModelOption[]): ModelOption[] {
-  const seen = new Set<string>();
-  return models.filter(model => {
-    const id = getModelId(model);
-    if (seen.has(id)) return false;
-    seen.add(id);
-    return true;
-  });
-}
+// 收敛：实现与共享组件 modelSelectService.dedupeModels 完全重复（P2 归一化），
+// 此处 re-export 组件实现，保持导出名/签名/行为兼容。
+export { dedupeModels };
 export function resolveProviderEndpoint(
   provider: string,
   config: ProviderConfig,

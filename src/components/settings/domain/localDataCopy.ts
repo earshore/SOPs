@@ -138,6 +138,6 @@ export function buildLocalDataImportChoiceContent(summary: LocalDataExportSummar
   ];
   return lines.join('\n');
 }
-export function getModelId(model: ModelOption): string {
-  return typeof model === 'string' ? model : model.id;
-}
+// 收敛：与共享组件 modelSelectService.getModelId 语义一致（string→原样；对象→.id），
+// 无额外 trim/fallback 语义，re-export 组件实现（P2 归一化）。
+export { getModelId } from '@/components/modelSelect/modelSelectService';

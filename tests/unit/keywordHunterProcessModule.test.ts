@@ -5,16 +5,20 @@ import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui';
 import { ErrorService } from '@/services/errorService';
-import { callLLM, fetchModelsFromApi } from '@/services/llmService';
+import { callLLM } from '@/services/llmService';
+import { fetchModelsFromApi } from '@/services/llmModelList';
 import { StorageService } from '@/services/storageService';
 
 const processMocks = vi.hoisted(() => {
   const template = `
     <section>
       <button id="keyword-hunter-go-analysis-btn"></button>
-      <select id="keyword-hunter-translation-model-select" aria-describedby="keyword-hunter-translation-model-status"></select>
-      <button id="keyword-hunter-refresh-models-btn" aria-label="重新获取 AI 翻译可用模型"><i id="keyword-hunter-refresh-models-icon"></i></button>
-      <span id="keyword-hunter-translation-model-status" role="status" aria-live="polite" aria-atomic="true"></span>
+      <div data-model-select-root>
+        <label for="keyword-hunter-model-select" class="sr-only">AI 翻译模型</label>
+        <select id="keyword-hunter-model-select" data-model-select aria-describedby="keyword-hunter-model-status"></select>
+        <button type="button" data-model-select-refresh aria-label="重新获取可用模型" title="重新获取可用模型"><i class="fas fa-sync-alt"></i></button>
+        <span id="keyword-hunter-model-status" data-model-select-status role="status" aria-live="polite" aria-atomic="true"></span>
+      </div>
       <button id="keyword-hunter-translate-btn" aria-describedby="keyword-hunter-translate-status"><span id="keyword-hunter-translate-btn-text"></span></button>
       <div id="keyword-hunter-translate-progress" class="hidden" role="progressbar" aria-valuenow="0"></div>
       <span id="keyword-hunter-translate-status" role="status" aria-live="polite" aria-atomic="true"></span>
@@ -130,6 +134,9 @@ vi.mock('@/services/errorService', () => ({
 
 vi.mock('@/services/llmService', () => ({
   callLLM: vi.fn(),
+}));
+
+vi.mock('@/services/llmModelList', () => ({
   fetchModelsFromApi: vi.fn(),
 }));
 
@@ -326,8 +333,8 @@ it('places AI translation next to the original/translation toggle', () => {
     'utf8'
   );
 
-  const modelSelectIndex = template.indexOf('id="keyword-hunter-translation-model-select"');
-  const refreshButtonIndex = template.indexOf('id="keyword-hunter-refresh-models-btn"');
+  const modelSelectIndex = template.indexOf('data-model-select-root');
+  const refreshButtonIndex = template.indexOf('data-model-select-refresh');
   const toggleIndex = template.indexOf('id="keyword-hunter-show-translation"');
   const translateButtonIndex = template.indexOf('id="keyword-hunter-translate-btn"');
   const savedStatusIndex = template.indexOf('aria-label="已自动保存"');
@@ -378,21 +385,31 @@ it('mounts template content, renders highlighted copy, stats, and floating keywo
   expect(document.querySelector('#keyword-hunter-tab-matched-count')?.textContent).toBe('1');
   expect(document.querySelector('#keyword-hunter-tab-unmatched-count')?.textContent).toBe('1');
   expect(document.querySelector('#keyword-hunter-minimized-badge')?.textContent).toBe('2');
-  expect(document.querySelector<HTMLButtonElement>('#keyword-hunter-translate-btn')?.disabled).toBe(
-    false
-  );
   expect(
-    document.querySelector<HTMLSelectElement>('#keyword-hunter-translation-model-select')?.value
-  ).toBe('gpt-test');
-  expect(document.querySelector('#keyword-hunter-translation-model-status')?.textContent).toBe(
-    '当前 AI 翻译模型：gpt-test'
+    document.querySelector<HTMLButtonElement>('#keyword-hunter-translate-btn')?.disabled
+  ).toBe(false);
+
+  await vi.waitFor(() => {
+    expect(document.querySelector<HTMLSelectElement>('#keyword-hunter-model-select')?.value).toBe(
+      'gpt-test'
+    );
+  });
+  expect(document.querySelector('#keyword-hunter-model-status')?.textContent).toBe(
+    '当前模型：gpt-test'
   );
 });
 
 it('refreshes available translation models and persists the selected model', async () => {
   await mountProcess();
 
-  click(document.querySelector('#keyword-hunter-refresh-models-btn'));
+  // 等待组件异步初始化完成（选项加载后 select 才有值）
+  await vi.waitFor(() => {
+    expect(document.querySelector<HTMLSelectElement>('#keyword-hunter-model-select')?.value).toBe(
+      'gpt-test'
+    );
+  });
+
+  click(document.querySelector('[data-model-select-refresh]'));
 
   await vi.waitFor(() => {
     expect(mockedFetchModelsFromApi).toHaveBeenCalledWith(
@@ -402,10 +419,16 @@ it('refreshes available translation models and persists the selected model', asy
     );
   });
 
+  await vi.waitFor(() => {
+    expect(document.querySelector<HTMLSelectElement>('#keyword-hunter-model-select')?.value).toBe(
+      'gpt-fast'
+    );
+  });
+
   expect(mockedStorage.setLLMConfig).toHaveBeenCalledWith(
     'openai',
     expect.objectContaining({
-      model: 'gpt-test',
+      model: 'gpt-fast',
       models: [
         { id: 'gpt-fast', context: 128000, features: [] },
         { id: 'gpt-quality', context: 128000, features: [] },
@@ -425,23 +448,27 @@ it('refreshes available translation models and persists the selected model', asy
       }),
     })
   );
-  expect(
-    document.querySelector<HTMLSelectElement>('#keyword-hunter-translation-model-select')?.value
-  ).toBe('gpt-fast');
   expect(showToast).toHaveBeenCalledWith('成功同步 2 个模型', { type: 'success' });
 });
 
 it('uses the model selected in the SEO process page for immersion translation', async () => {
   await mountProcess();
 
-  changeSelect(document.querySelector('#keyword-hunter-translation-model-select'), 'gpt-fast');
+  // 等待组件异步初始化完成后再切换模型
+  await vi.waitFor(() => {
+    expect(document.querySelector<HTMLSelectElement>('#keyword-hunter-model-select')?.value).toBe(
+      'gpt-test'
+    );
+  });
+
+  changeSelect(document.querySelector('#keyword-hunter-model-select'), 'gpt-fast');
   click(document.querySelector('#keyword-hunter-translate-btn'));
 
   await vi.waitFor(() => {
     expect(mockedCallLLM).toHaveBeenCalled();
   });
 
-  expect(mockedStorage.setLLMConfig).not.toHaveBeenCalledWith(
+  expect(mockedStorage.setLLMConfig).toHaveBeenCalledWith(
     'openai',
     expect.objectContaining({ model: 'gpt-fast' })
   );

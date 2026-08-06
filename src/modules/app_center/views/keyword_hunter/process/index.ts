@@ -13,24 +13,17 @@ import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import BaseModule from '@/common/BaseModule';
 import { showToast } from '@/common/ui';
-import { ValidationError } from '@/common/errors/AppError';
-import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
-import { getLlmProviderConfig } from '@/common/config/llmProviders';
-import { fetchModelsFromApi } from '@/services/llmService';
+import { createModelSelect } from '@/components/modelSelect';
+import type { ModelSelectController } from '@/components/modelSelect';
 import { appStore } from '@/stores/useAppStore';
 import { ErrorService } from '@/services/errorService';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
-import {
-  getToolTargetDefaultModel,
-  setToolTargetDefaultModel,
-} from '@/services/toolStrategyService';
 import { getRuntimeKeywordHunterSeoOptions } from '@/services/runtimeStrategyService';
 import { createSafeFragment } from '@/common/utils/security';
 import { clearRuntimeCssRule, updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
-import type { LLMProviderConfig } from '@/types/state';
 import '../styles.css';
 
 // ==========================================
@@ -65,13 +58,6 @@ interface ActiveTranslationRun {
   llmStatus?: KeywordHunterService.KeywordHunterLlmStatus;
 }
 
-interface TranslationModelRefreshConfig {
-  storedConfig: Partial<LLMProviderConfig> | null;
-  configWithKey: LLMProviderConfig | null;
-  endpoint: string;
-  apiKey: string;
-}
-
 interface AnalysisStats {
   total: number;
   matched: number;
@@ -92,8 +78,6 @@ interface HighlightedTranslationParagraph {
 
 type KeywordHunterStoreState = ReturnType<typeof appStore.getState>['keywordTracker'];
 type MatchedKeywordEntry = KeywordHunterStoreState['matchedKeywords'][number] | string;
-type TranslationModelOption = NonNullable<LLMProviderConfig['models']>[number];
-const SEO_PROCESS_TARGET_ID = 'keyword-hunter-seo-process';
 
 let floatWinState: FloatWinState = {
   isDragging: false,
@@ -102,7 +86,7 @@ let floatWinState: FloatWinState = {
 };
 let activeTranslationRun: ActiveTranslationRun | null = null;
 let processViewVersion = 0;
-let isRefreshingTranslationModels = false;
+let translationModelSelect: ModelSelectController | null = null;
 
 // ==========================================
 // Helper Functions
@@ -142,6 +126,8 @@ function removeKeywordHunterFloatingChrome(): void {
  * Removes body-level floating chrome left by process mount.
  */
 function cleanupProcessSurface(): void {
+  translationModelSelect?.destroy();
+  translationModelSelect = null;
   removeKeywordHunterFloatingChrome();
 
   floatWinState = {
@@ -177,287 +163,6 @@ function escapeAttr(text: string): string {
 function getActiveLlmProvider(): string | null {
   const provider = StorageService.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
   return typeof provider === 'string' && provider.trim() ? provider : null;
-}
-
-function getTranslationModelId(model: TranslationModelOption): string {
-  return typeof model === 'string' ? model : model.id;
-}
-
-function getTranslationModelLabel(model: TranslationModelOption): string {
-  if (typeof model === 'string') return model;
-  if (model.name && model.name !== model.id) return `${model.name} (${model.id})`;
-  return model.id;
-}
-
-function dedupeTranslationModels(models: TranslationModelOption[]): TranslationModelOption[] {
-  const seen = new Set<string>();
-  return models.filter(model => {
-    const id = getTranslationModelId(model);
-    if (!id || seen.has(id)) return false;
-    seen.add(id);
-    return true;
-  });
-}
-
-function ensureTranslationModelOption(
-  models: TranslationModelOption[],
-  modelId: string | undefined
-): TranslationModelOption[] {
-  if (!modelId) return models;
-  if (models.some(model => getTranslationModelId(model) === modelId)) return models;
-  return [modelId, ...models];
-}
-
-function getTranslationLlmConfig(provider: string): Partial<LLMProviderConfig> | null {
-  return StorageService.getLLMConfig(provider);
-}
-
-function getTranslationModelOptions(
-  provider: string | null,
-  config: Partial<LLMProviderConfig> | null
-): TranslationModelOption[] {
-  const presetModels = provider ? getLlmProviderConfig(provider)?.models || [] : [];
-  const configuredModels = config?.models || [];
-  const strategyModel = provider ? getToolTargetDefaultModel(SEO_PROCESS_TARGET_ID, provider) : '';
-  return dedupeTranslationModels(
-    ensureTranslationModelOption(
-      ensureTranslationModelOption([...configuredModels, ...presetModels], config?.model),
-      strategyModel
-    )
-  );
-}
-
-function getTranslationModelSelection(
-  provider: string | null,
-  config: Partial<LLMProviderConfig> | null,
-  models: TranslationModelOption[]
-): string {
-  const strategyModel = provider ? getToolTargetDefaultModel(SEO_PROCESS_TARGET_ID, provider) : '';
-  if (strategyModel) return strategyModel;
-  if (config?.model) return config.model;
-  const firstModel = models[0];
-  return firstModel ? getTranslationModelId(firstModel) : '';
-}
-
-function createTranslationModelOption(
-  model: TranslationModelOption,
-  selectedModel: string
-): HTMLOptionElement {
-  const option = document.createElement('option');
-  const id = getTranslationModelId(model);
-  option.value = id;
-  option.textContent = getTranslationModelLabel(model);
-  option.selected = id === selectedModel;
-  return option;
-}
-
-function setTranslationModelStatus(message: string, role: 'status' | 'alert' = 'status'): void {
-  const status = document.getElementById('keyword-hunter-translation-model-status');
-  if (!status) return;
-  status.textContent = message;
-  status.setAttribute('role', role);
-  status.setAttribute('aria-live', role === 'alert' ? 'assertive' : 'polite');
-}
-
-function renderTranslationModelRefreshButton(): void {
-  const button = document.getElementById(
-    'keyword-hunter-refresh-models-btn'
-  ) as HTMLButtonElement | null;
-  const icon = document.getElementById('keyword-hunter-refresh-models-icon');
-  if (!button) return;
-
-  button.disabled = isRefreshingTranslationModels || !getActiveLlmProvider();
-  if (isRefreshingTranslationModels) {
-    button.setAttribute('aria-busy', 'true');
-  } else {
-    button.removeAttribute('aria-busy');
-  }
-
-  if (icon) {
-    icon.className = isRefreshingTranslationModels
-      ? 'fas fa-sync-alt fa-spin text-[10px]'
-      : 'fas fa-sync-alt text-[10px]';
-  }
-}
-
-function renderTranslationModelSelector(): void {
-  const select = document.getElementById(
-    'keyword-hunter-translation-model-select'
-  ) as HTMLSelectElement | null;
-  if (!select) return;
-
-  const provider = getActiveLlmProvider();
-  const config = provider ? getTranslationLlmConfig(provider) : null;
-  const models = getTranslationModelOptions(provider, config);
-  const selectedModel = getTranslationModelSelection(provider, config, models);
-
-  select.replaceChildren();
-  if (models.length === 0) {
-    const option = document.createElement('option');
-    option.value = '';
-    option.textContent = provider ? '暂无可选模型' : '模型未配置';
-    select.appendChild(option);
-    select.disabled = true;
-  } else {
-    const fragment = document.createDocumentFragment();
-    models.forEach(model => {
-      fragment.appendChild(createTranslationModelOption(model, selectedModel));
-    });
-    select.appendChild(fragment);
-    select.disabled = false;
-    select.value = selectedModel;
-  }
-
-  if (!provider) {
-    setTranslationModelStatus('请先在全局设置中选择 LLM 提供商');
-  } else if (!selectedModel) {
-    setTranslationModelStatus('请先在全局设置中选择模型，或刷新可用模型列表');
-  } else {
-    setTranslationModelStatus(`当前 AI 翻译模型：${selectedModel}`);
-  }
-
-  renderTranslationModelRefreshButton();
-}
-
-function saveTranslationModelCatalog(
-  provider: string,
-  config: Partial<LLMProviderConfig> | null,
-  models: TranslationModelOption[],
-  fallbackModel?: string
-): void {
-  const presetConfig = getLlmProviderConfig(provider);
-  const persistedModel =
-    config?.model || fallbackModel || (models[0] ? getTranslationModelId(models[0]) : '');
-  const nextConfig: LLMProviderConfig = {
-    ...config,
-    provider,
-    endpoint: config?.endpoint || presetConfig?.endpoint || '',
-    apiKey: '',
-    model: persistedModel,
-    models,
-    enabled: config?.enabled ?? true,
-    ...(config?.serviceTier && { serviceTier: config.serviceTier }),
-  };
-
-  StorageService.setLLMConfig(provider, nextConfig);
-}
-
-function saveTranslationStrategyModel(provider: string, model: string): void {
-  setToolTargetDefaultModel(SEO_PROCESS_TARGET_ID, provider, model);
-}
-
-function selectTranslationModel(event: Event): void {
-  const model = (event.target as HTMLSelectElement).value;
-  if (!model) return;
-
-  const provider = getActiveLlmProvider();
-  if (!provider) {
-    showLlmFailureToast(
-      new ValidationError('请先在全局设置中选择 LLM 提供商', 'ERR_LLM_PROVIDER_NOT_SELECTED')
-    );
-    renderTranslationModelSelector();
-    return;
-  }
-
-  const config = getTranslationLlmConfig(provider);
-  const models = ensureTranslationModelOption(getTranslationModelOptions(provider, config), model);
-  saveTranslationModelCatalog(provider, config, models, model);
-  saveTranslationStrategyModel(provider, model);
-  setTranslationModelStatus(`当前 AI 翻译模型：${model}`);
-  showToast(`AI 翻译模型已切换为 ${model}`, { type: 'success' });
-}
-
-function warnTranslationModelRefreshBlocked(message: string): void {
-  if (message.includes('提供商') || message.includes('选择 LLM')) {
-    showLlmFailureToast(new ValidationError(message, 'ERR_LLM_PROVIDER_NOT_SELECTED'));
-  } else if (message.includes('API Key') || message.includes('密钥')) {
-    showLlmFailureToast(new ValidationError(message, 'ERR_LLM_API_KEY_MISSING'));
-  } else if (message.includes('端点') || message.includes('Endpoint')) {
-    showLlmFailureToast(new ValidationError(message, 'BIZ_NO_MODEL_CONFIGURED'));
-  } else {
-    showToast(message, { type: 'warning' });
-  }
-  setTranslationModelStatus(message, 'alert');
-}
-
-async function resolveTranslationModelRefreshConfig(
-  provider: string
-): Promise<TranslationModelRefreshConfig | null> {
-  const storedConfig = getTranslationLlmConfig(provider);
-  const configWithKey = await StorageService.getLLMConfigWithKey(provider);
-  const presetConfig = getLlmProviderConfig(provider);
-  const endpoint =
-    configWithKey?.endpoint || storedConfig?.endpoint || presetConfig?.endpoint || '';
-  const apiKey = configWithKey?.apiKey || '';
-
-  if (!endpoint) {
-    warnTranslationModelRefreshBlocked('请先在全局设置中配置 API 端点');
-    return null;
-  }
-
-  if (!apiKey) {
-    warnTranslationModelRefreshBlocked('请先在全局设置中配置 API Key');
-    return null;
-  }
-
-  return { storedConfig, configWithKey, endpoint, apiKey };
-}
-
-function getNextTranslationModel(
-  provider: string,
-  config: Partial<LLMProviderConfig> | null,
-  models: TranslationModelOption[]
-): string {
-  const selectedModel = getTranslationModelSelection(provider, config, models);
-  const modelExists = models.some(model => getTranslationModelId(model) === selectedModel);
-  const fallbackModel = models[0];
-  if (!fallbackModel) {
-    throw new ValidationError('未能获取到有效模型列表', 'KH_PROCESS_001', 'models', models, {
-      module: 'keyword_hunter',
-      action: 'getNextTranslationModel',
-      provider,
-    });
-  }
-  return modelExists ? selectedModel : getTranslationModelId(fallbackModel);
-}
-
-async function refreshTranslationModels(): Promise<void> {
-  if (isRefreshingTranslationModels) return;
-
-  const provider = getActiveLlmProvider();
-  if (!provider) {
-    warnTranslationModelRefreshBlocked('请先在全局设置中选择 LLM 提供商');
-    renderTranslationModelRefreshButton();
-    return;
-  }
-
-  isRefreshingTranslationModels = true;
-  setTranslationModelStatus('正在获取 AI 翻译可用模型');
-  renderTranslationModelRefreshButton();
-
-  try {
-    const refreshConfig = await resolveTranslationModelRefreshConfig(provider);
-    if (!refreshConfig) return;
-
-    const models = await fetchModelsFromApi(provider, refreshConfig.endpoint, refreshConfig.apiKey);
-    const config = refreshConfig.configWithKey || refreshConfig.storedConfig;
-    const nextModel = getNextTranslationModel(provider, config, models);
-    saveTranslationModelCatalog(provider, config, models, nextModel);
-    saveTranslationStrategyModel(provider, nextModel);
-    renderTranslationModelSelector();
-    showToast(`成功同步 ${models.length} 个模型`, { type: 'success' });
-  } catch (error) {
-    ErrorService.handle(getError(error), {
-      action: 'refreshTranslationModels',
-      module: 'keywordHunter',
-      notify: false,
-    });
-    const ux = showLlmFailureToast(error, { titlePrefix: '获取模型失败: ' });
-    setTranslationModelStatus(`获取模型失败: ${ux.title}`, 'alert');
-  } finally {
-    isRefreshingTranslationModels = false;
-    renderTranslationModelRefreshButton();
-  }
 }
 
 function getKeywordSet(sets: Set<string>[], index: number): Set<string> {
@@ -604,7 +309,6 @@ function restoreProcessStateFromState(): void {
  * 渲染处理模块
  */
 function renderProcessModule(): void {
-  renderTranslationModelSelector();
   updateTranslateButton();
   renderCopyDisplay();
   renderFloatingKeywords();
@@ -1907,18 +1611,6 @@ function setupEventListeners(container: HTMLElement): void {
     });
   }
 
-  const translationModelSelect = document.getElementById('keyword-hunter-translation-model-select');
-  if (translationModelSelect) {
-    addEventListener(translationModelSelect, 'change', selectTranslationModel);
-  }
-
-  const refreshModelsBtn = document.getElementById('keyword-hunter-refresh-models-btn');
-  if (refreshModelsBtn) {
-    addEventListener(refreshModelsBtn, 'click', () => {
-      void refreshTranslationModels();
-    });
-  }
-
   const goAnalysisBtn = document.getElementById('keyword-hunter-go-analysis-btn');
   if (goAnalysisBtn) {
     addEventListener(goAnalysisBtn, 'click', () => {
@@ -2052,10 +1744,18 @@ class KeywordHunterProcessModule extends BaseModule {
       // 3. 设置事件监听器
       setupEventListeners(container);
 
-      // 4. 从内存 state 恢复状态（不自动回填历史快照）
+      // 4. 挂载 ModelSelect 组件（模板已由 render() 渲染完成，组件内部异步加载模型选项）
+      const modelSelectRoot =
+        container.querySelector<HTMLElement>('[data-model-select-root]') ?? container;
+      translationModelSelect = createModelSelect(modelSelectRoot, {
+        targetId: 'keyword-hunter-seo-process',
+        provider: getActiveLlmProvider() || '',
+      });
+
+      // 5. 从内存 state 恢复状态（不自动回填历史快照）
       restoreProcessStateFromState();
 
-      // 5. 管理浮动窗口显示 - 延迟执行确保 DOM 已渲染
+      // 6. 管理浮动窗口显示 - 延迟执行确保 DOM 已渲染
       addTimeout(() => {
         manageFloatingWindowVisibility();
       }, 100);
