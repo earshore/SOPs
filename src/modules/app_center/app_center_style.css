@@ -88,7 +88,7 @@
   padding: 0;
 }
 
-/* ==================== 应用总览样式 ==================== */
+/* ==================== 工作台总览样式 ==================== */
 .app-overview-container {
   /* UI-P1-04: app overview 局部 token 必须映射到全局 token，登记见 docs/THEME_SYSTEM_GUIDELINES.md §6.1。 */
   color: var(--app-overview-text-primary);
@@ -2583,7 +2583,7 @@
   }
 }
 
-/* ==================== 应用总览深色主题（Theme dual-safe） ==================== */
+/* ==================== 工作台总览深色主题（Theme dual-safe） ==================== */
 /* Ownership minimax 玫红保持色相；soft/surface 局部 token 在深色下翻转为低明度 */
 .dark .app-overview-container,
 [data-color-mode-resolved='dark'] .app-overview-container,

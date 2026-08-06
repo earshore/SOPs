@@ -8,7 +8,7 @@ export const appCenterManifest = defineModuleManifest({
       key: 'OVERVIEW',
       routeId: 'app_center_overview',
       path: '/app-center',
-      label: '应用总览',
+      label: '工作台总览',
       icon: 'fas fa-th-large',
       loaderPath: './views/overview/index.ts',
     },

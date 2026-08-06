@@ -95,7 +95,7 @@ export const MENU_CONFIG: MenuConfig = {
   // ==========================================
   contexts: {
     sops: { id: 'sops', label: 'SOPs 流程中心' },
-    apps: { id: 'apps', label: '工作台' },
+    apps: { id: 'apps', label: '运营工作台' },
     hub: { id: 'hub', label: 'Amazon 智库' },
     more: { id: 'more', label: '更多' },
     sys: { id: 'sys', label: '系统设置' },
