@@ -253,6 +253,8 @@
 - 使用 Font Awesome 或项目已有图标体系，不使用 emoji 承担功能语义。
 - 主图标渐变必须跟左侧一级目录色系一致。
 - `--wb-icon-gradient-1` 是主色，`--wb-icon-gradient-2` 是同色系相邻色或同类辅助色。
+- **主图标必须是渐变，禁止纯色**：`.wb-icon` / `.wb-icon-main` 的 `background` 必须用 `linear-gradient(135deg, var(--wb-icon-gradient-1), var(--wb-icon-gradient-2))`，不允许页面级覆盖成单一 `background-color`。
+- **渐变对必须有可辨识色差**：`gradient-1` 与 `gradient-2` 须至少满足其一 —— ① 色相跨 1 个主色阶（如 cyan→blue、indigo→violet、amber→orange）；② 同色系明度差 ≥ 2 个阶（如 `-500` → `-700`）。禁止用色相几乎相同且明度相近的相邻阶（如 `cyan-500 → sky-500`、`green-500 → emerald-600`、`amber-500 → amber-600`），否则 135° 渐变肉眼不可辨、观感接近纯色。
 - 主图标阴影必须跟主图标同色系，不使用默认蓝色阴影覆盖其他目录。
 - 装饰性 `<i>` 必须设置 `aria-hidden="true"`。
 - 单页自定义 hero 也必须显式定义主图标 token，不能只写局部 `width/background/color`。

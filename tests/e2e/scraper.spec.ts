@@ -79,7 +79,7 @@ test.describe('页面加载与初始化', () => {
     await expect(page).toHaveTitle(/Amazing Amazon Architect/);
 
     // 验证：主要元素可见
-    await expect(page.getByRole('heading', { name: '产品数据采集与管理' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '竞品采集与导入管理' })).toBeVisible();
     await expect(page.getByRole('heading', { name: '手动采集配置' })).toBeVisible();
 
     // 验证：无 JavaScript 错误
@@ -685,7 +685,7 @@ test.describe('响应式测试', () => {
     await scraper.expandConfig();
 
     // 验证：主要元素仍然可见
-    await expect(page.getByRole('heading', { name: '产品数据采集与管理' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '竞品采集与导入管理' })).toBeVisible();
     await expect(page.locator('button.site-btn').first()).toBeVisible();
 
     console.log('✅ 移动端显示正常');

@@ -104,7 +104,7 @@ test.describe('页面加载性能', () => {
     await scraper.navigate();
 
     // 等待关键元素渲染
-    await page.getByRole('heading', { name: '产品数据采集与管理' }).waitFor({ state: 'visible' });
+    await page.getByRole('heading', { name: '竞品采集与导入管理' }).waitFor({ state: 'visible' });
     await page.getByRole('heading', { name: '手动采集配置' }).waitFor({ state: 'visible' });
     await page.locator('button.site-btn').first().waitFor({ state: 'attached' });
 

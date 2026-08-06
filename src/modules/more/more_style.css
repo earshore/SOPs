@@ -33,7 +33,7 @@
 }
 
 .more-overview .wb-container--simple .wb-icon {
-  background: linear-gradient(135deg, var(--color-green-500), var(--color-emerald-600)) !important;
+  background: linear-gradient(135deg, var(--color-green-500), var(--color-teal-600)) !important;
   box-shadow: 0 12px 24px -18px rgba(34, 197, 94, 0.56) !important;
 }
 
