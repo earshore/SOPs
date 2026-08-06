@@ -41,6 +41,24 @@
 
 组件层细则见 [COMPONENT_GUIDELINES §9](./COMPONENT_GUIDELINES.md#9-无障碍组件层最低线)。
 
+### 2.1 对比度数值（A9 细则）
+
+| 场景 | 最低要求 |
+| --- | --- |
+| 正文（正常字号） | ≥ 4.5:1 |
+| 大字号 / 粗体（≥18px，或 ≥14px bold） | ≥ 3:1 |
+| disabled | 不要求达标，但必须保留可辨识边框 |
+| 状态色文字（`--color-error` 等，浅底） | ≥ 4.5:1 |
+
+> `--color-error` / `--color-success` / `--color-warning` / `--color-info` 均存在于 `src/css/foundation/variables.css`（浅色 = 500 档；暗色模式自动切换为 400 档），深色模式按 resolved 模式复核。
+>
+> **执行指引**：500 档状态色（如 red-500 `#ef4444` 白底约 3.8:1）用于图标 / 描边 / 浅色底，**不用于浅底上的状态文字**。状态文字需满足 ≥ 4.5:1 时使用深档：优先 `--color-*-dark`（600 档，如 `--color-error-dark`），必要时用色阶 700 档（`--color-red-700` 等，来自 `design-tokens.ts`）。
+
+### 2.2 Focus ring 规格（A1 细则）
+
+- 统一 `--color-focus-ring`（`variables.css` 中 = `var(--color-primary)`）+ 2px 环（`--focus-ring-width: 2px`）+ 2px offset（`--focus-ring-offset: 2px`）。
+- 不得 `outline: none` 且无替代（与 A1 一致）。
+
 ---
 
 ## 3. 关键路径抽检清单（发版 / 大改 UI）

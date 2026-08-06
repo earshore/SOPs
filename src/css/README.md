@@ -38,7 +38,7 @@ src/css/
 .my-element {
   color: var(--color-blue-500);
   padding: var(--spacing-md);
-  border-radius: var(--radius-lg);
+  border-radius: var(--rounded-lg);
   transition: all var(--duration-normal) var(--ease-smooth);
 }
 ```
@@ -57,8 +57,8 @@ src/css/
 </div>
 
 <!-- 按钮 -->
-<button class="btn btn-primary">主要按钮</button>
-<button class="btn btn-secondary">次要按钮</button>
+<button class="action-btn action-btn-primary">主要按钮</button>
+<button class="action-btn action-btn-secondary">次要按钮</button>
 
 <!-- 徽章 -->
 <span class="badge badge-success">成功</span>
@@ -86,7 +86,7 @@ src/modules/
 为保持向后兼容，以下旧类名会自动映射到新组件：
 
 - `.app-center-card` → `.card`
-- `.app-center-btn` → `.btn`
+- `.app-center-btn` → `.action-btn`
 - `.app-center-badge` → `.badge`
 - `.sop-card-grid` → `.card-grid`
 

@@ -468,6 +468,7 @@ npm run build
 
 - 本文是主题系统的上层规范（宪法），回答“颜色、token、组件、Appearance 与模块归属、例外怎么决策”。
 - `docs/VISUAL_DESIGN_GUIDELINES.md` 是页面视觉和 welcome banner 的详细执行规范。
+- `docs/CHART_GUIDELINES.md` 是图表用色、图例、可访问性与动效规范（Chart.js）。
 - `src/css/README.md` 是 CSS 目录和组件使用说明。
 - `src/css/QUICK-REFERENCE.md` 是变量和组件类速查，不作为主题决策源。
 - Appearance 运行时实现以 `src/common/config/themeConfig.ts` 为准；模块归属以 `menuConfig.ts`、banner `wb-theme-*` 与 Ownership Role 代码表 `src/common/config/ownershipRoles.ts` 为准。

@@ -83,6 +83,8 @@
 | 更多 | 大模型探索 | `teal` | `wb-theme-teal` |
 | 更多 | 示例业务场景 | `cyan` | `zn-hero` 使用 cyan / blue |
 
+> 本表是 Role → Palette 映射的简表；**代码 SSOT 是 `src/common/config/ownershipRoles.ts`**（`getPaletteForRole` / `getOwnershipRoleForModule`），完整表与 role 决策见 [稳定主题系统规范 §3.2](./THEME_SYSTEM_GUIDELINES.md#32-当前主题映射) 与 Ownership Role 映射表。新页面只选 **role**，不发明新色名。
+
 模块总览页可以使用模块主题色，而不是某个一级目录色：
 
 | 模块总览 | 模块 themeColor | 总览主色 |
@@ -285,6 +287,28 @@ Badge 规则：
 - Badge 不承担页面主标题职责。
 - Badge 默认不做脉冲、闪烁等持续动画；如确有状态变化含义，必须显式使用状态组件，不在 welcome banner badge 上表达。
 
+#### 图标尺寸与分类
+
+通用图标体系尺寸层级：
+
+| 尺寸 | 用途 |
+| --- | --- |
+| 16px | 行内图标、按钮内操作图标 |
+| 20px | 工具栏图标 |
+| 24px | 导航 / 入口图标 |
+| 32px+ | 大图标容器（banner 主图标容器 52–56px 属此类） |
+
+banner 主图标（21–22px，压缩 19px）与 icon-badge（20px，压缩 18px）是 banner 专用规格，仍以本节上表为准。
+
+图标分类：
+
+- 导航图标：表达位置与入口（侧边栏、面包屑）。
+- 操作图标：按钮、工具栏动作；单独使用时必须有 `aria-label`（§6.2）。
+- 状态图标：成功、警告、错误、加载；必须伴随文字，或「颜色 + 形状」双通道传达（§6.3）。
+- 装饰图标：纯装饰；必须 `aria-hidden="true"`。
+
+emoji 边界：内容型、非语义装饰的 emoji 可以保留；禁止用 emoji 承担导航、按钮或状态语义（§3.5、§6.2）。
+
 ### 3.6 底部元素和 badge 归一化
 
 底部元素命名：
@@ -350,9 +374,59 @@ PC 端常规结构：
 - 同一区域同时使用粗边框、强阴影、大渐变。
 - hover 时大幅位移。
 
+### 4.4 间距语义
+
+间距使用 4px 倍数系统的数字 token（定义于 `variables.generated.css`，语义别名见 `variables.css`）：
+
+| Token | 值 | 用途 |
+| --- | --- | --- |
+| `--spacing-1` | 4px | 图标与文字间隙、紧凑型内边距 |
+| `--spacing-2` | 8px | 控件内 padding、内容区基本步进（§4.1 按 8px 递进） |
+| `--spacing-3` | 12px | 表单控件之间、标签与输入框间隙 |
+| `--spacing-4` | 16px | 卡内 padding、输入框内边距 |
+| `--spacing-6` | 24px | 卡片之间（§4.1 卡片间距 24px 左右） |
+| `--spacing-8` | 32px | 页面大区块分隔（`--section-gap` 默认 32px） |
+
+语义别名与数字 token 一一对应：`--spacing-xs`(8px) / `--spacing-sm`(12px) / `--spacing-md`(16px) / `--spacing-lg`(24px) / `--spacing-xl`(32px)。页面与组件优先用语义名，避免散落裸像素值。
+
+### 4.5 响应式与断点
+
+| 视口 | 布局约定 |
+| --- | --- |
+| ≥ 1440px | 标准主工作台：默认宽屏布局（`BREAKPOINTS['2xl']`，design-tokens.ts） |
+| 768–1439px | 侧栏压缩态、banner 压缩规格（§3.5 PC 压缩态：46px 图标容器 / 19px 图标） |
+| ≤ 768px | 单列布局；双字段并排表单按 [组件开发规范](./COMPONENT_GUIDELINES.md) §4.3 折行单列 |
+| ≤ 390px | 触控目标 40–44px 复核（对应 `BREAKPOINTS.xs` 375px 附近的手持宽度） |
+
+实现注记：banner PC 压缩态实际自 `@media (min-width: 769px)` 起生效且无上界（`welcome-banner.css`），侧栏在 769–1024px 收窄至 220px（`container.css`），页面 gutter 在 ≥ 1536px 加宽（`variables.css`）。上表的 1440px 分段为规范层约定，落地时以实际媒体查询为准。上表 768px 是**布局级**断点；表单内双字段折行按 [组件开发规范](./COMPONENT_GUIDELINES.md) §4.3 的 **≤520px 表单级**断点执行，两者不冲突。
+
 ---
 
 ## 5. 文字和信息层级
+
+### 5.0 排版角色
+
+字号、字重、行高引用 `design-tokens.ts` 的 `FONT_SIZE` / `FONT_WEIGHT` / `LINE_HEIGHT`。下表为角色总览，banner 与页面标题细则以 §3.3 / §5.1 为准。
+
+| Role | 应用 | 字号 / 字重 / 行高 | 说明 |
+| --- | --- | --- | --- |
+| Display | 模块总览 hero、品牌性大标题 | `xl`(20px)–`2xl`(24px) / `extrabold`(800) / `tight`(1.25) | 具体以 §3.3 总览/强 hero 规格（22px / 800 / 1.3）为准；仅首屏强层级，不进普通工具页（§1.2） |
+| Page title | 页面主标题 `h1.wb-title` | `xl`(20px) / `bold`(700) / `snug`(1.375) | 与 §3.3 banner Title 一致 |
+| Section title | 页面主要 section `h2` | `lg`(18px) / `semibold`(600) / `snug`(1.375) | 见 §5.1 |
+| Card title | 卡片内部标题 `h3` | `base`(14px)–`lg`(18px) / `semibold`(600) / `normal`(1.5) | 工具页卡片标题 14–18px（§3.3） |
+| Body | 正文 | `base`(14px) / `regular`(400) / `normal`(1.5)–`relaxed`(1.625) | token 最高 1.625；个别长文段落可放宽至 1.7（§5.2） |
+| Caption | 说明、脚注 | `sm`(13px) / `regular`(400) / `normal`(1.5) | |
+| Helper | 表单辅助提示 | `sm`(13px) / `regular`(400) / `normal`(1.5) | |
+| Label | 表单 label、表格表头 | `sm`(13px) / `medium`(500) / `normal`(1.5) | |
+| 标签 | `wb-tag` 胶囊标签 | `xs`(12px) / `medium`(500) | 最小高度 28px（§3.6） |
+| Numeric | 表格、数据区数字 | `base`(14px) 或 `sm`(13px) / `regular`(400) / `normal`(1.5) | 用 `font-variant-numeric: tabular-nums` 保持数字对齐 |
+
+约束：
+
+- 正文不得小于 `sm`（13px，`FONT_SIZE.sm`）；`xs`(12px) 与 `2xs`(10px) 只用于标签、徽章、辅助文字等次级内容。
+- Display 级展示字体不进工具页。
+- 正文不使用负 letter-spacing。
+- Numeric 表格数字必须 `font-variant-numeric: tabular-nums`。
 
 ### 5.1 标题层级
 

@@ -1,5 +1,7 @@
 # CSS 快速参考
 
+> 本速查仅为实现参考，非规范决策源；类名/变量以 `src/css/components/*` 与 `foundation/variables*.css` 实际为准（THEME_SYSTEM_GUIDELINES §10）
+
 ## 🎨 CSS 变量速查
 
 ### 颜色
@@ -24,8 +26,8 @@ var(--color-amber-500)  /* #f59e0b - 警告 */
 ### 间距
 
 ```css
-var(--spacing-xs)   /* 4px */
-var(--spacing-sm)   /* 8px */
+var(--spacing-xs)   /* 8px */
+var(--spacing-sm)   /* 12px */
 var(--spacing-md)   /* 16px */
 var(--spacing-lg)   /* 24px */
 var(--spacing-xl)   /* 32px */
@@ -34,11 +36,11 @@ var(--spacing-xl)   /* 32px */
 ### 圆角
 
 ```css
-var(--radius-sm)    /* 6px */
-var(--radius-md)    /* 8px */
-var(--radius-lg)    /* 12px */
-var(--radius-xl)    /* 16px */
-var(--radius-full)  /* 9999px - 完全圆角 */
+var(--rounded-sm)    /* 4px */
+var(--rounded-md)    /* 8px */
+var(--rounded-lg)    /* 12px */
+var(--rounded-xl)    /* 16px */
+var(--rounded-full)  /* 9999px - 完全圆角 */
 ```
 
 ### 动画
@@ -49,9 +51,9 @@ var(--ease-smooth)  /* 丝滑过渡 */
 var(--ease-spring)  /* Q弹效果 */
 
 /* 时长 */
-var(--duration-fast)    /* 150ms */
-var(--duration-normal)  /* 200ms */
-var(--duration-slow)    /* 300ms */
+var(--duration-fast)    /* 200ms */
+var(--duration-normal)  /* 300ms */
+var(--duration-slow)    /* 400ms */
 ```
 
 ## 🧩 组件类速查
@@ -74,21 +76,10 @@ var(--duration-slow)    /* 300ms */
 ### 按钮
 
 ```html
-<button class="btn btn-primary">主要</button>
-<button class="btn btn-secondary">次要</button>
-<button class="btn btn-outline">轮廓</button>
-<button class="btn btn-ghost">幽灵</button>
-<button class="btn btn-danger">危险</button>
-
-<!-- 尺寸 -->
-<button class="btn btn-sm">小</button>
-<button class="btn">默认</button>
-<button class="btn btn-lg">大</button>
-
-<!-- 图标按钮 -->
-<button class="btn btn-icon">
-  <i class="fas fa-search"></i>
-</button>
+<button class="action-btn">默认</button>
+<button class="action-btn action-btn-primary">主要</button>
+<button class="action-btn action-btn-secondary">次要</button>
+<button class="action-btn action-btn-glow">发光</button>
 ```
 
 ### 徽章
@@ -145,7 +136,7 @@ var(--duration-slow)    /* 300ms */
   </div>
   <div class="card-body">内容</div>
   <div class="card-footer">
-    <button class="btn btn-primary btn-sm">操作</button>
+    <button class="action-btn action-btn-primary">操作</button>
   </div>
 </div>
 ```
@@ -160,7 +151,7 @@ var(--duration-slow)    /* 300ms */
   /* 使用CSS变量 */
   background: linear-gradient(135deg, var(--color-blue-50), var(--color-purple-50));
   padding: var(--spacing-xl);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--rounded-2xl);
 }
 ```
 

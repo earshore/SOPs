@@ -199,20 +199,23 @@ border: 1px solid var(--border-default);
 ### Z-index 系统
 
 > ⚠️ 层级规范以 [Z_INDEX_LAYERING_GUIDELINES.md](../../Z_INDEX_LAYERING_GUIDELINES.md) 为 SSOT。
-> 下方为 design-tokens 生成尺度；运行期被 `variables.css` 紧凑尺度覆盖（dropdown 30 / sticky 35 / modal-backdrop 55 / modal 60 / popover 70 / toast 80 / tooltip 90），双尺度待收敛，业务样式一律使用运行期紧凑尺度。
+> 下方为**运行期紧凑尺度**（`variables.css` 同名覆盖 generated 的 1000+ 尺度）；业务样式一律使用此尺度，禁止按 1000+ 编写。
 
 ```css
---z-auto: auto
---z-0: 0
+--z-hide: -1
+--z-base: 0
+--z-raised: 1
 --z-10: 10
---z-dropdown: 1000
---z-sticky: 1020
---z-fixed: 1030
---z-modal-backdrop: 1040
---z-modal: 1050
---z-popover: 1060
---z-tooltip: 1070
---z-toast: 1080
+--z-20: 20
+--z-dropdown: 30
+--z-sticky: 35
+--z-header: 40
+--z-overlay: 50
+--z-modal-backdrop: 55
+--z-modal: 60
+--z-popover: 70
+--z-toast: 80
+--z-tooltip: 90
 --z-max: 9999
 ```
 

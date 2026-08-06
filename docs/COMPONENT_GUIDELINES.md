@@ -64,6 +64,7 @@
 | Loading | 防重复提交；保留按钮宽度防布局跳动 |
 | 图标按钮 | 必须有 `aria-label` 或可见文本 |
 | 工作台面板内 | 避免 `translateY` 强悬停位移（与 VISUAL 一致） |
+| 按钮 hover 边界（P2-2） | 按钮 hover 允许 ≤1px 位移（`translateY(-1px)`），active 允许 pressed 反馈（`scale(0.98)`）；**面板/卡片**不适用此位移（THEME §4.1/§4.2） |
 
 ### 3.3 禁止
 
@@ -114,6 +115,20 @@
 | 加载 | 共享 loading / 按钮 loading | 整页无反馈死锁 |
 | 确认 | `confirmWithModal` | `window.confirm`（devtools 除外） |
 
+### 5.1 状态 token → 组件对照
+
+状态色 token 以 `src/css/foundation/variables.css` 为准（暗色模式自动覆盖为 400 档）：
+
+| Token | 浅色模式取值 | 用于 |
+| --- | --- | --- |
+| `--color-success` | `--color-green-500` | `.badge-success*`、成功 toast、完成态 |
+| `--color-warning` | `--color-amber-500` | `.badge-warning*`、警告 toast、低置信度提示 |
+| `--color-error` | `--color-red-500` | `.badge-error*` / `.badge-danger*`、危险 toast、表单校验错误 |
+| `--color-info` | `--color-blue-500` | `.badge-info*`、信息 toast、空态说明图标 |
+| `--color-neutral` | 无此 token | 中性用 `.badge-neutral`（`--color-slate-100` 底 / `--color-slate-700` 字）或 `--color-secondary`（slate-600） |
+
+规则：状态只给语义（success/warning/error/info/neutral），组件内禁止另写状态色裸值。
+
 ---
 
 ## 6. 卡片与表面
@@ -125,6 +140,20 @@
 | Badge | 语义固定（成功/警告/危险/信息/中性）；单区主 badge 宜少 |
 
 卡片债与收敛：见 [CARD_UI_DEBT_REDUCTION_PLAN](./CARD_UI_DEBT_REDUCTION_PLAN.md)（计划，非替代本文）。
+
+### 6.1 数据表（Table）
+
+| 项 | 要求 |
+| --- | --- |
+| 数字列 | 右对齐 + `font-variant-numeric: tabular-nums`（数字位对齐，参考 VISUAL 排版角色 Numeric） |
+| 文本列 | 左对齐 |
+| 吸顶表头 | `position: sticky` + `z-index: var(--z-sticky)`（variables.css = 35） |
+| 行 hover | 只变背景，不做位移/缩放 |
+| 空态 | 复用共享 `.empty-state`（标题 + 一句说明） |
+| 加载 | 长表首屏用 skeleton（共享 loading），不做整页死锁 |
+| 窄屏 | 提供横向滚动容器或卡片摘要，不挤压正文（历史 UI-P2-07） |
+
+禁止：表内自建第二套空态、行 hover 位移、数字列左对齐且不设 tabular-nums。
 
 ---
 
@@ -226,6 +255,7 @@
 | --- | --- |
 | v1.0 | 初版：按钮/表单/反馈/卡片/弹层/清单 |
 | v1.1 | §10 系统设置即时 vs 显式保存矩阵（TD-SET-02） |
-| 后续 | 补 Table、DatePicker、虚拟列表；可加示意截图 |
+| v1.2 | 补充数据表规范（§6.1）、状态 token 对照表（§5.1）、按钮 hover 边界（§3.2） |
+| 后续 | 补 DatePicker、虚拟列表；可加示意截图 |
 
 变更走 [PRODUCT_PRINCIPLES §5](./PRODUCT_PRINCIPLES.md#5-规范变更流程)。

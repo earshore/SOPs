@@ -44,7 +44,7 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTE
 - [无障碍规范](./ACCESSIBILITY.md) — 底线 + 发版抽检清单。
 - [稳定主题系统规范](./THEME_SYSTEM_GUIDELINES.md) — Appearance / 模块归属 / token 契约。
 - [视觉设计规范指南](./VISUAL_DESIGN_GUIDELINES.md) — 页面与组件视觉执行细则。
-- [组件开发规范](./COMPONENT_GUIDELINES.md) — 按钮/表单/反馈/卡片/清单。
+- [组件开发规范](./COMPONENT_GUIDELINES.md) — 按钮/表单/反馈/卡片/数据表/清单。
 - [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md)
 - [页面访问动画规范](./PAGE_ENTRY_ANIMATION_GUIDELINES.md)
 
@@ -134,6 +134,7 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTE
 - [工作台圆角决策 D2](./superpowers/plans/2026-07-26-workbench-radius-decision.md)
 - Token 原子冲突 allowlist：`config/token-atomic-override-allowlist.json`
 - [视觉设计规范指南](./VISUAL_DESIGN_GUIDELINES.md)
+- [图表规范](./CHART_GUIDELINES.md)
 - [组件开发规范](./COMPONENT_GUIDELINES.md)
 - [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md)
 - [页面访问动画规范](./PAGE_ENTRY_ANIMATION_GUIDELINES.md)
