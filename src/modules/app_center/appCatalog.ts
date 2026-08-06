@@ -70,7 +70,7 @@ export const APP_CENTER_CATALOG_GROUPS: readonly AppCenterCatalogGroup[] = [
     subtitle: '关键词输入、处理、分析',
     description: '检查 ASIN 关键词覆盖，整理手动补充词，并输出 SEO 复核结果。',
     icon: 'fas fa-search',
-    cardClass: 'app-card-rose',
+    cardClass: 'app-card-fuchsia',
     badge: '3 入口',
     primaryRouteId: 'keyword_hunter_input',
     routeIds: ['keyword_hunter_input', 'keyword_hunter_process', 'keyword_hunter_analysis'],

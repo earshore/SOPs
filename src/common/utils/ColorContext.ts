@@ -173,12 +173,15 @@ export class ColorContext {
   private static validateColor(color: string): ColorSchemeName {
     const validColors: ColorSchemeName[] = [
       'blue',
+      'sky',
       'indigo',
       'violet',
       'purple',
+      'fuchsia',
       'emerald',
       'teal',
       'green',
+      'lime',
       'amber',
       'orange',
       'red',
@@ -186,7 +189,6 @@ export class ColorContext {
       'pink',
       'cyan',
       'slate',
-      'lime',
     ];
 
     if (validColors.includes(color as ColorSchemeName)) {

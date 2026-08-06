@@ -40,7 +40,7 @@
 | R1 | Home | **Pass (automated)** | `release-smoke` CORE_ROUTES `#panel-home` |
 | R2 | App Center | **Pass (automated)** | smoke `.app-overview-container` |
 | R3 | Master Analysis | **Pass (automated)** | smoke scraper / ai-analysis |
-| R4 | Keyword Hunter | **Pass (automated)** | smoke keyword-hunter input + 空态 + **ownership**（`wb-theme-rose` / sidebar 回退） |
+| R4 | Keyword Hunter | **Pass (automated)** | smoke keyword-hunter input + 空态 + **ownership**（`wb-theme-fuchsia` / sidebar 回退） |
 | R5 | PPC Search Terms | **Pass (automated)** | smoke + 本地分析用例 |
 | R6 | Deep Chat | **Pass (automated)** | smoke `#deep-chat-view` + draft 用例；**非** terracotta 色差 |
 | R7 | Settings Appearance | **Pass (automated)** 可达 + 双轴 | E2E-P1-04 可见 + smoke 切 `minimal` / color-mode；**非** default↔minimal 色差截图 |
@@ -66,8 +66,8 @@
 | R3-C3 | 空态/错误语义色 | **Pass (code contract)** + **Needs manual browser** | ThemeManager 不写 status |
 | R3-I1 | 分析工具条 `blue-*` | Informational | D6 → Phase 5 |
 | R4-C1 | 主按钮/focus | **Needs manual browser**（部分 sample code） | 壳层 vs 模块；KH 主 CTA 已迁 primary 样本，色差仍需肉眼 |
-| R4-C2 | KH ownership banner/sidebar | **Pass (automated)** class + **Needs manual browser** 质感 | 活模板 **`wb-theme-rose`**（历史文档曾写 fuchsia）；smoke 在 minimal（及 dark×minimal）后仍断言类名；渐变质感仍需人工 |
-| R4-C3 | 侧栏 KH 目录色 | **Pass (automated)** 回退路径 + **Needs manual browser** | smoke 可回退 `sidebar-theme-rose`；扫读仍人工 |
+| R4-C2 | KH ownership banner/sidebar | **Pass (automated)** class + **Needs manual browser** 质感 | 活模板 **`wb-theme-fuchsia`**（历史文档曾写 fuchsia）；smoke 在 minimal（及 dark×minimal）后仍断言类名；渐变质感仍需人工 |
+| R4-C3 | 侧栏 KH 目录色 | **Pass (automated)** 回退路径 + **Needs manual browser** | smoke 可回退 `sidebar-theme-fuchsia`；扫读仍人工 |
 | R4-I1 | 模块 `blue-*` | Informational | D6 |
 | R5-C1 | 全局壳层 primary/focus | **Needs manual browser** | |
 | R5-C2 | `.ppc-hero` emerald | **Pass (code contract)** + **Needs manual browser** | 业务 hero 非 Appearance |
@@ -82,7 +82,7 @@
 | R7-C2 | preview ≈ apply | **Pass (automated)** unit | `previewTheme('minimal')` 对齐 customVars；**设置 UI 无色块预览断言** |
 | R7-C3 | minimal = slate-700 档 | **Pass (automated)** unit | 非 scheme-500 |
 | R7-C4 | 7 presets 列表 | **Pass (code contract)** | `THEME_PRESETS` + settings `appearanceThemeOptions` 契约单测 |
-| R7-C5 | 切换不改侧栏/banner | **Pass (automated)** KH 抽检 + **Needs manual browser** 全站 | smoke：minimal 后 KH `wb-theme-rose`；其他路由仍需肉眼 |
+| R7-C5 | 切换不改侧栏/banner | **Pass (automated)** KH 抽检 + **Needs manual browser** 全站 | smoke：minimal 后 KH `wb-theme-fuchsia`；其他路由仍需肉眼 |
 | R7-C6 | `app-theme` 持久化 | **Pass (automated)** unit + 路由保持 + **Needs manual browser** 硬刷新 | smoke：minimal 在 KH / Promptlab 路由仍保持；**无** 全页 F5 reload e2e |
 | R7-D1 | Dark 与 Appearance 共存 | **Pass (automated)** 双轴 smoke + **Needs manual browser** 视觉 | smoke：dark×minimal 文档根 + KH ownership；**非** visual Pass |
 
@@ -118,7 +118,7 @@
 | ID | 场景 | 状态 |
 | --- | --- | --- |
 | X1 | default ↔ minimal ≥3 次 | **Needs manual browser**（select/API **Pass automated** 单次；≥3 次与体感仍人工） |
-| X2 | Ownership 不变 | **Pass (automated)** KH rose 抽检 + **Needs manual browser** 全站 |
+| X2 | Ownership 不变 | **Pass (automated)** KH fuchsia 抽检 + **Needs manual browser** 全站 |
 | X3 | 对比度 | **Needs manual browser** |
 | X4 | 长会话 15–30 min | **Needs manual browser** |
 | X5 | minimal+dark / default+dark | **Pass (automated)** dark×minimal 双轴 smoke + **Needs manual browser** 视觉 |
@@ -156,7 +156,7 @@
 | ☐ | **confirmModal primary chrome**（D6 #24） | 打开：任何页 Console 跑 `import('/src/components/modal/confirmModal.ts').then(m => m.confirmWithModal('主题确认抽检','仅 eye-check primary chrome（非删除）','','确认'))`；theme confirm CTA/header/border/checkbox 跟 `--color-primary*` / `--color-focus-ring`（minimal 偏 slate）；danger 仍 red→orange | theme confirm 仍死锁旧蓝且已迁 token 却无差；或 danger 被 Appearance 冲掉 |
 | ☐ | **AppModal primary soft chrome**（D6 #25） | 打开：任何已有 `<app-modal>` 的页（例：Restricted Words / NPI Next Step / Settings 相关）Console：`(document.querySelector('app-modal')||document.querySelector('#import-conflict-modal'))?.open?.()`；看 title icon / accent soft 跟 Appearance primary via color-mix（minimal 偏 slate）；neutrals 保留 | title chrome 仍死锁旧蓝且已迁 token 却无差；或 neutrals / focus 被误改 |
 | ☐ | **import-conflict primary soft chrome**（D6 #26） | 打开：任何页等 `#modal-container` 装载后 Console：`document.getElementById('import-conflict-modal')?.open?.()`（若 null：先进 Scraper/AI 或任何会拉 sharedModals 的流程）；recommended badge / 智能合并图标 soft chrome 跟 Appearance primary（minimal 偏 slate）；amber 冲突横幅 / danger overwrite 保留 | recommended soft chrome 仍死锁 indigo 且已迁 token 却无差；或 amber/danger 被 Appearance 冲掉 |
-| ☐ | **dark × minimal 烟测复核**（自动化已有） | 设置切 deep + 极简后打开 KH：`<html data-appearance=minimal data-color-mode=dark class~dark>`；rose banner/sidebar 类仍在 | 轴互擦；ownership 类消失（契约回归） |
+| ☐ | **dark × minimal 烟测复核**（自动化已有） | 设置切 deep + 极简后打开 KH：`<html data-appearance=minimal data-color-mode=dark class~dark>`；fuchsia banner/sidebar 类仍在 | 轴互擦；ownership 类消失（契约回归） |
 
 > dark×minimal **文档根 + KH ownership class 已在 smoke 自动化**；上表 dark×minimal 行仅 optional 肉眼复核，**不**等于 visual 签收。SOPs/NPI/Hub nav/#14/#15/#16/#18–26 为 D6 样本抽检，**不**阻塞 30 min 主脚本，**不**声称 visual Pass。
 
@@ -180,7 +180,7 @@
 | --- | --- |
 | 切换 Appearance（Settings select） | smoke **有** `settings-theme-select` → `minimal` / `default` |
 | `data-appearance` / `data-theme` / `data-color-mode` | smoke **有** `expectDocumentThemeState` |
-| KH ownership class 在 minimal 后 | smoke **有** `wb-theme-rose` / `sidebar-theme-rose` |
+| KH ownership class 在 minimal 后 | smoke **有** `wb-theme-fuchsia` / `sidebar-theme-fuchsia` |
 | dark × minimal 双轴共存（KH） | smoke **有**（文档根 + ownership；**无**色差） |
 | minimal 在 Promptlab 路由保持 | smoke **有**（文档根；**非**视觉） |
 | `--color-primary` computed default vs minimal | e2e **无**（仅 unit） |
@@ -213,7 +213,7 @@
 | 2–5 | 打开全局设置 → **外观与体验** | `#settings-section-appearance`、主题 select、颜色模式可见 | 无主题控件 |
 | 5–8 | 主题：`默认` → `极简素色` → `默认` → `极简素色`（≥3 次） | 切换无崩溃；`<html data-appearance>` 跟选中 id；兼容 `data-theme`=同 id | 闪崩；属性乱写 `dark` 进 theme 槽 |
 | 8–10 | 保持 **minimal**，刷新整页 | 仍为 minimal；`app-theme` 记忆 | 刷新回 default 且无说明 |
-| 10–14 | 仍 minimal：打开 Keyword Hunter | banner/侧栏 **rose 归属**（`wb-theme-rose` / 侧栏 rose）**不变**；仅 token 化壳层可偏 slate | banner 变灰/变蓝跟 Appearance |
+| 10–14 | 仍 minimal：打开 Keyword Hunter | banner/侧栏 **fuchsia 归属**（`wb-theme-fuchsia` / 侧栏 fuchsia）**不变**；仅 token 化壳层可偏 slate | banner 变灰/变蓝跟 Appearance |
 | 14–17 | PPC Search Terms | `.ppc-hero` emerald/teal **不变** | hero 被 primary 染成工业灰主叙事 |
 | 17–20 | Deep Chat | 发送/accent **terracotta**；shell chrome 可跟 primary；非全局 primary 顶替 terracotta | terracotta 被 Appearance 吃掉 |
 | 20–23 | Master Analysis（Scraper 或 AI） | `wb-theme-indigo` 类叙事不变；空态/错误色仍语义 | indigo banner 被冲 |
@@ -235,7 +235,7 @@
 | 2 | 2–5 | Settings → **外观与体验** | Appearance 区 + 主题 select + 颜色模式 |
 | 3 | 5–8 | **default → minimal ×3** | `data-appearance` 跟 select；`data-theme`=同 id；不把 `dark` 写进 theme 槽 |
 | 4 | 8–10 | 保持 **minimal** → **F5 刷新** | 仍 minimal；`app-theme` 记忆 |
-| 5 | 10–14 | KH `/#/app-center/keyword-hunter/…` | **rose** ownership 不变（`wb-theme-rose` / sidebar） |
+| 5 | 10–14 | KH `/#/app-center/keyword-hunter/…` | **fuchsia** ownership 不变（`wb-theme-fuchsia` / sidebar） |
 | 6 | 14–17 | PPC Search Terms | `.ppc-hero` emerald/teal **不变** |
 | 7 | 17–20 | Deep Chat | **terracotta** 发送/accent 不被 Appearance 顶替 |
 | 8 | 20–23 | Master Analysis（Scraper 或 AI） | indigo banner 叙事不变 |
@@ -245,8 +245,8 @@
 | 12 | 28–30 | **dark × appearance** | 颜色模式→深色；`.dark` + `data-color-mode=dark` 与 `data-appearance` 并存 |
 | 13 | 收尾 | 切回 **default + light** | 可恢复，不卡死 |
 
-**Ownership 必抽（X2）**: KH rose · PPC hero · MA indigo · Deep Chat terracotta。  
-**双轴必抽（X5）**: Settings dark + 保留/ 切换 Appearance；可选再开 KH 复核 rose class。
+**Ownership 必抽（X2）**: KH fuchsia · PPC hero · MA indigo · Deep Chat terracotta。  
+**双轴必抽（X5）**: Settings dark + 保留/ 切换 Appearance；可选再开 KH 复核 fuchsia class。
 
 **可选 +5~10 min（样本 through #27，非主脚本 Blocker）**: Skills 试用 CTA → Deep Chat shell chrome/focus → **#10 SOPs** → **#11 NPI** → **#13 Hub nav orange** → **#14–16** → **#18–21 residual** → **#22 SafeModuleLoader** → **#23 Home CTA** → **#24 confirmModal** → **#25 AppModal** → **#26 import-conflict** → **#27 legacy-compat primary/search**（App Center/SOPs 旧按钮类若仍挂载）→ dark×minimal KH 肉眼复核。见 §1.8。**不**声称 visual Pass。
 
@@ -276,7 +276,7 @@ document.getElementById('import-conflict-modal')?.open?.();
 XO: ________  Date: 2026-__-__  Build/SHA: ________ (expect 903dbf3e+ · sample wave FREEZE)
 Browser: ________  Viewport: ________
 X1 switch×3: Pass/Fail
-X2 ownership (KH rose / PPC / MA / DeepChat terracotta): Pass/Fail
+X2 ownership (KH fuchsia / PPC / MA / DeepChat terracotta): Pass/Fail
 X3 contrast/focus: Pass/Fail
 X4 long-session (or 10m proxy): Pass/Fail / Skipped
 X5 dark×appearance (设置颜色模式): Pass/Fail

@@ -62,7 +62,7 @@ Role → 默认 palette（menu / colorSchemes）→ 兼容 `wb-theme-*` class；
 | `role-apps-overview` | 应用中心总览 | `modules.app_center.themeColor: rose` | `rose` | 总览可用 `wb-theme-rose` 或 overview 局部 token（`--app-overview-*`） | 宪法旧文曾写 `purple`；**以 menuConfig `rose` 为准**。总览可走 App Center overview 局部 token，不发明新 `wb-theme-*`。 |
 | `role-analysis` | Master Analysis 工作台 | `modules.master_analysis.themeColor` + `appCategories.master_analysis.color: indigo` | `indigo` | `wb-theme-indigo`；遗留 `wb-theme-analytics`（blue 系） | 新页用 `indigo`。`wb-theme-analytics` 为历史 scraper/分析页 blue 变体，**仅兼容，禁止新开**；Phase 4/5 可逐步归并到 `role-analysis`。 |
 | `role-playground` | Playground / Deep Chat | 配置：`themeColor` / `appCategories.playground.color: orange` | 配置 `orange`；实现 terracotta 等 | **不**以 `wb-theme-orange` 为唯一 banner class；实现可见 `wb-theme-supply`、隐藏 banner、模块 CSS | **配置 vs 实现双层例外（硬登记）**。归属**不是** indigo / cyan。本轮**不新增** `wb-theme-orange`。重写 Deep Chat 色 = 独立需求，禁止夹带 Phase 4。 |
-| `role-keywords` | Keyword Hunter | 配置：`modules.keyword_hunter.themeColor` + `appCategories.keyword_hunter.color: rose`；历史/视觉文常写 `fuchsia` | **权威 menu：`rose`**；banner 兼容 `fuchsia` | `wb-theme-rose`（对齐 menu）/ 现网常见 `wb-theme-fuchsia` | **例外：menu rose vs banner fuchsia 双轨**。Phase 4 收敛前：新页优先按 **menu `rose` + `wb-theme-rose`**；既有 `wb-theme-fuchsia` 不强制本轮改完。禁止第三色名。 |
+| `role-keywords` | Keyword Hunter | 配置：`modules.keyword_hunter.themeColor` + `appCategories.keyword_hunter.color: fuchsia`（2026-08-06 起） | `fuchsia` | `wb-theme-fuchsia` / `sidebar-theme-fuchsia` | 曾存在 menu rose vs banner fuchsia 双轨，2026-08-06 已收敛为 fuchsia（区分工作台 rose）。禁止回退 rose。 |
 | `role-ppc` | PPC Tools | `modules.ppc_tools.themeColor` + `appCategories.ppc_tools.color: emerald` | `emerald` | 无强制单一 `wb-theme-*`；自定义 **PPC hero** + `--ppc-*` 局部 token | 自定义 hero 须受控（登记局部 token）；主 CTA 尽量语义化；**不**发明 `wb-theme-ppc` 除非走 role 扩表流程。emerald 与 `role-ops-growth` 同 palette、不同 role（业务域不同）。 |
 | `role-hub-overview` | Amazon 智库总览 | `modules.amz_hub.themeColor: orange` | `orange` | 总览入口色（实现可局部）；**不**默认等于 `role-playground` | 总览可与子分类 role 不同；子页必须用 hub 子 role，不得长期只绑 overview 色。 |
 | `role-hub-knowledge` | Amazon 知识早知道 | `hubCategories.knowledge.color: indigo` | `indigo` | `wb-theme-indigo` | 与 `role-analysis` 同 palette；靠 role id / 导航上下文区分，不合并 role。 |
@@ -201,7 +201,7 @@ Appearance **可以**动：`--color-primary*`、`--color-focus-ring`、token 化
 | --- | --- | --- | --- |
 | SOPs 总览 | `indigo` | 曾写 `blue` | 文档改 indigo；role=`role-sops-overview` |
 | 应用中心总览 | `rose` | 曾写 `purple` | 文档改 rose |
-| Keyword Hunter | `rose` | 常写 `fuchsia` + `wb-theme-fuchsia` | 产品拍板后单向收敛 |
+| Keyword Hunter | `fuchsia` | 曾为 `rose` + 文档 `fuchsia` 双轨 | **2026-08-06 已统一 fuchsia**（区分工作台 rose） |
 | Hub 运营提升 | `rose` | 常写 `violet` + `wb-theme-violet` | 同上 |
 | More 大模型探索 | `violet` | 曾写 `teal` + `wb-theme-teal` | 文档改 violet；role=`role-more-llm` |
 | Playground | 配置 `orange` | 实现 terracotta / supply / hidden | **保持双层例外** |

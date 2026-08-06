@@ -195,7 +195,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--rounded-md, 8px) !important;
+  border-radius: var(--wb-icon-radius) !important;
   /* 同系玫红 → 珊瑚，避免 ink 黑与 accent 红硬切 */
   background: linear-gradient(
     135deg,
@@ -2008,6 +2008,16 @@
   --color-border-light: color-mix(in srgb, var(--color-rose-500, #f43f5e) 28%, transparent);
 }
 
+.app-card-fuchsia {
+  --color-accent: var(--color-fuchsia-600);
+  --color-bg-selected: color-mix(
+    in srgb,
+    var(--color-fuchsia-500, #d946ef) 10%,
+    var(--surface-card, #ffffff)
+  );
+  --color-border-light: color-mix(in srgb, var(--color-fuchsia-500, #d946ef) 28%, transparent);
+}
+
 .app-card-emerald {
   --color-accent: var(--color-emerald-600);
   --color-bg-selected: color-mix(
@@ -2629,14 +2639,14 @@
 
 .dark
   .app-overview-container
-  :is(.app-card-rose, .app-overview-card[data-category='keyword_hunter']),
+  :is(.app-card-fuchsia, .app-overview-card[data-category='keyword_hunter']),
 [data-color-mode-resolved='dark']
   .app-overview-container
-  :is(.app-card-rose, .app-overview-card[data-category='keyword_hunter']),
+  :is(.app-card-fuchsia, .app-overview-card[data-category='keyword_hunter']),
 [data-theme='dark']
   .app-overview-container
-  :is(.app-card-rose, .app-overview-card[data-category='keyword_hunter']) {
-  --color-accent: var(--color-rose-300, #fda4af);
+  :is(.app-card-fuchsia, .app-overview-card[data-category='keyword_hunter']) {
+  --color-accent: var(--color-fuchsia-300, #f0abfc);
 }
 
 .dark .app-overview-container .app-card-emerald,

@@ -26,7 +26,7 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
 
   it('maps known modules to roles and palettes', () => {
     expect(getOwnershipRoleForModule('keyword_hunter')).toBe('role-keywords');
-    expect(getPaletteForRole('role-keywords')).toBe('rose');
+    expect(getPaletteForRole('role-keywords')).toBe('fuchsia');
 
     expect(getOwnershipRoleForModule('ppc_tools')).toBe('role-ppc');
     expect(getPaletteForRole('role-ppc')).toBe('emerald');
@@ -73,7 +73,7 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
     }
   });
 
-  it('soft-cross-checks Sidebar theme class for keyword_hunter with ownership rose (no production wire)', () => {
+  it('soft-cross-checks Sidebar theme class for keyword_hunter with ownership fuchsia (no production wire)', () => {
     // D8 light wire: assert the convention SidebarRenderer uses
     // (`sidebar-theme-${ColorSchemeName}`) matches ownershipRoles palette when
     // menu themeColor and role palette agree. Does not import SidebarRenderer /
@@ -84,9 +84,9 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
     const menuThemeColor = MENU_CONFIG.modules[moduleId]?.themeColor;
 
     expect(roleId).toBe('role-keywords');
-    expect(palette).toBe('rose');
-    expect(menuThemeColor).toBe('rose');
-    expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-rose');
+    expect(palette).toBe('fuchsia');
+    expect(menuThemeColor).toBe('fuchsia');
+    expect(`sidebar-theme-${palette}`).toBe('sidebar-theme-fuchsia');
   });
 
   it('soft-cross-checks Sidebar theme class for ppc_tools with ownership emerald (no production wire)', () => {
@@ -297,10 +297,10 @@ describe('ownershipRoles SSOT (D8 scaffold)', () => {
     expect(getOwnershipRoleForCategory('sop', 'unknown')).toBeNull();
   });
 
-  it('lists preferred wb-theme classes for dual-track roles', () => {
+  it('lists preferred wb-theme classes for roles (keyword_hunter unified fuchsia)', () => {
     const keywordsClasses = getWbThemeClassesForRole('role-keywords');
-    expect(keywordsClasses).toContain('wb-theme-rose');
     expect(keywordsClasses).toContain('wb-theme-fuchsia');
+    expect(keywordsClasses).not.toContain('wb-theme-rose');
 
     // PPC: custom hero, no mandatory single class
     expect(getWbThemeClassesForRole('role-ppc')).toEqual([]);
