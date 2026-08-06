@@ -194,6 +194,28 @@
   font-size: 12px;
 }
 
+/* Layer B Ownership：nav hover 条随 data-nav-palette 使用模块归属色阶 token，
+   不被 Appearance 改写；未声明 palette 时兜底 --color-primary。 */
+.nav-group[data-nav-palette='indigo'] .nav-trigger::after {
+  background: linear-gradient(90deg, var(--color-indigo-500), var(--color-indigo-400));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-indigo-500) 35%, transparent);
+}
+
+.nav-group[data-nav-palette='rose'] .nav-trigger::after {
+  background: linear-gradient(90deg, var(--color-rose-500), var(--color-rose-400));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-rose-500) 35%, transparent);
+}
+
+.nav-group[data-nav-palette='orange'] .nav-trigger::after {
+  background: linear-gradient(90deg, var(--color-orange-500), var(--color-orange-400));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-orange-500) 35%, transparent);
+}
+
+.nav-group[data-nav-palette='green'] .nav-trigger::after {
+  background: linear-gradient(90deg, var(--color-green-500), var(--color-green-400));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-green-500) 35%, transparent);
+}
+
 .nav-trigger::after {
   content: '';
   position: absolute;
@@ -201,11 +223,15 @@
   left: 50%;
   transform: translateX(-50%);
   width: 0;
-  height: 3px;
+  height: 2px;
   border-radius: var(--rounded-full, 9999px);
-  background: linear-gradient(90deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%);
+  background: linear-gradient(
+    90deg,
+    var(--color-primary, #6366f1),
+    var(--color-primary-light, #818cf8)
+  );
   transition: width var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-primary, #6366f1) 35%, transparent);
 }
 
 .nav-trigger .nav-icon {
@@ -515,8 +541,9 @@
 }
 
 .quick-access-item:hover {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(139, 92, 246, 0.04) 100%);
-  color: var(--color-primary, #6366f1);
+  /* More 菜单归属 green（module more_core）：hover 不走 Appearance primary */
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.06) 0%, rgba(16, 185, 129, 0.04) 100%);
+  color: var(--color-green-600, #16a34a);
 }
 
 .quick-access-icon {
@@ -535,18 +562,18 @@
 }
 
 .quick-access-item:hover .quick-access-icon {
-  background: color-mix(in srgb, var(--color-primary, #6366f1) 14%, var(--surface-panel, #ffffff));
-  color: var(--color-primary, #6366f1);
+  background: color-mix(in srgb, var(--color-green-500, #22c55e) 14%, var(--surface-panel, #ffffff));
+  color: var(--color-green-600, #16a34a);
   transform: scale(1.05);
 }
 
-/* Tip Card */
+/* Tip Card（更多菜单版本卡，归属 green） */
 .tip-card {
   margin-top: 24px;
   padding: 16px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(236, 72, 153, 0.04) 100%);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.06) 0%, rgba(16, 185, 129, 0.04) 100%);
   border-radius: var(--rounded-lg, 16px);
-  border: 1px solid rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.1);
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -556,7 +583,7 @@
   width: 22px;
   height: 22px;
   border-radius: 6px;
-  background: linear-gradient(135deg, #c7d2fe, #a5b4fc);
+  background: linear-gradient(135deg, #bbf7d0, #86efac);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -566,7 +593,7 @@
 
 .tip-card-icon i {
   font-size: 9px;
-  color: var(--color-primary-dark, #4f46e5);
+  color: var(--color-green-700, #15803d);
 }
 
 .tip-card-text {
@@ -1085,14 +1112,15 @@
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
 }
 
-/* Hover was light indigo wash (0.06) → almost invisible / muddy on dark */
+/* Hover was light indigo wash (0.06) → almost invisible / muddy on dark.
+   More 菜单归属 green：hover 背景/图标走 green 系而非 Appearance primary。 */
 .dark .quick-access-item:hover,
 .dark .quick-access-item:focus-visible,
 [data-color-mode-resolved='dark'] .quick-access-item:hover,
 [data-color-mode-resolved='dark'] .quick-access-item:focus-visible,
 [data-theme='dark'] .quick-access-item:hover,
 [data-theme='dark'] .quick-access-item:focus-visible {
-  background: color-mix(in srgb, var(--color-primary, #818cf8) 18%, var(--surface-card, #1e293b));
+  background: color-mix(in srgb, var(--color-green-400, #4ade80) 18%, var(--surface-card, #1e293b));
   color: var(--color-slate-50, #f8fafc);
 }
 
@@ -1102,9 +1130,9 @@
 [data-color-mode-resolved='dark'] .quick-access-item:focus-visible .quick-access-icon,
 [data-theme='dark'] .quick-access-item:hover .quick-access-icon,
 [data-theme='dark'] .quick-access-item:focus-visible .quick-access-icon {
-  background: color-mix(in srgb, var(--color-primary, #818cf8) 28%, #0f172a);
-  color: #e0e7ff;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary, #818cf8) 35%, transparent);
+  background: color-mix(in srgb, var(--color-green-400, #4ade80) 28%, #0f172a);
+  color: #dcfce7;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-green-400, #4ade80) 35%, transparent);
 }
 
 /* Version card used near-white mint gradient — blown out on dark mega */
