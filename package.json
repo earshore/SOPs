@@ -114,6 +114,7 @@
     "workbench-ui:audit": "tsx scripts/quality/audit-workbench-ui.ts",
     "css:audit": "tsx scripts/quality/audit-css-variables.ts",
     "z-index:audit": "tsx scripts/quality/audit-z-index.ts",
+    "doc-classnames:audit": "tsx scripts/quality/audit-doc-classnames.ts",
     "theme:hardcode-baseline": "tsx scripts/quality/theme-hardcode-baseline.ts",
     "theme:bridge:gate": "tsx scripts/quality/theme-bridge-gate.ts",
     "theme:hardcode-baseline:all": "tsx scripts/quality/theme-hardcode-baseline.ts --scope all",

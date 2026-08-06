@@ -88,7 +88,7 @@
 | P3-1 | D12 首 8 张人工截图（默认 vs minimal） | 截图 + MANIFEST（D12 §6 命名规范） | 人工 XO 记录（30 min 脚本） |
 | P3-2 | 签收结论：`PASS / PASS with debt / FAIL` | 更新 XO 签字状态文档 | 状态板 Visual Yellow → Green（或登记债务） |
 | P3-3 | a11y 评估（可选）：对核心路径跑一次 axe 扩展扫描 | 结果记录到 ACCESSIBILITY §5 或债务看板 | 不 fail-closed；仅登记 |
-| P3-4 | （可选）文档↔类名 audit 脚本 | `scripts/quality/audit-doc-classnames.ts`（校验 README/QUICK-REFERENCE 类名存在性） | 纳入 `ci:quality`（或作为 local 命令） |
+| P3-4 | （可选）文档↔类名 audit 脚本 | `scripts/quality/audit-doc-classnames.ts`（校验 README/QUICK-REFERENCE 类名存在性） | 纳入 `ci:quality`（或作为 local 命令） ✅ 已落地 |
 
 ### 验证
 
