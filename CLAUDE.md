@@ -254,7 +254,7 @@ const str = storageService.getRaw('key');
 
 ## Architectural Debt Tracking
 
-The project maintains architectural debt documentation in `.kiro/arch-debt/`:
+The project maintains architectural debt documentation in `docs/archive/kiro-2026-h1/arch-debt/` (historical, 2026-H1):
 
 - **debt-list.md**: Complete inventory of technical debt
 - **progress.md**: Refactoring progress (currently 79% complete)
@@ -345,7 +345,7 @@ Vite automatically splits code by:
 4. Always clean up subscriptions in component/module cleanup
 
 ### Fixing Architectural Debt
-1. Check `.kiro/arch-debt/debt-list.md` for the file
+1. Check `docs/archive/kiro-2026-h1/arch-debt/debt-list.md` for the file (historical 2026-H1 debt snapshot)
 2. Follow the established pattern from completed batches
 3. Update `progress.md` when complete
 4. Run `npm run type-check` to verify changes
@@ -370,4 +370,4 @@ Vite automatically splits code by:
 - **CSS Architecture**: See `docs/CSS-ARCHITECTURE-README.md`
 - **Routing System**: See `docs/routing-system-analysis-2026-02-28.md` (if exists)
 - **Best Practices**: See `docs/best-practices.md`
-- **Architectural Debt**: See `.kiro/arch-debt/` directory
+- **Architectural Debt**: See `docs/archive/kiro-2026-h1/arch-debt/` directory (historical)

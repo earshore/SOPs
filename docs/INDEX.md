@@ -28,7 +28,7 @@
 | 威胁模型 / 安全验收清单 | **[SECURITY_PLAYBOOK.md](./SECURITY_PLAYBOOK.md)** |
 | 查当前技术债 | **[TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)**（活） |
 | 做新功能设计 | `docs/superpowers/specs/` + 触及的上述宪法 |
-| 历史审计/旧计划 | `docs/archive/`、`.kiro/`（**只读**） |
+| 历史审计/旧计划 | `docs/archive/`（**只读**） |
 
 **冲突裁决顺序（高 → 低）：**  
 PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTENT / A11Y / TESTING / SECURITY_PLAYBOOK / OPS / RELEASE）→ 功能 Spec → 实现代码注释。
@@ -80,7 +80,7 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTE
 - [Release Notes 模板](./templates/RELEASE_NOTES_TEMPLATE.md)
 - [安全策略](../SECURITY.md)
 - [安全 Playbook](./SECURITY_PLAYBOOK.md) — BYOK 威胁模型 + PR/RC 验收清单。
-- [贡献指南（历史 Kiro 路径）](../.kiro/CONTRIBUTING.md) — 若与 README/`docs/` 冲突，以现行 `docs/` 与根 README 为准。
+- [贡献指南（历史 Kiro 路径）](../docs/archive/kiro-2026-h1/CONTRIBUTING.md) — 若与 README/`docs/` 冲突，以现行 `docs/` 与根 README 为准。
 
 ### 开发实践（注意日期）
 
@@ -148,12 +148,12 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTE
 - [历史验证归档](./archive/verification/README.md)
 - [其他历史文档](./archive/misc/)
 
-## 历史 Kiro 文档（勿当现行 SSOT）
+## 历史 Kiro 文档（已归档 · 勿当现行 SSOT）
 
-`.kiro/` 下的 specs、arch-debt、design、agents、fix-reports 和 test-reports 是 **2026-H1 及更早** 的规划与执行快照。
+`docs/archive/kiro-2026-h1/` 下的 specs、arch-debt、design、agents、fix-reports 和 test-reports 是 **2026-H1 及更早** 的规划与执行快照。
 
-- 入口说明：[`.kiro/README.md`](../.kiro/README.md)
-- 债务进度快照已标注 historical：[`arch-debt/progress.md`](../.kiro/arch-debt/progress.md)
+- 入口说明：[`kiro-2026-h1/README.md`](./archive/kiro-2026-h1/README.md)
+- 债务进度快照已标注 historical：[`arch-debt/progress.md`](./archive/kiro-2026-h1/arch-debt/progress.md)
 - **当前**架构、主题、发版与实现计划以本索引「现行规范」与 `docs/superpowers/` 为准。
 
 ---

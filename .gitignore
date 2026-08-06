@@ -72,7 +72,7 @@ playwright/.cache/
 
 # Playwright 视觉回归快照（CI 临时生成，不入库；本地保留）
 tests/visual/visual.test.ts-snapshots/
-ci-visual-artifacts/
+tests/visual/ci-artifacts/
 
 # Screenshots (保留目录结构，忽略截图文件)
 tests/screenshots/**/*.png
@@ -105,6 +105,8 @@ page-load-report.json
 tests/quality/eslint-output.json
 tests/quality/jscpd-report.*
 tests/quality/quality-history.json
+tests/quality/quality-progress-history.json
+tests/quality/quality-progress-report.txt
 tests/quality/quality-report-*.html
 tests/quality/quality-report-*.json
 tests/quality/quality-trend.html
@@ -271,11 +273,6 @@ tools/patches/
 .github/chatmodes/
 .github/agents/
 .github/instructions/
-
-# Kiro local machine state + CLI-synced skill steering dumps
-.kiro/hooks/
-.kiro/settings/
-.kiro/steering/
 
 # Development artifacts
 test-new-llm-service.html

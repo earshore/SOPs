@@ -60,9 +60,8 @@ SOPs/
 │   ├── modules/         # 业务模块
 │   ├── services/        # 服务层
 │   └── components/      # 组件
-├── docs/                # 文档
+├── docs/                # 文档（archive/ 为历史归档）
 ├── tests/               # 测试
-├── .kiro/               # 项目管理
 └── scripts/             # 构建脚本
 ```
 

@@ -32,9 +32,6 @@ variables.generated.css
 # Git
 .git
 
-# Kiro
-.kiro
-
 # Test artifacts
 test-results
 playwright-report

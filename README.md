@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 `https://new.hongecb.store/v1` 中转站；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/`（含 `docs/archive/kiro-2026-h1/`）中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 **文档唯一入口（规范 / 决策树 / 现行 SSOT）：** [docs/INDEX.md](./docs/INDEX.md)
 
@@ -581,7 +581,7 @@ export const unmount = () => instance.unmount();
 - [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) - Cloudflare Pages 与 new-api 部署说明
 - [docs/CI-QUALITY-GATES.md](./docs/CI-QUALITY-GATES.md) - 当前 CI 安全与质量门禁
 - [docs/CHANGELOG.md](./docs/CHANGELOG.md) - 项目变更记录
-- [.kiro/CONTRIBUTING.md](./.kiro/CONTRIBUTING.md) - 贡献指南
+- [docs/archive/kiro-2026-h1/CONTRIBUTING.md](./docs/archive/kiro-2026-h1/CONTRIBUTING.md) - 贡献指南（历史）
 
 ## 许可证
 

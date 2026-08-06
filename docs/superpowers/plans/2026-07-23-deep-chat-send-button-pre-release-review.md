@@ -42,7 +42,7 @@ Primary paths: `controller.ts`, `index.html`, `skillDeepChatHandoff*`, `skillCon
 | D6 | Process | Branch not pushed; no PR; no CHANGELOG / version bump yet | **Residual** | process | **Defer** to merge/release ops (out of this branch’s code debt); owner: release owner |
 | D7 | Product readiness | Full product GA gates (staging soak, full `test:e2e:smoke`, CHANGELOG freeze) not executed as GA cut | **Residual** | release-channel | **Defer** — drives **RC not GA**; owner: release owner |
 | D8 | Code quality | No `TODO`/`FIXME`/`@ts-ignore` in branch Deep Chat / handoff sources | **Cleared** | n/a | Grep clean |
-| D9 | Architecture debt tracker | `.kiro/arch-debt` items outside this branch | **Residual** | n/a | **Not-this-branch** (plan non-goal) |
+| D9 | Architecture debt tracker | `docs/archive/kiro-2026-h1/arch-debt` items outside this branch | **Residual** | n/a | **Not-this-branch** (plan non-goal) |
 
 **Blocking residual debt for merge:** none after D4.
 

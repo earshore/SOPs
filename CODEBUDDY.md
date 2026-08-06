@@ -57,5 +57,5 @@
 - `StorageService` 是统一存储入口，尽量不要直接碰 `localStorage`。
 - 路由 ID、菜单配置、壳层面板 ID、`content_area` ID 之间有隐式契约；改路由时要同时核对 `menuConfig.ts`、模块入口映射和对应 HTML 容器。
 - 新增子页面通常不止改一处：至少要检查路由常量、路由 ID 类型、`menuConfig.ts`，以及对应顶层模块的动态 import 映射。
-- 该仓库维护了 `.kiro/arch-debt/` 技术债跟踪，当前重点之一是把旧事件机制迁到 EventBus；碰到相关文件时最好先看对应债务记录。
+- 该仓库维护了 `docs/archive/kiro-2026-h1/arch-debt/`（2026-H1 历史快照）技术债跟踪记录；当前重点之一是把旧事件机制迁到 EventBus；碰到相关文件时最好先看对应债务记录。
 - 常用路径别名见 `tsconfig.json`：`@`、`@common`、`@services`、`@modules`、`@components`、`@router`。跨层引用优先用别名，别手写很长的相对路径。

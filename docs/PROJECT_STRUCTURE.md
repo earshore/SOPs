@@ -50,12 +50,12 @@ This review keeps the application layout intact and only documents the current s
 | `docs/superpowers/` | **Active** implementation plans and design specs |
 | `docs/*_GUIDELINES.md`, `docs/SHARED_CAPABILITIES_GUIDE.md`, `docs/TECH_DEBT_AUDIT.md` | **Active** product/engineering constitutions and live debt signals |
 | `docs/INDEX.md` | Navigation: active vs archive vs historical |
-| `.kiro/` | **Historical only** (see `.kiro/README.md`); not current debt/plan SSOT |
+| `docs/archive/kiro-2026-h1/` | **Historical only** (2026-H1 planning snapshots); not current debt/plan SSOT |
 | `docs/archive/` | Completed one-off audits and retired notes |
 
 ## Remaining Review Items
 
 - Keep generated reports out of Git unless they are explicitly promoted into a maintained document such as `TECH_DEBT_AUDIT.md` or `XSS_SCAN_REPORT.md`.
-- Treat `.kiro/` project planning documents as historical references; avoid adding local `.kiro/hooks/` or `.kiro/settings/` state back to version control. Optional later: mass-move `.kiro/` under `docs/archive/kiro-2026-h1/` only after confirming no required path dependencies.
+- Treat `docs/archive/kiro-2026-h1/` project planning documents as historical references. (Mass-move of `.kiro/` under `docs/archive/kiro-2026-h1/` completed 2026-08-06; the root `.kiro/` directory has been removed.)
 - Continue pruning root-level one-off reports after each audit cycle so the root remains limited to application entry points and repository-level documentation.
 - Structure cleanup batches D–F (dead `StandardModule`, orphan scripts, vite config ownership) remain out of batch C.

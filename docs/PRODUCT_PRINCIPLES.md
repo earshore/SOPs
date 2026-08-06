@@ -61,7 +61,7 @@
 | 状态 | 默认本机；云同步不在当前合同内 |
 | 主题 | Appearance 只改全局 primary/focus；**不**覆盖模块归属色 |
 | 监控 | Sentry **默认关**；开启须改 CSP 并写进发版说明 |
-| 规范 | 现行文档以 `docs/INDEX.md` 列表为准；archive / `.kiro` 只读 |
+| 规范 | 现行文档以 `docs/INDEX.md` 列表为准；`docs/archive/` 只读 |
 
 ---
 

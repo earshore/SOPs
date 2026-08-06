@@ -251,7 +251,7 @@ npm run ui:audit
 
 | 文档 | 状态解读 |
 |------|----------|
-| `.kiro/arch-debt/debt-list.md` | 清单内架构债标为 100% 完成（2026-07-11）；与本轮扫描一致（无 high tech-debt） |
+| `docs/archive/kiro-2026-h1/arch-debt/debt-list.md` | 清单内架构债标为 100% 完成（2026-07-11）；与本轮扫描一致（无 high tech-debt） |
 | `docs/TECH_DEBT_AUDIT.md` | 无阻塞 `ci:all` 的 P0；剩余 FU-09 身份服务为未来项 |
 | `docs/superpowers/plans/2026-07-19-release-debt-hardening-landing-status.md` | hardening 已落地；功能 E2E 仍非 gate 阻塞；Actions 配额 out-of-band |
 | 本报告 | **上线决策视角** 的收敛清单 + **2026-07-22 本地实扫证据** |

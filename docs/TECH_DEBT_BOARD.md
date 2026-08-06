@@ -5,7 +5,7 @@
 **Owner:** 工程负责人  
 
 > **用法：** 只维护 **Open** 债务。已关闭项写 CHANGELOG 或移入历史段落，**禁止**用长篇「已完成荣誉榜」冒充当前债。  
-> 历史快照：`docs/TECH_DEBT_AUDIT.md`（2026-07-15 及更早叙事）、`.kiro/arch-debt/*`（historical）。  
+> 历史快照：`docs/TECH_DEBT_AUDIT.md`（2026-07-15 及更早叙事）、`docs/archive/kiro-2026-h1/arch-debt/*`（historical）。
 > 主题专项债：以 [THEME 路线图 D1–D12](./superpowers/specs/2026-07-26-theme-system-enterprise-audit-and-roadmap.md) 为准，并在本板汇总 ID。
 
 ---

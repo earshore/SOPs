@@ -32,8 +32,8 @@ interface HistoryData {
   history: QualityMetrics[];
 }
 
-const HISTORY_FILE = '.kiro/specs/code-quality-improvement/history.json';
-const REPORT_FILE = '.kiro/specs/code-quality-improvement/latest-report.txt';
+const HISTORY_FILE = 'tests/quality/quality-progress-history.json';
+const REPORT_FILE = 'tests/quality/quality-progress-report.txt';
 
 function runLint(): string {
   try {
@@ -222,7 +222,7 @@ function generateReport(current: QualityMetrics, history: HistoryData | null): s
   }
   
   lines.push('');
-  lines.push('查看详细计划: .kiro/specs/code-quality-improvement/plan.md');
+  lines.push('查看详细计划: docs/archive/kiro-2026-h1/specs/code-quality-improvement/plan.md');
   lines.push('='.repeat(60));
   
   return lines.join('\n');

@@ -564,8 +564,8 @@ error  Do not use 'innerHTML' directly  no-restricted-syntax
 - [技术债务看板（活 · open 债唯一清单）](./TECH_DEBT_BOARD.md)
 - [XSS扫描报告](./XSS_SCAN_REPORT.md)
 - [技术债务审计报告（历史快照，勿当 open 债）](./TECH_DEBT_AUDIT.md)
-- [架构债务清单（historical）](../.kiro/arch-debt/debt-list.md)
-- [循环依赖修复记录（historical）](../.kiro/arch-debt/progress.md)
+- [架构债务清单（historical）](../docs/archive/kiro-2026-h1/arch-debt/debt-list.md)
+- [循环依赖修复记录（historical）](../docs/archive/kiro-2026-h1/arch-debt/progress.md)
 - [ESLint配置](../config/eslint.config.js)
 - [TypeScript配置](../tsconfig.app.json)
 
