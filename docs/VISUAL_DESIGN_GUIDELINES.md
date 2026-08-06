@@ -540,6 +540,14 @@ Welcome banner 只解释当前页面能做什么，不写操作手册。
 - 图标按钮必须有 `aria-label`。
 - 不用 emoji 作为按钮图标。
 
+**按钮 hover / active 动效指引：**
+
+- hover：≤1px 位移（`translateY(-1px)`），不做缩放放大；**面板 / 卡片内按钮**不适用（THEME §4.1）。
+- active：pressed 反馈二选一——`scale(0.98)` 或 `translateY(1px)`。
+- 时长 **150–250ms**（`--micro-duration-quick` / `--micro-duration-smooth` + `--micro-ease-button`）。
+- 必须支持 `prefers-reduced-motion` 降级：关闭位移 / 缩放，仅保留颜色反馈。
+- 行为契约见 [COMPONENT_GUIDELINES §3.2](./COMPONENT_GUIDELINES.md#32-行为契约)。
+
 ### 6.3 状态组件
 
 Loading、empty、error、success、toast 必须统一语义：

@@ -284,3 +284,17 @@
   color: var(--color-primary-contrast, #fff);
   box-shadow: 0 8px 18px color-mix(in srgb, var(--settings-accent) 22%, transparent);
 }
+
+/* Dark theme: --settings-accent-strong is re-derived brighter (mix 60% white),
+ * so white ink on the left stop ≈2.1:1. Deepen both stops from the accent hue
+ * instead — same hue family as the dark hover override in dataSection.css,
+ * default→hover stays a smooth dark→bright transition with no vertical band. */
+.dark .settings-strategy-footer__btn--primary,
+[data-color-mode-resolved='dark'] .settings-strategy-footer__btn--primary,
+[data-theme='dark'] .settings-strategy-footer__btn--primary {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--settings-accent) 76%, #000),
+    var(--settings-accent)
+  );
+}

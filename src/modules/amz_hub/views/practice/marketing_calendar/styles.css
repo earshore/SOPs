@@ -1855,6 +1855,10 @@
   color: var(--color-text-secondary, #cbd5e1);
 }
 
+.dark .amzf_view_btn:hover:not(.amzf_active) {
+  background: color-mix(in srgb, var(--color-slate-500) 18%, var(--surface-card, #1e293b));
+}
+
 .dark .amzf_country_tab {
   background: var(--surface-card, #1e293b);
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.14));

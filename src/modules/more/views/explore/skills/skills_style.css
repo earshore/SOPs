@@ -821,6 +821,18 @@
   color: var(--color-violet-300, #c4b5fd);
 }
 
+/* ---- 主 CTA 按钮：dark 下 --color-primary 仍为 blue-500（白字 ≈3.7:1），
+   加深到 primary-dark/-darker 清 AA（≈5.2:1 / ≈6.7:1） ---- */
+.dark .skill-cta-primary,
+[data-color-mode-resolved='dark'] .skill-cta-primary {
+  background: var(--color-primary-dark, var(--color-primary));
+}
+
+.dark .skill-cta-primary:hover:not(:disabled),
+[data-color-mode-resolved='dark'] .skill-cta-primary:hover:not(:disabled) {
+  background: var(--color-primary-darker, var(--color-primary-dark));
+}
+
 /* ---- 吸顶筛选区边框 ---- */
 .dark .skills-catalog-sticky,
 [data-color-mode-resolved='dark'] .skills-catalog-sticky {

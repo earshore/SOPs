@@ -43,35 +43,80 @@
 
 ## 3. 按钮（Button）
 
+> **裸按钮（naked button）重置：** 直接使用原生 `<button>` 而不套共享类时，必须重置浏览器默认样式——`font: inherit`（含 `font-family` / 字号）、`background: transparent`、`border: 0`、`cursor: pointer`；能复用共享类的场景优先用 `.action-btn` 族。裸按钮同样受 §3.2 契约与 focus ring 约束（ACCESSIBILITY §2.2）。
+
 ### 3.1 变体矩阵
 
 | 变体 | 类名（共享） | 用途 | 同屏建议 |
 | --- | --- | --- | --- |
 | **Primary** | `.action-btn.action-btn-primary` | 主保存、主提交、主 CTA | **每个操作区 ≤ 1** |
 | **Secondary** | `.action-btn.action-btn-secondary` | 取消、测试、导出、次要操作 | 可多个 |
-| **Danger** | 危险实心/描边（见 buttons.css 危险变体；无则用 border+红字） | 删除、清空 | **永不**与 Primary 同视觉权重并排争抢 |
-| **Ghost / Text** | 透明或文字链 | 三级操作、链接式 | 不单独承担不可逆 |
+| **Danger** | `.action-btn-danger`（实心）+ `.action-btn-danger-ghost`（描边）两档；token：`--color-error` / `--color-error-dark`；hover 加深；必须配 focus ring | 删除、清空 | **永不**与 Primary 同视觉权重并排争抢；危险区独立，与主操作间距 ≥1rem（16px） |
+| **Ghost / Text** | `.action-btn-ghost`（透明底；hover 用 `--color-bg-hover`；disabled 同 §3.2 disabled 规范） | 三级操作、链接式 | 不单独承担不可逆 |
+| **Icon（图标按钮）** | `.action-btn-icon`（icon-only）；触控 ≥44px；必须 `aria-label`；图标 16px（见 VISUAL §3.5） | 工具栏、紧凑操作 | 密集排布时相邻间距 ≥8px |
 
 设置区已对齐的模式（可参考，勿整文件复制）：
 
 - 表单底栏：次要 flex + 主按钮更宽（如 `settings-strategy-footer`）  
 - 双列操作：测试 | 保存等宽网格（如 `settings-proxy-form__actions`）
 
+**按钮组 / 工具栏 recipe：**
+
+- 组内间距 `8px`（`--spacing-xs`）；多组之间 `16px`（`--spacing-md`）。
+- 等宽网格场景（如「测试 | 保存」）用 CSS grid 均分，不用手写 margin。
+- 主次权重排布：Primary 放视觉终点（右侧 / 末位），Secondary 前置；同组必须同高（§3.4），禁止混档。
+
 ### 3.2 行为契约
 
 | 状态 | 要求 |
 | --- | --- |
 | Default / Hover / Active / Disabled / Loading | 必须可区分；disabled 不接收点击 |
-| Loading | 防重复提交；保留按钮宽度防布局跳动 |
+| Loading | 必须 `aria-busy="true"`；防重复提交；保留按钮宽度防布局跳动（实现细则见下） |
+| 筛选 / 切换类按钮 | 选中态用 `aria-pressed`（true/false）表达，不只靠颜色 |
+| 不可交互但需读屏 | 用 `aria-disabled="true"`（不用 disabled 属性）；样式同 disabled，保留可聚焦与可读屏 |
 | 图标按钮 | 必须有 `aria-label` 或可见文本 |
 | 工作台面板内 | 避免 `translateY` 强悬停位移（与 VISUAL 一致） |
 | 按钮 hover 边界（P2-2） | 按钮 hover 允许 ≤1px 位移（`translateY(-1px)`），active 允许 pressed 反馈（`scale(0.98)`）；**面板/卡片**不适用此位移（THEME §4.1/§4.2） |
+
+**Loading 态实现（`.action-btn.is-loading`）：**
+
+- 类名约定：`.is-loading` 挂在 `.action-btn` 族上（`.action-btn.is-loading`）。
+- spinner 尺寸 `14px`，颜色继承前景色（`currentColor`）。
+- 必须 `aria-busy="true"`（按钮或其容器）。
+- 防重复提交二选一：`disabled` 属性，或提交处理函数内业务锁早退。
+- 保留按钮宽度防布局跳动：spinner 与文案同槽位替换，或 `min-width` 占位，禁止撑宽/缩窄。
+
+**Disabled 规范：**
+
+- 默认 `opacity: 0.5`（允许业务按场景覆盖，如 0.4–0.6）。
+- **禁止 `cursor: not-allowed` 与 `pointer-events: none` 同时使用**（语义矛盾：前者表达可交互意图，后者已屏蔽事件）；二选一。
+- `[aria-disabled]` 场景（不可交互但需读屏）：`aria-disabled="true"` + 点击事件守卫（早退），**不得**移出 Tab 序；样式同 disabled（opacity 0.5）。
+
+**深色模式规则：**
+
+- **禁止把提亮型 accent-strong token（如 `--settings-accent-strong`，dark 下被 `color-mix(…, #fff)` 提亮）用作白字按钮背景**：白字对比 ≈2.1:1，不达标（A9）。
+- dark 主按钮向**深**推导：`--color-primary-dark`（或 `color-mix(accent, #000)`）；参照 `buttons.css` 既有做法（`.dark .action-btn-primary { --button-primary-bg: var(--color-primary-dark) }`）。
 
 ### 3.3 禁止
 
 - 每个页面自定义一套渐变主按钮色（应用 Appearance primary 或模块 CTA 约定）。  
 - 危险操作使用 Primary 实心蓝/绿。  
 - 仅靠颜色区分唯一操作（须有文案）。
+
+### 3.4 尺寸与密度
+
+高度阶梯（用 `min-height` 实现，配对应 padding 与字号）：
+
+| 档位 | 高度 | Padding | 字号 | 适用 |
+| --- | --- | --- | --- | --- |
+| 紧凑 | 36px | `var(--spacing-xs) var(--spacing-md)`（8px 16px） | `--text-xs`（12px） | 密集工具条、表格内操作 |
+| 默认 | 40px | `var(--spacing-sm) var(--spacing-lg)`（12px 24px） | `--text-sm`（13px） | 常规操作；**A10 下限** |
+| 大 | 44px | `var(--spacing-sm) var(--spacing-lg)`（12px 24px） | `--text-base`（14px） | 移动端 / 触控为主；**触控推荐值** |
+
+- **40px 是 A10 触控目标下限**（ACCESSIBILITY A10），不是推荐值；移动端触控目标**强制 ≥44px**（ACCESSIBILITY §2）。
+- 圆角统一 `--rounded-lg`（手写 `variables.css` = 12px）：按钮是**控件级**圆角，工作台面板 8px（`--workbench-radius`）是**表面级**圆角，控件 > 表面，形成层级差；禁止把按钮圆角压到面板 8px 或反向放大。
+  - 注意：generated 档 `--rounded-lg` 为 `0.5rem`（8px），与手写档不一致（THEME §8 债务 D2）——按钮实现以手写 `variables.css` 的 12px 为验收值。
+- 同组按钮必须同高（§3.1 按钮组 recipe）；高度阶梯只允许整体切换，禁止单按钮混档。
 
 ---
 
@@ -258,6 +303,7 @@
 | v1.1 | §10 系统设置即时 vs 显式保存矩阵（TD-SET-02） |
 | v1.2 | 补充数据表规范（§6.1）、状态 token 对照表（§5.1）、按钮 hover 边界（§3.2） |
 | v1.3 | 登记 ModelSelect 共享组件（模型选择 + 刷新，见 `docs/guides/model-select-component-guide.md`） |
+| v1.4 | 按钮规范补齐：danger/ghost/icon 变体类名、§3.4 尺寸与密度、Loading/aria/disabled 契约、深色 accent-strong 禁用（2026-08 按钮体系缺口审查） |
 | 后续 | 补 DatePicker、虚拟列表；可加示意截图 |
 
 变更走 [PRODUCT_PRINCIPLES §5](./PRODUCT_PRINCIPLES.md#5-规范变更流程)。

@@ -35,21 +35,6 @@ function initOverviewEvents(container: HTMLElement, context: SopTemplateModuleCo
   const disposeFilter = bindCategoryFilterButtons(container);
   context.addDisposable(disposeFilter);
 
-  const categoryTabs = container.querySelectorAll('.sop-category-tab');
-  categoryTabs.forEach(tab => {
-    context.addEventListener(tab, 'click', () => {
-      // 移除所有active状态
-      categoryTabs.forEach(t => t.classList.remove('active'));
-      // 添加当前active状态
-      tab.classList.add('active');
-      // 这里可以添加筛选逻辑
-      const category = (tab as HTMLElement).dataset.category;
-      if (category) {
-        filterSOPs(container, category);
-      }
-    });
-  });
-
   // 搜索框事件
   const searchInput = container.querySelector('#sop-search-input') as HTMLInputElement;
   if (searchInput) {
@@ -57,19 +42,6 @@ function initOverviewEvents(container: HTMLElement, context: SopTemplateModuleCo
       searchSOPs(container, (e.target as HTMLInputElement).value);
     });
   }
-}
-
-function filterSOPs(container: HTMLElement, category: string): void {
-  const cards = container.querySelectorAll('.sop-card');
-  cards.forEach(card => {
-    const cardElement = card as HTMLElement;
-    if (category === 'all' || cardElement.dataset.category === category) {
-      cardElement.hidden = false;
-      cardElement.classList.add('sop-fade-in');
-    } else {
-      cardElement.hidden = true;
-    }
-  });
 }
 
 function searchSOPs(container: HTMLElement, keyword: string): void {

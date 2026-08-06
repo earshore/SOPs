@@ -786,35 +786,6 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   margin-bottom: 2rem;
 }
 
-/* ==================== 分类过滤标签 ==================== */
-.sop-category-tab {
-  padding: 0.5rem 1rem;
-  border-radius: var(--rounded-full);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary, var(--color-slate-500));
-  background: transparent;
-  border: 1px solid transparent;
-  transition:
-    background-color var(--duration-normal) var(--ease-smooth),
-    border-color var(--duration-normal) var(--ease-smooth),
-    color var(--duration-normal) var(--ease-smooth),
-    box-shadow var(--duration-normal) var(--ease-smooth),
-    transform var(--duration-normal) var(--ease-smooth);
-  cursor: pointer;
-}
-
-.sop-category-tab:hover {
-  background: var(--color-slate-100);
-  color: var(--color-text-primary, var(--color-slate-700));
-}
-
-.sop-category-tab.active {
-  background: var(--color-blue-500);
-  color: white;
-  border-color: var(--color-blue-500);
-}
-
 /* ==================== 搜索框 ==================== */
 .sop-search-box {
   background: white;

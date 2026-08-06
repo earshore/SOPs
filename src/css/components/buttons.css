@@ -23,26 +23,33 @@
   cursor: pointer;
   user-select: none;
   outline: none;
+  /* 微交互时长/缓动（--micro-* token 未落地 variables.css，先字面量兜底） */
   transition:
-    background-color var(--duration-normal) var(--ease-smooth),
-    border-color var(--duration-normal) var(--ease-smooth),
-    color var(--duration-normal) var(--ease-smooth),
-    box-shadow var(--duration-normal) var(--ease-smooth),
-    transform var(--duration-normal) var(--ease-smooth);
+    background-color var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease),
+    border-color var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease),
+    color var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease),
+    box-shadow var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease),
+    transform var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease);
 }
 
-.action-btn:hover {
+.action-btn:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-.action-btn:active {
+.action-btn:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
 }
 
 .action-btn:disabled {
+  /* 移除 pointer-events: none（与 cursor: not-allowed 矛盾），
+     hover/active 反馈改由 :hover:not(:disabled) 精确守卫 */
   opacity: 0.5;
   cursor: not-allowed;
-  pointer-events: none;
+}
+
+.action-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-primary));
+  outline-offset: 2px;
 }
 
 /* ===== 按钮变体 ===== */
@@ -54,13 +61,13 @@
   border-color: var(--color-border-default);
 }
 
-.action-btn-secondary:hover {
+.action-btn-secondary:hover:not(:disabled) {
   background: var(--color-bg-hover);
   border-color: var(--color-border-strong, var(--color-border-default));
   box-shadow: var(--shadow-xs);
 }
 
-.action-btn-secondary:active {
+.action-btn-secondary:active:not(:disabled) {
   background: var(--color-bg-active);
   border-color: var(--color-border-strong, var(--color-border-default));
 }
@@ -72,16 +79,63 @@
   border-color: var(--button-primary-bg, var(--color-primary));
 }
 
-.action-btn-primary:hover {
+.action-btn-primary:hover:not(:disabled) {
   background: var(--button-primary-hover-bg, var(--color-primary-dark));
   border-color: var(--button-primary-hover-bg, var(--color-primary-dark));
   box-shadow: var(--shadow-primary-sm);
 }
 
-.action-btn-primary:active {
+.action-btn-primary:active:not(:disabled) {
   background: var(--button-primary-active-bg, var(--color-primary-darker));
   border-color: var(--button-primary-active-bg, var(--color-primary-darker));
   box-shadow: none;
+}
+
+/* 危险按钮 */
+.action-btn-danger {
+  background: var(--color-error);
+  color: var(--color-error-contrast, #ffffff);
+  border-color: var(--color-error);
+}
+
+.action-btn-danger:hover:not(:disabled) {
+  background: var(--color-error-dark);
+  border-color: var(--color-error-dark);
+}
+
+.action-btn-danger:active:not(:disabled) {
+  box-shadow: none;
+}
+
+/* 危险幽灵按钮 */
+.action-btn-danger-ghost {
+  background: transparent;
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.action-btn-danger-ghost:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-error) 10%, transparent);
+  color: var(--color-error-dark);
+  border-color: var(--color-error-dark);
+}
+
+/* 幽灵按钮 */
+.action-btn-ghost {
+  background: transparent;
+  color: var(--color-text-primary);
+  border-color: transparent;
+}
+
+.action-btn-ghost:hover:not(:disabled) {
+  background: var(--color-bg-hover);
+}
+
+/* 图标按钮：触控目标 ≥ 44px（2.75rem） */
+.action-btn-icon {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0;
 }
 
 /* 发光按钮效果：跟 Appearance primary，不硬编 brand blue */
@@ -91,7 +145,7 @@
     color-mix(in srgb, var(--color-primary, var(--color-focus-ring)) 40%, transparent);
 }
 
-.action-btn-glow:hover {
+.action-btn-glow:hover:not(:disabled) {
   box-shadow: 0 6px 30px
     color-mix(in srgb, var(--color-primary, var(--color-focus-ring)) 60%, transparent);
 }
@@ -103,10 +157,10 @@
   border-radius: var(--rounded-lg);
   background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   opacity: 0;
-  transition: opacity var(--duration-normal) var(--ease-smooth);
+  transition: opacity var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease);
 }
 
-.action-btn-glow:hover::before {
+.action-btn-glow:hover:not(:disabled)::before {
   opacity: 1;
   animation: shine var(--duration-2s) infinite;
 }
@@ -125,15 +179,20 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   transition:
-    background-color var(--duration-normal) var(--ease-smooth),
-    border-color var(--duration-normal) var(--ease-smooth),
-    color var(--duration-normal) var(--ease-smooth),
-    box-shadow var(--duration-normal) var(--ease-smooth),
-    transform var(--duration-normal) var(--ease-smooth);
+    background-color var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease),
+    border-color var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease),
+    color var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease),
+    box-shadow var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease),
+    transform var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease);
   font-family: inherit;
 }
 
-.qa-action-btn:hover {
+.qa-action-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-primary));
+  outline-offset: 2px;
+}
+
+.qa-action-btn:hover:not(:disabled) {
   background: var(--color-primary-light);
   border-color: var(--color-primary-light);
   color: var(--color-primary);
@@ -141,7 +200,7 @@
   box-shadow: var(--shadow-xs);
 }
 
-.qa-action-btn:active {
+.qa-action-btn:active:not(:disabled) {
   transform: translateY(0);
 }
 
@@ -283,4 +342,58 @@
 [data-color-mode-resolved='dark'] .action-btn-primary,
 [data-theme='dark'] .action-btn-primary {
   --button-primary-bg: var(--color-primary-dark, var(--color-primary));
+}
+
+/* ===== 加载中状态 ===== */
+/* 覆盖 utilities/interactive.css 的通用 .is-loading（绝对定位遮罩 + 子元素压暗）：
+   action-btn 的 loading 走行内 spinner（与文字同槽，由 gap 撑开），文字保持不透明度 */
+.action-btn.is-loading {
+  /* 与禁用态（opacity 0.5）视觉区分：loading 不压暗 */
+  opacity: 1;
+}
+
+.action-btn.is-loading > * {
+  /* 覆盖通用 .is-loading > * 的 0.4 压暗 */
+  opacity: 1;
+}
+
+.action-btn.is-loading::after {
+  content: '';
+  position: static; /* 覆盖通用规则的绝对定位，回到 flex 行内槽位 */
+  margin: 0;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  /* 复用 loading.css 的 spinner-rotate-optimized 关键帧 */
+  animation: spinner-rotate-optimized 1s linear infinite;
+  will-change: transform;
+}
+
+/* Dark: 实心 danger 白字对比核算 —— red-400 底 ≈2.8:1（不足 3:1 底线），
+   error-dark（red-500）底 ≈3.76:1 过 3:1（未达 4.5:1，取文档实心按钮 3:1 档）；
+   hover 再深至 red-600 ≈4.83:1 达 AA。danger-ghost 文字随 --color-error
+   dark 自动切 red-400 亮档（dark 底上 ≈6.5:1），无需覆盖 */
+.dark .action-btn-danger,
+[data-color-mode-resolved='dark'] .action-btn-danger,
+[data-theme='dark'] .action-btn-danger {
+  background: var(--color-error-dark);
+  border-color: var(--color-error-dark);
+}
+
+.dark .action-btn-danger:hover:not(:disabled),
+[data-color-mode-resolved='dark'] .action-btn-danger:hover:not(:disabled),
+[data-theme='dark'] .action-btn-danger:hover:not(:disabled) {
+  background: var(--color-red-600);
+  border-color: var(--color-red-600);
+}
+
+/* Dark: 通用 .is-loading::after（deferred 层后加载）会改写 border 色，此处钉回
+   currentColor + 透明段，保证按钮 loading 环在 dark 下一致 */
+.dark .action-btn.is-loading::after,
+[data-color-mode-resolved='dark'] .action-btn.is-loading::after,
+[data-theme='dark'] .action-btn.is-loading::after {
+  border-color: currentColor;
+  border-top-color: transparent;
 }

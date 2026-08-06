@@ -37,7 +37,7 @@
 | A7 | 状态 **不只靠色** | 成功/错误有文案或图标 |
 | A8 | 动效可关 | `prefers-reduced-motion`；设置「减少动效」生效 |
 | A9 | 对比度可用 | 正文对比大致达标；浅灰字勿用于关键信息 |
-| A10 | 触控目标 | 主按钮建议 **≥ 40–44px** 高 |
+| A10 | 触控目标 | 移动端触控目标**强制 ≥ 44px**（PC 主按钮 ≥ 40px 下限）；相邻按钮间距 **≥ 8px**（防误触） |
 
 组件层细则见 [COMPONENT_GUIDELINES §9](./COMPONENT_GUIDELINES.md#9-无障碍组件层最低线)。
 
@@ -58,6 +58,27 @@
 
 - 统一 `--color-focus-ring`（`variables.css` 中 = `var(--color-primary)`）+ 2px 环（`--focus-ring-width: 2px`）+ 2px offset（`--focus-ring-offset: 2px`）。
 - 不得 `outline: none` 且无替代（与 A1 一致）。
+
+**按钮 focus ring 落地指引（A1 对按钮的细则）：** 二选一：
+
+1. **outline 方案**（默认）：`outline: 2px solid var(--color-focus-ring); outline-offset: 2px;`
+2. **box-shadow 双环方案**（圆角元素上 outline 观感不佳时）：`box-shadow: 0 0 0 2px <按钮背景色>, 0 0 0 4px var(--color-focus-ring);`
+
+统一用 `--focus-ring-width` / `--focus-ring-shadow`（若已落地为 CSS token）或 `--color-focus-ring`；当前 `--focus-ring-width` / `--focus-ring-shadow` 尚未定义为 CSS token，可用上述字面量先行，并在落地时登记补 token。focus ring 必须显式保留在 `.action-btn` 全部变体上（含 danger / ghost / icon），禁止裸 `outline: none` 无替代。
+
+### 2.3 对比度豁免登记（A9 细则）
+
+已知豁免（登记即承认，不隐藏）：
+
+| 豁免项 | 实测对比 | 依据 / 缓解 |
+| --- | --- | --- |
+| `.action-btn-primary` 浅色模式白字（13px / `--text-sm`，非大字号，目标 4.5:1） | ≈ 3.7:1 | 大面积主 CTA 填充 + hover 加深至 `--color-primary-dark`；此前只写在 `buttons.css` 代码注释中，现登记于此 |
+
+规则：
+
+- 今后**新增豁免必须双处标注**：本节登记 + 对应代码注释，两处缺一视为未豁免。
+- 登记时注明：选择器、字号、实测比值、缓解手段。
+- 豁免仅允许「大面积填充 + 加深 hover」类缓解模式；纯文字小号状态色（§2.1）不适用豁免。
 
 ---
 

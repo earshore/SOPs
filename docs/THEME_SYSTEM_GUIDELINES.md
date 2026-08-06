@@ -230,8 +230,11 @@ npm run generate:tokens
 - 一个工作区内只保留一个主要 CTA。
 - Primary 使用模块主色或全局 `--color-primary`，不要在单页硬编码新渐变。
 - Secondary / Ghost 使用中性色边框和文本。
-- Danger 使用 `--color-error` / red 系列，并与普通操作保持空间分离。
-- 图标按钮必须有 `aria-label`，可点击面积不小于 `44px`。
+- **Danger 变体 token 规定**：实心 `.action-btn-danger` 用 `--color-error` 底 + 白字，hover 加深至 `--color-error-dark`；描边 `.action-btn-danger-ghost` 用 `--color-error` 边框 / 文字，hover 加深至 `--color-error-dark`。两档都必须配 focus ring，并与普通操作保持空间分离（≥1rem）。
+- **Ghost 变体 token 规定**：`.action-btn-ghost` 透明底，hover 背景用 `--color-bg-hover`，文字继承前景色；disabled 按 COMPONENT §3.2。
+- **图标按钮**：`.action-btn-icon` 可点击面积 ≥44px（移动端强制，A10）、图标 16px（VISUAL §3.5 按钮内操作图标）、必须有 `aria-label`；与文字按钮同高可选（40px / 44px，同组内统一）。
+- **过渡时长规定**：按钮 hover / active 动效 **150–250ms**——用 `--micro-duration-quick`（150ms）/ `--micro-duration-smooth`（250ms）+ `--micro-ease-button`（或 `--duration-fast` 200ms），与 §4.1 面板动效区间一致；`.action-btn` 现有 300ms（`--duration-normal`）超标，属待收敛项。
+- **深色规则（禁止）**：dark 下**禁止**把提亮型 accent-strong token（如 `--settings-accent-strong`，dark 下被 `color-mix(…, #fff)` 提亮）用作**白字按钮背景**（白字对比 ≈2.1:1，A9 不达标）；dark 主按钮向深推导（`--color-primary-dark`），与 COMPONENT §3.2 一致。
 
 ### 4.4 Badge 和状态
 

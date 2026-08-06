@@ -147,19 +147,76 @@
 }
 
 .settings-pref-row__icon--danger {
-  background: color-mix(in srgb, #dc2626 12%, var(--settings-surface));
-  color: #b91c1c;
+  background: color-mix(
+    in srgb,
+    var(--settings-danger, var(--color-error, #dc2626)) 12%,
+    var(--settings-surface)
+  );
+  color: var(--settings-danger, var(--color-error, #dc2626));
 }
 
 .settings-pref-row__action--danger {
-  border-color: color-mix(in srgb, #dc2626 28%, var(--settings-border, #e2e8f0));
-  color: #b91c1c;
+  border-color: color-mix(
+    in srgb,
+    var(--settings-danger, var(--color-error, #dc2626)) 28%,
+    var(--settings-border, #e2e8f0)
+  );
+  color: var(--settings-danger, var(--color-error, #dc2626));
 }
 
 .settings-pref-row__action--danger:hover {
-  border-color: color-mix(in srgb, #dc2626 45%, var(--settings-border, #e2e8f0));
-  color: #991b1b;
-  background: color-mix(in srgb, #fef2f2 80%, var(--settings-surface));
+  border-color: color-mix(
+    in srgb,
+    var(--settings-danger, var(--color-error, #dc2626)) 45%,
+    var(--settings-border, #e2e8f0)
+  );
+  color: var(--color-error-dark, #b91c1c);
+  background: color-mix(in srgb, var(--color-error) 10%, transparent);
+}
+
+/* Dark theme: --settings-danger stays red-600 (≈3:1 on panel, hover red-800
+ * ≈2.8:1) and #fef2f2 washes render as dirty pink. Flip to the dark error
+ * ladder (--color-error = red-400, ≈5.3:1); hover brightens one step (white
+ * mix) to keep both feedback and ≥4.5:1 contrast. */
+.dark .settings-pref-row__icon--danger,
+.dark .settings-pref-row__action--danger,
+[data-color-mode-resolved='dark'] .settings-pref-row__icon--danger,
+[data-color-mode-resolved='dark'] .settings-pref-row__action--danger,
+[data-theme='dark'] .settings-pref-row__icon--danger,
+[data-theme='dark'] .settings-pref-row__action--danger {
+  color: var(--color-error, #f87171);
+}
+
+.dark .settings-pref-row__icon--danger,
+[data-color-mode-resolved='dark'] .settings-pref-row__icon--danger,
+[data-theme='dark'] .settings-pref-row__icon--danger {
+  background: color-mix(in srgb, var(--color-error, #f87171) 12%, var(--settings-surface));
+}
+
+.dark .settings-pref-row__action--danger,
+[data-color-mode-resolved='dark'] .settings-pref-row__action--danger,
+[data-theme='dark'] .settings-pref-row__action--danger {
+  border-color: color-mix(
+    in srgb,
+    var(--color-error, #f87171) 32%,
+    var(--settings-border, #e2e8f0)
+  );
+}
+
+.dark .settings-pref-row__action--danger:hover,
+[data-color-mode-resolved='dark'] .settings-pref-row__action--danger:hover,
+[data-theme='dark'] .settings-pref-row__action--danger:hover {
+  color: color-mix(
+    in srgb,
+    var(--color-error, #f87171) 80%,
+    #ffffff
+  ); /* dark hover: 提亮一档保持对比 */
+  border-color: color-mix(
+    in srgb,
+    var(--color-error, #f87171) 48%,
+    var(--settings-border, #e2e8f0)
+  );
+  background: color-mix(in srgb, var(--color-error, #f87171) 12%, transparent);
 }
 
 /* Provider + API family (type) on one row */
