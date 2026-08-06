@@ -1,11 +1,115 @@
 {
-  "version": 1,
-  "scope": "shell",
-  "total": 13,
-  "filesScanned": 26,
-  "filesWithHits": 1,
-  "updatedAt": "2026-07-25T17:50:26.935Z",
-  "files": {
-    "src/common/ui/megaMenu.ts": 13
+  "version": 2,
+  "updatedAt": "2026-08-06T18:56:39.307Z",
+  "shell": {
+    "total": 13,
+    "filesScanned": 26,
+    "filesWithHits": 1,
+    "files": {
+      "src/common/ui/megaMenu.ts": 13
+    }
+  },
+  "modules": {
+    "filesScanned": 380,
+    "filesWithHits": 63,
+    "families": {
+      "sops": {
+        "total": 849,
+        "filesScanned": 52,
+        "filesWithHits": 23,
+        "files": {
+          "src/modules/sops/views/service/email_templates/template.html": 97,
+          "src/modules/sops/views/growth/npi_tracker/template.html": 83,
+          "src/modules/sops/views/growth/ppc_advertising/template.html": 80,
+          "src/modules/sops/views/safety/eu_gpsr_compliance/template.html": 73,
+          "src/modules/sops/views/service/qa_maintenance/template.html": 67,
+          "src/modules/sops/views/growth/listing_seo/template.html": 63,
+          "src/modules/sops/views/service/negative_review/template.html": 57,
+          "src/modules/sops/views/growth/competitor_monitoring/template.html": 49,
+          "src/modules/sops/views/growth/promotion_submission/template.html": 45,
+          "src/modules/sops/views/growth/restricted_words/template.html": 37,
+          "src/modules/sops/views/safety/product_compliance/template.html": 34,
+          "src/modules/sops/views/backend/fba_shipping/template.html": 29,
+          "src/modules/sops/views/backend/procurement_qc/template.html": 24,
+          "src/modules/sops/views/safety/account_security/template.html": 21,
+          "src/modules/sops/views/overview/template.html": 17,
+          "src/modules/sops/views/backend/inventory_replenishment/template.html": 16,
+          "src/modules/sops/views/safety/brand_infringement/template.html": 16,
+          "src/modules/sops/views/safety/performance_notification/template.html": 13,
+          "src/modules/sops/views/safety/permission_management/template.html": 9,
+          "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 7,
+          "src/modules/sops/views/growth/npi_tracker/index.ts": 6,
+          "src/modules/sops/sops_style.css": 4,
+          "src/modules/sops/views/growth/npi_tracker/data/mockData.ts": 2
+        }
+      },
+      "app_center": {
+        "total": 306,
+        "filesScanned": 254,
+        "filesWithHits": 16,
+        "files": {
+          "src/modules/app_center/views/master_analysis/master_analysis_style.css": 110,
+          "src/modules/app_center/views/master_analysis/ai_analysis/template.html": 49,
+          "src/modules/app_center/views/master_analysis/scraper/template.html": 37,
+          "src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanel.ts": 26,
+          "src/modules/app_center/views/master_analysis/promptlab/template.html": 21,
+          "src/modules/app_center/views/keyword_hunter/process/template.html": 14,
+          "src/modules/app_center/views/master_analysis/ai_analysis/components/PerformanceSettings.ts": 14,
+          "src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts": 7,
+          "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts": 6,
+          "src/modules/app_center/views/master_analysis/scraper/components/ScraperPanel.ts": 6,
+          "src/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel.ts": 5,
+          "src/modules/app_center/views/keyword_hunter/process/index.ts": 3,
+          "src/modules/app_center/views/master_analysis/scraper/scraper_style.css": 3,
+          "src/modules/app_center/views/master_analysis/promptlab/components/dnaActions.ts": 2,
+          "src/modules/app_center/views/master_analysis/promptlab/components/uiHelpers.ts": 2,
+          "src/modules/app_center/views/master_analysis/ai_analysis/services/reportGenerator.ts": 1
+        }
+      },
+      "amz_hub": {
+        "total": 262,
+        "filesScanned": 40,
+        "filesWithHits": 16,
+        "files": {
+          "src/modules/amz_hub/views/practice/quality_listing/template.html": 108,
+          "src/modules/amz_hub/views/advanced/conversion_optimization/template.html": 25,
+          "src/modules/amz_hub/views/advanced/new_product_30days/template.html": 22,
+          "src/modules/amz_hub/views/knowledge/ecosystem/template.html": 19,
+          "src/modules/amz_hub/views/advanced/mature_phase/template.html": 18,
+          "src/modules/amz_hub/views/knowledge/eu_insights/template.html": 15,
+          "src/modules/amz_hub/views/knowledge/seo_strategy/template.html": 14,
+          "src/modules/amz_hub/views/overview/template.html": 14,
+          "src/modules/amz_hub/views/knowledge/ecosystem/styles.css": 4,
+          "src/modules/amz_hub/views/knowledge/eu_insights/styles.css": 4,
+          "src/modules/amz_hub/views/knowledge/seo_strategy/styles.css": 4,
+          "src/modules/amz_hub/views/practice/quality_listing/styles.css": 4,
+          "src/modules/amz_hub/views/advanced/conversion_optimization/styles.css": 3,
+          "src/modules/amz_hub/views/advanced/mature_phase/styles.css": 3,
+          "src/modules/amz_hub/views/advanced/new_product_30days/styles.css": 3,
+          "src/modules/amz_hub/views/knowledge/eu_insights/index.ts": 2
+        }
+      },
+      "more": {
+        "total": 105,
+        "filesScanned": 30,
+        "filesWithHits": 8,
+        "files": {
+          "src/modules/more/views/business_scenarios/amazon_daily_report/template.html": 44,
+          "src/modules/more/views/explore/workflows/template.html": 17,
+          "src/modules/more/views/business_scenarios/review_monitor/template.html": 16,
+          "src/modules/more/views/explore/agents/template.html": 14,
+          "src/modules/more/views/business_scenarios/ad_acos_diagnosis/template.html": 9,
+          "src/modules/more/views/business_scenarios/usage_notice/template.html": 2,
+          "src/modules/more/views/overview/template.html": 2,
+          "src/modules/more/views/explore/skills/template.html": 1
+        }
+      },
+      "other": {
+        "total": 0,
+        "filesScanned": 4,
+        "filesWithHits": 0,
+        "files": {}
+      }
+    }
   }
 }

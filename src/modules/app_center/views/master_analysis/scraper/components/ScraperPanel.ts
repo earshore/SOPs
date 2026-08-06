@@ -334,7 +334,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
   getSiteButtonClass(site: ScraperSite): string {
     return this.isSelectedSite(site)
       ? 'selected border-[var(--color-primary)] bg-gradient-to-b from-[var(--color-primary-light)] to-white ring-2 ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] shadow-sm shadow-[0_1px_2px_color-mix(in_srgb,var(--color-primary)_12%,transparent)]'
-      : 'border-slate-150 bg-white hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary-light)_30%,transparent)]';
+      : 'border-slate-100 bg-white hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary-light)_30%,transparent)]';
   },
 
   getSiteNameClass(site: ScraperSite): string {
@@ -390,7 +390,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
   getHistoryCardClass(item: HistoryItem): string {
     return item.analysisStatus?.isAnalyzed
       ? 'analyzed border-emerald-100 bg-gradient-to-br from-emerald-50/30 to-white'
-      : 'border-slate-150';
+      : 'border-slate-100';
   },
 
   isHistoryAnalyzed(item: HistoryItem): boolean {

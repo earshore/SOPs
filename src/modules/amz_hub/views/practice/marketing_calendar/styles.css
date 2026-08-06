@@ -213,6 +213,8 @@
   max-width: 420px;
 }
 
+/* Search box is a registered form exception (ACCESSIBILITY §2.4): focus is
+ * carried by :focus-within ring instead of a control outline. */
 .amzf_search_box {
   display: flex;
   align-items: center;

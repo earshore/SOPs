@@ -488,6 +488,24 @@
   color: var(--app-overview-accent);
 }
 
+.app-flow-step.app-child-link:nth-child(5) {
+  --card-left-accent-bg: var(--app-overview-accent-surface);
+  --overview-card-accent-bg: var(--app-overview-accent-surface);
+  color: var(--app-overview-accent);
+}
+
+.app-flow-step.app-child-link:nth-child(6) {
+  --card-left-accent-bg: var(--app-overview-minimax-coral-soft);
+  --overview-card-accent-bg: var(--app-overview-minimax-coral-soft);
+  color: var(--app-overview-minimax-fire);
+}
+
+.app-flow-step.app-child-link:nth-child(7) {
+  --card-left-accent-bg: var(--app-overview-minimax-neutral-soft);
+  --overview-card-accent-bg: var(--app-overview-minimax-neutral-soft);
+  color: var(--app-overview-minimax-charcoal);
+}
+
 .app-flow-index {
   position: absolute;
   top: 0.625rem;
@@ -533,6 +551,24 @@
   border-color: var(--app-overview-accent-border);
   background: var(--app-overview-accent-surface);
   color: var(--app-overview-accent);
+}
+
+.app-flow-step.app-child-link:nth-child(5) .app-flow-icon {
+  border-color: var(--app-overview-accent-border);
+  background: var(--app-overview-accent-surface);
+  color: var(--app-overview-accent);
+}
+
+.app-flow-step.app-child-link:nth-child(6) .app-flow-icon {
+  border-color: color-mix(in srgb, var(--app-overview-minimax-fire) 18%, transparent);
+  background: var(--app-overview-minimax-coral-soft);
+  color: var(--app-overview-minimax-fire);
+}
+
+.app-flow-step.app-child-link:nth-child(7) .app-flow-icon {
+  border-color: color-mix(in srgb, var(--app-overview-minimax-charcoal) 16%, transparent);
+  background: var(--app-overview-minimax-neutral-soft);
+  color: var(--app-overview-minimax-charcoal);
 }
 
 .app-flow-copy {

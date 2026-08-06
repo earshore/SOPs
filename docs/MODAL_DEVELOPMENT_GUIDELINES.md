@@ -1,7 +1,7 @@
 # 模态框开发规范指南
 
 **Status:** active · SSOT  
-**Updated:** 2026-07-10  
+**Updated:** 2026-08-07  
 **适用范围**: SOPs Web 端所有模态框、确认弹窗、抽屉式面板、业务弹窗和类弹窗交互  
 **目标**: 统一弹窗选型、交互、可访问性、测试和安全要求，避免重复实现与孤岛式设计。
 
@@ -52,8 +52,8 @@
     <!-- 页面自己的内容 -->
   </div>
   <div slot="footer">
-    <button type="button" data-action="close">取消</button>
-    <button type="button" id="save-example">保存</button>
+    <button type="button" class="action-btn action-btn-secondary" data-action="close">取消</button>
+    <button type="button" class="action-btn action-btn-primary" id="save-example">保存</button>
   </div>
 </app-modal>
 ```
@@ -93,6 +93,19 @@ modal?.open();
 - 自己写焦点陷阱或 body scroll lock。
 - 在弹窗里再套一层视觉 card 作为主容器。
 - 只靠颜色表达危险、成功或禁用状态。
+
+### 3.1 弹层按钮契约
+
+弹层内（footer / body / confirm 面板）**所有按钮必须复用 `.action-btn` 族**（见 [COMPONENT_GUIDELINES §3.1](./COMPONENT_GUIDELINES.md#31-变体矩阵)），禁止弹窗内自绘按钮类（TD-CMP-03 已登记为债）：
+
+| 弹层位 | 类名 | 说明 |
+| --- | --- | --- |
+| 取消 / 关闭 | `.action-btn.action-btn-secondary` | 次要操作；承载 `data-action="close"` 的关闭路径 |
+| 主提交 / 保存 | `.action-btn.action-btn-primary` | 主操作，每弹层 ≤ 1 |
+| 危险 / 删除 | `.action-btn-danger`（实心）/ `.action-btn-danger-ghost`（描边）两档 | 危险确认；与主操作间距 ≥1rem |
+| 三级 / 链接式 | `.action-btn-ghost` | 非不可逆操作 |
+
+**danger 合规范例：** 共享 `confirmWithModal` 的面板按钮已 token 化对齐 `.action-btn-danger` 档——`.app-confirm-modal-confirm` 用 `--color-error` 底 + `--color-error-contrast` 白字、hover `--color-error-dark`、dark 三前缀加深 `--color-error-dark` / `red-600`（`confirmModal.css` L62-76、L101-109；对照 `buttons.css` L95-121、L378-385）。新弹层 danger 按钮直接复用共享类或按同一 token 对齐，不要新造红色系。
 
 ---
 
@@ -180,6 +193,18 @@ confirmWithModal(
 
 业务内容可以自定义，但必须保持工作台工具属性：信息可扫描、层级稳定、按钮位置可预期。不要在弹窗内加入说明弹窗如何使用的可见文案；必要帮助应放到字段标签、错误提示或 tooltip 中。
 
+### 6.1 弹层深色禁令（light-only 表面）
+
+弹层表面（面板 / body 区块 / 表单卡片）**禁止 light-only 表面写法**：`bg-white`、`bg-slate-50`、`from-*-50`、`bg-gradient-to-*`+浅色起点等浅色专属背景在 dark 下不翻转，会产生白色方块。
+
+| 做法 | 标准 | 代码事实 |
+| --- | --- | --- |
+| 面板背景 | `var(--surface-card)` / `var(--surface-panel)`（dark 自动翻转；variables.css L101-107 / L540-548） | 合规范例：`.app-confirm-modal` 已用 `var(--surface-panel)`（`confirmModal.css` L6-14）；`<app-modal>`（AppModal.ts Shadow DOM）同理 |
+| 边框 | `var(--border-subtle)` / `var(--border-muted)` | dark 适配见 variables.css L550-554 |
+| 文案色 | `var(--color-text-primary)` / `--color-text-secondary` | —— |
+
+**禁止静态内联 style：** 静态 `style="..."` 属性被迁移资产政策禁止——`src/common/config/apiEndpoints.test.ts` 对壳层/迁移资产断言 `not.toMatch(/\sstyle=/)`（L282-284），且拒绝 `x-bind:style` / `:style` 绑定（L235-243）。需要覆盖默认样式时用 **CSS 类或模块 CSS 文件**（如 `confirmModal.css`），不得退化为内联样式。
+
 ---
 
 ## 7. 测试要求
@@ -252,6 +277,8 @@ rg -n '\bconfirm\s*\(' src tests
 - 没有标题或只有图标的弹窗。
 - 没有取消路径的危险确认。
 - 只改视觉、不补键盘和可访问性测试的弹窗迁移。
+- 弹窗内自绘按钮类，未复用 `.action-btn` 族（§3.1）。
+- 弹层表面用 `bg-white` / `bg-slate-50` / `from-*-50` 等 light-only 背景或静态内联 style（§6.1）。
 
 ---
 
@@ -269,3 +296,5 @@ rg -n '\bconfirm\s*\(' src tests
 - 标题、关闭路径、焦点恢复、键盘操作是否齐全。
 - 测试是否覆盖弹窗交互和业务回归。
 - `npm run build` 和相关单测是否通过。
+- 弹层按钮是否复用 `.action-btn` 族（§3.1），danger 是否两档（实心 / 描边）。
+- 弹层是否无 light-only 表面、无静态内联 style（§6.1）。

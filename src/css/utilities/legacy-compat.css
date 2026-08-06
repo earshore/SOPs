@@ -58,37 +58,6 @@
   background: var(--color-slate-200, #e2e8f0);
 }
 
-/* ==================== 徽章兼容 ==================== */
-.app-center-badge {
-  /* 映射到 .badge 样式 */
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.app-center-badge-success {
-  background: var(--color-green-100, #dcfce7);
-  color: var(--color-green-700, #15803d);
-}
-
-.app-center-badge-warning {
-  background: var(--color-yellow-100, #fef3c7);
-  color: var(--color-yellow-700, #a16207);
-}
-
-.app-center-badge-info {
-  background: var(--color-blue-100, #dbeafe);
-  color: var(--color-blue-700, #1d4ed8);
-}
-
-.app-center-badge-error {
-  background: var(--color-red-100, #fee2e2);
-  color: var(--color-red-700, #b91c1c);
-}
-
 /* ==================== 网格兼容 ==================== */
 .app-center-card-grid,
 .sop-card-grid {

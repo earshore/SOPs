@@ -321,7 +321,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .border-sky-200\/40:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-sky-400) 13%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-slate-100:not(.twb-keep) { border-color: rgba(255, 255, 255, 0.07); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-slate-100\/80:not(.twb-keep) { border-color: color-mix(in srgb, rgba(255, 255, 255, 0.07) 80%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .border-slate-150:not(.twb-keep) { border-color: rgba(255, 255, 255, 0.08); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-slate-200:not(.twb-keep) { border-color: rgba(255, 255, 255, 0.1); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-slate-200\/30:not(.twb-keep) { border-color: color-mix(in srgb, rgba(255, 255, 255, 0.1) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-slate-200\/40:not(.twb-keep) { border-color: color-mix(in srgb, rgba(255, 255, 255, 0.1) 40%, transparent); }

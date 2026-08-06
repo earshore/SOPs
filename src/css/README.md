@@ -87,7 +87,6 @@ src/modules/
 
 - `.app-center-card` → `.card`
 - `.app-center-btn` → `.action-btn`
-- `.app-center-badge` → `.badge`
 - `.sop-card-grid` → `.card-grid`
 
 ### 推荐做法

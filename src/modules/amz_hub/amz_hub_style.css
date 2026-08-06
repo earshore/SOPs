@@ -12,16 +12,6 @@
   overflow: visible !important;
 }
 
-/* B1 修复 (TD-THM-01): Hub 归属橙（themeColor orange）。
-   全局 :root 的 --module-accent 是 indigo（--color-accent），导致
-   .amz_nav-btn 的 orange fallback 永不触发；此处按 app_center/sops
-   同模式在模块根容器覆写为 Hub 橙。 */
-#amz_hub_content_area {
-  --module-accent: var(--color-orange-500);
-  --module-accent-soft: color-mix(in srgb, var(--color-orange-500) 12%, transparent);
-  --module-accent-text: var(--color-orange-600);
-}
-
 .amz-hub-overview .wb-tag-dot--knowledge {
   --wb-tag-dot-color: var(--wb-tag-dot-2, #6178d3);
 }
@@ -80,66 +70,6 @@
 /* ----------------------------------------
    3. 导航与按钮 (Nav & Pills)
    ---------------------------------------- */
-/* 胶囊导航按钮 */
-.amz_nav-btn {
-  padding: 8px 20px;
-  border-radius: 99px;
-  color: var(--color-text-secondary, var(--color-slate-500));
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition:
-    background-color var(--duration-normal, 300ms) var(--ease-in-out, ease-in-out),
-    border-color var(--duration-normal, 300ms) var(--ease-in-out, ease-in-out),
-    color var(--duration-normal, 300ms) var(--ease-in-out, ease-in-out),
-    box-shadow var(--duration-normal, 300ms) var(--ease-in-out, ease-in-out),
-    transform var(--duration-normal, 300ms) var(--ease-in-out, ease-in-out);
-  border: 1px solid transparent;
-}
-
-.amz_nav-btn:hover {
-  color: var(--module-accent, var(--color-orange-500, #f97316));
-  background: var(--module-accent-soft, var(--color-orange-50, #fff7ed));
-}
-
-/* 激活态：Hub 归属橙（themeColor orange），非 Appearance primary */
-.amz_nav-btn.active,
-.tab-active {
-  background: linear-gradient(
-    135deg,
-    var(--module-accent, var(--color-orange-500, #f97316)) 0%,
-    var(--module-accent-text, var(--color-orange-600, #ea580c)) 100%
-  );
-  color: white !important;
-  box-shadow: 0 4px 12px
-    color-mix(in srgb, var(--module-accent, var(--color-orange-500, #f97316)) 28%, transparent);
-  border: none;
-  transform: translateY(-1px);
-}
-
-/* 传统的底部线条式 Tab 的增强版 */
-.amz_tab-underline-active {
-  color: var(--color-text-primary, var(--color-slate-900));
-  position: relative;
-}
-
-.amz_tab-underline-active::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 20px;
-  height: 3px;
-  background: var(--color-orange-500);
-  /* 橙色强调色 */
-  border-radius: var(--rounded-lg);
-  transition: width var(--duration-fast);
-}
-
-.amz_tab-underline-active:hover::after {
-  width: 32px;
-  /* 悬浮时线条变长 */
-}
 
 /* ----------------------------------------
    4. 业务组件细节 (Business Details)

@@ -1,7 +1,7 @@
 # 稳定主题系统规范
 
 **Status:** active · SSOT  
-**Updated:** 2026-07-26  
+**Updated:** 2026-08-07    
 **适用范围**: SOPs Web 端所有页面、模块样式、共享组件和视觉整改  
 **目标**: 企业级 **浅色 / 深色 / 跟随系统** 主题轴 + 可选 **色调（强调色）** + 模块归属 wayfinding；三者正交、可审计。
 
@@ -242,6 +242,10 @@ npm run generate:tokens
 - 状态色使用语义：success、warning、error、info、neutral。
 - 关键状态必须同时有文字或图标，不只靠颜色。
 - `wb-badge-*` 在 banner 中最终应受当前 `wb-theme-*` 控制。
+- **深色 badge chip 惯例（呼应 COMPONENT §5.1，共享层标准）**：深色语义 badge 统一「同色相低明度 chip + 亮字」——底 `color-mix(in srgb, var(--color-*-500) 18%, var(--surface-card))`，字用同色 `-300` 档（badges.css 已落地：sop-status L381-404 / stage L406-440 / category L443-496 / badge-* L501-538）。scale 裸档（-100 浅底 / -700 深字）在 `variables.generated.css` 中**无 dark 覆盖**、不自动翻转，深色规则必须显式补 `.dark` + `[data-color-mode-resolved='dark']`（badges.css 三前缀）。既往 `-400 底 16%` 局部实现（`amz_hub_style.css` L431-435 `.wb-badge`、`cards.css` L497-559 overview-accent）为待收敛派系，新代码用 `-500 底 18%`。
+- **solid 徽章文字对比规定**：
+  - **warning 系**（amber-500 底）用**深字** `--color-warning-contrast`（=`--color-slate-900`；variables.css L131；badges.css `.badge-warning-solid` L81-85）——amber 底白字 ≈2.2:1 不达标。
+  - **primary / success / error / info 系**用**白字**（`--color-primary-contrast` / `--color-error-contrast` 等，variables.css L65-71、L133-142），dark 下加深底：primary 用 `--color-primary-dark`（badges.css L542-546 已落地），error 对齐 `.action-btn-danger` dark 档（`--color-error-dark`）；success / error / info solid 的 dark 加深底**未落地**（dark 下 `--color-*-400` 提亮、白字不达标），列待收口项。
 
 ### 4.5 Welcome Banner
 
@@ -406,6 +410,8 @@ npm run generate:tokens
 | D10 | **Done**：`AppearanceThemeColors` 仅 primary 族 + focus；已删除 deprecated 别名 `ThemeColors`；`getColorVars` / `previewTheme` / `applyTheme` **从不**写 secondary/accent/status；生产 **0** 调用方读取状态色字段（见 landing §5.4） |
 | D11 | 暗色覆盖依赖 `data-theme='dark'`，与 D3 同源                                                                                                                              |
 | D12 | 缺 Appearance preset 壳层视觉回归矩阵                                                                                                                                     |
+| D13 | `--focus-ring-*` 组已写入手写 `variables.css`（L397-407）但 generated 层未生成、组件层未统一接线（forms 走 `--field-focus-ring`）；裁决与 token 登记见 ACCESSIBILITY §2.2                                                                                                                                                                      |
+| D14 | badge 深色两派（共享层 `-500 底 18%` vs 既有 `-400 底 16%` 局部）已裁决为 `-500 底 18%`（COMPONENT §5.1）；-400 派（`amz_hub_style.css` `.wb-badge`、`cards.css` overview-accent）待收敛                                                                                                                                                          |
 
 ---
 

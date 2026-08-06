@@ -1,7 +1,7 @@
 # 无障碍规范（Accessibility）
 
 **Status:** active · SSOT · v1.0  
-**Updated:** 2026-07-26  
+**Updated:** 2026-08-07  
 **Owner:** 前端 + 产品  
 **目标等级（本阶段）：** **实用子集**（接近 WCAG 2.2 **AA 的关键路径**，非全站认证式合规）  
 
@@ -56,15 +56,19 @@
 
 ### 2.2 Focus ring 规格（A1 细则）
 
-- 统一 `--color-focus-ring`（`variables.css` 中 = `var(--color-primary)`）+ 2px 环（`--focus-ring-width: 2px`）+ 2px offset（`--focus-ring-offset: 2px`）。
+**双轨裁决（2026-08 横向审查定案，与代码实现一致）：** 按钮/弹层与表单控件采用两套焦点环，按控件类型选用：
+
+| 轨道 | 适用 | 实现（代码事实） | 关键 token |
+| --- | --- | --- | --- |
+| **A · outline 双 2px** | 按钮（`.action-btn` 全变体）、弹层一般控件 | `outline: 2px solid var(--color-focus-ring); outline-offset: 2px;`（`buttons.css` L50-53 `.action-btn:focus-visible`） | `--color-focus-ring`（variables.css L118-122 = `var(--color-primary)`） |
+| **B · box-shadow 单环 3px** | 表单控件（input / textarea / select / checkbox / radio） | `outline: none` + `box-shadow: 0 0 0 3px var(--field-focus-ring)`（forms.css `.form-input:focus` L91-97、`.form-textarea:focus` L132-137、`.form-select:focus` L384-389） | `--field-focus-ring` = `color-mix(in srgb, var(--color-focus-ring) 14%, transparent)`（forms.css L41-45） |
+
+- 表格内联编辑 / 紧凑控件用 **2px 单环**变体：`box-shadow: 0 0 0 2px var(--field-focus-ring)`（forms.css L548-552，仅 `@media (min-width: 768px)`）；checkbox / radio 用 `--check-ring-focus`（10%，forms.css L56-60）。
+- **Token 登记：**
+  - `--field-focus-ring`（forms.css L41-45）：表单轨道专用，新增表单控件一律复用，禁止另写 `rgba(...)` 焦点环字面量（error / success 聚焦已对齐 color-mix 手法，forms.css L255-259 / L291-294）。
+  - `--focus-ring-width` / `--focus-ring-offset` / `--focus-ring-color` / `--focus-ring-style` / `--focus-ring-shadow`：**已定义于手写 `variables.css` §16 焦点环（L397-407）**，dark 下 `--focus-ring-shadow` 另有适配（L612-616）；但 **generated 层（variables.generated.css）未生成这些 token**、组件层未统一接线（forms 走 `--field-focus-ring`，buttons 走 outline 字面量）——登记为双写一致性收口项（THEME §8 D 类债务），本细则以轨道 A/B 验收。
 - 不得 `outline: none` 且无替代（与 A1 一致）。
-
-**按钮 focus ring 落地指引（A1 对按钮的细则）：** 二选一：
-
-1. **outline 方案**（默认）：`outline: 2px solid var(--color-focus-ring); outline-offset: 2px;`
-2. **box-shadow 双环方案**（圆角元素上 outline 观感不佳时）：`box-shadow: 0 0 0 2px <按钮背景色>, 0 0 0 4px var(--color-focus-ring);`
-
-统一用 `--focus-ring-width` / `--focus-ring-shadow`（若已落地为 CSS token）或 `--color-focus-ring`；当前 `--focus-ring-width` / `--focus-ring-shadow` 尚未定义为 CSS token，可用上述字面量先行，并在落地时登记补 token。focus ring 必须显式保留在 `.action-btn` 全部变体上（含 danger / ghost / icon），禁止裸 `outline: none` 无替代。
+- focus ring 必须显式保留在 `.action-btn` 全部变体上（含 danger / ghost / icon：buttons.css L50-53；`qa-action-btn` L190-193；`category-filter-btn` L282-292），禁止裸 `outline: none` 无替代。
 
 ### 2.3 对比度豁免登记（A9 细则）
 
@@ -79,6 +83,21 @@
 - 今后**新增豁免必须双处标注**：本节登记 + 对应代码注释，两处缺一视为未豁免。
 - 登记时注明：选择器、字号、实测比值、缓解手段。
 - 豁免仅允许「大面积填充 + 加深 hover」类缓解模式；纯文字小号状态色（§2.1）不适用豁免。
+
+### 2.4 特型控件焦点豁免登记（A1 细则）
+
+焦点环豁免规则对齐 §2.3：**新增豁免必须双处标注**（本节登记 + 对应代码注释，两处缺一视为未豁免）；登记注明选择器、实现、理由与代码侧标注状态。
+
+| 控件 | 实现（代码事实） | 豁免理由 | 代码侧标注 |
+| --- | --- | --- | --- |
+| 营销日历搜索框 `.amzf_search_box`（`marketing_calendar/styles.css` L216-227） | 输入框 `.amzf_search_input` `outline: none`（L268-277），可见焦点由容器 `.amzf_search_box:focus-within` 承接（border-color + 4px halo，L249-256） | 玻璃拟态搜索容器整体反馈，焦点环不落在裸输入框 | **待补**：styles.css 缺注释，未满足双处标注 |
+| Keyword Hunter 编辑器 `.keyword-hunter-editor-shell`（`keyword_hunter/styles.css` L950-960） | 内部 textarea 用 `focus:ring-0`，焦点由容器 `:focus-within` ring 承接（含 `--primary` 变体 L956-960） | 高亮层 + 容器统一 ring，避免双层焦点环 | **已标注**：forms.css L146-152 注释明示「focus 反馈由 editor-shell 的 focus-within ring 承担」 |
+
+**非豁免登记（待收口，不是豁免）：**
+
+| 项 | 现状（代码事实） | 收口方向 |
+| --- | --- | --- |
+| NPI 表格内联编辑（<768px） | 共享紧凑控件与焦点样式仅在 `@media (min-width: 768px)` 下存在（forms.css L531-552）；窄屏下 `[data-action="update-field"]` 控件无统一高度/焦点基线（sops_style.css L431-441 仅解固定列） | 补 <768px 基线或窄屏表格降级方案（关联 TD-CMP-02） |
 
 ---
 

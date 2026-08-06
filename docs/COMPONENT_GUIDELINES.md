@@ -1,7 +1,7 @@
 # 组件开发规范（Component Guidelines）
 
 **Status:** active · SSOT · v1.0  
-**Updated:** 2026-07-26  
+**Updated:** 2026-08-07  
 **Owner:** 前端 / 设计系统  
 **适用范围:** 全部用户可见 UI（含系统设置抽屉、工作台、模块页）
 
@@ -150,6 +150,16 @@
 | Label + 控件同一行 | flex，align center，控件 `min-width` 明确 |
 | 分段选择（5 档等） | `.settings-segmented` 或共享 segmented；选项等分 |
 
+### 4.4 特型控件焦点豁免对照
+
+少数特型控件允许 `focus` 由容器承担（豁免需**双处标注**：本节 + 代码注释，见 [ACCESSIBILITY §2.4](./ACCESSIBILITY.md#24-特型控件焦点豁免登记a1-细则)）：
+
+| 控件 | 代码现状 | 豁免状态 |
+| --- | --- | --- |
+| 营销日历搜索框 `.amzf_search_box` | `styles.css` L216-227；输入框 `outline: none`（L268-277），焦点环由容器 `:focus-within` 承担（L249-256） | 已豁免（代码侧标注待补） |
+| Keyword Hunter 编辑器 `keyword-hunter-editor-shell` | 容器 `:focus-within` 承担 ring（`styles.css` L950-960）；代码注释见 `forms.css` L146-152 | 已豁免（双处齐） |
+| NPI 表格内联编辑（<768px） | 共享紧凑控件样式仅存在于 `@media (min-width: 768px)`（`forms.css` L531-552）；窄屏无状态基线 | **非豁免**，登记为待收口项（关联 TD-CMP-02） |
+
 ---
 
 ## 5. 反馈（Toast / 空状态 / 加载）
@@ -174,6 +184,23 @@
 | `--color-neutral` | 无此 token | 中性用 `.badge-neutral`（`--color-slate-100` 底 / `--color-slate-700` 字）或 `--color-secondary`（slate-600） |
 
 规则：状态只给语义（success/warning/error/info/neutral），组件内禁止另写状态色裸值。
+
+**深色 badge 惯例（共享层标准，已落地 `badges.css`）：**
+
+深色模式下语义 badge 统一「同色相低明度 chip + 亮字」：底 `color-mix(in srgb, var(--color-*-500) 18%, var(--surface-card))`、字用同色相 `-300` 档亮字（如 `--color-green-300`）。实现段：`.sop-status-active/draft/pending`（L381–404）、`.stage-*`（L406–440）、`.category-badge.*`（L443–496）、`.badge-*` 语义变体（L501–538）、`.badge-primary-solid`（L542–546）。solid 档深色加深规范见 THEME §4.4。
+
+**裁决：深色 chip 两派统一为 `-500 底 18%`。** 历史上存在两派：共享层 badges.css 用 `-500 底 18%`；既有局部实现用 `-400 底 16%`（`welcome-banner` 生态：`amz_hub_style.css` L431-435 的 `.dark … .wb-badge` 用 `color-mix(in srgb, var(--color-orange-400) 16%, var(--surface-card))`；`cards.css` L497-559 `.overview-accent-*` 用 `-400/16%` 系；另有 `marketing_calendar/styles.css` L752 等 16% 变体）。**统一 `-500 底 18%` 为共享层标准**；`-400 底 16%` 家族为既有实现，登记为待收敛项，新代码禁止新增。
+
+**深色不自动翻转：** scale 裸档（`-100` 浅底 / `-700` 深字）在 `variables.generated.css` 中**无任何 dark 覆盖**（该文件仅 `:root` 一段），不会随 Color Mode 自动翻转；语义 badge 的深色规则必须显式补前缀：`.dark` + `[data-color-mode-resolved='dark']`（badges.css 并补 `[data-theme='dark']` 三前缀，L392-538）。新增 badge/状态组件时，凡依赖浅底深字必须按此显式补深色规则，不得只写浅色档。
+
+**生态登记（口径：TD-CMP-04；数字来自 TECH_DEBT_BOARD）：**
+
+| badge 类 | 定义位置 | 状态 / 处置 |
+| --- | --- | --- |
+| `.sop-status-badge`（+ `.sop-status-active/draft/pending`） | `src/css/components/badges.css` L221-251 | 生态主力（约 45 处引用）；新状态判断优先复用本族 |
+| `.stage-badge`（+ `.stage-test/growth/stable/clearance`） | `src/css/components/badges.css` L278-305 | 生态主力（约 12 处）；浅色部分档仍为裸 hex（`#d1fae5` 等），归 token 化收敛 |
+| `.wb-badge` | `src/css/components/welcome-banner.css` L630-640（变体 L681-727） | 定义于 welcome-banner.css 但被 **38 处跨模块引用**（TD-CMP-04）——登记为**规划迁移项**，目标迁移至 `badges.css` 共享层；迁移前 banner 内颜色仍由 `wb-theme-*` 控制 |
+| 业务自建 badge 类 | 各模块 | 新代码**禁止**自建第四条 badge 体系；必须复用上述共享类 + 语义状态 token（§5.1 表）；旧自建类归 TD-CMP-04 清理 |
 
 ---
 
@@ -215,6 +242,8 @@
 | 危险确认 | `confirmWithModal` |
 | 系统设置 | 抽屉 + 内部危险仍 confirm |
 | 特殊选择器 | 可定制布局，须复用焦点/Escape/滚动锁 |
+
+> **弹层按钮契约与深色禁令：** 弹层内按钮必须复用 `.action-btn` 族（[MODAL §3.1](./MODAL_DEVELOPMENT_GUIDELINES.md#31-弹层按钮契约)）；深色下禁止 light-only 表面与静态 style 内联（[MODAL §6.1](./MODAL_DEVELOPMENT_GUIDELINES.md#61-弹层深色禁令light-only-表面)）。
 
 ---
 
@@ -304,6 +333,7 @@
 | v1.2 | 补充数据表规范（§6.1）、状态 token 对照表（§5.1）、按钮 hover 边界（§3.2） |
 | v1.3 | 登记 ModelSelect 共享组件（模型选择 + 刷新，见 `docs/guides/model-select-component-guide.md`） |
 | v1.4 | 按钮规范补齐：danger/ghost/icon 变体类名、§3.4 尺寸与密度、Loading/aria/disabled 契约、深色 accent-strong 禁用（2026-08 按钮体系缺口审查） |
+| v1.5 | 补齐深色 badge 惯例与生态登记（§5.1）、表单特型控件豁免对照（§4.4）、弹层按钮契约指引（2026-08 UI 规范横向审查） |
 | 后续 | 补 DatePicker、虚拟列表；可加示意截图 |
 
 变更走 [PRODUCT_PRINCIPLES §5](./PRODUCT_PRINCIPLES.md#5-规范变更流程)。
