@@ -4,9 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 const read = (path: string): string => readFileSync(resolve(process.cwd(), path), 'utf8');
 
-const aiAnalysis = read(
-  'src/modules/app_center/views/master_analysis/ai_analysis/template.html'
-);
+const aiAnalysis = read('src/modules/app_center/views/master_analysis/ai_analysis/template.html');
 const promptlab = read('src/modules/app_center/views/master_analysis/promptlab/template.html');
 const scraper = read('src/modules/app_center/views/master_analysis/scraper/template.html');
 const headerCss = read('src/css/components/header-main.css');
@@ -26,9 +24,7 @@ describe('release accessibility contract', () => {
   });
 
   it('derives the Scraper empty-state button name from its visible content', () => {
-    const button = scraper.match(
-      /<button\b[^>]*\bid="no-data-msg"[^>]*>[\s\S]*?<\/button>/
-    )?.[0];
+    const button = scraper.match(/<button\b[^>]*\bid="no-data-msg"[^>]*>[\s\S]*?<\/button>/)?.[0];
 
     if (!button) {
       throw new Error('Expected a complete button with id="no-data-msg"');
@@ -75,7 +71,7 @@ describe('release accessibility contract', () => {
     expect(headerCss).toContain('.dark .version-card.tip-card');
     expect(headerCss).toContain('var(--surface-card, #1e293b) 92%');
     expect(headerCss).toContain('.dark .quick-access-item:hover');
-    expect(headerCss).toContain('var(--color-primary, #818cf8) 18%');
+    expect(headerCss).toContain('var(--color-green-400, #4ade80) 18%');
   });
 
   it('keeps the PromptLab missing-report notice one level below its card heading', () => {

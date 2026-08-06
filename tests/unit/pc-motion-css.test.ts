@@ -104,7 +104,9 @@ describe('PC motion CSS contract', () => {
     expect(badgesCss).toContain('transform var(--duration-fast) var(--ease-smooth)');
     expect(cardsCss).toContain('transform var(--duration-slow) var(--ease-spring)');
     expect(cardsCss).toContain('box-shadow var(--duration-normal) ease');
-    expect(buttonsCss).toContain('transform var(--duration-normal) var(--ease-smooth)');
+    expect(buttonsCss).toContain(
+      'transform var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease)'
+    );
   });
 
   it('keeps converged PC module styles from animating every CSS property', () => {

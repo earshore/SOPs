@@ -21,7 +21,8 @@ function createStatusButton(
 ): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'ppc-search-terms-resume-review-action';
+  // aria-pressed 切换由共享 .category-filter-btn 的 [aria-pressed='true'] 样式承接
+  button.className = 'category-filter-btn';
   button.dataset.reviewStatus = status;
   button.textContent = REVIEW_LABELS[status];
   button.setAttribute('aria-pressed', String(snapshot.reviewStatus === status));

@@ -46,22 +46,10 @@
   gap: 8px;
 }
 
-.ppc-search-terms-resume-review-action {
+/* 复核状态按钮走共享 .category-filter-btn（aria-pressed 切换，active 由胶囊承接），
+   保留原 44px 触控高度（§3.4 大档） */
+.ppc-search-terms-resume-review-actions .category-filter-btn {
   min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--ppc-search-terms-border-strong, var(--color-slate-300, #cbd5e1));
-  border-radius: 8px;
-  background: var(--surface-card, #ffffff);
-  color: var(--ppc-search-terms-ink-strong, var(--color-slate-700, #334155));
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.ppc-search-terms-resume-review-action[aria-pressed='true'] {
-  border-color: var(--color-primary, var(--color-blue-600, #2563eb));
-  background: var(--color-primary, var(--color-blue-600, #2563eb));
-  color: var(--color-primary-contrast, var(--color-white, #ffffff));
 }
 
 .ppc-search-terms-action-toolbar {
@@ -207,20 +195,6 @@
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
   background: var(--surface-card, #1e293b);
   color: var(--color-text-primary, #f8fafc);
-}
-
-.dark .ppc-search-terms-resume-review-action,
-[data-color-mode-resolved='dark'] .ppc-search-terms-resume-review-action {
-  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
-  background: var(--surface-card, #1e293b);
-  color: var(--color-text-secondary, #cbd5e1);
-}
-
-.dark .ppc-search-terms-resume-review-action[aria-pressed='true'],
-[data-color-mode-resolved='dark'] .ppc-search-terms-resume-review-action[aria-pressed='true'] {
-  border-color: var(--color-primary, var(--color-blue-500, #3b82f6));
-  background: var(--color-primary, var(--color-blue-500, #3b82f6));
-  color: var(--color-primary-contrast, var(--color-white, #ffffff));
 }
 
 .dark .ppc-search-terms-action-search,

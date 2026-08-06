@@ -1,24 +1,4 @@
-/* 容器微调：移除 min-height: 100vh，因为是嵌入在 Panel 里的 */
-/* 1. 修复滚动问题：确保容器撑满并允许内部滚动 */
-.amzf_container {
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-  background: var(--color-slate-50);
-  color: var(--color-slate-900);
-  line-height: 1.6;
-  width: 100%;
-  height: 100%;
-  /* 撑满父容器 */
-  overflow-y: auto;
-  /* 允许垂直滚动 */
-  padding: 20px;
-  /* 隐藏滚动条但保留功能 (可选) */
-  scrollbar-width: thin;
-}
-
+/* ==================== 基础样式 ==================== */
 /* Header 主容器：移除 overflow: hidden，移除背景 */
 .amzf_header {
   /* ✅ 关键修改：允许溢出，这样下拉框才能显示 */

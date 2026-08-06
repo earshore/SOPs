@@ -473,7 +473,8 @@
    可关闭徽章
    ======================================== */
 .badge-dismissible {
-  padding-right: 1.5rem;
+  /* 为 24px 关闭按钮（1.5rem 宽 + 0.25rem 右距）预留空间 */
+  padding-right: 2rem;
   position: relative;
 }
 
@@ -482,8 +483,9 @@
   right: 0.25rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 1rem;
-  height: 1rem;
+  /* WCAG 2.5.8 触控目标 ≥24px */
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 50%;
   background: transparent;
   border: none;
@@ -498,6 +500,11 @@
     color var(--duration-fast) var(--ease-smooth),
     opacity var(--duration-fast) var(--ease-smooth),
     transform var(--duration-fast) var(--ease-smooth);
+}
+
+.badge-dismiss-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-primary));
+  outline-offset: 2px;
 }
 
 .badge-dismiss-btn:hover {
@@ -584,6 +591,13 @@
 /* ========================================
    暗色模式
    ======================================== */
+.dark .badge-dismiss-btn:hover,
+[data-color-mode-resolved='dark'] .badge-dismiss-btn:hover,
+[data-theme='dark'] .badge-dismiss-btn:hover {
+  /* 组件惯例色：浅色 badge hover 用黑 0.1，深色 badge 反相用白 0.12 */
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .dark .badge-neutral,
 .dark .badge-secondary,
 [data-color-mode-resolved='dark'] .badge-neutral,

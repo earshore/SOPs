@@ -100,7 +100,7 @@ export function bindPpcSearchTermsEvents(
   addListener(getElement(container, 'ppc-search-terms-filter-buttons'), 'click', event => {
     const target =
       event.target instanceof Element
-        ? event.target.closest<HTMLElement>('.ppc-search-terms-filter-btn')
+        ? event.target.closest<HTMLElement>('.category-filter-btn')
         : null;
     if (target) handlers.setFilter(target);
   });

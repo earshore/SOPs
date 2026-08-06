@@ -179,43 +179,44 @@
   background: var(--surface-panel, #ffffff);
 }
 
-.ppc-search-terms-secondary-action,
-.ppc-search-terms-primary-action,
-.ppc-search-terms-ghost-action,
 .ppc-search-terms-threshold-toggle,
 .ppc-search-terms-export-btn,
-.ppc-search-terms-filter-btn,
 .ppc-search-terms-search-clear-btn {
   cursor: pointer;
   touch-action: manipulation;
 }
 
-.ppc-search-terms-secondary-action,
-.ppc-search-terms-primary-action,
-.ppc-search-terms-ghost-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 0 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 800;
-  transition:
-    transform 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    background-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    box-shadow 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+/* ===== 共享按钮体系接入（.action-btn / .category-filter-btn）===== */
+
+/* 筛选胶囊：模块色经 --button-filter-* 变量定制（模式同 more/amz_hub/sops），
+   accent 沿用模块 primary（蓝），边框/悬停跟随模块 token */
+.ppc-search-terms-app {
+  --button-filter-accent: var(--color-primary, var(--color-blue-600, #2563eb));
+  --button-filter-border: var(--ppc-search-terms-border-strong, #cbd5e1);
+  --button-filter-hover-bg: var(--color-bg-secondary, #f8fafc);
+  --button-filter-hover-border: var(--ppc-search-terms-border-strong, #cbd5e1);
+  --button-filter-hover-color: var(--color-text-secondary, #475569);
 }
 
-.ppc-search-terms-secondary-action {
-  border: 1px solid var(--border-subtle, var(--color-slate-200, #e2e8f0));
-  background: var(--surface-card, #ffffff);
-  color: var(--ppc-search-terms-ink, var(--color-slate-600, #475569));
+/* Primary CTA：模块绿经 --button-primary-* token 保留。
+   buttons.css 的 .dark .action-btn-primary 会把 bg 向深推导成 primary-dark（蓝），
+   故 dark 下需在模块内以更高优先级钉回模块绿（见下方暗色段） */
+.ppc-search-terms-app .action-btn-primary {
+  --button-primary-bg: var(--ppc-search-terms-cta-bg, #16a34a);
+  --button-primary-hover-bg: var(--ppc-search-terms-cta-bg-hover, #15803d);
+  --button-primary-active-bg: var(--ppc-search-terms-cta-bg-hover, #15803d);
+  box-shadow: var(--ppc-search-terms-shadow-accent, 0 8px 18px -14px rgba(22, 163, 74, 0.72));
 }
 
-.ppc-search-terms-secondary-action:hover {
+.ppc-search-terms-app .action-btn-primary:hover:not(:disabled) {
+  box-shadow: var(
+    --ppc-search-terms-shadow-accent-hover,
+    0 10px 22px -16px rgba(21, 128, 61, 0.78)
+  );
+}
+
+/* Secondary：共享基样式之上保留模块 emerald hover 色调 */
+.ppc-search-terms-import-actions .action-btn-secondary:hover:not(:disabled) {
   border-color: var(--ppc-search-terms-accent-line, var(--color-emerald-200, #a7f3d0));
   background: color-mix(
     in srgb,
@@ -225,6 +226,15 @@
   color: var(--ppc-search-terms-accent-strong, #15803d);
 }
 
+/* 共享 focus 风格（outline 2px var(--color-focus-ring)）；
+   已迁移按钮的 focus 由 .action-btn / .category-filter-btn 自带 */
+.ppc-search-terms-threshold-toggle:focus-visible,
+.ppc-search-terms-export-btn:focus-visible,
+.ppc-search-terms-search-clear-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-primary));
+  outline-offset: 2px;
+}
+
 .ppc-search-terms-import-actions {
   display: inline-flex;
   align-items: center;
@@ -232,48 +242,6 @@
   gap: 10px;
   flex-wrap: wrap;
   flex: 0 0 auto;
-}
-
-.ppc-search-terms-primary-action {
-  border: 1px solid transparent;
-  background: var(--ppc-search-terms-cta-bg, #16a34a);
-  color: rgb(255, 255, 255);
-  box-shadow: 0 10px 20px -18px rgba(22, 163, 74, 0.72);
-}
-
-.ppc-search-terms-primary-action:hover {
-  background: var(--ppc-search-terms-cta-bg-hover, #15803d);
-  box-shadow: 0 12px 24px -18px rgba(21, 128, 61, 0.78);
-}
-
-.ppc-search-terms-primary-action:disabled {
-  cursor: not-allowed;
-  opacity: 0.68;
-  transform: none;
-  box-shadow: none;
-}
-
-.ppc-search-terms-ghost-action {
-  border: 1px solid var(--ppc-search-terms-border-strong, rgb(203, 213, 225));
-  background: var(--surface-card, #ffffff);
-  color: var(--ppc-search-terms-ink-strong, rgb(51, 65, 85));
-}
-
-.ppc-search-terms-ghost-action:hover {
-  border-color: rgb(148, 163, 184);
-  background: var(--color-bg-secondary, #f8fafc);
-}
-
-.ppc-search-terms-secondary-action:focus-visible,
-.ppc-search-terms-primary-action:focus-visible,
-.ppc-search-terms-ghost-action:focus-visible,
-.ppc-search-terms-threshold-toggle:focus-visible,
-.ppc-search-terms-export-btn:focus-visible,
-.ppc-search-terms-search-clear-btn:focus-visible,
-.ppc-search-terms-filter-btn:focus-visible,
-.ppc-search-terms-dropzone:focus-within {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
 }
 
 @media (max-width: 1279px) {
@@ -396,15 +364,21 @@
   color: var(--color-emerald-300, #6ee7b7);
 }
 
-.dark .ppc-search-terms-secondary-action,
-[data-color-mode-resolved='dark'] .ppc-search-terms-secondary-action {
-  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
-  background: var(--surface-card, #1e293b);
-  color: var(--color-text-secondary, #cbd5e1);
+/* Dark：primary 钉回模块绿（覆盖 buttons.css 的 dark 向深推导），
+   secondary 保留模块 emerald hover 色调 */
+.dark .ppc-search-terms-app .action-btn-primary,
+[data-color-mode-resolved='dark'] .ppc-search-terms-app .action-btn-primary,
+[data-theme='dark'] .ppc-search-terms-app .action-btn-primary {
+  --button-primary-bg: var(--ppc-search-terms-cta-bg, #16a34a);
+  --button-primary-hover-bg: var(--ppc-search-terms-cta-bg-hover, #15803d);
+  --button-primary-active-bg: var(--ppc-search-terms-cta-bg-hover, #15803d);
 }
 
-.dark .ppc-search-terms-secondary-action:hover,
-[data-color-mode-resolved='dark'] .ppc-search-terms-secondary-action:hover {
+.dark .ppc-search-terms-import-actions .action-btn-secondary:hover:not(:disabled),
+[data-color-mode-resolved='dark']
+  .ppc-search-terms-import-actions
+  .action-btn-secondary:hover:not(:disabled),
+[data-theme='dark'] .ppc-search-terms-import-actions .action-btn-secondary:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 40%, transparent);
   background: color-mix(
     in srgb,
@@ -412,17 +386,4 @@
     var(--surface-card, #1e293b)
   );
   color: var(--color-emerald-300, #6ee7b7);
-}
-
-.dark .ppc-search-terms-ghost-action,
-[data-color-mode-resolved='dark'] .ppc-search-terms-ghost-action {
-  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
-  background: var(--surface-card, #1e293b);
-  color: var(--color-text-secondary, #cbd5e1);
-}
-
-.dark .ppc-search-terms-ghost-action:hover,
-[data-color-mode-resolved='dark'] .ppc-search-terms-ghost-action:hover {
-  border-color: var(--color-border-strong, rgba(255, 255, 255, 0.16));
-  background: var(--surface-card-hover, #334155);
 }
