@@ -552,12 +552,12 @@ function showLoadingState(container: HTMLElement): () => void {
     {
       icon: 'fa-brain',
       text: 'AI 正在深度分析 Listing…',
-      color: 'text-rose-600',
+      color: 'text-cyan-600',
     },
     {
       icon: 'fa-file-medical',
       text: '正在生成评审报告…',
-      color: 'text-pink-600',
+      color: 'text-sky-600',
     },
   ] as const;
 
@@ -567,21 +567,21 @@ function showLoadingState(container: HTMLElement): () => void {
         <div class="flex flex-col items-center justify-center py-16 text-center" id="keyword-hunter-loading-state"
              role="status" aria-live="polite" aria-atomic="true">
             <div class="relative mb-6">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50
-                            flex items-center justify-center border border-rose-100 shadow-inner">
-                    <i class="fas ${phase.icon} text-2xl text-rose-300 animate-pulse"></i>
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-50 to-sky-50
+                            flex items-center justify-center border border-cyan-100 shadow-inner">
+                    <i class="fas ${phase.icon} text-2xl text-cyan-300 animate-pulse"></i>
                 </div>
                 <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-white border border-slate-100
                             flex items-center justify-center shadow-sm">
-                    <i class="fas fa-spinner fa-spin text-rose-400 text-xs"></i>
+                    <i class="fas fa-spinner fa-spin text-cyan-400 text-xs"></i>
                 </div>
             </div>
             <p class="font-semibold ${phase.color} text-sm mb-1">${phase.text}</p>
             <p class="text-xs text-slate-400">这可能需要 10 ~ 30 秒，请耐心等待</p>
             <div class="mt-4 flex gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-rose-300 animate-bounce"></span>
-                <span class="w-1.5 h-1.5 rounded-full bg-rose-300 animate-bounce [animation-delay:150ms]"></span>
-                <span class="w-1.5 h-1.5 rounded-full bg-rose-300 animate-bounce [animation-delay:300ms]"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-bounce"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-bounce [animation-delay:150ms]"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-bounce [animation-delay:300ms]"></span>
             </div>
         </div>
     `;

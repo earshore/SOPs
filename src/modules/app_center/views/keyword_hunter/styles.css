@@ -1237,18 +1237,18 @@
 }
 
 .keyword-hunter-analysis-action--active {
-  border-color: var(--color-rose-600, #e11d48);
-  background: var(--color-rose-600, #e11d48);
+  border-color: var(--color-cyan-600, #0891b2);
+  background: var(--color-cyan-600, #0891b2);
   color: white;
-  box-shadow: 0 10px 20px -18px rgba(225, 29, 72, 0.65);
+  box-shadow: 0 10px 20px -18px rgba(8, 145, 178, 0.65);
 }
 
 .keyword-hunter-analysis-action--active:hover,
 .keyword-hunter-analysis-action--active:focus-visible {
-  border-color: var(--color-rose-700, #be123c);
-  background: var(--color-rose-700, #be123c);
+  border-color: var(--color-cyan-700, #0e7490);
+  background: var(--color-cyan-700, #0e7490);
   color: white;
-  box-shadow: 0 12px 24px -18px rgba(190, 18, 60, 0.72);
+  box-shadow: 0 12px 24px -18px rgba(14, 116, 144, 0.72);
 }
 
 .keyword-hunter-analysis-action--disabled {
@@ -1261,11 +1261,11 @@
 .keyword-hunter-analysis-action--loading {
   border-color: color-mix(
     in srgb,
-    var(--color-rose-500, #f43f5e) 30%,
+    var(--color-cyan-500, #06b6d4) 30%,
     var(--surface-panel, #ffffff)
   );
-  background: color-mix(in srgb, var(--color-rose-500, #f43f5e) 12%, var(--surface-panel, #ffffff));
-  color: var(--color-rose-700, #be123c);
+  background: color-mix(in srgb, var(--color-cyan-500, #06b6d4) 12%, var(--surface-panel, #ffffff));
+  color: var(--color-cyan-700, #0e7490);
   box-shadow: none;
 }
 
@@ -1277,7 +1277,7 @@
 }
 
 .keyword-hunter-analysis-action:focus-visible {
-  outline: 2px solid var(--color-rose-500, #f43f5e);
+  outline: 2px solid var(--color-cyan-500, #06b6d4);
   outline-offset: 2px;
 }
 
@@ -2885,8 +2885,8 @@
   }
 
   #app_center_content_area #keyword-hunter-module-analysis .keyword-hunter-analysis-report-icon {
-    /* Match rose workbench helper shadow; do not reintroduce marketing scale. */
-    box-shadow: 0 1px 2px rgba(244, 63, 94, 0.2) !important;
+    /* Match cyan workbench helper shadow; do not reintroduce marketing scale. */
+    box-shadow: 0 1px 2px rgba(8, 145, 178, 0.2) !important;
   }
 
   #app_center_content_area
@@ -3098,7 +3098,7 @@
 .dark .keyword-hunter-analysis-action--loading,
 [data-color-mode-resolved='dark'] .keyword-hunter-analysis-action--loading,
 [data-theme='dark'] .keyword-hunter-analysis-action--loading {
-  color: var(--color-rose-300, #fda4af);
+  color: var(--color-cyan-300, #67e8f9);
 }
 
 .dark .sentence-translation,
