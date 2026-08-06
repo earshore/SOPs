@@ -67,32 +67,32 @@
 
 ### 2.2 一级目录和 banner 色系映射
 
-| 模块 | 一级目录 | 目录 color | Banner theme / 主色 |
-| --- | --- | --- | --- |
-| SOPs 流程中心 | 运营与推广体系 | `emerald` | `wb-theme-growth` |
-| SOPs 流程中心 | 供应链与物流体系 | `amber` | `wb-theme-supply` |
-| SOPs 流程中心 | 账号安全与风控体系 | `red` | `wb-theme-safety` |
-| SOPs 流程中心 | 客服与客户体验体系 | `teal` | `wb-theme-service` / `wb-theme-teal` |
-| 工作台 | Master Analysis | `indigo` | `wb-theme-indigo` |
-| 工作台 | Keyword Hunter | `fuchsia` | `wb-theme-fuchsia` |
-| 工作台 | PPC Tools | `emerald` | PPC hero 使用 emerald / teal |
-| 工作台 | Playground | **配置** `orange`（`menuConfig` 的 `themeColor` / category `color`） | **实现例外**（模板/CSS 现状）：Deep Chat 使用 terracotta + `wb-theme-supply` / `wb-container--hidden` 等；**本轮不新增** `wb-theme-orange` 作为唯一 banner class。归属**不是** indigo / cyan |
-| Amazon 智库 | Amazon知识早知道 | `indigo` | `wb-theme-indigo` |
-| Amazon 智库 | 入门实操宝典 | `green` | `wb-theme-growth` |
-| Amazon 智库 | 运营提升全攻略 | `violet` | `wb-theme-violet` |
-| 更多 | 大模型探索 | `teal` | `wb-theme-teal` |
-| 更多 | 示例业务场景 | `cyan` | `zn-hero` 使用 cyan / blue |
+| 模块          | 一级目录           | 目录 color                                                           | Banner theme / 主色                                                                                                                                                                          |
+| ------------- | ------------------ | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SOPs 流程中心 | 运营与推广体系     | `emerald`                                                            | `wb-theme-growth`                                                                                                                                                                            |
+| SOPs 流程中心 | 供应链与物流体系   | `amber`                                                              | `wb-theme-supply`                                                                                                                                                                            |
+| SOPs 流程中心 | 账号安全与风控体系 | `red`                                                                | `wb-theme-safety`                                                                                                                                                                            |
+| SOPs 流程中心 | 客服与客户体验体系 | `teal`                                                               | `wb-theme-service` / `wb-theme-teal`                                                                                                                                                         |
+| 工作台        | Master Analysis    | `indigo`                                                             | `wb-theme-indigo`                                                                                                                                                                            |
+| 工作台        | Keyword Hunter     | `fuchsia`                                                            | `wb-theme-fuchsia`                                                                                                                                                                           |
+| 工作台        | PPC Tools          | `emerald`                                                            | PPC hero 使用 emerald / teal                                                                                                                                                                 |
+| 工作台        | Playground         | **配置** `orange`（`menuConfig` 的 `themeColor` / category `color`） | **实现例外**（模板/CSS 现状）：Deep Chat 使用 terracotta + `wb-theme-supply` / `wb-container--hidden` 等；**本轮不新增** `wb-theme-orange` 作为唯一 banner class。归属**不是** indigo / cyan |
+| Amazon 智库   | Amazon知识早知道   | `indigo`                                                             | `wb-theme-indigo`                                                                                                                                                                            |
+| Amazon 智库   | 入门实操宝典       | `green`                                                              | `wb-theme-growth`                                                                                                                                                                            |
+| Amazon 智库   | 运营提升全攻略     | `violet`                                                             | `wb-theme-violet`                                                                                                                                                                            |
+| 更多          | 大模型探索         | `teal`                                                               | `wb-theme-teal`                                                                                                                                                                              |
+| 更多          | 示例业务场景       | `cyan`                                                               | `zn-hero` 使用 cyan / blue                                                                                                                                                                   |
 
 > 本表是 Role → Palette 映射的简表；**代码 SSOT 是 `src/common/config/ownershipRoles.ts`**（`getPaletteForRole` / `getOwnershipRoleForModule`），完整表与 role 决策见 [稳定主题系统规范 §3.2](./THEME_SYSTEM_GUIDELINES.md#32-当前主题映射) 与 Ownership Role 映射表。新页面只选 **role**，不发明新色名。
 
 模块总览页可以使用模块主题色，而不是某个一级目录色：
 
-| 模块总览 | 模块 themeColor | 总览主色 |
-| --- | --- | --- |
-| SOPs 总览 | `blue` | blue / indigo |
-| 工作台总览 | `purple` | purple / pink |
-| Amazon 智库总览 | `orange` | orange / red |
-| 更多总览 | `green` | green / emerald |
+| 模块总览        | 模块 themeColor | 总览主色        |
+| --------------- | --------------- | --------------- |
+| SOPs 总览       | `blue`          | blue / indigo   |
+| 工作台总览      | `purple`        | purple / pink   |
+| Amazon 智库总览 | `orange`        | orange / red    |
+| 更多总览        | `green`         | green / emerald |
 
 ### 2.3 主色、辅色和点缀色
 
@@ -201,22 +201,22 @@
 
 ### 3.2 Banner 类型
 
-| 类型 | 使用场景 | 约束 |
-| --- | --- | --- |
-| `wb-container--simple` | SOPs、AMZ、More 普通内容页 | 横向轻量，背景淡，图标 52px 左右 |
-| `wb-container--card` | 工作台工具页 | 信息密度更高，允许 `.wb-card` 背景层 |
-| 模块总览 hero | 模块入口页 | 可以更强，但仍使用模块主题色 |
-| 自定义 hero | PPC、紫鸟业务场景等特殊页 | 必须遵守目录色映射和字体规格 |
-| `wb-container--hidden` | Deep Chat 等首屏不适合展示 banner 的页面 | 保留 DOM 语义，但视觉隐藏，不占布局 |
+| 类型                   | 使用场景                                 | 约束                                 |
+| ---------------------- | ---------------------------------------- | ------------------------------------ |
+| `wb-container--simple` | SOPs、AMZ、More 普通内容页               | 横向轻量，背景淡，图标 52px 左右     |
+| `wb-container--card`   | 工作台工具页                             | 信息密度更高，允许 `.wb-card` 背景层 |
+| 模块总览 hero          | 模块入口页                               | 可以更强，但仍使用模块主题色         |
+| 自定义 hero            | PPC、紫鸟业务场景等特殊页                | 必须遵守目录色映射和字体规格         |
+| `wb-container--hidden` | Deep Chat 等首屏不适合展示 banner 的页面 | 保留 DOM 语义，但视觉隐藏，不占布局  |
 
 ### 3.3 Banner 字体规格
 
-| 元素 | 普通 banner | 总览 / 强 hero | 说明 |
-| --- | --- | --- | --- |
-| Title | `20px / 700 / 1.375` | `22px / 800 / 1.3` | 不使用负 letter-spacing |
-| Description | `14px / 1.5` | `14px / 1.5` | 最大行宽建议 74ch |
-| Tag | `12px / 500` | `12px / 500` | 最小高度 28px |
-| Badge | `10px / 700` | `12px / 800` | 根据层级使用，不要过度放大 |
+| 元素        | 普通 banner          | 总览 / 强 hero     | 说明                       |
+| ----------- | -------------------- | ------------------ | -------------------------- |
+| Title       | `20px / 700 / 1.375` | `22px / 800 / 1.3` | 不使用负 letter-spacing    |
+| Description | `14px / 1.5`         | `14px / 1.5`       | 最大行宽建议 74ch          |
+| Tag         | `12px / 500`         | `12px / 500`       | 最小高度 28px              |
+| Badge       | `10px / 700`         | `12px / 800`       | 根据层级使用，不要过度放大 |
 
 页面内部紧凑卡片标题不应直接套 hero 字号。工具页卡片标题通常使用 `14px` 到 `18px`。
 
@@ -239,16 +239,16 @@
 
 主图标容器规则：
 
-| 项 | 标准值 | 说明 |
-| --- | --- | --- |
-| Card banner 图标容器 | `56px`，PC 压缩态 `46px` | `.wb-icon-main` |
-| Simple banner 图标容器 | `52px`，PC 压缩态 `46px` | `.wb-icon` |
-| 自定义 hero 图标容器 | PC 首屏默认 `46px` | PPC 等特殊 hero 必须对齐 |
-| 容器圆角 | `12px` | 使用 `--wb-icon-radius`，不改成胶囊或正圆 |
-| Card 主图标字号 | `22px`，PC 压缩态 `19px` | 使用 `--wb-icon-card-font-size` / `--wb-icon-pc-font-size` |
-| Simple 主图标字号 | `21px`，PC 压缩态 `19px` | 使用 `--wb-icon-font-size` / `--wb-icon-pc-font-size` |
-| 主图标颜色 | `#ffffff` | 使用 `--wb-icon-color`，不要在页面级覆盖成彩色 |
-| 阴影 | 同色系低透明阴影 | 使用 `--wb-icon-shadow` / `--wb-icon-shadow-hover` |
+| 项                     | 标准值                   | 说明                                                       |
+| ---------------------- | ------------------------ | ---------------------------------------------------------- |
+| Card banner 图标容器   | `56px`，PC 压缩态 `46px` | `.wb-icon-main`                                            |
+| Simple banner 图标容器 | `52px`，PC 压缩态 `46px` | `.wb-icon`                                                 |
+| 自定义 hero 图标容器   | PC 首屏默认 `46px`       | PPC 等特殊 hero 必须对齐                                   |
+| 容器圆角               | `12px`                   | 使用 `--wb-icon-radius`，不改成胶囊或正圆                  |
+| Card 主图标字号        | `22px`，PC 压缩态 `19px` | 使用 `--wb-icon-card-font-size` / `--wb-icon-pc-font-size` |
+| Simple 主图标字号      | `21px`，PC 压缩态 `19px` | 使用 `--wb-icon-font-size` / `--wb-icon-pc-font-size`      |
+| 主图标颜色             | `#ffffff`                | 使用 `--wb-icon-color`，不要在页面级覆盖成彩色             |
+| 阴影                   | 同色系低透明阴影         | 使用 `--wb-icon-shadow` / `--wb-icon-shadow-hover`         |
 
 图标配色规则：
 
@@ -263,14 +263,14 @@
 
 Icon-badge 规则：
 
-| 项 | 标准值 | 说明 |
-| --- | --- | --- |
-| 尺寸 | `20px`，PC 压缩态 `18px` | 使用 `--wb-icon-badge-size` / `--wb-icon-badge-pc-size` |
-| 偏移 | `right: -4px; bottom: -4px` | 使用 `--wb-icon-badge-offset` |
-| 圆角 | `999px` | 右下角小徽章允许为圆形 |
-| 边框 | `2px solid #ffffff` | 用白边把小徽章从主图标中分离 |
-| 内部图标字号 | `8px`，PC 压缩态 `7px` | 使用 `--wb-icon-badge-font-size` / `--wb-icon-badge-pc-font-size` |
-| 阴影 | 同色系轻阴影 | 使用 `--wb-icon-badge-shadow` |
+| 项           | 标准值                      | 说明                                                              |
+| ------------ | --------------------------- | ----------------------------------------------------------------- |
+| 尺寸         | `20px`，PC 压缩态 `18px`    | 使用 `--wb-icon-badge-size` / `--wb-icon-badge-pc-size`           |
+| 偏移         | `right: -4px; bottom: -4px` | 使用 `--wb-icon-badge-offset`                                     |
+| 圆角         | `999px`                     | 右下角小徽章允许为圆形                                            |
+| 边框         | `2px solid #ffffff`         | 用白边把小徽章从主图标中分离                                      |
+| 内部图标字号 | `8px`，PC 压缩态 `7px`      | 使用 `--wb-icon-badge-font-size` / `--wb-icon-badge-pc-font-size` |
+| 阴影         | 同色系轻阴影                | 使用 `--wb-icon-badge-shadow`                                     |
 
 Icon-badge 配色：
 
@@ -291,11 +291,11 @@ Badge 规则：
 
 通用图标体系尺寸层级：
 
-| 尺寸 | 用途 |
-| --- | --- |
-| 16px | 行内图标、按钮内操作图标 |
-| 20px | 工具栏图标 |
-| 24px | 导航 / 入口图标 |
+| 尺寸  | 用途                                           |
+| ----- | ---------------------------------------------- |
+| 16px  | 行内图标、按钮内操作图标                       |
+| 20px  | 工具栏图标                                     |
+| 24px  | 导航 / 入口图标                                |
 | 32px+ | 大图标容器（banner 主图标容器 52–56px 属此类） |
 
 banner 主图标（21–22px，压缩 19px）与 icon-badge（20px，压缩 18px）是 banner 专用规格，仍以本节上表为准。
@@ -333,6 +333,40 @@ Badge 视觉：
 
 ---
 
+### 3.7 统计卡片（Stat Tile）——welcome banner 内指标区
+
+> 适用：welcome banner 右侧/下方的数据指标区（如 PPC 搜索词分析器、EU 营销日历）。
+> 参考实现：`src/modules/app_center/views/ppc_tools/ppc_search_terms/styles/style.hero.stats.css`（基准）。
+
+**结构与视觉（卡片式，禁止胶囊）**：
+
+| 元素     | 标准值                                                                                                      | 说明                                                                               |
+| -------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| 卡片容器 | 细边框 + `color-mix(…, var(--surface-panel) 72%, transparent)` 底 + 轻阴影 + 圆角 `var(--workbench-radius)` | 与工作台卡片语言一致；**禁止** `border-radius: 50px` 胶囊                          |
+| 图标底   | `18–28px`，圆角 `6–8px`（方形底），语义色 `16%` 浅底                                                        | 图标底色用 `color-mix(in srgb, var(--color-{x}-500) 16%, var(--surface-panel))`    |
+| 图标文字 | 同色系深档（如 `--color-blue-600`）                                                                         | 颜色写在语义类选择器上（`.tile-blue i`），**禁止**在 HTML 里硬编码 `text-*` 工具类 |
+| Label    | `12px / 700`，`var(--color-text-secondary)`                                                                 | 图标 + 文案行内排，gap `7px`                                                       |
+| Value    | `20–22px / 800`，`var(--color-text-primary)`，`font-variant-numeric: tabular-nums`                          | 数字必须 `tabular-nums`，防止跳动                                                  |
+| 布局     | 网格等宽（`grid grid-cols-2 md:grid-cols-4 gap-3`）或 flex 等宽卡片                                         | banner 内紧凑区允许 flex + `min-width`，但卡片视觉一致                             |
+
+**色彩语义（业务自定义，固定四色族）**：
+
+| 语义类    | 浅色底 / 文字                                     | 深色底 / 文字                                     |
+| --------- | ------------------------------------------------- | ------------------------------------------------- |
+| `-blue`   | `--color-blue-500` 16% / `--color-blue-600`       | `--color-blue-400` 16% / `--color-blue-300`       |
+| `-green`  | `--color-emerald-500` 16% / `--color-emerald-600` | `--color-emerald-400` 16% / `--color-emerald-300` |
+| `-orange` | `--color-orange-500` 16% / `--color-orange-600`   | `--color-orange-400` 16% / `--color-orange-300`   |
+| `-violet` | `--color-violet-500` 16% / `--color-violet-600`   | `--color-violet-400` 16% / `--color-violet-300`   |
+
+**深色模式（强制）**：卡片容器 → `surface-card` 底 + `--color-border-default`；label/value → `--color-text-secondary/primary`；图标底 → 400 级 16%，文字 → 300 级。**全部四态必须覆盖**（容器/图标底/文字色/label+value）。
+
+**禁止**：
+
+- 胶囊形卡片（50px 圆角）、纯白硬编码底（`#ffffff`）、裸 hex 文字色（`#202124` 等）。
+- 图标上硬编码 `text-purple-500` 之类的工具类（语义色由类名控制，与底色错配即违规）。
+- 只适配浅色，深色漏配。
+- 数字不带 `tabular-nums`。
+
 ## 4. 布局、间距和圆角
 
 ### 4.1 页面容器
@@ -348,13 +382,13 @@ PC 端常规结构：
 
 ### 4.2 圆角
 
-| 元素 | 圆角 |
-| --- | --- |
-| 工作台面板 / 表单工作区 | **≤ 8px** |
+| 元素                            | 圆角                              |
+| ------------------------------- | --------------------------------- |
+| 工作台面板 / 表单工作区         | **≤ 8px**                         |
 | Welcome banner / 模块总览入口卡 | **12–16px**（不得复制到工具面板） |
-| 表单输入 | `8px` 到 `12px` |
-| Tag / pill | `999px` |
-| 图标容器 | `8px` 到 `12px` |
+| 表单输入                        | `8px` 到 `12px`                   |
+| Tag / pill                      | `999px`                           |
+| 图标容器                        | `8px` 到 `12px`                   |
 
 不要在同一页面混用过多圆角风格。工具页卡片优先克制，不使用过大的圆角；总览入口卡的大圆角不得套用到工作台面板。
 
@@ -378,25 +412,25 @@ PC 端常规结构：
 
 间距使用 4px 倍数系统的数字 token（定义于 `variables.generated.css`，语义别名见 `variables.css`）：
 
-| Token | 值 | 用途 |
-| --- | --- | --- |
-| `--spacing-1` | 4px | 图标与文字间隙、紧凑型内边距 |
-| `--spacing-2` | 8px | 控件内 padding、内容区基本步进（§4.1 按 8px 递进） |
-| `--spacing-3` | 12px | 表单控件之间、标签与输入框间隙 |
-| `--spacing-4` | 16px | 卡内 padding、输入框内边距 |
-| `--spacing-6` | 24px | 卡片之间（§4.1 卡片间距 24px 左右） |
-| `--spacing-8` | 32px | 页面大区块分隔（`--section-gap` 默认 32px） |
+| Token         | 值   | 用途                                               |
+| ------------- | ---- | -------------------------------------------------- |
+| `--spacing-1` | 4px  | 图标与文字间隙、紧凑型内边距                       |
+| `--spacing-2` | 8px  | 控件内 padding、内容区基本步进（§4.1 按 8px 递进） |
+| `--spacing-3` | 12px | 表单控件之间、标签与输入框间隙                     |
+| `--spacing-4` | 16px | 卡内 padding、输入框内边距                         |
+| `--spacing-6` | 24px | 卡片之间（§4.1 卡片间距 24px 左右）                |
+| `--spacing-8` | 32px | 页面大区块分隔（`--section-gap` 默认 32px）        |
 
 语义别名与数字 token 一一对应：`--spacing-xs`(8px) / `--spacing-sm`(12px) / `--spacing-md`(16px) / `--spacing-lg`(24px) / `--spacing-xl`(32px)。页面与组件优先用语义名，避免散落裸像素值。
 
 ### 4.5 响应式与断点
 
-| 视口 | 布局约定 |
-| --- | --- |
-| ≥ 1440px | 标准主工作台：默认宽屏布局（`BREAKPOINTS['2xl']`，design-tokens.ts） |
-| 768–1439px | 侧栏压缩态、banner 压缩规格（§3.5 PC 压缩态：46px 图标容器 / 19px 图标） |
-| ≤ 768px | 单列布局；双字段并排表单按 [组件开发规范](./COMPONENT_GUIDELINES.md) §4.3 折行单列 |
-| ≤ 390px | 触控目标 40–44px 复核（对应 `BREAKPOINTS.xs` 375px 附近的手持宽度） |
+| 视口       | 布局约定                                                                           |
+| ---------- | ---------------------------------------------------------------------------------- |
+| ≥ 1440px   | 标准主工作台：默认宽屏布局（`BREAKPOINTS['2xl']`，design-tokens.ts）               |
+| 768–1439px | 侧栏压缩态、banner 压缩规格（§3.5 PC 压缩态：46px 图标容器 / 19px 图标）           |
+| ≤ 768px    | 单列布局；双字段并排表单按 [组件开发规范](./COMPONENT_GUIDELINES.md) §4.3 折行单列 |
+| ≤ 390px    | 触控目标 40–44px 复核（对应 `BREAKPOINTS.xs` 375px 附近的手持宽度）                |
 
 实现注记：banner PC 压缩态实际自 `@media (min-width: 769px)` 起生效且无上界（`welcome-banner.css`），侧栏在 769–1024px 收窄至 220px（`container.css`），页面 gutter 在 ≥ 1536px 加宽（`variables.css`）。上表的 1440px 分段为规范层约定，落地时以实际媒体查询为准。上表 768px 是**布局级**断点；表单内双字段折行按 [组件开发规范](./COMPONENT_GUIDELINES.md) §4.3 的 **≤520px 表单级**断点执行，两者不冲突。
 
@@ -408,18 +442,18 @@ PC 端常规结构：
 
 字号、字重、行高引用 `design-tokens.ts` 的 `FONT_SIZE` / `FONT_WEIGHT` / `LINE_HEIGHT`。下表为角色总览，banner 与页面标题细则以 §3.3 / §5.1 为准。
 
-| Role | 应用 | 字号 / 字重 / 行高 | 说明 |
-| --- | --- | --- | --- |
-| Display | 模块总览 hero、品牌性大标题 | `xl`(20px)–`2xl`(24px) / `extrabold`(800) / `tight`(1.25) | 具体以 §3.3 总览/强 hero 规格（22px / 800 / 1.3）为准；仅首屏强层级，不进普通工具页（§1.2） |
-| Page title | 页面主标题 `h1.wb-title` | `xl`(20px) / `bold`(700) / `snug`(1.375) | 与 §3.3 banner Title 一致 |
-| Section title | 页面主要 section `h2` | `lg`(18px) / `semibold`(600) / `snug`(1.375) | 见 §5.1 |
-| Card title | 卡片内部标题 `h3` | `base`(14px)–`lg`(18px) / `semibold`(600) / `normal`(1.5) | 工具页卡片标题 14–18px（§3.3） |
-| Body | 正文 | `base`(14px) / `regular`(400) / `normal`(1.5)–`relaxed`(1.625) | token 最高 1.625；个别长文段落可放宽至 1.7（§5.2） |
-| Caption | 说明、脚注 | `sm`(13px) / `regular`(400) / `normal`(1.5) | |
-| Helper | 表单辅助提示 | `sm`(13px) / `regular`(400) / `normal`(1.5) | |
-| Label | 表单 label、表格表头 | `sm`(13px) / `medium`(500) / `normal`(1.5) | |
-| 标签 | `wb-tag` 胶囊标签 | `xs`(12px) / `medium`(500) | 最小高度 28px（§3.6） |
-| Numeric | 表格、数据区数字 | `base`(14px) 或 `sm`(13px) / `regular`(400) / `normal`(1.5) | 用 `font-variant-numeric: tabular-nums` 保持数字对齐 |
+| Role          | 应用                        | 字号 / 字重 / 行高                                             | 说明                                                                                        |
+| ------------- | --------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Display       | 模块总览 hero、品牌性大标题 | `xl`(20px)–`2xl`(24px) / `extrabold`(800) / `tight`(1.25)      | 具体以 §3.3 总览/强 hero 规格（22px / 800 / 1.3）为准；仅首屏强层级，不进普通工具页（§1.2） |
+| Page title    | 页面主标题 `h1.wb-title`    | `xl`(20px) / `bold`(700) / `snug`(1.375)                       | 与 §3.3 banner Title 一致                                                                   |
+| Section title | 页面主要 section `h2`       | `lg`(18px) / `semibold`(600) / `snug`(1.375)                   | 见 §5.1                                                                                     |
+| Card title    | 卡片内部标题 `h3`           | `base`(14px)–`lg`(18px) / `semibold`(600) / `normal`(1.5)      | 工具页卡片标题 14–18px（§3.3）                                                              |
+| Body          | 正文                        | `base`(14px) / `regular`(400) / `normal`(1.5)–`relaxed`(1.625) | token 最高 1.625；个别长文段落可放宽至 1.7（§5.2）                                          |
+| Caption       | 说明、脚注                  | `sm`(13px) / `regular`(400) / `normal`(1.5)                    |                                                                                             |
+| Helper        | 表单辅助提示                | `sm`(13px) / `regular`(400) / `normal`(1.5)                    |                                                                                             |
+| Label         | 表单 label、表格表头        | `sm`(13px) / `medium`(500) / `normal`(1.5)                     |                                                                                             |
+| 标签          | `wb-tag` 胶囊标签           | `xs`(12px) / `medium`(500)                                     | 最小高度 28px（§3.6）                                                                       |
+| Numeric       | 表格、数据区数字            | `base`(14px) 或 `sm`(13px) / `regular`(400) / `normal`(1.5)    | 用 `font-variant-numeric: tabular-nums` 保持数字对齐                                        |
 
 约束：
 
@@ -554,14 +588,14 @@ Deep Chat（`src/modules/app_center/views/playground/deep-chat/`）是工作台 
 
 #### 品牌色（Terracotta）
 
-| Token / 用途 | 值 |
-| --- | --- |
-| 主色 `--deep-chat-accent` | `#a85f3f`（rgb `168, 95, 63`） |
-| Hover `--deep-chat-accent-hover` | `#8f4f33` |
-| Active `--deep-chat-accent-active` | `#6f3925` |
-| Soft 底 `--deep-chat-accent-soft` | `#faf3ee` |
-| 画布底 `--deep-chat-bg` | `#fffaf7` |
-| 主文字 `--deep-chat-ink` | `#0f172a` |
+| Token / 用途                       | 值                             |
+| ---------------------------------- | ------------------------------ |
+| 主色 `--deep-chat-accent`          | `#a85f3f`（rgb `168, 95, 63`） |
+| Hover `--deep-chat-accent-hover`   | `#8f4f33`                      |
+| Active `--deep-chat-accent-active` | `#6f3925`                      |
+| Soft 底 `--deep-chat-accent-soft`  | `#faf3ee`                      |
+| 画布底 `--deep-chat-bg`            | `#fffaf7`                      |
+| 主文字 `--deep-chat-ink`           | `#0f172a`                      |
 
 - 主色只用于小面积强调：边框、焦点环、选中态、主操作填充按钮、hover 文字。
 - 工作台背景使用近白奶油渐变，不要整屏偏桃/偏橙染色。
@@ -571,11 +605,11 @@ Deep Chat（`src/modules/app_center/views/playground/deep-chat/`）是工作台 
 
 适用于侧栏「新建会话」「搜索会话」与顶栏「Skill Library」等次级 chrome 按钮。
 
-| 状态 | 背景 | 文字 / 图标 | 描边 |
-| --- | --- | --- | --- |
-| 默认 | `#ffffff` | 黑色 `#0f172a`（`--deep-chat-ink`） | terracotta 低透明度描边 |
-| Hover / Focus | `#ffffff` | terracotta `#8f4f33` | 描边略加重 + 轻阴影 |
-| Active | 同 hover | 同 hover | 可轻微下压 `translateY` |
+| 状态          | 背景      | 文字 / 图标                         | 描边                    |
+| ------------- | --------- | ----------------------------------- | ----------------------- |
+| 默认          | `#ffffff` | 黑色 `#0f172a`（`--deep-chat-ink`） | terracotta 低透明度描边 |
+| Hover / Focus | `#ffffff` | terracotta `#8f4f33`                | 描边略加重 + 轻阴影     |
+| Active        | 同 hover  | 同 hover                            | 可轻微下压 `translateY` |
 
 规则：
 

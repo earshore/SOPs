@@ -732,29 +732,27 @@
 
 /* 修改卡片容器样式 */
 .amzf_stat_item {
-  background: #ffffff;
-  padding: 6px 18px;
-  border-radius: 50px;
-  /* 与搜索框、视图切换按钮保持一致的胶囊形 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 120px;
-  color: var(--color-slate-900);
+  min-width: 132px;
+  min-height: 60px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.22));
+  border-radius: var(--workbench-radius, var(--card-radius, 8px));
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 72%, transparent);
+  box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.42);
 }
 
 .amzf_stat_icon {
   width: 28px;
   height: 28px;
   font-size: 1rem;
-  border-radius: 50%;
-  /* 胶囊容器内配圆形图标 */
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03);
 }
 
 .amzf_stat_icon i {
@@ -779,30 +777,51 @@
 }
 
 .amzf_stat_icon.amzf_blue {
-  background: rgba(66, 133, 244, 0.15);
+  background: color-mix(in srgb, var(--color-blue-500, #3b82f6) 16%, var(--surface-panel, #ffffff));
+}
+
+.amzf_stat_icon.amzf_blue i {
+  color: var(--color-blue-600, #2563eb);
 }
 
 .amzf_stat_icon.amzf_green {
-  background: rgba(52, 168, 83, 0.15);
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 16%,
+    var(--surface-panel, #ffffff)
+  );
+}
+
+.amzf_stat_icon.amzf_green i {
+  color: var(--color-emerald-600, #059669);
 }
 
 .amzf_stat_icon.amzf_orange {
-  background: rgba(251, 188, 4, 0.15);
+  background: color-mix(
+    in srgb,
+    var(--color-orange-500, #f97316) 16%,
+    var(--surface-panel, #ffffff)
+  );
 }
 
-/* 3. 数字：强制深色，加粗 */
+.amzf_stat_icon.amzf_orange i {
+  color: var(--color-orange-600, #ea580c);
+}
+
+/* 3. 数字：主文字色，加粗，数字等宽 */
 .amzf_stat_value {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #202124;
-  line-height: 1.15;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text-primary, #0f172a);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
-/* 4. 标签文字：强制灰色 */
+/* 4. 标签文字：次要色 */
 .amzf_stat_label {
-  font-size: 0.7rem;
-  color: #5f6368;
-  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #475569);
+  font-weight: 700;
 }
 
 /* Timeline View */
@@ -1628,7 +1647,55 @@
 
 .dark .amzf_stat_item,
 [data-color-mode-resolved='dark'] .amzf_stat_item {
-  background: var(--surface-card);
-  color: var(--color-text-primary);
-  box-shadow: var(--shadow-card, 0 4px 12px rgba(0, 0, 0, 0.4));
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  background: color-mix(in srgb, var(--surface-card, #1e293b) 72%, transparent);
+  box-shadow: 0 10px 24px -22px rgba(0, 0, 0, 0.72);
+}
+
+.dark .amzf_stat_value,
+[data-color-mode-resolved='dark'] .amzf_stat_value {
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.dark .amzf_stat_label,
+[data-color-mode-resolved='dark'] .amzf_stat_label {
+  color: var(--color-text-secondary, #cbd5e1);
+}
+
+.dark .amzf_stat_icon.amzf_blue,
+[data-color-mode-resolved='dark'] .amzf_stat_icon.amzf_blue {
+  background: color-mix(in srgb, var(--color-blue-400, #60a5fa) 16%, var(--surface-card, #1e293b));
+}
+
+.dark .amzf_stat_icon.amzf_blue i,
+[data-color-mode-resolved='dark'] .amzf_stat_icon.amzf_blue i {
+  color: var(--color-blue-300, #93c5fd);
+}
+
+.dark .amzf_stat_icon.amzf_green,
+[data-color-mode-resolved='dark'] .amzf_stat_icon.amzf_green {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-400, #34d399) 16%,
+    var(--surface-card, #1e293b)
+  );
+}
+
+.dark .amzf_stat_icon.amzf_green i,
+[data-color-mode-resolved='dark'] .amzf_stat_icon.amzf_green i {
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
+.dark .amzf_stat_icon.amzf_orange,
+[data-color-mode-resolved='dark'] .amzf_stat_icon.amzf_orange {
+  background: color-mix(
+    in srgb,
+    var(--color-orange-400, #fb923c) 16%,
+    var(--surface-card, #1e293b)
+  );
+}
+
+.dark .amzf_stat_icon.amzf_orange i,
+[data-color-mode-resolved='dark'] .amzf_stat_icon.amzf_orange i {
+  color: var(--color-orange-300, #fdba74);
 }

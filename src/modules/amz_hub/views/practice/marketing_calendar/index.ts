@@ -752,21 +752,21 @@ class MarketingCalendarModule extends BaseModule {
       container,
       `
             <div class="amzf_stat_item">
-                <div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline text-purple-500"></i></div>
+                <div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline"></i></div>
                 <div>
                     <div class="amzf_stat_value">${escapeHtml(filtered.length.toString())}</div>
                     <div class="amzf_stat_label">营销节点</div>
                 </div>
             </div>
             <div class="amzf_stat_item">
-                <div class="amzf_stat_icon amzf_green"><i class="fas fa-gifts text-purple-500"></i></div>
+                <div class="amzf_stat_icon amzf_green"><i class="fas fa-gifts"></i></div>
                 <div>
                     <div class="amzf_stat_value">${escapeHtml(holidays.toString())}</div>
                     <div class="amzf_stat_label">重要节日</div>
                 </div>
             </div>
             <div class="amzf_stat_item">
-                <div class="amzf_stat_icon amzf_orange"><i class="fas fa-shopping-cart text-purple-500"></i></div>
+                <div class="amzf_stat_icon amzf_orange"><i class="fas fa-shopping-cart"></i></div>
                 <div>
                     <div class="amzf_stat_value">${escapeHtml(shopping.toString())}</div>
                     <div class="amzf_stat_label">电商大促</div>
