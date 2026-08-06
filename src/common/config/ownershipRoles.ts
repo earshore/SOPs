@@ -125,11 +125,11 @@ export const OWNERSHIP_ROLES: Readonly<Record<OwnershipRoleId, OwnershipRoleDefi
   },
   'role-keywords': {
     id: 'role-keywords',
-    palette: 'fuchsia',
-    menuSource: 'modules.keyword_hunter.themeColor + appCategories.keyword_hunter.color: fuchsia',
-    wbThemeClasses: ['wb-theme-fuchsia'],
+    palette: 'cyan',
+    menuSource: 'modules.keyword_hunter.themeColor + appCategories.keyword_hunter.color: cyan',
+    wbThemeClasses: ['wb-theme-cyan'],
     notes:
-      'Unified fuchsia since 2026-08-06 (was menu rose vs banner fuchsia dual-track); distinct from app_center rose.',
+      'Unified cyan since 2026-08-06 (was fuchsia, earlier menu rose vs banner fuchsia dual-track); distinct from app_center rose, matches business_scenarios blue.',
   },
   'role-ppc': {
     id: 'role-ppc',

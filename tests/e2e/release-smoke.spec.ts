@@ -308,26 +308,26 @@ async function expectDocumentThemeState(
 
 /**
  * Layer B ownership chrome must not be rewritten by Appearance (Layer A).
- * Keyword Hunter live templates use wb-theme-fuchsia (menuConfig color: fuchsia).
+ * Keyword Hunter live templates use wb-theme-cyan (menuConfig color: cyan).
  * Prefer banner class; fall back to sidebar theme class when banner is hidden.
  */
 async function expectKeywordHunterOwnershipChrome(page: Page): Promise<void> {
-  const ownershipBanner = page.locator('#keyword-hunter-module-input .wb-container.wb-theme-fuchsia');
-  const ownershipSidebar = page.locator('.sidebar-shell.sidebar-theme-fuchsia');
+  const ownershipBanner = page.locator('#keyword-hunter-module-input .wb-container.wb-theme-cyan');
+  const ownershipSidebar = page.locator('.sidebar-shell.sidebar-theme-cyan');
 
   if ((await ownershipBanner.count()) > 0 && (await ownershipBanner.first().isVisible())) {
-    await expect(ownershipBanner.first()).toHaveClass(/\bwb-theme-fuchsia\b/);
+    await expect(ownershipBanner.first()).toHaveClass(/\bwb-theme-cyan\b/);
     return;
   }
 
   if ((await ownershipSidebar.count()) > 0) {
-    await expect(ownershipSidebar.first()).toHaveClass(/\bsidebar-theme-fuchsia\b/);
+    await expect(ownershipSidebar.first()).toHaveClass(/\bsidebar-theme-cyan\b/);
     return;
   }
 
   test.skip(
     true,
-    'Keyword Hunter ownership chrome (wb-theme-fuchsia / sidebar-theme-fuchsia) not detectable in DOM'
+    'Keyword Hunter ownership chrome (wb-theme-cyan / sidebar-theme-cyan) not detectable in DOM'
   );
 }
 
@@ -1209,8 +1209,8 @@ test.describe('release candidate smoke', () => {
     });
 
     // R4 / R7-C5: Appearance must not rewrite module ownership chrome.
-    // Persist minimal, leave settings, open Keyword Hunter, assert wb-theme-fuchsia
-    // (live template class; unified fuchsia since 2026-08-06).
+    // Persist minimal, leave settings, open Keyword Hunter, assert wb-theme-cyan
+    // (live template class; unified cyan since 2026-08-06).
     await closeGlobalSettings(page);
     const keywordHunterRoute = CORE_ROUTES.find(route => route.routeId === 'keyword_hunter_input');
     if (!keywordHunterRoute) {

@@ -70,7 +70,7 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | R1 | **Home** | `/#/home` · `#panel-home` | 是 | slate / 首页 splash；非工具 banner |
 | R2 | **App Center** | `/#/app-center` · `.app-overview-container` | 是 | 总览 purple 系入口，非子目录 banner |
 | R3 | **Master Analysis** | `/#/app-center/master-analysis/scraper` 或 `…/ai-analysis` | 是（scraper / ai-analysis） | indigo · `wb-theme-indigo` |
-| R4 | **Keyword Hunter** | `/#/app-center/keyword-hunter/input` | 是（+ ownership class） | **fuchsia** · 活模板 `wb-theme-fuchsia`（2026-08-06 由 rose 统一收敛，区分工作台） |
+| R4 | **Keyword Hunter** | `/#/app-center/keyword-hunter/input` | 是（+ ownership class） | **cyan** · 活模板 `wb-theme-cyan`（2026-08-06 由 rose 统一收敛，区分工作台） |
 | R5 | **PPC Search Terms** | `/#/app-center/ppc-tools/ppc-search-terms` | 是 | emerald/teal · PPC hero 归属 |
 | R6 | **Deep Chat** | `/#/app-center/playground/deep-chat` · `#deep-chat-view` | 是（路由/draft；**非** terracotta 色差） | terracotta 业务色；**非** Appearance primary |
 | R7 | **Settings Appearance** | 全局设置 → Appearance 面板 | 是（section + theme/color-mode 双轴 smoke） | 预览色与 apply 一致（色块仍人工） |
@@ -137,8 +137,8 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | ID | 检查项 | Must | E0/E1 | 备注 |
 | --- | --- | --- | --- | --- |
 | R4-C1 | Token 化主按钮 / focus | Change* | * | 主 CTA 样本已迁 primary；色差仍人工 |
-| R4-C2 | Banner `wb-theme-fuchsia`（活模板） | NOT | 不变 | Blocker；smoke **Automated** class 在 minimal / dark×minimal 后仍在 |
-| R4-C3 | 侧栏 Keyword Hunter 目录色 | NOT | 不变 | smoke 可回退 `sidebar-theme-fuchsia`；扫读人工 |
+| R4-C2 | Banner `wb-theme-cyan`（活模板） | NOT | 不变 | Blocker；smoke **Automated** class 在 minimal / dark×minimal 后仍在 |
+| R4-C3 | 侧栏 Keyword Hunter 目录色 | NOT | 不变 | smoke 可回退 `sidebar-theme-cyan`；扫读人工 |
 | R4-I1 | 模块 chrome `blue-*` | Info | D6 | | |
 
 #### R5 PPC Search Terms
@@ -370,7 +370,7 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 | 跨路由 `app-theme` 保持 | R7-C6 | **Partial automated** | 现网 | 硬刷新 F5 |
 | computed `--color-primary` | R7-C3 | unit **Automated**；e2e 无 | 可选加厚 | 视觉 |
 | 主按钮 bg 对比 default/minimal | 壳层 Change | 未做 | Phase 3 / D12 | 色差 |
-| Banner class `wb-theme-*` | R4-C2（KH rose） | **Automated** KH；其它路由无 | 现网抽检 | 质感 |
+| Banner class `wb-theme-*` | R4-C2（KH cyan） | **Automated** KH；其它路由无 | 现网抽检 | 质感 |
 | 侧栏目录色 class | R4-C3 | **Partial** KH 回退 | 现网 | 全站扫读 |
 | Deep Chat accent token | R6-C2 | **未做** e2e | 可选 | **手动** terracotta |
 | Skills CTA sample | R10-C1 | **未做** e2e | 可选 | 可选肉眼 |
@@ -391,7 +391,7 @@ Appearance **只保证 token 化全局壳层**（主按钮 / 链接强调 / focu
 ### 9.3 建议新增用例名（未做 / 加厚 · 不在本文实现）
 
 1. `appearance minimal persists after hard reload`（F5）  
-2. ~~`appearance switch does not change wb-theme on keyword hunter`~~ → **已有**（fuchsia class）  
+2. ~~`appearance switch does not change wb-theme on keyword hunter`~~ → **已有**（cyan class）  
 3. `deep chat accent remains terracotta after appearance change`（computed）  
 4. `focus ring token follows minimal slate`（selector 稳定后）  
 5. ~~`color mode dark coexists with appearance minimal`~~ → **已有**（KH smoke）  

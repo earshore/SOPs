@@ -2008,16 +2008,6 @@
   --color-border-light: color-mix(in srgb, var(--color-rose-500, #f43f5e) 28%, transparent);
 }
 
-.app-card-fuchsia {
-  --color-accent: var(--color-fuchsia-600);
-  --color-bg-selected: color-mix(
-    in srgb,
-    var(--color-fuchsia-500, #d946ef) 10%,
-    var(--surface-card, #ffffff)
-  );
-  --color-border-light: color-mix(in srgb, var(--color-fuchsia-500, #d946ef) 28%, transparent);
-}
-
 .app-card-emerald {
   --color-accent: var(--color-emerald-600);
   --color-bg-selected: color-mix(
@@ -2639,14 +2629,14 @@
 
 .dark
   .app-overview-container
-  :is(.app-card-fuchsia, .app-overview-card[data-category='keyword_hunter']),
+  :is(.app-card-cyan, .app-overview-card[data-category='keyword_hunter']),
 [data-color-mode-resolved='dark']
   .app-overview-container
-  :is(.app-card-fuchsia, .app-overview-card[data-category='keyword_hunter']),
+  :is(.app-card-cyan, .app-overview-card[data-category='keyword_hunter']),
 [data-theme='dark']
   .app-overview-container
-  :is(.app-card-fuchsia, .app-overview-card[data-category='keyword_hunter']) {
-  --color-accent: var(--color-fuchsia-300, #f0abfc);
+  :is(.app-card-cyan, .app-overview-card[data-category='keyword_hunter']) {
+  --color-accent: var(--color-cyan-300, #67e8f9);
 }
 
 .dark .app-overview-container .app-card-emerald,

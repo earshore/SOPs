@@ -10,7 +10,7 @@ describe('ColorContext', () => {
 
   it('infers module ownership color from menuConfig themeColor', () => {
     expect(ColorContext.inferColorFromModule('sops')).toBe('indigo');
-    expect(ColorContext.inferColorFromModule('keyword_hunter')).toBe('fuchsia');
+    expect(ColorContext.inferColorFromModule('keyword_hunter')).toBe('cyan');
     expect(ColorContext.inferColorFromModule('home')).toBe('slate');
     expect(ColorContext.inferColorFromModule('ppc_tools')).toBe('emerald');
   });

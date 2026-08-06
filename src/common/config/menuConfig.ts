@@ -172,7 +172,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0 Pro',
       icon: 'fas fa-search',
       description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。',
-      themeColor: 'fuchsia', // ✅ 品红系 - 与工作台 rose 主色区分
+      themeColor: 'cyan', // ✅ 青蓝色系 - 与示例业务场景同款蓝色，区分工作台 rose
     },
 
     // PPC Tools 模块配置
@@ -336,7 +336,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'keyword_hunter',
       label: 'Keyword Hunter',
       icon: 'fas fa-search',
-      color: 'fuchsia', // 与模块主题色一致（品红系，区分工作台 rose）
+      color: 'cyan', // 与模块主题色一致（青蓝色系，区分工作台 rose）
       order: 3,
       version: 'v1.0 Pro',
       description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。',

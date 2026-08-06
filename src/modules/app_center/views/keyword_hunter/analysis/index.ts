@@ -1373,7 +1373,7 @@ class KeywordHunterAnalysisModule extends BaseModule {
       // Workbench section icon — no marketing scale-110 (D4).
       const reportIcon = container.querySelector('.keyword-hunter-analysis-report-icon');
       if (reportIcon) {
-        reportIcon.className = `keyword-hunter-analysis-report-icon ${getWorkbenchIconContainerClasses('fuchsia', 'sm')} text-white`;
+        reportIcon.className = `keyword-hunter-analysis-report-icon ${getWorkbenchIconContainerClasses('cyan', 'sm')} text-white`;
       }
     } catch (error) {
       if (!this.isCurrentMount(mountSignal)) return;

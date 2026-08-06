@@ -62,7 +62,7 @@ Role → 默认 palette（menu / colorSchemes）→ 兼容 `wb-theme-*` class；
 | `role-apps-overview` | 应用中心总览 | `modules.app_center.themeColor: rose` | `rose` | 总览可用 `wb-theme-rose` 或 overview 局部 token（`--app-overview-*`） | 宪法旧文曾写 `purple`；**以 menuConfig `rose` 为准**。总览可走 App Center overview 局部 token，不发明新 `wb-theme-*`。 |
 | `role-analysis` | Master Analysis 工作台 | `modules.master_analysis.themeColor` + `appCategories.master_analysis.color: indigo` | `indigo` | `wb-theme-indigo`；遗留 `wb-theme-analytics`（blue 系） | 新页用 `indigo`。`wb-theme-analytics` 为历史 scraper/分析页 blue 变体，**仅兼容，禁止新开**；Phase 4/5 可逐步归并到 `role-analysis`。 |
 | `role-playground` | Playground / Deep Chat | 配置：`themeColor` / `appCategories.playground.color: orange` | 配置 `orange`；实现 terracotta 等 | **不**以 `wb-theme-orange` 为唯一 banner class；实现可见 `wb-theme-supply`、隐藏 banner、模块 CSS | **配置 vs 实现双层例外（硬登记）**。归属**不是** indigo / cyan。本轮**不新增** `wb-theme-orange`。重写 Deep Chat 色 = 独立需求，禁止夹带 Phase 4。 |
-| `role-keywords` | Keyword Hunter | 配置：`modules.keyword_hunter.themeColor` + `appCategories.keyword_hunter.color: fuchsia`（2026-08-06 起） | `fuchsia` | `wb-theme-fuchsia` / `sidebar-theme-fuchsia` | 曾存在 menu rose vs banner fuchsia 双轨，2026-08-06 已收敛为 fuchsia（区分工作台 rose）。禁止回退 rose。 |
+| `role-keywords` | Keyword Hunter | 配置：`modules.keyword_hunter.themeColor` + `appCategories.keyword_hunter.color: cyan`（2026-08-06 起） | `cyan` | `wb-theme-cyan` / `sidebar-theme-cyan` | 曾存在 menu rose vs banner cyan 双轨，2026-08-06 已收敛为 cyan（示例业务场景同款蓝色，区分工作台 rose）。禁止回退 rose。 |
 | `role-ppc` | PPC Tools | `modules.ppc_tools.themeColor` + `appCategories.ppc_tools.color: emerald` | `emerald` | 无强制单一 `wb-theme-*`；自定义 **PPC hero** + `--ppc-*` 局部 token | 自定义 hero 须受控（登记局部 token）；主 CTA 尽量语义化；**不**发明 `wb-theme-ppc` 除非走 role 扩表流程。emerald 与 `role-ops-growth` 同 palette、不同 role（业务域不同）。 |
 | `role-hub-overview` | Amazon 智库总览 | `modules.amz_hub.themeColor: orange` | `orange` | 总览入口色（实现可局部）；**不**默认等于 `role-playground` | 总览可与子分类 role 不同；子页必须用 hub 子 role，不得长期只绑 overview 色。 |
 | `role-hub-knowledge` | Amazon 知识早知道 | `hubCategories.knowledge.color: indigo` | `indigo` | `wb-theme-indigo` | 与 `role-analysis` 同 palette；靠 role id / 导航上下文区分，不合并 role。 |
@@ -83,7 +83,7 @@ Role → 默认 palette（menu / colorSchemes）→ 兼容 `wb-theme-*` class；
 | --- | --- | --- |
 | `wb-theme-analytics` | `role-analysis` | blue 历史变体；禁止新开 |
 | `wb-theme-teal` | `role-ops-service` | `service` 别名 |
-| `wb-theme-fuchsia` | `role-keywords` | 与 menu `rose` 双轨期间兼容 |
+| `wb-theme-cyan` | `role-keywords` | 与 menu `rose` 双轨期间兼容 |
 | `wb-theme-hub-promo-tools` | `role-hub-practice` 或 `role-hub-advanced`（按页面所属 category） | 促销工具页专用变体；**不**升为独立 role，除非 category 拆分 |
 | `wb-theme-hub-promo-activities` | 同上 | 促销活动页专用变体 |
 | `wb-theme-more-agents` | `role-more-llm` | agents/技能探索变体 |
@@ -94,7 +94,7 @@ Role → 默认 palette（menu / colorSchemes）→ 兼容 `wb-theme-*` class；
 
 `welcome-banner.css` 当前主题 class（便于对照，**不是**新 role 授权）：
 
-`analytics` · `neutral` · `cyan` · `fuchsia` · `growth` · `safety` · `supply` · `teal`/`service` · `indigo` · `violet` · `rose` · `hub-promo-tools` · `hub-promo-activities` · `more-agents`
+`analytics` · `neutral` · `cyan` · `cyan` · `growth` · `safety` · `supply` · `teal`/`service` · `indigo` · `violet` · `rose` · `hub-promo-tools` · `hub-promo-activities` · `more-agents`
 
 ---
 
@@ -150,7 +150,7 @@ Appearance **可以**动：`--color-primary*`、`--color-focus-ring`、token 化
 
 ### 5.1 Role 表落地
 
-- [ ] 将本文 §2.2 标为 Phase 4 MO 输入；与路线图 §3.4  diff 一次并收口漂移（keywords rose/fuchsia、hub-advanced rose/violet、more-llm violet vs 旧 teal、overview indigo/rose）。  
+- [ ] 将本文 §2.2 标为 Phase 4 MO 输入；与路线图 §3.4  diff 一次并收口漂移（keywords rose/cyan、hub-advanced rose/violet、more-llm violet vs 旧 teal、overview indigo/rose）。  
 - [ ] （可选）模板根或 banner 容器增加 `data-ownership-role="<role id>"`，与 class 双写过渡。  
 - [ ] 文档：`VISUAL_DESIGN_GUIDELINES` §2.2 表增加 role id 列（另开 PR，非本预备必做）。  
 - [ ] 登记遗留 class → role 挂靠（§2.3）到 MO 看板。
@@ -174,7 +174,7 @@ Appearance **可以**动：`--color-primary*`、`--color-focus-ring`、token 化
 - [x] **代码 SSOT scaffold**：`src/common/config/ownershipRoles.ts`（`OwnershipRoleId` × 19、`OWNERSHIP_ROLES`、`getPaletteForRole` / `getOwnershipRoleForModule`；**无** Appearance 写入、**无** 全站 `data-ownership-role` 绑定）。  
 - [ ] 生成「role → 首选 class」常量表的全站消费 / DOM 双写（仍 Phase 4 任务）。  
 - [ ] Playground：维持配置 orange / 实现 terracotta+例外；**不**加 `wb-theme-orange`。  
-- [ ] Keywords：定收敛目标（rose 或 fuchsia 二选一产品拍板）→ 改 menu 或改 banner 的单向迁移 PR。  
+- [ ] Keywords：定收敛目标（rose 或 cyan 二选一产品拍板）→ 改 menu 或改 banner 的单向迁移 PR。  
 - [ ] Hub advanced / More llm：对齐 menu 与 banner 的单向迁移 PR。  
 - [ ] 禁止清单写入 lint/文档门：新 HTML 不得出现未在表中的 `wb-theme-*`（可选 CI grep）。  
 
@@ -201,7 +201,7 @@ Appearance **可以**动：`--color-primary*`、`--color-focus-ring`、token 化
 | --- | --- | --- | --- |
 | SOPs 总览 | `indigo` | 曾写 `blue` | 文档改 indigo；role=`role-sops-overview` |
 | 应用中心总览 | `rose` | 曾写 `purple` | 文档改 rose |
-| Keyword Hunter | `fuchsia` | 曾为 `rose` + 文档 `fuchsia` 双轨 | **2026-08-06 已统一 fuchsia**（区分工作台 rose） |
+| Keyword Hunter | `cyan` | 曾为 `rose` + 文档 `cyan` 双轨 | **2026-08-06 已统一 cyan**（区分工作台 rose） |
 | Hub 运营提升 | `rose` | 常写 `violet` + `wb-theme-violet` | 同上 |
 | More 大模型探索 | `violet` | 曾写 `teal` + `wb-theme-teal` | 文档改 violet；role=`role-more-llm` |
 | Playground | 配置 `orange` | 实现 terracotta / supply / hidden | **保持双层例外** |

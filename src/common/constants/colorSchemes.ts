@@ -471,7 +471,7 @@ export const SOP_COLORS = {
  */
 export const APP_COLORS = {
   masterPrompt: 'blue' as ColorSchemeName,
-  keywordHunter: 'fuchsia' as ColorSchemeName,
+  keywordHunter: 'cyan' as ColorSchemeName,
   dataAnalysis: 'emerald' as ColorSchemeName,
 } as const;
 
