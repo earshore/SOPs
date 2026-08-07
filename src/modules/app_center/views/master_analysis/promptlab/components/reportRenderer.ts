@@ -228,7 +228,7 @@ const TARGET_CONFIG = Object.fromEntries(
   analysisTargets.map(({ id, name, icon, color }) => [id, { title: name, iconClass: icon, color }])
 ) as Record<string, TargetConfig>;
 
-const DEFAULT_TARGET_ICON_TONE_CLASS = 'bg-blue-50 text-blue-600 border-blue-100';
+const DEFAULT_TARGET_ICON_TONE_CLASS = 'bg-primary-100 text-primary-600 border-primary-100';
 
 const TARGET_ICON_TONE_CLASSES: Record<string, string> = {
   amber: 'bg-amber-50 text-amber-600 border-amber-100',
@@ -434,7 +434,7 @@ function renderModuleSubItems(
         <div class="flex gap-3">
           <button type="button"
                   @click.stop="selectAllSubItems('${safeTargetId}')"
-                  class="text-xs text-blue-600 hover:underline font-medium">
+                  class="text-xs text-primary-600 hover:underline font-medium">
             全选
           </button>
           <button type="button"
@@ -517,7 +517,7 @@ function renderSubItemContent(options: SubItemContentRenderOptions): string {
         <div class="flex gap-2">
           <button type="button"
                   @click.stop="selectAllContentItems('${safeTargetId}', '${safeKey}')"
-                  class="text-xs text-blue-600 hover:underline">
+                  class="text-xs text-primary-600 hover:underline">
             全选
           </button>
           <button type="button"
@@ -753,7 +753,7 @@ export function renderLegacyFormatModules(
 
     const div = document.createElement('div');
     div.className =
-      'relative flex items-start p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition duration-200';
+      'relative flex items-start p-3 rounded-lg border border-slate-200 bg-white hover:border-primary-100 hover:shadow-sm transition duration-200';
 
     const template = `
       <div class="flex h-5 items-center">

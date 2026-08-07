@@ -150,14 +150,14 @@
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .text-blue-400,
-    .text-blue-500,
-    .text-blue-600,
-    .text-blue-700,
-    .text-indigo-400,
-    .text-indigo-500,
-    .text-indigo-600,
-    .text-indigo-700,
+    .text-primary-400,
+    .text-primary-500,
+    .text-primary-600,
+    .text-primary-700,
+    .text-accent-400,
+    .text-accent-500,
+    .text-accent-600,
+    .text-accent-700,
     .text-purple-400,
     .text-purple-500,
     .text-purple-600,
@@ -171,21 +171,21 @@
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where(.bg-blue-50, .bg-indigo-50, .bg-purple-50, .bg-violet-50, .bg-pink-50) {
+  :where(.bg-primary-100, .bg-accent-100, .bg-purple-50, .bg-violet-50, .bg-pink-50) {
   background-color: var(--ma-accent-soft) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where(.bg-blue-100, .bg-indigo-100, .bg-purple-100, .bg-violet-100, .bg-pink-100) {
+  :where(.bg-purple-100, .bg-violet-100, .bg-pink-100) {
   background-color: var(--ma-accent-tint) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .bg-blue-500,
-    .bg-blue-600,
-    .bg-indigo-500,
-    .bg-indigo-600,
+    .bg-primary-500,
+    .bg-primary-600,
+    .bg-accent-500,
+    .bg-accent-600,
     .bg-purple-500,
     .bg-purple-600,
     .bg-violet-500,
@@ -197,10 +197,8 @@
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .border-blue-100,
-    .border-blue-200,
-    .border-indigo-100,
-    .border-indigo-200,
+    .border-primary-100,
+    .border-accent-100,
     .border-purple-100,
     .border-purple-200,
     .border-violet-100,
@@ -210,16 +208,16 @@
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where(.border-blue-300, .border-indigo-300, .border-purple-300, .border-violet-300) {
+  :where(.border-purple-300, .border-violet-300) {
   border-color: var(--ma-accent-border-hover) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .border-blue-500,
-    .border-blue-600,
-    .border-indigo-500,
-    .border-indigo-600,
+    .border-primary-500,
+    .border-primary-600,
+    .border-accent-500,
+    .border-accent-600,
     .border-purple-500
   ) {
   border-color: var(--ma-accent) !important;
@@ -227,20 +225,20 @@
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .ring-blue-500\/20,
-    .ring-indigo-500\/20,
-    .focus\:ring-indigo-500:focus,
-    .focus\:ring-blue-500:focus
+    .ring-primary-500\/20,
+    .ring-accent-500\/20,
+    .focus\:ring-accent-500:focus,
+    .focus\:ring-primary-500:focus
   ) {
   --tw-ring-color: rgba(var(--ma-accent-rgb), 0.24) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .shadow-blue-100,
-    .shadow-blue-200,
-    .shadow-indigo-100\/60,
-    .shadow-indigo-200,
+    .shadow-primary-100,
+    .shadow-primary-100,
+    .shadow-accent-100\/60,
+    .shadow-accent-100,
     .shadow-purple-200,
     .shadow-pink-600\/50,
     .shadow-pink-700\/40
@@ -251,22 +249,22 @@
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    [class~='bg-blue-50/30'],
-    [class~='bg-blue-50/60'],
-    [class~='bg-blue-50/70'],
-    [class~='bg-indigo-50/40'],
+    [class~='bg-primary-100/30'],
+    [class~='bg-primary-100/60'],
+    [class~='bg-primary-100/70'],
+    [class~='bg-accent-100/40'],
     [class~='bg-purple-50/30']
   ) {
   background-color: rgba(var(--ma-accent-rgb), 0.1) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where([class~='bg-blue-500/5'], [class~='bg-indigo-500/5'], [class~='bg-pink-500/5']) {
+  :where([class~='bg-primary-500/5'], [class~='bg-accent-500/5'], [class~='bg-pink-500/5']) {
   background-color: rgba(var(--ma-accent-rgb), 0.05) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where([class~='bg-blue-500/20'], [class~='bg-pink-300/20'], [class~='bg-pink-500/20']) {
+  :where([class~='bg-primary-500/20'], [class~='bg-pink-300/20'], [class~='bg-pink-500/20']) {
   background-color: rgba(var(--ma-accent-rgb), 0.18) !important;
 }
 
@@ -276,18 +274,18 @@
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where([class~='text-blue-300/50'], [class~='text-pink-300/50']) {
+  :where([class~='text-primary-100/50'], [class~='text-pink-300/50']) {
   color: rgba(var(--ma-accent-rgb), 0.58) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where([class~='text-blue-700/80'], [class~='text-pink-200/60']) {
+  :where([class~='text-primary-700/80'], [class~='text-pink-200/60']) {
   color: rgba(var(--ma-accent-rgb), 0.74) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    [class~='border-blue-500/20'],
+    [class~='border-primary-500/20'],
     [class~='border-pink-400/20'],
     [class~='border-pink-500/20'],
     [class~='border-pink-500/30']
@@ -296,18 +294,22 @@
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where([class~='ring-blue-200/70'], [class~='ring-blue-500/20'], [class~='ring-indigo-500/20']) {
+  :where(
+    [class~='ring-primary-100/70'],
+    [class~='ring-primary-500/20'],
+    [class~='ring-accent-500/20']
+  ) {
   --tw-ring-color: rgba(var(--ma-accent-rgb), 0.24) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    [class~='shadow-blue-500/20'],
-    [class~='shadow-blue-500/30'],
-    [class~='shadow-blue-900/30'],
-    [class~='shadow-indigo-100/60'],
-    [class~='shadow-indigo-200/30'],
-    [class~='shadow-indigo-500/20'],
+    [class~='shadow-primary-500/20'],
+    [class~='shadow-primary-500/30'],
+    [class~='shadow-primary-800/30'],
+    [class~='shadow-accent-100/60'],
+    [class~='shadow-accent-100/30'],
+    [class~='shadow-accent-500/20'],
     [class~='shadow-pink-900/30']
   ) {
   --tw-shadow-color: rgba(var(--ma-accent-rgb), 0.28) !important;
@@ -315,7 +317,7 @@
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where(.from-blue-50, .from-indigo-50, .from-purple-50, .from-violet-50, .from-pink-50) {
+  :where(.from-primary-100, .from-accent-100, .from-purple-50, .from-violet-50, .from-pink-50) {
   --tw-gradient-from: var(--ma-accent-soft) var(--tw-gradient-from-position) !important;
   --tw-gradient-to: rgba(var(--ma-accent-rgb), 0) var(--tw-gradient-to-position) !important;
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
@@ -323,12 +325,12 @@
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .from-blue-400,
-    .from-blue-500,
-    .from-blue-600,
-    .from-indigo-400,
-    .from-indigo-500,
-    .from-indigo-600,
+    .from-primary-400,
+    .from-primary-500,
+    .from-primary-600,
+    .from-accent-400,
+    .from-accent-500,
+    .from-accent-600,
     .from-purple-500,
     .from-purple-600,
     .from-violet-500,
@@ -342,8 +344,8 @@
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .via-blue-500,
-    .via-indigo-500,
+    .via-primary-500,
+    .via-accent-500,
     .via-purple-400,
     .via-purple-500,
     .via-purple-600,
@@ -356,21 +358,28 @@
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where(.to-blue-50, .to-indigo-50, .to-purple-50, .to-violet-50, .to-pink-50, .to-blue-100\/50) {
+  :where(
+    .to-primary-100,
+    .to-accent-100,
+    .to-purple-50,
+    .to-violet-50,
+    .to-pink-50,
+    .to-primary-100\/50
+  ) {
   --tw-gradient-to: var(--ma-accent-soft) var(--tw-gradient-to-position) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  [class~='to-indigo-50/50'] {
+  [class~='to-accent-100/50'] {
   --tw-gradient-to: rgba(var(--ma-accent-rgb), 0.12) var(--tw-gradient-to-position) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .to-blue-500,
-    .to-blue-600,
-    .to-indigo-500,
-    .to-indigo-600,
+    .to-primary-500,
+    .to-primary-600,
+    .to-accent-500,
+    .to-accent-600,
     .to-purple-500,
     .to-violet-500,
     .to-pink-400,
@@ -380,26 +389,20 @@
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where(.to-blue-900, .to-pink-900) {
+  :where(.to-primary-800, .to-pink-900) {
   --tw-gradient-to: var(--ma-accent-dark-surface) var(--tw-gradient-to-position) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where(
-    .hover\:bg-blue-50:hover,
-    .hover\:bg-blue-100:hover,
-    .hover\:bg-indigo-50:hover,
-    .hover\:bg-indigo-100:hover,
-    .hover\:bg-purple-50:hover
-  ) {
+  :where(.hover\:bg-primary-100:hover, .hover\:bg-accent-100:hover, .hover\:bg-purple-50:hover) {
   background-color: var(--ma-accent-soft) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    [class~='hover:bg-blue-50/30']:hover,
-    [class~='hover:bg-blue-50/50']:hover,
-    [class~='hover:bg-indigo-50/40']:hover,
+    [class~='hover:bg-primary-100/30']:hover,
+    [class~='hover:bg-primary-100/50']:hover,
+    [class~='hover:bg-accent-100/40']:hover,
     [class~='hover:bg-violet-50/50']:hover
   ) {
   background-color: rgba(var(--ma-accent-rgb), 0.1) !important;
@@ -407,39 +410,36 @@
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .hover\:bg-blue-600:hover,
-    .hover\:bg-blue-700:hover,
-    .hover\:bg-indigo-600:hover,
-    .hover\:bg-indigo-700:hover
+    .hover\:bg-primary-600:hover,
+    .hover\:bg-primary-700:hover,
+    .hover\:bg-accent-600:hover,
+    .hover\:bg-accent-700:hover
   ) {
   background-color: var(--ma-accent-hover) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .hover\:border-blue-100:hover,
-    .hover\:border-blue-200:hover,
-    .hover\:border-blue-300:hover,
-    .hover\:border-indigo-100:hover,
-    .hover\:border-indigo-200:hover,
-    .hover\:border-indigo-600:hover
+    .hover\:border-primary-100:hover,
+    .hover\:border-accent-100:hover,
+    .hover\:border-accent-600:hover
   ) {
   border-color: var(--ma-accent-border-hover) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   :where(
-    .hover\:text-blue-500:hover,
-    .hover\:text-blue-600:hover,
-    .hover\:text-blue-700:hover,
-    .hover\:text-indigo-700:hover,
+    .hover\:text-primary-500:hover,
+    .hover\:text-primary-600:hover,
+    .hover\:text-primary-700:hover,
+    .hover\:text-accent-700:hover,
     .hover\:text-pink-500:hover
   ) {
   color: var(--ma-accent-hover) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
-  :where([class~='hover:shadow-blue-500/40']:hover, [class~='hover:shadow-pink-600/50']:hover) {
+  :where([class~='hover:shadow-primary-500/40']:hover, [class~='hover:shadow-pink-600/50']:hover) {
   --tw-shadow-color: rgba(var(--ma-accent-rgb), 0.36) !important;
   --tw-shadow: var(--tw-shadow-colored) !important;
 }
@@ -447,35 +447,39 @@
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   .group:hover
   :where(
-    .group-hover\:text-blue-400,
-    .group-hover\:text-blue-500,
-    .group-hover\:text-blue-600,
-    .group-hover\:text-indigo-600
+    .group-hover\:text-primary-400,
+    .group-hover\:text-primary-500,
+    .group-hover\:text-primary-600,
+    .group-hover\:text-accent-600
   ) {
   color: var(--ma-accent) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   .group:hover
-  :where(.group-hover\:bg-blue-50, .group-hover\:bg-blue-100, .group-hover\:bg-indigo-50) {
+  :where(.group-hover\:bg-primary-100, .group-hover\:bg-accent-100) {
   background-color: var(--ma-accent-soft) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   .group:hover
-  :where(.group-hover\:bg-blue-500, .group-hover\:bg-indigo-500) {
+  :where(.group-hover\:bg-primary-500, .group-hover\:bg-accent-500) {
   background-color: var(--ma-accent) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   .group:hover
-  :where(.group-hover\:border-blue-300, .group-hover\:border-indigo-500) {
+  :where(.group-hover\:border-primary-100, .group-hover\:border-accent-500) {
   border-color: var(--ma-accent-border-hover) !important;
 }
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   .group:hover
-  :where(.group-hover\:from-blue-50, .group-hover\:from-blue-500, .group-hover\:from-indigo-500) {
+  :where(
+    .group-hover\:from-primary-100,
+    .group-hover\:from-primary-500,
+    .group-hover\:from-accent-500
+  ) {
   --tw-gradient-from: var(--ma-accent) var(--tw-gradient-from-position) !important;
   --tw-gradient-to: rgba(var(--ma-accent-rgb), 0) var(--tw-gradient-to-position) !important;
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
@@ -483,7 +487,11 @@
 
 :where([x-data='scraperPanel'], [x-data='aiAnalysisPanel'], [x-data='promptlabPanel'])
   .group:hover
-  :where(.group-hover\:to-blue-100\/50, .group-hover\:to-indigo-500, .group-hover\:to-violet-500) {
+  :where(
+    .group-hover\:to-primary-100\/50,
+    .group-hover\:to-accent-500,
+    .group-hover\:to-violet-500
+  ) {
   --tw-gradient-to: var(--ma-accent-light) var(--tw-gradient-to-position) !important;
 }
 
@@ -754,8 +762,8 @@
     + *
     :where(
       [class*='from-slate-900'],
-      [class*='from-blue-'],
-      [class*='from-indigo-'],
+      [class*='from-primary-'],
+      [class*='from-accent-'],
       [class*='from-orange-'],
       [class*='from-pink-']
     ) {

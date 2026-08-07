@@ -346,7 +346,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
   getTaskCardClass(task: Task): Record<string, boolean> {
     return {
       'border-slate-200 bg-slate-50/60': task.status === 'pending',
-      'border-blue-200 bg-blue-50/60 scraping-shimmer': task.status === 'scraping',
+      'border-primary-100 bg-primary-100/60 scraping-shimmer': task.status === 'scraping',
       'border-emerald-200 bg-emerald-50/60': task.status === 'success',
       'border-rose-200 bg-rose-50/60': task.status === 'failed',
     };
@@ -355,7 +355,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
   getTaskIconWrapperClass(task: Task): Record<string, boolean> {
     return {
       'bg-slate-100 text-slate-400': task.status === 'pending',
-      'bg-blue-100 text-blue-600 ring-1 ring-blue-200/70': task.status === 'scraping',
+      'bg-primary-100 text-primary-600 ring-1 ring-primary-100/70': task.status === 'scraping',
       'bg-emerald-100 text-emerald-600 ring-1 ring-emerald-200/70': task.status === 'success',
       'bg-rose-100 text-rose-600 ring-1 ring-rose-200/70': task.status === 'failed',
     };
@@ -373,7 +373,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
   getTaskMessageClass(task: Task): Record<string, boolean> {
     return {
       'text-slate-400': task.status === 'pending',
-      'text-blue-600': task.status === 'scraping',
+      'text-primary-600': task.status === 'scraping',
       'text-emerald-600': task.status === 'success',
       'text-rose-500': task.status === 'failed',
     };

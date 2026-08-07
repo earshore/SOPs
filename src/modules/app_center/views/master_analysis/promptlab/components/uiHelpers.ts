@@ -120,7 +120,7 @@ export function toggleConsoleMode(
     toggleContainer?.classList.add('bg-pink-900/30', 'border-pink-500/30');
     toggleContainer?.classList.remove('bg-white/20', 'border-white/10');
 
-    btnListing?.classList.replace('text-blue-600', 'text-slate-400');
+    btnListing?.classList.replace('text-primary-600', 'text-slate-400');
     btnListing?.classList.add('opacity-60');
 
     btnVisual?.classList.replace('text-slate-400', 'text-pink-500');
@@ -139,7 +139,7 @@ export function toggleConsoleMode(
     btnVisual?.classList.replace('text-pink-500', 'text-slate-400');
     btnVisual?.classList.add('hover:text-pink-500');
 
-    btnListing?.classList.replace('text-slate-400', 'text-blue-600');
+    btnListing?.classList.replace('text-slate-400', 'text-primary-600');
     btnListing?.classList.remove('opacity-60');
 
     if (outputTitle) outputTitle.textContent = 'Listing Prompt';

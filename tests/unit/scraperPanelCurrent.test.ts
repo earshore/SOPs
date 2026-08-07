@@ -240,7 +240,7 @@ it('computes input, task, site, and history branch states', () => {
   expect(panel.taskProgressClass).toBe('progress-bar-fill--50');
   expect(panel.getTaskCardClass(panel.tasks[0])['border-slate-200 bg-slate-50/60']).toBe(true);
   expect(
-    panel.getTaskCardClass(panel.tasks[1])['border-blue-200 bg-blue-50/60 scraping-shimmer']
+    panel.getTaskCardClass(panel.tasks[1])['border-primary-100 bg-primary-100/60 scraping-shimmer']
   ).toBe(true);
   expect(panel.getTaskCardClass(panel.tasks[2])['border-emerald-200 bg-emerald-50/60']).toBe(true);
   expect(panel.getTaskCardClass(panel.tasks[3])['border-rose-200 bg-rose-50/60']).toBe(true);

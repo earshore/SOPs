@@ -32,7 +32,7 @@ const SCHEDULE_OPTION_ACTIVE_CLASS: Record<SchedulingPreference, string> = {
 };
 
 const INACTIVE_SCHEDULE_OPTION_CLASS =
-  'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/40';
+  'border-slate-200 bg-white text-slate-600 hover:border-accent-100 hover:bg-accent-100/40';
 const INACTIVE_SCHEDULE_TIER_CLASS = 'border-slate-200 bg-white text-slate-500';
 const SCHEDULE_TIER_CONFIG: Record<ScheduleTier, { label: string; activeClass: string }> = {
   stable: { label: '稳定', activeClass: 'border-blue-200 bg-blue-50 text-blue-700 shadow-sm' },

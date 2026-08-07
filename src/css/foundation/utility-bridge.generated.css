@@ -24,7 +24,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 12%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50\/50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 6%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50\/60:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 7%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50\/70:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 8%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-cyan-100:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-cyan-400) 18%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-cyan-50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-cyan-400) 12%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-cyan-50\/60:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-cyan-400) 7%, transparent); }
@@ -100,16 +99,12 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-yellow-200:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-yellow-400) 26%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-yellow-50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-yellow-400) 12%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .focus\:bg-white:not(.twb-keep):focus { background-color: var(--surface-card); }
-:is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:bg-blue-100:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 22%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:bg-blue-50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 16%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:bg-slate-200:not(.twb-keep) { background-color: rgba(255, 255, 255, 0.14); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-amber-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-amber-400) 22%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-amber-200:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-amber-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-amber-50:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-amber-400) 16%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-blue-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-blue-400) 22%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-blue-50:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-blue-400) 16%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-blue-50\/30:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-blue-400) 5%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-blue-50\/50:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-blue-400) 8%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-cyan-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-cyan-400) 22%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-emerald-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-emerald-400) 22%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-emerald-50:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-emerald-400) 16%, transparent); }
@@ -117,8 +112,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-gray-300:not(.twb-keep):hover { background-color: rgba(255, 255, 255, 0.18); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-green-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-green-400) 22%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-indigo-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-indigo-400) 22%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-indigo-50:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-indigo-400) 16%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-indigo-50\/40:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-indigo-400) 6%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-orange-50\/50:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-orange-400) 8%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-purple-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-purple-400) 22%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-red-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-red-400) 22%, transparent); }
@@ -139,7 +132,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:bg-yellow-100:not(.twb-keep):hover { background-color: color-mix(in srgb, var(--color-yellow-400) 22%, transparent); }
 
 /* ── 文字 → 亮灰阶 / hue 亮档平移 ── */
-:is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:text-blue-500:not(.twb-keep) { color: var(--color-blue-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:text-blue-600:not(.twb-keep) { color: var(--color-blue-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:text-orange-600:not(.twb-keep) { color: var(--color-orange-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:text-rose-600:not(.twb-keep) { color: var(--color-rose-400); }
@@ -151,8 +143,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-amber-800:not(.twb-keep):hover { color: var(--color-amber-300); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-blue-500:not(.twb-keep):hover { color: var(--color-blue-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-gray-800:not(.twb-keep):hover { color: var(--color-slate-100); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-indigo-600:not(.twb-keep):hover { color: var(--color-indigo-400); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-indigo-700:not(.twb-keep):hover { color: var(--color-indigo-300); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-pink-500:not(.twb-keep):hover { color: var(--color-pink-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-red-500:not(.twb-keep):hover { color: var(--color-red-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-rose-500:not(.twb-keep):hover { color: var(--color-rose-400); }
@@ -172,7 +162,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .text-blue-600:not(.twb-keep) { color: var(--color-blue-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-blue-600\/80:not(.twb-keep) { color: color-mix(in srgb, var(--color-blue-400) 80%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-blue-700:not(.twb-keep) { color: var(--color-blue-300); }
-:is(.dark, [data-color-mode-resolved="dark"]) .text-blue-700\/80:not(.twb-keep) { color: color-mix(in srgb, var(--color-blue-300) 80%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-blue-800:not(.twb-keep) { color: var(--color-blue-300); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-blue-900:not(.twb-keep) { color: var(--color-blue-200); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-blue-900\/75:not(.twb-keep) { color: color-mix(in srgb, var(--color-blue-200) 75%, transparent); }
@@ -270,7 +259,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .border-amber-200\/40:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-amber-400) 13%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-amber-300:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-amber-400) 42%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-blue-100:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-blue-400) 22%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .border-blue-100\/60:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-blue-400) 13%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-blue-200:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-blue-400) 32%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-blue-200\/40:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-blue-400) 13%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-blue-300:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-blue-400) 42%, transparent); }
@@ -334,13 +322,9 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .border-yellow-200:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-yellow-400) 32%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .border-yellow-300:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-yellow-400) 42%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .focus\:border-emerald-300:not(.twb-keep):focus { border-color: color-mix(in srgb, var(--color-emerald-400) 42%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:border-blue-300:not(.twb-keep) { border-color: color-mix(in srgb, var(--color-blue-400) 42%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-amber-300:not(.twb-keep):hover { border-color: color-mix(in srgb, var(--color-amber-400) 42%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-blue-200:not(.twb-keep):hover { border-color: color-mix(in srgb, var(--color-blue-400) 32%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-blue-300:not(.twb-keep):hover { border-color: color-mix(in srgb, var(--color-blue-400) 42%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-emerald-200:not(.twb-keep):hover { border-color: color-mix(in srgb, var(--color-emerald-400) 32%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-indigo-100:not(.twb-keep):hover { border-color: color-mix(in srgb, var(--color-indigo-400) 22%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-indigo-200:not(.twb-keep):hover { border-color: color-mix(in srgb, var(--color-indigo-400) 32%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-orange-200:not(.twb-keep):hover { border-color: color-mix(in srgb, var(--color-orange-400) 32%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-orange-300:not(.twb-keep):hover { border-color: color-mix(in srgb, var(--color-orange-400) 42%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-purple-200:not(.twb-keep):hover { border-color: color-mix(in srgb, var(--color-purple-400) 32%, transparent); }
@@ -358,7 +342,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .focus\:ring-amber-100:not(.twb-keep):focus { --tw-ring-color: color-mix(in srgb, var(--color-amber-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .focus\:ring-emerald-100:not(.twb-keep):focus { --tw-ring-color: color-mix(in srgb, var(--color-emerald-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .focus\:ring-emerald-200:not(.twb-keep):focus { --tw-ring-color: color-mix(in srgb, var(--color-emerald-400) 40%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .focus\:ring-indigo-100:not(.twb-keep):focus { --tw-ring-color: color-mix(in srgb, var(--color-indigo-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .focus\:ring-purple-100:not(.twb-keep):focus { --tw-ring-color: color-mix(in srgb, var(--color-purple-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .focus\:ring-red-100:not(.twb-keep):focus { --tw-ring-color: color-mix(in srgb, var(--color-red-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .focus\:ring-rose-100:not(.twb-keep):focus { --tw-ring-color: color-mix(in srgb, var(--color-rose-400) 30%, transparent); }
@@ -391,7 +374,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .from-amber-50:not(.twb-keep) { --tw-gradient-from: color-mix(in srgb, var(--color-amber-400) 12%, transparent) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-amber-400) 12%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
 :is(.dark, [data-color-mode-resolved="dark"]) .from-blue-200\/40:not(.twb-keep) { --tw-gradient-from: color-mix(in srgb, var(--color-blue-400) 10%, transparent) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-blue-400) 10%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
 :is(.dark, [data-color-mode-resolved="dark"]) .from-blue-50:not(.twb-keep) { --tw-gradient-from: color-mix(in srgb, var(--color-blue-400) 12%, transparent) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-blue-400) 12%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
-:is(.dark, [data-color-mode-resolved="dark"]) .from-blue-50\/80:not(.twb-keep) { --tw-gradient-from: color-mix(in srgb, var(--color-blue-400) 10%, transparent) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-blue-400) 10%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
 :is(.dark, [data-color-mode-resolved="dark"]) .from-cyan-200\/40:not(.twb-keep) { --tw-gradient-from: color-mix(in srgb, var(--color-cyan-400) 10%, transparent) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-cyan-400) 10%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
 :is(.dark, [data-color-mode-resolved="dark"]) .from-cyan-50:not(.twb-keep) { --tw-gradient-from: color-mix(in srgb, var(--color-cyan-400) 12%, transparent) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-cyan-400) 12%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
 :is(.dark, [data-color-mode-resolved="dark"]) .from-emerald-200\/40:not(.twb-keep) { --tw-gradient-from: color-mix(in srgb, var(--color-emerald-400) 10%, transparent) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-emerald-400) 10%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
@@ -425,7 +407,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .from-teal-50:not(.twb-keep) { --tw-gradient-from: color-mix(in srgb, var(--color-teal-400) 12%, transparent) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-teal-400) 12%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
 :is(.dark, [data-color-mode-resolved="dark"]) .from-violet-200\/40:not(.twb-keep) { --tw-gradient-from: color-mix(in srgb, var(--color-violet-400) 10%, transparent) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-violet-400) 10%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
 :is(.dark, [data-color-mode-resolved="dark"]) .from-white:not(.twb-keep) { --tw-gradient-from: var(--surface-card) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, var(--surface-card) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
-:is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:from-blue-50:not(.twb-keep) { --tw-gradient-from: color-mix(in srgb, var(--color-blue-400) 12%, transparent) var(--tw-gradient-from-position); --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-blue-400) 12%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
 
 /* ── 渐变端点 · via (映射 + 回写) ── */
 :is(.dark, [data-color-mode-resolved="dark"]) .via-amber-100\/20:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--color-amber-400) 4%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), color-mix(in srgb, var(--color-amber-400) 4%, transparent) var(--tw-gradient-via-position), var(--tw-gradient-to); }
@@ -452,15 +433,12 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .via-white\/95:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, color-mix(in srgb, var(--surface-card) 95%, transparent) 0%, transparent) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), color-mix(in srgb, var(--surface-card) 95%, transparent) var(--tw-gradient-via-position), var(--tw-gradient-to); }
 
 /* ── 渐变端点 · to (映射 + 回写) ── */
-:is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:to-blue-100\/50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-blue-400) 9%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:to-rose-500:not(.twb-keep):hover { --tw-gradient-to: var(--color-rose-500) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-amber-100:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-amber-400) 18%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-amber-500:not(.twb-keep) { --tw-gradient-to: var(--color-amber-500) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-blue-100:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-blue-400) 18%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-blue-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-blue-400) 12%, transparent) var(--tw-gradient-to-position); }
-:is(.dark, [data-color-mode-resolved="dark"]) .to-blue-500:not(.twb-keep) { --tw-gradient-to: var(--color-blue-500) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-blue-600:not(.twb-keep) { --tw-gradient-to: var(--color-blue-600) var(--tw-gradient-to-position); }
-:is(.dark, [data-color-mode-resolved="dark"]) .to-blue-900:not(.twb-keep) { --tw-gradient-to: var(--color-blue-900) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-cyan-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-cyan-400) 12%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-cyan-600:not(.twb-keep) { --tw-gradient-to: var(--color-cyan-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-emerald-100:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-emerald-400) 18%, transparent) var(--tw-gradient-to-position); }
@@ -475,8 +453,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .to-green-500:not(.twb-keep) { --tw-gradient-to: var(--color-green-500) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-green-600:not(.twb-keep) { --tw-gradient-to: var(--color-green-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-indigo-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-indigo-400) 12%, transparent) var(--tw-gradient-to-position); }
-:is(.dark, [data-color-mode-resolved="dark"]) .to-indigo-50\/50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-indigo-400) 6%, transparent) var(--tw-gradient-to-position); }
-:is(.dark, [data-color-mode-resolved="dark"]) .to-indigo-500:not(.twb-keep) { --tw-gradient-to: var(--color-indigo-500) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-indigo-600:not(.twb-keep) { --tw-gradient-to: var(--color-indigo-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-orange-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-orange-400) 12%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-orange-500:not(.twb-keep) { --tw-gradient-to: var(--color-orange-500) var(--tw-gradient-to-position); }

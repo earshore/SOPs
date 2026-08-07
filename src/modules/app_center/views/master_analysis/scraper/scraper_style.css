@@ -1852,15 +1852,15 @@ textarea:focus-visible {
 .dark [x-data='scraperPanel'] .manual-config-panel .bg-slate-50,
 .dark [x-data='scraperPanel'] .manual-config-panel .bg-white,
 .dark [x-data='scraperPanel'] .config-header .bg-slate-50,
-.dark [x-data='scraperPanel'] .config-header .bg-blue-50,
+.dark [x-data='scraperPanel'] .config-header .bg-primary-100,
 [data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .bg-slate-50,
 [data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-config-panel .bg-white,
 [data-color-mode-resolved='dark'] [x-data='scraperPanel'] .config-header .bg-slate-50,
-[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .config-header .bg-blue-50,
+[data-color-mode-resolved='dark'] [x-data='scraperPanel'] .config-header .bg-primary-100,
 [data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .bg-slate-50,
 [data-theme='dark'] [x-data='scraperPanel'] .manual-config-panel .bg-white,
 [data-theme='dark'] [x-data='scraperPanel'] .config-header .bg-slate-50,
-[data-theme='dark'] [x-data='scraperPanel'] .config-header .bg-blue-50 {
+[data-theme='dark'] [x-data='scraperPanel'] .config-header .bg-primary-100 {
   background-color: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, #000) !important;
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1)) !important;
 }

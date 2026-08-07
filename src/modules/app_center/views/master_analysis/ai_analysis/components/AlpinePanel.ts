@@ -667,13 +667,13 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     if (this.analysisHeroIsCompact)
       return 'bg-[var(--surface-panel)] border border-slate-200 shadow-sm shadow-slate-200/60';
     return this.analysisHeroIsStrong
-      ? 'shadow-lg shadow-indigo-200/30'
+      ? 'shadow-lg shadow-accent-100/30'
       : 'bg-[var(--surface-panel)] border border-slate-200 shadow-sm shadow-slate-200/60';
   },
 
   get analysisHeroBackdropClass(): string {
     return this.analysisHeroIsStrong
-      ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600'
+      ? 'bg-gradient-to-r from-accent-600 via-purple-600 to-pink-600'
       : 'bg-[var(--surface-panel)]';
   },
 

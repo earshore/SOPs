@@ -697,8 +697,8 @@ export function highlightAutoFilledFields(
   fieldIds: string[],
   color: 'blue' | 'green' = 'blue'
 ): void {
-  const bgClass = color === 'blue' ? 'bg-blue-50' : 'bg-green-50';
-  const borderClass = color === 'blue' ? 'border-blue-300' : 'border-green-300';
+  const bgClass = color === 'blue' ? 'bg-primary-100' : 'bg-green-50';
+  const borderClass = color === 'blue' ? 'border-primary-100' : 'border-green-300';
 
   fieldIds.forEach(id => {
     const el = document.getElementById(id);

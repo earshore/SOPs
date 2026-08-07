@@ -122,34 +122,34 @@
               <!-- Icon Container -->
               <div class="relative mb-6 upload-icon">
                 <div
-                  class="empty-state-icon w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center border-2 border-dashed border-slate-200 shadow-inner group-hover:border-blue-300 group-hover:from-blue-50 group-hover:to-blue-100/50 transition duration-200"
+                  class="empty-state-icon w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center border-2 border-dashed border-slate-200 shadow-inner group-hover:border-primary-100 group-hover:from-primary-100 group-hover:to-primary-100/50 transition duration-200"
                 >
                   <i
-                    class="fas fa-file-import text-3xl text-slate-300 group-hover:text-blue-400 transition-colors duration-300"
+                    class="fas fa-file-import text-3xl text-slate-300 group-hover:text-primary-400 transition-colors duration-300"
                   ></i>
                 </div>
                 <!-- Decorative dots -->
                 <div
-                  class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-slate-100 border border-slate-200 group-hover:bg-blue-100 group-hover:border-blue-300 transition duration-200"
+                  class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-slate-100 border border-slate-200 group-hover:bg-primary-100 group-hover:border-primary-100 transition duration-200"
                 ></div>
                 <div
-                  class="absolute -bottom-1 -left-1 w-2 h-2 rounded-full bg-slate-100 border border-slate-200 group-hover:bg-blue-100 group-hover:border-blue-300 transition duration-200"
+                  class="absolute -bottom-1 -left-1 w-2 h-2 rounded-full bg-slate-100 border border-slate-200 group-hover:bg-primary-100 group-hover:border-primary-100 transition duration-200"
                 ></div>
               </div>
               <p
-                class="text-base font-semibold text-slate-500 mb-2 group-hover:text-blue-600 transition-colors duration-300"
+                class="text-base font-semibold text-slate-500 mb-2 group-hover:text-primary-600 transition-colors duration-300"
               >
                 还没有产品数据
               </p>
               <p
                 id="scraper-import-help"
-                class="text-sm text-slate-400 mb-3 max-w-sm leading-relaxed group-hover:text-blue-500 transition-colors duration-300"
+                class="text-sm text-slate-400 mb-3 max-w-sm leading-relaxed group-hover:text-primary-500 transition-colors duration-300"
               >
                 当前预览区为空，无法进入 AI 分析。推荐操作：点击导入 JSON 文件，或在下方输入 ASIN
                 开始采集。
               </p>
               <div
-                class="flex items-center gap-2 text-xs text-slate-400 group-hover:text-blue-500 transition-colors duration-300"
+                class="flex items-center gap-2 text-xs text-slate-400 group-hover:text-primary-500 transition-colors duration-300"
               >
                 <i class="fas fa-mouse-pointer text-[10px]"></i>
                 <span>支持点击任意位置选择文件；采集成功后会自动生成历史快照</span>
@@ -162,25 +162,25 @@
             <button
               type="button"
               data-scraper-import-trigger
-              class="import-trigger mb-4 w-full appearance-none p-4 rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-r from-slate-50/50 to-white hover:border-blue-300 hover:bg-blue-50/30 cursor-pointer group flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2"
+              class="import-trigger mb-4 w-full appearance-none p-4 rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-r from-slate-50/50 to-white hover:border-primary-100 hover:bg-primary-100/30 cursor-pointer group flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2"
               aria-label="重新导入 JSON 产品数据文件"
               aria-describedby="scraper-reimport-help scraper-import-status"
             >
               <div
-                class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center group-hover:border-blue-300 group-hover:bg-blue-50 transition duration-200"
+                class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center group-hover:border-primary-100 group-hover:bg-primary-100 transition duration-200"
               >
                 <i
-                  class="fas fa-file-import text-slate-400 group-hover:text-blue-500 transition-colors duration-300"
+                  class="fas fa-file-import text-slate-400 group-hover:text-primary-500 transition-colors duration-300"
                 ></i>
               </div>
               <div class="flex flex-col">
                 <span
-                  class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition-colors duration-300"
+                  class="text-sm font-semibold text-slate-700 group-hover:text-primary-600 transition-colors duration-300"
                   >重新导入</span
                 >
                 <span
                   id="scraper-reimport-help"
-                  class="text-xs text-slate-400 group-hover:text-blue-500 transition-colors duration-300"
+                  class="text-xs text-slate-400 group-hover:text-primary-500 transition-colors duration-300"
                   >点击选择 JSON 文件</span
                 >
               </div>
@@ -247,9 +247,9 @@
           <div class="flex items-center justify-between">
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5 section-header">
               <div
-                class="header-icon w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center transition-colors duration-200"
+                class="header-icon w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center transition-colors duration-200"
               >
-                <i class="fas fa-crosshairs text-blue-500 text-sm"></i>
+                <i class="fas fa-crosshairs text-primary-500 text-sm"></i>
               </div>
               手动采集配置
             </h2>
@@ -288,7 +288,7 @@
               <label
                 class="manual-config-label flex items-center text-sm font-bold text-slate-700 mb-3"
               >
-                <span class="w-1 h-4 bg-blue-500 rounded-full mr-2"></span>
+                <span class="w-1 h-4 bg-primary-500 rounded-full mr-2"></span>
                 目标站点
               </label>
               <div class="manual-site-grid" aria-label="目标站点列表">
@@ -441,7 +441,7 @@ B0EXAMPLE1"
               </div>
               <!-- Review Toggle -->
               <div
-                class="manual-option-card p-4 rounded-xl bg-slate-50/70 border border-slate-100 transition duration-200 hover:border-blue-200 hover:bg-blue-50/30"
+                class="manual-option-card p-4 rounded-xl bg-slate-50/70 border border-slate-100 transition duration-200 hover:border-primary-100 hover:bg-primary-100/30"
               >
                 <button
                   type="button"
@@ -454,16 +454,16 @@ B0EXAMPLE1"
                 >
                   <div class="flex items-center gap-3">
                     <div
-                      class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:border-blue-300 transition duration-200"
+                      class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:border-primary-100 transition duration-200"
                     >
                       <i
-                        class="fas fa-comments text-slate-400 text-sm group-hover:text-blue-500 transition-colors duration-300"
+                        class="fas fa-comments text-slate-400 text-sm group-hover:text-primary-500 transition-colors duration-300"
                       ></i>
                     </div>
                     <div class="flex flex-col">
                       <span
                         id="scraper-reviews-toggle-label"
-                        class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition-colors duration-200"
+                        class="text-sm font-semibold text-slate-700 group-hover:text-primary-600 transition-colors duration-200"
                         >采集评论</span
                       >
                       <span id="scraper-reviews-toggle-help" class="text-[10px] text-slate-400"
@@ -498,9 +498,9 @@ B0EXAMPLE1"
                   class="text-sm font-bold text-slate-800 flex items-center gap-2 whitespace-nowrap section-header"
                 >
                   <div
-                    class="header-icon w-6 h-6 rounded-md bg-indigo-50 flex items-center justify-center"
+                    class="header-icon w-6 h-6 rounded-md bg-accent-100 flex items-center justify-center"
                   >
-                    <i class="fas fa-tasks text-indigo-500 text-xs"></i>
+                    <i class="fas fa-tasks text-accent-500 text-xs"></i>
                   </div>
                   采集状态
                 </h3>
@@ -529,7 +529,7 @@ B0EXAMPLE1"
               >
                 <div
                   :class="taskProgressClass"
-                  class="progress-bar-fill h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500"
+                  class="progress-bar-fill h-full rounded-full bg-gradient-to-r from-primary-500 to-accent-500"
                 ></div>
               </div>
             </div>
@@ -679,7 +679,7 @@ B0EXAMPLE1"
               <div class="flex flex-wrap gap-1 mb-2 pl-0.5">
                 <template :key="asin" x-for="asin in item.asins.slice(0,3)">
                   <span
-                    class="asin-tag text-[10px] font-mono font-semibold text-slate-600 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-md transition duration-200 hover:bg-indigo-50 hover:border-indigo-100 hover:text-indigo-600 cursor-default"
+                    class="asin-tag text-[10px] font-mono font-semibold text-slate-600 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-md transition duration-200 hover:bg-accent-100 hover:border-accent-100 hover:text-accent-600 cursor-default"
                     x-text="asin"
                   ></span>
                 </template>
@@ -826,11 +826,11 @@ B0EXAMPLE1"
                   </div>
                 </div>
                 <div
-                  class="strategy-item blue flex items-start gap-3 p-3 rounded-xl hover:bg-blue-50/50 transition-colors"
+                  class="strategy-item blue flex items-start gap-3 p-3 rounded-xl hover:bg-primary-100/50 transition-colors"
                 >
                   <div class="flex-shrink-0 mt-0.5">
                     <span
-                      class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-sm"
+                      class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-sm"
                       >Rufus</span
                     >
                   </div>
@@ -839,7 +839,7 @@ B0EXAMPLE1"
                       具体痛点与解决方案 (QA Pairs)
                     </h5>
                     <p class="text-[11px] text-slate-500 leading-relaxed">
-                      提取负面 Review 中的具体失效点（如"<span class="text-blue-600 font-medium"
+                      提取负面 Review 中的具体失效点（如"<span class="text-primary-600 font-medium"
                         >拉链在零下度数卡住</span
                       >"），转化为 Listing 中的 QA 或属性描述。
                     </p>

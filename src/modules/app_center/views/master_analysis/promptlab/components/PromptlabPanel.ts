@@ -438,7 +438,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
   get extractButtonClass(): string {
     return !this.dnaActionDisabled
-      ? 'text-blue-600 bg-blue-50/70 hover:bg-blue-100 border border-blue-100 hover:border-blue-200 cursor-pointer'
+      ? 'text-primary-600 bg-primary-100/70 hover:bg-primary-100 border border-primary-100 hover:border-primary-100 cursor-pointer'
       : 'text-slate-500 bg-slate-100 border border-slate-200 cursor-not-allowed';
   },
 

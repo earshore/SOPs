@@ -159,10 +159,10 @@ function renderProductCardHeader(viewModel: ProductCardViewModel): string {
                     <div class="flex items-center gap-3 text-xs font-medium text-slate-500">
                         <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fa-brands fa-amazon text-yellow-500"></i>${getSiteDomain(siteKey)}</span>
                         <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fa-solid fa-heading"></i></span>
-                        <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-list-ul text-blue-500"></i> ${(product.feature_bullets || []).length}</span>
+                        <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-list-ul text-primary-500"></i> ${(product.feature_bullets || []).length}</span>
                         <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-comments text-purple-500"></i> ${(product.customer_reviews || []).length}</span>
                     </div>
-                    <span class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-500 transition duration-200">
+                    <span class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 group-hover:bg-primary-100 group-hover:text-primary-500 transition duration-200">
                         <i id="card-icon-${product.asin}" class="fas fa-chevron-down transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}"></i>
                     </span>
                 </div>
@@ -190,8 +190,8 @@ function renderFeatureBullets(product: ProductData): string {
   const bulletsHtml = bullets
     .map(
       (bullet: string, index: number) => `
-                                <li class="text-sm text-slate-600 bg-white p-3 rounded-lg border border-slate-100 shadow-sm flex gap-3 hover:border-blue-200 transition-colors">
-                                    <span class="text-blue-500 font-bold font-mono text-xs mt-0.5 bg-blue-50 px-1.5 py-0.5 rounded h-fit">${index + 1}</span> 
+                                <li class="text-sm text-slate-600 bg-white p-3 rounded-lg border border-slate-100 shadow-sm flex gap-3 hover:border-primary-100 transition-colors">
+                                    <span class="text-primary-500 font-bold font-mono text-xs mt-0.5 bg-primary-100 px-1.5 py-0.5 rounded h-fit">${index + 1}</span> 
                                     <span class="leading-relaxed">${bullet}</span>
                                 </li>
                             `
@@ -200,7 +200,7 @@ function renderFeatureBullets(product: ProductData): string {
 
   return `
                 <div>
-                    <h5 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fas fa-list-ul text-blue-500"></i> 五点描述</h5>
+                    <h5 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fas fa-list-ul text-primary-500"></i> 五点描述</h5>
                     ${bullets.length > 0 ? `<ul class="space-y-2">${bulletsHtml}</ul>` : '<p class="text-sm text-slate-400 italic pl-6">无五点描述</p>'} 
                 </div>`;
 }
