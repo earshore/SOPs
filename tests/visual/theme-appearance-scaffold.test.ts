@@ -271,6 +271,15 @@ async function expectDocumentAppearance(
 }
 
 async function openAppearanceSettings(page: Page, appearance: AppearanceId): Promise<void> {
+  // Settings panel needs its Alpine x-data stack mounted before reveal (same
+  // gate as release-smoke waitForSettingsPanel); clicking #nav-more earlier
+  // races the drawer and can time out on the '全局设置' button.
+  await page.waitForFunction(() => {
+    const root = document.querySelector('[x-data="settingsPanel"]') as
+      | (HTMLElement & { _x_dataStack?: unknown[] })
+      | null;
+    return Array.isArray(root?._x_dataStack);
+  });
   await page.locator('#nav-more').click();
   await page.getByRole('button', { name: '全局设置' }).click();
   await expect(page.getByRole('heading', { name: '系统设置' })).toBeVisible({ timeout: 15000 });

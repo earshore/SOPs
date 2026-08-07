@@ -123,7 +123,7 @@
 | **D9**  | P2        | **Partial (Doc + F2 skim)**         | 生命周期文档已落地；**F2 code skim**: `--ppc-hero-*` / `--kh-*` / `--playground-*` = docs+audit-only（`src/` 0 声明 0 消费）；**0 CSS 删除**；F3+ 仍 optional |
 | **D10** | P1        | **Done（ThemeColors removed）** | `AppearanceThemeColors` 仅 primary 族 + focus；deprecated 别名 **`ThemeColors` removed**；**0** prod 误用状态色字段（§5.4） |
 | **D11** | P2        | **Code fixed / legacy residual only** | **`src/css` 全15 文件 / 185 dark 规则组均已 tri**（`.dark` + `data-color-mode-resolved` + legacy `data-theme`）；**0** 缺 resolved 的 dual-only；剩余仅 intentional legacy 选择器（§10） |
-| **D12** | P2 | **Open（scaffold opt-in + first-8 readiness）** | `theme-appearance-scaffold`：**12 屏 × 2 = 24**（settings/KH/home + App Center/Scraper/PromptLab/PPC + SOPs + Amazon Hub + Deep Chat + **Skills** + **NPI**）；terracotta send / Skills violet / NPI growth **不**当 primary；`test:visual:theme` opt-in；first-8 human capture readiness @ `8f13db32`；**不** visual Pass；人工首 8 张 XO 仍 required |
+| **D12** | P2 | **Baseline minted（待人工 XO）** | `theme-appearance-scaffold`：**12 屏 × 2 × 3 browsers = 144 张基线已 mint**（含 settings 打开竞态修复）；terracotta send / Skills violet / NPI growth **不**当 primary；`test:visual:theme:update` 全绿；**不** visual Pass；**待人工 XO 签收**（含 D3 视觉签联动） |
 
 ### 5.1 D5 — remaining intentional blue / non-Appearance focus
 
