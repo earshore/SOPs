@@ -22,7 +22,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-100:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 18%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-200:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 26%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 12%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50\/50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 6%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50\/60:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 7%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-cyan-100:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-cyan-400) 18%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-cyan-50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-cyan-400) 12%, transparent); }
@@ -141,7 +140,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:text-slate-800:not(.twb-keep) { color: var(--color-slate-100); }
 :is(.dark, [data-color-mode-resolved="dark"]) .group:hover .group-hover\:text-slate-900:not(.twb-keep) { color: var(--color-slate-100); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-amber-800:not(.twb-keep):hover { color: var(--color-amber-300); }
-:is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-blue-500:not(.twb-keep):hover { color: var(--color-blue-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-gray-800:not(.twb-keep):hover { color: var(--color-slate-100); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-pink-500:not(.twb-keep):hover { color: var(--color-pink-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:text-red-500:not(.twb-keep):hover { color: var(--color-red-400); }

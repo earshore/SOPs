@@ -282,13 +282,13 @@ function renderProfileCells(row: NPIProductRecord, context: TableRowRenderContex
             <td class="px-3 py-3 sticky left-0 bg-white z-10 border-r">
                 <span class="px-2 py-1 rounded text-xs font-medium ${safeText(context.stageConfig.color)}">${safeText(context.stageConfig.label)}</span>
             </td>
-            <td class="px-3 py-3 text-sm font-mono text-blue-600 cursor-pointer hover:underline" data-action="open-product" data-domain="${safeText(context.domain)}" data-asin="${safeText(row.asin)}">
+            <td class="px-3 py-3 text-sm font-mono text-primary-600 cursor-pointer hover:underline" data-action="open-product" data-domain="${safeText(context.domain)}" data-asin="${safeText(row.asin)}">
                 ${safeText(row.sku)}
             </td>
             <td class="px-3 py-3 text-sm">${safeText(row.cn_name)}</td>
             <td class="px-3 py-3 text-sm">${safeText(row.store)}</td>
             <td class="px-3 py-3 text-sm font-mono">
-                <a href="https://www.${safeText(context.domain)}/dp/${safeText(row.asin)}" target="_blank" class="text-blue-600 hover:underline">${safeText(row.asin)}</a>
+                <a href="https://www.${safeText(context.domain)}/dp/${safeText(row.asin)}" target="_blank" class="text-primary-600 hover:underline">${safeText(row.asin)}</a>
             </td>
             <td class="px-3 py-3 text-sm text-center">
                 <span class="inline-flex items-center gap-1" title="${safeText(row.site)}">
@@ -374,7 +374,7 @@ function renderDecisionCells(row: NPIProductRecord, context: TableRowRenderConte
             <td class="px-3 py-3">
                 <div class="flex flex-wrap gap-1">
                     ${renderNextStepTags(row.next_step)}
-                    <button type="button" data-action="open-next-step-editor" class="px-2 py-0.5 border border-dashed border-slate-300 rounded text-xs text-slate-400 hover:border-blue-400 hover:text-blue-500" aria-label="${rowActionLabel(row, '添加 Next Step')}" title="${rowActionLabel(row, '添加 Next Step')}">
+                    <button type="button" data-action="open-next-step-editor" class="px-2 py-0.5 border border-dashed border-slate-300 rounded text-xs text-slate-400 hover:border-primary-400 hover:text-primary-500" aria-label="${rowActionLabel(row, '添加 Next Step')}" title="${rowActionLabel(row, '添加 Next Step')}">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>

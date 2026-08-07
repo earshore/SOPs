@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-07T02:45:22.595Z",
+  "updatedAt": "2026-08-07T03:24:27.139Z",
   "shell": {
     "total": 13,
     "filesScanned": 26,
@@ -14,7 +14,7 @@
     "filesWithHits": 49,
     "families": {
       "sops": {
-        "total": 377,
+        "total": 334,
         "filesScanned": 52,
         "filesWithHits": 22,
         "files": {
@@ -27,19 +27,19 @@
           "src/modules/sops/views/safety/product_compliance/template.html": 21,
           "src/modules/sops/views/backend/procurement_qc/template.html": 19,
           "src/modules/sops/views/overview/template.html": 17,
-          "src/modules/sops/views/backend/inventory_replenishment/template.html": 16,
-          "src/modules/sops/views/safety/brand_infringement/template.html": 16,
           "src/modules/sops/views/growth/listing_seo/template.html": 15,
-          "src/modules/sops/views/growth/promotion_submission/template.html": 13,
-          "src/modules/sops/views/safety/performance_notification/template.html": 13,
           "src/modules/sops/views/growth/competitor_monitoring/template.html": 12,
-          "src/modules/sops/views/safety/permission_management/template.html": 9,
-          "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 7,
-          "src/modules/sops/views/growth/npi_tracker/index.ts": 6,
+          "src/modules/sops/views/safety/brand_infringement/template.html": 9,
+          "src/modules/sops/views/backend/inventory_replenishment/template.html": 8,
+          "src/modules/sops/views/growth/promotion_submission/template.html": 7,
+          "src/modules/sops/views/safety/performance_notification/template.html": 7,
           "src/modules/sops/sops_style.css": 4,
           "src/modules/sops/views/backend/fba_shipping/template.html": 3,
           "src/modules/sops/views/growth/npi_tracker/template.html": 3,
-          "src/modules/sops/views/growth/npi_tracker/data/mockData.ts": 2
+          "src/modules/sops/views/growth/npi_tracker/data/mockData.ts": 2,
+          "src/modules/sops/views/growth/npi_tracker/index.ts": 2,
+          "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 2,
+          "src/modules/sops/views/safety/permission_management/template.html": 2
         }
       },
       "app_center": {

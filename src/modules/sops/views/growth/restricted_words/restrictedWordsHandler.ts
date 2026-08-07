@@ -509,7 +509,7 @@ function createActionCell(word: RestrictedWord): HTMLTableCellElement {
   const detailBtn = document.createElement('button');
   detailBtn.type = 'button';
   detailBtn.className =
-    'px-3 py-1.5 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 rounded-md text-xs font-medium transition duration-200 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1';
+    'px-3 py-1.5 bg-white border border-primary-100 text-primary-600 hover:bg-primary-100 hover:border-primary-100 rounded-md text-xs font-medium transition duration-200 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1';
   detailBtn.textContent = '详情';
   detailBtn.addEventListener('click', () => showWordDetail(word.id));
   actionTd.appendChild(detailBtn);
@@ -709,7 +709,7 @@ function createProductsSection(word: RestrictedWord): HTMLDivElement {
   const productsDiv = document.createElement('div');
   const prodTitle = document.createElement('h4');
   prodTitle.className = 'font-bold text-slate-800 mb-3 flex items-center gap-2';
-  appendIcon(prodTitle, 'fas fa-bullseye text-blue-500');
+  appendIcon(prodTitle, 'fas fa-bullseye text-primary-500');
   prodTitle.appendChild(document.createTextNode(' 常见触雷场景'));
   productsDiv.appendChild(prodTitle);
 
