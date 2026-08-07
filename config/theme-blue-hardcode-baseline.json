@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-07T02:00:36.948Z",
+  "updatedAt": "2026-08-07T02:45:22.595Z",
   "shell": {
     "total": 13,
     "filesScanned": 26,
@@ -11,23 +11,21 @@
   },
   "modules": {
     "filesScanned": 380,
-    "filesWithHits": 50,
+    "filesWithHits": 49,
     "families": {
       "sops": {
-        "total": 466,
+        "total": 377,
         "filesScanned": 52,
-        "filesWithHits": 23,
+        "filesWithHits": 22,
         "files": {
-          "src/modules/sops/views/growth/ppc_advertising/template.html": 58,
-          "src/modules/sops/views/safety/eu_gpsr_compliance/template.html": 46,
-          "src/modules/sops/views/growth/restricted_words/template.html": 37,
-          "src/modules/sops/views/safety/product_compliance/template.html": 34,
+          "src/modules/sops/views/growth/ppc_advertising/template.html": 57,
+          "src/modules/sops/views/safety/eu_gpsr_compliance/template.html": 40,
           "src/modules/sops/views/service/email_templates/template.html": 30,
-          "src/modules/sops/views/backend/fba_shipping/template.html": 29,
-          "src/modules/sops/views/service/negative_review/template.html": 28,
-          "src/modules/sops/views/service/qa_maintenance/template.html": 26,
-          "src/modules/sops/views/backend/procurement_qc/template.html": 24,
-          "src/modules/sops/views/safety/account_security/template.html": 21,
+          "src/modules/sops/views/service/negative_review/template.html": 27,
+          "src/modules/sops/views/service/qa_maintenance/template.html": 24,
+          "src/modules/sops/views/growth/restricted_words/template.html": 23,
+          "src/modules/sops/views/safety/product_compliance/template.html": 21,
+          "src/modules/sops/views/backend/procurement_qc/template.html": 19,
           "src/modules/sops/views/overview/template.html": 17,
           "src/modules/sops/views/backend/inventory_replenishment/template.html": 16,
           "src/modules/sops/views/safety/brand_infringement/template.html": 16,
@@ -39,6 +37,7 @@
           "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 7,
           "src/modules/sops/views/growth/npi_tracker/index.ts": 6,
           "src/modules/sops/sops_style.css": 4,
+          "src/modules/sops/views/backend/fba_shipping/template.html": 3,
           "src/modules/sops/views/growth/npi_tracker/template.html": 3,
           "src/modules/sops/views/growth/npi_tracker/data/mockData.ts": 2
         }
