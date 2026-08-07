@@ -492,9 +492,11 @@ test.describe('release candidate smoke', () => {
       for (const asset of styleResponses) {
         expect(asset.status, asset.url).toBeGreaterThanOrEqual(200);
         expect(asset.status, asset.url).toBeLessThan(400);
-        // preview 对部分动态 CSS 可能省略 Content-Type；有状态码即可，有则须为 css
+        // vite dev 下 CSS import 以 JS 模块返回（text/javascript，HMR wrapper）；
+        // preview 下为 text/css 或省略 Content-Type。故 css 资产只要求非 HTML 等异常类型：
+        // 状态码已保证真实返回，return 覆盖 css 与 vite dev 两种合法语义。
         if (asset.contentType) {
-          expect(asset.contentType, asset.url).toMatch(/css|stylesheet/i);
+          expect(asset.contentType, asset.url).toMatch(/css|stylesheet|javascript/i);
         }
       }
       expect(

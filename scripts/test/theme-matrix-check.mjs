@@ -17,9 +17,9 @@ const BASE = process.argv[2] || 'http://localhost:4273';
 const MODES = ['light', 'dark'];
 const ACCENTS = ['default', 'minimal', 'ocean'];
 
-/** KH input 页带 rose ownership banner（release-smoke 同源断言点） */
+/** KH input 页带 cyan ownership banner（release-smoke 同源断言点） */
 const OWNERSHIP_ROUTE = '#/app-center/keyword-hunter/input';
-const OWNERSHIP_CLASS = 'wb-theme-rose';
+const OWNERSHIP_CLASS = 'wb-theme-cyan';
 
 const failures = [];
 const matrix = {};
