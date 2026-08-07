@@ -60,7 +60,9 @@ export function mapResponsesReasoning(prefs: {
   allowed?: readonly ReasoningEffortLevel[];
 }): Record<string, unknown> {
   if (!prefs.enabled || prefs.effort === 'off') {
-    return {};
+    // Explicit off: omit leaves the vendor default ON on thinking-by-default
+    // gateways (deepseek-v4 etc), turning “关闭推理” into a no-op. Send none.
+    return { reasoning: { effort: 'none' } };
   }
   return {
     reasoning: {

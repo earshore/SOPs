@@ -56,6 +56,46 @@ describe('responsesParse', () => {
     ).toBe('think');
   });
 
+  it('extracts whole-answer text from content_part.done (gateways without text deltas)', () => {
+    expect(
+      getResponsesStreamTextDelta({
+        type: 'response.content_part.done',
+        item_id: 'msg_1',
+        output_index: 0,
+        content_index: 0,
+        part: { type: 'output_text', annotations: [], text: '我很好，谢谢！' },
+      })
+    ).toBe('我很好，谢谢！');
+    // reasoning items are never treated as visible text
+    expect(
+      getResponsesStreamTextDelta({
+        type: 'response.content_part.done',
+        part: { type: 'summary_text', text: 'think' },
+      })
+    ).toBe('');
+  });
+
+  it('extracts whole-answer text from output_item.done message items', () => {
+    expect(
+      getResponsesStreamTextDelta({
+        type: 'response.output_item.done',
+        output_index: 0,
+        item: {
+          id: 'msg_1',
+          type: 'message',
+          content: [{ type: 'output_text', annotations: [], text: 'complete answer' }],
+        },
+      })
+    ).toBe('complete answer');
+    // reasoning item on output_item.done stays invisible
+    expect(
+      getResponsesStreamTextDelta({
+        type: 'response.output_item.done',
+        item: { type: 'reasoning', summary: [{ type: 'summary_text', text: 'think' }] },
+      })
+    ).toBe('');
+  });
+
   it('detects terminal events and response id', () => {
     expect(isResponsesTerminalEvent({ type: 'response.completed' })).toBe(true);
     expect(extractResponsesId({ id: 'resp_abc' })).toBe('resp_abc');

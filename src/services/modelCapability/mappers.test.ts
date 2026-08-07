@@ -52,7 +52,11 @@ describe('multi-protocol mappers', () => {
     expect(mapResponsesReasoning({ enabled: true, effort: 'low' })).toEqual({
       reasoning: { effort: 'low', summary: 'auto' },
     });
-    expect(mapResponsesReasoning({ enabled: false, effort: 'high' })).toEqual({});
+    // Explicit off must disable thinking (deepseek-v4 family defaults thinking ON;
+    // omitting the field leaves the vendor default intact → thinking black hole).
+    expect(mapResponsesReasoning({ enabled: false, effort: 'high' })).toEqual({
+      reasoning: { effort: 'none' },
+    });
   });
 
   it('openai thinking toggle emits thinking.type enabled only when on', () => {

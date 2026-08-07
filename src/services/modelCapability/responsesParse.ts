@@ -166,6 +166,16 @@ function isResponsesTextDeltaType(type: string): boolean {
   );
 }
 
+/** Some gateways deliver the whole answer on content_part.done / output_item.done instead of deltas. */
+function isResponsesTextDoneType(type: string): boolean {
+  return (
+    type === 'response.content_part.done' ||
+    type === 'response.output_item.done' ||
+    type.endsWith('content_part.done') ||
+    type.endsWith('output_item.done')
+  );
+}
+
 function readDeltaTextPayload(delta: unknown): string {
   if (typeof delta === 'string') return delta;
   if (!delta || typeof delta !== 'object') return '';
@@ -181,12 +191,52 @@ function readDeltaTextPayload(delta: unknown): string {
   return texts.join('');
 }
 
+/**
+ * Extract text from one-shot done events:
+ * - content_part.done: `part.text`
+ * - output_item.done: `item.content[].text` (message items only)
+ */
+function readContentPartDoneText(payload: Record<string, unknown>): string {
+  const part = payload.part as { type?: unknown; text?: unknown } | undefined;
+  if (
+    part &&
+    typeof part === 'object' &&
+    (part.type === 'output_text' || part.type === 'text') &&
+    typeof part.text === 'string'
+  ) {
+    return part.text;
+  }
+  return '';
+}
+
+function readOutputItemDoneText(payload: Record<string, unknown>): string {
+  const item = payload.item as { type?: unknown; content?: unknown } | undefined;
+  if (item && typeof item === 'object' && item.type === 'message') {
+    return collectOutputTextFromMessageItem(item as Record<string, unknown>).join('');
+  }
+  return '';
+}
+
+function readDoneTextPayload(payload: Record<string, unknown>): string {
+  const type = typeof payload.type === 'string' ? payload.type : '';
+  if (type === 'response.content_part.done' || type.endsWith('content_part.done')) {
+    return readContentPartDoneText(payload);
+  }
+  if (type === 'response.output_item.done' || type.endsWith('output_item.done')) {
+    return readOutputItemDoneText(payload);
+  }
+  return '';
+}
+
 export function getResponsesStreamTextDelta(payload: Record<string, unknown>): string {
   const type = typeof payload.type === 'string' ? payload.type : '';
-  if (!isResponsesTextDeltaType(type)) {
-    return '';
+  if (isResponsesTextDeltaType(type)) {
+    return readDeltaTextPayload(payload.delta);
   }
-  return readDeltaTextPayload(payload.delta);
+  if (isResponsesTextDoneType(type)) {
+    return readDoneTextPayload(payload);
+  }
+  return '';
 }
 
 function readReasoningDeltaField(delta: unknown): string {

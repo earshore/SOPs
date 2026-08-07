@@ -179,7 +179,10 @@ export function abortPendingDeepChatRequest(
 ): void {
   pendingRequest.abortReason ||= reason;
   if (!pendingRequest.controller.signal.aborted) {
-    pendingRequest.controller.abort();
+    // 带 reason abort，避免浏览器默认 “signal is aborted without reason” 噪音（同 llmModelList 约定）
+    const reasonError = new Error(reason === 'stopped' ? '已停止生成' : '请求已取消');
+    reasonError.name = 'AbortError';
+    pendingRequest.controller.abort(reasonError);
   }
 }
 

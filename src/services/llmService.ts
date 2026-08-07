@@ -921,12 +921,14 @@ function createLLMAbortResources(
   const abortOnTimeout = (): void => {
     if (controller.signal.aborted) return;
     state.timedOut = true;
-    controller.abort();
+    // 带 reason abort，避免浏览器默认 “signal is aborted without reason” 噪音
+    controller.abort(createLLMTimeoutAbortError(options.timeout));
   };
   const abortFromExternalSignal = (): void => {
     if (controller.signal.aborted) return;
     state.externallyAborted = true;
-    controller.abort();
+    // 复用外部 signal 的 reason，错误消息保持友好（如“已停止生成”）
+    controller.abort(options.signal ? getAbortError(options.signal) : new Error('Aborted'));
   };
   let timeoutId = setTimeout(abortOnTimeout, options.timeout);
   const clearTimeoutOnly = (): void => clearTimeout(timeoutId);
@@ -1392,6 +1394,13 @@ function createLLMTimeoutError(
     },
     error
   );
+}
+
+/** Abort reason for the internal controller on timeout — friendly message, AbortError name. */
+function createLLMTimeoutAbortError(timeoutMs: number): Error {
+  const error = new Error(`模型响应超时(${timeoutMs / 1000}秒)`);
+  error.name = 'AbortError';
+  return error;
 }
 
 function createLLMNetworkError(
