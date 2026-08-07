@@ -307,3 +307,4 @@ tests/performance/lighthouse-reports/
 tests/performance/performance-reports/
 tests/performance/performance-score-reports/
 tests/performance/baseline-scores.json
+src/css/foundation/utility-bridge.gate-check.css
