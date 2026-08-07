@@ -38,6 +38,7 @@ import {
   getResponsesFailureFromEvent,
   getResponsesFailureFromPayload,
   getResponsesRefusalDelta,
+  getResponsesStreamTextDeltaDeduped,
   harvestResponsesReasoningIncrement,
   isResponsesTerminalEvent,
   mergeChatStreamToolCallDeltas,
@@ -62,6 +63,7 @@ import {
 } from './modelCapability';
 import {
   assertStreamPayloadIsOk,
+  getChatCompletionsStreamDelta,
   getChatCompletionFinishReason,
   getLLMErrorMessage,
   getReasoningStreamDelta,
@@ -276,9 +278,15 @@ function resolveStreamTextDelta(
   payload: Record<string, unknown>,
   context: OpenAIStreamLineContext
 ): string {
+  if (context.apiSurface === 'responses') {
+    // 带去重：done 事件的完整文本不与 delta 重复拼接（部分网关两者都发）
+    return (
+      getResponsesStreamTextDeltaDeduped(payload, context.state.responsesTextSeenItems) ||
+      getChatCompletionsStreamDelta(payload)
+    );
+  }
   const delta = getStreamDelta(payload, context.apiSurface);
   if (delta) return delta;
-  if (context.apiSurface !== 'responses') return '';
   const eventType = typeof payload.type === 'string' ? payload.type : '';
   if (eventType !== 'response.refusal.delta') return '';
   return getResponsesRefusalDelta(eventType, payload) ?? '';
@@ -727,6 +735,7 @@ async function readOpenAIStream(
     reasoningContent: '',
     chunkCount: 0,
     responseIdReported: false,
+    responsesTextSeenItems: new Set(),
   };
   const lineContext: OpenAIStreamLineContext = {
     response,

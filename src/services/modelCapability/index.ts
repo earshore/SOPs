@@ -58,6 +58,7 @@ export {
   getResponsesReasoningStreamDelta,
   getResponsesRefusalDelta,
   getResponsesStreamTextDelta,
+  getResponsesStreamTextDeltaDeduped,
   harvestResponsesReasoningIncrement,
   isResponsesTerminalEvent,
   type ResponsesFailure,

@@ -239,6 +239,70 @@ export function getResponsesStreamTextDelta(payload: Record<string, unknown>): s
   return '';
 }
 
+/**
+ * 带去重的流文本提取（responses 流）。
+ *
+ * 部分网关（实测 new.hongecb.store /v1/responses）在标准 output_text.delta 之后
+ * 还会发送 content_part.done / output_item.done 事件，且每个 done 事件都携带完整文本；
+ * 若把 done 的完整文本当作增量追加，正文会变成「增量 + 完整文本×N」的重复拼接，
+ * 导致 JSON.parse 必然失败（PARSE_LLM_002）。
+ *
+ * 规则：按 item_id 记录是否已收到过 delta；
+ * - 已收到 delta 的 item，其 done 事件完整文本视为重复，忽略；
+ * - 从未收到 delta 的 item（纯 done 网关），done 完整文本作为正文兜底。
+ */
+export function getResponsesStreamTextDeltaDeduped(
+  payload: Record<string, unknown>,
+  seenItems: Set<string> | undefined
+): string {
+  const type = typeof payload.type === 'string' ? payload.type : '';
+  if (isResponsesTextDeltaType(type)) {
+    return readSeenAwareDelta(payload, seenItems);
+  }
+  if (isResponsesTextDoneType(type)) {
+    return readSeenAwareDone(payload, seenItems);
+  }
+  return '';
+}
+
+function readSeenAwareDelta(
+  payload: Record<string, unknown>,
+  seenItems: Set<string> | undefined
+): string {
+  const delta = readDeltaTextPayload(payload.delta);
+  if (delta && typeof payload.item_id === 'string') {
+    seenItems?.add(payload.item_id);
+  }
+  return delta;
+}
+
+function readSeenAwareDone(
+  payload: Record<string, unknown>,
+  seenItems: Set<string> | undefined
+): string {
+  const itemId = resolveDoneItemId(payload);
+  if (itemId && seenItems?.has(itemId)) {
+    return '';
+  }
+  const doneText = readDoneTextPayload(payload);
+  if (doneText && itemId) {
+    seenItems?.add(itemId);
+  }
+  return doneText;
+}
+
+/** output_item.done 事件的 item id 在 payload.item.id（无顶层 item_id）。 */
+function resolveDoneItemId(payload: Record<string, unknown>): string {
+  if (typeof payload.item_id === 'string' && payload.item_id) {
+    return payload.item_id;
+  }
+  const item = payload.item as { id?: unknown } | undefined;
+  if (item && typeof item === 'object' && typeof item.id === 'string') {
+    return item.id;
+  }
+  return '';
+}
+
 function readReasoningDeltaField(delta: unknown): string {
   if (typeof delta === 'string') return delta;
   if (!delta || typeof delta !== 'object') return '';

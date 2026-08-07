@@ -9,6 +9,7 @@ import {
 } from './skillContextChip';
 import type { DeepChatElement, DeepChatMessage, DeepChatSkillContext } from '../types';
 import { getMessageText, isZwspOnlyText } from '../infra/utils';
+import { isListingPromptContext, sanitizeListingCopy } from './listingCopySanitize';
 
 /** Live generation progress at toolbar end (正在生成回复 · 已收到 N 字). */
 export const TOOLBAR_LIVE_STATUS_CLASS = 'deep-chat-toolbar-live-status';
@@ -531,7 +532,7 @@ function createMessageToolbar(
         getSendIcon(),
         () => {
           void actions.sendToKeywordHunter?.(
-            getMessageContent(bubble, skillContexts),
+            getOutgoingMessageContent(bubble, skillContexts),
             storedMessage
           );
         },
@@ -581,7 +582,7 @@ function createToolbarButton(
 }
 
 function copyMessageContent(bubble: HTMLElement, skillContexts: DeepChatSkillContext[] = []): void {
-  const content = getMessageContent(bubble, skillContexts);
+  const content = getOutgoingMessageContent(bubble, skillContexts);
   if (!content) {
     return;
   }
@@ -605,7 +606,7 @@ function editMessageContent(
   actions: MessageToolbarActions
 ): void {
   const skillContexts = actions.getSkillContexts?.() || [];
-  const content = getMessageContent(bubble, skillContexts);
+  const content = getOutgoingMessageContent(bubble, skillContexts);
   if (!content) {
     return;
   }
@@ -640,6 +641,18 @@ function getMessageContent(
     return serializeChipContainingElement(bubble, skillContexts).trim();
   }
   return (bubble.innerText || bubble.textContent || '').trim();
+}
+
+/**
+ * 消息正文出口（复制 / 推送到 Keyword Hunter / 编辑回填共用）。
+ * Listing 工作流下剥离模型误写入正文的自我审查/开场前言，普通聊天原样返回。
+ */
+function getOutgoingMessageContent(
+  bubble: HTMLElement,
+  skillContexts: DeepChatSkillContext[] = []
+): string {
+  const content = getMessageContent(bubble, skillContexts);
+  return isListingPromptContext() ? sanitizeListingCopy(content) : content;
 }
 
 function formatToolbarTime(timestamp: number | undefined): string {

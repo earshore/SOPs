@@ -220,6 +220,8 @@ export interface OpenAIStreamState {
   firstChunkMs?: number;
   chunkCount: number;
   responseIdReported?: boolean;
+  /** 已收到过 output_text.delta 的 item_id（用于去重 done 事件携带的完整文本）。 */
+  responsesTextSeenItems?: Set<string>;
   /** Last terminal Responses payload (for tool-call harvest after stream). */
   lastResponsesPayload?: Record<string, unknown>;
   /** Accumulated function_call items seen on stream/completed events. */

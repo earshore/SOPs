@@ -11,6 +11,10 @@ import type { ChatMessage } from '@/services/llmService';
 
 import { buildStoredThreadMessages, withVisionAttachmentMetaDisplay } from './conversationContext';
 import {
+  resolveListingDisplayText,
+  withListingDisplaySanitize,
+} from '../composer/listingCopyDisplay';
+import {
   abortPendingDeepChatRequest,
   appendPendingDeepChatAssistantText,
   createPendingDeepChatRequest,
@@ -50,7 +54,7 @@ export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessag
   const pendingRequest = sessionState.pendingRequests.get(thread.id);
   if (!pendingRequest) {
     // Display-only honesty line for vision turns; LLM path uses raw stored text.
-    return withVisionAttachmentMetaDisplay(thread.messages);
+    return withListingDisplaySanitize(withVisionAttachmentMetaDisplay(thread.messages));
   }
 
   const displayMessages = buildStoredThreadMessages(
@@ -74,7 +78,7 @@ export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessag
   );
 
   if (pendingRequest.displayedAssistantText.trim()) {
-    return withoutLivePartial;
+    return withListingDisplaySanitize(withoutLivePartial);
   }
 
   // 占位 AI 槽位：给 deep-chat 一个 host 挂 深度思考 chrome。
@@ -84,16 +88,20 @@ export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessag
   const durationSec = pendingRequest.isSettled
     ? getPendingReasoningDurationSec(pendingRequest)
     : undefined;
-  return withVisionAttachmentMetaDisplay([
-    ...withoutLivePartial,
-    {
-      role: 'ai',
-      text: '\u200b',
-      createdAt: pendingRequest.startedAt,
-      ...(pendingRequest.reasoningText.trim() ? { reasoning: pendingRequest.reasoningText } : {}),
-      ...(typeof durationSec === 'number' ? { reasoningDurationSec: durationSec } : {}),
-    },
-  ]);
+  return withListingDisplaySanitize(
+    withVisionAttachmentMetaDisplay([
+      ...withoutLivePartial,
+      {
+        role: 'ai',
+        text: '\u200b',
+        createdAt: pendingRequest.startedAt,
+        ...(pendingRequest.reasoningText.trim()
+          ? { reasoning: pendingRequest.reasoningText }
+          : {}),
+        ...(typeof durationSec === 'number' ? { reasoningDurationSec: durationSec } : {}),
+      },
+    ])
+  );
 }
 
 /**
@@ -255,7 +263,8 @@ export function renderPendingAssistantDisplay(
   }
 
   // 空内容时不把「正在生成」写进气泡正文，改由气泡前 inline status 展示
-  const text = pendingRequest.displayedAssistantText.trim() || '\u200b';
+  // 展示层净化：Listing 工作流下折叠模型写进正文开头的自我审查/开场前言（不改存储原文）
+  const text = resolveListingDisplayText(pendingRequest.displayedAssistantText.trim() || '\u200b');
   if (typeof chat.addMessage === 'function') {
     chat.addMessage({ role: 'ai', text, overwrite: true }, true);
     return;
