@@ -35,6 +35,30 @@ export default {
       ...generatedConfig.theme.extend,
 
       // 项目特定的扩展配置
+      colors: {
+        ...generatedConfig.theme.extend.colors,
+        // 语义色键：blue-* → primary（跟随 Appearance），indigo-* → accent。
+        // 值全部 var() 引用运行时 token（ThemeManager 注入），换肤自动生效。
+        primary: {
+          DEFAULT: 'var(--color-primary)',
+          100: 'var(--color-primary-light)',
+          400: 'var(--color-primary)',
+          500: 'var(--color-primary)',
+          600: 'var(--color-primary-dark)',
+          700: 'var(--color-primary-darker)',
+          800: 'var(--color-primary-darker)',
+        },
+        accent: {
+          DEFAULT: 'var(--color-accent)',
+          100: 'var(--color-accent-light)',
+          400: 'var(--color-accent)',
+          500: 'var(--color-accent)',
+          600: 'var(--color-accent)',
+          700: 'var(--color-accent)',
+          800: 'var(--color-accent)',
+        },
+      },
+
       boxShadow: {
         ...generatedConfig.theme.extend.boxShadow,
         // 彩色阴影（项目特有）

@@ -22,8 +22,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-100:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 18%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-200:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 26%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 12%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50\/20:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 4%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50\/30:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 4%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50\/50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 6%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50\/60:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 7%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-blue-50\/70:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-blue-400) 8%, transparent); }
