@@ -226,6 +226,7 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .text-rose-700:not(.twb-keep) { color: var(--color-rose-300); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-rose-700\/80:not(.twb-keep) { color: color-mix(in srgb, var(--color-rose-300) 80%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-rose-800:not(.twb-keep) { color: var(--color-rose-300); }
+:is(.dark, [data-color-mode-resolved="dark"]) .text-rose-900:not(.twb-keep) { color: var(--color-rose-200); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-sky-500:not(.twb-keep) { color: var(--color-sky-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-sky-600:not(.twb-keep) { color: var(--color-sky-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-sky-600\/80:not(.twb-keep) { color: color-mix(in srgb, var(--color-sky-400) 80%, transparent); }
