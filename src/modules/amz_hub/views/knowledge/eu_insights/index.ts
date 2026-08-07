@@ -81,7 +81,7 @@ class EuInsightsModule extends BaseModule {
                     <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
                         <span class="text-3xl">${this.getFlagEmoji(code)}</span> ${escapeHtml(data.name)}
                     </h2>
-                    <span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold uppercase rounded-full">Mature Market</span>
+                    <span class="px-3 py-1 bg-accent-100 text-accent-600 text-xs font-bold uppercase rounded-full">Mature Market</span>
                 </div>
                 <div class="space-y-4">
                     <div>

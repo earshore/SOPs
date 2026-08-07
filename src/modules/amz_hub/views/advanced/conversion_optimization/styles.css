@@ -2,6 +2,8 @@
   .cvo-page
     > :nth-child(n + 2):where(
       .bg-white,
+      .bg-primary-100,
+      .bg-accent-100,
       .bg-slate-50,
       .bg-blue-50,
       .bg-emerald-50,
@@ -33,6 +35,8 @@
     > :nth-child(n + 2)
     :is([class^='p-'], [class*=' p-']):where(
       .bg-white,
+      .bg-primary-100,
+      .bg-accent-100,
       .bg-slate-50,
       .bg-blue-50,
       .bg-emerald-50,
@@ -51,6 +55,8 @@
     > :nth-child(n + 2)
     :is([class^='p-'], [class*=' p-']):where(
       .bg-slate-50,
+      .bg-primary-100,
+      .bg-accent-100,
       .bg-blue-50,
       .bg-emerald-50,
       .bg-rose-50,

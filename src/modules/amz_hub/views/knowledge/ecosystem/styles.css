@@ -11,6 +11,8 @@
     > :nth-child(n + 2)
     :is([class^='p-'], [class*=' p-']):where(
       .bg-white,
+      .bg-primary-100,
+      .bg-accent-100,
       .bg-slate-50,
       .bg-gray-100,
       .bg-gray-200,
@@ -31,6 +33,8 @@
     > :nth-child(n + 2)
     :is([class^='p-'], [class*=' p-']):where(
       .bg-slate-50,
+      .bg-primary-100,
+      .bg-accent-100,
       .bg-gray-100,
       .bg-gray-200,
       .bg-blue-50,
