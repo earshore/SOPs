@@ -26,10 +26,16 @@ describe('Scraper template accessibility semantics', () => {
       throw new Error('Expected an opening input tag with id="import-file-input"');
     }
 
-    expect(template.match(/data-scraper-import-trigger/g)).toHaveLength(2);
+    expect(template.match(/data-scraper-import-trigger/g)).toHaveLength(1);
+    expect(template.match(/data-scraper-merge-trigger/g)).toHaveLength(1);
+    expect(template.match(/data-scraper-overwrite-trigger/g)).toHaveLength(1);
     expect(template).not.toContain('@click="triggerImport()"');
     expect(hiddenFileInput).toContain('aria-label="导入 JSON 产品数据文件"');
-    expect(template).toContain('aria-label="重新导入 JSON 产品数据文件"');
+    expect(template).toContain('aria-label="合并导入 JSON 产品数据文件"');
+    expect(template).toContain('aria-label="覆盖导入 JSON 产品数据文件"');
+    expect(template).toContain('id="overwrite-file-input"');
+    expect(template).toContain("handleImportFiles($event, 'merge')");
+    expect(template).toContain("handleImportFiles($event, 'overwrite')");
     // Focus ring is Appearance-tokenized (theme Phase 1–2), not hard blue.
     expect(template).toContain(
       'focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))]'
@@ -40,7 +46,8 @@ describe('Scraper template accessibility semantics', () => {
     expect(emptyStateButton).not.toContain('@keydown.space.prevent="triggerImport()"');
     expect(template).toContain('id="scraper-import-status"');
     expect(emptyStateButton).toContain('aria-describedby="scraper-import-status"');
-    expect(template).toContain('aria-describedby="scraper-reimport-help scraper-import-status"');
+    expect(template).toContain('aria-describedby="scraper-merge-help scraper-import-status"');
+    expect(template).toContain('aria-describedby="scraper-overwrite-help scraper-import-status"');
     expect(template).toContain(':role="importStatusRole"');
     expect(template).toContain(':aria-live="importStatusLive"');
     expect(hiddenFileInput).toContain('aria-describedby="scraper-import-status"');

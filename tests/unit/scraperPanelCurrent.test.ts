@@ -432,7 +432,7 @@ it('imports files, deletes data, and handles delete results', async () => {
   expect(scraperMocks.appState.setScrapedData).toHaveBeenCalledWith(importedData);
   expect(scraperMocks.appState.setAnalysisReport).toHaveBeenCalledWith(null);
   expect(scraperMocks.appState.setSelectedSite).toHaveBeenCalledWith('UK');
-  expect(panel.importStatus).toBe('导入完成：1 个 ASIN 已更新。');
+  expect(panel.importStatus).toBe('合并导入完成：1 个 ASIN 已更新。');
   expect(panel.importStatusRole).toBe('status');
   expect(input.hasAttribute('aria-invalid')).toBe(false);
   expect(input.value).toBe('');

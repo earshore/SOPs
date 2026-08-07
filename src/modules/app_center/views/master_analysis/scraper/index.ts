@@ -39,6 +39,31 @@ const scraperModule = createAlpinePanelModule({
         }
       });
     });
+
+    // 覆盖导入：打开覆盖模式隐藏文件输入框
+    const overwriteInput = container.querySelector<HTMLInputElement>('#overwrite-file-input');
+    container.querySelectorAll<HTMLElement>('[data-scraper-overwrite-trigger]').forEach(trigger => {
+      module.bindEventListener(trigger, 'click', () => {
+        if (!openFilePicker(overwriteInput)) {
+          showToast('无法打开文件选择器', {
+            type: 'error',
+            description: '请刷新页面后重试，或重新进入数据采集页面。',
+          });
+        }
+      });
+    });
+
+    // 合并导入：打开合并模式隐藏文件输入框
+    container.querySelectorAll<HTMLElement>('[data-scraper-merge-trigger]').forEach(trigger => {
+      module.bindEventListener(trigger, 'click', () => {
+        if (!openFilePicker(input)) {
+          showToast('无法打开文件选择器', {
+            type: 'error',
+            description: '请刷新页面后重试，或重新进入数据采集页面。',
+          });
+        }
+      });
+    });
   },
   logPrefix: 'Scraper',
 });

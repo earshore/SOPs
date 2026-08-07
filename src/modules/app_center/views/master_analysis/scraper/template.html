@@ -158,33 +158,63 @@
           </button>
           <!-- Data Cards Container with Click-to-Import Overlay -->
           <div class="hidden" id="data-cards-wrapper">
-            <!-- Floating Import Trigger -->
-            <button
-              type="button"
-              data-scraper-import-trigger
-              class="import-trigger mb-4 w-full appearance-none p-4 rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-r from-slate-50/50 to-white hover:border-primary-100 hover:bg-primary-100/30 cursor-pointer group flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2"
-              aria-label="重新导入 JSON 产品数据文件"
-              aria-describedby="scraper-reimport-help scraper-import-status"
-            >
-              <div
-                class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center group-hover:border-primary-100 group-hover:bg-primary-100 transition duration-200"
+            <!-- Import Triggers: 覆盖导入 + 合并导入 -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <!-- 覆盖导入：清空现有数据并替换为文件内容 -->
+              <button
+                type="button"
+                data-scraper-overwrite-trigger
+                class="import-trigger mb-4 w-full appearance-none p-4 rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-r from-slate-50/50 to-white hover:border-primary-100 hover:bg-primary-100/30 cursor-pointer group flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2"
+                aria-label="覆盖导入 JSON 产品数据文件（将清空现有数据）"
+                aria-describedby="scraper-overwrite-help scraper-import-status"
               >
-                <i
-                  class="fas fa-file-import text-slate-400 group-hover:text-primary-500 transition-colors duration-300"
-                ></i>
-              </div>
-              <div class="flex flex-col">
-                <span
-                  class="text-sm font-semibold text-slate-700 group-hover:text-primary-600 transition-colors duration-300"
-                  >重新导入</span
+                <div
+                  class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center group-hover:border-primary-100 group-hover:bg-primary-100 transition duration-200"
                 >
-                <span
-                  id="scraper-reimport-help"
-                  class="text-xs text-slate-400 group-hover:text-primary-500 transition-colors duration-300"
-                  >点击选择 JSON 文件</span
+                  <i
+                    class="fas fa-file-circle-xmark text-slate-400 group-hover:text-primary-500 transition-colors duration-300"
+                  ></i>
+                </div>
+                <div class="flex flex-col">
+                  <span
+                    class="text-sm font-semibold text-slate-700 group-hover:text-primary-600 transition-colors duration-300"
+                    >覆盖导入</span
+                  >
+                  <span
+                    id="scraper-overwrite-help"
+                    class="text-xs text-slate-400 group-hover:text-primary-500 transition-colors duration-300"
+                    >清空现有数据并替换为文件内容</span
+                  >
+                </div>
+              </button>
+              <!-- 合并导入：覆盖同 ASIN 并合并评论 -->
+              <button
+                type="button"
+                data-scraper-merge-trigger
+                class="import-trigger mb-4 w-full appearance-none p-4 rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-r from-slate-50/50 to-white hover:border-primary-100 hover:bg-primary-100/30 cursor-pointer group flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2"
+                aria-label="合并导入 JSON 产品数据文件"
+                aria-describedby="scraper-merge-help scraper-import-status"
+              >
+                <div
+                  class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center group-hover:border-primary-100 group-hover:bg-primary-100 transition duration-200"
                 >
-              </div>
-            </button>
+                  <i
+                    class="fas fa-file-import text-slate-400 group-hover:text-primary-500 transition-colors duration-300"
+                  ></i>
+                </div>
+                <div class="flex flex-col">
+                  <span
+                    class="text-sm font-semibold text-slate-700 group-hover:text-primary-600 transition-colors duration-300"
+                    >合并导入</span
+                  >
+                  <span
+                    id="scraper-merge-help"
+                    class="text-xs text-slate-400 group-hover:text-primary-500 transition-colors duration-300"
+                    >追加导入新数据，相同 ASIN 仅追加导入评论</span
+                  >
+                </div>
+              </button>
+            </div>
             <div class="space-y-4" id="data-cards"></div>
           </div>
           <p
@@ -973,15 +1003,25 @@ B0EXAMPLE1"
       </div>
     </div>
   </div>
-  <!-- Hidden File Input for JSON Import -->
+  <!-- Hidden File Inputs for JSON Import（merge / overwrite 各一个） -->
   <input
-    @change="handleImportFiles($event)"
+    @change="handleImportFiles($event, 'merge')"
     accept=".json"
     class="hidden"
     id="import-file-input"
     multiple=""
     type="file"
     aria-label="导入 JSON 产品数据文件"
+    aria-describedby="scraper-import-status"
+  />
+  <input
+    @change="handleImportFiles($event, 'overwrite')"
+    accept=".json"
+    class="hidden"
+    id="overwrite-file-input"
+    multiple=""
+    type="file"
+    aria-label="覆盖导入 JSON 产品数据文件"
     aria-describedby="scraper-import-status"
   />
 </div>

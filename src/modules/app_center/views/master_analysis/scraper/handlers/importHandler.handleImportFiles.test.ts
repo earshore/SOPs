@@ -104,7 +104,7 @@ describe('handleImportFiles', () => {
     expect(eventBus.emit).toHaveBeenCalledWith(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, result.data);
     expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.DATA_UPDATED);
     expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.HISTORY_UPDATED);
-    expect(showToast).toHaveBeenCalledWith('成功导入并合并 1 个ASIN (基准站点: FR)', {
+    expect(showToast).toHaveBeenCalledWith('成功合并导入 1 个ASIN (基准站点: FR)', {
       type: 'success',
     });
   });
@@ -127,7 +127,7 @@ describe('handleImportFiles', () => {
     expect(document.querySelector('[x-init]')).toBeNull();
   });
 
-  it('keeps the selected marketplace product as the merge master when current data already has the same ASIN', () => {
+  it('keeps existing fields and appends only reviews for ASINs already in current data', () => {
     const currentProduct = createProduct('DE', 'Existing DE title', [
       createReview('R-SAME', 'Existing duplicate review'),
       createReview('R-DE', 'Existing DE review'),
@@ -150,16 +150,17 @@ describe('handleImportFiles', () => {
     const mergedProduct = result[0];
     if (!mergedProduct) throw new Error('Expected merged product');
 
-    expect(mergedProduct.productTitle).toBe('Selected FR title');
-    expect(mergedProduct.feature_bullets).toEqual(['FR bullet']);
+    // 同 ASIN 已存在：保留现有字段（标题/五点），导入仅追加评论
+    expect(mergedProduct.productTitle).toBe('Existing DE title');
+    expect(mergedProduct.feature_bullets).toEqual(['DE bullet']);
     expect(mergedProduct.customer_reviews.find(review => review.id === 'R-SAME')?.headline).toBe(
-      'Selected FR duplicate review'
+      'Existing duplicate review'
     );
     expect(mergedProduct.customer_reviews.map(review => review.id)).toEqual([
       'R-SAME',
+      'R-DE',
       'R-FR',
       'R-IT',
-      'R-DE',
     ]);
   });
   it('keeps existing ASINs that are not re-imported when merging in batches', () => {
@@ -180,5 +181,114 @@ describe('handleImportFiles', () => {
     expect(result.map(product => product.asin)).toEqual(['B0TEST0001', 'B0TEST0002']);
     expect(result[0]?.customer_reviews.map(review => review.id)).toEqual(['R-A1']);
     expect(result[1]?.customer_reviews.map(review => review.id)).toEqual(['R-B1']);
+  });
+
+  it('overwrite mode replaces existing products with imported ones', async () => {
+    const currentProduct = {
+      asin: 'B0TEST0001',
+      url: 'https://example.test/dp/B0TEST0001',
+      language: 'French',
+      productTitle: 'Existing A title',
+      feature_bullets: ['Existing bullet'],
+      customer_reviews: [createReview('R-X', 'Existing review')],
+      scrape_status: 'success',
+      error: '',
+    };
+    const importedProductX = {
+      ...currentProduct,
+      productTitle: 'Imported B title',
+      feature_bullets: ['Imported bullet'],
+      customer_reviews: [createReview('R-X2', 'Imported review')],
+    };
+    const importedProductY = {
+      ...currentProduct,
+      asin: 'B0TEST0002',
+      url: 'https://example.test/dp/B0TEST0002',
+      productTitle: 'New Y title',
+      feature_bullets: ['Y bullet'],
+      customer_reviews: [createReview('R-Y', 'Y review')],
+    };
+    const currentData: ScrapedData = {
+      ...createImportData('FR'),
+      products: [currentProduct],
+    };
+    const importedData: ScrapedData = {
+      ...createImportData('FR'),
+      products: [importedProductX, importedProductY],
+    };
+
+    const result = await handleImportFiles(
+      [createImportFile(importedData)],
+      currentData,
+      'FR',
+      'overwrite'
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.data?.products).toHaveLength(2);
+
+    // 已存在的 ASIN X 被导入版本整体覆盖：标题/五点/评论全部替换为导入数据，旧数据清空
+    const productX = result.data?.products.find(product => product.asin === 'B0TEST0001');
+    expect(productX?.productTitle).toBe('Imported B title');
+    expect(productX?.feature_bullets).toEqual(['Imported bullet']);
+    expect(productX?.customer_reviews.map(review => review.id)).toEqual(['R-X2']);
+
+    // 新 ASIN Y 被加入
+    const productY = result.data?.products.find(product => product.asin === 'B0TEST0002');
+    expect(productY?.productTitle).toBe('New Y title');
+    expect(productY?.customer_reviews.map(review => review.id)).toEqual(['R-Y']);
+  });
+
+  it('overwrite mode shows the overwrite toast message', async () => {
+    const currentData = createImportData('FR');
+    const importedData: ScrapedData = {
+      ...createImportData('FR'),
+      products: [
+        {
+          ...createImportData('FR').products[0],
+          asin: 'B0TEST0002',
+          url: 'https://example.test/dp/B0TEST0002',
+          productTitle: 'New Y title',
+        },
+      ],
+    };
+
+    const result = await handleImportFiles(
+      [createImportFile(importedData)],
+      currentData,
+      'FR',
+      'overwrite'
+    );
+
+    expect(result.success).toBe(true);
+    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('成功覆盖导入'), {
+      type: 'success',
+    });
+  });
+
+  it('overwrite mode drops existing ASINs entirely', () => {
+    const existing = createProduct('DE', 'Existing title', [createReview('R-1', 'Existing review')]);
+    const importedB = {
+      ...createProduct('FR', 'Imported B title', [createReview('R-B', 'Imported B review')]),
+      asin: 'B0TEST0002',
+    };
+
+    // overwrite 模式：清空替换，现有 ASIN X 被丢弃，结果只含导入的 Y
+    const overwriteResult = mergeProducts(
+      new Map([['B0TEST0002', [importedB]]]),
+      'FR',
+      new Map([['B0TEST0001', existing]]),
+      'overwrite'
+    );
+    expect(overwriteResult.map(product => product.asin)).toEqual(['B0TEST0002']);
+
+    // merge 模式：未被导入覆盖的现有 ASIN X 保留
+    const mergeResult = mergeProducts(
+      new Map([['B0TEST0002', [importedB]]]),
+      'FR',
+      new Map([['B0TEST0001', existing]]),
+      'merge'
+    );
+    expect(mergeResult.map(product => product.asin)).toEqual(['B0TEST0001', 'B0TEST0002']);
   });
 });

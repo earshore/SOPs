@@ -22,6 +22,11 @@ type FileReadReject = (reason?: unknown) => void;
 type ImportedProductWithSource = ScrapedProduct & { _source_site?: string; _filename?: string };
 type ImportedProductPool = Map<string, ImportedProductWithSource[]>;
 
+/**
+ * 导入模式：merge 保留未覆盖 ASIN 并整体覆盖已存在 ASIN，overwrite 清空替换仅保留本次导入的 ASIN
+ */
+export type ImportMode = 'merge' | 'overwrite';
+
 interface ImportCollectionContext {
   productPool: ImportedProductPool;
   detectedSites: Set<string>;
@@ -198,7 +203,9 @@ function getBaseProductVersion(
   masterVersion: ImportedProductWithSource | undefined,
   existingVersion: ScrapedProduct | undefined
 ): ScrapedProduct | undefined {
-  return masterVersion || existingVersion || versions[0];
+  // 同 ASIN 已存在时保留现有字段（标题/五点），导入版本仅作为评论来源并入；
+  // 新 ASIN 或覆盖导入（无现有版本）时才以导入版本为基准。
+  return existingVersion || masterVersion || versions[0];
 }
 
 function collectReviewSources(
@@ -206,11 +213,12 @@ function collectReviewSources(
   masterVersion: ImportedProductWithSource | undefined,
   existingVersion: ScrapedProduct | undefined
 ): Array<ScrapedProduct & { _source_site?: string }> {
+  // 同 ASIN 已存在时现有评论优先，导入评论仅追加新签名（去重后保留现有版本）。
   if (masterVersion) {
     return [
+      ...(existingVersion ? [existingVersion] : []),
       masterVersion,
       ...versions.filter(version => version !== masterVersion),
-      ...(existingVersion ? [existingVersion] : []),
     ];
   }
 
@@ -278,14 +286,18 @@ function mergeProductVersions(
 export function mergeProducts(
   productPool: Map<string, Array<ScrapedProduct & { _source_site?: string; _filename?: string }>>,
   targetMarketplace: string,
-  currentProductsMap: Map<string, ScrapedProduct>
+  currentProductsMap: Map<string, ScrapedProduct>,
+  mode: ImportMode = 'merge'
 ): ProductData[] {
   const finalProducts: ProductData[] = [];
 
-  // 保留当前已有、但本次导入未覆盖的 ASIN（分批导入时追加拼合，避免覆盖丢失）
-  for (const [asin, product] of currentProductsMap.entries()) {
-    if (!productPool.has(asin)) {
-      finalProducts.push(product);
+  // 保留当前已有、但本次导入未覆盖的 ASIN（merge 分批导入时拼合，避免覆盖丢失）
+  // overwrite 模式：清空替换，不保留任何现有 ASIN，跳过本循环
+  if (mode === 'merge') {
+    for (const [asin, product] of currentProductsMap.entries()) {
+      if (!productPool.has(asin)) {
+        finalProducts.push(product);
+      }
     }
   }
 
@@ -293,7 +305,8 @@ export function mergeProducts(
     const mergedProduct = mergeProductVersions(
       versions,
       targetMarketplace,
-      currentProductsMap.get(asin)
+      // overwrite 模式下不传入现有版本，标题/五点/评论全部来自导入文件，不并入旧数据
+      mode === 'overwrite' ? undefined : currentProductsMap.get(asin)
     );
     if (mergedProduct) {
       finalProducts.push(mergedProduct);
@@ -731,7 +744,8 @@ function getMarketplaceHeader(
 
 function createImportedScrapedData(
   finalProducts: ProductData[],
-  targetMarketplace: string
+  targetMarketplace: string,
+  mode: ImportMode
 ): ScrapedData {
   const marketplaceHeader = getMarketplaceHeader(targetMarketplace);
 
@@ -740,7 +754,7 @@ function createImportedScrapedData(
       marketplace: targetMarketplace,
       scrape_timestamp: new Date().toISOString(),
       total_asins: finalProducts.length,
-      last_action: 'multi_site_import_merge',
+      last_action: mode === 'merge' ? 'merge_import' : 'overwrite_import',
       // Used by 最近作业 journey captions (数据采集 → 数据来源).
       data_source: 'json_import',
       domain: marketplaceHeader?.domain || 'unknown',
@@ -772,7 +786,8 @@ function createImportUserMessage(errorMessage: string): string {
 export async function handleImportFiles(
   files: File[],
   currentScrapedData: ScrapedData | null,
-  selectedSite: ScraperSite
+  selectedSite: ScraperSite,
+  mode: ImportMode = 'merge'
 ): Promise<ImportResult> {
   try {
     validateImportFiles(files);
@@ -808,9 +823,9 @@ export async function handleImportFiles(
     const currentProductsMap = new Map<string, ScrapedProduct>(
       (currentScrapedData?.products || []).map((p: ScrapedProduct) => [p.asin, p])
     );
-    const finalProducts = mergeProducts(productPool, targetMarketplace, currentProductsMap);
+    const finalProducts = mergeProducts(productPool, targetMarketplace, currentProductsMap, mode);
 
-    const scrapedData = createImportedScrapedData(finalProducts, targetMarketplace);
+    const scrapedData = createImportedScrapedData(finalProducts, targetMarketplace, mode);
 
     await HistoryService.saveAsync(scrapedData);
 
@@ -819,7 +834,8 @@ export async function handleImportFiles(
     eventBus.emit(APP_EVENTS.DATA_UPDATED);
     emitHistoryUpdated();
 
-    showToast(`成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, {
+    const actionLabel = mode === 'merge' ? '合并导入' : '覆盖导入';
+    showToast(`成功${actionLabel} ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, {
       type: 'success',
     });
 

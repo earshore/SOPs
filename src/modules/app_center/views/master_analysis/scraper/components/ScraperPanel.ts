@@ -31,7 +31,10 @@ import {
   saveScrapeSnapshot,
   updateTask,
 } from '../handlers/scrapeHandler';
-import { handleImportFiles as handleImportFilesCore } from '../handlers/importHandler';
+import {
+  handleImportFiles as handleImportFilesCore,
+  type ImportMode,
+} from '../handlers/importHandler';
 import {
   deleteProduct as deleteProductCore,
   deleteReview as deleteReviewCore,
@@ -762,26 +765,52 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
     }
   },
 
-  async handleImportFiles(event: Event): Promise<void> {
+  async handleImportFiles(event: Event, mode: ImportMode = 'merge'): Promise<void> {
     const target = event.target as HTMLInputElement;
     const files = Array.from(target.files || []);
     if (files.length === 0) return;
 
+    // 覆盖导入会清空现有数据，属于破坏性操作，导入前需用户确认
+    if (mode === 'overwrite') {
+      const confirmed = await confirmWithModal(
+        '覆盖导入',
+        '将清空当前全部产品数据并用文件内容替换，确定继续吗？',
+        '',
+        '确认覆盖'
+      );
+      if (!confirmed) return;
+    }
+
     setImportStatus(this, target, `正在导入 ${files.length} 个 JSON 文件...`, 'status');
 
     try {
+      // 导入前的当前数据（可能为 null，按 0 处理）
+      const currentData = appStore.getState().scraper.scrapedData;
       const result: ImportResult = await handleImportFilesCore(
         files,
-        appStore.getState().scraper.scrapedData,
-        this.selectedSite
+        currentData,
+        this.selectedSite,
+        mode
       );
 
       if (result.success && result.data) {
         applyImportedData(this, result.data);
+
+        if (mode === 'overwrite') {
+          // 覆盖模式：清空替换，直接显示文件导入的 ASIN 数量
+          setImportStatus(
+            this,
+            target,
+            `覆盖导入完成：${result.data.products?.length || 0} 个 ASIN。`,
+            'status'
+          );
+          return;
+        }
+
         setImportStatus(
           this,
           target,
-          `导入完成：${result.data.products?.length || 0} 个 ASIN 已更新。`,
+          `合并导入完成：${result.data.products?.length || 0} 个 ASIN 已更新。`,
           'status'
         );
         return;
