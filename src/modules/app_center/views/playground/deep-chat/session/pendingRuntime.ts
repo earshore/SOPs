@@ -95,9 +95,7 @@ export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessag
         role: 'ai',
         text: '\u200b',
         createdAt: pendingRequest.startedAt,
-        ...(pendingRequest.reasoningText.trim()
-          ? { reasoning: pendingRequest.reasoningText }
-          : {}),
+        ...(pendingRequest.reasoningText.trim() ? { reasoning: pendingRequest.reasoningText } : {}),
         ...(typeof durationSec === 'number' ? { reasoningDurationSec: durationSec } : {}),
       },
     ])

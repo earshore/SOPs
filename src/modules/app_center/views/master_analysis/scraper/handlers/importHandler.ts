@@ -835,9 +835,12 @@ export async function handleImportFiles(
     emitHistoryUpdated();
 
     const actionLabel = mode === 'merge' ? '合并导入' : '覆盖导入';
-    showToast(`成功${actionLabel} ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, {
-      type: 'success',
-    });
+    showToast(
+      `成功${actionLabel} ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`,
+      {
+        type: 'success',
+      }
+    );
 
     return { success: true, data: scrapedData };
   } catch (error) {

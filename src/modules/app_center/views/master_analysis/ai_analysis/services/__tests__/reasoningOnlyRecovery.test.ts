@@ -18,7 +18,7 @@ const callLLM = vi.fn();
 // 模拟三个调用点（reviewEvidencePipeline / sellingPointsPipeline / parallelAnalysisService）的接入形态：
 // 恢复时追加恢复 prompt + 关闭推理，其余参数保持不变。
 function buildCallAnalysis(prompt: string): Promise<string> {
-  return callWithReasoningOnlyRecovery((recovery) => {
+  return callWithReasoningOnlyRecovery(recovery => {
     const messages = [
       { role: 'system', content: '系统提示' },
       { role: 'user', content: recovery ? buildRecoveryPrompt(prompt) : prompt },
@@ -96,9 +96,9 @@ describe('callWithReasoningOnlyRecovery', () => {
     const secondContent = (secondMessages[1] as { content: string }).content;
     expect(secondContent).toContain('不要输出 reasoning');
     expect(secondContent).toContain('原始 prompt');
-    expect(
-      (secondOptions as { reasoningPrefs: { enabled: boolean } }).reasoningPrefs.enabled
-    ).toBe(false);
+    expect((secondOptions as { reasoningPrefs: { enabled: boolean } }).reasoningPrefs.enabled).toBe(
+      false
+    );
   });
 
   it('PARSE_LLM_001 失败时同样重试一次', async () => {
@@ -161,7 +161,7 @@ describe('管线形态：解析放入恢复闭包（callAnalysisJson 接入形�
 
   // 模拟三处管线：闭包内先 callLLM 再解析；解析抛 PARSE_LLM_002 时由恢复包装器重试一次
   function buildCallAnalysisWithParse(prompt: string): Promise<unknown> {
-    return callWithReasoningOnlyRecovery((recovery) => {
+    return callWithReasoningOnlyRecovery(recovery => {
       const messages = [
         { role: 'system', content: '系统提示' },
         { role: 'user', content: recovery ? buildRecoveryPrompt(prompt) : prompt },
@@ -196,9 +196,9 @@ describe('管线形态：解析放入恢复闭包（callAnalysisJson 接入形�
     const secondContent = (secondMessages[1] as { content: string }).content;
     expect(secondContent).toContain('不要输出 reasoning');
     expect(secondContent).toContain('原始 prompt');
-    expect(
-      (secondOptions as { reasoningPrefs: { enabled: boolean } }).reasoningPrefs.enabled
-    ).toBe(false);
+    expect((secondOptions as { reasoningPrefs: { enabled: boolean } }).reasoningPrefs.enabled).toBe(
+      false
+    );
   });
 
   it('解析持续失败（重试仍是推理文本）时只重试一次并抛出 PARSE_LLM_002', async () => {

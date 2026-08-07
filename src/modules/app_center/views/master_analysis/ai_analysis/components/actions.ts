@@ -21,10 +21,7 @@ import { generateMarkdownReport, generateJsonReportData } from '../services/repo
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
 import type { Product } from '../config/sampleData';
-import {
-  estimateAnalysisTime,
-  estimateAnalysisWorkload,
-} from '../services/analysisTimeEstimator';
+import { estimateAnalysisTime, estimateAnalysisWorkload } from '../services/analysisTimeEstimator';
 import {
   getAnalysisReasoningEffortLabel,
   getAnalysisReasoningPrefs,
@@ -420,8 +417,6 @@ function getProductsForAnalysis(context: AlpineContext): Product[] {
   );
 }
 
-
-
 async function prepareAnalysisRun(
   context: AlpineContext,
   selectedTargets: string[],
@@ -464,8 +459,7 @@ async function prepareAnalysisRun(
     reasoning: reasoningPrefs,
   });
   const hygienePart = workload.hygieneHits > 0 ? `，证据清洗约 ${workload.hygieneHits} 条` : '';
-  const cachePart =
-    cachedCount > 0 ? `，缓存命中 ${cachedCount}/${selectedTargets.length} 维` : '';
+  const cachePart = cachedCount > 0 ? `，缓存命中 ${cachedCount}/${selectedTargets.length} 维` : '';
   showToast(
     `正在分析 ${products.length} 个 ASIN · ${depthLabel}档 · ${getAnalysisReasoningEffortLabel(reasoningPrefs)}推理 · 预计 ${timeEstimate.label} · 约 ${workload.mapCalls} 次分片调用${hygienePart}${cachePart}`,
     { type: 'info' }

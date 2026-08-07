@@ -184,7 +184,7 @@ describe('handleImportFiles', () => {
   });
 
   it('overwrite mode replaces existing products with imported ones', async () => {
-    const currentProduct = {
+    const currentProduct: ScrapedProduct = {
       asin: 'B0TEST0001',
       url: 'https://example.test/dp/B0TEST0001',
       language: 'French',
@@ -241,11 +241,13 @@ describe('handleImportFiles', () => {
 
   it('overwrite mode shows the overwrite toast message', async () => {
     const currentData = createImportData('FR');
+    const baseProduct = createImportData('FR').products[0];
+    if (!baseProduct) throw new Error('Expected a base product');
     const importedData: ScrapedData = {
       ...createImportData('FR'),
       products: [
         {
-          ...createImportData('FR').products[0],
+          ...baseProduct,
           asin: 'B0TEST0002',
           url: 'https://example.test/dp/B0TEST0002',
           productTitle: 'New Y title',
@@ -267,7 +269,9 @@ describe('handleImportFiles', () => {
   });
 
   it('overwrite mode drops existing ASINs entirely', () => {
-    const existing = createProduct('DE', 'Existing title', [createReview('R-1', 'Existing review')]);
+    const existing = createProduct('DE', 'Existing title', [
+      createReview('R-1', 'Existing review'),
+    ]);
     const importedB = {
       ...createProduct('FR', 'Imported B title', [createReview('R-B', 'Imported B review')]),
       asin: 'B0TEST0002',

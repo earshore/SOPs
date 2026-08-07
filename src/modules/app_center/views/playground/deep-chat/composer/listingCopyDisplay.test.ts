@@ -49,7 +49,7 @@ describe('withListingDisplaySanitize（历史渲染列表净化）', () => {
     expect(result[0]).toBe(userMessage);
     // AI 消息克隆并净化
     expect(result[1]).not.toBe(aiMessage);
-    expect(result[1].text).toBe('1. Title: Kabellose Ohrhörer mit langer Akkulaufzeit');
+    expect(result[1]?.text).toBe('1. Title: Kabellose Ohrhörer mit langer Akkulaufzeit');
     // 不污染入参
     expect(aiMessage.text).toBe(prefaceText);
   });

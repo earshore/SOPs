@@ -735,7 +735,7 @@ async function executeDirectAnalysisTask(
   task.estimatedInputTokens = estimateTokenCount(
     messages.map(message => message.content).join('\n')
   );
-  const data = await callWithReasoningOnlyRecovery(async (recovery) => {
+  const data = await callWithReasoningOnlyRecovery(async recovery => {
     // 非恢复轮按证据深度设置推理等级（fast 关闭推理）；恢复轮强制关闭推理，优先级更高
     const reasoningPrefs = recovery
       ? ({ enabled: false, effort: 'medium' } as const)

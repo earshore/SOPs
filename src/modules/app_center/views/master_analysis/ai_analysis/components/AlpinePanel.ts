@@ -1148,11 +1148,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   get hasFailedAnalysis(): boolean {
-    return (
-      this.hasReport &&
-      !this.isAnalyzing &&
-      (this.analysisRunSummary?.failedCount || 0) > 0
-    );
+    return this.hasReport && !this.isAnalyzing && (this.analysisRunSummary?.failedCount || 0) > 0;
   },
 
   get failedTargetLabels(): string {

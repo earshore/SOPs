@@ -302,7 +302,11 @@ describe('getResponsesStreamTextDeltaDeduped', () => {
       getResponsesStreamTextDeltaDeduped(
         {
           type: 'response.output_item.done',
-          item: { id: 'msg_9', type: 'message', content: [{ type: 'output_text', text: '{"d":4}' }] },
+          item: {
+            id: 'msg_9',
+            type: 'message',
+            content: [{ type: 'output_text', text: '{"d":4}' }],
+          },
         },
         seen
       )
@@ -322,7 +326,10 @@ describe('getResponsesStreamTextDeltaDeduped', () => {
       )
     ).toBe('{"c":3}');
     expect(
-      getResponsesStreamTextDeltaDeduped({ type: 'response.output_text.delta', item_id: 'msg_2', delta: 'x' }, undefined)
+      getResponsesStreamTextDeltaDeduped(
+        { type: 'response.output_text.delta', item_id: 'msg_2', delta: 'x' },
+        undefined
+      )
     ).toBe('x');
   });
 });

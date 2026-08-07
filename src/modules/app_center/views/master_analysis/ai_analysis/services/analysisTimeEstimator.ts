@@ -155,7 +155,10 @@ export function estimateAnalysisTime(input: AnalysisTimeEstimateInput): Analysis
   const effectiveConcurrency = Math.max(1, Math.min(maxConcurrency, uncachedTargetCount));
   const perCallSeconds = resolvePerCallSeconds(reasoning);
   const wallSeconds =
-    Math.ceil(callCount / effectiveConcurrency) * perCallSeconds * resolveSizeFactor(estimatedInputTokens) * 1.15;
+    Math.ceil(callCount / effectiveConcurrency) *
+    perCallSeconds *
+    resolveSizeFactor(estimatedInputTokens) *
+    1.15;
 
   const secondsLow = Math.max(1, Math.round(wallSeconds * 0.8));
   const secondsHigh = Math.max(secondsLow, Math.round(wallSeconds * 1.3));

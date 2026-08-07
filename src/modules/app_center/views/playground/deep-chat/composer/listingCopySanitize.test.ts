@@ -22,7 +22,8 @@ describe('sanitizeListingCopy', () => {
   });
 
   it('德语 "Titel:" 场景截取', () => {
-    const text = 'Vorab: Ich habe die Briefings gegen die Quellen-Prioritätsregeln geprüft.\nTitel: Kabellose Ohrhörer';
+    const text =
+      'Vorab: Ich habe die Briefings gegen die Quellen-Prioritätsregeln geprüft.\nTitel: Kabellose Ohrhörer';
     expect(sanitizeListingCopy(text)).toBe('Titel: Kabellose Ohrhörer');
   });
 

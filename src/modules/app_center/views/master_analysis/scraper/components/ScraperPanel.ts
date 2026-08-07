@@ -178,6 +178,13 @@ function getImportResultStatus(result: ImportResult): {
   };
 }
 
+function getImportSuccessMessage(mode: ImportMode, productCount: number): string {
+  // 覆盖模式：清空替换，直接显示文件导入的 ASIN 数量；合并模式：追加新 ASIN 并仅并入评论
+  return mode === 'overwrite'
+    ? `覆盖导入完成：${productCount} 个 ASIN。`
+    : `合并导入完成：${productCount} 个 ASIN 已更新。`;
+}
+
 function attachScraperPanelBehavior(
   panel: ScraperPanelState
 ): ScraperPanelState & Record<string, unknown> {
@@ -795,22 +802,10 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
       if (result.success && result.data) {
         applyImportedData(this, result.data);
-
-        if (mode === 'overwrite') {
-          // 覆盖模式：清空替换，直接显示文件导入的 ASIN 数量
-          setImportStatus(
-            this,
-            target,
-            `覆盖导入完成：${result.data.products?.length || 0} 个 ASIN。`,
-            'status'
-          );
-          return;
-        }
-
         setImportStatus(
           this,
           target,
-          `合并导入完成：${result.data.products?.length || 0} 个 ASIN 已更新。`,
+          getImportSuccessMessage(mode, result.data.products?.length || 0),
           'status'
         );
         return;

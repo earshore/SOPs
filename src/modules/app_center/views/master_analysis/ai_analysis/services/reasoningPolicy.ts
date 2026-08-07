@@ -53,7 +53,9 @@ export function getUserReasoningPrefs(): { enabled: boolean; effort: ReasoningEf
     if (!provider) return { enabled: false, effort: null };
     const config = StorageService.getLLMConfig(provider);
     const prefs = normalizeReasoningUserPrefs(config?.reasoningPrefs);
-    return prefs.enabled ? { enabled: true, effort: prefs.effort } : { enabled: false, effort: null };
+    return prefs.enabled
+      ? { enabled: true, effort: prefs.effort }
+      : { enabled: false, effort: null };
   } catch {
     return { enabled: false, effort: null };
   }

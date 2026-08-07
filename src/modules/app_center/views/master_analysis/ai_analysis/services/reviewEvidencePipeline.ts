@@ -927,7 +927,7 @@ async function callAnalysisJson(args: {
   let streamedChars = 0;
   let text = '';
 
-  const parsed = await callWithReasoningOnlyRecovery(async (recovery) => {
+  const parsed = await callWithReasoningOnlyRecovery(async recovery => {
     // 重试时清空首帧/流指标，避免把失败尝试的 reasoning 流计入成功结果
     firstResponseMs = undefined;
     streamChunks = 0;
