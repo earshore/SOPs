@@ -28,14 +28,21 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本           | 说明                                               |
 | ---------------------------- | -------------- | -------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.0.11`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.12-rc.8` | 系统设置 LLM 元信息/文案校正与应用中心交互优化；**非** Latest |
-| package.json                 | `3.0.12-rc.8`  | 与当前 RC tag / Release 一致                       |
+| **当前 Pre-release 候选**    | `v3.0.12-rc.9` | 主题语义色全站迁移（primary/accent）+ 组件/工具链收口；**非** Latest |
+| package.json                 | `3.0.12-rc.9`  | 与当前 RC tag / Release 一致                       |
 | 上一 GA                      | `v3.0.11`      | 回滚参考                                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.8` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.9` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.8`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.9`。
+
+`v3.0.12-rc.9`（2026-08-07，Pre-release）收口 Phase B 主题语义色全站迁移与工具链硬化：
+
+- **主题系统**：业务页 `blue-*`/`indigo-*` 工具类全站迁移至语义键 `primary-*`/`accent-*`（运行时 Appearance token，换肤+深浅色自动跟随）；sops 466→334、amz_hub 262→162、more 105→40 残留；多色指标/阶段/风险/步骤徽章与页面主题色按设计保留；utility bridge 456→454 同步；门禁基线更新（shell 13 / sops 334 / app_center 39 / amz_hub 162 / more 40）。
+- **视觉基线**：D12 scaffold 全页截图（滚动链展开 + settings 弹层展平，144 张可复现），快照按需本地 mint。
+- **修复**：release-smoke CSS content-type 断言兼容 dev/preview 双语义（29/29 全绿）；theme-matrix ownership 断言更新为 `wb-theme-cyan`；ecosystem 模板结构修复；NPI 表格窄屏 focus 基线（TD-CMP-02）。
+- GitHub Latest **仍指向** `v3.0.11`；回滚基线为 `v3.0.11`；生产目标 `https://sops.hongecb.store`。
 
 `v3.0.12-rc.8`（2026-08-04，Pre-release）收口系统设置 LLM 详情元信息与文案校正、应用中心最近作业交互优化与数据采集布局对齐：
 
