@@ -5,45 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [3.0.12-rc.9] - 2026-08-07
 
-> Release Candidate. GitHub Release remains a **Pre-release**; Latest continues to point to stable GA `v3.0.11`.
-> This candidate lands the Phase B theme-token convergence: business pages now use semantic
-> `primary-*`/`accent-*` keys driven by runtime Appearance tokens (theme + dark mode follow
-> automatically), plus smoke/tooling hardening. Rollback target remains the Pages deployment
-> for `v3.0.11`. Deployment target: https://sops.hongecb.store
+> 候选版本。GitHub Release 保持 **Pre-release**；Latest 仍指向稳定版 GA `v3.0.11`。
+> 本候选落地 Phase B 主题语义色收口：业务页面改用 `primary-*`/`accent-*` 语义键
+> （由运行时 Appearance token 驱动，换肤与深浅色自动跟随），并完成 smoke/工具链硬化。
+> 回滚基线保持 `v3.0.11` 的 Pages 部署。部署目标：https://sops.hongecb.store
 
-### Added
+### Added（新增）
 
-- Semantic color keys `primary-*` / `accent-*` (var() references to runtime Appearance tokens) with
-  full business-page migration: sops 466 to 334, amz_hub 262 to 162, more 105 to 40 residual
-  blue-/indigo- utilities; card-ized `:where()` selectors in amz_hub shells now include the
-  semantic bg classes.
-- D12 theme visual scaffold captures full-page baselines (scroll chain un-collapsed, settings
-  modal flattened; 12 screens x 2 appearances x 2 modes x 3 browsers) and is reproducible.
+- 语义色键 `primary-*` / `accent-*`（var() 引用运行时 Appearance token）+ 业务页全量迁移：
+  sops 残留 466 → 334、amz_hub 262 → 162、more 105 → 40 处 blue-/indigo- 工具类；
+  amz_hub 壳层卡片化 `:where()` 选择器已包含语义 bg 类。
+- D12 主题视觉基线脚手架支持整页截图（解除滚动链 + settings 弹层展平；
+  12 屏 × 2 外观 × 2 模式 × 3 浏览器），截图像基线可复现、按需本地生成。
 
-### Changed
+### Changed（变更）
 
-- Business blue-/indigo- utilities migrated to `primary-*`/`accent-*` across sops, amz_hub and
-  more views (Phase B-2 .. B-6); multi-color metric / stage / risk / step-badge palettes and
-  page theme colors are intentionally retained; utility bridge regenerated (456 to 454 rules).
-- Theme hardcode baseline gate updated (shell 13 / sops 334 / app_center 39 / amz_hub 162 /
-  more 40 / other 0).
-- `theme-matrix-check.mjs` ownership assertion updated to `wb-theme-cyan` (Keyword Hunter was
-  unified to cyan since 2026-08-06; the rose assertion predated it).
+- 业务页 blue-/indigo- 工具类迁移至 `primary-*`/`accent-*`（sops、amz_hub、more，
+  Phase B-2 … B-6）；多色指标/阶段/风险/步骤徽章与页面主题色按设计保留；
+  utility bridge 重新生成（456 → 454 条规则）。
+- 主题硬编码基线门禁更新（shell 13 / sops 334 / app_center 39 / amz_hub 162 / more 40 / other 0）。
+- `theme-matrix-check.mjs` 的模块归属断言更新为 `wb-theme-cyan`
+  （Keyword Hunter 自 2026-08-06 起统一为 cyan；rose 断言早于该变更）。
 
-### Fixed
+### Fixed（修复）
 
-- Deep Chat: an LLM stream failure (e.g. gateway forwarding `invalid character ...` JSON
-  errors mid-stream) left the pending request unsettled, so the reasoning typewriter and
-  waiting timers kept running (“深度思考” flickered forever). The LLM turn now settles
-  exactly like the success path; abort behavior unchanged. Regression tests added.
-- release-smoke style-content-type assertion accepts both dev (JS-wrapped CSS modules) and
-  preview semantics while keeping status and non-HTML checks; suite is fully green (29/29).
-- ecosystem template markup: orphan `</section>` and missing section close repaired without
-  changing `.eco-page` direct-child structure.
-- Table inline-edit controls (td input/select, `update-field`) now have a narrow-viewport
-  (<768px) focus-state baseline (TD-CMP-02); desktop behavior unchanged.
+- Deep Chat：LLM 流错误（如网关透传 `invalid character ...` 的 JSON 错误）会让
+  pending 请求永不落定，导致「深度思考」打字机与等待状态定时器持续运行
+  （“深度思考”一直刷个不停）。现 LLM 轮次错误路径与成功路径一致完成 settle；
+  中止行为不变。已补充回归测试。
+- release-smoke 样式 content-type 断言同时适配 dev（JS 包装的 CSS 模块）与
+  preview 语义，保留状态码与非 HTML 校验；套件全绿（29/29）。
+- ecosystem 模板结构修复：孤立 `</section>` 与缺失收尾的 section 闭合已校正，
+  不改变 `.eco-page` 直接子级结构。
+- 表格内联编辑（td input/select、`update-field`）补齐窄屏（<768px）焦点状态基线
+  （TD-CMP-02）；桌面行为不变。
 
 ## [Unreleased] - 2026-08-07
 
@@ -61,54 +59,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Playground Deep Chat “refresh model config” now truly re-fetches `/models` instead of only re-reading the local config; refresh failure surfaces the unified LLM failure toast with loading/error states and `aria-live` status.
 
+
 ## [3.0.12-rc.8] - 2026-08-04
 
-> Release Candidate. GitHub Release remains a **Pre-release**; Latest continues to point to stable GA `v3.0.11`.
-> This candidate closes the settings LLM detail meta/copy corrections and panel type contract fix, App Center recent-jobs interaction tweaks, and data-collection history snapshot layout alignment.
-> Rollback target remains the Pages deployment for `v3.0.11`.
-> Deployment target: https://sops.hongecb.store
+> 候选版本。GitHub Release 保持 **Pre-release**；Latest 仍指向稳定版 GA `v3.0.11`。
+> 本候选收口「系统设置 LLM 详情元信息/文案校正 + 面板类型契约修复、应用中心最近任务
+> 交互微调、数据采集历史快照布局对齐」。回滚基线保持 `v3.0.11` 的 Pages 部署。
+> 部署目标：https://sops.hongecb.store
 
-### Added
+### Added（新增）
 
-- Basic Info row now shows the complete endpoint URL including the API call path, and the Model & Capability row shows `模型 · 推理等级` — the reasoning level appears only while reasoning is enabled.
-- With no saved credentials, the model list shows only `— 请选择 —` instead of preset models that cannot be called yet; the default model resolves to `未选择`.
+- 基本信息行展示完整端点 URL（含 API 调用路径），模型与能力行展示 `模型 · 推理等级`；
+  推理等级仅在开启推理时显示。
+- 无已存凭据时模型列表仅显示 `— 请选择 —`，默认模型解析为 `未选择`（不再预置无法调用）。
 
-### Changed
+### Changed（变更）
 
-- System Settings category menu renames `Deep Chat` to `Playground`; the tool strategy `恢复默认` button now carries a leading reset icon.
-- Data & Backup renames `清理项` → `项目清理` and `危险操作` → `本地数据清空`; Appearance renames `跟随系统动效偏好` → `动效偏好` and the animation speed `标准` → `默认`.
-- LLM credential row shows `API Key` without the `本机混淆保存` suffix; the privacy hint moves into the `查看说明` tip button.
-- App Center recent jobs: `已移除记录` becomes a job status filter choice; the columns toggle moves to the far right of the toolbar; the task path collapse control shows its icon only.
+- 系统设置目录菜单 `Deep Chat` 更名为 `Playground`；工具策略 `恢复默认` 按钮增加前置重置图标。
+- 数据与备份 `清理项` → `项目清理`、`危险操作` → `本地数据清空`；外观中
+  `跟随系统动效偏好` → `动效偏好`、动画速度 `标准` → `默认`。
+- LLM 凭据行显示 `API Key`（去掉 `本机混淆保存` 后缀）；隐私提示移入 `查看说明` 提示按钮。
+- 应用中心最近任务：`已移除记录` 纳入任务状态筛选；列数切换移至工具栏最右；
+  任务路径收起仅保留图标。
 
-### Fixed
+### Fixed（修复）
 
-- API path display is stable: selecting OpenAI shows `/responses` consistently instead of flipping back to `/chat/completions` after re-selecting another path.
-- Restored `basicInfoMetaText` / `modelMetaText` to the `SettingsPanelData` type contract so `npm run type-check` passes.
-- Data collection history snapshot height aligns with the left product-import/manual-collection column and no longer stretches when the manual config expands.
+- API 路径显示稳定：选择 OpenAI 持续显示 `/responses`，切换路径后不再闪回 `/chat/completions`。
+- 恢复 `basicInfoMetaText` / `modelMetaText` 到 `SettingsPanelData` 类型契约，`npm run type-check` 通过。
+- 数据采集历史快照高度与左侧产品导入/手动采集配置列齐平，手动配置展开不再撑高右侧快照。
+
 
 ## [3.0.12-rc.7] - 2026-08-04
 
-> Release Candidate. GitHub Release remains a **Pre-release**; Latest continues to point to stable GA `v3.0.11`.
-> This candidate closes the settings navigation and data-export interaction corrections, PromptLab SKU fact authority, and Keyword Hunter input snapshot visibility.
-> Rollback target remains the Pages deployment for `v3.0.11`.
-> Deployment target: https://sops.hongecb.store
+> 候选版本。GitHub Release 保持 **Release Candidate**；Latest 仍指向稳定版 GA `v3.0.11`。
+> 本候选收口「系统设置导航与数据导出交互修正、PromptLab SKU 事实权威、Keyword Hunter
+> 输入历史快照可见性」。回滚基线保持 `v3.0.11` 的 Pages 部署。
+> 部署目标：https://sops.hongecb.store
 
-### Added
+### Added（新增）
 
-- PromptLab Detailed Parameters now persist `specsAuthority` (`user-confirmed`, `report-derived`, or `unconfirmed`) and validate it at the Profile import/recovery boundary.
-- Regression coverage for profile authority validation, legacy snapshots, full-bucket export semantics, settings navigation, and complete Keyword Hunter snapshot rendering.
+- PromptLab 详细参数持久化 `specsAuthority`（`user-confirmed` / `report-derived` / `unconfirmed`），
+  并在 Profile 导入/恢复边界做校验。
+- 新增回归覆盖：Profile 权威校验、旧快照、全桶导出语义、设置导航、完整 Keyword Hunter 快照渲染。
 
-### Changed
+### Changed（变更）
 
-- System Settings now renders `数据采集` / `AI 智能分析` below `Master Analysis`, and `SEO 处理` / `Listing 评审` below `Keyword Hunter`, as third-level navigation targets. Appearance navigation is split into `界面动画`, `跟随系统动效偏好`, and `动画速度`.
-- PromptLab Tier 1 core terms, restricted terms, and target audience use the same collapsed-and-expandable textarea behavior as Tier 2 functional terms.
+- 系统设置现于 `Master Analysis` 之下渲染 `数据采集` / `AI 智能分析`、于 `Keyword Hunter`
+  之下渲染 `SEO 处理` / `Listing 评审` 三级导航；外观导航拆分为 `界面动画`、
+  `跟随系统动效偏好`、`动画速度`。
+- PromptLab 一级词条/受限词/目标受众与二级功能词一致改用可折叠展开的 textarea 行为。
 
-### Fixed
+### Fixed（修复）
 
-- Selecting an individual data bucket makes `导出选中分类` visually active. Selecting every bucket intentionally retains the existing `导出全部备份` behavior and full-backup payload.
-- Selecting `色调` now highlights only the tone control rather than the whole Appearance preferences list.
-- Listing prompts accept capacity, weight, dimensions, quantities, variants, and package accessories only from user-confirmed Detailed Parameters. Competitor-report values remain market context and cannot be combined with or override SKU facts.
-- Keyword Hunter input history now renders every persisted snapshot instead of truncating the list after six entries.
+- 选择单个数据桶时 `导出选中分类` 呈激活态；全选仍保持 `导出全部备份` 行为与全量备份载荷（有意）。
+- 选择 `色调` 仅高亮色调控件，不再高亮整个外观偏好列表。
+- Listing 词条仅接受用户已确认的详细参数（容量/重量/尺寸/数量/变体/包装附件）；
+  竞品报告的值保持市场语境，不可合并或覆盖 SKU 事实。
+- Keyword Hunter 输入历史现渲染全部持久化快照，不再截断为六条以内。
 
 ## [3.0.12-rc.5] - 2026-08-02
 
