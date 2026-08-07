@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Deep Chat: an LLM stream failure (e.g. gateway forwarding `invalid character ...` JSON
+  errors mid-stream) left the pending request unsettled, so the reasoning typewriter and
+  waiting timers kept running (“深度思考” flickered forever). The LLM turn now settles
+  exactly like the success path; abort behavior unchanged. Regression tests added.
 - release-smoke style-content-type assertion accepts both dev (JS-wrapped CSS modules) and
   preview semantics while keeping status and non-HTML checks; suite is fully green (29/29).
 - ecosystem template markup: orphan `</section>` and missing section close repaired without
