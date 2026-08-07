@@ -552,6 +552,20 @@
   }
 }
 
+/* TD-CMP-02 收口：窄屏（<768px）表格内联编辑控件 focus 状态基线。
+   桌面紧凑控件样式在 768+ 块内（L531-552），窄屏控件仅有 Tailwind 尺寸
+   兑底，focus 无视觉反馈；这里补齐 focus 环，不改变桌面行为。 */
+@media (max-width: 767.98px) {
+  body td input:is([type='text'], [type='number']):focus,
+  body td select:focus,
+  body input[data-action='update-field']:focus,
+  body select[data-action='update-field']:focus {
+    outline: none;
+    border-color: var(--field-focus);
+    box-shadow: 0 0 0 2px var(--field-focus-ring);
+  }
+}
+
 /* ========================================
    10. Checkbox 复选框
    ======================================== */

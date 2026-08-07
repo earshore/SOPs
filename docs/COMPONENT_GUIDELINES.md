@@ -158,7 +158,7 @@
 | --- | --- | --- |
 | 营销日历搜索框 `.amzf_search_box` | `styles.css` L216-227；输入框 `outline: none`（L268-277），焦点环由容器 `:focus-within` 承担（L249-256） | 已豁免（代码侧标注待补） |
 | Keyword Hunter 编辑器 `keyword-hunter-editor-shell` | 容器 `:focus-within` 承担 ring（`styles.css` L950-960）；代码注释见 `forms.css` L146-152 | 已豁免（双处齐） |
-| NPI 表格内联编辑（<768px） | 共享紧凑控件样式仅存在于 `@media (min-width: 768px)`（`forms.css` L531-552）；窄屏无状态基线 | **非豁免**，登记为待收口项（关联 TD-CMP-02） |
+| NPI 表格内联编辑（<768px） | 共享紧凑控件样式在 `@media (min-width: 768px)`（`forms.css` L531-552）；**已收口**：窄屏 focus 状态基线见 `forms.css` 窄屏块（focus 环 + 边框，桌面行为不变，双视口验证通过） | **已收口**（TD-CMP-02） |
 
 ---
 
