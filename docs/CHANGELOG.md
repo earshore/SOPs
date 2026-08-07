@@ -5,7 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-08-06
+## [3.0.12-rc.9] - 2026-08-07
+
+> Release Candidate. GitHub Release remains a **Pre-release**; Latest continues to point to stable GA `v3.0.11`.
+> This candidate lands the Phase B theme-token convergence: business pages now use semantic
+> `primary-*`/`accent-*` keys driven by runtime Appearance tokens (theme + dark mode follow
+> automatically), plus smoke/tooling hardening. Rollback target remains the Pages deployment
+> for `v3.0.11`. Deployment target: https://sops.hongecb.store
+
+### Added
+
+- Semantic color keys `primary-*` / `accent-*` (var() references to runtime Appearance tokens) with
+  full business-page migration: sops 466 to 334, amz_hub 262 to 162, more 105 to 40 residual
+  blue-/indigo- utilities; card-ized `:where()` selectors in amz_hub shells now include the
+  semantic bg classes.
+- D12 theme visual scaffold captures full-page baselines (scroll chain un-collapsed, settings
+  modal flattened; 12 screens x 2 appearances x 2 modes x 3 browsers) and is reproducible.
+
+### Changed
+
+- Business blue-/indigo- utilities migrated to `primary-*`/`accent-*` across sops, amz_hub and
+  more views (Phase B-2 .. B-6); multi-color metric / stage / risk / step-badge palettes and
+  page theme colors are intentionally retained; utility bridge regenerated (456 to 454 rules).
+- Theme hardcode baseline gate updated (shell 13 / sops 334 / app_center 39 / amz_hub 162 /
+  more 40 / other 0).
+- `theme-matrix-check.mjs` ownership assertion updated to `wb-theme-cyan` (Keyword Hunter was
+  unified to cyan since 2026-08-06; the rose assertion predated it).
+
+### Fixed
+
+- release-smoke style-content-type assertion accepts both dev (JS-wrapped CSS modules) and
+  preview semantics while keeping status and non-HTML checks; suite is fully green (29/29).
+- ecosystem template markup: orphan `</section>` and missing section close repaired without
+  changing `.eco-page` direct-child structure.
+- Table inline-edit controls (td input/select, `update-field`) now have a narrow-viewport
+  (<768px) focus-state baseline (TD-CMP-02); desktop behavior unchanged.
+
+## [Unreleased] - 2026-08-07
+
 
 ### Added
 
