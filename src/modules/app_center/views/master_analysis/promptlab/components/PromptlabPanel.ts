@@ -349,15 +349,15 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
   /** Workbench section icons — no marketing scale-110 (D4). */
   get workbenchSectionIconAnalysis(): string {
-    return `${getWorkbenchIconContainerClasses('blue', 'sm')} text-white`;
+    return `${getWorkbenchIconContainerClasses('blue', 'sm')} text-white promptlab-section-icon`;
   },
 
   get workbenchSectionIconDna(): string {
-    return `${getWorkbenchIconContainerClasses('indigo', 'sm')} text-white`;
+    return `${getWorkbenchIconContainerClasses('indigo', 'sm')} text-white promptlab-section-icon`;
   },
 
   get workbenchSectionIconStrategy(): string {
-    return `${getWorkbenchIconContainerClasses('orange', 'sm')} text-white`;
+    return `${getWorkbenchIconContainerClasses('orange', 'sm')} text-white promptlab-section-icon`;
   },
 
   get hasReport(): boolean {

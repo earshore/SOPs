@@ -749,11 +749,11 @@
     border-radius: var(--workbench-radius, 8px) !important;
   }
 
-  [x-data='promptlabPanel'] > * + * [class*='bg-gradient-to-'] {
+  [x-data='promptlabPanel'] > * + * [class*='bg-gradient-to-']:not(.promptlab-section-icon) {
     background-image: none !important;
   }
 
-  [x-data='promptlabPanel'] > * + * [class*='shadow-'] {
+  [x-data='promptlabPanel'] > * + * [class*='shadow-']:not(.promptlab-section-icon) {
     box-shadow: none !important;
   }
 
@@ -766,7 +766,7 @@
       [class*='from-accent-'],
       [class*='from-orange-'],
       [class*='from-pink-']
-    ) {
+    ):not(.promptlab-section-icon) {
     background-color: var(--color-slate-800, #1e293b);
   }
 
