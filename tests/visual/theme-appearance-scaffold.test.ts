@@ -232,6 +232,72 @@ type ColorModeId = 'light' | 'dark';
  */
 const COLOR_MODES: ColorModeId[] = ['light', 'dark'];
 
+/**
+ * Un-collapse the app scroll chain so fullPage captures the real content.
+ *
+ * Layout: body/html fixed height + overflow hidden; #main-content is flex-1
+ * with overflow-y-auto; each module renders inside an absolute #panel-* with
+ * overflow hidden, and content scrolls in <id>_content_area (h-full overflow,
+ * e.g. sops_content_area). Without flattening the chain the page never scrolls
+ * at document level and fullPage == viewport only.
+ */
+async function expandDocumentForFullPage(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const setFlow = (el: HTMLElement | null) => {
+      if (!el) return;
+      // Y-axis only: un-collapse vertical height while keeping the original
+      // overflow-x clipping (wide tables/code blocks must not widen the page).
+      el.style.overflowY = 'visible';
+      el.style.height = 'auto';
+    };
+    setFlow(document.documentElement);
+    setFlow(document.body);
+
+    let node = document.querySelector<HTMLElement>('#main-content');
+    while (node && node !== document.body) {
+      setFlow(node);
+      node = node.parentElement;
+    }
+
+    document
+      .querySelectorAll<HTMLElement>('[id$="_content_area"]')
+      .forEach(setFlow);
+
+    // Module panels are absolutely positioned (out of document flow) and would
+    // otherwise clip content; home splash is a fixed-height relative block.
+    document
+      .querySelectorAll<HTMLElement>(
+        '#main-content [id^="panel-"], #main-content [id$="-splash-container"]'
+      )
+      .forEach((el) => {
+        const pos = getComputedStyle(el).position;
+        if (pos === 'absolute' || pos === 'fixed') el.style.position = 'static';
+        setFlow(el);
+      });
+  });
+}
+
+/**
+ * Flatten the System Settings modal (fixed full-screen overlay) so its whole
+ * panel content participates in document flow and is included in fullPage.
+ */
+async function expandSettingsModalForFullPage(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const root = document.querySelector<HTMLElement>('.settings-panel-root');
+    if (!root) return;
+    root.style.position = 'static';
+    root.style.overflow = 'visible';
+    root.style.height = 'auto';
+    for (const cls of ['.settings-panel-shell', '.settings-panel-scroll']) {
+      const el = root.querySelector<HTMLElement>(cls);
+      if (el) {
+        el.style.height = 'auto';
+        el.style.overflow = 'visible';
+      }
+    }
+  });
+}
+
 async function waitForStablePage(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
     // Soft: some SPA routes never fully idle
@@ -326,6 +392,18 @@ suite('Theme appearance axis (D12 scaffold · opt-in THEME_VISUAL=1)', () => {
 
           if (screen.beforeScreenshot) {
             await screen.beforeScreenshot(page);
+          }
+
+          // App content scrolls inside <id>_content_area containers (h-full
+          // overflow-y-auto) with body/html fixed-height overflow hidden; a
+          // plain fullPage capture only crops the 1280x720 window. Un-collapse
+          // the scroll chain BEFORE the stability wait so reflow/scrollbar
+          // settles before capture. The settings modal (fixed overlay) is
+          // flattened only for its own screen; deep-chat stays a window
+          // capture (app-style UI, not flowing content).
+          await expandDocumentForFullPage(page);
+          if (screen.openAppearanceSettings) {
+            await expandSettingsModalForFullPage(page);
           }
 
           await waitForStablePage(page);
