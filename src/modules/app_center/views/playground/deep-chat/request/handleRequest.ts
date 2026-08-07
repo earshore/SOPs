@@ -105,6 +105,84 @@ async function reportDeepChatRequestFailure(
   await emitDeepChatResponse(signals, { text: responseText });
 }
 
+/** 与正常完成一致的 settle 收尾：标记 settled + 卸下流式 chrome + 未读/展示调度。 */
+function settlePendingDeepChatRequest(
+  pendingRequest: PendingDeepChatRequest,
+  threadId: string
+): void {
+  markPendingDeepChatRequestSettled(pendingRequest);
+  paintSettledGenerationChrome();
+  notifyBackgroundPendingSettled(threadId);
+  schedulePendingAssistantDisplay(threadId);
+}
+
+interface DeepChatLLMTurnOptions {
+  messages: ChatMessage[];
+  config: LLMProviderConfig;
+  model: string;
+  signals: DeepChatSignals;
+  container: HTMLElement;
+  requestController: AbortController;
+  pendingRequest: PendingDeepChatRequest;
+  activeThreadId: string;
+  conversationMessages: ChatMessage[];
+  hadVisionParts: boolean;
+  visionUserParts?: Array<Record<string, unknown>>;
+  userAttachmentMeta?: { count: number };
+}
+
+/**
+ * 单轮 LLM 调用 + settle。流错误（网关透传如 invalid character ...）在此
+ * 收尾：渲染失败文案后与正常路径一致 settle，避免 pending/打字机残留。
+ */
+async function invokeDeepChatLLMTurn(options: DeepChatLLMTurnOptions): Promise<void> {
+  const {
+    messages,
+    config,
+    model,
+    signals,
+    container,
+    requestController,
+    pendingRequest,
+    activeThreadId,
+    conversationMessages,
+    hadVisionParts,
+    visionUserParts,
+    userAttachmentMeta,
+  } = options;
+  let assistantText: string;
+  try {
+    assistantText = await callDeepChatLLM({
+      messages,
+      config,
+      model,
+      signals,
+      sourceChat: getChat(container),
+      controller: requestController,
+      pendingRequest,
+      visionUserParts,
+    });
+    if (!pendingRequest.abortReason && threadExists(activeThreadId)) {
+      saveThreadMessages(getMountedRenderContainer(), conversationMessages, assistantText, {
+        threadId: activeThreadId,
+        assistantReasoning: pendingRequest.reasoningText,
+        assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
+        assistantPreReplySteps: pendingRequest.preReplySteps,
+        ...(userAttachmentMeta ? { userAttachmentMeta } : {}),
+      });
+      settlePendingDeepChatRequest(pendingRequest, activeThreadId);
+    }
+  } catch (error) {
+    if (requestController.signal.aborted) {
+      throw error;
+    }
+    await reportDeepChatRequestFailure(error, activeThreadId, hadVisionParts, signals);
+    if (threadExists(activeThreadId)) {
+      settlePendingDeepChatRequest(pendingRequest, activeThreadId);
+    }
+  }
+}
+
 async function runPreparedDeepChatRequest(
   container: HTMLElement,
   preparedRequest: PreparedDeepChatRequest,
@@ -150,29 +228,20 @@ async function runPreparedDeepChatRequest(
   renderMountedThreadList();
   notifyContextBudgetApplied(droppedMessageCount);
 
-  const assistantText = await callDeepChatLLM({
+  await invokeDeepChatLLMTurn({
     messages,
     config,
     model,
     signals,
-    sourceChat: getChat(container),
-    controller: requestController,
+    container,
+    requestController,
     pendingRequest,
+    activeThreadId: activeThread.id,
+    conversationMessages,
+    hadVisionParts,
     visionUserParts,
+    userAttachmentMeta,
   });
-  if (!pendingRequest.abortReason && threadExists(activeThread.id)) {
-    saveThreadMessages(getMountedRenderContainer(), conversationMessages, assistantText, {
-      threadId: activeThread.id,
-      assistantReasoning: pendingRequest.reasoningText,
-      assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
-      assistantPreReplySteps: pendingRequest.preReplySteps,
-      ...(userAttachmentMeta ? { userAttachmentMeta } : {}),
-    });
-    markPendingDeepChatRequestSettled(pendingRequest);
-    paintSettledGenerationChrome();
-    notifyBackgroundPendingSettled(activeThread.id);
-    schedulePendingAssistantDisplay(activeThread.id);
-  }
 
   return {
     pendingThreadId: activeThread.id,
