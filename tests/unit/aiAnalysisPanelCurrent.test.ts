@@ -314,7 +314,7 @@ it('computes hero, progress, report, JSON, and confidence branches', () => {
   expect(panel.canRunAnalysis).toBe(true);
   expect(panel.runAnalysisDisabled).toBe(false);
   expect(panel.runAnalysisButtonClass).toContain('bg-[var(--color-primary)]');
-  expect(panel.performanceSummaryText).toBe('并发 3 · 均衡 · 缓存开 · 失败继续');
+  expect(panel.performanceSummaryText).toBe('并发 3 · 均衡 · 推理关闭 · 缓存开 · 失败继续');
   expect(panel.runAnalysisNotRunningLabel).toBe('重新分析');
   expect(panel.runAnalysisNotRunningIconClass).toContain('rotate-right');
   expect(panel.showRunDisabledHint).toBe(false);
@@ -518,7 +518,7 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   expect(panel.reportStatusBadgeText).toBe('实时生成');
   panel.perfSettings.settings.enableCache = false;
   panel.perfSettings.settings.failureStrategy = 'stop';
-  expect(panel.performanceSummaryText).toBe('并发 3 · 均衡 · 缓存关 · 失败中止');
+  expect(panel.performanceSummaryText).toBe('并发 3 · 均衡 · 推理关闭 · 缓存关 · 失败中止');
 
   panel.analysisReport = null;
   expect(panel.reportConfidence).toBeNull();

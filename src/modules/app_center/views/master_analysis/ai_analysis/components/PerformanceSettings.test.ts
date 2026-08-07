@@ -129,9 +129,10 @@ describe('PerformanceSettings', () => {
     expect(template).toContain('data-testid="ma-primary-split"');
     expect(template).toContain('selectEvidenceDepth(');
     expect(template).toContain('ai-analysis-depth-control__select');
-    expect(template).toContain('<option value="fast">');
-    expect(template).toContain('<option value="balanced">');
-    expect(template).toContain('<option value="deep">');
+    expect(template).toContain('x-for="depthOption in evidenceDepthOptions"');
+    expect(template).toContain(':value="depthOption.value"');
+    expect(template).toContain('depthOption.label');
+    expect(template).not.toContain('<option value="fast">');
     expect(template).not.toContain('openEvidenceDepthMenu()');
     expect(template).not.toContain('scheduleCloseEvidenceDepthMenu()');
     expect(template).not.toContain('evidenceDepthExpanded');

@@ -831,9 +831,9 @@
                     aria-label="证据深度"
                     title="证据深度：快速更省时，深入更完整"
                   >
-                    <option value="fast">快速（约 1-3 分钟）</option>
-                    <option value="balanced">均衡（约 2-5 分钟）</option>
-                    <option value="deep">深入（约 4-8 分钟）</option>
+                    <template x-for="depthOption in evidenceDepthOptions" :key="depthOption.value">
+                      <option :value="depthOption.value" x-text="depthOption.label"></option>
+                    </template>
                   </select>
                 </div>
               </div>
@@ -1641,6 +1641,40 @@
                 </div>
               </div>
             </template>
+          </div>
+        </div>
+      </div>
+    </template>
+    <!-- 分析失败提示 -->
+    <template x-if="hasFailedAnalysis">
+      <div
+        class="relative overflow-hidden rounded-xl border border-rose-200 bg-rose-50 p-6 shadow-sm animate-fade-in"
+        data-testid="ma-analysis-failure-banner"
+      >
+        <div class="flex items-start gap-4">
+          <div
+            class="w-12 h-12 shrink-0 rounded-xl bg-rose-100 flex items-center justify-center border border-rose-200"
+          >
+            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-xl"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <h3 class="text-lg font-bold text-rose-900" x-text="analysisFailureSummaryText"></h3>
+            <p class="mt-1.5 text-sm text-rose-700 leading-relaxed">
+              目标模型在最大推理强度下未返回正文，已自动重试仍失败。
+              可仅对失败目标重新发起分析：<span class="font-semibold" x-text="failedTargetLabels"></span>
+            </p>
+            <div class="mt-4">
+              <button
+                type="button"
+                class="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+                data-testid="ma-retry-failed-targets"
+                :disabled="!canRetryFailedTargets"
+                @click="retryFailedTargets()"
+              >
+                <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                重试失败目标
+              </button>
+            </div>
           </div>
         </div>
       </div>

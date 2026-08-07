@@ -22,14 +22,13 @@ import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
 import type { Product } from '../config/sampleData';
 import {
-  buildReviewSourcePack,
-  estimateReviewMapCalls,
-  isReviewEvidenceTargetId,
-} from '../services/reviewEvidencePipeline';
+  estimateAnalysisTime,
+  estimateAnalysisWorkload,
+} from '../services/analysisTimeEstimator';
 import {
-  buildSellingPointsSourcePack,
-  shouldUseSellingPointsMapReduce,
-} from '../services/sellingPointsPipeline';
+  getAnalysisReasoningEffortLabel,
+  getAnalysisReasoningPrefs,
+} from '../services/reasoningPolicy';
 import type { AlpineContext, FullReportData } from '../types';
 import { appStore } from '@/stores/useAppStore';
 import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analysisReportData';
@@ -421,40 +420,7 @@ function getProductsForAnalysis(context: AlpineContext): Product[] {
   );
 }
 
-function estimateMapWorkload(
-  product: Product,
-  selectedTargets: string[]
-): {
-  mapCalls: number;
-  hygieneHits: number;
-} {
-  let mapCalls = 0;
-  let hygieneHits = 0;
 
-  for (const targetId of selectedTargets) {
-    if (targetId === 'selling-points') {
-      const pack = buildSellingPointsSourcePack(product);
-      hygieneHits +=
-        pack.dedupe.duplicatesRemoved + pack.dedupe.emptyRemoved + pack.budget.omittedByBudget;
-      if (shouldUseSellingPointsMapReduce(product)) {
-        mapCalls += Math.max(1, Math.ceil(pack.bulletCount / 8));
-      } else {
-        mapCalls += 1;
-      }
-      continue;
-    }
-    if (isReviewEvidenceTargetId(targetId)) {
-      const pack = buildReviewSourcePack(product, targetId);
-      mapCalls += estimateReviewMapCalls(product, targetId);
-      hygieneHits +=
-        pack.dedupe.duplicatesRemoved + pack.dedupe.emptyRemoved + pack.budget.omittedByBudget;
-      continue;
-    }
-    mapCalls += 1;
-  }
-
-  return { mapCalls, hygieneHits };
-}
 
 async function prepareAnalysisRun(
   context: AlpineContext,
@@ -463,7 +429,7 @@ async function prepareAnalysisRun(
 ): Promise<PreparedAnalysisRun> {
   const products = getProductsForAnalysis(context);
   const mergedProduct = mergeProducts(products);
-  const workload = estimateMapWorkload(mergedProduct, selectedTargets);
+  const workload = estimateAnalysisWorkload(mergedProduct, selectedTargets);
   const language = getMarketLanguage();
   const perfSettings = getPerformanceSettings();
   const depthLabel =
@@ -479,13 +445,6 @@ async function prepareAnalysisRun(
     perfSettings.enableCache
   );
   const cachedCount = Object.keys(preloadedCachedResults).length;
-  const hygienePart = workload.hygieneHits > 0 ? `，证据清洗约 ${workload.hygieneHits} 条` : '';
-  const cachePart =
-    cachedCount > 0 ? `，缓存命中 ${cachedCount}/${selectedTargets.length} 维，预计更快` : '';
-  showToast(
-    `正在分析 ${products.length} 个 ASIN · ${depthLabel}档 · 约 ${workload.mapCalls} 次分片调用${hygienePart}${cachePart}`,
-    { type: 'info' }
-  );
   const schedulePlan = resolveAnalysisSchedulePlan({
     preference: perfSettings.schedulingPreference,
     targetIds: selectedTargets,
@@ -494,6 +453,23 @@ async function prepareAnalysisRun(
     enableCache: perfSettings.enableCache,
     cachedTargetIds: Object.keys(preloadedCachedResults),
   });
+  // 动态耗时估算：按真联动后的实际推理档位 + 真实并发/缓存命中
+  const reasoningPrefs = getAnalysisReasoningPrefs();
+  const timeEstimate = estimateAnalysisTime({
+    targetIds: selectedTargets,
+    product: mergedProduct,
+    maxConcurrency: schedulePlan.maxConcurrency,
+    cachedTargetIds: schedulePlan.cachedTargetIds,
+    estimatedInputTokens: schedulePlan.estimatedInputTokens,
+    reasoning: reasoningPrefs,
+  });
+  const hygienePart = workload.hygieneHits > 0 ? `，证据清洗约 ${workload.hygieneHits} 条` : '';
+  const cachePart =
+    cachedCount > 0 ? `，缓存命中 ${cachedCount}/${selectedTargets.length} 维` : '';
+  showToast(
+    `正在分析 ${products.length} 个 ASIN · ${depthLabel}档 · ${getAnalysisReasoningEffortLabel(reasoningPrefs)}推理 · 预计 ${timeEstimate.label} · 约 ${workload.mapCalls} 次分片调用${hygienePart}${cachePart}`,
+    { type: 'info' }
+  );
 
   return {
     selectedTargets,

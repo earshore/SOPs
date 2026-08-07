@@ -18,6 +18,16 @@ import { createPerformanceSettingsPanel } from './PerformanceSettings';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
+import { appStore } from '@/stores/useAppStore';
+import type { Product } from '../config/sampleData';
+import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
+import { resolveAnalysisSchedule } from '../services/analysisScheduler';
+import { estimateAnalysisTime } from '../services/analysisTimeEstimator';
+import {
+  getAnalysisReasoningEffortLabel,
+  getUserReasoningPrefs,
+  resolveAnalysisReasoningPrefs,
+} from '../services/reasoningPolicy';
 
 type AlpineWatchContext = {
   $watch: (property: string, callback: (newValue: unknown) => void) => void;
@@ -108,6 +118,7 @@ type AiAnalysisPanelThis = AiAnalysisPanelContext &
     getProgressStageClass(state: 'pending' | 'active' | 'done'): string;
     evidenceDepthValue: 'fast' | 'balanced' | 'deep';
     evidenceDepthLabel: string;
+    evidenceDepthOptions: Array<{ value: 'fast' | 'balanced' | 'deep'; label: string }>;
     selectEvidenceDepth(depth: string): void;
     reportConfidence: Record<string, number> | null;
     overallConfidence: number;
@@ -123,6 +134,11 @@ type AiAnalysisPanelThis = AiAnalysisPanelContext &
     canRerunWarnedTargets: boolean;
     rerunWarnedTargetsLabel: string;
     rerunWarnedTargets(): Promise<void>;
+    hasFailedAnalysis: boolean;
+    failedTargetLabels: string;
+    analysisFailureSummaryText: string;
+    canRetryFailedTargets: boolean;
+    retryFailedTargets(): Promise<void>;
     getPromptText(targetId: string): string;
     calculateEvidenceHygieneSummary(buckets: EvidenceHygieneBucket[]): EvidenceHygieneSummary;
     getPromptTokenCount(targetId: string): number;
@@ -960,7 +976,8 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     const cacheText = settings.enableCache ? '缓存开' : '缓存关';
     const failureText = settings.failureStrategy === 'continue' ? '失败继续' : '失败中止';
     const depthText = this.evidenceDepthLabel;
-    return `并发 ${settings.maxConcurrency} · ${depthText} · ${cacheText} · ${failureText}`;
+    const reasoningLabel = getAnalysisReasoningEffortLabel();
+    return `并发 ${settings.maxConcurrency} · ${depthText} · 推理${reasoningLabel} · ${cacheText} · ${failureText}`;
   },
 
   get evidenceDepthValue(): 'fast' | 'balanced' | 'deep' {
@@ -972,6 +989,45 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     if (this.evidenceDepthValue === 'fast') return '快速';
     if (this.evidenceDepthValue === 'deep') return '深入';
     return '均衡';
+  },
+
+  /**
+   * 证据深度下拉的动态选项：按「全局推理等级 × 深度上限」真联动后的实际档位
+   * 与动态耗时估算实时生成文案（如「快速 · 推理低 · 预计 1-2 分钟」）。
+   */
+  get evidenceDepthOptions(): Array<{ value: 'fast' | 'balanced' | 'deep'; label: string }> {
+    const depthLabels: Record<string, string> = { fast: '快速', balanced: '均衡', deep: '深入' };
+    const userPrefs = getUserReasoningPrefs();
+    const targetIds = this.selectedTargets.length
+      ? this.selectedTargets
+      : analysisTargets.map(target => target.id);
+    const scrapedData = appStore.getState().scraper?.scrapedData;
+    const products = getProductsByAsins(scrapedData, this.selectedAsins);
+    const maxConcurrency = resolveAnalysisSchedule({
+      schedulingPreference: this.perfSettings.settings.schedulingPreference,
+    }).maxConcurrency;
+
+    return (['fast', 'balanced', 'deep'] as const).map(depth => {
+      const reasoning = resolveAnalysisReasoningPrefs(userPrefs, depth);
+      const reasoningLabel = getAnalysisReasoningEffortLabel(reasoning);
+      let estimateText = '预计 —';
+      if (products.length > 0 && targetIds.length > 0) {
+        const merged = products.length === 1 ? (products[0] as Product) : mergeProducts(products);
+        const estimate = estimateAnalysisTime({
+          targetIds,
+          product: merged,
+          maxConcurrency,
+          cachedTargetIds: [],
+          estimatedInputTokens: 0,
+          reasoning,
+        });
+        estimateText = `预计 ${estimate.label}`;
+      }
+      return {
+        value: depth,
+        label: `${depthLabels[depth]} · 推理${reasoningLabel} · ${estimateText}`,
+      };
+    });
   },
 
   selectEvidenceDepth(depth: string): void {
@@ -1089,6 +1145,31 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   get hasNoReportIdle(): boolean {
     return !this.hasReport && !this.isAnalyzing;
+  },
+
+  get hasFailedAnalysis(): boolean {
+    return (
+      this.hasReport &&
+      !this.isAnalyzing &&
+      (this.analysisRunSummary?.failedCount || 0) > 0
+    );
+  },
+
+  get failedTargetLabels(): string {
+    return (this.analysisRunSummary?.failedTargetIds || [])
+      .map(id => this.getTargetName(id))
+      .join('、');
+  },
+
+  get analysisFailureSummaryText(): string {
+    const summary = this.analysisRunSummary;
+    if (!summary) {
+      return '';
+    }
+    const labels = this.failedTargetLabels;
+    return labels
+      ? `分析完成：成功 ${summary.successCount || 0} · 失败 ${summary.failedCount}（${labels}）`
+      : `分析完成：成功 ${summary.successCount || 0} · 失败 ${summary.failedCount}`;
   },
 
   get overallConfidenceAriaLabel(): string {
@@ -1239,6 +1320,22 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     const ctx = this as unknown as AlpineContext & ComputedProperties;
     const targetIds = this.analysisQualityWarnings.map(item => item.targetId);
     await actions.rerunAnalysisTargetsAction(ctx, ctx.currentProducts, targetIds);
+  },
+
+  get canRetryFailedTargets(): boolean {
+    return (
+      !this.isAnalyzing &&
+      this.hasFailedAnalysis &&
+      (this.analysisRunSummary?.failedTargetIds?.length || 0) > 0 &&
+      this.selectedAsins.length > 0
+    );
+  },
+
+  async retryFailedTargets() {
+    if (!this.canRetryFailedTargets) return;
+    const ctx = this as unknown as AlpineContext & ComputedProperties;
+    const failedTargetIds = this.analysisRunSummary?.failedTargetIds || [];
+    await actions.rerunAnalysisTargetsAction(ctx, ctx.currentProducts, failedTargetIds);
   },
 
   async navigateToScraper() {
