@@ -97,8 +97,9 @@ export function mapOpenAiThinkingToggle(prefs: {
  * Thinking toggle + OpenAI reasoning_effort on OpenAI-compatible surfaces
  * (DeepSeek V4 low|high|max; GLM-5.x max|xhigh|high|medium|low).
  *
- * DeepSeek/GLM ship with thinking ON by default — off omits the fields so the
- * vendor default is preserved (same precedent as grok-4.5 cannot-disable).
+ * DeepSeek/GLM ship with thinking ON by default — an explicit off must send
+ * thinking.type disabled (same precedent as the thinkingToggle family),
+ * otherwise “关闭推理” stays a no-op on these gateways.
  * On = force thinking + send the allowlisted effort tier.
  */
 export function mapThinkingPlusEffort(prefs: {
@@ -107,7 +108,7 @@ export function mapThinkingPlusEffort(prefs: {
   allowed?: readonly ReasoningEffortLevel[];
 }): Record<string, unknown> {
   if (!prefs.enabled || prefs.effort === 'off') {
-    return {};
+    return { thinking: { type: 'disabled' } };
   }
   return {
     thinking: { type: 'enabled' },

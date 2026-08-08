@@ -398,7 +398,7 @@ async function callAnalysisJson(args: {
     firstResponseMs = undefined;
     streamChunks = 0;
     streamedChars = 0;
-    // 非恢复轮按证据深度设置推理等级（fast 关闭推理）；恢复轮强制关闭推理，优先级更高
+    // 非恢复轮按证据深度设置推理等级（fast 档封顶 low，balanced 封顶 medium）；恢复轮强制关闭推理，优先级更高
     const reasoningPrefs = recovery
       ? ({ enabled: false, effort: 'medium' } as const)
       : getAnalysisReasoningPrefs();

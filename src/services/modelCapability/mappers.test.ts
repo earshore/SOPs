@@ -85,7 +85,11 @@ describe('multi-protocol mappers', () => {
       thinking: { type: 'enabled' },
       reasoning_effort: 'high',
     });
-    expect(mapThinkingPlusEffort({ enabled: false, effort: 'high' })).toEqual({});
+    // Off on default-thinking families must send the vendor disable field,
+    // otherwise DeepSeek/GLM keep thinking and the toggle is a no-op.
+    expect(mapThinkingPlusEffort({ enabled: false, effort: 'high' })).toEqual({
+      thinking: { type: 'disabled' },
+    });
   });
 
   it('anthropic adaptive thinking + output_config.effort are paired (not effort alone)', () => {
