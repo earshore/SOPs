@@ -28,14 +28,23 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本           | 说明                                               |
 | ---------------------------- | -------------- | -------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.0.11`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.12-rc.9` | 主题语义色全站迁移（primary/accent）+ 组件/工具链收口；**非** Latest |
-| package.json                 | `3.0.12-rc.9`  | 与当前 RC tag / Release 一致                       |
+| **当前 Pre-release 候选**    | `v3.0.12-rc.10` | AI 分析推理联动与动态耗时估算 + Deep Chat 正文净化/流式去重 + 数据采集合并/覆盖导入；**非** Latest |
+| package.json                 | `3.0.12-rc.10`  | 与当前 RC tag / Release 一致                       |
 | 上一 GA                      | `v3.0.11`      | 回滚参考                                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.9` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12-rc.10` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.9`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.11`，开放候选为 `v3.0.12-rc.10`。
+
+`v3.0.12-rc.10`（2026-08-08，Pre-release）收口 AI 智能分析推理联动、Deep Chat 正文净化与数据采集导入双模式：
+
+- **AI 智能分析**：证据深度下拉动态耗时估算（按目标数/推理档位/并发实时计算区间，联动全局推理等级）；推理等级真联动（fast→low、balanced→medium、deep→透传全局，深入档+max 实测请求体 `reasoning.effort=max` 生效）；toast/性能摘要展示实际推理档位。
+- **Deep Chat**：Listing 工作流剥离模型误写入正文的自我审查/开场前言（普通聊天原样）；Responses 流式 done 事件完整文本与 delta 去重，避免重复拼接。
+- **数据采集**：产品导入拆分为**合并导入**（保留未覆盖 ASIN、相同 ASIN 仅并入评论）与**覆盖导入**（清空替换 + 确认弹窗）；双按钮 + 双隐藏 input 可访问性同步。
+- **共享组件**：统一 ModelSelect 组件族（Keyword Hunter / Deep Chat / 系统设置收敛）；“刷新模型配置”真正重新请求 `/models`。
+- **门禁**：utility bridge 454→455 同步；tests 类型修复、prettier 全量格式化；XSS 扫描 0 命中。
+- GitHub Latest **仍指向** `v3.0.11`；回滚基线为 `v3.0.11`；生产目标 `https://sops.hongecb.store`。
 
 `v3.0.12-rc.9`（2026-08-07，Pre-release）收口 Phase B 主题语义色全站迁移与工具链硬化：
 
