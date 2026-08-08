@@ -240,9 +240,16 @@ function renderReviewCard(review: unknown, index: number, viewModel: ProductCard
 
 function renderReviewSection(viewModel: ProductCardViewModel): string {
   const reviews = viewModel.product.customer_reviews || [];
-  const reviewsHtml = reviews
+  // 评论可能达数百条：渲染上限内截断，避免展开卡片时生成 O(n) DOM 节点导致卡顿
+  const REVIEW_SECTION_LIMIT = 50;
+  const visibleReviews = reviews.slice(0, REVIEW_SECTION_LIMIT);
+  const reviewsHtml = visibleReviews
     .map((review: unknown, index: number) => renderReviewCard(review, index, viewModel))
     .join('');
+  const truncatedNote =
+    reviews.length > visibleReviews.length
+      ? `<p class="text-xs text-slate-400 px-1 pt-1">共 ${reviews.length} 条评论，仅渲染前 ${REVIEW_SECTION_LIMIT} 条以保持流畅</p>`
+      : '';
 
   return `
                 <div>
@@ -250,7 +257,7 @@ function renderReviewSection(viewModel: ProductCardViewModel): string {
                         <i class="fas fa-comments text-purple-500"></i> 评论内容 
                         <span class="text-xs font-normal text-slate-400 px-2 py-0.5 bg-slate-100 rounded-full">TOP ${reviews.length}</span>
                     </h5>
-                    ${reviews.length > 0 ? `<div class="max-h-96 overflow-y-auto space-y-3 pr-1 custom-scrollbar">${reviewsHtml}</div>` : '<p class="text-sm text-slate-400 italic pl-6">无评论数据</p>'} 
+                    ${reviews.length > 0 ? `<div class="max-h-96 overflow-y-auto space-y-3 pr-1 custom-scrollbar">${reviewsHtml}</div>${truncatedNote}` : '<p class="text-sm text-slate-400 italic pl-6">无评论数据</p>'} 
                 </div>`;
 }
 
