@@ -35,4 +35,5 @@
 - commit：`Harden release gates and audit coverage`
 
 ## 阶段 E — 下一迭代（GA 后，本文档仅记录）
-- P1-1 耗时估算同源化、P1-2 流式超时语义、业务 e2e 进 CI、评论列表截断、xss-scanner 补模式、browserslist
+- ~~P1-1 耗时估算同源化~~ ✅ 已完成（commit 20738bcb）：`estimateRunAtDepth` 统一入口，下拉与 toast 同源；`estimateAnalysisTime` 支持显式 evidenceDepth
+- P1-2 流式超时语义、业务 e2e 进 CI、评论列表截断、xss-scanner 补模式、browserslist
