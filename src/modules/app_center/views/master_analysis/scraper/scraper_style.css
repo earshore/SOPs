@@ -405,6 +405,11 @@
 }
 
 /* ---- History Cards ---- */
+/* 历史快照列表限高：约 5 条卡片高度（不超过一屏可视高度），超出后内部滚动 */
+.history-card-list {
+  max-height: min(560px, 60vh);
+}
+
 .history-card {
   transition:
     background-color var(--duration-normal) var(--ease-smooth),
