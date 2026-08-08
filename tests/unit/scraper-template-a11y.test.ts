@@ -32,10 +32,13 @@ describe('Scraper template accessibility semantics', () => {
     expect(template).not.toContain('@click="triggerImport()"');
     expect(hiddenFileInput).toContain('aria-label="导入 JSON 产品数据文件"');
     expect(template).toContain('aria-label="合并导入 JSON 产品数据文件"');
-    expect(template).toContain('aria-label="覆盖导入 JSON 产品数据文件"');
+    expect(template).toContain('aria-label="合并导入 JSON 产品数据文件"');
+    expect(template).toContain('aria-label="导入新的 JSON 产品数据文件"');
     expect(template).toContain('id="overwrite-file-input"');
     expect(template).toContain("handleImportFiles($event, 'merge')");
-    expect(template).toContain("handleImportFiles($event, 'overwrite')");
+    // 导入新的：模板必须绑定 'new' 模式（存档现有数据 + 确认弹窗）；禁旧 'overwrite' 值
+    expect(template).toContain("handleImportFiles($event, 'new')");
+    expect(template).not.toContain("handleImportFiles($event, 'overwrite')");
     // Focus ring is Appearance-tokenized (theme Phase 1–2), not hard blue.
     expect(template).toContain(
       'focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))]'
