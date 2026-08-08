@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 候选版本。GitHub Release 保持 **Pre-release**；Latest 仍指向稳定版 GA `v3.0.11`。
 > 本候选收口 AI 智能分析推理联动与动态耗时估算、Deep Chat 正文净化与流式去重、
-> 数据采集导入双模式（合并/覆盖），并统一 LLM 模型选择组件。
+> 数据采集导入双模式（合并/导入新的），并统一 LLM 模型选择组件。
 > 回滚基线保持 `v3.0.11` 的 Pages 部署。部署目标：https://sops.hongecb.store
 
 ### Added（新增）
@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AI 智能分析证据深度下拉改为动态耗时估算（按目标数/推理档位/并发实时计算区间），
   并在系统设置全局推理等级变更时联动刷新，不再展示误导性的静态时长文案。
 - 数据采集「产品导入管理」拆分为双模式：**合并导入**（保留未覆盖 ASIN、相同 ASIN 仅
-  并入评论）与**覆盖导入**（清空现有数据并以文件内容替换，带确认弹窗）。
+  并入评论）与**导入新的**（现有数据自动存入历史快照后以文件内容替换当前数据，带确认弹窗）。
 - 共享 `src/components/modelSelect/` 组件族（state / service / ui / controller）作为
   “选择 LLM 模型 + 重新拉取模型列表”的唯一实现；文档见 `docs/guides/model-select-component-guide.md`。
 
@@ -27,18 +27,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AI 智能分析推理等级与全局设置真联动：证据深度作为推理预算上限
   （fast→low、balanced→medium、deep→透传全局等级），toast 与性能摘要展示实际档位；
   深入档+全局 max 实测请求体 `reasoning.effort=max` 透传生效。
+- AI 智能分析耗时估算与真实运行计划同源：证据深度三档文案各自使用本档位的分片预算与
+  推理基准（不再共用运行时档位），并发/缓存/输入规模与开始分析的 toast 一致。
 - Deep Chat 文案出口统一净化：Listing 工作流剥离模型误写入正文的自我审查/开场前言，
   普通聊天原样返回；Responses 流式 done 事件完整文本与 delta 去重，避免重复拼接。
 - Keyword Hunter SEO 流程页与 Playground Deep Chat 改用共享 ModelSelect 组件；
   系统设置模型助手收敛到组件服务层（`dedupeModels`/`getModelId` 复用）。
-- utility bridge 重新生成（454 → 455 条规则，覆盖导入 UI 新增工具类）。
+- utility bridge 重新生成（454 → 455 条规则，导入模式 UI 新增工具类）。
 
 ### Fixed（修复）
 
 - Playground Deep Chat “刷新模型配置”改为真正重新请求 `/models`，而非仅重读本地配置；
   失败时呈现统一 LLM 失败 toast 与加载/错误状态、`aria-live` 状态。
-- 数据采集导入链路补齐测试类型修复与可访问性断言同步（追加/覆盖按钮 aria-label、
+- 数据采集导入链路补齐测试类型修复与可访问性断言同步（追加/导入新的按钮 aria-label、
   双隐藏 input 语义）。
+- 修复「导入新的」按钮绑定失效（此前仍传旧模式值，导致确认弹窗与历史存档不生效）。
+- 纯推理流不再无限滑动请求超时：新增推理阶段预算（max(2×超时, 120s)），
+  正文迟迟不出现时按超时终止，避免“快速档”被思考流拖到 8-15 分钟。
+- 历史快照双存储镜像同步：异步写入后 localStorage 同步键同源更新，清空/删除时同步
+  清理源键与迁移标记，避免刷新后旧数据回灌。
+- DeepSeek/GLM 关闭推理协议级生效：off 时发送 `thinking.type: disabled`，恢复轮不再无效。
 
 ## [3.0.12-rc.9] - 2026-08-07
 
