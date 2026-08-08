@@ -711,13 +711,15 @@ describe('流式推理超时策略', () => {
         { stream: true, retries: 0, timeout: 30_000 }
       );
 
+      // 先挂 rejection handler，再推进定时器：避免 rejection 在 handler 注册前被记未处理
+      const rejection = expect(promise).rejects.toMatchObject({
+        message: expect.stringContaining('模型响应超时(30秒)'),
+      });
       // 让首个推理 chunk 被处理（reasoningOnly=true，不重置全量超时）
       await vi.advanceTimersByTimeAsync(50);
       // 推进至全量超时窗口：纯推理未滑动窗口 → 应触发超时 abort
       await vi.advanceTimersByTimeAsync(30_000);
-      await expect(promise).rejects.toMatchObject({
-        message: expect.stringContaining('模型响应超时(30秒)'),
-      });
+      await rejection;
       expect(global.fetch).toHaveBeenCalledTimes(1);
     } finally {
       vi.useRealTimers();
