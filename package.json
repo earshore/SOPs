@@ -1,6 +1,6 @@
 {
   "name": "sops",
-  "version": "3.0.12-rc.9",
+  "version": "3.0.12-rc.10",
   "description": "sops - 亚马逊运营管理平台",
   "type": "module",
   "scripts": {
@@ -26,7 +26,7 @@
     "format:check": "prettier --config config/.prettierrc.json --ignore-path config/.prettierignore --check \"src/**/*.{js,ts,jsx,tsx,json,css,md}\"",
     "format:check:performance": "prettier --config config/.prettierrc.json --ignore-path config/.prettierignore --check package.json .github/workflows/test.yml config/playwright.config.ts config/playwright.performance.config.ts config/tsconfig.performance.json tests/performance/lighthouse-gate.ts tests/performance/release-performance-gate.test.ts",
     "type-check": "tsc --noEmit -p tsconfig.app.json",
-  "settings-scale": "tsx scripts/quality/audit-settings-scale.ts",
+    "settings-scale": "tsx scripts/quality/audit-settings-scale.ts",
     "type-check:tests": "tsc --noEmit",
     "type-check:performance": "tsc --noEmit -p config/tsconfig.performance.json",
     "xss:scan": "node tools/security/xss-scanner.js",

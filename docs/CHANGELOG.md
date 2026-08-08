@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [3.0.12-rc.10] - 2026-08-08
+
+> 候选版本。GitHub Release 保持 **Pre-release**；Latest 仍指向稳定版 GA `v3.0.11`。
+> 本候选收口 AI 智能分析推理联动与动态耗时估算、Deep Chat 正文净化与流式去重、
+> 数据采集导入双模式（合并/覆盖），并统一 LLM 模型选择组件。
+> 回滚基线保持 `v3.0.11` 的 Pages 部署。部署目标：https://sops.hongecb.store
+
+### Added（新增）
+
+- AI 智能分析证据深度下拉改为动态耗时估算（按目标数/推理档位/并发实时计算区间），
+  并在系统设置全局推理等级变更时联动刷新，不再展示误导性的静态时长文案。
+- 数据采集「产品导入管理」拆分为双模式：**合并导入**（保留未覆盖 ASIN、相同 ASIN 仅
+  并入评论）与**覆盖导入**（清空现有数据并以文件内容替换，带确认弹窗）。
+- 共享 `src/components/modelSelect/` 组件族（state / service / ui / controller）作为
+  “选择 LLM 模型 + 重新拉取模型列表”的唯一实现；文档见 `docs/guides/model-select-component-guide.md`。
+
+### Changed（变更）
+
+- AI 智能分析推理等级与全局设置真联动：证据深度作为推理预算上限
+  （fast→low、balanced→medium、deep→透传全局等级），toast 与性能摘要展示实际档位；
+  深入档+全局 max 实测请求体 `reasoning.effort=max` 透传生效。
+- Deep Chat 文案出口统一净化：Listing 工作流剥离模型误写入正文的自我审查/开场前言，
+  普通聊天原样返回；Responses 流式 done 事件完整文本与 delta 去重，避免重复拼接。
+- Keyword Hunter SEO 流程页与 Playground Deep Chat 改用共享 ModelSelect 组件；
+  系统设置模型助手收敛到组件服务层（`dedupeModels`/`getModelId` 复用）。
+- utility bridge 重新生成（454 → 455 条规则，覆盖导入 UI 新增工具类）。
+
+### Fixed（修复）
+
+- Playground Deep Chat “刷新模型配置”改为真正重新请求 `/models`，而非仅重读本地配置；
+  失败时呈现统一 LLM 失败 toast 与加载/错误状态、`aria-live` 状态。
+- 数据采集导入链路补齐测试类型修复与可访问性断言同步（追加/覆盖按钮 aria-label、
+  双隐藏 input 语义）。
+
 ## [3.0.12-rc.9] - 2026-08-07
 
 > 候选版本。GitHub Release 保持 **Pre-release**；Latest 仍指向稳定版 GA `v3.0.11`。
@@ -42,23 +76,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   不改变 `.eco-page` 直接子级结构。
 - 表格内联编辑（td input/select、`update-field`）补齐窄屏（<768px）焦点状态基线
   （TD-CMP-02）；桌面行为不变。
-
-## [Unreleased] - 2026-08-07
-
-
-### Added
-
-- New shared `src/components/modelSelect/` component family (state / service / ui / controller) as the single implementation for “select LLM model + re-fetch model list”; documented in `docs/guides/model-select-component-guide.md`.
-
-### Changed
-
-- Keyword Hunter SEO process page and Playground Deep Chat now use the shared ModelSelect component instead of their own model selector / refresh implementations; duplicated model option builders (`dedupeTranslationModels`, `normalizeModels`, …) are removed.
-- System Settings converges its model helpers onto the component service layer: `dedupeModels` and `getModelId` re-export from `modelSelectService`; LLM form and tool-strategy UI semantics are unchanged.
-
-### Fixed
-
-- Playground Deep Chat “refresh model config” now truly re-fetches `/models` instead of only re-reading the local config; refresh failure surfaces the unified LLM failure toast with loading/error states and `aria-live` status.
-
 
 ## [3.0.12-rc.8] - 2026-08-04
 
@@ -208,14 +225,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 删除 `ai_analysis_style.css` 中无效的 dark 模式覆盖死代码（覆盖的体系 B 变量 `--text-secondary` 等无任何类引用）。
 - 模板 `template.html` 类名替换约 80 处；`AlpinePanel.ts` 类名替换约 10 处 + `runAnalysisButtonClass` 状态重写。
 - 新增 `ai-analysis-contrast-audit.md` 诊断报告，记录根因与修复对照。
-
-## [Unreleased]
-
-### Added
-
-### Changed
-
-### Fixed
 
 ## [3.0.12-rc.2] - 2026-07-28
 
