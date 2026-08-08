@@ -23,6 +23,7 @@ import {
   toolStrategySectionBehavior,
 } from './sections/toolStrategySection';
 import { confirmSettingsAction, dataSectionBehavior } from './sections/dataSection';
+import { LOCAL_DATA_BUCKET_IDS } from '@/services/localDataStore';
 import { diagnosticsSectionBehavior } from './sections/diagnosticsSection';
 import {
   findFirstSettingsSearchMatch,
@@ -187,8 +188,8 @@ function createSettingsState(): Pick<
       isBusy: false,
       clearingBucketId: null,
       cleanupItemsExpanded: false,
-      // Empty selection = full export; advanced UI can opt into partial buckets.
-      selectedExportBuckets: [],
+      // 默认全选（勾选 = 纳入导出）；用户按需取消勾选即可只导出所需分类。
+      selectedExportBuckets: [...LOCAL_DATA_BUCKET_IDS],
     },
   };
 }

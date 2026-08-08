@@ -76,7 +76,10 @@
                             <div class="settings-pref-row__meta">
                               <div class="min-w-0">
                                 <span class="settings-pref-row__title" x-text="bucket.label"></span>
-                                <p class="settings-pref-row__hint">纳入本次导入 / 导出</p>
+                                <p
+                                  class="settings-pref-row__hint"
+                                  x-text="bucket.isEmpty ? '暂无数据' : bucket.usedText + ' · ' + bucket.keysText"
+                                ></p>
                               </div>
                             </div>
                             <span class="settings-pref-row__check">
@@ -92,6 +95,24 @@
                             </span>
                           </label>
                         </template>
+                      </div>
+                      <div class="settings-data-io-select-actions">
+                        <button
+                          type="button"
+                          @click="selectAllExportBuckets()"
+                          :disabled="localData.isBusy"
+                          class="settings-data-io-actions__btn"
+                        >
+                          全选
+                        </button>
+                        <button
+                          type="button"
+                          @click="clearExportBucketSelection()"
+                          :disabled="localData.isBusy"
+                          class="settings-data-io-actions__btn"
+                        >
+                          清空选择
+                        </button>
                       </div>
                       <div class="settings-data-io-actions">
                         <button

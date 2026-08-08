@@ -8,6 +8,7 @@ import {
 } from '../domain/localDataCopy';
 import { LocalDataBucketView, SettingsPanelPart } from '../panelTypes';
 import {
+  LOCAL_DATA_BUCKET_IDS,
   LocalDataStore,
   precheckLocalDataImportText,
   type LocalDataBucketId,
@@ -20,17 +21,6 @@ import { downloadJson } from '@/common/utils/download';
 import { isStorageQuotaWarning } from '@/components/settings/domain/settingsHealth';
 import { showToast } from '@/common/ui';
 
-const ALL_LOCAL_DATA_BUCKET_IDS: LocalDataBucketId[] = [
-  'config',
-  'secrets',
-  'workspace-state',
-  'scrape-history',
-  'chat-history',
-  'keyword-history',
-  'app-center-history',
-  'cache',
-  'other',
-];
 async function resetAppStoreRuntimeState(): Promise<void> {
   const state = appStore.getState();
 
@@ -174,7 +164,7 @@ export const dataSectionBehavior: SettingsPanelPart = {
 
   get isPartialLocalDataExport(): boolean {
     const selected = this.localData.selectedExportBuckets;
-    return selected.length > 0 && selected.length < ALL_LOCAL_DATA_BUCKET_IDS.length;
+    return selected.length > 0 && selected.length < LOCAL_DATA_BUCKET_IDS.length;
   },
 
   get exportLocalDataButtonText(): string {
@@ -338,7 +328,7 @@ export const dataSectionBehavior: SettingsPanelPart = {
   },
 
   selectAllExportBuckets(): void {
-    this.localData.selectedExportBuckets = [...ALL_LOCAL_DATA_BUCKET_IDS];
+    this.localData.selectedExportBuckets = [...LOCAL_DATA_BUCKET_IDS];
   },
 
   clearExportBucketSelection(): void {

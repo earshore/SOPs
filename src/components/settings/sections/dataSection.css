@@ -51,6 +51,18 @@
 /* Collapsed data cards — shared summary rhythm */
 
 /* Bottom actions inside framed data tool-pages (export/import, save retention) */
+.settings-data-io-select-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.settings-data-io-select-actions .settings-data-io-actions__btn {
+  min-height: 2rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.7rem;
+}
+
 .settings-data-io-actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

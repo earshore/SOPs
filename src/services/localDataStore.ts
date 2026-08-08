@@ -93,7 +93,7 @@ const DB_VERSION = 1;
 const STORAGE_VERSION = 'local-data-v1';
 
 const CACHE_PREFIXES = ['cache:', 'view_cache_', 'http-cache:', 'ai_analysis_'];
-const LOCAL_DATA_BUCKET_IDS: LocalDataBucketId[] = [
+export const LOCAL_DATA_BUCKET_IDS: LocalDataBucketId[] = [
   'config',
   'secrets',
   'workspace-state',
