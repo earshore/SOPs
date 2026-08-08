@@ -34,6 +34,12 @@
 - 验证：本地跑 xss:gate/secret:scan、artifact-contract（本地 build 后）、type-check、bundle-size-gate
 - commit：`Harden release gates and audit coverage`
 
-## 阶段 E — 下一迭代（GA 后，本文档仅记录）
-- ~~P1-1 耗时估算同源化~~ ✅ 已完成（commit 20738bcb）：`estimateRunAtDepth` 统一入口，下拉与 toast 同源；`estimateAnalysisTime` 支持显式 evidenceDepth
-- P1-2 流式超时语义、业务 e2e 进 CI、评论列表截断、xss-scanner 补模式、browserslist
+## 阶段 E — GA 后迭代（本文档记录）
+- ✅ P1-1 耗时估算同源化（commit 20738bcb）：`estimateRunAtDepth` 统一入口，下拉与 toast 同源
+- ✅ P1-2 流式推理预算（commit ecf1a0df）：纯推理不滑动全量超时，独立预算 max(2×超时,120s) 兜底
+- ✅ XSS 扫描 query 接收方模式（commit 1626b362）
+- ✅ 评论渲染上限 50 条（commit 6854bd56）
+- ✅ 发版物料术语同步（commit 7369e5e2）
+- ✅ 浏览器基线 + at() 降级（commit bbed47cc）
+- ✅ 业务 e2e 进 CI：scraper.spec（commit 9b0bcd18）；keyword-hunter-process 存在 fixture 时序不稳，修复后再纳入
+- 遗留：keyword-hunter e2e 稳定性、P2 清单其余项（依赖 PR 门禁完善、Markdown 渲染监控、e2e 残余时序等待）
