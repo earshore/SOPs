@@ -376,6 +376,30 @@ describe('错误类型处理', () => {
 
     expect(console.error).toHaveBeenCalledWith('[FATAL]', '系统错误', expect.anything(), 'System');
   });
+
+  it('NET_OFFLINE 应走 LLM 失败提示（白名单）', () => {
+    mockShowToast.mockClear();
+    const error = new NetworkError('网络不可用', 'NET_OFFLINE');
+
+    handler.handle(error);
+
+    expect(mockShowToast).toHaveBeenCalledWith(
+      expect.stringContaining('网络'),
+      expect.objectContaining({ description: expect.stringContaining('网络') })
+    );
+  });
+
+  it('NET_REQUEST_FAILED 应走 LLM 失败提示（白名单）', () => {
+    mockShowToast.mockClear();
+    const error = new NetworkError('请求失败', 'NET_REQUEST_FAILED');
+
+    handler.handle(error);
+
+    expect(mockShowToast).toHaveBeenCalledWith(
+      expect.stringContaining('网络'),
+      expect.objectContaining({ description: expect.stringContaining('网络') })
+    );
+  });
 });
 
 // ================================================================

@@ -144,6 +144,14 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Static artifact contract
+        # _headers/_redirects/404.html 是生产安全头与路由事实源，契约必须在 CI 强制执行
+        run: npm run release:artifact-contract
+
+      - name: Bundle size gate
+        # 任何 dist JS chunk 超过体积预算（gzip 400KB / raw 1200KB）即失败
+        run: npm run build:size-gate
+
       - name: Check build output
         shell: pwsh
         run: |

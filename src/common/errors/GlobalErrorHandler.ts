@@ -199,6 +199,8 @@ export class GlobalErrorHandler {
       code.startsWith('API_') ||
       code === 'LLM_TIMEOUT' ||
       code === 'NET_TIMEOUT' ||
+      code === 'NET_OFFLINE' ||
+      code === 'NET_REQUEST_FAILED' ||
       code === 'SYS_STORAGE_FULL' ||
       code === 'SYS_STORAGE_ERROR' ||
       code === 'BIZ_NO_MODEL_CONFIGURED'

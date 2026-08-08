@@ -137,7 +137,7 @@ jobs:
         shell: pwsh
         run: |
           npm update --save
-          npm audit fix --audit-level=moderate
+          npm audit fix --audit-level=high
       
       - name: 检查变更
         id: changes
@@ -154,7 +154,7 @@ jobs:
         if: steps.changes.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.AUTOMATION_PAT || secrets.GITHUB_TOKEN }}
           commit-message: 'chore(deps): 自动更新依赖补丁版本'
           title: 'chore(deps): 自动更新依赖补丁版本'
           body: |
@@ -163,7 +163,9 @@ jobs:
             此 PR 由自动化工作流创建,包含以下更新:
             
             - 更新所有补丁版本依赖
-            - 自动修复中危及以上安全漏洞
+            - 自动修复高危安全漏洞
+            
+            > 提示：通过 AUTOMATION_PAT 创建的 PR 会触发 CI 门禁；未配置时回退 GITHUB_TOKEN（不会触发 CI，需人工复核）。
             
             ### 检查清单
             

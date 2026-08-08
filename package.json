@@ -136,6 +136,7 @@
     "ci:quality": "npm run architecture:audit && npm run css:audit && npm run doc-classnames:audit && npm run z-index:audit && npm run theme:hardcode-baseline:gate && npm run theme:bridge:gate && npm run content-surface:gate && npm run token:override-audit:gate && npm run action-names:audit && npm run import-paths:audit && npm run source-names:audit && npm run type-check && npm run settings-scale && npm run lint && npm run lint:warning-gate && npm run ci:test-quality && npm run ci:format && npm run button-ui:gate",
     "ci:all": "npm run ci:security && npm run ci:quality && npm run build:app",
     "release:artifact-contract": "tsx scripts/release/static-artifact-contract.ts dist",
+    "build:size-gate": "tsx scripts/quality/bundle-size-gate.ts",
     "release:validate": "tsx scripts/release/prepare-release.ts validate",
     "release:notes": "tsx scripts/release/prepare-release.ts notes",
     "release:package": "tsx scripts/release/prepare-release.ts package",

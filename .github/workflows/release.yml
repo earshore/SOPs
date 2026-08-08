@@ -194,6 +194,13 @@ jobs:
             npx tsx scripts/release/prepare-release.ts notes --version $env:RELEASE_VERSION --out release-artifacts/RELEASE_BODY.md
           }
 
+      - name: Static artifact contract
+        # _headers/_redirects/404.html 是生产安全头与路由事实源，契约必须在发版时强制
+        run: npx tsx scripts/release/static-artifact-contract.ts dist
+
+      - name: Bundle size gate
+        run: npx tsx scripts/quality/bundle-size-gate.ts
+
       - name: Package artifacts
         shell: pwsh
         env:
