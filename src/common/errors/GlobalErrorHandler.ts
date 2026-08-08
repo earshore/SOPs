@@ -13,6 +13,17 @@ import { errorTracker } from '@/services/errorTracker';
 
 const nativeLoggerConsole = globalThis.console;
 
+/** 走 LLM 失败提示（showLlmFailureToast）的整码白名单 */
+const LLM_FAILURE_TOAST_CODES = [
+  'LLM_TIMEOUT',
+  'NET_TIMEOUT',
+  'NET_OFFLINE',
+  'NET_REQUEST_FAILED',
+  'SYS_STORAGE_FULL',
+  'SYS_STORAGE_ERROR',
+  'BIZ_NO_MODEL_CONFIGURED',
+];
+
 /**
  * 错误处理选项
  */
@@ -197,13 +208,7 @@ export class GlobalErrorHandler {
     return (
       code.startsWith('ERR_LLM_') ||
       code.startsWith('API_') ||
-      code === 'LLM_TIMEOUT' ||
-      code === 'NET_TIMEOUT' ||
-      code === 'NET_OFFLINE' ||
-      code === 'NET_REQUEST_FAILED' ||
-      code === 'SYS_STORAGE_FULL' ||
-      code === 'SYS_STORAGE_ERROR' ||
-      code === 'BIZ_NO_MODEL_CONFIGURED'
+      LLM_FAILURE_TOAST_CODES.includes(code)
     );
   }
 

@@ -1086,7 +1086,11 @@ class StorageServiceClass implements IStorageService {
     const trimmed = history.slice(0, maxItems);
 
     try {
-      const saved = await LocalDataStore.set(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`, trimmed, 'user-data');
+      const saved = await LocalDataStore.set(
+        `user:${STORAGE_KEYS.SCRAPE_HISTORY}`,
+        trimmed,
+        'user-data'
+      );
       if (saved) {
         // IDB 为权威：成功后同步镜像 localStorage，让同步读路径（getScrapeHistory / getById 等）见到最新值
         this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
