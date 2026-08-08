@@ -300,6 +300,7 @@ tools/naming-validator/css_report.md
 # Generated example exports
 examples/Amz_*.json
 examples/analysis-report-*.json
+examples/product_json/
 
 # Performance test reports
 tests/performance/baseline-reports/
