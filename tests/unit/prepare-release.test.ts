@@ -33,6 +33,7 @@ function escapeRegExp(value: string): string {
 /** Current RC/GA under release — assertions track package.json instead of rotting literals. */
 const CURRENT_VERSION = (JSON.parse(readRepoFile('package.json')) as { version: string }).version;
 const CURRENT_VERSION_RE = escapeRegExp(CURRENT_VERSION);
+const IS_PRE_RELEASE = /-(alpha|beta|rc)(\.|$)/i.test(CURRENT_VERSION);
 
 describe('extractChangelogSection', () => {
   const sample = `# Changelog
@@ -194,7 +195,7 @@ describe('v3.0.12-rc.3 release metadata', () => {
     expect(nextReleaseStart).toBeGreaterThan(rcStart);
 
     const rcSection = changelog.slice(rcStart, nextReleaseStart);
-    expect(rcSection).toMatch(/Pre-release|生产验证候选/);
+    expect(rcSection).toMatch(IS_PRE_RELEASE ? /Pre-release|生产验证候选/ : /正式 GA|稳定 GA/);
     expect(rcSection).toMatch(/`v3\.0\.11`/);
     expect(rcSection).toContain('https://sops.hongecb.store');
     expect(rcSection).toContain('### Changed');
@@ -204,24 +205,32 @@ describe('v3.0.12-rc.3 release metadata', () => {
   it('publishes the current GA, package RC, and previous GA in README', () => {
     const readme = readRepoFile('README.md');
 
-    expect(readme).toMatch(/\|\s*\*\*GitHub Latest（稳定 GA）\*\*\s*\|\s*`v3\.0\.11`\s*\|/);
-    expect(readme).toMatch(
-      new RegExp(`\\|\\s*\\*\\*当前 Pre-release 候选\\*\\*\\s*\\|\\s*\`v${CURRENT_VERSION_RE}\`\\s*\\|`)
-    );
+    expect(readme).toMatch(/\|\s*\*\*GitHub Latest（稳定 GA）\*\*\s*\|\s*`v3\.0\.12`\s*\|/);
+    if (IS_PRE_RELEASE) {
+      expect(readme).toMatch(
+        new RegExp(`\\|\\s*\\*\\*当前 Pre-release 候选\\*\\*\\s*\\|\\s*\`v${CURRENT_VERSION_RE}\`\\s*\\|`)
+      );
+    } else {
+      expect(readme).toMatch(/\|\s*\*\*当前 Pre-release 候选\*\*\s*\|\s*—\s*\|/);
+    }
     expect(readme).toMatch(
       new RegExp(`\\|\\s*package\\.json\\s*\\|\\s*\`${CURRENT_VERSION_RE}\`\\s*\\|`)
     );
     expect(readme).toMatch(/\|\s*上一 GA\s*\|\s*`v3\.0\.11`\s*\|/);
     expect(readme).toContain(`\`0.1.0\`…\`${CURRENT_VERSION}\``);
-    expect(readme).toContain('当前稳定版为 `v3.0.11`');
+    expect(readme).toContain(`当前稳定版为 \`v${CURRENT_VERSION}\``);
   });
 
   it('declares the current GA and candidate line in release policy', () => {
     const policy = readRepoFile('docs/RELEASE_POLICY.md');
 
-    expect(policy).toMatch(/`v3\.0\.11`.*2026-07-27.*当前 GA/);
-    expect(policy).toContain('当前候选线为 `v3.0.12-rc.*`');
-    expect(policy).toContain('定稿后发 `v3.0.12` GA');
+    expect(policy).toMatch(/`v3\.0\.12`.*2026-08-08.*当前 GA/);
+    expect(policy).toMatch(/`v3\.0\.11`.*2026-07-27.*上一 GA/);
+    if (IS_PRE_RELEASE) {
+      expect(policy).toContain(`当前候选线为 \`v${CURRENT_VERSION}-rc.*\``);
+    } else {
+      expect(policy).toContain('当前候选线关闭');
+    }
   });
 
   it('uses illustrative RC and GA commands that do not re-open closed GA lines', () => {
