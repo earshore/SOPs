@@ -67,6 +67,35 @@ describe('estimateAnalysisWorkload', () => {
     expect(w.reduceCalls).toBe(1);
     expect(w.callsByTarget['selling-points']).toBe(3); // ceil(10/8)=2 map + 1 reduce
   });
+
+  it('显式档位：三档分片预算单调（fast < balanced < deep）', () => {
+    const reviews = Array.from({ length: 200 }, (_, i) => makeReview(1, `issue ${i}`));
+    const product = makeProduct({ customer_reviews: reviews });
+    // fatal-flaws 属 star bucket：预算 36 / 96 / 160 → 分片 3 / 6 / 10
+    const fast = estimateAnalysisWorkload(product, ['fatal-flaws'], 'fast');
+    const balanced = estimateAnalysisWorkload(product, ['fatal-flaws'], 'balanced');
+    const deep = estimateAnalysisWorkload(product, ['fatal-flaws'], 'deep');
+    expect(fast.callsByTarget['fatal-flaws']).toBe(4);
+    expect(balanced.callsByTarget['fatal-flaws']).toBe(7);
+    expect(deep.callsByTarget['fatal-flaws']).toBe(11);
+  });
+
+  it('显式档位：预算封顶生效（400 条仍按预算分片）', () => {
+    const reviews = Array.from({ length: 400 }, (_, i) => makeReview(1, `issue ${i}`));
+    const product = makeProduct({ customer_reviews: reviews });
+    const fast = estimateAnalysisWorkload(product, ['fatal-flaws'], 'fast');
+    const deep = estimateAnalysisWorkload(product, ['fatal-flaws'], 'deep');
+    expect(fast.callsByTarget['fatal-flaws']).toBe(4); // ceil(36/16)=3 map + 1 reduce
+    expect(deep.callsByTarget['fatal-flaws']).toBe(11); // ceil(160/16)=10 map + 1 reduce
+  });
+
+  it('不传档位时回退运行时（与既有行为一致）', () => {
+    const reviews = Array.from({ length: 60 }, (_, i) => makeReview(1, `issue ${i}`));
+    const product = makeProduct({ customer_reviews: reviews });
+    // 默认（运行时档位）60 条 > 24 阈值 → map-reduce
+    const w = estimateAnalysisWorkload(product, ['fatal-flaws']);
+    expect(w.callsByTarget['fatal-flaws']).toBeGreaterThan(1);
+  });
 });
 
 describe('estimateAnalysisTime', () => {
@@ -78,6 +107,27 @@ describe('estimateAnalysisTime', () => {
     estimatedInputTokens: 4000,
     reasoning: { enabled: false, effort: 'low' as const },
   };
+
+  it('显式档位驱动耗时：deep 调用数与时长均高于 fast（同并发同推理）', () => {
+    const reviews = Array.from({ length: 200 }, (_, i) => makeReview(1, `issue ${i}`));
+    const product = makeProduct({ customer_reviews: reviews });
+    const fast = estimateAnalysisTime({
+      ...base,
+      targetIds: ['fatal-flaws'],
+      product,
+      maxConcurrency: 4,
+      evidenceDepth: 'fast',
+    });
+    const deep = estimateAnalysisTime({
+      ...base,
+      targetIds: ['fatal-flaws'],
+      product,
+      maxConcurrency: 4,
+      evidenceDepth: 'deep',
+    });
+    expect(deep.callCount).toBeGreaterThan(fast.callCount);
+    expect(deep.secondsHigh).toBeGreaterThan(fast.secondsHigh);
+  });
 
   it('off 档：8 目标并发 6 → 约 2-3 分钟级（区间格式正确）', () => {
     const est = estimateAnalysisTime(base);

@@ -21,8 +21,7 @@ import { getWorkbenchIconContainerClasses } from '@/common/constants/colorScheme
 import { appStore } from '@/stores/useAppStore';
 import type { Product } from '../config/sampleData';
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
-import { resolveAnalysisSchedule } from '../services/analysisScheduler';
-import { estimateAnalysisTime } from '../services/analysisTimeEstimator';
+import { estimateRunAtDepth } from '../services/estimateRunPlan';
 import {
   getAnalysisReasoningEffortLabel,
   getUserReasoningPrefs,
@@ -1003,25 +1002,28 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
       : analysisTargets.map(target => target.id);
     const scrapedData = appStore.getState().scraper?.scrapedData;
     const products = getProductsByAsins(scrapedData, this.selectedAsins);
-    const maxConcurrency = resolveAnalysisSchedule({
-      schedulingPreference: this.perfSettings.settings.schedulingPreference,
-    }).maxConcurrency;
 
     return (['fast', 'balanced', 'deep'] as const).map(depth => {
-      const reasoning = resolveAnalysisReasoningPrefs(userPrefs, depth);
-      const reasoningLabel = getAnalysisReasoningEffortLabel(reasoning);
       let estimateText = '预计 —';
+      let reasoningLabel: string;
       if (products.length > 0 && targetIds.length > 0) {
+        // 与开始分析 toast 同源：并发/缓存/token/分片均来自真实计划与档位参数
         const merged = products.length === 1 ? (products[0] as Product) : mergeProducts(products);
-        const estimate = estimateAnalysisTime({
-          targetIds,
-          product: merged,
-          maxConcurrency,
-          cachedTargetIds: [],
-          estimatedInputTokens: 0,
-          reasoning,
-        });
-        estimateText = `预计 ${estimate.label}`;
+        const run = estimateRunAtDepth(
+          {
+            product: merged,
+            targetIds,
+            schedulingPreference: this.perfSettings.settings.schedulingPreference,
+            userReasoning: userPrefs,
+          },
+          depth
+        );
+        reasoningLabel = getAnalysisReasoningEffortLabel(run.reasoning);
+        estimateText = `预计 ${run.estimate.label}`;
+      } else {
+        reasoningLabel = getAnalysisReasoningEffortLabel(
+          resolveAnalysisReasoningPrefs(userPrefs, depth)
+        );
       }
       return {
         value: depth,

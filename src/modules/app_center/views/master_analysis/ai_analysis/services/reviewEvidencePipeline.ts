@@ -81,6 +81,11 @@ function getEvidenceDepth(): MasterAnalysisEvidenceDepth {
   return getRuntimeMasterAnalysisOptions().evidenceDepth || 'balanced';
 }
 
+/** 估算路径可显式指定档位；执行路径不传则回退运行时设置 */
+function resolveEvidenceDepth(depth?: MasterAnalysisEvidenceDepth): MasterAnalysisEvidenceDepth {
+  return depth ?? getEvidenceDepth();
+}
+
 type SourceProductSlice = {
   asin: string;
   productTitle: string;
@@ -784,11 +789,14 @@ export type ReviewSourcePack = {
   budget: EvidenceBudgetStats;
 };
 
-function getReviewMapBudget(targetId: ReviewEvidenceTargetId): number {
-  const depth = getEvidenceDepth();
+function getReviewMapBudget(
+  targetId: ReviewEvidenceTargetId,
+  depth?: MasterAnalysisEvidenceDepth
+): number {
+  const resolved = resolveEvidenceDepth(depth);
   return STAR_BUCKET_TARGETS.includes(targetId)
-    ? STAR_MAP_BUDGET_BY_DEPTH[depth]
-    : GENERAL_MAP_BUDGET_BY_DEPTH[depth];
+    ? STAR_MAP_BUDGET_BY_DEPTH[resolved]
+    : GENERAL_MAP_BUDGET_BY_DEPTH[resolved];
 }
 
 function getReviewMapConcurrency(): number {
@@ -802,7 +810,8 @@ function getReviewMapConcurrency(): number {
  */
 export function buildReviewSourcePack(
   product: Product,
-  targetId: ReviewEvidenceTargetId
+  targetId: ReviewEvidenceTargetId,
+  depth?: MasterAnalysisEvidenceDepth
 ): ReviewSourcePack {
   const handler = TARGET_HANDLERS[targetId];
   const raw = product.metadata?.source_products;
@@ -838,7 +847,7 @@ export function buildReviewSourcePack(
   const dedupe = mergeDedupeStats(statsParts);
   const budgeted = applyFairSliceBudget<Review, SourceProductSlice & { items: Review[] }>(
     hygienic,
-    getReviewMapBudget(targetId),
+    getReviewMapBudget(targetId, depth),
     (slice, items) => ({
       ...slice,
       customer_reviews: items,
@@ -874,17 +883,22 @@ export function countReviewsForTarget(product: Product, targetId: ReviewEvidence
 
 export function shouldUseReviewMapReduce(
   product: Product,
-  targetId: ReviewEvidenceTargetId
+  targetId: ReviewEvidenceTargetId,
+  depth?: MasterAnalysisEvidenceDepth
 ): boolean {
   // Gate only by packed evidence volume (not multi-ASIN alone).
   // Multi-ASIN with few cleaned reviews is faster/safer as oneshot, improving TTFT.
   const packedCount = countReviewsForTarget(product, targetId);
   if (packedCount === 0) return false;
-  const depth = getEvidenceDepth();
+  const resolved = resolveEvidenceDepth(depth);
   const base = TARGET_HANDLERS[targetId].mapReduceThreshold;
   // Fast stays oneshot longer to cut multi-target TTFT; deep maps earlier for coverage.
   const threshold =
-    depth === 'fast' ? Math.round(base * 1.75) : depth === 'deep' ? Math.round(base * 0.75) : base;
+    resolved === 'fast'
+      ? Math.round(base * 1.75)
+      : resolved === 'deep'
+        ? Math.round(base * 0.75)
+        : base;
   return packedCount > threshold;
 }
 
@@ -1046,10 +1060,14 @@ function buildMapUnits(slices: SourceProductSlice[]): ReviewMapUnit[] {
 }
 
 /** Approximate Map shard count after hygiene/budget (for UX estimates). */
-export function estimateReviewMapCalls(product: Product, targetId: ReviewEvidenceTargetId): number {
-  const pack = buildReviewSourcePack(product, targetId);
+export function estimateReviewMapCalls(
+  product: Product,
+  targetId: ReviewEvidenceTargetId,
+  depth?: MasterAnalysisEvidenceDepth
+): number {
+  const pack = buildReviewSourcePack(product, targetId, depth);
   if (pack.reviewCount === 0) return 0;
-  if (!shouldUseReviewMapReduce(product, targetId)) return 1;
+  if (!shouldUseReviewMapReduce(product, targetId, depth)) return 1;
   return buildMapUnits(pack.slices).length;
 }
 

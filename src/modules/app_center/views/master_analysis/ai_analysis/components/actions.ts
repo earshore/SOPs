@@ -457,6 +457,8 @@ async function prepareAnalysisRun(
     cachedTargetIds: schedulePlan.cachedTargetIds,
     estimatedInputTokens: schedulePlan.estimatedInputTokens,
     reasoning: reasoningPrefs,
+    // 显式传当前档位，与下拉选项的估算公式（estimateRunAtDepth）同源
+    evidenceDepth: perfSettings.evidenceDepth,
   });
   const hygienePart = workload.hygieneHits > 0 ? `，证据清洗约 ${workload.hygieneHits} 条` : '';
   const cachePart = cachedCount > 0 ? `，缓存命中 ${cachedCount}/${selectedTargets.length} 维` : '';

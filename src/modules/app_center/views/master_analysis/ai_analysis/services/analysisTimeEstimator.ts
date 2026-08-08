@@ -7,6 +7,7 @@
  */
 
 import type { Product } from '../config/sampleData';
+import type { MasterAnalysisEvidenceDepth } from '@/services/runtimeStrategyService';
 import {
   buildReviewSourcePack,
   estimateReviewMapCalls,
@@ -33,11 +34,13 @@ export interface AnalysisWorkloadEstimate {
 
 /**
  * 估算各分析目标需要的模型调用次数。
- * 与 actions.ts 的 toast 口径一致（mapCalls 为分片数），并补充 reduce 与逐目标明细。
+ * evidenceDepth 缺省时按运行时当前档位（与执行一致），
+ * 传入档位时用于「选项预览」——展示选择该档位后的真实分片成本。
  */
 export function estimateAnalysisWorkload(
   product: Product,
-  selectedTargets: string[]
+  selectedTargets: string[],
+  evidenceDepth?: MasterAnalysisEvidenceDepth
 ): AnalysisWorkloadEstimate {
   let mapCalls = 0;
   let reduceCalls = 0;
@@ -64,8 +67,8 @@ export function estimateAnalysisWorkload(
       const pack = buildReviewSourcePack(product, targetId);
       hygieneHits +=
         pack.dedupe.duplicatesRemoved + pack.dedupe.emptyRemoved + pack.budget.omittedByBudget;
-      const maps = estimateReviewMapCalls(product, targetId);
-      const usesReduce = shouldUseReviewMapReduce(product, targetId);
+      const maps = estimateReviewMapCalls(product, targetId, evidenceDepth);
+      const usesReduce = shouldUseReviewMapReduce(product, targetId, evidenceDepth);
       mapCalls += maps;
       if (usesReduce) {
         reduceCalls += 1;
@@ -93,6 +96,8 @@ export interface AnalysisTimeEstimateInput {
   estimatedInputTokens: number;
   /** 映射后的实际推理档位（真联动结果）。 */
   reasoning: AnalysisReasoningPrefs;
+  /** 选项档位：估算所用分片预算/阈值；缺省 = 运行时当前档位（与执行一致） */
+  evidenceDepth?: MasterAnalysisEvidenceDepth;
 }
 
 export interface AnalysisTimeEstimate {
@@ -139,9 +144,16 @@ function formatDurationLabel(secondsLow: number, secondsHigh: number): string {
  * 输出区间：low = 0.8×wall，high = 1.3×wall。
  */
 export function estimateAnalysisTime(input: AnalysisTimeEstimateInput): AnalysisTimeEstimate {
-  const { targetIds, product, maxConcurrency, cachedTargetIds, estimatedInputTokens, reasoning } =
-    input;
-  const workload = estimateAnalysisWorkload(product, targetIds);
+  const {
+    targetIds,
+    product,
+    maxConcurrency,
+    cachedTargetIds,
+    estimatedInputTokens,
+    reasoning,
+    evidenceDepth,
+  } = input;
+  const workload = estimateAnalysisWorkload(product, targetIds, evidenceDepth);
   const cachedSet = new Set(cachedTargetIds);
 
   let callCount = 0;
