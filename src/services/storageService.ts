@@ -1039,12 +1039,19 @@ class StorageServiceClass implements IStorageService {
   }
 
   /**
-   * 保存采集历史
+   * 保存采集历史（localStorage 同步键）
    */
   setScrapeHistory(history: HistoryItem[]): boolean {
     const maxItems = getRuntimeStorageStrategyOptions().historyMaxItems;
     const trimmed = history.slice(0, maxItems);
-    return this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
+    const saved = this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
+    if (saved) {
+      // 镜像到 IndexedDB：同步/异步两条读路径保持同源（失败静默，异步读仍可回退 localStorage）
+      LocalDataStore.set(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`, trimmed, 'user-data').catch(
+        () => undefined
+      );
+    }
+    return saved;
   }
 
   /**
@@ -1079,7 +1086,12 @@ class StorageServiceClass implements IStorageService {
     const trimmed = history.slice(0, maxItems);
 
     try {
-      return await LocalDataStore.set(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`, trimmed, 'user-data');
+      const saved = await LocalDataStore.set(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`, trimmed, 'user-data');
+      if (saved) {
+        // IDB 为权威：成功后同步镜像 localStorage，让同步读路径（getScrapeHistory / getById 等）见到最新值
+        this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
+      }
+      return saved;
     } catch (e) {
       this.reportStorageReadError('setScrapeHistoryAsync', STORAGE_KEYS.SCRAPE_HISTORY, e as Error);
       return this.setScrapeHistory(trimmed);
@@ -1098,6 +1110,8 @@ class StorageServiceClass implements IStorageService {
     }
 
     this.remove(STORAGE_KEYS.SCRAPE_HISTORY);
+    // 同步清理迁移标记，避免下次 migrate 时误读其状态
+    this.remove(`${STORAGE_KEYS.SCRAPE_HISTORY}_migrated_to_indexeddb`);
   }
 
   /**

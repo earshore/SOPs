@@ -758,6 +758,39 @@ describe('错误处理', () => {
     expect(StorageService.getScrapeHistory()).toEqual(history);
   });
 
+  it('异步保存成功后应同步镜像到localStorage，同步读路径见最新值', async () => {
+    const history = [{ id: '1', url: 'https://example.com', timestamp: Date.now() }];
+    const expected = [{ id: '1', url: 'https://example.com', timestamp: Date.now() }];
+
+    await expect(StorageService.setScrapeHistoryAsync(history)).resolves.toBe(true);
+
+    expect(StorageService.getScrapeHistory()).toEqual(expected);
+  });
+
+  it('同步保存后会镜像到IndexedDB，保持双读路径同源', async () => {
+    const history = [{ id: '1', url: 'https://example.com', timestamp: Date.now() }];
+    const setSpy = vi.spyOn(LocalDataStore, 'set');
+
+    StorageService.setScrapeHistory(history);
+
+    expect(setSpy).toHaveBeenCalledWith(
+      `user:${STORAGE_KEYS.SCRAPE_HISTORY}`,
+      history,
+      'user-data'
+    );
+  });
+
+  it('删除采集历史时同步清理迁移标记', async () => {
+    const history = [{ id: '1', url: 'https://example.com', timestamp: Date.now() }];
+    StorageService.setScrapeHistory(history);
+    window.localStorage.setItem('scrape_history_migrated_to_indexeddb', '2026-08-08T00:00:00Z');
+
+    await StorageService.removeScrapeHistoryAsync();
+
+    expect(StorageService.getScrapeHistory()).toEqual([]);
+    expect(window.localStorage.getItem('scrape_history_migrated_to_indexeddb')).toBeNull();
+  });
+
   it('异步采集历史删除应该在IndexedDB失败时仍清理localStorage历史', async () => {
     const history = [{ id: '1', url: 'https://example.com', timestamp: Date.now() }];
     StorageService.setScrapeHistory(history);
