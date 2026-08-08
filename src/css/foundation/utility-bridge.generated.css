@@ -349,6 +349,7 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .ring-blue-100:not(.twb-keep) { --tw-ring-color: color-mix(in srgb, var(--color-blue-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .ring-cyan-100:not(.twb-keep) { --tw-ring-color: color-mix(in srgb, var(--color-cyan-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .ring-emerald-100:not(.twb-keep) { --tw-ring-color: color-mix(in srgb, var(--color-emerald-400) 30%, transparent); }
+:is(.dark, [data-color-mode-resolved="dark"]) .ring-indigo-100:not(.twb-keep) { --tw-ring-color: color-mix(in srgb, var(--color-indigo-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .ring-rose-100:not(.twb-keep) { --tw-ring-color: color-mix(in srgb, var(--color-rose-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .ring-slate-200:not(.twb-keep) { --tw-ring-color: rgba(255, 255, 255, 0.16); }
 :is(.dark, [data-color-mode-resolved="dark"]) .ring-slate-300:not(.twb-keep) { --tw-ring-color: rgba(255, 255, 255, 0.22); }

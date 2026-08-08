@@ -71,6 +71,7 @@ it('reports usage by local data bucket', async () => {
     'scrape-history',
     'chat-history',
     'keyword-history',
+    'app-center-history',
     'cache',
     'other',
   ]);
@@ -222,6 +223,46 @@ it('removes LRU metadata when clearing cache keys', async () => {
   expect(removed).toBe(1);
   expect(localStorage.getItem('cache:view:item')).toBeNull();
   expect(localStorage.getItem('_lru_access_cache:view:item')).toBeNull();
+});
+
+it('classifies and clears app center history as its own bucket', async () => {
+  localStorage.setItem(
+    'app_center_work_items_v1',
+    JSON.stringify([{ id: 'w1', status: 'done' }])
+  );
+  localStorage.setItem(
+    'app_center_artifact_envelopes_v1',
+    JSON.stringify([{ id: 'a1', type: 'analysis_report' }])
+  );
+  localStorage.setItem(
+    'app_center_recent_queue_prefs_v1',
+    JSON.stringify({ pinnedIds: [], dismissedIds: ['a1'] })
+  );
+  localStorage.setItem('llm_active_provider', JSON.stringify('new_api'));
+
+  const removed = await LocalDataStore.clearBucket('app-center-history');
+
+  expect(removed).toBe(3);
+  expect(localStorage.getItem('app_center_work_items_v1')).toBeNull();
+  expect(localStorage.getItem('app_center_artifact_envelopes_v1')).toBeNull();
+  expect(localStorage.getItem('app_center_recent_queue_prefs_v1')).toBeNull();
+  expect(localStorage.getItem('llm_active_provider')).not.toBeNull();
+});
+
+it('includes app center history in full export but not in other buckets', async () => {
+  localStorage.setItem(
+    'app_center_artifact_envelopes_v1',
+    JSON.stringify([{ id: 'a1', type: 'analysis_report' }])
+  );
+  localStorage.setItem('llm_active_provider', JSON.stringify('new_api'));
+  localStorage.setItem('cache:view:item', 'cached-view');
+
+  const full = await LocalDataStore.exportAll();
+  expect(full.localStorage).toHaveProperty('app_center_artifact_envelopes_v1');
+
+  const cacheOnly = await LocalDataStore.exportAll({ buckets: ['cache'] });
+  expect(cacheOnly.localStorage).not.toHaveProperty('app_center_artifact_envelopes_v1');
+  expect(cacheOnly.localStorage).toHaveProperty('cache:view:item');
 });
 
 it('UT-P2-03 summarizes backup metadata including keys and secret detection', () => {

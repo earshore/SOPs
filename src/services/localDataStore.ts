@@ -16,6 +16,7 @@ export type LocalDataBucketId =
   | 'scrape-history'
   | 'chat-history'
   | 'keyword-history'
+  | 'app-center-history'
   | 'cache'
   | 'other';
 
@@ -99,6 +100,7 @@ const LOCAL_DATA_BUCKET_IDS: LocalDataBucketId[] = [
   'scrape-history',
   'chat-history',
   'keyword-history',
+  'app-center-history',
   'cache',
   'other',
 ];
@@ -137,6 +139,11 @@ const KEYWORD_HISTORY_KEYS = new Set([
   'keyword_hunter_snapshots',
   'user:keyword_hunter_snapshots',
   'keyword_hunter_snapshots_migrated_to_indexeddb',
+]);
+const APP_CENTER_HISTORY_KEYS = new Set([
+  'app_center_work_items_v1',
+  'app_center_artifact_envelopes_v1',
+  'app_center_recent_queue_prefs_v1',
 ]);
 
 function isCacheKey(key: string): boolean {
@@ -186,6 +193,7 @@ function classifyKey(key: string, storageClass?: StorageClass): LocalDataBucketI
   if (SCRAPE_HISTORY_KEYS.has(key)) return 'scrape-history';
   if (CHAT_HISTORY_KEYS.has(key)) return 'chat-history';
   if (KEYWORD_HISTORY_KEYS.has(key)) return 'keyword-history';
+  if (APP_CENTER_HISTORY_KEYS.has(key)) return 'app-center-history';
   if (isConfigBucketKey(key, storageClass)) return 'config';
   return 'other';
 }

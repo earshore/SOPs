@@ -1314,6 +1314,7 @@ it('UT-P2-01 full bucket selection keeps full backup export semantics', async ()
     'scrape-history',
     'chat-history',
     'keyword-history',
+    'app-center-history',
     'cache',
     'other',
   ];

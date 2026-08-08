@@ -27,6 +27,7 @@ const ALL_LOCAL_DATA_BUCKET_IDS: LocalDataBucketId[] = [
   'scrape-history',
   'chat-history',
   'keyword-history',
+  'app-center-history',
   'cache',
   'other',
 ];
@@ -69,6 +70,16 @@ async function syncLocalDataRuntimeAfterBucketClear(bucketId: LocalDataBucketId)
     const { KeywordHunterSnapshotService } =
       await import('../../../modules/app_center/views/keyword_hunter/services/snapshotService');
     await KeywordHunterSnapshotService.clearAsync();
+    return;
+  }
+
+  if (bucketId === 'app-center-history') {
+    const { clearArtifactEnvelopeIndex } =
+      await import('../../../modules/app_center/artifactEnvelopeService');
+    const { clearRecentQueuePreferences } =
+      await import('../../../modules/app_center/recentQueueService');
+    clearArtifactEnvelopeIndex();
+    clearRecentQueuePreferences();
   }
 }
 

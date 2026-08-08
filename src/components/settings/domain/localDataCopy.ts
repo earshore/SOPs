@@ -80,6 +80,15 @@ export const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMe
     actionLabel: '清理关键词',
     confirmMessage: '这会删除 Keyword Hunter 本地快照和历史对比记录，建议先导出备份。继续？',
   },
+  'app-center-history': {
+    label: '最近作业记录',
+    description: '工作台总览的作业与工件记录（采集/AI 分析/Prompt/文案/评审等）',
+    icon: 'fa-clock-rotate-left',
+    iconClass: 'bg-indigo-50 text-indigo-600 ring-indigo-100',
+    buttonClass: 'border-indigo-100 bg-indigo-50 text-indigo-700 hover:bg-indigo-100',
+    actionLabel: '清理作业记录',
+    confirmMessage: '这会删除工作台总览的最近作业记录（含置顶/移除偏好），建议先导出备份。继续？',
+  },
   cache: {
     label: '缓存',
     description: '页面模板、HTTP 响应和 AI 分析缓存',

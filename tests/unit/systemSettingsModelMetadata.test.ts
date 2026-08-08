@@ -112,7 +112,7 @@ function createSettingsPanel(): SettingsPanelForTest {
     const panel = createSettingsPanel();
     await panel.refreshLocalDataUsage();
 
-    expect(panel.localDataCleanupSummaryText).toContain('8 类数据');
+    expect(panel.localDataCleanupSummaryText).toContain('9 类数据');
     // Lightweight API retained for compatibility; expand/collapse is native <details>
     expect(panel.localData.cleanupItemsExpanded).toBe(false);
     panel.toggleLocalDataCleanupItems();
