@@ -829,7 +829,7 @@
                     @change="selectEvidenceDepth($event.target.value)"
                     :disabled="isAnalyzing"
                     aria-label="证据深度"
-                    title="证据深度：快速更省时，深入更完整"
+                    title="证据深度仅影响本次 AI 分析，不改变全局模型与推理等级；快速更省时，深入更完整"
                   >
                     <template x-for="depthOption in evidenceDepthOptions" :key="depthOption.value">
                       <option :value="depthOption.value" x-text="depthOption.label"></option>

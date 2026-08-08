@@ -117,6 +117,15 @@ describe('resolveAnalysisReasoningPrefs（真联动矩阵）', () => {
   });
 });
 
+it('analysis reasoning resolution is read-only: never writes global settings', () => {
+  mockEvidence('fast');
+  mockGlobalReasoning(true, 'max');
+  getAnalysisReasoningPrefs();
+  // mock 未提供 StorageService.set：任何写全局推理/模型配置的行为都会直接抛错使测试失败
+  expect(mockStorageGet).toHaveBeenCalled();
+  expect(mockStorageGetLLMConfig).toHaveBeenCalled();
+});
+
 describe('getUserReasoningPrefs', () => {
   beforeEach(() => {
     mockStorageGet.mockReset();

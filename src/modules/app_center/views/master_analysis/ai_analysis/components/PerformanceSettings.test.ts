@@ -119,6 +119,17 @@ describe('PerformanceSettings', () => {
     );
   });
 
+  it('evidence depth selection writes only runtime strategy, never global LLM settings', () => {
+    vi.mocked(StorageService.get).mockReturnValue(null);
+    const panel = createPerformanceSettingsPanel();
+    panel.setEvidenceDepth('fast');
+    // 证据深度选择仅写 runtime 策略（masterAnalysis 专属），不得写入全局 LLM 配置
+    expect(vi.mocked(StorageService.set)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(StorageService.set).mock.calls[0]?.[0]).toBe(
+      STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS
+    );
+  });
+
   it('template exposes minimal clear-cache control and simple evidence-depth select', () => {
     const template = readFileSync(
       'src/modules/app_center/views/master_analysis/ai_analysis/template.html',
