@@ -41,5 +41,5 @@
 - ✅ 评论渲染上限 50 条（commit 6854bd56）
 - ✅ 发版物料术语同步（commit 7369e5e2）
 - ✅ 浏览器基线 + at() 降级（commit bbed47cc）
-- ✅ 业务 e2e 进 CI：scraper.spec（commit 9b0bcd18）；keyword-hunter-process 存在 fixture 时序不稳，修复后再纳入
-- 遗留：keyword-hunter e2e 稳定性、P2 清单其余项（依赖 PR 门禁完善、Markdown 渲染监控、e2e 残余时序等待）
+- ✅ 业务 e2e 进 CI：scraper.spec（commit 9b0bcd18）；keyword-hunter 三页 spec：selector 失效实为确定性回归（de806df0 改 title 未同步测试，`button[title="恢复到输入页"]` 精确匹配永久失效），修复为子串匹配 + analysis 断言对齐（报告后按钮为「重新生成」属 design，非 bug）；三组 + scraper 41/41 本地全绿并纳入 CI business-e2e
+- 遗留 2：跟随 PR 门禁完善、Markdown 渲染监控（P2，不阻塞 GA）

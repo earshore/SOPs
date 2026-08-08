@@ -81,7 +81,7 @@ async function holdMockAnalysisRequest(page: Page): Promise<{
 async function restoreSeededSnapshotFromInput(page: Page): Promise<void> {
   await page.goto(KEYWORD_HUNTER_ROUTES.input);
   await page.waitForSelector('#keyword-hunter-module-input', { timeout: 15000 });
-  await page.locator('button[title="恢复到输入页"]').first().click();
+  await page.locator('button[title*="恢复到输入页"]').first().click();
 }
 
 test.describe('Keyword Hunter 分析页', () => {
@@ -131,8 +131,7 @@ test.describe('Keyword Hunter 分析页', () => {
     await page.goto(KEYWORD_HUNTER_ROUTES.analysis);
     await page.waitForSelector('#keyword-hunter-llm-analysis-result', { timeout: 15000 });
 
-    await expect(page.locator('#keyword-hunter-analyze-btn')).toBeEnabled();
-    await page.locator('#keyword-hunter-analyze-btn').click();
+    // 无报告快照落地时 analysis 会自动触发分析（SEO「进入分析」设计），无需手动点击
     await heldRequest.requestStarted;
     await expect(page.locator('#keyword-hunter-loading-state')).toContainText(
       '正在读取文案与关键词数据'
@@ -153,7 +152,7 @@ test.describe('Keyword Hunter 分析页', () => {
     await expect(page.locator('#keyword-hunter-llm-analysis-result')).toContainText('88/100', {
       timeout: 10000,
     });
-    await expect(page.locator('#keyword-hunter-analyze-btn-text')).toHaveText('报告已生成');
+    await expect(page.locator('#keyword-hunter-analyze-btn-text')).toHaveText('重新生成');
     expect(heldRequest.getRequestCount()).toBe(1);
   });
 });

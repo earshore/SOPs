@@ -25,7 +25,7 @@ const TRANSLATED_COPY = '带主动降噪和长续航的无线耳机。';
 async function restoreSeededSnapshotFromInput(page: Page): Promise<void> {
   await page.goto(KEYWORD_HUNTER_ROUTES.input);
   await page.waitForSelector('#keyword-hunter-module-input', { timeout: 15000 });
-  await page.locator('button[title="恢复到输入页"]').first().click();
+  await page.locator('button[title*="恢复到输入页"]').first().click();
 }
 
 async function openProcessWithState(
