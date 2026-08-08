@@ -303,6 +303,7 @@ examples/analysis-report-*.json
 examples/product_json/
 
 # Performance test reports
+.madge-scan-*/
 tests/performance/baseline-reports/
 tests/performance/lighthouse-reports/
 tests/performance/performance-reports/
