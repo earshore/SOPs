@@ -540,10 +540,15 @@ async function readOpenAIStreamBody(
       break;
     }
 
-    context.options.onStreamActivity?.();
     const decoded = decoder.decode(value, { stream: true });
     rawText += decoded;
+    // 先解析再上报活动：区分「纯推理」与「正文进展」，供超时策略决策
+    const contentBefore = context.state.content.length;
     buffer = processStreamText(decoded, buffer, context);
+    context.options.onStreamActivity?.({
+      reasoningOnly: context.state.content.length === contentBefore,
+      contentChars: context.state.content.length,
+    });
   }
 
   const tail = decoder.decode();
@@ -925,6 +930,8 @@ function createLLMAbortResources(
   controller: AbortController;
   clearRequestTimeout: () => void;
   resetRequestTimeout: () => void;
+  resetThinkingBudget: () => void;
+  clearThinkingBudget: () => void;
 } {
   const controller = new AbortController();
   const abortOnTimeout = (): void => {
@@ -932,6 +939,12 @@ function createLLMAbortResources(
     state.timedOut = true;
     // 带 reason abort，避免浏览器默认 “signal is aborted without reason” 噪音
     controller.abort(createLLMTimeoutAbortError(options.timeout));
+  };
+  const abortOnThinkingTimeout = (): void => {
+    if (controller.signal.aborted) return;
+    state.timedOut = true;
+    // 纯推理流超预算：正文迟迟未出现（网关思考死循环/超大推理流），按超时归类
+    controller.abort(createLLMTimeoutAbortError(options.timeout, 'reasoning'));
   };
   const abortFromExternalSignal = (): void => {
     if (controller.signal.aborted) return;
@@ -956,7 +969,30 @@ function createLLMAbortResources(
   } else {
     options.signal?.addEventListener('abort', abortFromExternalSignal, { once: true });
   }
-  return { controller, clearRequestTimeout, resetRequestTimeout };
+
+  // 推理阶段预算：纯推理流不重置全量超时（否则可无限思考），正文出现后清除；
+  // 预算 = max(2×timeout, 120s)，给深度思考留出余量。
+  const thinkingBudgetMs = Math.max(options.timeout * 2, 120_000);
+  let thinkingTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  const clearThinkingBudget = (): void => {
+    if (thinkingTimeoutId !== null) {
+      clearTimeout(thinkingTimeoutId);
+      thinkingTimeoutId = null;
+    }
+  };
+  const resetThinkingBudget = (): void => {
+    clearThinkingBudget();
+    if (controller.signal.aborted) return;
+    thinkingTimeoutId = setTimeout(abortOnThinkingTimeout, thinkingBudgetMs);
+  };
+
+  return {
+    controller,
+    clearRequestTimeout,
+    resetRequestTimeout,
+    resetThinkingBudget,
+    clearThinkingBudget,
+  };
 }
 
 async function fetchLLMResponse(
@@ -1287,16 +1323,27 @@ async function executeLLMAttemptPayload(
 ): Promise<LLMResponsePayload> {
   await waitBeforeLLMRetry(attempt, context.options);
 
-  const { clearRequestTimeout, controller, resetRequestTimeout } = createLLMAbortResources(
-    context.options,
-    state
-  );
+  const {
+    clearRequestTimeout,
+    controller,
+    resetRequestTimeout,
+    resetThinkingBudget,
+    clearThinkingBudget,
+  } = createLLMAbortResources(context.options, state);
   const attemptContext: LLMCallContext = context.options.stream
     ? {
         ...context,
         options: {
           ...context.options,
-          onStreamActivity: resetRequestTimeout,
+          // 纯推理活动不重置全量超时（防无限思考），走独立推理预算；正文进展才滑动窗口
+          onStreamActivity: activity => {
+            if (activity.reasoningOnly) {
+              resetThinkingBudget();
+            } else {
+              clearThinkingBudget();
+              resetRequestTimeout();
+            }
+          },
         },
       }
     : context;
@@ -1406,8 +1453,9 @@ function createLLMTimeoutError(
 }
 
 /** Abort reason for the internal controller on timeout — friendly message, AbortError name. */
-function createLLMTimeoutAbortError(timeoutMs: number): Error {
-  const error = new Error(`模型响应超时(${timeoutMs / 1000}秒)`);
+function createLLMTimeoutAbortError(timeoutMs: number, phase?: string): Error {
+  const suffix = phase ? `，${phase}阶段` : '';
+  const error = new Error(`模型响应超时(${timeoutMs / 1000}秒${suffix})`);
   error.name = 'AbortError';
   return error;
 }

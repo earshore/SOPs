@@ -672,3 +672,55 @@ describe('取消信号支持', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('流式推理超时策略', () => {
+  it('纯推理流不重置全量超时：timeout 窗口内被终止', async () => {
+    vi.useFakeTimers();
+    try {
+      const { callLLM } = await import('../../src/services/llmService');
+      const encoder = new TextEncoder();
+
+      (global.fetch as any).mockImplementationOnce((_url: string, init: RequestInit) => {
+        const stream = new ReadableStream<Uint8Array>({
+          start(controller) {
+            // 仅推送推理增量，随后挂起：模拟网关持续思考、正文迟迟不出
+            controller.enqueue(
+              encoder.encode(
+                'data: {"choices":[{"delta":{"reasoning_content":"deep thinking "}}]}\n\n'
+              )
+            );
+            init.signal?.addEventListener('abort', () => {
+              controller.error(new DOMException('Aborted', 'AbortError'));
+            });
+          },
+        });
+        return Promise.resolve(
+          new Response(stream, {
+            status: 200,
+            headers: { 'content-type': 'text/event-stream' },
+          })
+        );
+      });
+
+      const promise = callLLM(
+        [{ role: 'user' as const, content: 'Test' }],
+        'openai',
+        'https://api.example.com/v1',
+        'test-key',
+        'gpt-4',
+        { stream: true, retries: 0, timeout: 30_000 }
+      );
+
+      // 让首个推理 chunk 被处理（reasoningOnly=true，不重置全量超时）
+      await vi.advanceTimersByTimeAsync(50);
+      // 推进至全量超时窗口：纯推理未滑动窗口 → 应触发超时 abort
+      await vi.advanceTimersByTimeAsync(30_000);
+      await expect(promise).rejects.toMatchObject({
+        message: expect.stringContaining('模型响应超时(30秒)'),
+      });
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

@@ -207,11 +207,19 @@ export interface ModelInfo {
   /** 支持的特性列表 */
   features: string[];
 }
+/** 流式活动信息：区分「纯推理」与「正文进展」，供超时策略决策 */
+export interface StreamActivityInfo {
+  /** 本批次仅包含推理内容（正文字符为 0） */
+  reasoningOnly: boolean;
+  /** 已累计正文字符数 */
+  contentChars: number;
+}
+
 export type OpenAIStreamOptions = Pick<
   LLMOptions,
   'onFirstResponse' | 'onStreamUpdate' | 'onResponseId' | 'onUsage'
 > & {
-  onStreamActivity?: () => void;
+  onStreamActivity?: (info: StreamActivityInfo) => void;
 };
 
 export interface OpenAIStreamState {
