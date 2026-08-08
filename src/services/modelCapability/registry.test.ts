@@ -143,7 +143,11 @@ describe('multi-protocol flagship catalog', () => {
       thinking: { type: 'enabled' },
       reasoning_effort: 'max',
     });
-    expect(deepseek.mapRequest?.({ enabled: false, effort: 'high' })).toEqual({});
+    // Off must send the vendor disable field so 关闭推理 is a real no-op
+    // (deepseek ships with thinking ON by default).
+    expect(deepseek.mapRequest?.({ enabled: false, effort: 'high' })).toEqual({
+      thinking: { type: 'disabled' },
+    });
 
     // Kimi K3: low|high|max, default max; K2.x: toggle-only (no tiers).
     const k3 = resolveModelCapability(
