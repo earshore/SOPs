@@ -31,12 +31,14 @@ const CONFIG = {
     // 风险模式
     patterns: {
         innerHTML: /(\w+)\.innerHTML\s*[=+]\s*(.+)/g,
+        // 带调用括号的接收方（querySelector/getElementById 等）同样危险
+        queryReceiverHtml: /(?:querySelector(?:All)?|getElementById|getElementsByClassName)\s*\([^)]*\)\s*\.(?:innerHTML\s*[=+]|outerHTML\s*=|insertAdjacentHTML\s*\()/g,
         outerHTML: /(\w+)\.outerHTML\s*=\s*(.+)/g,
         insertAdjacentHTML: /(\w+)\.insertAdjacentHTML\s*\(/g,
         documentWrite: /document\.write\s*\(/g,
         eval: /eval\s*\(/g,
         inlineHandler: /\s(on(?:click|input|change|load|error|mouseenter|mouseleave|mouseover|focus|blur))\s*=/g,
-        alpineHtml: /\sx-html\s*=/g
+        alpineHtml: /\sx-html\s*=/g,
     },
     
     // 高危关键词 (表示可能包含用户输入)
