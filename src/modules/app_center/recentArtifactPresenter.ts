@@ -371,7 +371,8 @@ export function buildRecentArtifactPresentation(
 }
 
 function getExecutionId(workItem: AppCenterWorkItem | null | undefined): string {
-  return workItem?.id.split(':').at(-1) || '';
+  const parts = workItem?.id.split(':');
+  return (parts && parts.length > 0 ? parts[parts.length - 1] : '') || '';
 }
 
 /**

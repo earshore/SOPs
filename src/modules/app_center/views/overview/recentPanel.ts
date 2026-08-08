@@ -515,7 +515,7 @@ function getSequentialJourney(
   const progress = getWorkItemProgress(item.artifact.workItemId);
   const artifacts = getArtifactsForWorkItem(item.artifact.workItemId);
 
-  const lastType = progressTypes.at(-1);
+  const lastType = progressTypes.length > 0 ? progressTypes[progressTypes.length - 1] : undefined;
   const complete = Boolean(lastType && progress.completedTypes.includes(lastType));
   const resolvedCurrentIndex = Math.min(progress.completedTypes.length, workflow.steps.length - 1);
   const complianceArtifact = artifacts.find(artifact => artifact.type === 'compliance_check');
