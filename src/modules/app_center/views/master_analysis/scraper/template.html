@@ -158,14 +158,14 @@
           </button>
           <!-- Data Cards Container with Click-to-Import Overlay -->
           <div class="hidden" id="data-cards-wrapper">
-            <!-- Import Triggers: 覆盖导入 + 合并导入 -->
+            <!-- Import Triggers: 导入新的 + 合并导入 -->
             <div class="grid grid-cols-2 gap-3 mb-4">
-              <!-- 覆盖导入：清空现有数据并替换为文件内容 -->
+              <!-- 导入新的：现有数据自动存入历史快照，文件内容替换当前数据 -->
               <button
                 type="button"
                 data-scraper-overwrite-trigger
                 class="import-trigger mb-4 w-full appearance-none p-4 rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-r from-slate-50/50 to-white hover:border-primary-100 hover:bg-primary-100/30 cursor-pointer group flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2"
-                aria-label="覆盖导入 JSON 产品数据文件（将清空现有数据）"
+                aria-label="导入新的 JSON 产品数据文件（现有数据自动存入历史快照）"
                 aria-describedby="scraper-overwrite-help scraper-import-status"
               >
                 <div
@@ -178,12 +178,12 @@
                 <div class="flex flex-col">
                   <span
                     class="text-sm font-semibold text-slate-700 group-hover:text-primary-600 transition-colors duration-300"
-                    >覆盖导入</span
+                    >导入新的</span
                   >
                   <span
                     id="scraper-overwrite-help"
                     class="text-xs text-slate-400 group-hover:text-primary-500 transition-colors duration-300"
-                    >清空现有数据并替换导入为新数据</span
+                    >现有数据自动存入历史快照，导入文件替换当前数据</span
                   >
                 </div>
               </button>
@@ -1021,7 +1021,7 @@ B0EXAMPLE1"
     id="overwrite-file-input"
     multiple=""
     type="file"
-    aria-label="覆盖导入 JSON 产品数据文件"
+    aria-label="导入新的 JSON 产品数据文件"
     aria-describedby="scraper-import-status"
   />
 </div>

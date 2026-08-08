@@ -179,9 +179,9 @@ function getImportResultStatus(result: ImportResult): {
 }
 
 function getImportSuccessMessage(mode: ImportMode, productCount: number): string {
-  // 覆盖模式：清空替换，直接显示文件导入的 ASIN 数量；合并模式：追加新 ASIN 并仅并入评论
-  return mode === 'overwrite'
-    ? `覆盖导入完成：${productCount} 个 ASIN。`
+  // 导入新的：替换当前数据（原数据已存入历史快照）；合并模式：追加新 ASIN 并仅并入评论
+  return mode === 'new'
+    ? `导入新的完成：${productCount} 个 ASIN。`
     : `合并导入完成：${productCount} 个 ASIN 已更新。`;
 }
 
@@ -777,13 +777,13 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
     const files = Array.from(target.files || []);
     if (files.length === 0) return;
 
-    // 覆盖导入会清空现有数据，属于破坏性操作，导入前需用户确认
-    if (mode === 'overwrite') {
+    // 导入新的会替换当前工作区数据，导入前需用户确认（现有数据会先存入历史快照）
+    if (mode === 'new') {
       const confirmed = await confirmWithModal(
-        '覆盖导入',
-        '将清空当前全部产品数据并用文件内容替换，确定继续吗？',
+        '导入新的',
+        '当前产品数据将先保存到历史快照，再用文件内容替换当前数据，确定继续吗？',
         '',
-        '确认覆盖'
+        '确认导入'
       );
       if (!confirmed) return;
     }

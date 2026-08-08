@@ -40,7 +40,7 @@ const scraperModule = createAlpinePanelModule({
       });
     });
 
-    // 覆盖导入：打开覆盖模式隐藏文件输入框
+    // 导入新的：打开替换模式隐藏文件输入框
     const overwriteInput = container.querySelector<HTMLInputElement>('#overwrite-file-input');
     container.querySelectorAll<HTMLElement>('[data-scraper-overwrite-trigger]').forEach(trigger => {
       module.bindEventListener(trigger, 'click', () => {

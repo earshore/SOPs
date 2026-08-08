@@ -183,7 +183,7 @@ describe('handleImportFiles', () => {
     expect(result[1]?.customer_reviews.map(review => review.id)).toEqual(['R-B1']);
   });
 
-  it('overwrite mode replaces existing products with imported ones', async () => {
+  it('new mode replaces existing products with imported ones', async () => {
     const currentProduct: ScrapedProduct = {
       asin: 'B0TEST0001',
       url: 'https://example.test/dp/B0TEST0001',
@@ -221,13 +221,13 @@ describe('handleImportFiles', () => {
       [createImportFile(importedData)],
       currentData,
       'FR',
-      'overwrite'
+      'new'
     );
 
     expect(result.success).toBe(true);
     expect(result.data?.products).toHaveLength(2);
 
-    // 已存在的 ASIN X 被导入版本整体覆盖：标题/五点/评论全部替换为导入数据，旧数据清空
+    // 已存在的 ASIN X 被导入版本整体替换：标题/五点/评论全部来自导入数据，旧数据不并入
     const productX = result.data?.products.find(product => product.asin === 'B0TEST0001');
     expect(productX?.productTitle).toBe('Imported B title');
     expect(productX?.feature_bullets).toEqual(['Imported bullet']);
@@ -239,7 +239,7 @@ describe('handleImportFiles', () => {
     expect(productY?.customer_reviews.map(review => review.id)).toEqual(['R-Y']);
   });
 
-  it('overwrite mode shows the overwrite toast message', async () => {
+  it('new mode shows the new-import toast message', async () => {
     const currentData = createImportData('FR');
     const baseProduct = createImportData('FR').products[0];
     if (!baseProduct) throw new Error('Expected a base product');
@@ -259,16 +259,73 @@ describe('handleImportFiles', () => {
       [createImportFile(importedData)],
       currentData,
       'FR',
-      'overwrite'
+      'new'
     );
 
     expect(result.success).toBe(true);
-    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('成功覆盖导入'), {
+    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('成功导入新的'), {
       type: 'success',
     });
   });
 
-  it('overwrite mode drops existing ASINs entirely', () => {
+  it('new mode archives existing data to history before replacing', async () => {
+    const currentData = createImportData('FR');
+    const baseProduct = createImportData('FR').products[0];
+    if (!baseProduct) throw new Error('Expected a base product');
+    const importedData: ScrapedData = {
+      ...createImportData('FR'),
+      products: [
+        {
+          ...baseProduct,
+          asin: 'B0TEST0002',
+          url: 'https://example.test/dp/B0TEST0002',
+          productTitle: 'New Y title',
+        },
+      ],
+    };
+
+    const result = await handleImportFiles(
+      [createImportFile(importedData)],
+      currentData,
+      'FR',
+      'new'
+    );
+
+    expect(result.success).toBe(true);
+    // 现有数据先存入历史快照，再保存导入结果
+    expect(HistoryService.saveAsync).toHaveBeenNthCalledWith(1, currentData);
+    expect(HistoryService.saveAsync).toHaveBeenNthCalledWith(2, result.data);
+  });
+
+  it('merge mode does not archive existing data before importing', async () => {
+    const currentData = createImportData('FR');
+    const baseProduct = createImportData('FR').products[0];
+    if (!baseProduct) throw new Error('Expected a base product');
+    const importedData: ScrapedData = {
+      ...createImportData('FR'),
+      products: [
+        {
+          ...baseProduct,
+          asin: 'B0TEST0002',
+          url: 'https://example.test/dp/B0TEST0002',
+          productTitle: 'New Y title',
+        },
+      ],
+    };
+
+    const result = await handleImportFiles(
+      [createImportFile(importedData)],
+      currentData,
+      'FR',
+      'merge'
+    );
+
+    expect(result.success).toBe(true);
+    expect(HistoryService.saveAsync).toHaveBeenCalledTimes(1);
+    expect(HistoryService.saveAsync).toHaveBeenCalledWith(result.data);
+  });
+
+  it('new mode drops existing ASINs entirely', () => {
     const existing = createProduct('DE', 'Existing title', [
       createReview('R-1', 'Existing review'),
     ]);
@@ -277,14 +334,14 @@ describe('handleImportFiles', () => {
       asin: 'B0TEST0002',
     };
 
-    // overwrite 模式：清空替换，现有 ASIN X 被丢弃，结果只含导入的 Y
-    const overwriteResult = mergeProducts(
+    // new 模式：现有 ASIN X 被替换，结果只含导入的 Y
+    const newModeResult = mergeProducts(
       new Map([['B0TEST0002', [importedB]]]),
       'FR',
       new Map([['B0TEST0001', existing]]),
-      'overwrite'
+      'new'
     );
-    expect(overwriteResult.map(product => product.asin)).toEqual(['B0TEST0002']);
+    expect(newModeResult.map(product => product.asin)).toEqual(['B0TEST0002']);
 
     // merge 模式：未被导入覆盖的现有 ASIN X 保留
     const mergeResult = mergeProducts(
