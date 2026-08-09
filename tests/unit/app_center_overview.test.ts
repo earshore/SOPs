@@ -654,7 +654,7 @@ describe('App Center Overview', () => {
     );
     expect(
       container.querySelector<HTMLSelectElement>('.app-overview-recent-sort select')?.value
-    ).toBe('priority');
+    ).toBe('activity');
 
     container.querySelector<HTMLButtonElement>('[data-recent-load-more]')?.click();
     await vi.waitFor(() => {

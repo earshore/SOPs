@@ -1000,6 +1000,20 @@
   display: grid;
   grid-template-columns: repeat(var(--app-recent-columns), minmax(0, 1fr));
   gap: 0;
+  /* 列表限高：约视口高的可用区域，超出内部滚动，避免撑开整页（与历史快照模式一致） */
+  max-height: min(34rem, calc(100dvh - 26rem));
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.app-overview-recent-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.app-overview-recent-list::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--app-overview-border-strong) 60%, transparent);
+  border-radius: 9999px;
 }
 
 .app-overview-recent-list.hidden {

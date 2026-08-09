@@ -1375,7 +1375,7 @@ export async function renderRecentPanel(
     typeFilter: 'all',
     statusFilter: 'all',
     query: '',
-    sortMode: 'priority',
+    sortMode: 'activity',
     visibleLimit: RECENT_ARTIFACT_LIMIT,
     columns: getStoredRecentColumns(),
     showDismissed: false,
@@ -1442,7 +1442,7 @@ export async function renderRecentPanel(
     state.query = '';
     state.typeFilter = 'all';
     state.statusFilter = 'all';
-    state.sortMode = 'priority';
+    state.sortMode = 'activity';
     state.visibleLimit = RECENT_ARTIFACT_LIMIT;
     state.showDismissed = false;
     if (searchInput) searchInput.value = '';
