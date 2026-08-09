@@ -131,6 +131,8 @@ interface ParallelAnalysisConfig {
   preloadedCachedResults?: Record<string, unknown>; // 本轮目标已完成预扫的缓存结果
   retryBudget?: number; // 单任务重试预算
   stopOnFailure?: boolean; // 失败后停止继续排队新任务
+  /** 整轮分析取消信号（取消按钮 → AbortController；abort 后不再调度新任务，在跑调用被中断）。 */
+  signal?: AbortSignal;
   onTaskComplete?: (update: ParallelAnalysisResultUpdate) => void;
   onTaskFailed?: (update: ParallelAnalysisResultUpdate) => void;
   /** Called after every settled task with the current partial report (断点续跑). */
@@ -151,6 +153,8 @@ interface AnalysisTaskExecutionOptions {
   retryBudget?: number;
   /** Optional shared general-review Map bundle (hesitation/buyer/vocab/promise). */
   sharedGeneralMap?: SharedGeneralMapBundle;
+  /** 取消信号：透传到两次 pipeline 的 callLLM（含恢复轮与共享 Map）。 */
+  signal?: AbortSignal;
   onFirstResponse?: (task: AnalysisTask, metrics: LLMStreamMetrics) => void;
   /** Pipeline-level phase labels (Map/Reduce). Progress must stay non-decreasing at caller. */
   onPhase?: (task: AnalysisTask, message: string) => void;
@@ -679,6 +683,7 @@ async function executeSellingPointsTask(
     config: options.config,
     language: options.language,
     retryBudget: options.retryBudget,
+    signal: options.signal,
     ...callbacks,
   });
   return applyPipelineTaskResult(task, pipeline);
@@ -705,6 +710,7 @@ async function executeReviewEvidenceTask(
             config: options.config,
             language: options.language,
             retryBudget: options.retryBudget,
+            signal: options.signal,
             ...callbacks,
           },
           shared
@@ -714,6 +720,7 @@ async function executeReviewEvidenceTask(
           config: options.config,
           language: options.language,
           retryBudget: options.retryBudget,
+          signal: options.signal,
           ...callbacks,
         });
   return applyPipelineTaskResult(task, pipeline);
@@ -757,6 +764,7 @@ async function executeDirectAnalysisTask(
           ...(options.config.serviceTier && { serviceTier: options.config.serviceTier }),
           // 恢复时关闭推理，避免再次只输出 reasoning 通道（覆盖上面的深度映射）
           ...(reasoningPrefs && { reasoningPrefs }),
+          ...(options.signal && { signal: options.signal }),
           stream: true,
           onFirstResponse: callbacks.onFirstResponse,
           onStreamUpdate: callbacks.onStreamUpdate,
@@ -869,7 +877,7 @@ async function executeTasksWithConcurrency(options: ConcurrencyExecutionOptions)
   const runningTasks = new Set<Promise<void>>();
 
   for (const task of tasks) {
-    if (shouldStopScheduling) {
+    if (shouldStopScheduling || options.signal?.aborted) {
       break;
     }
 
@@ -903,6 +911,19 @@ async function executeTasksWithConcurrency(options: ConcurrencyExecutionOptions)
   }
 
   await Promise.all(runningTasks);
+
+  // 取消：全部在跑任务已 settle（部分被 abort 中断），向上抛出取消信号而非当作失败报告
+  if (options.signal?.aborted) {
+    throw new AbortControllerAbortError();
+  }
+}
+
+/** 编排层取消信号错误：name 固定为 AbortError，供调用方（actions）短路取消分支。 */
+class AbortControllerAbortError extends Error {
+  constructor() {
+    super('分析已取消');
+    this.name = 'AbortError';
+  }
 }
 
 async function hydrateCachedAnalysisTasks(
@@ -1082,6 +1103,7 @@ function resolveParallelAnalysisConfig(
     preloadedCachedResults: config.preloadedCachedResults,
     retryBudget: config.retryBudget,
     stopOnFailure: config.stopOnFailure ?? false,
+    signal: config.signal,
     onTaskComplete: config.onTaskComplete,
     onTaskFailed: config.onTaskFailed,
     onTaskSettledSnapshot: config.onTaskSettledSnapshot,
@@ -1245,6 +1267,7 @@ function createPendingTaskWaveOptions(
     language,
     enableCache: config.enableCache,
     skipCacheRead: true as const,
+    signal: config.signal,
     retryBudget: config.retryBudget,
     stopOnFailure: config.stopOnFailure,
     onTaskSettled: (task, completedCount, _totalCount, currentTasks) => {
@@ -1484,6 +1507,9 @@ export async function runParallelAIAnalysis(
   });
 
   const finalReport = buildFinalAnalysisReport(runContext);
+  if (analysisConfig.signal?.aborted) {
+    throw new AbortControllerAbortError();
+  }
   assertParallelAnalysisSucceeded(runContext, analysisConfig.failureStrategy);
   onProgress(100, formatFinalProgressStep(runContext));
 

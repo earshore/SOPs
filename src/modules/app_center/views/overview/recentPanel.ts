@@ -59,6 +59,7 @@ const RECENT_ARTIFACT_ICONS: Record<AppCenterArtifactType, string> = {
   listing_review: 'fas fa-file-circle-check',
   ppc_action_list: 'fas fa-list-check',
   compliance_check: 'fas fa-shield-halved',
+  analysis_running: 'fa-solid fa-spinner fa-spin',
 };
 
 type RecentJourneyStepState = 'complete' | 'current' | 'upcoming' | 'issue' | 'unavailable';

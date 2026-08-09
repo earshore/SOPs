@@ -531,3 +531,67 @@ describe('性能设置', () => {
     });
   });
 });
+
+describe('取消信号（AbortController）', () => {
+  it('已 abort 的 signal：不调度任何 LLM 调用并抛出 AbortError', async () => {
+    mockLlmConfig();
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      runParallelAIAnalysis(['title-keywords'], createProduct(), () => {}, 'en', {
+        signal: controller.signal,
+        enableCache: false,
+      })
+    ).rejects.toMatchObject({ name: 'AbortError' });
+    expect(llmMocks.callLLM).not.toHaveBeenCalled();
+  });
+
+  it('运行中 abort：在跑调用收到 signal，abort 后不再调度新任务', async () => {
+    mockLlmConfig();
+    const resolves: Array<(v: unknown) => void> = [];
+    // 模拟真实 fetch 行为：signal abort 时拒绝，否则保持挂起等待测试主动 resolve
+    llmMocks.callLLM.mockImplementation(
+      (
+        _m: unknown,
+        _p: unknown,
+        _e: unknown,
+        _k: unknown,
+        _m2: unknown,
+        options?: { signal?: AbortSignal }
+      ) =>
+        new Promise((resolve, reject) => {
+          if (options?.signal?.aborted) {
+            reject(new DOMException('Aborted', 'AbortError'));
+            return;
+          }
+          options?.signal?.addEventListener(
+            'abort',
+            () => reject(new DOMException('Aborted', 'AbortError')),
+            { once: true }
+          );
+          resolves.push(resolve);
+        })
+    );
+
+    const controller = new AbortController();
+    const runPromise = runParallelAIAnalysis(
+      ['title-keywords', 'fatal-flaws'],
+      createProduct({ reviewBody: 'bad product issue' }),
+      () => {},
+      'en',
+      {
+        signal: controller.signal,
+        maxConcurrency: 1,
+        enableCache: false,
+      }
+    );
+
+    await vi.waitFor(() => {
+      expect(llmMocks.callLLM).toHaveBeenCalled();
+    });
+    controller.abort();
+
+    await expect(runPromise).rejects.toMatchObject({ name: 'AbortError' });
+  });
+});

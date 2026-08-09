@@ -125,6 +125,8 @@ type CallOptions = {
   config: LlmConfig;
   language: string;
   retryBudget?: number;
+  /** 取消信号：中断请求（含恢复轮）。 */
+  signal?: AbortSignal;
   onFirstResponse?: (metrics: LLMStreamMetrics) => void;
   onStreamUpdate?: (update: { chunkCount: number; content: string }) => void;
   /** Fine-grained Map–Reduce phase labels for UI progress. */
@@ -924,6 +926,7 @@ async function callAnalysisJson(args: {
   schemaName: string;
   maxTokens: number;
   retryBudget?: number;
+  signal?: AbortSignal;
   onFirstResponse?: (metrics: LLMStreamMetrics) => void;
   onStreamUpdate?: (update: { chunkCount: number; content: string }) => void;
   /** 解析回调：在恢复闭包内执行，解析失败（如 PARSE_LLM_002）同样可触发恢复重试 */
@@ -972,6 +975,7 @@ async function callAnalysisJson(args: {
           ...(args.config.serviceTier && { serviceTier: args.config.serviceTier }),
           // 恢复时关闭推理，避免再次只输出 reasoning 通道（覆盖上面的深度映射）
           ...(reasoningPrefs && { reasoningPrefs }),
+          ...(args.signal && { signal: args.signal }),
           stream: true,
           onFirstResponse: (metrics: LLMStreamMetrics) => {
             firstResponseMs = metrics.elapsedMs;
@@ -1018,6 +1022,7 @@ async function runOneshot(
     schemaName: `analysis_${targetId}`,
     maxTokens: getMasterAnalysisTargetMaxTokens(targetId),
     retryBudget: options.retryBudget,
+    signal: options.signal,
     onFirstResponse: options.onFirstResponse,
     onStreamUpdate: options.onStreamUpdate,
     // 解析放入恢复闭包：推理文本挤占正文导致的 PARSE_LLM_002 可触发一次恢复重试
@@ -1135,6 +1140,7 @@ async function runReviewMapPhase(
         schemaName: `analysis_${targetId}_map`,
         maxTokens: mapMaxTokens,
         retryBudget: options.retryBudget,
+        signal: options.signal,
         onFirstResponse: metrics => {
           if (firstResponseMs === undefined) {
             firstResponseMs = metrics.elapsedMs;
@@ -1209,6 +1215,7 @@ async function runReviewReducePhase(
       schemaName: `analysis_${targetId}_reduce`,
       maxTokens: getMasterAnalysisReduceMaxTokens(targetId),
       retryBudget: options.retryBudget,
+      signal: options.signal,
       onStreamUpdate: update => {
         streamChunks += update.chunkCount;
         streamedChars += update.content.length;
@@ -1431,6 +1438,7 @@ async function runSharedGeneralMapUnit({
       schemaName: 'analysis_shared_general_map',
       maxTokens: mapMaxTokens,
       retryBudget: options.retryBudget,
+      signal: options.signal,
       onFirstResponse: metrics => {
         if (state.firstResponseMs === undefined) {
           state.firstResponseMs = metrics.elapsedMs;

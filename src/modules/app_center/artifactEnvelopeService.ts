@@ -30,7 +30,8 @@ export type AppCenterArtifactType =
   | 'keyword_snapshot'
   | 'listing_review'
   | 'ppc_action_list'
-  | 'compliance_check';
+  | 'compliance_check'
+  | 'analysis_running';
 
 /** Competitor listing workflow artifact types used for progress (7 steps). */
 export const COMPETITOR_LISTING_PROGRESS_TYPES: readonly AppCenterArtifactType[] = [
@@ -559,6 +560,49 @@ export function getRecentArtifacts(limit = 10): AppCenterArtifactEnvelope[] {
 
 export function getAllArtifacts(): AppCenterArtifactEnvelope[] {
   return sortByCreatedAt(readArtifacts());
+}
+
+/**
+ * 分析运行中进度工件：deep 档运行期间总览「最近作业」可见「分析中 a/b」。
+ * 完成后由 complete/cancel 路径移除，正式 analysis_report 工件照常由 history 落库。
+ */
+const ANALYSIS_RUNNING_ID_PREFIX = 'analysis_running:';
+
+export function registerAnalysisRunningArtifact(input: {
+  historyId: number | string;
+  done: number;
+  total: number;
+}): void {
+  const id = `${ANALYSIS_RUNNING_ID_PREFIX}${input.historyId}`;
+  upsertWorkItem({
+    id,
+    type: 'competitor_listing',
+    title: 'AI 分析',
+    status: 'in_progress',
+    marketplace: '',
+    asinOrSku: '',
+    sourceRoute: 'ai_analysis',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+  upsertArtifact({
+    id,
+    workItemId: id,
+    type: 'analysis_running',
+    sourceRoute: 'ai_analysis',
+    title: 'AI 分析',
+    summary: `分析进行中 ${input.done}/${input.total}`,
+    payloadRef: `history:${String(input.historyId)}#running`,
+    createdAt: new Date().toISOString(),
+  });
+}
+
+/** 移除运行中进度工件（分析完成/取消时，幂等）。 */
+export function removeAnalysisRunningArtifact(historyId: number | string): void {
+  const id = `${ANALYSIS_RUNNING_ID_PREFIX}${historyId}`;
+  persistArtifacts(readArtifacts().filter(a => a.id !== id));
+  persistWorkItems(readWorkItems().filter(w => w.id !== id));
+  emitArtifactsChanged({ reason: 'upsert' });
 }
 
 export function registerHistoryArtifacts(historyItem: HistoryItem): AppCenterArtifactEnvelope[] {

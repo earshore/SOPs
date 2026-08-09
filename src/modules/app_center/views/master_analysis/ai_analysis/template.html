@@ -962,6 +962,16 @@
                   <span class="truncate" x-text="evidenceHygieneShortText"></span>
                 </p>
               </template>
+              <div class="mt-4 flex justify-end" data-testid="ma-analysis-cancel">
+                <button
+                  type="button"
+                  @click="cancelAnalysisRun"
+                  class="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs text-white/90 transition hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/60"
+                >
+                  <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                  取消分析
+                </button>
+              </div>
             </div>
           </template>
         </div>

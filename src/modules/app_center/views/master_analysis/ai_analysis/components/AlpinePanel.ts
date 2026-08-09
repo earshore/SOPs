@@ -16,8 +16,10 @@ import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analy
 import { createMultipleStateSyncs, cleanupSubscriptions } from '@/common/utils/stateSync';
 import { createPerformanceSettingsPanel } from './PerformanceSettings';
 import { navigateToRouteId } from '@/common/router/initRouter';
+import { showToast } from '@/common/ui';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
+import { confirmWithModal } from '@/components/modal/confirmModal';
 import {
   getAnalysisReasoningEffortLabel,
   getUserReasoningPrefs,
@@ -32,8 +34,10 @@ type AiAnalysisPanelContext = AlpineContext &
   ComputedProperties &
   AlpineWatchContext & {
     _navigationHandler: EventListener | null;
+    _baseTabTitle: string | null;
     navigateToScraper: () => void;
     refreshReportView: () => void;
+    syncAnalysisTabTitle: () => void;
   };
 
 type AiAnalysisPanelState = Pick<
@@ -63,6 +67,7 @@ type AiAnalysisPanelState = Pick<
   isCollapsed: boolean;
   Math: AlpineSafeMath;
   _navigationHandler: EventListener | null;
+  _baseTabTitle: string | null;
   perfSettings: ReturnType<typeof createPerformanceSettingsPanel>;
 };
 
@@ -129,6 +134,7 @@ type AiAnalysisPanelThis = AiAnalysisPanelContext &
     canRerunWarnedTargets: boolean;
     rerunWarnedTargetsLabel: string;
     rerunWarnedTargets(): Promise<void>;
+    cancelAnalysisRun(): Promise<void>;
     hasFailedAnalysis: boolean;
     failedTargetLabels: string;
     analysisFailureSummaryText: string;
@@ -342,6 +348,7 @@ function createAiAnalysisPanelState(): AiAnalysisPanelState {
     Math: ALPINE_SAFE_MATH,
     _unsubscribes: [] as Array<() => void>,
     _navigationHandler: null,
+    _baseTabTitle: null,
     perfSettings: createPerformanceSettingsPanel(),
   };
 }
@@ -439,6 +446,27 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     // 恢复上次未完成的分析（断点续跑）
     void actions.restoreInterruptedAnalysis(this);
     this.refreshReportView();
+
+    // 运行中页签标题标识：分析期间 document.title 前缀「分析中 a/b」，结束/取消/失败/离开时还原
+    this.$watch('isAnalyzing', () => this.syncAnalysisTabTitle());
+    this.$watch('reportResults', () => this.syncAnalysisTabTitle());
+    this.syncAnalysisTabTitle();
+  },
+
+  syncAnalysisTabTitle(this: AiAnalysisPanelContext) {
+    if (this.isAnalyzing) {
+      if (this._baseTabTitle === null) {
+        this._baseTabTitle = document.title;
+      }
+      const done = this.reportResults?.length ?? 0;
+      const total = this.selectedTargets.length || analysisTargets.length;
+      document.title = `分析中 ${done}/${total} · ${this._baseTabTitle}`;
+      return;
+    }
+    if (this._baseTabTitle !== null) {
+      document.title = this._baseTabTitle;
+      this._baseTabTitle = null;
+    }
   },
 
   // ========== 清理 ==========
@@ -452,6 +480,24 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     if (this._navigationHandler) {
       window.removeEventListener(APP_EVENTS.NAVIGATE_TO_SCRAPER, this._navigationHandler);
       this._navigationHandler = null;
+    }
+
+    // 离开页面时还原页签标题（若有分析中前缀）
+    if (this._baseTabTitle !== null) {
+      document.title = this._baseTabTitle;
+      this._baseTabTitle = null;
+    }
+
+    // 分析运行中离开：告知（后台继续 + 断点自动保存），提供回看入口
+    if (this.isAnalyzing && this.progress < 100) {
+      showToast('分析仍在后台进行，已完成的维度会自动保存', {
+        type: 'info',
+        duration: 5000,
+        action: {
+          label: '查看进度',
+          onClick: () => navigateToRouteId('ai_analysis'),
+        },
+      });
     }
   },
 
@@ -1291,6 +1337,18 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     const ctx = this as unknown as AlpineContext & ComputedProperties;
     const targetIds = this.analysisQualityWarnings.map(item => item.targetId);
     await actions.rerunAnalysisTargetsAction(ctx, ctx.currentProducts, targetIds);
+  },
+
+  async cancelAnalysisRun() {
+    const confirmed = await confirmWithModal(
+      '取消本次分析？',
+      '已完成的维度将保留在报告中，未完成的维度会停止分析且不会重跑。',
+      'ai_analysis_cancel_confirm_v1',
+      '确定取消'
+    );
+    if (!confirmed) return;
+    const ctx = this as unknown as AlpineContext;
+    actions.cancelAnalysisAction(ctx);
   },
 
   get canRetryFailedTargets(): boolean {

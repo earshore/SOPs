@@ -40,9 +40,16 @@ import {
   saveAnalysisSession,
   type AnalysisSessionSnapshot,
 } from '../utils/analysisSession';
+import {
+  registerAnalysisRunningArtifact,
+  removeAnalysisRunningArtifact,
+} from '../../../../artifactEnvelopeService';
 
 type AnalysisSchedulePlan = ReturnType<typeof resolveAnalysisSchedulePlan>;
 type PerformanceSettings = ReturnType<typeof getPerformanceSettings>;
+
+/** 当前运行的整轮分析取消控制器（模块级单例：一轮分析一个）。 */
+let activeAbortController: AbortController | null = null;
 
 interface PreparedAnalysisRun {
   selectedTargets: string[];
@@ -53,6 +60,8 @@ interface PreparedAnalysisRun {
   preloadedCachedResults: Record<string, unknown>;
   schedulePlan: AnalysisSchedulePlan;
   streamResults: boolean;
+  /** 取消信号：贯穿整个编排层到每个 LLM 调用。 */
+  signal?: AbortSignal;
 }
 
 /**
@@ -476,6 +485,7 @@ async function prepareAnalysisRun(
     preloadedCachedResults,
     schedulePlan,
     streamResults: schedulePlan.streamMode === 'progressive',
+    signal: activeAbortController?.signal,
   };
 }
 
@@ -512,6 +522,7 @@ async function runPreparedParallelAnalysis(
       maxConcurrency: schedulePlan.maxConcurrency,
       enableCache: perfSettings.enableCache,
       streamResults,
+      signal: preparedRun.signal,
       failureStrategy: schedulePlan.failureStrategy,
       preloadedCachedResults,
       retryBudget: schedulePlan.retryBudget,
@@ -523,6 +534,8 @@ async function runPreparedParallelAnalysis(
         streamResults
       ),
       onTaskSettledSnapshot: (report, targetIds) => {
+        // 取消防复活：取消后瞬间落定的任务不得写回已删除的断点会话
+        if (activeAbortController?.signal.aborted) return;
         persistAnalysisSession(report, targetIds, preparedRun.sourceBinding);
       },
     }
@@ -742,6 +755,10 @@ async function completeAnalysisAction(
   // Preserve meaningful summary; do not clobber with bare "分析完成".
   syncAnalysisProgress(context, 100, completion.step);
   await persistAnalysisReportToSource(sourceBinding, analysisReport);
+  if (sourceBinding.sourceHistoryId != null) {
+    // 正式 analysis_report 工件由 history 落库负责，运行中工件退位
+    removeAnalysisRunningArtifact(sourceBinding.sourceHistoryId);
+  }
   showToast(completion.toastMessage, { type: completion.toastType });
 }
 
@@ -765,9 +782,18 @@ export async function runAnalysisAction(
   const selectedTargets = [...context.selectedTargets];
   const sourceBinding = createAnalysisSourceBinding(context);
 
-  // 新分析开始：清掉旧断点，避免误恢复
+  // 新分析开始：清掉旧断点，避免误恢复；初始化本轮取消控制器；总览注册运行中工件
   clearAnalysisSession();
+  activeAbortController?.abort();
+  activeAbortController = new AbortController();
   startAnalysisAction(context);
+  if (sourceBinding.sourceHistoryId != null) {
+    registerAnalysisRunningArtifact({
+      historyId: sourceBinding.sourceHistoryId,
+      done: 0,
+      total: selectedTargets.length,
+    });
+  }
 
   try {
     const preparedRun = await prepareAnalysisRun(context, selectedTargets, sourceBinding);
@@ -779,10 +805,42 @@ export async function runAnalysisAction(
     await completeAnalysisAction(context, sourceBinding, boundAnalysisReport);
     clearAnalysisSession();
   } catch (error) {
+    if (isCancelledAnalysisError(error)) {
+      // 用户取消：不弹失败 toast（cancelAnalysisAction 已提示），保留已完成维度
+      return;
+    }
     handleAnalysisActionError(context, error);
   } finally {
+    activeAbortController = null;
     finishAnalysisAction(context);
   }
+}
+
+/** 判定错误是否属于用户取消（信号已 abort 或错误名为 AbortError）。 */
+function isCancelledAnalysisError(error: unknown): boolean {
+  return (
+    activeAbortController?.signal.aborted === true ||
+    (error instanceof Error && error.name === 'AbortError')
+  );
+}
+
+/**
+ * 取消本轮分析（用户主动）：中断进行中的 LLM 调用、清除断点、保留已完成的维度结果。
+ */
+export function cancelAnalysisAction(context: AlpineContext): void {
+  const controller = activeAbortController;
+  if (!controller) return;
+  controller.abort();
+  activeAbortController = null;
+  clearAnalysisSession();
+  const doneCount = context.reportResults?.length ?? 0;
+  const totalCount = context.selectedTargets.length;
+  showToast(`已取消分析，保留已完成 ${doneCount}/${totalCount} 个维度结果`, { type: 'info' });
+  const historyId = appStore.getState().scraper?.currentHistoryId;
+  if (historyId != null) {
+    removeAnalysisRunningArtifact(historyId);
+  }
+  finishAnalysisAction(context);
 }
 
 function getExistingAnalysisReport(context: AlpineContext): FullAnalysisReport | null {
@@ -905,10 +963,20 @@ async function runRerunWithExistingReport(
 ): Promise<void> {
   const sourceBinding = createAnalysisSourceBinding(context);
   const labels = rerunTargetIds.map(getAnalysisTargetLabel).join('、');
+  // 重跑也是新一轮分析：重置取消控制器
+  activeAbortController?.abort();
+  activeAbortController = new AbortController();
   startAnalysisAction(context, {
     preserveExistingReport: true,
     progressLabel: `正在重跑：${labels}`,
   });
+  if (sourceBinding.sourceHistoryId != null) {
+    registerAnalysisRunningArtifact({
+      historyId: sourceBinding.sourceHistoryId,
+      done: 0,
+      total: rerunTargetIds.length,
+    });
+  }
 
   try {
     const preparedRun = await prepareAnalysisRun(context, rerunTargetIds, sourceBinding);
@@ -921,8 +989,12 @@ async function runRerunWithExistingReport(
       );
     }
   } catch (error) {
+    if (isCancelledAnalysisError(error)) {
+      return;
+    }
     handleAnalysisActionError(context, error);
   } finally {
+    activeAbortController = null;
     finishAnalysisAction(context);
   }
 }

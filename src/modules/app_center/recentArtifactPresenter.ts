@@ -24,6 +24,7 @@ export const RECENT_ARTIFACT_TYPE_LABELS: Record<AppCenterArtifactType, string> 
   listing_review: '文案评审',
   ppc_action_list: 'PPC',
   compliance_check: '合规',
+  analysis_running: '分析中',
 };
 
 const WORK_ITEM_STATUS_LABELS: Record<AppCenterWorkItem['status'], string> = {

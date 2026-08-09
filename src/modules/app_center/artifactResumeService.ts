@@ -92,6 +92,7 @@ const OPEN_ROUTE_BY_TYPE: Record<AppCenterArtifactType, string> = {
   listing_review: 'keyword_hunter_analysis',
   ppc_action_list: 'ppc_search_terms',
   compliance_check: 'keyword_hunter_analysis',
+  analysis_running: 'ai_analysis',
 };
 
 const NEXT_ROUTE_BY_TYPE: Record<AppCenterArtifactType, string> = {
@@ -103,6 +104,7 @@ const NEXT_ROUTE_BY_TYPE: Record<AppCenterArtifactType, string> = {
   listing_review: 'keyword_hunter_analysis',
   ppc_action_list: 'ppc_search_terms',
   compliance_check: 'sops_restricted_words',
+  analysis_running: 'ai_analysis',
 };
 
 const RESUME_ACTIONS_BY_TYPE: Record<AppCenterArtifactType, readonly ArtifactResumeActionSpec[]> = {
@@ -217,6 +219,15 @@ const RESUME_ACTIONS_BY_TYPE: Record<AppCenterArtifactType, readonly ArtifactRes
       label: '前往下一项合规检查',
       title: '进入下一项尚未完成的人工合规检查',
       icon: 'fas fa-arrow-right',
+      primary: true,
+    },
+  ],
+  analysis_running: [
+    {
+      mode: 'open',
+      label: '查看分析进度',
+      title: '回到 AI 分析页查看运行进度与已完成维度',
+      icon: 'fas fa-spinner',
       primary: true,
     },
   ],
