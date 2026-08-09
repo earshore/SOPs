@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { callLLM } from './llmService';
+import { ApiError } from '@/common/errors';
 
 function createSseResponse(lines: string[]): Response {
   const encoder = new TextEncoder();
@@ -263,6 +264,231 @@ describe('callLLM streaming', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/responses');
     expect(String(fetchMock.mock.calls[1]?.[0])).toContain('/chat/completions');
+  });
+
+  it('falls back from /responses 404 to chat_completions on the stream-first tool path, keeping tools and dropping store', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(async () => {
+        return new Response(JSON.stringify({ error: { message: 'not found' } }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      })
+      .mockImplementationOnce(async () => {
+        return createSseResponse([
+          'data: {"choices":[{"delta":{"content":"fallback ok"}}]}',
+          'data: [DONE]',
+        ]);
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const tool = {
+      type: 'function',
+      function: { name: 'search', description: 'test', parameters: { type: 'object' } },
+    };
+    const text = await callLLM([{ role: 'user', content: 'hi' }], 'new_api', 'https://new.hongecb.store/v1', 'test-key', 'deepseek-v4-flash', {
+      stream: true,
+      retries: 0,
+      apiPath: 'responses',
+      tools: [tool] as never,
+      executeTool: vi.fn(async () => 'tool-out') as never,
+      enableToolLoop: true,
+    });
+
+    expect(text).toBe('fallback ok');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/responses');
+    const fallbackUrl = String(fetchMock.mock.calls[1]?.[0]);
+    expect(fallbackUrl).toContain('/chat/completions');
+    const fallbackBody = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as Record<string, unknown>;
+    // 平级回落：tools 保留（chat tool loop 原生处理），store 剥离（chat 无链式语义）
+    expect(fallbackBody.tools).toBeDefined();
+    expect(fallbackBody.store).toBeUndefined();
+  });
+
+  it('runs chat tool loop after fallback when the chat response emits tool_calls (peer-level semantics)', async () => {
+    const executeTool = vi.fn(async () => 'search-result-42');
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(async () => {
+        // responses 首请求 404
+        return new Response(JSON.stringify({ error: { message: 'not found' } }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      })
+      .mockImplementationOnce(async () => {
+        // 回落 chat 流式首跳：SSE tool_calls delta（完整 chunk 形态，与既有用例一致）
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+          start(controller) {
+            const chunks = [
+              {
+                id: 'chatcmpl-fb',
+                object: 'chat.completion.chunk',
+                choices: [
+                  {
+                    index: 0,
+                    delta: {
+                      tool_calls: [
+                        {
+                          index: 0,
+                          id: 'call_1',
+                          type: 'function',
+                          function: { name: 'search', arguments: '{"q":"a"}' },
+                        },
+                      ],
+                    },
+                    finish_reason: null,
+                  },
+                ],
+              },
+              {
+                id: 'chatcmpl-fb',
+                object: 'chat.completion.chunk',
+                choices: [{ index: 0, delta: {}, finish_reason: 'tool_calls' }],
+              },
+            ];
+            for (const c of chunks) {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(c)}\n\n`));
+            }
+            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+            controller.close();
+          },
+        });
+        return new Response(stream, {
+          status: 200,
+          headers: { 'Content-Type': 'text/event-stream' },
+        });
+      })
+      .mockImplementationOnce(async () => {
+        // 工具结果回放 → 最终文本（非流式）
+        return new Response(
+          JSON.stringify({
+            id: 'chatcmpl-test',
+            object: 'chat.completion',
+            created: 1,
+            model: 'deepseek-v4-flash',
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: '结果：search-result-42' },
+                finish_reason: 'stop',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const tool = {
+      type: 'function',
+      function: { name: 'search', description: 'test', parameters: { type: 'object' } },
+    };
+    const text = await callLLM([{ role: 'user', content: 'hi' }], 'new_api', 'https://new.hongecb.store/v1', 'test-key', 'deepseek-v4-flash', {
+      stream: true,
+      retries: 0,
+      apiPath: 'responses',
+      tools: [tool] as never,
+      executeTool,
+      enableToolLoop: true,
+    });
+
+    expect(executeTool).toHaveBeenCalledTimes(1);
+    expect(executeTool).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'search', arguments: '{"q":"a"}' })
+    );
+    expect(text).toContain('search-result-42');
+    // 回落后的全部请求都走 chat/completions（v4 切断 v2 污染路径：不再回到 /responses）
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    for (const call of fetchMock.mock.calls.slice(1)) {
+      expect(String(call[0])).toContain('/chat/completions');
+    }
+  });
+
+  it('does NOT fall back when the first tool-loop request already targets chat_completions', async () => {
+    const fetchMock = vi.fn(async () => {
+      return new Response(JSON.stringify({ error: { message: 'not found' } }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      callLLM([{ role: 'user', content: 'hi' }], 'new_api', 'https://new.hongecb.store/v1', 'test-key', 'deepseek-v4-flash', {
+        stream: true,
+        retries: 0,
+        apiPath: 'chat_completions',
+        tools: [{ type: 'function', function: { name: 'search', description: 'test', parameters: { type: 'object' } } }] as never,
+        executeTool: vi.fn(async () => 'tool-out') as never,
+        enableToolLoop: true,
+      })
+    ).rejects.toThrow('not found');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-throws the SECOND request error when the chat_completions fallback also fails', async () => {
+    const fetchMock = vi.fn(async () => {
+      return new Response(JSON.stringify({ error: { message: 'not found' } }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const error = await callLLM([{ role: 'user', content: 'hi' }], 'new_api', 'https://new.hongecb.store/v1', 'test-key', 'deepseek-v4-flash', {
+      stream: true,
+      retries: 0,
+      apiPath: 'responses',
+      tools: [{ type: 'function', function: { name: 'search', description: 'test', parameters: { type: 'object' } } }] as never,
+      executeTool: vi.fn(async () => 'tool-out') as never,
+      enableToolLoop: true,
+    }).then(
+      () => null,
+      errorValue => errorValue
+    );
+
+    expect(error).toBeInstanceOf(ApiError);
+    // 附注回落上下文，且保留原始 code/statusCode（不发明合成 code）
+    expect(error.message).toContain('已尝试从 /responses 回落 Chat Completions 仍失败');
+    expect(error.message).toContain('not found');
+    expect(error.statusCode).toBe(404);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/responses');
+    expect(String(fetchMock.mock.calls[1]?.[0])).toContain('/chat/completions');
+  });
+
+  it('isResponsesPathFallbackEligible gates only responses + ApiError + unsupported text', async () => {
+    const { isResponsesPathFallbackEligible } = await import('./llmService');
+    const { ApiError } = await import('@/common/errors');
+    const notFound = new ApiError('not found', 'HTTP_404', 404, '{}', {
+      module: 'test',
+      action: 'test',
+    });
+    const unsupported400 = new ApiError('no route', 'HTTP_400', 400, '{}', {
+      module: 'test',
+      action: 'test',
+    });
+    const generic400 = new ApiError('bad request', 'HTTP_400', 400, '{}', {
+      module: 'test',
+      action: 'test',
+    });
+
+    expect(isResponsesPathFallbackEligible(notFound, { apiPath: 'responses' })).toBe(true);
+    expect(isResponsesPathFallbackEligible(unsupported400, { apiPath: 'responses' })).toBe(true);
+    expect(isResponsesPathFallbackEligible(notFound, { apiPath: 'chat_completions' })).toBe(false);
+    expect(isResponsesPathFallbackEligible(notFound, { apiPath: 'anthropic_messages' })).toBe(
+      false
+    );
+    expect(
+      isResponsesPathFallbackEligible(generic400, { apiPath: 'responses' })
+    ).toBe(false);
+    expect(isResponsesPathFallbackEligible(new Error('not found'), { apiPath: 'responses' })).toBe(
+      false
+    );
   });
 
   it('omits reasoning_effort when prefs are disabled', async () => {

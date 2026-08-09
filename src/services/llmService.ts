@@ -1026,6 +1026,23 @@ function isAlternatePathUnsupportedError(error: ApiError): boolean {
   );
 }
 
+/**
+ * 仅 responses → chat_completions 的路径回落守卫（tool loop 流式首请求复用）。
+ * 显式限定 apiPath==='responses'：避免 anthropic/gemini 等原生路径被错误强制切到
+ * chat_completions（认证头/消息结构按 path 切换，协议不兼容）。
+ * 与 callLLMWithRetry 内嵌的回落判定（triedPathFallback）行为一致，各自独立维护。
+ */
+export function isResponsesPathFallbackEligible(
+  errorValue: unknown,
+  context: { apiPath?: ApiPathId }
+): boolean {
+  return (
+    context.apiPath === 'responses' &&
+    errorValue instanceof ApiError &&
+    isAlternatePathUnsupportedError(errorValue)
+  );
+}
+
 function getLLMStatusError(
   status: number,
   errorMsg: string,
@@ -2145,11 +2162,47 @@ async function callLLMStreamFirstThenToolLoop(
     stream: true,
     enableToolLoop: false,
   };
-  const context = createInitialLLMContext(request, streamOptions, normalizedEndpoint);
-  const firstPayload = await executeLLMAttemptPayload(context, 0, {
+  const firstAttemptState: LLMAttemptState = {
     timedOut: false,
     externallyAborted: false,
-  });
+  };
+  const context = createInitialLLMContext(request, streamOptions, normalizedEndpoint);
+  let firstPayload: LLMResponsePayload;
+  try {
+    firstPayload = await executeLLMAttemptPayload(context, 0, firstAttemptState);
+  } catch (errorValue) {
+    if (!isResponsesPathFallbackEligible(errorValue, context)) {
+      throw errorValue;
+    }
+    // responses 不可用（404/400 unsupported）→ 平级切 chat tool loop：tools/executeTool
+    // 保留（chat 机器原生处理 tool_calls），store 剥离（chat 无链式语义）。
+    // 只包首请求：tool loop 中途轮次错误原样抛出，避免已执行工具轮次被重放。
+    try {
+      return await callLLMChatStreamFirstThenToolLoop(
+        request,
+        { ...streamOptions, apiPath: 'chat_completions', store: undefined },
+        normalizedEndpoint
+      );
+    } catch (fallbackError) {
+      const detail =
+        fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+      if (fallbackError instanceof ApiError) {
+        throw new ApiError(
+          `已尝试从 /responses 回落 Chat Completions 仍失败：${detail}`,
+          fallbackError.code,
+          fallbackError.statusCode,
+          fallbackError.response,
+          { ...fallbackError.context, fallbackFrom: 'responses' },
+          fallbackError
+        );
+      }
+      const wrapped = new Error(`已尝试从 /responses 回落 Chat Completions 仍失败：${detail}`);
+      if (fallbackError instanceof Error) {
+        wrapped.name = fallbackError.name;
+      }
+      throw wrapped;
+    }
+  }
   const streamed = getLLMResponseContent(firstPayload);
   const raw = resolveRawFromStreamFirstPayload(firstPayload);
   const functionCalls = resolveFunctionCallsFromStreamFirstPayload(firstPayload, raw);
