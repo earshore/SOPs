@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.1.0-rc.1] - 2026-08-09
 
 > 功能冻结后的发布候选（Pre-release）。Long-task 运行感知（v3.1）+ 链路收尾（v3.2）+
-> 总览优化；Latest 仍为 `v3.0.12`。回滚基线 `v3.0.12`。
+> 总览优化；Latest 仍为 `v3.0.12`；上一 GA 与回滚基线均为 `v3.0.11`。
+> 生产目标为 `https://sops.hongecb.store`。
 
 ### Added（新增）
 
@@ -30,6 +31,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 总览最近作业：默认排序改为**「最近更新」**（需处理优先仍可从排序下拉选择）；列表限高
   视口内滚动（多列 grid 布局不变）。
 - 取消后部分结果持久化（仅新分析场景；重跑取消不覆盖历史完整报告）。
+
+### Fixed（修复）
+
+- 取消竞态：取消后瞬间落定的任务不再写回断点/复活「分析中」卡片（signal.aborted 守卫生效）。
+- 共享 general-review Map 调用未透传取消信号（取消后仍继续请求）；失败与数据变更路径补齐
+  「分析中」卡片移除。
+- Keyword Hunter 评审启动 toast 改读全局推理档位（原硬编码不匹配实际调用）。
+- 设置健康消息去重：存储占用警告由 quota 警告条独立展示，不进页脚。
 
 ### Removed（移除）
 

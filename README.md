@@ -25,17 +25,17 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-| 通道                         | 版本      | 说明                                                               |
-| ---------------------------- | --------- | ------------------------------------------------------------------ |
-| **GitHub Latest（稳定 GA）** | `v3.0.12` | 生产推荐版本                                                       |
-| **当前 Pre-release 候选**    | —         | 无开放 RC；下一候选进入 `v3.0.13-rc.1` 或 `v3.1.0-rc.1`               |
-| package.json                 | `3.0.12`  | 与 GA tag / Release 一致                                           |
-| 上一 GA                      | `v3.0.11` | 回滚参考                                                           |
+| 通道                         | 版本          | 说明                                                               |
+| ---------------------------- | ------------- | ------------------------------------------------------------------ |
+| **GitHub Latest（稳定 GA）** | `v3.0.12`     | 生产推荐版本                                                     |
+| **当前 Pre-release 候选**    | `v3.1.0-rc.1` | 功能冻结后的发布候选（AI 分析取消/运行感知、总览优化）           |
+| package.json                 | `3.1.0-rc.1`  | 与候选 tag / Release 一致                                        |
+| 上一 GA                      | `v3.0.11`     | 回滚参考                                                         |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.12` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.1.0-rc.1` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.0.12`，上一 GA 为 `v3.0.11`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.0-rc.1`，上一 GA 为 `v3.0.11`。
 
 `v3.0.12`（2026-08-08，稳定 GA）定稿 `v3.0.12-rc.1`…`rc.10` 全部候选增量：
 
