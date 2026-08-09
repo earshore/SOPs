@@ -192,10 +192,16 @@ jobs:
         run: npm ci
 
       - name: Download build artifact
+        id: download-build
+        continue-on-error: true # artifact quota outage: fall back to local build below
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: build-artifact
           path: dist
+
+      - name: Build dist locally (artifact unavailable)
+        if: steps.download-build.outcome == 'failure'
+        run: npm run build
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
@@ -268,10 +274,16 @@ jobs:
         run: npm ci
 
       - name: Download build artifact
+        id: download-build
+        continue-on-error: true # artifact quota outage: fall back to local build below
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: build-artifact
           path: dist
+
+      - name: Build dist locally (artifact unavailable)
+        if: steps.download-build.outcome == 'failure'
+        run: npm run build
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
@@ -328,10 +340,16 @@ jobs:
         run: npm ci
 
       - name: Download build artifact
+        id: download-build
+        continue-on-error: true # artifact quota outage: fall back to local build below
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: build-artifact
           path: dist
+
+      - name: Build dist locally (artifact unavailable)
+        if: steps.download-build.outcome == 'failure'
+        run: npm run build
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
