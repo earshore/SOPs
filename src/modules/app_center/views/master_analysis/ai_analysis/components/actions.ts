@@ -456,14 +456,14 @@ async function prepareAnalysisRun(
     cachedTargetIds: schedulePlan.cachedTargetIds,
     estimatedInputTokens: schedulePlan.estimatedInputTokens,
     reasoning: reasoningPrefs,
-    // 显式传当前档位，与下拉选项的估算公式（estimateRunAtDepth）同源
+    // 显式传当前档位，与执行路径（resolveAnalysisSchedulePlan）同源
     evidenceDepth: perfSettings.evidenceDepth,
   });
   // 精简启动反馈：仅保留核心信息 + 测算时间范围 + 缓存命中（有命中时）
   const cachePart =
     cachedCount > 0 ? ` · 缓存命中 ${cachedCount}/${selectedTargets.length} 维` : '';
   showToast(
-    `正在分析 ${products.length} 个 ASIN · ${depthLabel}档 · ${getAnalysisReasoningEffortLabel(reasoningPrefs)}推理 · 预计 ${timeEstimate.label}${cachePart}`,
+    `正在分析 ${products.length} 个 ASIN · ${depthLabel}档 · ${getAnalysisReasoningEffortLabel(reasoningPrefs)}推理 · ${timeEstimate.label}${cachePart}`,
     { type: 'info' }
   );
 

@@ -25,6 +25,7 @@ import { confirmWithModal } from '../utils/confirmModal';
 import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 import { resolveToolLlmPublicConfig } from '@/services/llmToolBridge';
 import { estimateSingleCallTime } from '../../master_analysis/ai_analysis/services/analysisTimeEstimator';
+import { getUserReasoningPrefs } from '../../master_analysis/ai_analysis/services/reasoningPolicy';
 import '../styles.css';
 
 // ==========================================
@@ -1261,12 +1262,15 @@ async function runLLMAnalysis(
   if (!(await confirmRegenerateListingReportIfNeeded(hasExistingReport, options))) return;
 
   const bypassCache = options.bypassCache === true;
-  // 启动反馈统一 toast：仅提示测算时间范围（同源估算，UI 不承诺耗时）
+  // 启动反馈统一 toast：测算时间与真实调用同源（callLLM 会注入全局推理等级，故读全局偏好而非硬编码 off 档）
+  const userPrefs = getUserReasoningPrefs();
   const singleCallEstimate = estimateSingleCallTime(
-    { enabled: false, effort: 'low' },
+    userPrefs.enabled && userPrefs.effort
+      ? { enabled: true, effort: userPrefs.effort }
+      : { enabled: false, effort: 'low' },
     { toolScale: true }
   );
-  showToast(`正在生成评审报告 · 预计 ${singleCallEstimate.label}`, { type: 'info' });
+  showToast(`正在生成评审报告 · ${singleCallEstimate.label}`, { type: 'info' });
   attachAnalysisRunToPage(startAnalysisRun(processedCopy, { bypassCache }));
 }
 

@@ -5,7 +5,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { estimateAnalysisTime, estimateAnalysisWorkload } from '../analysisTimeEstimator';
+import {
+  estimateAnalysisTime,
+  estimateAnalysisWorkload,
+  estimateSingleCallTime,
+} from '../analysisTimeEstimator';
 import type { Product } from '../../config/sampleData';
 
 function makeProduct(overrides: Partial<Product> = {}): Product {
@@ -169,5 +173,28 @@ describe('estimateAnalysisTime', () => {
     const serial = estimateAnalysisTime({ ...base, maxConcurrency: 1 });
     const parallel = estimateAnalysisTime(base);
     expect(serial.secondsHigh).toBeGreaterThan(parallel.secondsHigh);
+  });
+});
+
+describe('estimateSingleCallTime', () => {
+  it('toolScale 缺省：off 档单调用秒级区间（无 3x 放大）', () => {
+    const est = estimateSingleCallTime({ enabled: false, effort: 'low' });
+    expect(est.callCount).toBe(1);
+    expect(est.secondsHigh).toBeLessThan(60);
+    expect(est.label).toMatch(/约 \d+-\d+ 秒/);
+  });
+
+  it('toolScale 生效：off 档放大后进入分钟级区间', () => {
+    const est = estimateSingleCallTime({ enabled: false, effort: 'low' }, { toolScale: true });
+    // 14 × 1.15 × 3 = 48.3 → 区间 39-63 秒 → 「约 1-2 分钟」
+    expect(est.secondsLow).toBe(39);
+    expect(est.secondsHigh).toBe(63);
+    expect(est.label).toMatch(/约 \d+-\d+ 分钟/);
+  });
+
+  it('全局推理档位影响单调用估算（与真实调用继承推理等级同源）', () => {
+    const off = estimateSingleCallTime({ enabled: false, effort: 'low' }, { toolScale: true });
+    const max = estimateSingleCallTime({ enabled: true, effort: 'max' }, { toolScale: true });
+    expect(max.secondsHigh).toBeGreaterThan(off.secondsHigh * 3);
   });
 });
