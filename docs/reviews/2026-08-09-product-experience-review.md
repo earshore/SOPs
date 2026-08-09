@@ -2,6 +2,7 @@
 
 > 身份：产品体验官（实测驱动）。所有"通过项"均以真实点击链路验证，所有"问题项"均附实测数据 + 源码锚点。
 > 基线提交：`b881eccf`（HEAD，工作区干净，与 `origin/main` 同步）。探针脚本已全部清理。
+> **修复状态（2026-08-09 同日晚些时候）**：P0-1/P0-2/P1/P2/P3 已按用户拍板方案修复并验收（见 `docs/reviews/2026-08-09-p0-p3-fix-spec.md`，提交 `Tighten analysis time estimates and toasts`）。
 
 ---
 

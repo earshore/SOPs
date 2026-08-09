@@ -27,15 +27,16 @@ it('UT-P0-09b healthy when endpoint and key present without repair', () => {
   expect(result.messages).toEqual([]);
 });
 
-it('UT-P0-09c warns on high storage usage ratio', () => {
+it('UT-P0-09c storage warning stays in quota bar, not footer messages', () => {
   const result = evaluateSettingsHealth({
     runtimeNormalized: false,
     hasLlmEndpoint: true,
     hasLlmKey: true,
     storageUsageRatio: 0.9,
   });
-  expect(result.ok).toBe(false);
-  expect(result.messages.some(m => m.includes('存储'))).toBe(true);
+  // 存储警告由设置面板 quota 警告条（quotaWarningVisible）独立承担，避免与页脚重复
+  expect(result.ok).toBe(true);
+  expect(result.messages.some(m => m.includes('存储'))).toBe(false);
 });
 
 it('UT-P0-09d isRuntimeRawInvalid detects unusable payloads', () => {

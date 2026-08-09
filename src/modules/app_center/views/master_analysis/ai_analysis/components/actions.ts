@@ -21,7 +21,7 @@ import { generateMarkdownReport, generateJsonReportData } from '../services/repo
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
 import type { Product } from '../config/sampleData';
-import { estimateAnalysisTime, estimateAnalysisWorkload } from '../services/analysisTimeEstimator';
+import { estimateAnalysisTime } from '../services/analysisTimeEstimator';
 import {
   getAnalysisReasoningEffortLabel,
   getAnalysisReasoningPrefs,
@@ -424,7 +424,6 @@ async function prepareAnalysisRun(
 ): Promise<PreparedAnalysisRun> {
   const products = getProductsForAnalysis(context);
   const mergedProduct = mergeProducts(products);
-  const workload = estimateAnalysisWorkload(mergedProduct, selectedTargets);
   const language = getMarketLanguage();
   const perfSettings = getPerformanceSettings();
   const depthLabel =
@@ -460,10 +459,11 @@ async function prepareAnalysisRun(
     // 显式传当前档位，与下拉选项的估算公式（estimateRunAtDepth）同源
     evidenceDepth: perfSettings.evidenceDepth,
   });
-  const hygienePart = workload.hygieneHits > 0 ? `，证据清洗约 ${workload.hygieneHits} 条` : '';
-  const cachePart = cachedCount > 0 ? `，缓存命中 ${cachedCount}/${selectedTargets.length} 维` : '';
+  // 精简启动反馈：仅保留核心信息 + 测算时间范围 + 缓存命中（有命中时）
+  const cachePart =
+    cachedCount > 0 ? ` · 缓存命中 ${cachedCount}/${selectedTargets.length} 维` : '';
   showToast(
-    `正在分析 ${products.length} 个 ASIN · ${depthLabel}档 · ${getAnalysisReasoningEffortLabel(reasoningPrefs)}推理 · 预计 ${timeEstimate.label} · 约 ${workload.mapCalls} 次分片调用${hygienePart}${cachePart}`,
+    `正在分析 ${products.length} 个 ASIN · ${depthLabel}档 · ${getAnalysisReasoningEffortLabel(reasoningPrefs)}推理 · 预计 ${timeEstimate.label}${cachePart}`,
     { type: 'info' }
   );
 

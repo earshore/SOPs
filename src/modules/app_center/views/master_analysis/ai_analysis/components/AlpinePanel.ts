@@ -18,10 +18,6 @@ import { createPerformanceSettingsPanel } from './PerformanceSettings';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
-import { appStore } from '@/stores/useAppStore';
-import type { Product } from '../config/sampleData';
-import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
-import { estimateRunAtDepth } from '../services/estimateRunPlan';
 import {
   getAnalysisReasoningEffortLabel,
   getUserReasoningPrefs,
@@ -991,43 +987,20 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   /**
-   * 证据深度下拉的动态选项：按「全局推理等级 × 深度上限」真联动后的实际档位
-   * 与动态耗时估算实时生成文案（如「快速 · 推理低 · 预计 1-2 分钟」）。
+   * 证据深度下拉的动态选项：按「全局推理等级 × 深度上限」真联动后的实际档位。
+   * 文案仅展示档位与推理等级；耗时测算只出现在「开始分析」toast（同源估算）。
    */
   get evidenceDepthOptions(): Array<{ value: 'fast' | 'balanced' | 'deep'; label: string }> {
     const depthLabels: Record<string, string> = { fast: '快速', balanced: '均衡', deep: '深入' };
     const userPrefs = getUserReasoningPrefs();
-    const targetIds = this.selectedTargets.length
-      ? this.selectedTargets
-      : analysisTargets.map(target => target.id);
-    const scrapedData = appStore.getState().scraper?.scrapedData;
-    const products = getProductsByAsins(scrapedData, this.selectedAsins);
 
     return (['fast', 'balanced', 'deep'] as const).map(depth => {
-      let estimateText = '预计 —';
-      let reasoningLabel: string;
-      if (products.length > 0 && targetIds.length > 0) {
-        // 与开始分析 toast 同源：并发/缓存/token/分片均来自真实计划与档位参数
-        const merged = products.length === 1 ? (products[0] as Product) : mergeProducts(products);
-        const run = estimateRunAtDepth(
-          {
-            product: merged,
-            targetIds,
-            schedulingPreference: this.perfSettings.settings.schedulingPreference,
-            userReasoning: userPrefs,
-          },
-          depth
-        );
-        reasoningLabel = getAnalysisReasoningEffortLabel(run.reasoning);
-        estimateText = `预计 ${run.estimate.label}`;
-      } else {
-        reasoningLabel = getAnalysisReasoningEffortLabel(
-          resolveAnalysisReasoningPrefs(userPrefs, depth)
-        );
-      }
+      const reasoningLabel = getAnalysisReasoningEffortLabel(
+        resolveAnalysisReasoningPrefs(userPrefs, depth)
+      );
       return {
         value: depth,
-        label: `${depthLabels[depth]} · 推理${reasoningLabel} · ${estimateText}`,
+        label: `${depthLabels[depth]} · 推理${reasoningLabel}`,
       };
     });
   },

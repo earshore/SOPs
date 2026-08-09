@@ -35,9 +35,8 @@ export function evaluateSettingsHealth(input: {
     messages.push('尚未配置 LLM API Key。');
   }
 
-  if (isStorageQuotaWarning(input.storageUsageRatio)) {
-    messages.push('本机存储占用较高，建议清理缓存或导出备份。');
-  }
+  // 存储占用警告不进入页脚消息：由设置面板 quota 警告条（quotaWarningVisible）独立承担，避免同屏重复。
+  // storageUsageRatio 参数保留以兼容调用方签名。
 
   return {
     ok: messages.length === 0,

@@ -297,7 +297,7 @@ export function findFirstSettingsSearchMatch(
 const SECTION_LABEL_BY_ID: Record<string, string> = {
   'settings-section-llm': 'AI 模型与连接',
   'settings-section-tool-strategy': '工具策略',
-  'settings-section-network': '工具策略',
+  'settings-section-network': '工具策略 · 数据采集',
   'settings-section-data': '数据与备份',
   'settings-section-appearance': '外观与体验',
   'settings-section-performance': '开发者诊断',

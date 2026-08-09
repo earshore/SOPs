@@ -707,7 +707,10 @@ it('regenerates the report with a fresh LLM call even when a cached report exist
     expect(mockedCallLLM).toHaveBeenCalledTimes(1);
   });
   expect(analysisMocks.confirmWithModal).toHaveBeenCalled();
-  expect(showToast).toHaveBeenCalledWith('正在重新生成评审报告…', { type: 'info' });
+  expect(showToast).toHaveBeenCalledWith(
+    expect.stringContaining('正在生成评审报告 · 预计'),
+    { type: 'info' }
+  );
 
   await vi.waitFor(() => {
     expect(container.querySelector('#keyword-hunter-analyze-btn-text')?.textContent).toBe(

@@ -107,14 +107,21 @@ export interface AnalysisTimeEstimate {
   label: string;
 }
 
-/** 每调用基准耗时（秒）：按实际推理档位，基于本次实测校准（off 档并发下约 4-8s/调用）。 */
+/**
+ * 每调用基准耗时（秒）：按实际推理档位，保守校准值。
+ * 校准依据（2026-08 实测）：
+ * - off 档：Deep Chat 单次回复实测约 20s（含中转），取 14s 保守下限；
+ * - low 档：AI 分析快速档全链路实测 ~128s，按调用数/并发反推单调用 ~36s；
+ * - 其余档位按 low 的偏移比例上修（高推理档位首 token 延迟占比更高，但分片可并行）。
+ * 估算定位为「测算区间」而非承诺，展示仅用于 toast 提示。
+ */
 const PER_CALL_SECONDS: Record<ReasoningEffortLevel | 'off', number> = {
-  off: 6,
-  low: 12,
-  medium: 25,
-  high: 45,
-  xhigh: 70,
-  max: 100,
+  off: 14,
+  low: 36,
+  medium: 55,
+  high: 100,
+  xhigh: 150,
+  max: 200,
 };
 
 /** 输入规模系数：大 prompt（多 ASIN / 多评论）单调用更慢。 */
@@ -138,9 +145,18 @@ function formatDurationLabel(secondsLow: number, secondsHigh: number): string {
   return lowMin === highMin ? `约 ${lowMin} 分钟` : `约 ${lowMin}-${highMin} 分钟`;
 }
 
+/** 估算缓冲系数：与 estimateAnalysisTime 同源。 */
+const ESTIMATE_BUFFER = 1.15;
+
+/**
+ * 大 prompt 工具场景（如 Keyword Hunter 单次评审）额外保守系数。
+ * 校准依据：KH 实测单次评审 ~60s vs off 档基准 14s×1.15≈16s → 比值约 3.75，取 3。
+ */
+const TOOL_SCALE_FACTOR = 3;
+
 /**
  * 估算分析总耗时。
- * wall = ceil(未缓存调用数 / 有效并发) × 每调用基准 × 规模系数 × 1.15 缓冲；
+ * wall = ceil(未缓存调用数 / 有效并发) × 每调用基准 × 规模系数 × ESTIMATE_BUFFER；
  * 输出区间：low = 0.8×wall，high = 1.3×wall。
  */
 export function estimateAnalysisTime(input: AnalysisTimeEstimateInput): AnalysisTimeEstimate {
@@ -170,7 +186,7 @@ export function estimateAnalysisTime(input: AnalysisTimeEstimateInput): Analysis
     Math.ceil(callCount / effectiveConcurrency) *
     perCallSeconds *
     resolveSizeFactor(estimatedInputTokens) *
-    1.15;
+    ESTIMATE_BUFFER;
 
   const secondsLow = Math.max(1, Math.round(wallSeconds * 0.8));
   const secondsHigh = Math.max(secondsLow, Math.round(wallSeconds * 1.3));
@@ -178,6 +194,31 @@ export function estimateAnalysisTime(input: AnalysisTimeEstimateInput): Analysis
     secondsLow,
     secondsHigh,
     callCount,
+    label: formatDurationLabel(secondsLow, secondsHigh),
+  };
+}
+
+export interface SingleCallEstimateOptions {
+  /** 大 prompt 工具场景（如 Keyword Hunter 评审）：额外保守系数，避免低估。 */
+  toolScale?: boolean;
+}
+
+/**
+ * 单次调用耗时估算（供工具场景 toast 同源使用，如 Keyword Hunter 评审）。
+ * wall = 每调用基准 × 缓冲（× 工具系数）；区间与 estimateAnalysisTime 同口径（0.8~1.3）。
+ */
+export function estimateSingleCallTime(
+  reasoning: AnalysisReasoningPrefs,
+  options: SingleCallEstimateOptions = {}
+): AnalysisTimeEstimate {
+  const scale = options.toolScale ? TOOL_SCALE_FACTOR : 1;
+  const wallSeconds = resolvePerCallSeconds(reasoning) * ESTIMATE_BUFFER * scale;
+  const secondsLow = Math.max(1, Math.round(wallSeconds * 0.8));
+  const secondsHigh = Math.max(secondsLow, Math.round(wallSeconds * 1.3));
+  return {
+    secondsLow,
+    secondsHigh,
+    callCount: 1,
     label: formatDurationLabel(secondsLow, secondsHigh),
   };
 }

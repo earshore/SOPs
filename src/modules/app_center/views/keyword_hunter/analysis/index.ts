@@ -24,6 +24,7 @@ import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { confirmWithModal } from '../utils/confirmModal';
 import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 import { resolveToolLlmPublicConfig } from '@/services/llmToolBridge';
+import { estimateSingleCallTime } from '../../master_analysis/ai_analysis/services/analysisTimeEstimator';
 import '../styles.css';
 
 // ==========================================
@@ -141,24 +142,13 @@ function renderReport(container: HTMLElement, markdown: string): void {
   });
 }
 
-function renderAnalysisSuccess(
-  response: string,
-  resultDiv: HTMLElement | null,
-  btn: HTMLButtonElement | null
-): void {
+function renderAnalysisSuccess(response: string, resultDiv: HTMLElement | null): void {
   if (resultDiv) {
     renderReport(resultDiv, response);
   }
 
-  if (btn) {
-    setBtnState(btn, 'success', getAnalyzeButtonLabel('success'));
-    // Keep regeneratable after success chrome
-    btn.disabled = false;
-    btn.classList.remove(...BTN_CLASSES.disabled, ...BTN_CLASSES.loading);
-    btn.classList.add(...BTN_CLASSES.active);
-    const textEl = document.getElementById('keyword-hunter-analyze-btn-text');
-    if (textEl) textEl.textContent = getAnalyzeButtonLabel('active');
-  }
+  // 完成态统一由 updateAnalyzeButtonState 派生（success 样式 + 「重新生成」文案），避免双写矛盾
+  updateAnalyzeButtonState();
 }
 
 // ==========================================
@@ -406,7 +396,7 @@ function attachAnalysisRunToPage(run: ActiveAnalysisRun): void {
       if (viewVersion !== analysisViewVersion || !isAnalysisRunForCurrentCopy(run)) return;
 
       const current = getCurrentAnalysisElements();
-      renderAnalysisSuccess(response, current.resultDiv, current.btn);
+      renderAnalysisSuccess(response, current.resultDiv);
       if (!run.successToastShown) {
         showToast('报告生成成功', { type: 'success' });
         run.successToastShown = true;
@@ -577,7 +567,7 @@ function showLoadingState(container: HTMLElement): () => void {
                 </div>
             </div>
             <p class="font-semibold ${phase.color} text-sm mb-1">${phase.text}</p>
-            <p class="text-xs text-slate-400">这可能需要 10 ~ 30 秒，请耐心等待</p>
+            <p class="text-xs text-slate-400">正在生成评审报告，请稍候…</p>
             <div class="mt-4 flex gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-bounce"></span>
                 <span class="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-bounce [animation-delay:150ms]"></span>
@@ -1271,9 +1261,12 @@ async function runLLMAnalysis(
   if (!(await confirmRegenerateListingReportIfNeeded(hasExistingReport, options))) return;
 
   const bypassCache = options.bypassCache === true;
-  if (bypassCache && hasExistingReport) {
-    showToast('正在重新生成评审报告…', { type: 'info' });
-  }
+  // 启动反馈统一 toast：仅提示测算时间范围（同源估算，UI 不承诺耗时）
+  const singleCallEstimate = estimateSingleCallTime(
+    { enabled: false, effort: 'low' },
+    { toolScale: true }
+  );
+  showToast(`正在生成评审报告 · 预计 ${singleCallEstimate.label}`, { type: 'info' });
   attachAnalysisRunToPage(startAnalysisRun(processedCopy, { bypassCache }));
 }
 
