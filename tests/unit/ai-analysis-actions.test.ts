@@ -1,6 +1,6 @@
 /**
  * AI 分析模块 - actions 单元测试
- * 
+ *
  * 测试用户动作处理函数：
  * - toggleAsin: 切换 ASIN 选择
  * - selectAllAsins/clearAllAsins: 全选/清空 ASIN
@@ -27,7 +27,8 @@ import {
   downloadJson,
   rerunAnalysisTargetsAction,
   runAnalysisAction,
-  restoreInterruptedAnalysis
+  cancelAnalysisAction,
+  restoreInterruptedAnalysis,
 } from '../../src/modules/app_center/views/master_analysis/ai_analysis/components/actions';
 import { AlpineContext } from '../../src/modules/app_center/views/master_analysis/ai_analysis/types';
 import type { Product } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/sampleData';
@@ -35,7 +36,7 @@ import { getScrapedDataFingerprint } from '../../src/modules/app_center/views/ma
 
 // Mock 依赖
 vi.mock('@/common/ui/index', () => ({
-  showToast: vi.fn()
+  showToast: vi.fn(),
 }));
 
 const mockAppStoreState = vi.hoisted(() => ({
@@ -46,7 +47,7 @@ const mockAppStoreState = vi.hoisted(() => ({
     mockAppStoreState.scraper = { ...(mockAppStoreState.scraper || {}), scrapedData: data };
   }),
   setCurrentHistoryId: vi.fn(),
-  scraper: undefined as any
+  scraper: undefined as any,
 }));
 
 const mockLoadAnalysisSession = vi.hoisted(() => vi.fn());
@@ -58,11 +59,17 @@ const mockRunParallelAIAnalysis = vi.hoisted(() => vi.fn());
 const mockGetCachedAnalysisResults = vi.hoisted(() => vi.fn());
 const mockResolveAnalysisSchedulePlan = vi.hoisted(() => vi.fn());
 
-vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/utils/analysisSession', () => ({
-  loadAnalysisSession: mockLoadAnalysisSession,
-  saveAnalysisSession: mockSaveAnalysisSession,
-  clearAnalysisSession: mockClearAnalysisSession,
-}));
+const mockRegisterRunningArtifact = vi.hoisted(() => vi.fn());
+const mockRemoveRunningArtifact = vi.hoisted(() => vi.fn());
+
+vi.mock(
+  '../../src/modules/app_center/views/master_analysis/ai_analysis/utils/analysisSession',
+  () => ({
+    loadAnalysisSession: mockLoadAnalysisSession,
+    saveAnalysisSession: mockSaveAnalysisSession,
+    clearAnalysisSession: mockClearAnalysisSession,
+  })
+);
 
 vi.mock('../../src/modules/app_center/views/master_analysis/services/historyService', () => ({
   HistoryService: { getAllAsync: mockHistoryGetAll },
@@ -70,54 +77,77 @@ vi.mock('../../src/modules/app_center/views/master_analysis/services/historyServ
 
 vi.mock('@/stores/useAppStore', () => ({
   appStore: {
-    getState: () => mockAppStoreState
-  }
+    getState: () => mockAppStoreState,
+  },
 }));
 
-vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/prompts/analysisPrompts', () => ({
-  generateAnalysisPrompt: vi.fn(() => 'Mock prompt text')
+vi.mock('../../src/modules/app_center/artifactEnvelopeService', () => ({
+  registerAnalysisRunningArtifact: mockRegisterRunningArtifact,
+  removeAnalysisRunningArtifact: mockRemoveRunningArtifact,
 }));
 
-vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/services/reportGenerator', () => ({
-  generateMarkdownReport: vi.fn(() => '# Mock Markdown Report'),
-  generateJsonReportData: vi.fn(() => ({ mock: 'data' }))
-}));
+vi.mock(
+  '../../src/modules/app_center/views/master_analysis/ai_analysis/prompts/analysisPrompts',
+  () => ({
+    generateAnalysisPrompt: vi.fn(() => 'Mock prompt text'),
+  })
+);
 
-vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/utils/dataTransformers', () => ({
-  mergeProducts: vi.fn((products: Product[]) => products[0]),
-  getProductsByAsins: vi.fn((_scrapedData, _asins) => [
-    {
-      asin: 'B001',
-      productTitle: 'Test Product',
-      feature_bullets: ['Feature 1'],
-      customer_reviews: [],
-      scrape_status: 'success',
-      metadata: {},
-    },
-  ]),
-}));
+vi.mock(
+  '../../src/modules/app_center/views/master_analysis/ai_analysis/services/reportGenerator',
+  () => ({
+    generateMarkdownReport: vi.fn(() => '# Mock Markdown Report'),
+    generateJsonReportData: vi.fn(() => ({ mock: 'data' })),
+  })
+);
 
-vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService', () => ({
-  getCachedAnalysisResults: mockGetCachedAnalysisResults,
-  runParallelAIAnalysis: mockRunParallelAIAnalysis
-}));
+vi.mock(
+  '../../src/modules/app_center/views/master_analysis/ai_analysis/utils/dataTransformers',
+  () => ({
+    mergeProducts: vi.fn((products: Product[]) => products[0]),
+    getProductsByAsins: vi.fn((_scrapedData, _asins) => [
+      {
+        asin: 'B001',
+        productTitle: 'Test Product',
+        feature_bullets: ['Feature 1'],
+        customer_reviews: [],
+        scrape_status: 'success',
+        metadata: {},
+      },
+    ]),
+  })
+);
 
-vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/services/analysisScheduler', () => ({
-  resolveAnalysisSchedulePlan: mockResolveAnalysisSchedulePlan
-}));
+vi.mock(
+  '../../src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService',
+  () => ({
+    getCachedAnalysisResults: mockGetCachedAnalysisResults,
+    runParallelAIAnalysis: mockRunParallelAIAnalysis,
+  })
+);
 
-vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/components/PerformanceSettings', () => ({
-  getPerformanceSettings: vi.fn(() => ({
-    schedulingPreference: 'reliability',
-    maxConcurrency: 2,
-    enableCache: true,
-    failureStrategy: 'continue'
-  }))
-}));
+vi.mock(
+  '../../src/modules/app_center/views/master_analysis/ai_analysis/services/analysisScheduler',
+  () => ({
+    resolveAnalysisSchedulePlan: mockResolveAnalysisSchedulePlan,
+  })
+);
+
+vi.mock(
+  '../../src/modules/app_center/views/master_analysis/ai_analysis/components/PerformanceSettings',
+  () => ({
+    getPerformanceSettings: vi.fn(() => ({
+      schedulingPreference: 'reliability',
+      maxConcurrency: 2,
+      enableCache: true,
+      failureStrategy: 'continue',
+    })),
+  })
+);
 
 describe('actions - ASIN 选择操作', () => {
   let mockContext: AlpineContext;
-  
+
   beforeEach(() => {
     mockContext = {
       selectedAsins: [],
@@ -136,65 +166,65 @@ describe('actions - ASIN 选择操作', () => {
       canAnalyze: false,
       syncFromModuleState: vi.fn(),
       syncToModuleState: vi.fn(),
-      $nextTick: vi.fn((cb) => cb())
+      $nextTick: vi.fn(cb => cb()),
     } as AlpineContext;
   });
-  
+
   afterEach(() => {
     vi.clearAllMocks();
   });
-  
+
   describe('toggleAsin', () => {
     it('应该添加未选中的 ASIN', () => {
       toggleAsin(mockContext, 'B001');
-      
+
       expect(mockContext.selectedAsins).toContain('B001');
       expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith(['B001']);
     });
-    
+
     it('应该移除已选中的 ASIN', () => {
       mockContext.selectedAsins = ['B001', 'B002'];
-      
+
       toggleAsin(mockContext, 'B001');
-      
+
       expect(mockContext.selectedAsins).not.toContain('B001');
       expect(mockContext.selectedAsins).toContain('B002');
       expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith(['B002']);
     });
-    
+
     it('应该同步状态到应用 store', () => {
       toggleAsin(mockContext, 'B001');
-      
+
       expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith(mockContext.selectedAsins);
     });
   });
-  
+
   describe('selectAllAsins', () => {
     it('应该选中所有可用的 ASIN', () => {
       const availableAsins = ['B001', 'B002', 'B003'];
-      
+
       selectAllAsins(mockContext, availableAsins);
-      
+
       expect(mockContext.selectedAsins).toEqual(availableAsins);
       expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith(availableAsins);
     });
-    
+
     it('应该替换现有的选择', () => {
       mockContext.selectedAsins = ['B001'];
       const availableAsins = ['B002', 'B003'];
-      
+
       selectAllAsins(mockContext, availableAsins);
-      
+
       expect(mockContext.selectedAsins).toEqual(availableAsins);
     });
   });
-  
+
   describe('clearAllAsins', () => {
     it('应该清空所有选中的 ASIN', () => {
       mockContext.selectedAsins = ['B001', 'B002', 'B003'];
-      
+
       clearAllAsins(mockContext);
-      
+
       expect(mockContext.selectedAsins).toEqual([]);
       expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith([]);
     });
@@ -203,7 +233,7 @@ describe('actions - ASIN 选择操作', () => {
 
 describe('actions - 分析目标选择操作', () => {
   let mockContext: AlpineContext;
-  
+
   beforeEach(() => {
     mockContext = {
       selectedAsins: [],
@@ -222,45 +252,45 @@ describe('actions - 分析目标选择操作', () => {
       canAnalyze: false,
       syncFromModuleState: vi.fn(),
       syncToModuleState: vi.fn(),
-      $nextTick: vi.fn((cb) => cb())
+      $nextTick: vi.fn(cb => cb()),
     } as AlpineContext;
   });
-  
+
   afterEach(() => {
     vi.clearAllMocks();
   });
-  
+
   describe('toggleTarget', () => {
     it('应该添加未选中的目标', () => {
       toggleTarget(mockContext, 'target1');
-      
+
       expect(mockContext.selectedTargets).toContain('target1');
     });
-    
+
     it('应该移除已选中的目标', () => {
       mockContext.selectedTargets = ['target1', 'target2'];
-      
+
       toggleTarget(mockContext, 'target1');
-      
+
       expect(mockContext.selectedTargets).not.toContain('target1');
       expect(mockContext.selectedTargets).toContain('target2');
     });
   });
-  
+
   describe('selectAllTargets', () => {
     it('应该选中所有分析目标', () => {
       selectAllTargets(mockContext);
-      
+
       expect(mockContext.selectedTargets.length).toBeGreaterThan(0);
     });
   });
-  
+
   describe('clearAllTargets', () => {
     it('应该清空所有选中的目标', () => {
       mockContext.selectedTargets = ['target1', 'target2'];
-      
+
       clearAllTargets(mockContext);
-      
+
       expect(mockContext.selectedTargets).toEqual([]);
     });
   });
@@ -268,7 +298,7 @@ describe('actions - 分析目标选择操作', () => {
 
 describe('actions - UI 面板切换操作', () => {
   let mockContext: AlpineContext;
-  
+
   beforeEach(() => {
     mockContext = {
       selectedAsins: [],
@@ -287,74 +317,73 @@ describe('actions - UI 面板切换操作', () => {
       canAnalyze: false,
       syncFromModuleState: vi.fn(),
       syncToModuleState: vi.fn(),
-      $nextTick: vi.fn((cb) => cb())
+      $nextTick: vi.fn(cb => cb()),
     } as AlpineContext;
   });
-  
+
   afterEach(() => {
     vi.clearAllMocks();
   });
-  
+
   describe('togglePromptPanel', () => {
     it('应该切换提示词面板显示状态', () => {
       expect(mockContext.showPromptPanel).toBe(false);
-      
+
       togglePromptPanel(mockContext);
       expect(mockContext.showPromptPanel).toBe(true);
-      
+
       togglePromptPanel(mockContext);
       expect(mockContext.showPromptPanel).toBe(false);
     });
-    
+
     it('应该只更新当前上下文状态', () => {
       togglePromptPanel(mockContext);
 
       expect(mockContext.showPromptPanel).toBe(true);
     });
   });
-  
+
   describe('togglePromptItem', () => {
     it('应该展开指定的提示词项', () => {
       togglePromptItem(mockContext, 0);
-      
+
       expect(mockContext.expandedPromptIndex).toBe(0);
     });
-    
+
     it('应该折叠已展开的提示词项', () => {
       mockContext.expandedPromptIndex = 0;
-      
+
       togglePromptItem(mockContext, 0);
-      
+
       expect(mockContext.expandedPromptIndex).toBe(null);
     });
-    
+
     it('应该切换到不同的提示词项', () => {
       mockContext.expandedPromptIndex = 0;
-      
+
       togglePromptItem(mockContext, 1);
-      
+
       expect(mockContext.expandedPromptIndex).toBe(1);
     });
   });
-  
+
   describe('toggleJsonViewer', () => {
     it('应该切换 JSON 查看器显示状态', () => {
       expect(mockContext.showJsonViewer).toBe(false);
-      
+
       toggleJsonViewer(mockContext);
       expect(mockContext.showJsonViewer).toBe(true);
-      
+
       toggleJsonViewer(mockContext);
       expect(mockContext.showJsonViewer).toBe(false);
     });
   });
-  
 });
 
 describe('actions - 复制操作', () => {
   let mockContext: AlpineContext;
   let mockProducts: Product[];
-  
+
   beforeEach(() => {
     mockContext = {
       selectedAsins: ['B001'],
@@ -371,8 +400,8 @@ describe('actions - 复制操作', () => {
           color: 'blue',
           stats: [],
           highlights: [],
-          details: []
-        }
+          details: [],
+        },
       ],
       analysisReport: { data: 'test' },
       expandedPromptIndex: null,
@@ -384,68 +413,68 @@ describe('actions - 复制操作', () => {
       canAnalyze: false,
       syncFromModuleState: vi.fn(),
       syncToModuleState: vi.fn(),
-      $nextTick: vi.fn((cb) => cb())
+      $nextTick: vi.fn(cb => cb()),
     } as AlpineContext;
-    
+
     mockProducts = [
       {
         asin: 'B001',
         title: 'Test Product',
         bulletPoints: ['Feature 1'],
-        reviews: []
-      }
+        reviews: [],
+      },
     ];
-    
+
     // Mock clipboard API
     Object.assign(navigator, {
       clipboard: {
-        writeText: vi.fn().mockResolvedValue(undefined)
-      }
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
     });
   });
-  
+
   afterEach(() => {
     vi.clearAllMocks();
   });
-  
+
   describe('copyPrompt', () => {
     it('应该复制指定索引的提示词', async () => {
       copyPrompt(mockContext, mockProducts, 0);
-      
+
       await vi.waitFor(() => {
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Mock prompt text');
       });
     });
-    
+
     it('应该在没有产品时不执行复制', () => {
       copyPrompt(mockContext, [], 0);
-      
+
       expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     });
-    
+
     it('应该在索引无效时不执行复制', () => {
       copyPrompt(mockContext, mockProducts, 999);
-      
+
       expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     });
   });
-  
+
   describe('copyJson', () => {
     it('应该复制 JSON 报告', async () => {
       copyJson(mockContext, 'US');
-      
+
       await vi.waitFor(() => {
         expect(navigator.clipboard.writeText).toHaveBeenCalled();
         const callArg = (navigator.clipboard.writeText as any).mock.calls[0][0];
         expect(callArg).toContain('"mock"');
       });
     });
-    
+
     it('应该在没有报告时不执行复制', () => {
       mockContext.analysisReport = null;
-      
+
       copyJson(mockContext, 'US');
-      
+
       expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     });
   });
@@ -470,8 +499,8 @@ describe('actions - Markdown 复制操作', () => {
           color: 'blue',
           stats: [],
           highlights: [],
-          details: []
-        }
+          details: [],
+        },
       ],
       analysisReport: { data: 'test' },
       expandedPromptIndex: null,
@@ -483,34 +512,34 @@ describe('actions - Markdown 复制操作', () => {
       canAnalyze: false,
       syncFromModuleState: vi.fn(),
       syncToModuleState: vi.fn(),
-      $nextTick: vi.fn((cb) => cb())
+      $nextTick: vi.fn(cb => cb()),
     } as AlpineContext;
 
     Object.assign(navigator, {
       clipboard: {
-        writeText: vi.fn().mockResolvedValue(undefined)
-      }
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
     });
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
-  
+
   describe('copyMarkdown', () => {
     it('应该复制 Markdown 报告', async () => {
       copyMarkdown(mockContext, 'US', '数据采集');
-      
+
       await vi.waitFor(() => {
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith('# Mock Markdown Report');
       });
     });
-    
+
     it('应该在没有报告时不执行复制', () => {
       mockContext.analysisReport = null;
-      
+
       copyMarkdown(mockContext, 'US', '数据采集');
-      
+
       expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     });
   });
@@ -535,8 +564,8 @@ describe('actions - 下载操作', () => {
           color: 'blue',
           stats: [],
           highlights: [],
-          details: []
-        }
+          details: [],
+        },
       ],
       analysisReport: { data: 'test' },
       expandedPromptIndex: null,
@@ -548,59 +577,66 @@ describe('actions - 下载操作', () => {
       canAnalyze: false,
       syncFromModuleState: vi.fn(),
       syncToModuleState: vi.fn(),
-      $nextTick: vi.fn((cb) => cb())
+      $nextTick: vi.fn(cb => cb()),
     } as AlpineContext;
   });
-  
+
   describe('downloadJson', () => {
     let mockCreateElement: any;
     let mockAppendChild: any;
     let mockRemoveChild: any;
-    
+
     beforeEach(() => {
       const mockAnchor = {
         href: '',
         download: '',
-        click: vi.fn()
+        click: vi.fn(),
       };
-      
+
       mockCreateElement = vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor as any);
-      mockAppendChild = vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockAnchor as any);
-      mockRemoveChild = vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockAnchor as any);
-      
+      mockAppendChild = vi
+        .spyOn(document.body, 'appendChild')
+        .mockImplementation(() => mockAnchor as any);
+      mockRemoveChild = vi
+        .spyOn(document.body, 'removeChild')
+        .mockImplementation(() => mockAnchor as any);
+
       // Mock URL API
       global.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-url');
       global.URL.revokeObjectURL = vi.fn();
     });
-    
+
     afterEach(() => {
       mockCreateElement.mockRestore();
       mockAppendChild.mockRestore();
       mockRemoveChild.mockRestore();
       vi.clearAllMocks();
     });
-    
+
     it('应该下载 JSON 报告', () => {
       downloadJson(mockContext, 'US');
-      
+
       expect(mockCreateElement).toHaveBeenCalledWith('a');
       expect(mockAppendChild).toHaveBeenCalled();
       expect(mockRemoveChild).toHaveBeenCalled();
       expect(global.URL.createObjectURL).toHaveBeenCalled();
       expect(global.URL.revokeObjectURL).toHaveBeenCalled();
     });
-    
+
     it('应该在没有报告时不执行下载', () => {
       mockContext.analysisReport = null;
-      
+
       downloadJson(mockContext, 'US');
-      
+
       expect(mockCreateElement).not.toHaveBeenCalled();
     });
   });
 });
 
-function createRunAnalysisActionTestState(): { mockContext: AlpineContext; mockProducts: Product[] } {
+function createRunAnalysisActionTestState(): {
+  mockContext: AlpineContext;
+  mockProducts: Product[];
+} {
   const mockContext = {
     selectedAsins: ['B001'],
     selectedTargets: ['selling-points'],
@@ -623,8 +659,8 @@ function createRunAnalysisActionTestState(): { mockContext: AlpineContext; mockP
     availableAsins: ['B001'],
     hasData: true,
     canAnalyze: true,
-    $nextTick: vi.fn((cb) => cb()),
-    _unsubscribes: []
+    $nextTick: vi.fn(cb => cb()),
+    _unsubscribes: [],
   } as AlpineContext;
 
   const mockProducts = [
@@ -635,15 +671,15 @@ function createRunAnalysisActionTestState(): { mockContext: AlpineContext; mockP
       customer_reviews: [],
       scrape_status: 'success',
       metadata: {},
-    }
+    },
   ];
 
   mockAppStoreState.scraper = {
     scrapedData: { products: mockProducts },
-    currentHistoryId: null
+    currentHistoryId: null,
   };
   mockGetCachedAnalysisResults.mockResolvedValue({
-    'selling-points': { details: [] }
+    'selling-points': { details: [] },
   });
   mockResolveAnalysisSchedulePlan.mockReturnValue({
     taskOrder: ['selling-points'],
@@ -651,20 +687,21 @@ function createRunAnalysisActionTestState(): { mockContext: AlpineContext; mockP
     failureStrategy: 'abort',
     retryBudget: 2,
     failureMode: 'complete_required',
-    streamMode: 'final_only'
+    streamMode: 'final_only',
   });
-  mockRunParallelAIAnalysis.mockImplementation(async (_targets, _product, onProgress, _language, options) => {
-    const partialReport = { 'selling-points': { details: [] } };
-    onProgress(45, '正在分析: selling-points...');
-    options.onTaskComplete?.({ report: partialReport });
-    return partialReport;
-  });
+  mockRunParallelAIAnalysis.mockImplementation(
+    async (_targets, _product, onProgress, _language, options) => {
+      const partialReport = { 'selling-points': { details: [] } };
+      onProgress(45, '正在分析: selling-points...');
+      options.onTaskComplete?.({ report: partialReport });
+      return partialReport;
+    }
+  );
 
   return { mockContext, mockProducts };
 }
 
 describe('actions - 执行分析', () => {
-
   afterEach(() => {
     vi.clearAllMocks();
   });
@@ -676,15 +713,15 @@ describe('actions - 执行分析', () => {
 
     expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({
       progress: 0,
-      currentStep: '正在准备分析...'
+      currentStep: '正在准备分析...',
     });
     expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({
       progress: 45,
-      currentStep: '正在分析: selling-points...'
+      currentStep: '正在分析: selling-points...',
     });
     expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({
       progress: 100,
-      currentStep: '分析完成：成功 1/1'
+      currentStep: '分析完成：成功 1/1',
     });
     expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({ isAnalyzing: false });
     expect(mockContext.progress).toBe(100);
@@ -702,12 +739,14 @@ describe('actions - 执行分析', () => {
       expect.any(String),
       true
     );
-    expect(mockResolveAnalysisSchedulePlan).toHaveBeenCalledWith(expect.objectContaining({
-      preference: 'reliability',
-      targetIds: ['selling-points'],
-      cachedTargetIds: ['selling-points'],
-      enableCache: true
-    }));
+    expect(mockResolveAnalysisSchedulePlan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        preference: 'reliability',
+        targetIds: ['selling-points'],
+        cachedTargetIds: ['selling-points'],
+        enableCache: true,
+      })
+    );
     expect(mockRunParallelAIAnalysis).toHaveBeenCalledWith(
       ['selling-points'],
       expect.objectContaining({ asin: 'B001' }),
@@ -719,11 +758,11 @@ describe('actions - 执行分析', () => {
         streamResults: false,
         failureStrategy: 'abort',
         preloadedCachedResults: {
-          'selling-points': { details: [] }
+          'selling-points': { details: [] },
         },
         retryBudget: 2,
         stopOnFailure: true,
-        onTaskComplete: undefined
+        onTaskComplete: undefined,
       })
     );
   });
@@ -747,88 +786,126 @@ describe('actions - 执行分析', () => {
     expect(mockContext.selectedTargets).toEqual(['title-keywords']);
   });
 
-describe('restoreInterruptedAnalysis', () => {
-  const makeScrapedData = () => ({
-    metadata: { marketplace: 'DE', scrape_timestamp: '2026-01-01T00:00:00.000Z', total_asins: 1 },
-    products: [
-      {
-        asin: "B001",
-        feature_bullets: ["Feature 1"],
-        customer_reviews: [],
-        scrape_status: "success",
-      },
-    ],
-  });
+  describe('restoreInterruptedAnalysis', () => {
+    const makeScrapedData = () => ({
+      metadata: { marketplace: 'DE', scrape_timestamp: '2026-01-01T00:00:00.000Z', total_asins: 1 },
+      products: [
+        {
+          asin: 'B001',
+          feature_bullets: ['Feature 1'],
+          customer_reviews: [],
+          scrape_status: 'success',
+        },
+      ],
+    });
 
-  const makeSession = (overrides: Record<string, unknown> = {}) => {
-    const data = makeScrapedData();
-    return {
-      version: 1 as const,
-      sourceHistoryId: "h1",
-      sourceAsins: ["B001"],
-      sourceDataFingerprint: getScrapedDataFingerprint(data) || undefined,
-      targetIds: ["title-keywords", "selling-points"],
-      completedTargetIds: ["title-keywords"],
-      report: { title: {} },
-      startedAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
-      ...overrides,
+    const makeSession = (overrides: Record<string, unknown> = {}) => {
+      const data = makeScrapedData();
+      return {
+        version: 1 as const,
+        sourceHistoryId: 'h1',
+        sourceAsins: ['B001'],
+        sourceDataFingerprint: getScrapedDataFingerprint(data) || undefined,
+        targetIds: ['title-keywords', 'selling-points'],
+        completedTargetIds: ['title-keywords'],
+        report: { title: {} },
+        startedAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        ...overrides,
+      };
     };
-  };
 
-  let restoredContext: AlpineContext;
+    let restoredContext: AlpineContext;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockLoadAnalysisSession.mockReturnValue(null);
-    mockHistoryGetAll.mockResolvedValue([]);
-    mockAppStoreState.scraper = undefined;
-    restoredContext = {
-      selectedAsins: [],
-      selectedTargets: [],
-      analysisReport: null,
-      hasReport: false,
-      syncFromModuleState: vi.fn(),
-      syncToModuleState: vi.fn(),
-      $nextTick: vi.fn((cb: () => void) => cb()),
-    } as AlpineContext;
+    beforeEach(() => {
+      vi.clearAllMocks();
+      mockLoadAnalysisSession.mockReturnValue(null);
+      mockHistoryGetAll.mockResolvedValue([]);
+      mockAppStoreState.scraper = undefined;
+      restoredContext = {
+        selectedAsins: [],
+        selectedTargets: [],
+        analysisReport: null,
+        hasReport: false,
+        syncFromModuleState: vi.fn(),
+        syncToModuleState: vi.fn(),
+        $nextTick: vi.fn((cb: () => void) => cb()),
+      } as AlpineContext;
+    });
+
+    it('returns false when no session exists', async () => {
+      const restored = await restoreInterruptedAnalysis(restoredContext);
+      expect(restored).toBe(false);
+    });
+
+    it('restores from history when store has no data and fingerprint matches', async () => {
+      const data = makeScrapedData();
+      const session = makeSession();
+      mockLoadAnalysisSession.mockReturnValue(session);
+      mockHistoryGetAll.mockResolvedValue([{ id: 'h1', data }]);
+      mockAppStoreState.scraper = undefined;
+
+      const restored = await restoreInterruptedAnalysis(restoredContext);
+      expect(restored).toBe(true);
+      expect(mockAppStoreState.setScrapedData).toHaveBeenCalledWith(data);
+      expect(mockAppStoreState.setCurrentHistoryId).toHaveBeenCalledWith('h1');
+      expect(restoredContext.selectedAsins).toEqual(['B001']);
+    });
+
+    it('returns false when fingerprint does not match current data', async () => {
+      const otherData = makeScrapedData();
+      otherData.products = [{ ...otherData.products[0], asin: 'B999' }];
+      mockAppStoreState.scraper = { scrapedData: otherData };
+      mockLoadAnalysisSession.mockReturnValue(makeSession());
+
+      const restored = await restoreInterruptedAnalysis(restoredContext);
+      expect(restored).toBe(false);
+    });
+
+    it('restores when store already has matching data', async () => {
+      const data = makeScrapedData();
+      mockAppStoreState.scraper = { scrapedData: data };
+      mockLoadAnalysisSession.mockReturnValue(makeSession());
+      const restored = await restoreInterruptedAnalysis(restoredContext);
+      expect(restored).toBe(true);
+    });
   });
 
-  it("returns false when no session exists", async () => {
-    const restored = await restoreInterruptedAnalysis(restoredContext);
-    expect(restored).toBe(false);
+  describe('actions - 取消分析竞态', () => {
+    beforeEach(() => {
+      mockSaveAnalysisSession.mockClear();
+      mockClearAnalysisSession.mockClear();
+      mockRegisterRunningArtifact.mockClear();
+      mockRemoveRunningArtifact.mockClear();
+      // 不设置 scraper：sourceHistoryId 为 null，取消路径跳过持久化/工件，聚焦守卫行为
+      mockAppStoreState.scraper = undefined;
+    });
+
+    it('取消后落定的任务不再写回断点（signal.aborted 守卫生效）', async () => {
+      let settleSnapshot: ((report: unknown, targetIds: string[]) => void) | undefined;
+      const { mockContext, mockProducts } = createRunAnalysisActionTestState();
+      // 在 create（内部会设置默认 mockImplementation）之后覆写为挂起版：
+      // 进入 in-flight 后保持挂起，abort 时结束本轮（与真实 fetch 行为一致）
+      mockRunParallelAIAnalysis.mockImplementation(
+        (_targets, _product, _onProgress, _language, options) =>
+          new Promise(resolve => {
+            settleSnapshot = options.onTaskSettledSnapshot;
+            options.signal?.addEventListener('abort', () => resolve(null), { once: true });
+          })
+      );
+
+      const runPromise = runAnalysisAction(mockContext, mockProducts);
+      await vi.waitFor(() => expect(settleSnapshot).toBeDefined());
+
+      await cancelAnalysisAction(mockContext);
+
+      // 取消之后任务才落定：守卫（signal.aborted）应拦截断点写回与运行卡更新
+      settleSnapshot?.({ 'selling-points': { details: [] } }, ['selling-points']);
+      await vi.waitFor(() => expect(mockClearAnalysisSession).toHaveBeenCalled());
+      expect(mockSaveAnalysisSession).not.toHaveBeenCalled();
+      expect(mockRegisterRunningArtifact).not.toHaveBeenCalled();
+
+      await runPromise;
+    });
   });
-
-  it("restores from history when store has no data and fingerprint matches", async () => {
-    const data = makeScrapedData();
-    const session = makeSession();
-    mockLoadAnalysisSession.mockReturnValue(session);
-    mockHistoryGetAll.mockResolvedValue([{ id: "h1", data }]);
-    mockAppStoreState.scraper = undefined;
-
-    const restored = await restoreInterruptedAnalysis(restoredContext);
-    expect(restored).toBe(true);
-    expect(mockAppStoreState.setScrapedData).toHaveBeenCalledWith(data);
-    expect(mockAppStoreState.setCurrentHistoryId).toHaveBeenCalledWith("h1");
-    expect(restoredContext.selectedAsins).toEqual(["B001"]);
-  });
-
-  it("returns false when fingerprint does not match current data", async () => {
-    const otherData = makeScrapedData();
-    otherData.products = [{ ...otherData.products[0], asin: "B999" }];
-    mockAppStoreState.scraper = { scrapedData: otherData };
-    mockLoadAnalysisSession.mockReturnValue(makeSession());
-
-    const restored = await restoreInterruptedAnalysis(restoredContext);
-    expect(restored).toBe(false);
-  });
-
-  it("restores when store already has matching data", async () => {
-    const data = makeScrapedData();
-    mockAppStoreState.scraper = { scrapedData: data };
-    mockLoadAnalysisSession.mockReturnValue(makeSession());
-    const restored = await restoreInterruptedAnalysis(restoredContext);
-    expect(restored).toBe(true);
-  });
-});
 });

@@ -51,6 +51,9 @@ type PerformanceSettings = ReturnType<typeof getPerformanceSettings>;
 /** 当前运行的整轮分析取消控制器（模块级单例：一轮分析一个）。 */
 let activeAbortController: AbortController | null = null;
 
+/** 本轮是否为重跑（preserve-existing-report）：取消时不覆盖 history 中的完整报告。 */
+let lastRunIsRerun = false;
+
 interface PreparedAnalysisRun {
   selectedTargets: string[];
   sourceBinding: AnalysisSourceBinding;
@@ -537,6 +540,17 @@ async function runPreparedParallelAnalysis(
         // 取消防复活：取消后瞬间落定的任务不得写回已删除的断点会话
         if (activeAbortController?.signal.aborted) return;
         persistAnalysisSession(report, targetIds, preparedRun.sourceBinding);
+        // 同步总览运行中卡片的已完成计数（复用事件总线，每次落定即刷新）
+        if (preparedRun.sourceBinding.sourceHistoryId != null) {
+          const done = targetIds.filter(
+            id => (report as Record<string, unknown>)[id] !== undefined
+          ).length;
+          registerAnalysisRunningArtifact({
+            historyId: preparedRun.sourceBinding.sourceHistoryId,
+            done,
+            total: preparedRun.selectedTargets.length,
+          });
+        }
       },
     }
   );
@@ -546,6 +560,9 @@ async function runPreparedParallelAnalysis(
     showToast('采集数据已变更，本次分析结果已丢弃，请重新分析', {
       type: 'warning',
     });
+    if (preparedRun.sourceBinding.sourceHistoryId != null) {
+      removeAnalysisRunningArtifact(preparedRun.sourceBinding.sourceHistoryId);
+    }
     return null;
   }
 
@@ -770,6 +787,11 @@ function handleAnalysisActionError(context: AlpineContext, error: unknown): void
   const ux = showLlmFailureToast(error, { titlePrefix: '分析失败: ' });
   syncAnalysisProgress(context, context.progress, `分析失败: ${ux.title}`);
   console.error('[用户动作] 分析失败:', error);
+  // 失败收尾：总览运行中卡片退位，避免残留"分析中"僵尸卡
+  const historyId = appStore.getState().scraper?.currentHistoryId;
+  if (historyId != null) {
+    removeAnalysisRunningArtifact(historyId);
+  }
 }
 
 /**
@@ -789,6 +811,7 @@ export async function runAnalysisAction(
   // 新分析开始：清掉旧断点，避免误恢复；初始化本轮取消控制器；总览注册运行中工件
   clearAnalysisSession();
   context.resumeProgress = null;
+  lastRunIsRerun = false;
   activeAbortController?.abort();
   activeAbortController = new AbortController();
   startAnalysisAction(context);
@@ -817,6 +840,7 @@ export async function runAnalysisAction(
     handleAnalysisActionError(context, error);
   } finally {
     activeAbortController = null;
+    lastRunIsRerun = false;
     finishAnalysisAction(context);
   }
 }
@@ -829,20 +853,30 @@ function isCancelledAnalysisError(error: unknown): boolean {
   );
 }
 
-/**
- * 取消本轮分析（用户主动）：中断进行中的 LLM 调用、清除断点、保留已完成的维度结果。
- */
-export function cancelAnalysisAction(context: AlpineContext): void {
+export async function cancelAnalysisAction(context: AlpineContext): Promise<void> {
   const controller = activeAbortController;
   if (!controller) return;
   controller.abort();
-  activeAbortController = null;
+  // 注意：不要置 activeAbortController = null——onTaskSettledSnapshot 守卫依赖 signal.aborted，
+  // 置空会使守卫失效导致断点/运行卡复活；由 runAnalysisAction/rerun 的 finally 统一清理。
   clearAnalysisSession();
   const doneCount = context.reportResults?.length ?? 0;
   const totalCount = context.selectedTargets.length;
   showToast(`已取消分析，保留已完成 ${doneCount}/${totalCount} 个维度结果`, { type: 'info' });
   const historyId = appStore.getState().scraper?.currentHistoryId;
   if (historyId != null) {
+    // 非重跑场景：部分结果落库（刷新后仍可见）；重跑取消不覆盖 history 中的完整报告（避免降级）
+    if (!lastRunIsRerun && context.analysisReport) {
+      const sourceBinding = createAnalysisSourceBinding(context);
+      try {
+        await persistAnalysisReportToSource(
+          sourceBinding,
+          context.analysisReport as FullAnalysisReport
+        );
+      } catch (persistError) {
+        console.error('[取消分析] 部分结果持久化失败:', persistError);
+      }
+    }
     removeAnalysisRunningArtifact(historyId);
   }
   finishAnalysisAction(context);
@@ -972,6 +1006,7 @@ async function runRerunWithExistingReport(
   activeAbortController?.abort();
   activeAbortController = new AbortController();
   context.resumeProgress = null;
+  lastRunIsRerun = true;
   startAnalysisAction(context, {
     preserveExistingReport: true,
     progressLabel: `正在重跑：${labels}`,
@@ -1001,6 +1036,7 @@ async function runRerunWithExistingReport(
     handleAnalysisActionError(context, error);
   } finally {
     activeAbortController = null;
+    lastRunIsRerun = false;
     finishAnalysisAction(context);
   }
 }

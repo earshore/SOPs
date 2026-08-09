@@ -1239,6 +1239,7 @@ function startSharedGeneralReviewMap(
       config: llmConfig,
       language,
       retryBudget: config.retryBudget,
+      signal: config.signal,
       onPhase: message => {
         const settled = context.successCount + context.failedCount;
         const settledFloor = Math.round((settled / Math.max(1, context.totalTasks)) * 100);
