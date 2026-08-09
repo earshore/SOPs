@@ -3,6 +3,7 @@
 > 产出方式：PM（路线图/优先级）+ UX（长任务反馈交互）+ Tech Lead（实现 spec）三代理并行只读核查后汇总；
 > **技术审核（本人，2026-08-09）**：对关键链路逐点复核，修订两处 spec（见 §7）。
 > **v3.1 实现状态（2026-08-09 晚）**：R1 取消（AbortController 贯穿编排层 + 测试）✅；R2 页签标题 ✅；R3 总览运行中工件 ✅；R4 离开告知 toast ✅。见提交 `Add cancel and running-state feedback`。
+> **v3.2 实现状态（2026-08-09 深夜）**：R5 评审摘要注人工复核位置 ✅；R6 删孤儿 `estimateRunPlan.ts`（-152 行）✅；R7 同值区间文案收起（约 1 秒）✅；R8 恢复按钮「继续分析（已完成 a/b）」+ 清缓存清断点 ✅。见提交 `Tighten polish items for release`。
 > 关键确认（Tech Lead）：`llmService.callLLM` 的 signal/abort 链路**已完全就绪**（`resolveLLMOptions` L870 透传 signal → `createLLMAbortResources` L949-954 外部 abort → `fetchLLMResponse` L1002-1007 fetch 级中断 → `resolveLLMAttemptFailure` L1486 外部 abort 不重试；`tests/unit/llmService.test.ts` L549-617 已有 abort 用例）。缺的只是上游编排层不传 signal——取消机制从"大工程"降级为"~210 行最小集"。
 
 ---

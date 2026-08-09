@@ -146,6 +146,8 @@ describe('estimateAnalysisTime', () => {
     const est = estimateAnalysisTime({ ...base, cachedTargetIds: EIGHT_TARGETS });
     expect(est.callCount).toBe(0);
     expect(est.secondsLow).toBe(1);
+    // 同值区间收起为单值：约 1 秒（而非约 1-1 秒）
+    expect(est.label).toBe('约 1 秒');
   });
 
   it('max 档比 off 档慢（基准表生效）', () => {

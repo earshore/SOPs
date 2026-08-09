@@ -138,7 +138,9 @@ function resolvePerCallSeconds(reasoning: AnalysisReasoningPrefs): number {
 
 function formatDurationLabel(secondsLow: number, secondsHigh: number): string {
   if (secondsHigh < 60) {
-    return `约 ${secondsLow}-${secondsHigh} 秒`;
+    return secondsLow === secondsHigh
+      ? `约 ${secondsLow} 秒`
+      : `约 ${secondsLow}-${secondsHigh} 秒`;
   }
   const lowMin = Math.max(1, Math.ceil(secondsLow / 60));
   const highMin = Math.max(lowMin, Math.ceil(secondsHigh / 60));

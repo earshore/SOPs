@@ -630,8 +630,12 @@ export async function restoreInterruptedAnalysis(context: AlpineContext): Promis
   const restored = await restoreScopedData(context, session);
   if (!restored) return false;
 
+  context.resumeProgress = {
+    done: session.completedTargetIds.length,
+    total: session.targetIds.length,
+  };
   showToast(
-    `已恢复上次未完成的分析（已完成 ${session.completedTargetIds.length}/${session.targetIds.length}），点击“开始分析”将继续剩余目标`,
+    `已恢复上次未完成的分析（已完成 ${session.completedTargetIds.length}/${session.targetIds.length}），点击"继续分析"将继续剩余目标`,
     { type: 'info' }
   );
   return true;
@@ -784,6 +788,7 @@ export async function runAnalysisAction(
 
   // 新分析开始：清掉旧断点，避免误恢复；初始化本轮取消控制器；总览注册运行中工件
   clearAnalysisSession();
+  context.resumeProgress = null;
   activeAbortController?.abort();
   activeAbortController = new AbortController();
   startAnalysisAction(context);
@@ -966,6 +971,7 @@ async function runRerunWithExistingReport(
   // 重跑也是新一轮分析：重置取消控制器
   activeAbortController?.abort();
   activeAbortController = new AbortController();
+  context.resumeProgress = null;
   startAnalysisAction(context, {
     preserveExistingReport: true,
     progressLabel: `正在重跑：${labels}`,

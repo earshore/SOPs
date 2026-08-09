@@ -642,6 +642,7 @@ function registerListingReviewFromSnapshot(
   const reviewParts: string[] = [];
   if (reviewScore) reviewParts.push(reviewScore.grade, `${reviewScore.score}/100`);
   if (reviewModel) reviewParts.push(reviewModel);
+  const reviewSummary = reviewParts.length > 0 ? reviewParts.join(' · ') : 'Listing 评审报告已生成';
 
   upsertArtifact({
     id: `${workItemId}:listing_review:${snapshot.id}`,
@@ -649,7 +650,7 @@ function registerListingReviewFromSnapshot(
     type: 'listing_review',
     sourceRoute,
     title: '文案评审',
-    summary: reviewParts.length > 0 ? reviewParts.join(' · ') : 'Listing 评审报告已生成',
+    summary: `${reviewSummary} · 人工复核：SOP › Listing 极致优化`,
     payloadRef: `keyword_snapshot:${snapshot.id}`,
     createdAt: snapshot.updatedAt,
     metadata: {

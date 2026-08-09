@@ -92,6 +92,8 @@ export interface AlpineContext {
   reportTotalDetails: number;
   reportFullData: FullReportData | null;
   reportRenderVersion: number;
+  /** 断点恢复标记：存在时主按钮显示「继续分析（已完成 a/b）」。 */
+  resumeProgress?: { done: number; total: number } | null;
   expandedPromptIndex: number | null;
   showPromptPanel: boolean;
   showJsonViewer: boolean;

@@ -19,6 +19,7 @@ import {
 } from '../services/analysisScheduler';
 import { showToast } from '@/common/ui/index';
 import { openSettings } from '@/components/settings/systemSettings';
+import { clearAnalysisSession } from '../utils/analysisSession';
 
 const SETTINGS_VERSION = 3;
 
@@ -215,6 +216,8 @@ function createPerformanceSettingsActions(): PanelMixin<{
     async clearCache() {
       try {
         await clearAnalysisCacheAsync();
+        // 缓存与断点会话同源：清缓存后断点中的已命中结果已失效，一并清除避免下次误恢复
+        clearAnalysisSession();
         await this.updateCacheStats();
         showToast('缓存已清除', { type: 'success' });
       } catch (error) {

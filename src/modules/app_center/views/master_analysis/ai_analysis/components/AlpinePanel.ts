@@ -1057,6 +1057,9 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   get runAnalysisNotRunningLabel(): string {
+    if (this.resumeProgress) {
+      return `继续分析（已完成 ${this.resumeProgress.done}/${this.resumeProgress.total}）`;
+    }
     return this.analysisHeroIsComplete ? '重新分析' : '开始分析';
   },
 
