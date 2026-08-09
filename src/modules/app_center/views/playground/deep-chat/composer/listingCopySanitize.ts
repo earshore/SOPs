@@ -21,6 +21,23 @@ const TITLE_START_MARKERS = ['1. Title', '**Title**', 'Title:', 'Titel:'] as con
 /** 行首编号列表起始，例如 "1. Title" / "1) Titel" / "1、Title"。 */
 const LISTING_START_PATTERN = /(?:^|\n)\s*1[.、)．]\s*(?:Title|Titel)/i;
 
+/**
+ * 行首独立词 Title / Titel（兼容 grok 实测输出 "Title  \nOrganizer Box…"，无冒号无编号）。
+ * 词边界 = 空白或半角/全角冒号或行尾，避免德语连字符构词（如 "Title-Verifikation"）误命中。
+ */
+const TITLE_WORD_START_PATTERN = /(?:^|\n)\s*(?:Title|Titel)(?=[\s:：]|$)/i;
+
+/**
+ * Listing 工作流下判断正文是否包含真实文案起始标记（含放宽的行首 Title/Titel 词）。
+ * 用于拦截 DEEP_CHAT_001 错误文案 / 仅推理无正文等无价值推送：
+ * 正文只要含 "1. Title" / "Title:" / "**Title**" 或行首独立词 Title/Titel 即视为已生成正文。
+ * 普通聊天（非 Listing 上下文）不调用本函数，由调用方（handoffs）保证。
+ */
+export function hasListingCopyStart(text: string): boolean {
+  if (!text) return false;
+  return findCopyStartIndex(text) !== null || TITLE_WORD_START_PATTERN.test(text);
+}
+
 function findCopyStartIndex(text: string): number | null {
   const positions: number[] = [];
   for (const marker of TITLE_START_MARKERS) {

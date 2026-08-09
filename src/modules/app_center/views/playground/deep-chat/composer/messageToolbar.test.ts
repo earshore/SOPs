@@ -75,6 +75,41 @@ describe('isToolbarCopyableContent + syncToolbarContentBoundActions (TB2)', () =
     expect(copy.title).toBe('复制消息');
     expect(edit.disabled).toBe(false);
   });
+
+  it('keyword-hunter 按钮随 isPushReady 禁用/恢复，copy/edit 不受影响（P0 范围）', () => {
+    const toolbar = document.createElement('div');
+    const copy = document.createElement('button');
+    copy.dataset.toolbarAction = 'copy';
+    copy.setAttribute('aria-label', '复制消息');
+    copy.title = '复制消息';
+    const push = document.createElement('button');
+    push.dataset.toolbarAction = 'keyword-hunter';
+    push.setAttribute('aria-label', '推送到 Keyword Hunter 复核');
+    push.title = '推送到 Keyword Hunter 复核';
+    const edit = document.createElement('button');
+    edit.dataset.toolbarAction = 'edit';
+    edit.setAttribute('aria-label', '编辑消息');
+    edit.title = '编辑消息';
+    toolbar.append(copy, push, edit);
+
+    // 有正文但生成未完成（打字机 drain 中）→ 仅 keyword-hunter 禁用
+    syncToolbarContentBoundActions(toolbar, 'partial answer', false);
+    expect(push.disabled).toBe(true);
+    expect(push.getAttribute('aria-disabled')).toBe('true');
+    expect(push.title).toBe('生成完成后可推送');
+    expect(copy.disabled).toBe(false);
+    expect(edit.disabled).toBe(false);
+
+    // 生成完成 → 恢复可点，title 回到 aria-label
+    syncToolbarContentBoundActions(toolbar, 'partial answer', true);
+    expect(push.disabled).toBe(false);
+    expect(push.getAttribute('aria-disabled')).toBe('false');
+    expect(push.title).toBe('推送到 Keyword Hunter 复核');
+
+    // 缺省（未传 isPushReady）→ 视为就绪，行为与旧版本一致
+    syncToolbarContentBoundActions(toolbar, 'partial answer');
+    expect(push.disabled).toBe(false);
+  });
 });
 
 describe('resolveToolbarStatusLabel', () => {

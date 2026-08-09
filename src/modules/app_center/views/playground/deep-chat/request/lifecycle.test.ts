@@ -7,6 +7,7 @@ import {
   createPendingDeepChatRequest,
   getDeepChatGenerationPhase,
   isPendingDeepChatDisplayComplete,
+  isPendingPushReady,
   liveGenerationPhaseNeedsBubbleChrome,
   markPendingDeepChatAssistantTextDisplayed,
   markPendingDeepChatPartialPersisted,
@@ -98,6 +99,55 @@ describe('Playground request lifecycle display state', () => {
     expect(pendingRequest.isSettled).toBe(true);
     expect(pendingRequest.updatedAt).toBe(1400);
     expect(isPendingDeepChatDisplayComplete(pendingRequest)).toBe(true);
+  });
+});
+
+describe('isPendingPushReady', () => {
+  function makePending(overrides: {
+    assistantText?: string;
+    displayedAssistantText?: string;
+    isSettled?: boolean;
+  } = {}): ReturnType<typeof createPendingDeepChatRequest> {
+    const pendingRequest = createPendingDeepChatRequest('thread-1', conversationMessages, {
+      controller: new AbortController(),
+      now: 1000,
+    });
+    if (overrides.assistantText !== undefined) pendingRequest.assistantText = overrides.assistantText;
+    if (overrides.displayedAssistantText !== undefined) {
+      pendingRequest.displayedAssistantText = overrides.displayedAssistantText;
+    }
+    if (overrides.isSettled !== undefined) pendingRequest.isSettled = overrides.isSettled;
+    return pendingRequest;
+  }
+
+  it('无 pending → 就绪（允许推送）', () => {
+    expect(isPendingPushReady(undefined)).toBe(true);
+  });
+
+  it('pending 未 settle（流式 / waiting / reasoning）→ 未就绪', () => {
+    expect(isPendingPushReady(makePending({ assistantText: 'partial text', isSettled: false }))).toBe(
+      false
+    );
+  });
+
+  it('settle 后打字机未放完（displayed < full）→ 未就绪', () => {
+    expect(
+      isPendingPushReady(
+        makePending({ assistantText: 'full answer text', displayedAssistantText: 'full answ', isSettled: true })
+      )
+    ).toBe(false);
+  });
+
+  it('settle 且 displayed === full → 就绪', () => {
+    expect(
+      isPendingPushReady(
+        makePending({ assistantText: 'full answer text', displayedAssistantText: 'full answer text', isSettled: true })
+      )
+    ).toBe(true);
+  });
+
+  it('settle 且正文为空（displayed === full === 空）→ 就绪（由 P1 内容校验兜底拦截）', () => {
+    expect(isPendingPushReady(makePending({ isSettled: true }))).toBe(true);
   });
 });
 

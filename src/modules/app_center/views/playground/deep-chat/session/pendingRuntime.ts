@@ -517,6 +517,8 @@ export function saveFailedDeepChatResponse(threadId: string | null, responseText
     assistantText,
     {
       threadId,
+      // 有部分正文才标 partial（拦截推送 + 「未完成」badge）；纯错误文案不落，避免语义奇怪。
+      ...(partialResponse ? { assistantStatus: 'partial' as const } : {}),
     }
   );
 }

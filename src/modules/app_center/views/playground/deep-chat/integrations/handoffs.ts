@@ -45,6 +45,8 @@ import { chooseWithModal, confirmWithModal } from '../infra/confirmModal';
 import { getDeepChatSystemPromptBudgetError } from '../request/budget';
 
 import { getPromptDrafts } from '../composer/promptDrafts';
+import { hasListingCopyStart } from '../composer/listingCopySanitize';
+import { resolveIncompleteGenerationGuard } from '../composer/pushGuard';
 
 import type { DeepChatMessage, DeepChatSkillContext } from '../types';
 import { normalizeTemperature, updateTemperatureTrack } from '../infra/utils';
@@ -494,6 +496,27 @@ function buildListingCopyFromPrompt(
   };
 }
 
+/**
+ * 推送拦截判定：返回拒绝原因文案，null 表示可推送。
+ * 覆盖：① 生成未完成（status partial/stopped，即使已含 Title 起始行；
+ * 失败路径 store 合并消息与 DOM 拆分渲染时由线程最新 AI 消息兜底）；
+ * ② 正文不含真实 Listing 起始标记（仅推理 / 空正文报错 / DEEP_CHAT_001 错误文案）。
+ */
+function resolveKeywordHunterPushBlock(
+  content: string,
+  message?: DeepChatMessage
+): string | null {
+  const latestAi = [...getActiveThread().messages].reverse().find(m => m.role === 'ai');
+  const incomplete = resolveIncompleteGenerationGuard(message, latestAi);
+  if (incomplete) {
+    return '回复生成未完成，无法推送复核';
+  }
+  if (!hasListingCopyStart(content)) {
+    return '当前回复未生成完整产品文案（可能仅推理或请求失败），无法推送复核';
+  }
+  return null;
+}
+
 export async function sendAssistantCopyToKeywordHunter(
   content: string,
   message?: DeepChatMessage
@@ -512,6 +535,13 @@ export async function sendAssistantCopyToKeywordHunter(
 
   const trimmedContent = content.trim();
   if (!trimmedContent) return;
+
+  const blockReason = resolveKeywordHunterPushBlock(trimmedContent, message);
+  if (blockReason) {
+    showToast(blockReason, { type: 'warning' });
+    return;
+  }
+
   const copy = buildListingCopyFromPrompt(trimmedContent, message, promptContext);
 
   try {

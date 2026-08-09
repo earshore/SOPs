@@ -173,6 +173,20 @@ export function isPendingDeepChatDisplayComplete(pendingRequest: PendingDeepChat
   return pendingRequest.displayedAssistantText.length >= pendingRequest.assistantText.length;
 }
 
+/**
+ * 推送门禁纯判定：生成完全结束且正文已完整落 DOM 才允许推送。
+ * - 无 pending → 就绪（无进行中请求）
+ * - 未 settle → 未就绪（流式 / waiting / reasoning）
+ * - settle 后 displayed < full → 未就绪（打字机重放未完成）
+ */
+export function isPendingPushReady(
+  pendingRequest: PendingDeepChatRequest | undefined
+): boolean {
+  if (!pendingRequest) return true;
+  if (!pendingRequest.isSettled) return false;
+  return isPendingDeepChatDisplayComplete(pendingRequest);
+}
+
 export function abortPendingDeepChatRequest(
   pendingRequest: PendingDeepChatRequest,
   reason: DeepChatPendingAbortReason

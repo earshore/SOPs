@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { isListingPromptContext, sanitizeListingCopy } from './listingCopySanitize';
+import {
+  hasListingCopyStart,
+  isListingPromptContext,
+  sanitizeListingCopy,
+} from './listingCopySanitize';
 
 describe('sanitizeListingCopy', () => {
   it('剥离 "Ich habe die Briefings ... geprüft." 前言，截取到 "1. Title"', () => {
@@ -35,6 +39,57 @@ describe('sanitizeListingCopy', () => {
   it('空字符串 / 纯空白原样返回', () => {
     expect(sanitizeListingCopy('')).toBe('');
     expect(sanitizeListingCopy('   ')).toBe('   ');
+  });
+});
+
+describe('hasListingCopyStart', () => {
+  it('grok 实测格式「Title  \nOrganizer Box…」（行首独立词 + 尾随两空格）命中', () => {
+    expect(hasListingCopyStart('Title  \nOrganizer Box Storage Organizer Stackable Waterproof')).toBe(
+      true
+    );
+  });
+
+  it('行首纯 Title（无冒号无编号）命中', () => {
+    expect(hasListingCopyStart('Title\nProduct name here')).toBe(true);
+  });
+
+  it('gpt 实测格式（前言 + "1. Title"）命中', () => {
+    expect(
+      hasListingCopyStart(
+        'Below is a complete, Rufus-ready Amazon.com listing\n1. Title: Organizer Box'
+      )
+    ).toBe(true);
+  });
+
+  it('德语 Titel （含冒号/行首词）命中', () => {
+    expect(hasListingCopyStart('Vorab geprüft.\nTitel: Kabellose Ohrhörer')).toBe(true);
+    expect(hasListingCopyStart('Titel\nProduktname')).toBe(true);
+  });
+
+  it('全角冒号 Title：命中', () => {
+    expect(hasListingCopyStart('Title：Organizer Box')).toBe(true);
+  });
+
+  it('德语连字符构词（Title-Verifikation）不误命中', () => {
+    expect(hasListingCopyStart('Title-Verifikation: Ich prüfe die Briefings.')).toBe(false);
+  });
+
+  it('DEEP_CHAT_001 错误文案不命中', () => {
+    expect(
+      hasListingCopyStart(
+        '请求失败：模型完成了推理但未返回可见正文（常见原因：max_output_tokens 过小、网关只推 reasoning、或 /responses 返回了非标准正文格式）。请增大输出上限、关闭推理后重试，或在系统设置将路径改为 chat/completions。'
+      )
+    ).toBe(false);
+  });
+
+  it('普通句子 / 空字符串不命中', () => {
+    expect(hasListingCopyStart('这是普通聊天消息，没有任何 Title 标记')).toBe(false);
+    expect(hasListingCopyStart('')).toBe(false);
+    expect(hasListingCopyStart('   ')).toBe(false);
+  });
+
+  it('正文中间（非行首）的 Title 不命中（要求行首或在冒号后行内）', () => {
+    expect(hasListingCopyStart('please check the Title field.')).toBe(false);
   });
 });
 

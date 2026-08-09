@@ -66,7 +66,10 @@ import { appStore } from '@/stores/useAppStore';
 import { buildSkillDeepChatUserDraft } from '@/modules/app_center/skillDeepChatHandoff';
 import { skillRegistry } from '@/services/skillRegistry';
 
-import { markPendingDeepChatAssistantTextDisplayed } from '../request/lifecycle';
+import {
+  isPendingPushReady,
+  markPendingDeepChatAssistantTextDisplayed,
+} from '../request/lifecycle';
 
 import { THREAD_RAIL_COLLAPSED_CLASS } from '../constants';
 import {
@@ -1090,6 +1093,9 @@ export function initDeepChat(container: HTMLElement): void {
       const pending = sessionState.pendingRequests.get(sessionState.threadStore.activeThreadId);
       return Boolean(pending && !pending.isSettled);
     },
+    // 推送门禁：流式 / settle 后打字机重放未完成时禁用 Keyword Hunter 推送
+    isPushReady: () =>
+      isPendingPushReady(sessionState.pendingRequests.get(sessionState.threadStore.activeThreadId)),
   });
   setConversationActive(
     container,

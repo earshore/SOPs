@@ -44,6 +44,11 @@ export interface MessageToolbarActions {
    * Used so remount + ZWSP live bubble still gets a toolbar shell (TB-O1).
    */
   hasActivePendingGeneration?: () => boolean;
+  /**
+   * 推送门禁：生成完全结束且正文已完整落 DOM 才返回 true（未提供视为就绪）。
+   * 覆盖流式生成中 / settle 后打字机重放中，避免把部分正文推送到 Keyword Hunter。
+   */
+  isPushReady?: () => boolean;
 }
 
 /**
@@ -248,7 +253,7 @@ function installOrUpdateMessageToolbar(args: {
   });
 
   // Empty / ZWSP live bubbles keep the shell but disable copy / content-bound actions (TB2).
-  syncToolbarContentBoundActions(toolbar, meaningfulContent);
+  syncToolbarContentBoundActions(toolbar, meaningfulContent, args.actions.isPushReady?.() ?? true);
 
   // 「正在生成回复 · 已收到 N 字」 at toolbar end (after copy / tools), not above bubble.
   syncToolbarLiveGenerationLabel(toolbar, isLiveAi ? args.liveLabel : null);
@@ -302,8 +307,13 @@ function ensureMessageToolbarElement(args: {
   return toolbar;
 }
 
-/** Enable/disable copy & keyword-hunter when bubble has no real text (TB2). */
-export function syncToolbarContentBoundActions(toolbar: HTMLElement, content: string): void {
+/** Enable/disable copy & keyword-hunter when bubble has no real text (TB2);
+ *  keyword-hunter 额外受推送门禁（生成未完成时禁用，P0）。 */
+export function syncToolbarContentBoundActions(
+  toolbar: HTMLElement,
+  content: string,
+  isPushReady = true
+): void {
   const copyable = isToolbarCopyableContent(content);
   toolbar.querySelectorAll<HTMLButtonElement>('[data-toolbar-action="copy"]').forEach(btn => {
     setToolbarButtonDisabled(btn, !copyable, '暂无正文可复制');
@@ -311,7 +321,13 @@ export function syncToolbarContentBoundActions(toolbar: HTMLElement, content: st
   toolbar
     .querySelectorAll<HTMLButtonElement>('[data-toolbar-action="keyword-hunter"]')
     .forEach(btn => {
-      setToolbarButtonDisabled(btn, !copyable, '暂无正文可推送');
+      if (!copyable) {
+        setToolbarButtonDisabled(btn, true, '暂无正文可推送');
+      } else if (!isPushReady) {
+        setToolbarButtonDisabled(btn, true, '生成完成后可推送');
+      } else {
+        setToolbarButtonDisabled(btn, false, '');
+      }
     });
   toolbar.querySelectorAll<HTMLButtonElement>('[data-toolbar-action="edit"]').forEach(btn => {
     setToolbarButtonDisabled(btn, !copyable, '暂无正文可编辑');
@@ -531,6 +547,11 @@ function createMessageToolbar(
         '推送到 Keyword Hunter 复核',
         getSendIcon(),
         () => {
+          // 竞态兜底：禁用态渲染与点击之间最多滞后一帧（rAF 同步间隙），点击时再查一次。
+          if (actions.isPushReady && !actions.isPushReady()) {
+            showToast('生成完成后可推送', { type: 'warning' });
+            return;
+          }
           void actions.sendToKeywordHunter?.(
             getOutgoingMessageContent(bubble, skillContexts),
             storedMessage

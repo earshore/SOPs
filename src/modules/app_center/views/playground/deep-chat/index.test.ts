@@ -1063,7 +1063,8 @@ describe('deep-chat Listing workflow handoff', () => {
     inner.className = 'inner-message-container';
     const bubble = document.createElement('div');
     bubble.className = 'message-bubble';
-    bubble.textContent = 'Saved answer';
+    // 使用真实形态的 Listing 文案（含起始标记），满足推送内容校验
+    bubble.textContent = '1. Title: Saved Answer\nSecond line';
     inner.append(bubble);
     outer.append(inner);
     shadowRoot.querySelector('#messages')?.append(outer);
@@ -1091,7 +1092,7 @@ describe('deep-chat Listing workflow handoff', () => {
     expect(mocks.saveListingCopy).toHaveBeenCalledWith(
       expect.objectContaining({
         promptId: 'prompt-1',
-        content: 'Saved answer',
+        content: '1. Title: Saved Answer\nSecond line',
         seoKeywords: ['wireless earbuds', 'long battery life'],
         workItemId: 'competitor_listing:history-1',
       })
