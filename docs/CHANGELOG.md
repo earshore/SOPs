@@ -77,6 +77,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   切回才恢复。现仅首次赋值；另加 `#container` childList 观察，vendor 自发重建时重放
   当前会话历史兜底。新增 e2e `deep-chat-model-switch`（消息保留/通知显示样式/记录不
   冲掉），deep-chat 组 e2e 27/27 全绿。
+- **修复用户消息复制/编辑被 Listing 净化截断**：用户发送的 Listing Prompt 消息含
+  `1. **Title:**` 等结构标记，复制/编辑经 `sanitizeListingCopy` 时被从首个
+  `Title:` 处截断，复制结果与右侧 Prompt 列表填充的完整 Prompt 不一致；该净化只面向
+  AI 生成文案（剥离模型前言），用户自己消息的复制/编辑现原样返回（AI 复制/推送行为
+  不变），新增 `getOutgoingMessageContent` sanitize 门禁单测。
 
 ### Removed（移除）
 

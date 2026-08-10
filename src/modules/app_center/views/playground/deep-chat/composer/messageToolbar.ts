@@ -534,7 +534,7 @@ function createMessageToolbar(
     createToolbarButton(
       '复制消息',
       getCopyIcon(),
-      () => copyMessageContent(bubble, skillContexts),
+      () => copyMessageContent(bubble, skillContexts, role),
       {
         action: 'copy',
       }
@@ -602,8 +602,15 @@ function createToolbarButton(
   return button;
 }
 
-function copyMessageContent(bubble: HTMLElement, skillContexts: DeepChatSkillContext[] = []): void {
-  const content = getOutgoingMessageContent(bubble, skillContexts);
+function copyMessageContent(
+  bubble: HTMLElement,
+  skillContexts: DeepChatSkillContext[] = [],
+  role: 'user' | 'ai'
+): void {
+  const content = getOutgoingMessageContent(bubble, skillContexts, {
+    // 用户自己的消息原样复制；AI 消息在 Listing 工作流下剥离模型自我审查前言
+    sanitizeListing: role === 'ai',
+  });
   if (!content) {
     return;
   }
@@ -627,7 +634,8 @@ function editMessageContent(
   actions: MessageToolbarActions
 ): void {
   const skillContexts = actions.getSkillContexts?.() || [];
-  const content = getOutgoingMessageContent(bubble, skillContexts);
+  // 用户自己的消息原样回填（Listing 净化只面向 AI 生成文案，不截断用户 Prompt）
+  const content = getOutgoingMessageContent(bubble, skillContexts, { sanitizeListing: false });
   if (!content) {
     return;
   }
@@ -667,12 +675,17 @@ function getMessageContent(
 /**
  * 消息正文出口（复制 / 推送到 Keyword Hunter / 编辑回填共用）。
  * Listing 工作流下剥离模型误写入正文的自我审查/开场前言，普通聊天原样返回。
+ * @param options.sanitizeListing 仅 AI 消息开启（用户自己的 Prompt 必须原样）。
  */
-function getOutgoingMessageContent(
+export function getOutgoingMessageContent(
   bubble: HTMLElement,
-  skillContexts: DeepChatSkillContext[] = []
+  skillContexts: DeepChatSkillContext[] = [],
+  options: { sanitizeListing?: boolean } = {}
 ): string {
   const content = getMessageContent(bubble, skillContexts);
+  if (options.sanitizeListing === false) {
+    return content;
+  }
   return isListingPromptContext() ? sanitizeListingCopy(content) : content;
 }
 

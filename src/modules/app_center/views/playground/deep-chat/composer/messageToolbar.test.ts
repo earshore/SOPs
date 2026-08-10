@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { sessionState } from '../session/sessionState';
 import type { DeepChatMessage } from '../types';
 import {
   findStoredMessageForToolbar,
+  getOutgoingMessageContent,
   isToolbarCopyableContent,
   resolveToolbarStatusLabel,
   shouldMountMessageToolbarShell,
@@ -175,5 +177,79 @@ describe('findStoredMessageForToolbar', () => {
     const matched = findStoredMessageForToolbar(withStopped, used, 'ai', '已停止生成。');
     expect(matched?.status).toBe('stopped');
     expect(resolveToolbarStatusLabel(matched?.status)?.label).toBe('已停止');
+  });
+});
+
+// 用户发送的 Listing Prompt 原文（含 "1. **Title:**" 结构标记，见 promptlabService.generateMasterPrompt）
+const USER_LISTING_PROMPT = `# ROLE
+Act as a Senior German Listing Copywriter.
+
+# GOAL
+Create a high-converting listing.
+
+# EXECUTION STEPS
+1. **Internal Review**: Silently review the competitor insights.
+
+# OUTPUT TASK
+Generate the complete Amazon Listing following the structure below:
+1. **Title:** (Max 180 chars).
+2. **5 Bullet Points:** Target 150-200 visible characters each.`;
+
+describe('getOutgoingMessageContent listing sanitize gating', () => {
+  afterEach(() => {
+    sessionState.threadStore = { activeThreadId: '', threads: [] };
+  });
+
+  function mountListingThread(): void {
+    sessionState.threadStore = {
+      activeThreadId: 'listing-1',
+      threads: [
+        {
+          id: 'listing-1',
+          title: 'Listing',
+          messages: [{ role: 'user', text: USER_LISTING_PROMPT, createdAt: 1 }],
+          createdAt: 1,
+          updatedAt: 1,
+          listingPromptContext: {
+            promptId: 'prompt-1',
+            prompt: USER_LISTING_PROMPT,
+            seoKeywords: ['wireless earbuds'],
+            workItemId: 'competitor_listing:1',
+            marketplace: 'US',
+            asinOrSku: 'B001',
+          },
+        },
+      ],
+    };
+  }
+
+  function mountBubble(text: string): HTMLElement {
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+    bubble.textContent = text;
+    return bubble;
+  }
+
+  it('keeps the user Listing Prompt complete when copy/edit disables listing sanitize', () => {
+    mountListingThread();
+    const bubble = mountBubble(USER_LISTING_PROMPT);
+    expect(getOutgoingMessageContent(bubble, [], { sanitizeListing: false })).toBe(
+      USER_LISTING_PROMPT
+    );
+  });
+
+  it('default sanitize still truncates at the first Title marker (AI copy path regression test)', () => {
+    mountListingThread();
+    const bubble = mountBubble(USER_LISTING_PROMPT);
+    const cut = getOutgoingMessageContent(bubble);
+    expect(cut).not.toBe(USER_LISTING_PROMPT);
+    expect(cut.startsWith('Title:')).toBe(true);
+  });
+
+  it('returns the bubble verbatim outside a listing context', () => {
+    const bubble = mountBubble('# ROLE\n说明文字\n1. **Title:** 任意');
+    expect(getOutgoingMessageContent(bubble, [], { sanitizeListing: false })).toBe(
+      '# ROLE\n说明文字\n1. **Title:** 任意'
+    );
   });
 });
