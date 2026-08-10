@@ -1082,8 +1082,16 @@ describe('deep-chat Listing workflow handoff', () => {
     inner.className = 'inner-message-container';
     const bubble = document.createElement('div');
     bubble.className = 'message-bubble';
-    // 使用真实形态的 Listing 文案（含起始标记），满足推送内容校验
-    bubble.textContent = '1. Title: Saved Answer\nSecond line';
+    // 完整编号 Listing（Title + 5 Bullet + Description），满足推送结构门禁
+    bubble.textContent = [
+      '1. Title: Saved Answer',
+      '2. Bullet 1: Feature one',
+      '3. Bullet 2: Feature two',
+      '4. Bullet 3: Feature three',
+      '5. Bullet 4: Feature four',
+      '6. Bullet 5: Feature five',
+      '7. Description: Full product description for keyword hunter.',
+    ].join('\n');
     inner.append(bubble);
     outer.append(inner);
     shadowRoot.querySelector('#messages')?.append(outer);
@@ -1111,11 +1119,12 @@ describe('deep-chat Listing workflow handoff', () => {
     expect(mocks.saveListingCopy).toHaveBeenCalledWith(
       expect.objectContaining({
         promptId: 'prompt-1',
-        content: '1. Title: Saved Answer\nSecond line',
+        content: expect.stringContaining('1. Title: Saved Answer'),
         seoKeywords: ['wireless earbuds', 'long battery life'],
         workItemId: 'competitor_listing:history-1',
       })
     );
+    expect(mocks.saveListingCopy.mock.calls[0]?.[0]?.content).toMatch(/Description:/);
     expect(mocks.registerListingCopyArtifact).toHaveBeenCalled();
     expect(mocks.applyListingCopyToKeywordHunter).toHaveBeenCalled();
     expect(mocks.setWorkspaceContext).toHaveBeenCalledWith(
