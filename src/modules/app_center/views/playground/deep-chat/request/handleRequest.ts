@@ -262,6 +262,18 @@ export async function handleDeepChatRequest(
   let lifecyclePendingRequest: PendingDeepChatRequest | null = null;
   let hadVisionParts = false;
 
+  // Sync claim before any await — closes double-submit race during prepare.
+  const claimThreadId = getActiveThread().id;
+  if (
+    sessionState.pendingRequests.has(claimThreadId) ||
+    sessionState.submittingThreadIds.has(claimThreadId)
+  ) {
+    await rejectDeepChatRequest(signals, '当前会话仍在生成回复，请等待完成后再发送。');
+    return;
+  }
+  sessionState.submittingThreadIds.add(claimThreadId);
+  pendingThreadId = claimThreadId;
+
   try {
     const preparedRequest = await prepareDeepChatRequest(body, signals);
     if (!preparedRequest) return;
@@ -290,6 +302,7 @@ export async function handleDeepChatRequest(
     }
     await reportDeepChatRequestFailure(error, pendingThreadId, hadVisionParts, signals);
   } finally {
+    sessionState.submittingThreadIds.delete(claimThreadId);
     cleanupLifecyclePendingRequest(pendingThreadId, lifecyclePendingRequest);
     setVisionComposerPending(false);
     // 生成中切换模型的通知只落了数据：生成结束统一补渲染（缺失的才补）；

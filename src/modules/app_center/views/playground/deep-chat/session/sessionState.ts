@@ -60,6 +60,8 @@ export const sessionState = {
   threadStore: createBootstrapThreadStore() as DeepChatThreadStore,
   mountedContainer: null as HTMLElement | null,
   pendingRequests: new Map<string, PendingDeepChatRequest>(),
+  /** Sync submit claim before any await in handleDeepChatRequest (double-send guard). */
+  submittingThreadIds: new Set<string>(),
   pendingDisplayTimers: new Map<string, number>(),
   pendingChromeObserver: null as MutationObserver | null,
   pendingChromeObservedChat: null as DeepChatElement | null,

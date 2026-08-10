@@ -106,14 +106,17 @@ function mergePersistedAppState(persistedState: unknown, currentState: AppStore)
     return currentState;
   }
 
-  const persistedKeywordSettings = persistedState.keywordTracker?.settings;
+  const persistedKeyword = persistedState.keywordTracker;
 
   return {
     ...currentState,
     ui: createRefreshSafeUIState(persistedState.ui),
     scraper: createRefreshSafeScraperState(persistedState.scraper),
     promptlab: createPersistedPromptLabState(persistedState.promptlab),
-    keywordTracker: createRefreshSafeKeywordTrackerState(persistedKeywordSettings),
+    keywordTracker: createRefreshSafeKeywordTrackerState(persistedKeyword?.settings, {
+      copyInputText: persistedKeyword?.copyInputText,
+      keywordsInputText: persistedKeyword?.keywordsInputText,
+    }),
   };
 }
 
@@ -238,8 +241,18 @@ function createPersistedPromptLabState(promptlab?: Partial<PromptLabState>): Pro
   };
 }
 
-function createRefreshSafeKeywordTrackerState(
-  settings?: Partial<KeywordTrackerState['settings']>
+export const KEYWORD_HUNTER_INPUT_PERSIST_MAX_CHARS = 200_000;
+
+function clipPersistedInputText(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  if (value.length <= KEYWORD_HUNTER_INPUT_PERSIST_MAX_CHARS) return value;
+  return value.slice(0, KEYWORD_HUNTER_INPUT_PERSIST_MAX_CHARS);
+}
+
+/** Pure: settings + input texts for refresh-safe persist/merge. */
+export function createRefreshSafeKeywordTrackerState(
+  settings?: Partial<KeywordTrackerState['settings']>,
+  inputs?: { copyInputText?: unknown; keywordsInputText?: unknown }
 ): KeywordTrackerState {
   return {
     ...initialKeywordTrackerState,
@@ -247,6 +260,8 @@ function createRefreshSafeKeywordTrackerState(
       ...initialKeywordTrackerState.settings,
       ...(settings || {}),
     },
+    copyInputText: clipPersistedInputText(inputs?.copyInputText),
+    keywordsInputText: clipPersistedInputText(inputs?.keywordsInputText),
     snapshotSource: { type: 'manual' },
   };
 }
@@ -439,7 +454,10 @@ export const appStore = createStore<AppStore>()(
         ui: createRefreshSafeUIState(state.ui),
         scraper: createRefreshSafeScraperState(state.scraper),
         promptlab: createPersistedPromptLabState(state.promptlab),
-        keywordTracker: createRefreshSafeKeywordTrackerState(state.keywordTracker.settings),
+        keywordTracker: createRefreshSafeKeywordTrackerState(state.keywordTracker.settings, {
+          copyInputText: state.keywordTracker.copyInputText,
+          keywordsInputText: state.keywordTracker.keywordsInputText,
+        }),
       }),
     }),
     {
