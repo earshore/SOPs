@@ -127,6 +127,7 @@ interface RecentPanelState {
 
 let unsubscribers: Array<() => void> = [];
 let renderSequence = 0;
+let recentListObserver: IntersectionObserver | null = null;
 const openComplianceDialogIds = new Set<string>();
 let pendingFocusSelector = '';
 let searchDebounceTimer: number | undefined;
@@ -1353,8 +1354,24 @@ async function renderRecentList(container: HTMLElement, state: RecentPanelState)
     badge.textContent =
       total > visibleCount ? `显示 ${visibleCount} / 共 ${total} 项` : `显示 ${visibleCount} 项`;
   }
-  const loadMore = container.querySelector<HTMLButtonElement>('[data-recent-load-more]');
-  loadMore?.classList.toggle('hidden', items.length >= total || total === 0);
+  // 触底增量加载：未展示完时在列表末尾挂哨兵，滚动接近底部自动追加一页
+  recentListObserver?.disconnect();
+  recentListObserver = null;
+  if (state.visibleLimit < total && items.length > 0) {
+    const sentinel = document.createElement('div');
+    sentinel.className = 'app-overview-recent-sentinel';
+    list.append(sentinel);
+    recentListObserver = new IntersectionObserver(
+      entries => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        if (state.visibleLimit >= total) return;
+        state.visibleLimit += RECENT_ARTIFACT_LIMIT;
+        void renderRecentList(container, state);
+      },
+      { root: list, rootMargin: '200px 0px' }
+    );
+    recentListObserver.observe(sentinel);
+  }
   container
     .querySelector<HTMLButtonElement>('[data-recent-undo-remove]')
     ?.classList.toggle('hidden', !state.lastRemovedQueueId);
@@ -1419,13 +1436,6 @@ export async function renderRecentPanel(
     }, 160);
   });
 
-  container
-    .querySelector<HTMLButtonElement>('[data-recent-load-more]')
-    ?.addEventListener('click', () => {
-      state.visibleLimit += RECENT_ARTIFACT_LIMIT;
-      void renderRecentList(container, state);
-    });
-
   const undoButton = container.querySelector<HTMLButtonElement>('[data-recent-undo-remove]');
   undoButton?.addEventListener('click', () => {
     if (!state.lastRemovedQueueId) return;
@@ -1464,6 +1474,8 @@ export async function renderRecentPanel(
 
 export function cleanupRecentPanel(): void {
   renderSequence += 1;
+  recentListObserver?.disconnect();
+  recentListObserver = null;
   if (searchDebounceTimer !== undefined) window.clearTimeout(searchDebounceTimer);
   searchDebounceTimer = undefined;
   openComplianceDialogIds.clear();

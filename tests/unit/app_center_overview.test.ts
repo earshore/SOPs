@@ -126,6 +126,34 @@ function registerRecentListingReviewArtifact(): void {
   );
 }
 
+class IntersectionObserverMock {
+  static instances: IntersectionObserverMock[] = [];
+  readonly callback: IntersectionObserverCallback;
+  readonly root: Element | null;
+  readonly rootMargin: string;
+  readonly observed: Element[] = [];
+  readonly disconnect = vi.fn();
+  readonly observe = vi.fn((target: Element): void => {
+    this.observed.push(target);
+  });
+  readonly unobserve = vi.fn();
+  readonly takeRecords = vi.fn((): IntersectionObserverEntry[] => []);
+
+  constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+    this.callback = callback;
+    this.root = options?.root ?? null;
+    this.rootMargin = options?.rootMargin ?? '0px';
+    IntersectionObserverMock.instances.push(this);
+  }
+
+  trigger(entry?: Partial<IntersectionObserverEntry>): void {
+    this.callback(
+      [{ isIntersecting: true, ...entry }] as IntersectionObserverEntry[],
+      this as unknown as IntersectionObserver
+    );
+  }
+}
+
 describe('App Center Overview', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -137,11 +165,14 @@ describe('App Center Overview', () => {
       rows: [],
     });
     vi.spyOn(console, 'log').mockImplementation(() => {});
+    IntersectionObserverMock.instances = [];
+    vi.stubGlobal('IntersectionObserver', IntersectionObserverMock);
   });
 
   afterEach(() => {
     document.body.innerHTML = '';
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('exports the lifecycle API used by ModuleLoader', () => {
@@ -620,7 +651,7 @@ describe('App Center Overview', () => {
     ).toBe('true');
   });
 
-  it('shows the queue total, sorting control, and loads additional recent jobs', async () => {
+  it('shows the queue total, sorting control, and loads additional recent jobs on scroll', async () => {
     safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(
       readFileSync(realOverviewTemplatePath, 'utf8')
     );
@@ -656,13 +687,26 @@ describe('App Center Overview', () => {
       container.querySelector<HTMLSelectElement>('.app-overview-recent-sort select')?.value
     ).toBe('activity');
 
-    container.querySelector<HTMLButtonElement>('[data-recent-load-more]')?.click();
+    // 未展示完时挂哨兵，观察器以列表滚动容器为根、带预加载边距
+    const list = container.querySelector('.app-overview-recent-list');
+    expect(list?.querySelector('.app-overview-recent-sentinel')).not.toBeNull();
+    expect(IntersectionObserverMock.instances).toHaveLength(1);
+    expect(IntersectionObserverMock.instances[0].root).toBe(list);
+    expect(IntersectionObserverMock.instances[0].rootMargin).toBe('200px 0px');
+    expect(IntersectionObserverMock.instances[0].observed).toHaveLength(1);
+
+    // 模拟滚动触底：哨兵进入可视区即追加一页
+    IntersectionObserverMock.instances[0].trigger({ isIntersecting: true });
     await vi.waitFor(() => {
       expect(container.querySelectorAll('.app-overview-recent-item')).toHaveLength(12);
     });
-    expect(
-      container.querySelector<HTMLButtonElement>('[data-recent-load-more]')?.classList
-    ).toContain('hidden');
+    expect(container.querySelector('.app-overview-recent-count-badge')?.textContent).toBe(
+      '显示 12 项'
+    );
+    // 全部加载完成后哨兵移除、观察器断开
+    expect(container.querySelector('.app-overview-recent-sentinel')).toBeNull();
+    expect(IntersectionObserverMock.instances[0].disconnect).toHaveBeenCalled();
+    expect(IntersectionObserverMock.instances).toHaveLength(1);
   });
 
   it('keeps cards as containers and leaves entry buttons on delegated switch-tab routing', async () => {
