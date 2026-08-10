@@ -44,7 +44,7 @@ interface ModelSelectRuntime {
   statusEl: HTMLElement | null;
   source: ModelSelectSource;
   hooks: ModelSelectHooks;
-  persist: 'strategy' | 'dirty';
+  persist: 'strategy' | 'dirty' | 'none';
   state: ModelSelectState;
 }
 
@@ -121,6 +121,8 @@ async function switchProvider(runtime: ModelSelectRuntime, provider: string): Pr
     previous && models.some(model => service.getModelId(model) === previous) ? previous : resolved;
   runtime.state = toReady(runtime.state, models, selectedModel);
   renderAll(runtime);
+  // 列表就绪后通知宿主：挂载/切 provider 时线程模型恢复依赖此时重放。
+  runtime.hooks.onReady?.();
 }
 
 /**

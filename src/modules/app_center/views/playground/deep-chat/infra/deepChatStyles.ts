@@ -320,6 +320,35 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     max-width: 100% !important;
   }
 
+  /*
+   * 模型切换通知（role: system）：小字、居中、无气泡底——与对话消息区分，
+   * 避免误读为 AI 回复，也避免视觉淹没之前的切换记录。
+   */
+  .deep-chat-outer-container-role-system {
+    justify-content: center !important;
+    margin-top: 2px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .deep-chat-outer-container-role-system .inner-message-container {
+    align-items: center !important;
+    width: auto !important;
+    max-width: 100% !important;
+  }
+
+  .deep-chat-outer-container-role-system .message-bubble {
+    margin: 0 !important;
+    padding: 2px 10px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    color: var(--deep-chat-ink-muted, #64748b) !important;
+    box-shadow: none !important;
+    text-align: center !important;
+  }
+
   .message-bubble {
     box-sizing: border-box !important;
     overflow-wrap: anywhere !important;

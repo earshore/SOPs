@@ -162,7 +162,25 @@ export function appendThreadNotice(container: HTMLElement | null, text: string):
     return;
   }
   const message: DeepChatMessage = { role: 'system', text, createdAt: Date.now() };
-  getChat(container)?.addMessage?.(message, false);
+  const chat = getChat(container);
+  // 生成中只落数据不实时渲染（通知追加会带动消息区滚动/重排，干扰当次生成观感）；
+  // 生成结束由 reconcileSwitchNotices 统一补渲染，记录一条不丢。
+  const isGenerating = sessionState.pendingRequests.has(thread.id);
+  if (!isGenerating && chat) {
+    const messagesEl = chat.shadowRoot?.querySelector<HTMLElement>('#messages');
+    const prevScrollTop = messagesEl?.scrollTop ?? 0;
+    const wasNearBottom = messagesEl
+      ? messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < 32
+      : true;
+    chat.addMessage?.(message, false);
+    // 用户不在底部时保留视野，避免追加通知把滚动拉走（“闪一下”）。
+    if (messagesEl && !wasNearBottom) {
+      messagesEl.scrollTop = prevScrollTop;
+      window.requestAnimationFrame(() => {
+        messagesEl.scrollTop = prevScrollTop;
+      });
+    }
+  }
   updateActiveThreadFields(container, { messages: [...thread.messages, message] });
 }
 
@@ -288,7 +306,17 @@ export function updateActiveThreadFields(
       .slice(0, getMaxThreadCount()),
   };
   persistThreadStoreNow();
-  renderHistoryThreadList(container);
+  // 侧栏只展示标题/条数/时间：仅排序相关字段变化才重绘，调参/模型/链字段写回
+  // 不再整表重建；「仅追加 system 切换通知」的 messages 变更同样跳过（条数计数
+  // 已排除通知），避免切换模型时侧栏闪烁。
+  const isNoticeOnlyAppend =
+    'messages' in fields &&
+    Array.isArray(fields.messages) &&
+    fields.messages.length === activeThread.messages.length + 1 &&
+    fields.messages.at(-1)?.role === 'system';
+  if (bumpsSortOrder && !isNoticeOnlyAppend) {
+    renderHistoryThreadList(container);
+  }
   uiHooks.refreshChatSearchResultsIfOpen(container);
 }
 
@@ -491,11 +519,12 @@ export function applyDeepChatThreadResume(store: DeepChatThreadStore): DeepChatT
   return { ...store, activeThreadId: threadId };
 }
 
-/** 页面默认继承字段（线程显式字段优先，model 不继承：跟随页面/全局默认）。 */
+/** 页面默认继承字段（线程显式字段优先；model 继承页面默认，无则跟随全局）。 */
 function createInheritedThreadDefaults(
   pageDefaults: DeepChatPageDefaults
 ): Partial<DeepChatThread> {
   return {
+    ...(pageDefaults.model ? { model: pageDefaults.model } : {}),
     ...(pageDefaults.systemPrompt ? { systemPrompt: pageDefaults.systemPrompt } : {}),
     ...(typeof pageDefaults.temperature === 'number'
       ? { temperature: pageDefaults.temperature }
@@ -891,6 +920,9 @@ export function getSanitizedThreadOptionalFields(thread: DeepChatThread): Partia
   const promptDraftId = getOptionalString(thread.promptDraftId);
   const systemPrompt = getOptionalString(thread.systemPrompt);
   const model = getOptionalString(thread.model);
+  // Responses 链与最后调用模型：跨会话/刷新恢复所需，清洗时保留。
+  const lastResponseId = getOptionalString(thread.lastResponseId);
+  const lastResponseModel = getOptionalString(thread.lastResponseModel);
   const pinnedAt = getOptionalFiniteTimestamp(thread.pinnedAt);
   const listingPromptContext = getSanitizedListingPromptContext(thread.listingPromptContext);
   const skillContexts = getSanitizedSkillContexts(thread.skillContexts);
@@ -898,6 +930,8 @@ export function getSanitizedThreadOptionalFields(thread: DeepChatThread): Partia
   assignOptionalStringField(fields, 'promptDraftId', promptDraftId);
   assignOptionalStringField(fields, 'systemPrompt', systemPrompt);
   assignOptionalStringField(fields, 'model', model);
+  assignOptionalStringField(fields, 'lastResponseId', lastResponseId);
+  assignOptionalStringField(fields, 'lastResponseModel', lastResponseModel);
   if (typeof thread.temperature === 'number' && Number.isFinite(thread.temperature)) {
     fields.temperature = normalizeTemperature(String(thread.temperature));
   }
@@ -910,7 +944,13 @@ export function getSanitizedThreadOptionalFields(thread: DeepChatThread): Partia
 
 function assignOptionalStringField(
   fields: Partial<DeepChatThread>,
-  key: 'customTitle' | 'promptDraftId' | 'systemPrompt' | 'model',
+  key:
+    | 'customTitle'
+    | 'promptDraftId'
+    | 'systemPrompt'
+    | 'model'
+    | 'lastResponseId'
+    | 'lastResponseModel',
   value: string | undefined
 ): void {
   if (value) {

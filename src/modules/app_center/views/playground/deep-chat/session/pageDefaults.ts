@@ -1,5 +1,6 @@
 import { isReasoningEffortLevel, type ReasoningEffortLevel } from '@/services/modelCapability';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+import { getToolTargetDefaultModel } from '@/services/toolStrategyService';
 import { normalizeTemperature } from '../infra/utils';
 
 /**
@@ -9,6 +10,8 @@ import { normalizeTemperature } from '../infra/utils';
  * 优先级：线程显式值 > 页面默认 > 全局默认。
  */
 export interface DeepChatPageDefaults {
+  /** 页面默认模型（切换模型时记录；带指纹，全局模型变更后失效跟随全局）。 */
+  model?: string;
   systemPrompt?: string;
   temperature?: number;
   reasoning?: { enabled?: boolean; effort?: ReasoningEffortLevel };
@@ -18,6 +21,8 @@ export interface DeepChatPageDefaults {
    * 存储保留，用户下次显式改动时刷新指纹。
    */
   reasoningFingerprint?: string;
+  /** 写入 model 时记录的全局生效模型指纹（工具策略默认 || provider 配置）。 */
+  modelFingerprint?: string;
 }
 
 export function sanitizePageDefaults(raw: unknown): DeepChatPageDefaults | null {
@@ -26,6 +31,11 @@ export function sanitizePageDefaults(raw: unknown): DeepChatPageDefaults | null 
   }
   const value = raw as Partial<DeepChatPageDefaults>;
   const sanitized: DeepChatPageDefaults = {};
+
+  const model = sanitizeModelPart(value.model);
+  if (model) {
+    sanitized.model = model;
+  }
 
   const systemPrompt = sanitizeSystemPromptPart(value.systemPrompt);
   if (systemPrompt) {
@@ -47,7 +57,17 @@ export function sanitizePageDefaults(raw: unknown): DeepChatPageDefaults | null 
     sanitized.reasoningFingerprint = reasoningFingerprint;
   }
 
+  const modelFingerprint = sanitizeFingerprintPart(value.modelFingerprint);
+  if (modelFingerprint) {
+    sanitized.modelFingerprint = modelFingerprint;
+  }
+
   return Object.keys(sanitized).length > 0 ? sanitized : null;
+}
+
+function sanitizeModelPart(value: unknown): string | undefined {
+  const model = typeof value === 'string' ? value.trim() : '';
+  return model || undefined;
 }
 
 function sanitizeSystemPromptPart(value: unknown): string | undefined {
@@ -108,16 +128,32 @@ export function resolveReasoningFingerprint(provider: string): string {
 
 /**
  * 生效页面默认：推理指纹与当前 provider 全局 reasoningPrefs 不一致时，
- * 丢弃页面默认推理（跟随全局），其余字段不变。
+ * 丢弃页面默认推理（跟随全局）；模型指纹与当前全局生效模型不一致时，
+ * 丢弃页面默认模型（跟随全局）。其余字段不变。
  */
 export function readEffectivePageDefaults(provider: string): DeepChatPageDefaults {
   const defaults = readPageDefaults();
-  if (!defaults.reasoning) {
-    return defaults;
+  const rest = { ...defaults };
+  if (rest.reasoning) {
+    if (rest.reasoningFingerprint !== resolveReasoningFingerprint(provider)) {
+      delete rest.reasoning;
+    }
   }
-  if (defaults.reasoningFingerprint !== resolveReasoningFingerprint(provider)) {
-    const { reasoning: _reasoning, reasoningFingerprint: _fingerprint, ...rest } = defaults;
-    return rest;
+  delete rest.reasoningFingerprint;
+  if (rest.model) {
+    if (rest.modelFingerprint !== resolveModelFingerprint(provider)) {
+      delete rest.model;
+    }
   }
-  return defaults;
+  delete rest.modelFingerprint;
+  return rest;
+}
+
+/** 页面默认模型的指纹口径：全局生效模型（工具策略默认 || provider 配置 model）。 */
+export function resolveModelFingerprint(provider: string): string {
+  const config = StorageService.getLLMConfig(provider);
+  if (!config) {
+    return '';
+  }
+  return getToolTargetDefaultModel('playground-deep-chat', provider) || config.model || '';
 }

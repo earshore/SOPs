@@ -145,8 +145,9 @@ function getThreadMeta(
     return `草稿 · ${formatThreadTime(thread.updatedAt)}`;
   }
 
-  if (thread.messages.length > 0) {
-    return `${thread.messages.length} 条 · ${formatThreadTime(thread.updatedAt)}`;
+  if (thread.messages.some(message => message.role !== 'system')) {
+    const messageCount = thread.messages.filter(message => message.role !== 'system').length;
+    return `${messageCount} 条 · ${formatThreadTime(thread.updatedAt)}`;
   }
 
   return `空会话 · ${formatThreadTime(thread.updatedAt)}`;

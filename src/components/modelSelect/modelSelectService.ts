@@ -183,6 +183,9 @@ export function persistSelectedModel(
   const { targetId, provider } = source;
   if (!provider || !model) return;
 
+  // 'none'：宿主自行处理会话/页面级持久化，组件不写任何全局存储。
+  if (persist === 'none') return;
+
   if (targetId !== 'llm-global') {
     setToolTargetDefaultModel(targetId as ToolStrategyTargetId, provider, model);
   }

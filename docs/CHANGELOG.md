@@ -58,6 +58,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `#input` 的 childList，root 丢失即重建；顺带修复 vision e2e 的 localStorage
   SecurityError（seed 改用 addInitScript）与初始化发送竞态（用例等待 vendor 就绪），
   `deep-chat-send` + `deep-chat-prompt-preview` e2e 26/26 全绿。
+- **会话级模型设置不再覆盖系统全局设置**：Deep Chat 页面切换模型仅写当前会话
+  （thread.model）与页面默认（`deep_chat_page_defaults.model`，带全局模型指纹，
+  系统设置改动后自动失效跟随全局），不再写工具策略默认 / provider 配置 model；
+  新会话继承页面默认模型。
+- **历史会话恢复最后调用模型**：切历史会话时模型框优先恢复 `thread.model`，无记录时
+  回退 `lastResponseModel`（存量会话最后调用模型）；线程加载清洗白名单补
+  `lastResponseId`/`lastResponseModel` 保留；ModelSelect 新增 `onReady` 钩子，
+  修复挂载时模型列表未就绪导致线程模型恢复失效。
+- **Deep Chat 切换体验打磨**：切换通知改为小字居中无气泡底的系统提示样式（role
+  system 专属 CSS，browser computed style 实测生效），不再与对话消息混淆；生成中
+  切换模型只落数据不实时渲染，生成结束后统一补渲染（记录一条不丢，也不打扰当次
+  生成）；通知渲染带滚动保护、侧栏「仅追加通知」的写回跳过整表重绘；适配线程计数
+  排除 system 通知，侧栏条数与对话消息一致。
+- **修复切换模型消息区清空**（根因+兜底）：`applyDeepChatVisionUploadConfig` 此前每次
+  调用都重复赋值 `chat.images`（值未变），vendor 属性 setter 响应后异步整层重建
+  `#chat-view`，新消息区为空且不重放 history——会话内容与切换通知全部消失，切走再
+  切回才恢复。现仅首次赋值；另加 `#container` childList 观察，vendor 自发重建时重放
+  当前会话历史兜底。新增 e2e `deep-chat-model-switch`（消息保留/通知显示样式/记录不
+  冲掉），deep-chat 组 e2e 27/27 全绿。
 
 ### Removed（移除）
 

@@ -3468,9 +3468,140 @@ describe('deep-chat playground session model persistence', () => {
     modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
 
     // 空线程不落盘（isPersistableThread 语义），thread.model 仅存内存；
-    // 页面级模型默认已由 ModelSelect 写工具策略（persistSelectedModel）
+    // 页面级模型默认写入 deep_chat_page_defaults（不再写工具策略 / provider 配置）
     expect(systemNotices(persistedActiveThread(mocks))).toHaveLength(0);
     expect(getChat(container).history ?? []).toHaveLength(0);
+
+    unmount();
+  });
+
+  it('user model change writes session + page defaults only, never global strategy or provider config', async () => {
+    const { unmount, mocks, modelSelect } = await mountWithModels({
+      storedThreadStore: structuredClone(storedThreadStore),
+    });
+    mocks.storageService.setLLMConfig.mockClear();
+    mocks.storageService.set.mockClear();
+
+    modelSelect.value = 'gpt-4.1';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // 会话级：thread.model
+    expect(persistedActiveThread(mocks)?.model).toBe('gpt-4.1');
+    // 页面默认：deep_chat_page_defaults.model + 指纹
+    const pageDefaultsCall = mocks.storageService.set.mock.calls.find(
+      ([key]) => key === deepChatStorageKeys.DEEP_CHAT_PAGE_DEFAULTS
+    );
+    expect(pageDefaultsCall?.[1]).toMatchObject({
+      model: 'gpt-4.1',
+      modelFingerprint: expect.any(String),
+    });
+    // 不覆盖系统全局设置：不写工具策略默认、不写 provider 配置 model
+    expect(
+      mocks.storageService.set.mock.calls.some(
+        ([key]) => key === deepChatStorageKeys.TOOL_STRATEGY_SETTINGS
+      )
+    ).toBe(false);
+    expect(mocks.storageService.setLLMConfig).not.toHaveBeenCalled();
+
+    unmount();
+  });
+
+  it('recovers the last-called model for a stored thread without a model record', async () => {
+    const stored = structuredClone(storedThreadStore);
+    // 存量会话（功能上线前）：无 model 字段，但最后调用模型有记录
+    delete (stored.threads[0] as Record<string, unknown>).model;
+    (stored.threads[0] as Record<string, unknown>).lastResponseModel = 'gpt-4.1';
+    const { container, unmount } = await mountWithModels({ storedThreadStore: stored });
+
+    const select = queryRequired<HTMLSelectElement>(container, '[data-model-select]');
+    // onReady（模型列表就绪）后 syncThreadModelToSession 已同步 setModel
+    expect(select.value).toBe('gpt-4.1');
+
+    unmount();
+  });
+
+  it('new thread inherits the page-default model', async () => {
+    const { container, unmount, modelSelect } = await mountWithModels({
+      storedThreadStore: structuredClone(storedThreadStore),
+      pageDefaults: { model: 'gpt-4.1', modelFingerprint: 'o3-mini' },
+    });
+
+    queryRequired<HTMLButtonElement>(container, '#deep-chat-clear-chat').click();
+    await vi.waitFor(() => {
+      expect(modelSelect.value).toBe('gpt-4.1');
+    });
+
+    unmount();
+  });
+
+  it('does not rerender the thread list for model-only writes', async () => {
+    const { container, unmount, modelSelect } = await mountWithModels({
+      storedThreadStore: structuredClone(storedThreadStore),
+    });
+    const list = container.querySelector('#deep-chat-thread-list');
+    const firstChild = list?.firstChild ?? null;
+
+    modelSelect.value = 'gpt-4.1';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // 模型字段写回不重绘侧栏（节点未被替换，避免切换模型时侧栏闪烁）
+    expect(container.querySelector('#deep-chat-thread-list')?.firstChild).toBe(firstChild);
+
+    unmount();
+  });
+
+  it('defers switch notices while generating and reconciles them after the turn', async () => {
+    const { container, unmount, mocks, modelSelect } = await mountWithModels({
+      storedThreadStore: structuredClone(storedThreadStore),
+    });
+    const chat = getChat(container);
+    mocks.callLLM.mock.calls.length = 0;
+    chat.addMessage.mockClear();
+
+    // 发起生成：callLLM 挂起直到 release
+    let release!: () => void;
+    mocks.callLLM.mockReturnValueOnce(
+      new Promise<void>(resolve => {
+        release = resolve;
+      })
+    );
+    const onClose = vi.fn();
+    chat.connect?.handler({ text: '生成中切换测试' }, { onResponse: vi.fn(), onClose });
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+    });
+
+    // 生成中切换模型：通知只落数据（thread.messages），不实时渲染（不 addMessage）
+    modelSelect.value = 'gpt-4.1';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(chat.addMessage).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        role: 'system',
+        text: expect.stringContaining('切换至gpt-4.1'),
+      }),
+      false
+    );
+    expect(
+      persistedActiveThread(mocks)?.messages?.some(
+        message =>
+          message.role === 'system' &&
+          typeof message.text === 'string' &&
+          message.text.includes('切换至gpt-4.1')
+      )
+    ).toBe(true);
+
+    // 生成结束：通知补渲染（缺失的才补，已渲染的不重复）
+    release();
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+    expect(chat.addMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        role: 'system',
+        text: expect.stringContaining('切换至gpt-4.1'),
+      }),
+      false
+    );
 
     unmount();
   });

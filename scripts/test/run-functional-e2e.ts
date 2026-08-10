@@ -48,7 +48,11 @@ export const FUNCTIONAL_E2E_GROUPS = [
   },
   {
     name: 'deep-chat',
-    files: ['tests/e2e/deep-chat-prompt-preview.spec.ts', 'tests/e2e/deep-chat-send.spec.ts'],
+    files: [
+      'tests/e2e/deep-chat-model-switch.spec.ts',
+      'tests/e2e/deep-chat-prompt-preview.spec.ts',
+      'tests/e2e/deep-chat-send.spec.ts',
+    ],
   },
   {
     name: 'keyword-hunter',

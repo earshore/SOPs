@@ -86,8 +86,10 @@ import { unmountVisionComposer } from '../composer/visionComposer';
 
 import { hidePromptPreview, setupPromptPreview } from './promptPreview';
 import { renderPromptDraftList, renderThreadList } from './renderers';
+import { disconnectChatViewRebuildWatch, watchChatViewRebuild } from '../chrome/chatViewChrome';
 import {
   clearPageDefaults,
+  resolveModelFingerprint,
   resolveReasoningFingerprint,
   writePageDefaults,
 } from '../session/pageDefaults';
@@ -250,6 +252,8 @@ function resolveGlobalReasoningPrefs(provider: string): NonNullable<DeepChatThre
 
 /**
  * 线程模型可恢复目标：线程模型在列表内直接用，否则回落全局（与 refreshLLMConfig 同源）。
+ * 优先 thread.model（会话显式设置）；存量会话无 model 时回退 lastResponseModel
+ * （该会话最后调用模型的设置）。
  */
 function resolveThreadModelTarget(config: LLMProviderConfig | null, threadModel: string): string {
   if (!config) {
@@ -263,7 +267,8 @@ function resolveThreadModelTarget(config: LLMProviderConfig | null, threadModel:
 
 /**
  * 线程模型恢复到模型选择框（applyThreadTuningToSession 末尾调用，覆盖切会话/挂载/重置）：
- * - thread.model 在当前 config.models 中 → setModel(target)（UI-only，不写任何持久化）；
+ * - thread.model（无则回退 lastResponseModel）在当前 config.models 中 → setModel(target)
+ *   （UI-only，不写任何持久化）；
  * - 否则（含空）→ 回落全局模型（与 refreshLLMConfig 同源）；
  * - 线程有 model 记录但不可用 → 覆盖线程推理为全局 prefs + 清 Responses 链 + warning toast。
  */
@@ -276,7 +281,7 @@ export function syncThreadModelToSession(container: HTMLElement | null): void {
   if (!tracked || !config) {
     return;
   }
-  const threadModel = getActiveThread().model || '';
+  const threadModel = getActiveThread().model || getActiveThread().lastResponseModel || '';
   const target = resolveThreadModelTarget(config, threadModel);
   if (!target) {
     return;
@@ -303,6 +308,14 @@ export function bindModelControls(refs: ModelControlRefs): void {
 
   const onModelChange = (nextModel: string): void => {
     applyEffectiveModelSwitch(container, nextModel);
+    // 页面默认模型：仅写会话 + 页面默认（deep_chat_page_defaults），
+    // 不覆盖系统全局设置（工具策略默认 / provider 配置 model）。
+    // 指纹记录全局生效模型，系统设置改动后页面默认自动失效跟随全局。
+    const provider = resolveActiveModelProvider();
+    writePageDefaults({
+      model: nextModel,
+      modelFingerprint: resolveModelFingerprint(provider),
+    });
     const chat = getChat(container);
     // Capability-gated controls must re-evaluate when the model changes.
     // Vision composer shows modelSwitch toast when staged files + vision lost.
@@ -330,7 +343,14 @@ export function bindModelControls(refs: ModelControlRefs): void {
     controller: createModelSelect(
       container,
       { targetId: 'playground-deep-chat', provider: resolveActiveModelProvider() },
-      { onModelChange, onRefresh }
+      // persist 'none'：切换模型不写工具策略/provider 配置（系统全局设置），
+      // 持久化由 onModelChange（会话 + 页面默认）负责。
+      {
+        onModelChange,
+        onRefresh,
+        onReady: () => syncThreadModelToSession(container),
+        persist: 'none',
+      }
     ),
     provider: resolveActiveModelProvider(),
   };
@@ -1225,6 +1245,8 @@ export function initDeepChat(container: HTMLElement): void {
   if (!sessionState.pendingRequests.has(activeThread.id)) {
     schedulePendingAssistantDisplay(activeThread.id);
   }
+  // vendor 自发重建 #chat-view 时重放历史，避免消息区空置。
+  watchChatViewRebuild(chat, container);
 }
 
 export function replaceChat(container: HTMLElement): void {
@@ -1237,6 +1259,8 @@ export function replaceChat(container: HTMLElement): void {
   // Detached bubble DOM must not keep receiving typewriter ticks.
   stopReasoningTypewriter();
   disconnectChromeMutationObserver();
+  // 旧元素被替换：重建兜底 observer 由 initDeepChat 对新元素重新绑定。
+  disconnectChatViewRebuildWatch();
   // Turn-local staged images never cross thread remounts.
   unmountVisionComposer();
 

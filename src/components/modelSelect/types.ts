@@ -37,12 +37,15 @@ export interface ModelSelectSource {
 export interface ModelSelectHooks {
   /** 选中模型变化；组件不代做能力控件联动，由宿主决定后续动作。 */
   onModelChange?(model: string): void;
+  /** 模型列表加载完成（初始化 / 切换 provider 后）：宿主可在此重放线程级选中。 */
+  onReady?(): void;
   /**
    * 持久化模式（默认 'strategy'）：
    * - 'strategy': 立即写 provider config + 工具策略默认模型；
-   * - 'dirty': provider config 由宿主表单保存，组件仍负责工具策略写入。
+   * - 'dirty': provider config 由宿主表单保存，组件仍负责工具策略写入；
+   * - 'none': 组件不写任何全局存储，持久化完全由宿主（onModelChange）负责。
    */
-  persist?: 'strategy' | 'dirty';
+  persist?: 'strategy' | 'dirty' | 'none';
   /**
    * 覆盖成功 toast 与兜底提示（默认走 showToast）。
    * showLlmFailureToast 的错误 UX 不替换。

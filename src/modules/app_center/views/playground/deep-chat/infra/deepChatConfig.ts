@@ -64,7 +64,13 @@ export function configureDeepChatBase(
 export function applyDeepChatVisionUploadConfig(chat: DeepChatElement | null | undefined): void {
   if (!chat) return;
   // Force-off vendor upload UI (Approach B host surface).
-  chat.images = resolveDeepChatImagesConfig(false);
+  // 仅首次赋值：vendor 属性 setter 对「值未变的重复赋值」也会响应，并异步重建整个
+  // chat-view（消息区随旧元素销毁且不重放 history）——反复切换模型不能每次都赋值。
+  const withImagesFlag = chat as DeepChatElement & { __deepChatImagesForcedOff?: boolean };
+  if (!withImagesFlag.__deepChatImagesForcedOff) {
+    chat.images = resolveDeepChatImagesConfig(false);
+    withImagesFlag.__deepChatImagesForcedOff = true;
+  }
 
   const featureOn = isDeepChatVisionFeatureEnabled();
   if (!featureOn) {

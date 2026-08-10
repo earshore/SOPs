@@ -21,6 +21,7 @@ import {
   syncPendingRequestView,
 } from '../session/pendingRuntime';
 import { callDeepChatLLM } from './llmCall';
+import { reconcileSwitchNotices } from '../chrome/switchNoticeChrome';
 import type { ChatMessage } from '@/services/llmService';
 import type { LLMProviderConfig } from '@/types/state';
 
@@ -284,6 +285,9 @@ export async function handleDeepChatRequest(
   } finally {
     cleanupLifecyclePendingRequest(pendingThreadId, lifecyclePendingRequest);
     setVisionComposerPending(false);
+    // 生成中切换模型的通知只落了数据：生成结束统一补渲染（缺失的才补）；
+    // 已切走的会话跳过（切回时 history 自然带出通知）。
+    reconcileSwitchNotices(container, pendingThreadId ?? undefined);
     signals.onClose?.();
   }
 }
