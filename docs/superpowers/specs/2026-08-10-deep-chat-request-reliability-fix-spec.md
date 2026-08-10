@@ -1,7 +1,7 @@
 # Deep Chat 请求链路可靠性修复 Spec
 
 **Date:** 2026-08-10  
-**Status:** approved（评审修订后实施）  
+**Status:** implemented（随 `v3.1.0-rc.3` 发布；推送门禁含后续误拦修复）  
 **来源:** 会话 `019feaf4` 审查 + 代码复核；评审修正 F1–F5 已并入  
 **Scope:** Deep Chat 请求归属 / 失败收敛 / 预算预检 / 推送 Keyword Hunter 完整性  
 **基线:** `main`（实施前重跑聚焦单测与 type-check）

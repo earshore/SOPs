@@ -268,18 +268,26 @@ function normalizeReasoningDurationSec(value: unknown): number | undefined {
   return Math.max(0, Math.round(value));
 }
 
+function normalizeAssistantPushBlockReason(
+  value: DeepChatMessage['assistantPushBlockReason']
+): 'partial_timeout' | undefined {
+  return value === 'partial_timeout' ? 'partial_timeout' : undefined;
+}
+
+function normalizeStoredMessageStatus(
+  value: DeepChatMessage['status']
+): DeepChatMessageStatus | undefined {
+  return value === 'stopped' || value === 'partial' ? value : undefined;
+}
+
 function optionalStoredMessageFields(
   message: DeepChatMessage,
   maxMessageChars: number | undefined
 ): Partial<DeepChatMessage> {
   const reasoning = typeof message.reasoning === 'string' ? message.reasoning.trim() : '';
   const durationSec = normalizeReasoningDurationSec(message.reasoningDurationSec);
-  const status =
-    message.status === 'stopped' || message.status === 'partial' ? message.status : undefined;
-  const pushBlock =
-    message.assistantPushBlockReason === 'partial_timeout'
-      ? ('partial_timeout' as const)
-      : undefined;
+  const status = normalizeStoredMessageStatus(message.status);
+  const pushBlock = normalizeAssistantPushBlockReason(message.assistantPushBlockReason);
   const preReplySteps = normalizePreReplyActivitySteps(message.preReplySteps, maxMessageChars);
   const attachmentMeta = normalizeAttachmentMeta(message.attachmentMeta);
   return {

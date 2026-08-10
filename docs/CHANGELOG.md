@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [3.1.0-rc.3] - 2026-08-10
+
+> 承接 rc.2 的发布候选：**Deep Chat 请求链路可靠性**（跨会话串线、删除复活、预算预检、
+> Keyword Hunter 推送门禁误拦、双提交占坑、输入刷新恢复）与推送格式兼容（德语/markdown
+> Listing）。Latest 仍为 `v3.0.12`；回滚基线 `v3.0.12`（生产）/ 上一候选 `v3.1.0-rc.2`。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Fixed（修复）
+
+- **Deep Chat 请求归属绑定发起线程**：Responses 链 `previous_response_id` / `onResponseId`
+  写回、业务工具 `getThread`、工具活动记录均按 `pendingRequest.threadId` 解析，后台生成中
+  切换会话不再污染当前激活线程的上下文（fail-closed：线程不存在不回退 active）。
+- **删除生成中会话不再「复活」**：`abortPendingRequest('deleted'|'cleared')` 同步 discard
+  pending map 条目；`handleDeepChatRequest` 在 set pending 后立即挂 lifecycle 引用，abort
+  路径 finally 可清理；remount 不再用残留 pending 重建已删线程。
+- **预算预检与推理输出上限对齐**：`resolveDeepChatRequestBudget` 按 reasoning 有效
+  `max_output_tokens`（含 context clamp）计算输入预算；output 占满窗口时 fail-closed，
+  禁止伪造可用输入；`callDeepChatLLM` 下发的 maxTokens 与预检一致。
+- **Keyword Hunter 推送完整性门禁**：
+  - 超时保留正文写入 `assistantPushBlockReason: partial_timeout`（不改 UI「未完成」badge），
+    推送 toast「回复生成超时未完成，无法推送复核」。
+  - 结构门禁识别 `**Titel**:` / `# Title` 等 markdown 包裹标题；不再因单独 `1. Title` 误走
+    严格编号模板；支持 `**Bullet N**`、`-`/`•` 列表、`**Beschreibung**` 等真实模型格式；
+    仍拦截编号 Bullet 写到一半且无 Description 的截断正文。
+- **同会话双提交竞态**：`submittingThreadIds` 在任何 await 前同步占坑，prepare 期间连点
+  第二次直接拒绝。
+- **Keyword Hunter 输入跨刷新恢复**：persist 切片扩展 `copyInputText` / `keywordsInputText`
+  （单字段上限 200_000 字符）；`resetKeywordTracker` 仍清空。
+- **eslint 复杂度门禁**：`optionalStoredMessageFields` 拆出 status / push-block 规范化辅助，
+  恢复 `lint:warning-gate` 绿。
+
+### Docs（文档）
+
+- Spec / Plan：`docs/superpowers/specs/2026-08-10-deep-chat-request-reliability-fix-spec.md`、
+  `docs/superpowers/plans/2026-08-10-deep-chat-request-reliability-fix.md`（评审修订后实施）。
+
 ## [3.1.0-rc.2] - 2026-08-10
 
 > 承接 rc.1 收口的发布候选：**Deep Chat 会话设置加固** 全部增量（会话级模型持久化、
