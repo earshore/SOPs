@@ -26,7 +26,7 @@ describe('keywordTracker input persistence slice', () => {
   it('clips oversized inputs to the persist max', () => {
     const huge = 'x'.repeat(KEYWORD_HUNTER_INPUT_PERSIST_MAX_CHARS + 50);
     const slice = createRefreshSafeKeywordTrackerState(undefined, { copyInputText: huge });
-    expect(slice.copyInputText.length).toBe(KEYWORD_HUNTER_INPUT_PERSIST_MAX_CHARS);
+    expect(slice.copyInputText?.length).toBe(KEYWORD_HUNTER_INPUT_PERSIST_MAX_CHARS);
   });
 
   it('resetKeywordTracker clears inputs', () => {

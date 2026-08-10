@@ -19,14 +19,14 @@ vi.mock('@/modules/app_center/listingWorkflowHandoff', async importOriginal => {
   const actual = await importOriginal<typeof import('@/modules/app_center/listingWorkflowHandoff')>();
   return {
     ...actual,
-    saveListingCopy: (...args: unknown[]) => saveListingCopy(...args),
-    applyListingCopyToKeywordHunter: (...args: unknown[]) => applyListingCopyToKeywordHunter(...args),
-    registerListingCopyArtifact: (...args: unknown[]) => registerListingCopyArtifact(...args),
+    saveListingCopy: (copy: unknown) => saveListingCopy(copy),
+    applyListingCopyToKeywordHunter: (copy: unknown) => applyListingCopyToKeywordHunter(copy),
+    registerListingCopyArtifact: (copy: unknown) => registerListingCopyArtifact(copy),
   };
 });
 
 vi.mock('@/modules/app_center/workspaceContext', () => ({
-  setWorkspaceContext: (...args: unknown[]) => setWorkspaceContext(...args),
+  setWorkspaceContext: (ctx: unknown) => setWorkspaceContext(ctx),
 }));
 
 const { sessionState } = await import('../session/sessionState');

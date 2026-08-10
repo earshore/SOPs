@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ChatMessage } from '@/services/llmService';
+import type { LLMProviderConfig } from '@/types/state';
 import {
   DEFAULT_DEEP_CHAT_REQUEST_BUDGET,
   DEEP_CHAT_REASONING_MAX_OUTPUT_TOKENS_FLOOR,
@@ -83,7 +84,7 @@ describe('Playground request budget', () => {
       model: 'small-model',
       models: [{ id: 'small-model', context: 16000 }],
       enabled: true,
-    } as const;
+    } as LLMProviderConfig;
 
     const off = resolveDeepChatRequestBudget(config, 'small-model', false);
     const on = resolveDeepChatRequestBudget(config, 'small-model', true);
@@ -106,7 +107,7 @@ describe('Playground request budget', () => {
       model: 'tiny',
       models: [{ id: 'tiny', context: 8000 }],
       enabled: true,
-    } as const;
+    } as LLMProviderConfig;
 
     const budget = resolveDeepChatRequestBudget(config, 'tiny', true);
     // Cannot invent 1000 free input tokens when output already fills the window

@@ -1124,7 +1124,8 @@ describe('deep-chat Listing workflow handoff', () => {
         workItemId: 'competitor_listing:history-1',
       })
     );
-    expect(mocks.saveListingCopy.mock.calls[0]?.[0]?.content).toMatch(/Description:/);
+    const savedCopy = mocks.saveListingCopy.mock.calls[0]?.[0] as { content?: string } | undefined;
+    expect(savedCopy?.content).toMatch(/Description:/);
     expect(mocks.registerListingCopyArtifact).toHaveBeenCalled();
     expect(mocks.applyListingCopyToKeywordHunter).toHaveBeenCalled();
     expect(mocks.setWorkspaceContext).toHaveBeenCalledWith(
