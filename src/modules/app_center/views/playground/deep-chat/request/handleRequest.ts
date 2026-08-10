@@ -188,7 +188,8 @@ async function runPreparedDeepChatRequest(
   container: HTMLElement,
   preparedRequest: PreparedDeepChatRequest,
   signals: DeepChatSignals,
-  requestController: AbortController
+  requestController: AbortController,
+  onPendingCreated?: (pending: PendingDeepChatRequest) => void
 ): Promise<{ pendingThreadId: string; lifecyclePendingRequest: PendingDeepChatRequest }> {
   const {
     config,
@@ -214,6 +215,7 @@ async function runPreparedDeepChatRequest(
   );
   bindStopSignal(signals, pendingRequest);
   sessionState.pendingRequests.set(activeThread.id, pendingRequest);
+  onPendingCreated?.(pendingRequest);
   // Host staged images consumed for this turn only — clear UI immediately after snapshot.
   if (hadVisionParts) {
     clearStagedVisionAttachments();
@@ -273,7 +275,12 @@ export async function handleDeepChatRequest(
       container,
       preparedRequest,
       signals,
-      requestController
+      requestController,
+      pending => {
+        // Double insurance: assign before await LLM so finally can cleanup on abort.
+        lifecyclePendingRequest = pending;
+        pendingThreadId = pending.threadId;
+      }
     );
     pendingThreadId = running.pendingThreadId;
     lifecyclePendingRequest = running.lifecyclePendingRequest;

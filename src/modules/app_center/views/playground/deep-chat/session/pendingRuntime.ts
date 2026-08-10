@@ -567,10 +567,39 @@ export function preserveStoppedResponse(threadId: string | null): void {
   showToast('已停止生成，已保留当前回复', { type: 'warning' });
 }
 
+/**
+ * Abort + drop map entry so remount cannot resurrect a deleted/cleared thread.
+ * Mirrors stopPendingRequest's delete semantics for discard reasons.
+ */
+export function discardPendingRequest(threadId: string): boolean {
+  const pendingRequest = sessionState.pendingRequests.get(threadId);
+  if (!pendingRequest) {
+    return false;
+  }
+
+  if (!pendingRequest.abortReason) {
+    abortPendingDeepChatRequest(pendingRequest, 'deleted');
+  } else if (!pendingRequest.controller.signal.aborted) {
+    abortPendingDeepChatRequest(pendingRequest, pendingRequest.abortReason);
+  }
+  clearPendingDisplayTimer(threadId);
+  sessionState.pendingRequests.delete(threadId);
+  renderMountedThreadList();
+  return true;
+}
+
 export function abortPendingRequest(threadId: string, reason: DeepChatPendingAbortReason): boolean {
   const pendingRequest = sessionState.pendingRequests.get(threadId);
   if (!pendingRequest) {
     return false;
+  }
+
+  if (reason === 'deleted' || reason === 'cleared') {
+    abortPendingDeepChatRequest(pendingRequest, reason);
+    clearPendingDisplayTimer(threadId);
+    sessionState.pendingRequests.delete(threadId);
+    renderMountedThreadList();
+    return true;
   }
 
   abortPendingDeepChatRequest(pendingRequest, reason);
