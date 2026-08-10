@@ -235,7 +235,7 @@ import { it, expect, beforeEach, afterEach, vi } from 'vitest';
     expect(persisted.state.promptlab.history).toHaveLength(20);
   });
 
-  it('恢复 app-storage 时清空 Keyword Hunter 页面工作数据并保留设置', async () => {
+  it('恢复 app-storage 时清空 Keyword Hunter 运行时工作数据，保留设置与输入草稿', async () => {
     localStorage.setItem(
       'app-storage',
       JSON.stringify({
@@ -295,8 +295,9 @@ import { it, expect, beforeEach, afterEach, vi } from 'vitest';
     expect(state.isWindowMinimized).toBe(false);
     expect(state.trackingData).toBeNull();
     expect(state.isTracking).toBe(false);
-    expect(state.keywordsInputText).toBe('');
-    expect(state.copyInputText).toBe('');
+    // Input drafts intentionally survive refresh (v3.1.0-rc.3).
+    expect(state.keywordsInputText).toBe('wireless earbuds\nnoise cancelling');
+    expect(state.copyInputText).toBe('Wireless earbuds with active noise cancelling.');
     expect(state.llmAnalysisResult).toBe('');
     expect(state.showTranslation).toBe(false);
     expect(state.currentSnapshotId).toBeNull();
@@ -308,8 +309,8 @@ import { it, expect, beforeEach, afterEach, vi } from 'vitest';
         processedCopy: '',
         matchedKeywords: [],
         paragraphs: [],
-        keywordsInputText: '',
-        copyInputText: '',
+        keywordsInputText: 'wireless earbuds\nnoise cancelling',
+        copyInputText: 'Wireless earbuds with active noise cancelling.',
         llmAnalysisResult: '',
         showTranslation: false,
         currentSnapshotId: null
@@ -317,7 +318,7 @@ import { it, expect, beforeEach, afterEach, vi } from 'vitest';
     );
   });
 
-  it('保存状态时不持久化 Keyword Hunter 页面工作数据', async () => {
+  it('保存状态时持久化 Keyword Hunter 输入草稿，不持久化运行时工作数据', async () => {
     const { appStore } = await import('@/stores/useAppStore');
 
     appStore.getState().updateKeywordTracker({
@@ -355,8 +356,8 @@ import { it, expect, beforeEach, afterEach, vi } from 'vitest';
         wordFrequency: [],
         paragraphs: [],
         translationMode: false,
-        keywordsInputText: '',
-        copyInputText: '',
+        keywordsInputText: 'wireless earbuds',
+        copyInputText: 'Wireless earbuds copy',
         llmAnalysisResult: '',
         showTranslation: false,
         currentSnapshotId: null,

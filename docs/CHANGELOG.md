@@ -8,10 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.1.0-rc.3] - 2026-08-10
 
-> 承接 rc.2 的发布候选：**Deep Chat 请求链路可靠性**（跨会话串线、删除复活、预算预检、
-> Keyword Hunter 推送门禁误拦、双提交占坑、输入刷新恢复）与推送格式兼容（德语/markdown
-> Listing）。Latest 仍为 `v3.0.12`；回滚基线 `v3.0.12`（生产）/ 上一候选 `v3.1.0-rc.2`。
+> 生产验证候选（Pre-release）。承接 rc.2：**Deep Chat 请求链路可靠性**（跨会话串线、
+> 删除复活、预算预检、Keyword Hunter 推送门禁误拦、双提交占坑、输入刷新恢复）与推送
+> 格式兼容（德语/markdown Listing）。Latest 仍为 `v3.0.12`；回滚基线 `v3.0.12`（生产）/
+> 上一候选 `v3.1.0-rc.2`；上一 GA `v3.0.11`。
 > 生产目标为 `https://sops.hongecb.store`。
+
+### Changed（变更）
+
+- Keyword Hunter 刷新恢复策略：`copyInputText` / `keywordsInputText` 纳入 persist 切片
+  （单字段上限 200_000 字符），其余运行时工作数据仍刷新清空。
 
 ### Fixed（修复）
 
