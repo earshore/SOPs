@@ -8,6 +8,17 @@ describe('resolveIncompleteGenerationGuard', () => {
     );
   });
 
+  it('timeout push-block reason → 拦截（无 UI partial badge）', () => {
+    expect(
+      resolveIncompleteGenerationGuard({ assistantPushBlockReason: 'partial_timeout' }, undefined)
+    ).toBe('partial_timeout');
+    expect(
+      resolveIncompleteGenerationGuard(undefined, {
+        assistantPushBlockReason: 'partial_timeout',
+      })
+    ).toBe('partial_timeout');
+  });
+
   it('按钮气泡匹配到 stopped → 拦截', () => {
     expect(resolveIncompleteGenerationGuard({ status: 'stopped' }, { status: 'partial' })).toBe(
       'stopped'

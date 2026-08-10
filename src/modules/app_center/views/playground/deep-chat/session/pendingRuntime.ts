@@ -473,6 +473,8 @@ export function preserveTimedOutPartialResponse(threadId: string | null, error: 
       assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
       // Keep partial marker only when we intentionally stop mid-stream; timeout
       // content is treated as final retained text (no sticky 「未完成」).
+      // Push gate still blocks via assistantPushBlockReason.
+      assistantPushBlockReason: 'partial_timeout',
     }
   );
   markPendingDeepChatRequestSettled(pendingRequest);

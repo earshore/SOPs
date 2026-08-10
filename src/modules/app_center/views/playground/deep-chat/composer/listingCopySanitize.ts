@@ -38,6 +38,34 @@ export function hasListingCopyStart(text: string): boolean {
   return findCopyStartIndex(text) !== null || TITLE_WORD_START_PATTERN.test(text);
 }
 
+/** Numbered section markers used by template-style listing copy. */
+const NUMBERED_LISTING_SECTION =
+  /^\d+[.)、．]\s*(?:Title|Titel|Bullet|Description)/gim;
+const DESCRIPTION_SECTION =
+  /(?:^|\n)\s*(?:\d+[.)、．]\s*)?(?:Description|Beschreibung|Produktbeschreibung)\b/i;
+const BULLET_SECTION = /(?:^|\n)\s*\d+[.)、．]\s*Bullet\b/gi;
+
+/**
+ * Structural completeness for Listing push.
+ * - No Title start → incomplete
+ * - Numbered template present → require Description + ≥5 Bullet markers
+ * - Free-form (no numbered markers) → allow (conservative; avoid false blocks)
+ */
+export function isCompleteListingCopy(text: string): boolean {
+  if (!hasListingCopyStart(text)) {
+    return false;
+  }
+  const numberedHits = text.match(NUMBERED_LISTING_SECTION);
+  if (!numberedHits || numberedHits.length === 0) {
+    return true;
+  }
+  if (!DESCRIPTION_SECTION.test(text)) {
+    return false;
+  }
+  const bullets = text.match(BULLET_SECTION);
+  return (bullets?.length ?? 0) >= 5;
+}
+
 function findCopyStartIndex(text: string): number | null {
   const positions: number[] = [];
   for (const marker of TITLE_START_MARKERS) {

@@ -228,6 +228,7 @@ export function saveThreadMessages(
       now,
       assistantCreatedAt: options.assistantCreatedAt,
       assistantStatus: options.assistantStatus,
+      assistantPushBlockReason: options.assistantPushBlockReason,
       assistantReasoning: options.assistantReasoning,
       assistantReasoningDurationSec: options.assistantReasoningDurationSec,
       assistantPreReplySteps: options.assistantPreReplySteps,

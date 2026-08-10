@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   hasListingCopyStart,
+  isCompleteListingCopy,
   isListingPromptContext,
   sanitizeListingCopy,
 } from './listingCopySanitize';
@@ -39,6 +40,38 @@ describe('sanitizeListingCopy', () => {
   it('空字符串 / 纯空白原样返回', () => {
     expect(sanitizeListingCopy('')).toBe('');
     expect(sanitizeListingCopy('   ')).toBe('   ');
+  });
+});
+
+describe('isCompleteListingCopy', () => {
+  const fullNumbered = [
+    '1. Title: Kabellose Ohrhörer',
+    '2. Bullet 1: Feature one',
+    '3. Bullet 2: Feature two',
+    '4. Bullet 3: Feature three',
+    '5. Bullet 4: Feature four',
+    '6. Bullet 5: Feature five',
+    '7. Description: Long product description here.',
+  ].join('\n');
+
+  it('accepts a full numbered listing with Description and 5 bullets', () => {
+    expect(isCompleteListingCopy(fullNumbered)).toBe(true);
+  });
+
+  it('rejects truncated numbered listing missing Description / bullets', () => {
+    const truncated = [
+      '1. Title: Kabellose Ohrhörer',
+      '2. Bullet 1: Feature one',
+      '3. Bullet 2: Feature two',
+    ].join('\n');
+    expect(hasListingCopyStart(truncated)).toBe(true);
+    expect(isCompleteListingCopy(truncated)).toBe(false);
+  });
+
+  it('allows free-form Title start without numbered markers', () => {
+    expect(
+      isCompleteListingCopy('Title  \nOrganizer Box Storage Organizer Stackable Waterproof')
+    ).toBe(true);
   });
 });
 

@@ -213,6 +213,8 @@ export interface SaveThreadMessagesOptions {
   threadId?: string;
   assistantCreatedAt?: number;
   assistantStatus?: DeepChatMessageStatus;
+  /** Push-only incomplete marker (no UI badge). */
+  assistantPushBlockReason?: 'partial_timeout';
   /** Display-only reasoning channel for the assistant message */
   assistantReasoning?: string;
   /** Whole seconds for settled 「已完成 Xs」 */

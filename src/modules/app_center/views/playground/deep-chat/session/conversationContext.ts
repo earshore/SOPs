@@ -40,12 +40,19 @@ export interface DeepChatMessage {
   attachmentMeta?: DeepChatAttachmentMeta;
   createdAt?: number;
   status?: DeepChatMessageStatus;
+  /**
+   * Push-only incomplete marker (does not change UI badge semantics).
+   * Used when timeout content is retained as final text without status=partial.
+   */
+  assistantPushBlockReason?: 'partial_timeout';
 }
 
 export interface BuildStoredThreadMessagesOptions {
   now?: number;
   assistantCreatedAt?: number;
   assistantStatus?: DeepChatMessageStatus;
+  /** Push-only incomplete marker for timeout-retained final text. */
+  assistantPushBlockReason?: 'partial_timeout';
   /** Display-only reasoning channel for the new assistant message */
   assistantReasoning?: string;
   /** Whole seconds from request start to settle (「已完成 Xs」). */
@@ -146,6 +153,9 @@ function buildAssistantStoredMessage(
     // Only persist incomplete markers; omit status when settled (clears 「未完成」).
     ...(options.assistantStatus === 'stopped' || options.assistantStatus === 'partial'
       ? { status: options.assistantStatus }
+      : {}),
+    ...(options.assistantPushBlockReason === 'partial_timeout'
+      ? { assistantPushBlockReason: 'partial_timeout' as const }
       : {}),
     ...(reasoning ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) } : {}),
     ...(typeof durationSec === 'number' && Number.isFinite(durationSec) && durationSec >= 0
@@ -266,12 +276,17 @@ function optionalStoredMessageFields(
   const durationSec = normalizeReasoningDurationSec(message.reasoningDurationSec);
   const status =
     message.status === 'stopped' || message.status === 'partial' ? message.status : undefined;
+  const pushBlock =
+    message.assistantPushBlockReason === 'partial_timeout'
+      ? ('partial_timeout' as const)
+      : undefined;
   const preReplySteps = normalizePreReplyActivitySteps(message.preReplySteps, maxMessageChars);
   const attachmentMeta = normalizeAttachmentMeta(message.attachmentMeta);
   return {
     ...(reasoning ? { reasoning: truncateStoredMessage(reasoning, maxMessageChars) } : {}),
     ...(durationSec !== undefined ? { reasoningDurationSec: durationSec } : {}),
     ...(status ? { status } : {}),
+    ...(pushBlock ? { assistantPushBlockReason: pushBlock } : {}),
     ...(preReplySteps ? { preReplySteps } : {}),
     ...(attachmentMeta ? { attachmentMeta } : {}),
   };

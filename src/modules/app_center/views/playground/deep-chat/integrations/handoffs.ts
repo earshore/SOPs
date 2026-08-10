@@ -46,7 +46,7 @@ import { chooseWithModal, confirmWithModal } from '../infra/confirmModal';
 import { getDeepChatSystemPromptBudgetError } from '../request/budget';
 
 import { getPromptDrafts } from '../composer/promptDrafts';
-import { hasListingCopyStart } from '../composer/listingCopySanitize';
+import { hasListingCopyStart, isCompleteListingCopy } from '../composer/listingCopySanitize';
 import { resolveIncompleteGenerationGuard } from '../composer/pushGuard';
 
 import type { DeepChatMessage, DeepChatSkillContext } from '../types';
@@ -523,11 +523,17 @@ function buildListingCopyFromPrompt(
 function resolveKeywordHunterPushBlock(content: string, message?: DeepChatMessage): string | null {
   const latestAi = [...getActiveThread().messages].reverse().find(m => m.role === 'ai');
   const incomplete = resolveIncompleteGenerationGuard(message, latestAi);
+  if (incomplete === 'partial_timeout') {
+    return '回复生成超时未完成，无法推送复核';
+  }
   if (incomplete) {
     return '回复生成未完成，无法推送复核';
   }
   if (!hasListingCopyStart(content)) {
     return '当前回复未生成完整产品文案（可能仅推理或请求失败），无法推送复核';
+  }
+  if (!isCompleteListingCopy(content)) {
+    return '正文结构不完整，无法推送复核';
   }
   return null;
 }

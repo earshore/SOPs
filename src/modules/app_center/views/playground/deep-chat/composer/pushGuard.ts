@@ -8,7 +8,12 @@
  * 兜底：只要线程最新 AI 消息带未完成 status，即使按钮气泡匹配不到 store，也拦截。
  */
 
-export type PushGuardMessageLike = { status?: 'partial' | 'stopped' } | undefined;
+export type PushGuardMessageLike =
+  | {
+      status?: 'partial' | 'stopped';
+      assistantPushBlockReason?: 'partial_timeout';
+    }
+  | undefined;
 
 /**
  * 返回应触发「生成未完成」拦截的状态，无则 undefined。
@@ -18,12 +23,18 @@ export type PushGuardMessageLike = { status?: 'partial' | 'stopped' } | undefine
 export function resolveIncompleteGenerationGuard(
   stored: PushGuardMessageLike,
   latestAi: PushGuardMessageLike
-): 'partial' | 'stopped' | undefined {
+): 'partial' | 'stopped' | 'partial_timeout' | undefined {
   if (stored?.status === 'partial' || stored?.status === 'stopped') {
     return stored.status;
   }
+  if (stored?.assistantPushBlockReason === 'partial_timeout') {
+    return 'partial_timeout';
+  }
   if (latestAi?.status === 'partial' || latestAi?.status === 'stopped') {
     return latestAi.status;
+  }
+  if (latestAi?.assistantPushBlockReason === 'partial_timeout') {
+    return 'partial_timeout';
   }
   return undefined;
 }
