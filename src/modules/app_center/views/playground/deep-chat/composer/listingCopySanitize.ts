@@ -51,32 +51,87 @@ export function hasListingCopyStart(text: string): boolean {
   return findCopyStartIndex(text) !== null;
 }
 
-/** Numbered section markers used by template-style listing copy. */
-const NUMBERED_LISTING_SECTION =
-  /^\d+[.)、．]\s*(?:Title|Titel|Bullet|Description)/gim;
+/**
+ * Strict numbered bullet labels: "2. Bullet 1" / "3) Bullet".
+ * Presence of these means the model chose the N. Bullet template — require 5 + description.
+ */
+const NUMBERED_BULLET_LABEL =
+  /(?:^|\n)\s*\d+[.)、．]\s*Bullet\b/gi;
+
+/**
+ * Description section header (EN/DE), allowing markdown wrappers and optional numbering.
+ * Covers: "7. Description:", "**Beschreibung**:", "## Product Description"
+ */
 const DESCRIPTION_SECTION =
-  /(?:^|\n)\s*(?:\d+[.)、．]\s*)?(?:Description|Beschreibung|Produktbeschreibung)\b/i;
-const BULLET_SECTION = /(?:^|\n)\s*\d+[.)、．]\s*Bullet\b/gi;
+  /(?:^|\n)\s*(?:#{1,6}\s+)?(?:\*{1,2}|_{1,2})?(?:\d+[.)、．]\s*)?(?:Description|Beschreibung|Produktbeschreibung|Product\s+Description)(?:\*{1,2}|_{1,2})?\b/i;
+
+/**
+ * Loose bullet markers used by real models (not only "N. Bullet"):
+ * - "Bullet 1:" / "**Bullet 2**" / "Bullet Point 3"
+ * - "N. Bullet …"
+ */
+const LOOSE_BULLET_LABEL =
+  /(?:^|\n)\s*(?:#{1,6}\s+)?(?:\*{1,2}|_{1,2})?(?:\d+[.)、．]\s*)?Bullet(?:\s*Point)?\s*\d*(?:\*{1,2}|_{1,2})?\b/gi;
+
+/** Dash / bullet-list lines (avoid matching markdown bold openers). */
+const DASH_BULLET_LINE = /(?:^|\n)\s*(?:[-•▪◦]|\*(?!\*))\s+\S+/g;
+
+/** Free-form body after Title must be non-trivial to count as a real listing. */
+const MIN_FREEFORM_LISTING_CHARS = 200;
 
 /**
  * Structural completeness for Listing push.
- * - No Title start → incomplete
- * - Numbered template present → require Description + ≥5 Bullet markers
- * - Free-form (no numbered markers) → allow (conservative; avoid false blocks)
+ *
+ * Design notes (false-block fix):
+ * - Do NOT treat a lone "1. Title" as full numbered template (models often mix
+ *   "1. Title" + free-form / bold bullets / dash lists).
+ * - Only when "N. Bullet" labels appear, require 5 bullets + description (catches
+ *   mid-template truncation like 40% stream abort).
+ * - Otherwise accept: description section, ≥5 loose bullets, or long free-form body.
  */
 export function isCompleteListingCopy(text: string): boolean {
   if (!hasListingCopyStart(text)) {
     return false;
   }
-  const numberedHits = text.match(NUMBERED_LISTING_SECTION);
-  if (!numberedHits || numberedHits.length === 0) {
-    return true;
-  }
-  if (!DESCRIPTION_SECTION.test(text)) {
+
+  const start = findCopyStartIndex(text) ?? 0;
+  const body = text.slice(start).trim();
+  if (!body) {
     return false;
   }
-  const bullets = text.match(BULLET_SECTION);
-  return (bullets?.length ?? 0) >= 5;
+
+  const numberedBulletCount = countMatches(body, NUMBERED_BULLET_LABEL);
+  const looseBulletCount = Math.max(
+    numberedBulletCount,
+    countMatches(body, LOOSE_BULLET_LABEL),
+    countMatches(body, DASH_BULLET_LINE)
+  );
+  const hasDesc = DESCRIPTION_SECTION.test(body);
+
+  // Clear incomplete numbered-Bullet template (started 1–4 bullets, no description yet).
+  if (numberedBulletCount >= 1 && numberedBulletCount < 5 && !hasDesc) {
+    return false;
+  }
+
+  // Full numbered-Bullet template: need 5 labels + description header.
+  if (numberedBulletCount >= 5) {
+    return hasDesc;
+  }
+
+  // Mixed / free-form / markdown-bold styles common in DE listings.
+  if (hasDesc) {
+    return true;
+  }
+  if (looseBulletCount >= 5) {
+    return true;
+  }
+  return body.length >= MIN_FREEFORM_LISTING_CHARS;
+}
+
+function countMatches(text: string, pattern: RegExp): number {
+  const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
+  const re = new RegExp(pattern.source, flags);
+  return text.match(re)?.length ?? 0;
 }
 
 function findCopyStartIndex(text: string): number | null {

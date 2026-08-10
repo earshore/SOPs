@@ -58,7 +58,7 @@ describe('isCompleteListingCopy', () => {
     expect(isCompleteListingCopy(fullNumbered)).toBe(true);
   });
 
-  it('rejects truncated numbered listing missing Description / bullets', () => {
+  it('rejects truncated numbered Bullet template missing Description / bullets', () => {
     const truncated = [
       '1. Title: Kabellose Ohrhörer',
       '2. Bullet 1: Feature one',
@@ -68,10 +68,59 @@ describe('isCompleteListingCopy', () => {
     expect(isCompleteListingCopy(truncated)).toBe(false);
   });
 
-  it('allows free-form Title start without numbered markers', () => {
-    expect(
-      isCompleteListingCopy('Title  \nOrganizer Box Storage Organizer Stackable Waterproof')
-    ).toBe(true);
+  it('does not treat lone "1. Title" as incomplete when body is a long free-form listing', () => {
+    const mixed = [
+      '1. Title: HONGE CB Ordnungssystem – Platzsparend & Wasserdicht',
+      '',
+      'Dieses vielseitige Ordnungssystem schafft Stauraum in Küche und Bad.',
+      'Es ist stapelbar, wasserdicht und in unter zwei Minuten aufgebaut.',
+      'Ideal für Gewürze, Kosmetik und Büroartikel mit neutralem Design.',
+      'Bestellen Sie jetzt und schaffen Sie Ordnung im gesamten Zuhause.',
+    ].join('\n');
+    expect(hasListingCopyStart(mixed)).toBe(true);
+    expect(isCompleteListingCopy(mixed)).toBe(true);
+  });
+
+  it('accepts markdown-bold DE listing (**Titel** / **Bullet** / **Beschreibung**)', () => {
+    const boldDe = [
+      '**Titel**: Kabellose Ohrhörer mit ANC',
+      '**Bullet 1**: Langer Akku',
+      '**Bullet 2**: Aktive Geräuschunterdrückung',
+      '**Bullet 3**: IPX5 wasserdicht',
+      '**Bullet 4**: Bequemer Sitz',
+      '**Bullet 5**: Schnellladen',
+      '**Beschreibung**: Hochwertige Ohrhörer für den Alltag mit klarem Klang.',
+    ].join('\n');
+    expect(isCompleteListingCopy(boldDe)).toBe(true);
+  });
+
+  it('accepts Title + dash bullets + Description (no "N. Bullet" labels)', () => {
+    const dashStyle = [
+      '1. Title: Wireless Earbuds',
+      'Key benefits:',
+      '- Long battery life for all-day use',
+      '- Active noise cancellation',
+      '- IPX5 sweat resistance',
+      '- Comfortable fit',
+      '- Fast USB-C charging',
+      'Description:',
+      'Premium wireless earbuds designed for daily commuting and workouts.',
+    ].join('\n');
+    expect(isCompleteListingCopy(dashStyle)).toBe(true);
+  });
+
+  it('allows long free-form Title start without numbered Bullet labels', () => {
+    const free = `Title
+Organizer Box Storage Organizer Stackable Waterproof for Kitchen and Bathroom
+This modular system creates extra space in every cabinet and is easy to clean.
+Stackable design, BPA-free plastic, tool-free setup in under two minutes.
+Perfect for spices, cosmetics, tools, and office supplies in any room.`;
+    expect(isCompleteListingCopy(free)).toBe(true);
+  });
+
+  it('rejects title-only stub', () => {
+    expect(isCompleteListingCopy('Title\nShort name')).toBe(false);
+    expect(isCompleteListingCopy('1. Title: Only a title line')).toBe(false);
   });
 });
 
