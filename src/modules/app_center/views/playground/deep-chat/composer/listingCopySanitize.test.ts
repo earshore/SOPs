@@ -44,9 +44,9 @@ describe('sanitizeListingCopy', () => {
 
 describe('hasListingCopyStart', () => {
   it('grok 实测格式「Title  \nOrganizer Box…」（行首独立词 + 尾随两空格）命中', () => {
-    expect(hasListingCopyStart('Title  \nOrganizer Box Storage Organizer Stackable Waterproof')).toBe(
-      true
-    );
+    expect(
+      hasListingCopyStart('Title  \nOrganizer Box Storage Organizer Stackable Waterproof')
+    ).toBe(true);
   });
 
   it('行首纯 Title（无冒号无编号）命中', () => {

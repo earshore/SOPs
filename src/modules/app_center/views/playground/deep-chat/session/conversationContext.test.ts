@@ -162,11 +162,11 @@ describe('buildStoredThreadMessages', () => {
 });
 
 describe('normalizeStoredThreadMessages', () => {
-  it('drops invalid messages and fills missing timestamps', () => {
+  it('drops invalid messages, fills missing timestamps, and keeps system notices', () => {
     expect(
       normalizeStoredThreadMessages(
         [
-          { role: 'system', text: '系统' },
+          { role: 'system', text: '切换至gpt-5.6-sol · medium' },
           { role: 'user', text: '   ' },
           { role: 'assistant', text: '保留' },
         ],
@@ -174,7 +174,35 @@ describe('normalizeStoredThreadMessages', () => {
           fallbackCreatedAt: 5000,
         }
       )
-    ).toEqual([{ role: 'ai', text: '保留', createdAt: 5000 }]);
+    ).toEqual([
+      { role: 'system', text: '切换至gpt-5.6-sol · medium', createdAt: 5000 },
+      { role: 'ai', text: '保留', createdAt: 5000 },
+    ]);
+  });
+
+  it('carries over system notices in createdAt order with the current turn', () => {
+    const stored = buildStoredThreadMessages(
+      [
+        { role: 'system', text: '切换至gpt-5.6-sol · medium', createdAt: 1500 },
+        { role: 'user', text: '旧问题', createdAt: 1000 },
+        { role: 'ai', text: '旧回答', createdAt: 1200 },
+      ],
+      [{ role: 'user', content: '新问题' }],
+      '新回答',
+      {
+        now: 2000,
+        maxMessageChars: 500,
+      }
+    );
+
+    // 当轮 U(2000)/A(2000) + 存量通知 N(1500) 按 createdAt 稳定合并：N → U → A
+    expect(stored.map(message => message.role)).toEqual(['system', 'user', 'ai']);
+    expect(stored[0]).toEqual({
+      role: 'system',
+      text: '切换至gpt-5.6-sol · medium',
+      createdAt: 1500,
+    });
+    expect(stored[1]).toEqual({ role: 'user', text: '新问题', createdAt: 2000 });
   });
 
   it('normalizeAttachmentMeta keeps finite count 1-4 only', () => {

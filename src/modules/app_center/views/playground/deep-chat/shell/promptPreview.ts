@@ -8,11 +8,19 @@ import { escapeHTML } from '../infra/utils';
 /** Hover must stay still this long before the Listing Prompt bubble appears. */
 const PROMPT_PREVIEW_SHOW_DELAY_MS = 1000;
 
+/**
+ * 点击后此窗口内的 pointerover 不重新调度 dwell：
+ * 浏览器/测试输入序列会在 click 后残留一次同位置 pointerover，且列表重渲染
+ * 也会重放 over——两者都会让「点击即清 timer」失效，1s 后气泡又弹出来。
+ */
+const PROMPT_PREVIEW_CLICK_SUPPRESS_MS = 1000;
+
 let activePromptPreviewId: string | null = null;
 let promptPreviewHideTimer: number | null = null;
 let promptPreviewShowTimer: number | null = null;
 let pendingPromptPreviewId: string | null = null;
 let isPromptPreviewHovered = false;
+let lastPromptListClickAt = 0;
 
 export function setupPromptPreview(
   container: HTMLElement,
@@ -48,21 +56,19 @@ export function setupPromptPreview(
       return;
     }
 
+    // 点击后的残留 over / 重渲染重放：抑制 dwell，避免点击后 1s 突然弹泡
+    if (Date.now() - lastPromptListClickAt < PROMPT_PREVIEW_CLICK_SUPPRESS_MS) {
+      return;
+    }
+
     schedulePromptPreviewShow(container, promptId, promptButton, {
       clientX: event.clientX,
       clientY: event.clientY,
     });
   };
 
-  const onPromptFocusIn = (event: FocusEvent): void => {
-    const target = event.target as HTMLElement | null;
-    const promptButton = target?.closest<HTMLButtonElement>('[data-preview-prompt-id]');
-    const promptId = promptButton?.dataset.previewPromptId;
-    if (promptId) {
-      // Keyboard focus: show immediately (no hover dwell).
-      clearPromptPreviewShowTimer();
-      showPromptPreview(container, promptId, promptButton);
-    }
+  const onPromptListClickCapture = (): void => {
+    lastPromptListClickAt = Date.now();
   };
 
   const onPromptPointerLeave = (): void => {
@@ -82,15 +88,16 @@ export function setupPromptPreview(
   };
 
   promptList.addEventListener('pointerover', onPromptPointerOver);
-  promptList.addEventListener('focusin', onPromptFocusIn);
   promptList.addEventListener('pointerleave', onPromptPointerLeave);
+  // capture 阶段记录点击（先于 shell 的 bubble handler），供 dwell 抑制判定
+  promptList.addEventListener('click', onPromptListClickCapture, true);
   preview.addEventListener('pointerenter', onPreviewPointerEnter);
   preview.addEventListener('pointerleave', onPreviewPointerLeave);
   addCleanup(() => {
     clearPromptPreviewShowTimer();
     promptList.removeEventListener('pointerover', onPromptPointerOver);
-    promptList.removeEventListener('focusin', onPromptFocusIn);
     promptList.removeEventListener('pointerleave', onPromptPointerLeave);
+    promptList.removeEventListener('click', onPromptListClickCapture, true);
     preview.removeEventListener('pointerenter', onPreviewPointerEnter);
     preview.removeEventListener('pointerleave', onPreviewPointerLeave);
   });
@@ -193,6 +200,7 @@ export function resetPromptPreviewState(): void {
   clearPromptPreviewShowTimer();
   clearPromptPreviewHideTimer();
   isPromptPreviewHovered = false;
+  lastPromptListClickAt = 0;
 }
 
 export function getActivePromptPreviewId(): string | null {

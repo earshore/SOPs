@@ -5,6 +5,7 @@ import {
   type DeepChatReasoningSessionOverride,
 } from '../session/uiHooks';
 import {
+  appendThreadNotice,
   cancelThreadRename,
   closeThreadMenu,
   commitThreadRename,
@@ -48,6 +49,7 @@ import {
 import {
   applySkillContextsToSession,
   applyThreadTuningToSession,
+  buildModelSwitchNotice,
   createThreadFromSkillContext,
   deletePromptDraft,
   sendAssistantCopyToKeywordHunter,
@@ -82,11 +84,17 @@ import {
 import { refreshMessageToolbarStatuses, setupMessageToolbars } from '../composer/messageToolbar';
 import { unmountVisionComposer } from '../composer/visionComposer';
 
-import { setupPromptPreview } from './promptPreview';
+import { hidePromptPreview, setupPromptPreview } from './promptPreview';
 import { renderPromptDraftList, renderThreadList } from './renderers';
+import {
+  clearPageDefaults,
+  resolveReasoningFingerprint,
+  writePageDefaults,
+} from '../session/pageDefaults';
 
 import { setupSkillLibrary } from './skillLibrary';
 import type { DeepChatElement, DeepChatThread, TuningControlRefs } from '../types';
+import type { LLMProviderConfig } from '@/types/state';
 import {
   escapeHTML,
   getFirstModel,
@@ -208,22 +216,96 @@ function syncModelSelectProvider(container: HTMLElement): void {
   });
 }
 
+/**
+ * 会话中生效模型变更的统一处理（onModelChange / onRefresh 共用）：
+ * 落 thread.model + 清 Responses 多轮链 + 会话内切换通知。
+ * 通知的推理状态取请求期语义：先同步推理控件（档位钳制），再读 live DOM。
+ */
+function applyEffectiveModelSwitch(container: HTMLElement, nextModel: string): void {
+  if (nextModel === sessionState.selectedModel) {
+    return;
+  }
+  sessionState.selectedModel = nextModel;
+  updateActiveThreadFields(container, {
+    model: nextModel || undefined,
+    lastResponseId: undefined,
+    lastResponseModel: undefined,
+  });
+  syncDeepChatReasoningControlsFromThread(container);
+  const thread = getActiveThread();
+  if (thread.messages.length > 0) {
+    const reasoningState = resolveDeepChatReasoningSessionOverride(container) ?? { enabled: false };
+    appendThreadNotice(container, buildModelSwitchNotice(nextModel, reasoningState));
+  }
+}
+
+/** 全局推理默认（fallback 时覆盖线程，保证 UI 与实际发送一致）。 */
+function resolveGlobalReasoningPrefs(provider: string): NonNullable<DeepChatThread['reasoning']> {
+  const stored = StorageService.getLLMConfig(provider)?.reasoningPrefs;
+  return {
+    enabled: Boolean(stored?.enabled),
+    effort: parseReasoningEffortValue(stored?.effort),
+  };
+}
+
+/**
+ * 线程模型可恢复目标：线程模型在列表内直接用，否则回落全局（与 refreshLLMConfig 同源）。
+ */
+function resolveThreadModelTarget(config: LLMProviderConfig | null, threadModel: string): string {
+  if (!config) {
+    return '';
+  }
+  if (threadModel && findConfigModelsEntry(config, threadModel)) {
+    return threadModel;
+  }
+  return resolveToolTargetModel('playground-deep-chat', config) || getFirstModel(config) || '';
+}
+
+/**
+ * 线程模型恢复到模型选择框（applyThreadTuningToSession 末尾调用，覆盖切会话/挂载/重置）：
+ * - thread.model 在当前 config.models 中 → setModel(target)（UI-only，不写任何持久化）；
+ * - 否则（含空）→ 回落全局模型（与 refreshLLMConfig 同源）；
+ * - 线程有 model 记录但不可用 → 覆盖线程推理为全局 prefs + 清 Responses 链 + warning toast。
+ */
+export function syncThreadModelToSession(container: HTMLElement | null): void {
+  if (!container) {
+    return;
+  }
+  const tracked = modelSelectControllers.get(container);
+  const config = sessionState.currentConfig;
+  if (!tracked || !config) {
+    return;
+  }
+  const threadModel = getActiveThread().model || '';
+  const target = resolveThreadModelTarget(config, threadModel);
+  if (!target) {
+    return;
+  }
+
+  tracked.controller.setModel(target);
+  sessionState.selectedModel = target;
+
+  const isFallback = threadModel !== '' && target !== threadModel;
+  if (isFallback) {
+    updateActiveThreadFields(container, {
+      lastResponseId: undefined,
+      lastResponseModel: undefined,
+      reasoning: resolveGlobalReasoningPrefs(config.provider),
+    });
+    showToast('该会话的模型当前不可用，已切换至全局默认模型', { type: 'warning' });
+  }
+  syncDeepChatReasoningControlsFromThread(container);
+  applyDeepChatVisionUploadConfig(getChat(container));
+}
+
 export function bindModelControls(refs: ModelControlRefs): void {
   const { clearButton, container, railToggleButton, settingsButton } = refs;
 
   const onModelChange = (nextModel: string): void => {
-    if (nextModel !== sessionState.selectedModel) {
-      // Invalidate Responses multi-turn chain when model changes mid-thread.
-      updateActiveThreadFields(container, {
-        lastResponseId: undefined,
-        lastResponseModel: undefined,
-      });
-    }
+    applyEffectiveModelSwitch(container, nextModel);
     const chat = getChat(container);
-    sessionState.selectedModel = nextModel;
     // Capability-gated controls must re-evaluate when the model changes.
     // Vision composer shows modelSwitch toast when staged files + vision lost.
-    syncDeepChatReasoningControlsFromThread(container);
     applyDeepChatVisionUploadConfig(chat);
   };
 
@@ -236,10 +318,10 @@ export function bindModelControls(refs: ModelControlRefs): void {
     models: unknown[];
     selectedModel: string;
   }): Promise<void> => {
-    sessionState.selectedModel = selectedModel;
-    // 重读含 key 的完整配置（组件写盘时密钥走 secure 存储），供后续请求使用。
+    // 先重读含 key 的完整配置（组件写盘时密钥走 secure 存储），供能力解析与后续请求使用。
     sessionState.currentConfig = await StorageService.getLLMConfigWithKey();
     renderLLMConfigState(container);
+    applyEffectiveModelSwitch(container, selectedModel);
     syncDeepChatReasoningControlsFromThread(container);
     applyDeepChatVisionUploadConfig(getChat(container));
   };
@@ -345,6 +427,8 @@ export function bindThreadControls(
 
   const onPromptListClick = (event: MouseEvent): void => {
     const target = event.target as HTMLElement | null;
+    // 点击即隐藏预览气泡并取消 dwell timer（避免残留遮挡与点击后 1s 突然弹泡）
+    hidePromptPreview(container);
     if (target?.closest('[data-open-promptlab]')) {
       void openPromptlab();
       return;
@@ -841,28 +925,39 @@ export function bindReasoningTuningControls(container: HTMLElement): void {
   );
   const reasoningEffort = container.querySelector<HTMLSelectElement>('#deep-chat-reasoning-effort');
 
+  const writeReasoningPageDefault = (reasoning: NonNullable<DeepChatThread['reasoning']>): void => {
+    writePageDefaults({
+      reasoning: { ...reasoning },
+      reasoningFingerprint: resolveReasoningFingerprint(sessionState.currentConfig?.provider || ''),
+    });
+  };
+
   const onReasoningEnabledChange = (): void => {
     const enabled = Boolean(reasoningEnabled?.checked);
     if (reasoningEffort) {
       reasoningEffort.disabled = !enabled;
     }
     const prev = getActiveThread().reasoning || {};
+    const nextReasoning = {
+      ...prev,
+      enabled,
+      effort: parseReasoningEffortValue(reasoningEffort?.value ?? prev.effort),
+    };
     updateActiveThreadFields(container, {
-      reasoning: {
-        ...prev,
-        enabled,
-        effort: parseReasoningEffortValue(reasoningEffort?.value ?? prev.effort),
-      },
+      reasoning: nextReasoning,
     });
+    writeReasoningPageDefault(nextReasoning);
   };
   const onReasoningEffortChange = (): void => {
     const effort = parseReasoningEffortValue(reasoningEffort?.value);
     const prev = getActiveThread().reasoning || {};
     const enabled =
       prev.enabled !== undefined ? Boolean(prev.enabled) : Boolean(reasoningEnabled?.checked);
+    const nextReasoning = { ...prev, enabled, effort };
     updateActiveThreadFields(container, {
-      reasoning: { ...prev, enabled, effort },
+      reasoning: nextReasoning,
     });
+    writeReasoningPageDefault(nextReasoning);
   };
   reasoningEnabled?.addEventListener('change', onReasoningEnabledChange);
   reasoningEffort?.addEventListener('change', onReasoningEffortChange);
@@ -882,6 +977,7 @@ export function bindTuningControls(container: HTMLElement, refs: TuningControlRe
     updateActiveThreadFields(container, {
       systemPrompt: sessionState.sessionSystemPrompt || undefined,
     });
+    writePageDefaults({ systemPrompt: sessionState.sessionSystemPrompt || undefined });
   };
   systemPromptInput?.addEventListener('input', onSystemPromptInput);
   sessionState.cleanupCallbacks.push(() =>
@@ -895,6 +991,7 @@ export function bindTuningControls(container: HTMLElement, refs: TuningControlRe
     }
     updateTemperatureTrack(temperatureInput);
     updateActiveThreadFields(container, { temperature: sessionState.sessionTemperature });
+    writePageDefaults({ temperature: sessionState.sessionTemperature });
   };
   temperatureInput?.addEventListener('input', onTemperatureInput);
   sessionState.cleanupCallbacks.push(() =>
@@ -921,6 +1018,7 @@ export function bindTuningControls(container: HTMLElement, refs: TuningControlRe
       temperature: 0.3,
       reasoning: undefined,
     });
+    clearPageDefaults();
     syncDeepChatReasoningControlsFromThread(container);
     showToast('Deep Chat 调试参数已重置', { type: 'success' });
   };
@@ -1201,4 +1299,5 @@ registerShellUiHooks({
   setToggleExpanded,
   renderThreadList,
   renderPromptDraftList,
+  syncThreadModelToSession,
 });

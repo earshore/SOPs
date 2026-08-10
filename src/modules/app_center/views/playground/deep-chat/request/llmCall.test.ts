@@ -20,6 +20,7 @@ const {
   buildReasoningOnlyRecoveryMessages,
   DEEP_CHAT_REASONING_ONLY_RECOVERY_PROMPT,
   mapDeepChatEmptyResponsesMessage,
+  resolveDeepChatScaledTimeout,
   resolveDeepChatResponsesChainOptions,
   shouldTypewriteFinalAssistantText,
   stripResponsesChainForRetry,
@@ -177,5 +178,25 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     expect(next[1]?.role).toBe('user');
     expect(next[1]?.content).toBe(DEEP_CHAT_REASONING_ONLY_RECOVERY_PROMPT);
     expect(String(next[1]?.content)).toMatch(/最终答案|可见/);
+  });
+});
+
+describe('resolveDeepChatScaledTimeout', () => {
+  it('doubles the timeout for max effort with the default 90s base', () => {
+    expect(resolveDeepChatScaledTimeout(90_000, 'max')).toBe(180_000);
+  });
+
+  it('caps at 300s', () => {
+    expect(resolveDeepChatScaledTimeout(250_000, 'max')).toBe(300_000);
+    expect(resolveDeepChatScaledTimeout(300_000, 'max')).toBe(300_000);
+  });
+
+  it('keeps the base timeout for non-max efforts, reasoning off, and unknown', () => {
+    expect(resolveDeepChatScaledTimeout(90_000, 'low')).toBe(90_000);
+    expect(resolveDeepChatScaledTimeout(90_000, 'medium')).toBe(90_000);
+    expect(resolveDeepChatScaledTimeout(90_000, 'high')).toBe(90_000);
+    expect(resolveDeepChatScaledTimeout(90_000, 'xhigh')).toBe(90_000);
+    expect(resolveDeepChatScaledTimeout(90_000, 'off')).toBe(90_000);
+    expect(resolveDeepChatScaledTimeout(90_000, undefined)).toBe(90_000);
   });
 });

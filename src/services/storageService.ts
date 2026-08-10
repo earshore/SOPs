@@ -43,6 +43,9 @@ export const STORAGE_KEYS = {
   // === 功能开关 ===
   FEATURE_FLAGS_PREFIX: 'feature_',
 
+  // === Deep Chat ===
+  DEEP_CHAT_PAGE_DEFAULTS: 'deep_chat_page_defaults',
+
   // === 搜索历史 ===
   AMZ_SEARCH_HISTORY: 'amzf_search_history',
 } as const;

@@ -1299,6 +1299,13 @@ test('uses a generated Prompt draft and sends it with the raised budget', async 
   await expect(usePromptButton).toBeVisible();
   await usePromptButton.click();
 
+  // 等 vendor 初始化完成（技能加载横幅收起）再发送：初始化期间发送的流式回复会
+  // 被 vendor 输入区重建丢弃（既有竞态，曾被 focusin 预览的渲染耗时掩盖）。
+  const skillBanner = page.locator('#deep-chat-view #deep-chat-skill-load-banner');
+  if (await skillBanner.count()) {
+    await expect(skillBanner).toHaveAttribute('hidden', '', { timeout: 10000 });
+  }
+
   const chatInput = page.locator('#deep-chat-view #text-input');
   await expect(chatInput).toContainText(GENERATED_PROMPT_MARKER, { timeout: 5000 });
 
@@ -1569,7 +1576,10 @@ test('shows a pressed stop control and stops with Space', async ({ page }) => {
 
 /** Opt-in product flag: deepChat.enableVision (default false). */
 async function seedDeepChatVisionFeatureEnabled(page: Page): Promise<void> {
-  await page.evaluate(() => {
+  // addInitScript（而非 evaluate）：测试初始页为 about:blank，evaluate 访问 localStorage
+  // 会抛 SecurityError（opaque origin）；init script 在真实页面导航后执行，与
+  // seedMockProviderStorage 同机制。
+  await page.addInitScript(() => {
     const key = 'runtime_strategy_settings';
     let prev: Record<string, unknown> = {};
     try {

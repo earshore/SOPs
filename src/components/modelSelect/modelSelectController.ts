@@ -32,6 +32,7 @@ function createNoopController(): ModelSelectController {
   return {
     refresh: async () => {},
     setProvider: async () => {},
+    setModel: () => {},
     destroy: () => {},
   };
 }
@@ -178,6 +179,21 @@ export function createModelSelect(
   return {
     refresh: () => refreshModels(runtime),
     setProvider: (provider: string) => switchProvider(runtime, provider),
+    setModel: (model: string, opts?: { persist?: boolean }) => {
+      if (!model || model === runtime.state.selectedModel) {
+        return;
+      }
+      // 成员资格判定（与 switchProvider L120 同语义）：不在列表直接 no-op
+      const known = runtime.state.models.some(m => service.getModelId(m) === model);
+      if (!known) {
+        return;
+      }
+      runtime.state = { ...runtime.state, selectedModel: model };
+      renderAll(runtime);
+      if (opts?.persist) {
+        service.persistSelectedModel(runtime.source, model, runtime.persist);
+      }
+    },
     destroy: () => abort.abort(),
   };
 }

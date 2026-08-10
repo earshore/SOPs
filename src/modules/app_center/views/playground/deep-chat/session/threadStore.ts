@@ -27,6 +27,7 @@ import type {
   SaveThreadMessagesOptions,
 } from '../types';
 import { createThreadId, getThreadTitle, normalizeTemperature } from '../infra/utils';
+import { readEffectivePageDefaults, type DeepChatPageDefaults } from './pageDefaults';
 
 import { showToast } from '@/common/ui/notifications';
 
@@ -145,6 +146,24 @@ export function getActiveThread(): DeepChatThread {
   };
   persistThreadStoreNow();
   return fallbackThread;
+}
+
+/**
+ * 会话内追加系统通知消息（模型切换提示等）：实时渲染 + 落线程。
+ * 仅展示不发送：mergeThreadHistoryWithRequest 丢弃 system 角色。
+ */
+export function appendThreadNotice(container: HTMLElement | null, text: string): void {
+  if (!container) {
+    return;
+  }
+  const thread = getActiveThread();
+  const last = thread.messages[thread.messages.length - 1];
+  if (last?.role === 'system' && last.text === text) {
+    return;
+  }
+  const message: DeepChatMessage = { role: 'system', text, createdAt: Date.now() };
+  getChat(container)?.addMessage?.(message, false);
+  updateActiveThreadFields(container, { messages: [...thread.messages, message] });
 }
 
 export function getThreadForSave(threadId?: string): DeepChatThread | null {
@@ -472,8 +491,23 @@ export function applyDeepChatThreadResume(store: DeepChatThreadStore): DeepChatT
   return { ...store, activeThreadId: threadId };
 }
 
+/** 页面默认继承字段（线程显式字段优先，model 不继承：跟随页面/全局默认）。 */
+function createInheritedThreadDefaults(
+  pageDefaults: DeepChatPageDefaults
+): Partial<DeepChatThread> {
+  return {
+    ...(pageDefaults.systemPrompt ? { systemPrompt: pageDefaults.systemPrompt } : {}),
+    ...(typeof pageDefaults.temperature === 'number'
+      ? { temperature: pageDefaults.temperature }
+      : {}),
+    ...(pageDefaults.reasoning ? { reasoning: { ...pageDefaults.reasoning } } : {}),
+  };
+}
+
 export function createThread(container: HTMLElement, options: CreateThreadOptions = {}): void {
   uiHooks.saveActiveThreadDraft(container);
+  const pageDefaults = readEffectivePageDefaults(sessionState.currentConfig?.provider || '');
+  const inheritedDefaults = createInheritedThreadDefaults(pageDefaults);
   const nextThread: DeepChatThread = {
     ...createEmptyThread(),
     ...(options.promptDraftId ? { promptDraftId: options.promptDraftId } : {}),
@@ -486,6 +520,7 @@ export function createThread(container: HTMLElement, options: CreateThreadOption
       ? { skillContexts: uiHooks.cloneSkillContexts(options.skillContexts) }
       : {}),
     ...(options.draftText ? { draftText: options.draftText } : {}),
+    ...inheritedDefaults,
   };
   sessionState.threadStore = {
     activeThreadId: nextThread.id,
@@ -497,6 +532,9 @@ export function createThread(container: HTMLElement, options: CreateThreadOption
   uiHooks.refreshChatSearchResultsIfOpen(container);
   uiHooks.replaceChat(container);
   uiHooks.applySkillContextsToSession(container);
+  // 新线程继承页面默认后同步 sessionState 与调试面板 DOM（skill 优先语义由
+  // applySkillContextsToSession 内部保证，顺序与 switchThread 一致）
+  uiHooks.applyThreadTuningToSession(container);
   uiHooks.hydrateActiveThreadInlineSkillChips(container);
   if (options.toastMessage !== null) {
     showToast(options.toastMessage || '已创建新的 Deep Chat 会话', {
@@ -852,12 +890,14 @@ export function getSanitizedThreadOptionalFields(thread: DeepChatThread): Partia
   const customTitle = getOptionalString(thread.customTitle);
   const promptDraftId = getOptionalString(thread.promptDraftId);
   const systemPrompt = getOptionalString(thread.systemPrompt);
+  const model = getOptionalString(thread.model);
   const pinnedAt = getOptionalFiniteTimestamp(thread.pinnedAt);
   const listingPromptContext = getSanitizedListingPromptContext(thread.listingPromptContext);
   const skillContexts = getSanitizedSkillContexts(thread.skillContexts);
-  if (customTitle) fields.customTitle = customTitle;
-  if (promptDraftId) fields.promptDraftId = promptDraftId;
-  if (systemPrompt) fields.systemPrompt = systemPrompt;
+  assignOptionalStringField(fields, 'customTitle', customTitle);
+  assignOptionalStringField(fields, 'promptDraftId', promptDraftId);
+  assignOptionalStringField(fields, 'systemPrompt', systemPrompt);
+  assignOptionalStringField(fields, 'model', model);
   if (typeof thread.temperature === 'number' && Number.isFinite(thread.temperature)) {
     fields.temperature = normalizeTemperature(String(thread.temperature));
   }
@@ -866,6 +906,16 @@ export function getSanitizedThreadOptionalFields(thread: DeepChatThread): Partia
   if (pinnedAt) fields.pinnedAt = pinnedAt;
   if (thread.hasUnread === true) fields.hasUnread = true;
   return fields;
+}
+
+function assignOptionalStringField(
+  fields: Partial<DeepChatThread>,
+  key: 'customTitle' | 'promptDraftId' | 'systemPrompt' | 'model',
+  value: string | undefined
+): void {
+  if (value) {
+    fields[key] = value;
+  }
 }
 
 /** 日志脱敏：避免 apiKey / token 等敏感字段进入 console */

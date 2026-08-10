@@ -2184,8 +2184,7 @@ async function callLLMStreamFirstThenToolLoop(
         normalizedEndpoint
       );
     } catch (fallbackError) {
-      const detail =
-        fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+      const detail = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
       if (fallbackError instanceof ApiError) {
         throw new ApiError(
           `已尝试从 /responses 回落 Chat Completions 仍失败：${detail}`,

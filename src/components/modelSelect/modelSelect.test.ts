@@ -596,7 +596,107 @@ describe('modelSelectController', () => {
     expect(warn).toHaveBeenCalled();
     await expect(controller.refresh()).resolves.toBeUndefined();
     await expect(controller.setProvider('other')).resolves.toBeUndefined();
+    expect(() => controller.setModel('a')).not.toThrow();
     expect(() => controller.destroy()).not.toThrow();
     warn.mockRestore();
+  });
+
+  describe('setModel', () => {
+    it('selects a listed model without persisting (UI-only default)', async () => {
+      const { controller, select } = mount({
+        targetId: 'keyword-hunter-seo-process',
+        provider: 'new_api',
+      });
+      await controller.setProvider('new_api');
+
+      controller.setModel('other');
+      expect(select.value).toBe('other');
+      expect(mocks.setToolTargetDefaultModel).not.toHaveBeenCalled();
+      expect(mocks.setLLMConfig).not.toHaveBeenCalled();
+    });
+
+    it('persists strategy + provider config when opts.persist is true', async () => {
+      const { controller } = mount({
+        targetId: 'keyword-hunter-seo-process',
+        provider: 'new_api',
+      });
+      await controller.setProvider('new_api');
+
+      controller.setModel('other', { persist: true });
+      expect(mocks.setToolTargetDefaultModel).toHaveBeenCalledWith(
+        'keyword-hunter-seo-process',
+        'new_api',
+        'other'
+      );
+      expect(mocks.setLLMConfig).toHaveBeenCalledWith(
+        'new_api',
+        expect.objectContaining({ model: 'other' })
+      );
+    });
+
+    it('no-ops for a model that is not in the current options', async () => {
+      const { controller, select } = mount({
+        targetId: 'keyword-hunter-seo-process',
+        provider: 'new_api',
+      });
+      await controller.setProvider('new_api');
+
+      controller.setModel('zzz-not-listed');
+      expect(select.value).toBe('old-model');
+      expect(mocks.setLLMConfig).not.toHaveBeenCalled();
+    });
+
+    it('early-returns without rerendering when the target equals the current selection', async () => {
+      const { controller, select } = mount({
+        targetId: 'keyword-hunter-seo-process',
+        provider: 'new_api',
+      });
+      await controller.setProvider('new_api');
+      const replaceChildren = vi.spyOn(select, 'replaceChildren');
+
+      controller.setModel('old-model');
+      expect(replaceChildren).not.toHaveBeenCalled();
+      expect(select.value).toBe('old-model');
+      replaceChildren.mockRestore();
+    });
+
+    it('does not trigger onModelChange or a change event', async () => {
+      const onModelChange = vi.fn();
+      const { controller, select } = mount(
+        { targetId: 'keyword-hunter-seo-process', provider: 'new_api' },
+        { onModelChange }
+      );
+      await controller.setProvider('new_api');
+
+      controller.setModel('other');
+      expect(onModelChange).not.toHaveBeenCalled();
+      // 后续用户 change 仍以组件 state 为基准（无状态分叉）
+      select.value = 'old-model';
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      expect(onModelChange).toHaveBeenCalledWith('old-model');
+    });
+
+    it('no-ops when the component is still loading (no models yet)', async () => {
+      let resolveProvider!: (value: unknown) => void;
+      mocks.getLLMConfigWithKey.mockReturnValueOnce(
+        new Promise(resolve => {
+          resolveProvider = resolve;
+        })
+      );
+      const { controller, select } = mount({
+        targetId: 'keyword-hunter-seo-process',
+        provider: 'new_api',
+      });
+      // provider 加载未完成：state 仍为空列表
+      controller.setModel('old-model');
+      expect(select.value).toBe('');
+      resolveProvider({
+        provider: 'new_api',
+        endpoint: 'https://llm.example/v1',
+        apiKey: 'secret',
+        model: 'old-model',
+        models: [{ id: 'old-model' }],
+      });
+    });
   });
 });

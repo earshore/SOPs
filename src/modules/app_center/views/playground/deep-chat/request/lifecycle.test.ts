@@ -103,16 +103,19 @@ describe('Playground request lifecycle display state', () => {
 });
 
 describe('isPendingPushReady', () => {
-  function makePending(overrides: {
-    assistantText?: string;
-    displayedAssistantText?: string;
-    isSettled?: boolean;
-  } = {}): ReturnType<typeof createPendingDeepChatRequest> {
+  function makePending(
+    overrides: {
+      assistantText?: string;
+      displayedAssistantText?: string;
+      isSettled?: boolean;
+    } = {}
+  ): ReturnType<typeof createPendingDeepChatRequest> {
     const pendingRequest = createPendingDeepChatRequest('thread-1', conversationMessages, {
       controller: new AbortController(),
       now: 1000,
     });
-    if (overrides.assistantText !== undefined) pendingRequest.assistantText = overrides.assistantText;
+    if (overrides.assistantText !== undefined)
+      pendingRequest.assistantText = overrides.assistantText;
     if (overrides.displayedAssistantText !== undefined) {
       pendingRequest.displayedAssistantText = overrides.displayedAssistantText;
     }
@@ -125,15 +128,19 @@ describe('isPendingPushReady', () => {
   });
 
   it('pending 未 settle（流式 / waiting / reasoning）→ 未就绪', () => {
-    expect(isPendingPushReady(makePending({ assistantText: 'partial text', isSettled: false }))).toBe(
-      false
-    );
+    expect(
+      isPendingPushReady(makePending({ assistantText: 'partial text', isSettled: false }))
+    ).toBe(false);
   });
 
   it('settle 后打字机未放完（displayed < full）→ 未就绪', () => {
     expect(
       isPendingPushReady(
-        makePending({ assistantText: 'full answer text', displayedAssistantText: 'full answ', isSettled: true })
+        makePending({
+          assistantText: 'full answer text',
+          displayedAssistantText: 'full answ',
+          isSettled: true,
+        })
       )
     ).toBe(false);
   });
@@ -141,7 +148,11 @@ describe('isPendingPushReady', () => {
   it('settle 且 displayed === full → 就绪', () => {
     expect(
       isPendingPushReady(
-        makePending({ assistantText: 'full answer text', displayedAssistantText: 'full answer text', isSettled: true })
+        makePending({
+          assistantText: 'full answer text',
+          displayedAssistantText: 'full answer text',
+          isSettled: true,
+        })
       )
     ).toBe(true);
   });

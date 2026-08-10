@@ -179,9 +179,7 @@ export function isPendingDeepChatDisplayComplete(pendingRequest: PendingDeepChat
  * - 未 settle → 未就绪（流式 / waiting / reasoning）
  * - settle 后 displayed < full → 未就绪（打字机重放未完成）
  */
-export function isPendingPushReady(
-  pendingRequest: PendingDeepChatRequest | undefined
-): boolean {
+export function isPendingPushReady(pendingRequest: PendingDeepChatRequest | undefined): boolean {
   if (!pendingRequest) return true;
   if (!pendingRequest.isSettled) return false;
   return isPendingDeepChatDisplayComplete(pendingRequest);

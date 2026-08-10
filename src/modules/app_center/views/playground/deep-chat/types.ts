@@ -108,6 +108,11 @@ export interface DeepChatThread {
     effort?: import('@/services/modelCapability').ReasoningEffortLevel;
   };
   /**
+   * 会话生效模型（模型切换/刷新回落时写回）。缺省 undefined = 跟随页面默认 → 全局默认。
+   * 与 lastResponseModel 的关系：生效模型变化 ⇒ Responses 多轮链失效。
+   */
+  model?: string;
+  /**
    * Last OpenAI Responses `response.id` for this thread (R3 multi-turn).
    * Used as previous_response_id when apiPath is responses. Cleared on model change / new thread.
    */

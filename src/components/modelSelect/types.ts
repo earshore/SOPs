@@ -60,6 +60,15 @@ export interface ModelSelectController {
   refresh(): Promise<void>;
   /** 切换 provider 并重新加载选项 */
   setProvider(provider: string): Promise<void>;
+  /**
+   * 编程式选中模型：仅同步组件 state + 重渲染 select。
+   * - 模型不在当前 options 列表时 no-op（调用方负责先 fallback 解析）；
+   * - 与当前选中相同则直接返回（避免无谓重绘/闪烁）；
+   * - persist: true 时才调 persistSelectedModel（默认 false = UI-only，绝不写
+   *   工具策略默认模型 / provider config）；
+   * - 不触发 change 事件、不调 onModelChange（宿主自行决定副作用）。
+   */
+  setModel(model: string, opts?: { persist?: boolean }): void;
   /** 卸载时调用：移除事件监听 */
   destroy(): void;
 }

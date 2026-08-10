@@ -215,6 +215,14 @@ export function buildStoredThreadMessages(
     storedMessages.push(buildAssistantStoredMessage(trimmedAssistantText, now, options));
   }
 
+  // Carry over persisted system notices (model-switch hints) so they survive
+  // every save and stay in display order with user/AI turns.
+  const carriedNotices = carryOverSystemDisplayMessages(existingMessages, options.maxMessageChars);
+  if (carriedNotices.length > 0) {
+    storedMessages.push(...carriedNotices);
+    storedMessages.sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+  }
+
   // Stamp count-only meta onto newest user turn (never image bytes / names).
   stampUserAttachmentMeta(storedMessages, normalizeAttachmentMeta(options.userAttachmentMeta));
 
@@ -275,16 +283,41 @@ function normalizeStoredMessage(
     Pick<NormalizeStoredThreadMessagesOptions, 'maxMessageChars'>
 ): DeepChatMessage | null {
   const text = truncateStoredMessage(getDeepChatMessageText(message), options.maxMessageChars);
-  if (!text || message.role === 'system') {
+  if (!text) {
     return null;
   }
 
   return {
-    role: message.role === 'user' ? 'user' : 'ai',
+    role: message.role === 'user' ? 'user' : message.role === 'system' ? 'system' : 'ai',
     text,
     createdAt: getFiniteTimestamp(message.createdAt, options.fallbackCreatedAt),
     ...optionalStoredMessageFields(message, options.maxMessageChars),
   };
+}
+
+/**
+ * 存量 system 通知（模型切换提示等）跨保存透传：从 existingMessages 过滤角色为
+ * system 且文本非空的展示性消息，按 createdAt 与当轮消息稳定合并排序。
+ * 通知仅展示不发送：mergeThreadHistoryWithRequest 仍丢弃 system 角色。
+ */
+export function carryOverSystemDisplayMessages(
+  existingMessages: DeepChatMessage[],
+  maxMessageChars?: number
+): DeepChatMessage[] {
+  const carried: DeepChatMessage[] = [];
+  for (const message of existingMessages) {
+    if (message.role !== 'system') {
+      continue;
+    }
+    const normalized = normalizeStoredMessage(message, {
+      fallbackCreatedAt: 0,
+      maxMessageChars,
+    });
+    if (normalized) {
+      carried.push(normalized);
+    }
+  }
+  return carried.sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
 }
 
 function findExistingStoredMessage(

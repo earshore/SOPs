@@ -139,6 +139,7 @@ type ImportOptions = {
   threadStoreLoadDelays?: Promise<void>[];
   promptHistory?: PromptHistoryState['promptlab']['history'];
   toolStrategySettings?: Record<string, unknown> | null;
+  pageDefaults?: Record<string, unknown> | null;
   callLLM?: (...args: unknown[]) => Promise<string>;
   pendingPromptContext?: ListingPromptWorkflowContext;
   pendingThreadId?: string;
@@ -299,16 +300,21 @@ const deepChatStorageKeys = {
   LLM_ACTIVE_PROVIDER: 'llm_active_provider',
   TOOL_STRATEGY_SETTINGS: 'tool_strategy_settings',
   RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
+  DEEP_CHAT_PAGE_DEFAULTS: 'deep_chat_page_defaults',
 } as const;
 
 function createDeepChatStorageService(options: ImportOptions) {
   const initialConfig = options.config === undefined ? defaultConfig : options.config;
   let llmConfig: Record<string, unknown> | null = initialConfig;
   let strategySettings = options.toolStrategySettings ?? null;
+  let pageDefaults = options.pageDefaults ?? null;
   return {
     get: vi.fn((key: string, fallback?: unknown) => {
       if (key === deepChatStorageKeys.TOOL_STRATEGY_SETTINGS) {
         return strategySettings;
+      }
+      if (key === deepChatStorageKeys.DEEP_CHAT_PAGE_DEFAULTS) {
+        return pageDefaults;
       }
       return fallback ?? null;
     }),
@@ -331,8 +337,15 @@ function createDeepChatStorageService(options: ImportOptions) {
       if (key === deepChatStorageKeys.TOOL_STRATEGY_SETTINGS) {
         strategySettings = value as typeof strategySettings;
       }
+      if (key === deepChatStorageKeys.DEEP_CHAT_PAGE_DEFAULTS) {
+        pageDefaults = value as typeof pageDefaults;
+      }
     }),
-    remove: vi.fn(),
+    remove: vi.fn((key: string) => {
+      if (key === deepChatStorageKeys.DEEP_CHAT_PAGE_DEFAULTS) {
+        pageDefaults = null;
+      }
+    }),
   };
 }
 
@@ -964,10 +977,16 @@ describe('deep-chat playground module', () => {
       '[data-preview-prompt-id="prompt-1"]'
     );
     expect(container.querySelector('.deep-chat-prompt-use')).toBeNull();
+    // 气泡仅 hover 驻留触发：focus/点击均不弹泡（Spec-04）
     promptRecord.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-    expect(document.body.querySelector('.deep-chat-prompt-preview-title')?.textContent).toContain(
-      'Listing Prompt'
-    );
+    expect(
+      document.body.querySelector('.deep-chat-prompt-preview-title')?.textContent
+    ).not.toContain('Listing Prompt');
+    expect(
+      document.body
+        .querySelector('.deep-chat-prompt-preview-popover')
+        ?.classList.contains('is-visible') ?? false
+    ).toBe(false);
 
     promptRecord.click();
     await vi.advanceTimersByTimeAsync(600);
@@ -3352,6 +3371,531 @@ describe('deep-chat playground inline rename validation', () => {
     expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
       'Other thread'
     );
+
+    unmount();
+  });
+});
+
+describe('deep-chat playground session model persistence', () => {
+  const THREAD_STORE_KEY = 'user:playground_deep_chat_threads_v1';
+
+  function persistedActiveThread(mocks: DeepChatMocks) {
+    const last = mocks.localDataStore.set.mock.calls
+      .filter(([key]) => key === THREAD_STORE_KEY)
+      .at(-1)?.[1] as {
+      activeThreadId: string;
+      threads: Array<Record<string, unknown> & { id?: string }>;
+    };
+    return last?.threads.find(thread => thread.id === last.activeThreadId);
+  }
+
+  function systemNotices(thread: Record<string, unknown> | undefined) {
+    return ((thread?.messages as Array<{ role?: string; text?: string }>) ?? []).filter(
+      message => message.role === 'system'
+    );
+  }
+
+  async function mountWithModels(options: ImportOptions = {}) {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const runtime = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'o3-mini',
+        models: ['o3-mini', 'gpt-4.1'],
+      },
+      ...options,
+    });
+    await runtime.mount(container);
+    const modelSelect = queryRequired<HTMLSelectElement>(container, '[data-model-select]');
+    await vi.waitFor(() => {
+      expect(modelSelect.options.length).toBeGreaterThan(0);
+    });
+    return { ...runtime, container, modelSelect };
+  }
+
+  it('writes thread.model, clears the response chain, and appends a switch notice on user model change', async () => {
+    const stored = structuredClone(storedThreadStore);
+    (stored.threads[0] as Record<string, unknown>).lastResponseId = 'resp-1';
+    (stored.threads[0] as Record<string, unknown>).lastResponseModel = 'o3-mini';
+    const { container, unmount, mocks, modelSelect } = await mountWithModels({
+      storedThreadStore: stored,
+    });
+
+    // 会话已有消息（fixture thread-1）→ 切换模型应产生通知
+    modelSelect.value = 'gpt-4.1';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const thread = persistedActiveThread(mocks);
+    expect(thread?.model).toBe('gpt-4.1');
+    // Responses 多轮链跨模型失效
+    expect(thread?.lastResponseId).toBeUndefined();
+    expect(thread?.lastResponseModel).toBeUndefined();
+
+    const notices = systemNotices(thread);
+    expect(notices).toHaveLength(1);
+    expect(notices[0]?.text).toBe('切换至gpt-4.1 · 推理关');
+    expect(getChat(container).history?.at(-1)).toMatchObject({
+      role: 'system',
+      text: '切换至gpt-4.1 · 推理关',
+    });
+
+    unmount();
+  });
+
+  it('does not notice on an empty session but still records thread.model', async () => {
+    const emptyStore = {
+      activeThreadId: 't-empty',
+      threads: [
+        {
+          id: 't-empty',
+          title: 'New Thread',
+          messages: [],
+          draftText: '',
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      ],
+    };
+    const { container, unmount, mocks, modelSelect } = await mountWithModels({
+      storedThreadStore: emptyStore,
+    });
+    expect(getChat(container).history ?? []).toHaveLength(0);
+
+    modelSelect.value = 'gpt-4.1';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // 空线程不落盘（isPersistableThread 语义），thread.model 仅存内存；
+    // 页面级模型默认已由 ModelSelect 写工具策略（persistSelectedModel）
+    expect(systemNotices(persistedActiveThread(mocks))).toHaveLength(0);
+    expect(getChat(container).history ?? []).toHaveLength(0);
+
+    unmount();
+  });
+
+  it('deduplicates repeated same-model switches and keeps A→B→A as two notices', async () => {
+    const { unmount, mocks, modelSelect } = await mountWithModels({
+      storedThreadStore: structuredClone(storedThreadStore),
+    });
+
+    modelSelect.value = 'gpt-4.1';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    modelSelect.value = 'gpt-4.1';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(systemNotices(persistedActiveThread(mocks))).toHaveLength(1);
+
+    modelSelect.value = 'o3-mini';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    modelSelect.value = 'gpt-4.1';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // 序列 B(同值忽略) → B → O → B：通知 = B, O, B 共 3 条
+    const notices = systemNotices(persistedActiveThread(mocks));
+    expect(notices).toHaveLength(3);
+    expect(notices[0]?.text).toBe('切换至gpt-4.1 · 推理关');
+    expect(notices[1]?.text).toMatch(/^切换至o3-mini · /);
+    expect(notices[2]?.text).toBe('切换至gpt-4.1 · 推理关');
+
+    unmount();
+  });
+
+  it('notices and updates thread.model when refresh falls back to a different model', async () => {
+    const { container, unmount, mocks } = await mountWithModels({
+      storedThreadStore: structuredClone(storedThreadStore),
+    });
+
+    mocks.fetchModelsFromApi.mockResolvedValue([{ id: 'gpt-5.6-sol' }]);
+    queryRequired<HTMLButtonElement>(container, '[data-model-select-refresh]').click();
+    await vi.waitFor(() => {
+      expect(mocks.fetchModelsFromApi).toHaveBeenCalled();
+    });
+
+    const thread = persistedActiveThread(mocks);
+    expect(thread?.model).toBe('gpt-5.6-sol');
+    expect(systemNotices(thread).at(-1)?.text).toBe('切换至gpt-5.6-sol · 推理关');
+
+    // 回落相同模型：不追加新通知
+    const noticesBefore = systemNotices(thread).length;
+    mocks.fetchModelsFromApi.mockResolvedValue([{ id: 'gpt-5.6-sol' }]);
+    queryRequired<HTMLButtonElement>(container, '[data-model-select-refresh]').click();
+    await vi.waitFor(() => {
+      expect(mocks.fetchModelsFromApi.mock.calls.length).toBe(2);
+    });
+    expect(systemNotices(persistedActiveThread(mocks)).length).toBe(noticesBefore);
+
+    unmount();
+  });
+
+  it('createThread inherits page defaults into the thread and the tuning panel', async () => {
+    const { container, unmount, mocks } = await mountWithModels({
+      pageDefaults: {
+        systemPrompt: '页面默认系统提示',
+        temperature: 0.7,
+        reasoning: { enabled: true, effort: 'high' },
+        // 与当前 provider 全局 reasoningPrefs（无）的指纹一致，页面默认推理才生效
+        reasoningFingerprint: 'null',
+      },
+    });
+
+    queryRequired<HTMLButtonElement>(container, '#deep-chat-clear-chat').click();
+
+    // 新线程（空）不落盘；继承值在首次发送时随线程持久化
+    const chat = getChat(container);
+    const onResponse = vi.fn();
+    const onClose = vi.fn();
+    chat.connect?.handler(
+      { messages: [{ role: 'user', text: '使用继承设置' }] },
+      { onResponse, onClose }
+    );
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+    });
+
+    const thread = persistedActiveThread(mocks);
+    expect(thread?.systemPrompt).toBe('页面默认系统提示');
+    expect(thread?.temperature).toBe(0.7);
+    expect(thread?.reasoning).toEqual({ enabled: true, effort: 'high' });
+
+    // 面板 DOM 同步继承值
+    const systemPromptInput = queryRequired<HTMLTextAreaElement>(
+      container,
+      '#deep-chat-system-prompt'
+    );
+    expect(systemPromptInput.value).toBe('页面默认系统提示');
+    expect(queryRequired<HTMLInputElement>(container, '#deep-chat-temperature').value).toBe('0.7');
+
+    unmount();
+  });
+
+  it('restores persisted system notices into the loaded thread history', async () => {
+    const stored = structuredClone(storedThreadStore);
+    (stored.threads[0] as { messages: unknown[] }).messages.splice(1, 0, {
+      role: 'system',
+      text: '切换至gpt-5.6-sol · medium',
+      createdAt: 1500,
+    });
+    (stored.threads[0] as Record<string, unknown>).model = 'o3-mini';
+    const { container, unmount } = await mountWithModels({ storedThreadStore: stored });
+
+    const history = getChat(container).history ?? [];
+    expect(history.some(message => message.role === 'system')).toBe(true);
+    expect(history.find(message => message.role === 'system')?.text).toBe(
+      '切换至gpt-5.6-sol · medium'
+    );
+
+    unmount();
+  });
+});
+
+describe('deep-chat playground thread model sync', () => {
+  const THREAD_STORE_KEY = 'user:playground_deep_chat_threads_v1';
+
+  function modelSelect(container: HTMLElement): HTMLSelectElement {
+    return queryRequired<HTMLSelectElement>(container, '[data-model-select]');
+  }
+
+  function threadButton(container: HTMLElement, threadId: string): HTMLButtonElement {
+    const button = container.querySelector<HTMLButtonElement>(`[data-thread-id="${threadId}"]`);
+    if (!button) {
+      throw new Error(`thread button ${threadId} not found`);
+    }
+    return button;
+  }
+
+  function persistedThreadById(mocks: DeepChatMocks, threadId: string) {
+    const last = mocks.localDataStore.set.mock.calls
+      .filter(([key]) => key === THREAD_STORE_KEY)
+      .at(-1)?.[1] as { threads: Array<Record<string, unknown> & { id?: string }> };
+    return last?.threads.find(thread => thread.id === threadId);
+  }
+
+  async function mountSync(options: ImportOptions = {}) {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const runtime = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'o3-mini',
+        models: ['o3-mini', 'gpt-4.1'],
+      },
+      ...options,
+    });
+    await runtime.mount(container);
+    await vi.waitFor(() => {
+      expect(modelSelect(container).options.length).toBeGreaterThan(0);
+    });
+    return { ...runtime, container };
+  }
+
+  it('switches the model select to the active thread model without persisting', async () => {
+    const stored = structuredClone(storedThreadStore);
+    (stored.threads[1] as Record<string, unknown>).model = 'gpt-4.1';
+    const { container, unmount, mocks } = await mountSync({ storedThreadStore: stored });
+    expect(modelSelect(container).value).toBe('o3-mini');
+
+    threadButton(container, 'thread-2').click();
+    expect(modelSelect(container).value).toBe('gpt-4.1');
+    expect(mocks.toast).not.toHaveBeenCalled();
+    // UI-only：不写工具策略默认模型（浏览历史不改页面默认）
+    expect(mocks.storageService.set).not.toHaveBeenCalledWith(
+      'tool_strategy_settings',
+      expect.anything()
+    );
+
+    unmount();
+  });
+
+  it('falls back to the global model and reasoning with a warning toast when thread model is unavailable', async () => {
+    const stored = structuredClone(storedThreadStore);
+    (stored.threads[0] as Record<string, unknown>).model = 'zzz-removed';
+    (stored.threads[0] as Record<string, unknown>).lastResponseId = 'resp-1';
+    (stored.threads[0] as Record<string, unknown>).lastResponseModel = 'zzz-removed';
+    (stored.threads[1] as Record<string, unknown>).model = 'gpt-4.1';
+    const { container, unmount, mocks } = await mountSync({ storedThreadStore: stored });
+
+    // 挂载（active=thread-1）：线程模型不可用 → 回落全局 + toast
+    expect(modelSelect(container).value).toBe('o3-mini');
+    expect(mocks.toast).toHaveBeenCalledWith('该会话的模型当前不可用，已切换至全局默认模型', {
+      type: 'warning',
+    });
+    const thread1 = persistedThreadById(mocks, 'thread-1');
+    expect(thread1?.reasoning).toEqual({ enabled: false, effort: 'medium' }); // 全局推理默认
+    expect(thread1?.lastResponseId).toBeUndefined(); // 链失效防跨模型续链
+    expect(thread1?.lastResponseModel).toBeUndefined();
+
+    // 切到模型在列表内的会话：正常恢复，不再 toast
+    threadButton(container, 'thread-2').click();
+    expect(modelSelect(container).value).toBe('gpt-4.1');
+    const toastCount = mocks.toast.mock.calls.length;
+
+    // 切回受损会话：再次 fallback toast
+    threadButton(container, 'thread-1').click();
+    expect(modelSelect(container).value).toBe('o3-mini');
+    expect(mocks.toast.mock.calls.length).toBe(toastCount + 1);
+
+    unmount();
+  });
+
+  it('does not touch thread fields when the session model is available', async () => {
+    const stored = structuredClone(storedThreadStore);
+    (stored.threads[1] as Record<string, unknown>).model = 'gpt-4.1';
+    const { container, unmount, mocks } = await mountSync({ storedThreadStore: stored });
+
+    threadButton(container, 'thread-2').click();
+    expect(modelSelect(container).value).toBe('gpt-4.1');
+    // 正常恢复不覆盖推理（仅 fallback 才写 reasoning）且不 toast
+    expect(persistedThreadById(mocks, 'thread-2')?.reasoning).toBeUndefined();
+    expect(mocks.toast).not.toHaveBeenCalled();
+
+    unmount();
+  });
+
+  it('does not fall back when the model is listed even if reasoning is unsupported', async () => {
+    const stored = structuredClone(storedThreadStore);
+    (stored.threads[1] as Record<string, unknown>).model = 'gpt-4.1';
+    const { container, unmount, mocks } = await mountSync({ storedThreadStore: stored });
+    const toastCount = mocks.toast.mock.calls.length;
+
+    threadButton(container, 'thread-2').click();
+    expect(modelSelect(container).value).toBe('gpt-4.1');
+    expect(mocks.toast.mock.calls.length).toBe(toastCount);
+    expect(queryRequired<HTMLElement>(container, '#deep-chat-reasoning-controls').hidden).toBe(
+      true
+    );
+
+    unmount();
+  });
+});
+
+describe('deep-chat playground reasoning timeout scaling', () => {
+  async function mountDeepSeek() {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const runtime = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'deepseek-v4-flash',
+        models: ['deepseek-v4-flash'],
+        apiPath: 'chat_completions',
+      },
+    });
+    await runtime.mount(container);
+    await vi.waitFor(() => {
+      expect(
+        queryRequired<HTMLSelectElement>(container, '[data-model-select]').options.length
+      ).toBeGreaterThan(0);
+    });
+    return { ...runtime, container };
+  }
+
+  function setReasoningUi(container: HTMLElement, enabled: boolean, effort: string): void {
+    const enabledEl = queryRequired<HTMLInputElement>(container, '#deep-chat-reasoning-enabled');
+    enabledEl.checked = enabled;
+    enabledEl.dispatchEvent(new Event('change', { bubbles: true }));
+    const effortEl = queryRequired<HTMLSelectElement>(container, '#deep-chat-reasoning-effort');
+    effortEl.value = effort;
+    effortEl.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function sendMessage(container: HTMLElement): void {
+    const onResponse = vi.fn();
+    const onClose = vi.fn();
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'deep question' }] },
+      { onResponse, onClose }
+    );
+  }
+
+  function lastCallTimeout(mocks: DeepChatMocks): number | undefined {
+    const options = mocks.callLLM.mock.calls.at(-1)?.[5] as { timeout?: number } | undefined;
+    return options?.timeout;
+  }
+
+  it('scales the request timeout ×2 when the effective effort is max', async () => {
+    const { container, unmount, mocks } = await mountDeepSeek();
+    setReasoningUi(container, true, 'max');
+
+    sendMessage(container);
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+    });
+    expect(lastCallTimeout(mocks)).toBe(180_000);
+
+    unmount();
+  });
+
+  it('keeps the base timeout for non-max efforts', async () => {
+    const { container, unmount, mocks } = await mountDeepSeek();
+    setReasoningUi(container, true, 'high');
+
+    sendMessage(container);
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+    });
+    expect(lastCallTimeout(mocks)).toBe(90_000);
+
+    unmount();
+  });
+
+  it('keeps the base timeout when reasoning is disabled', async () => {
+    const { container, unmount, mocks } = await mountDeepSeek();
+    setReasoningUi(container, false, 'max');
+
+    sendMessage(container);
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+    });
+    expect(lastCallTimeout(mocks)).toBe(90_000);
+
+    unmount();
+  });
+
+  it('passes the temperature slider value to the LLM call', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'o3-mini',
+        models: ['o3-mini'],
+      },
+    });
+    await mount(container);
+
+    const temperatureInput = queryRequired<HTMLInputElement>(container, '#deep-chat-temperature');
+    temperatureInput.value = '0.7';
+    temperatureInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+    sendMessage(container);
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+    });
+    const options = mocks.callLLM.mock.calls.at(-1)?.[5] as { temperature?: number } | undefined;
+    expect(options?.temperature).toBe(0.7);
+
+    unmount();
+  });
+
+  it('forces reasoning off (no reasoning fields) for models without reasoning controls', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'gpt-4.1',
+        models: ['gpt-4.1'],
+      },
+    });
+    await mount(container);
+    expect(queryRequired<HTMLElement>(container, '#deep-chat-reasoning-controls').hidden).toBe(
+      true
+    );
+
+    sendMessage(container);
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+    });
+    const options = mocks.callLLM.mock.calls.at(-1)?.[5] as
+      | {
+          reasoningPrefs?: { enabled?: boolean };
+        }
+      | undefined;
+    expect(options?.reasoningPrefs?.enabled).toBe(false);
+
+    unmount();
+  });
+
+  it('reset button restores the tuning panel and clears thread tuning fields', async () => {
+    const stored = structuredClone(storedThreadStore);
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'o3-mini',
+        models: ['o3-mini'],
+      },
+      storedThreadStore: stored,
+    });
+    await mount(container);
+
+    const systemPromptInput = queryRequired<HTMLTextAreaElement>(
+      container,
+      '#deep-chat-system-prompt'
+    );
+    const temperatureInput = queryRequired<HTMLInputElement>(container, '#deep-chat-temperature');
+    systemPromptInput.value = '自定义提示';
+    systemPromptInput.dispatchEvent(new Event('input', { bubbles: true }));
+    temperatureInput.value = '0.9';
+    temperatureInput.dispatchEvent(new Event('input', { bubbles: true }));
+    setReasoningUi(container, true, 'max');
+
+    queryRequired<HTMLButtonElement>(container, '#deep-chat-reset-tuning').click();
+
+    expect(systemPromptInput.value).toBe('');
+    expect(temperatureInput.value).toBe('0.3');
+    expect(mocks.toast).toHaveBeenCalledWith('Deep Chat 调试参数已重置', { type: 'success' });
+    const last = mocks.localDataStore.set.mock.calls
+      .filter(([key]) => key === 'user:playground_deep_chat_threads_v1')
+      .at(-1)?.[1] as { threads: Array<Record<string, unknown> & { id?: string }> };
+    const activeThread = last?.threads.find(
+      thread => thread.id === (last as { activeThreadId?: string }).activeThreadId
+    );
+    expect(activeThread?.systemPrompt).toBeUndefined();
+    expect(activeThread?.temperature).toBe(0.3);
+    expect(activeThread?.reasoning).toBeUndefined();
 
     unmount();
   });

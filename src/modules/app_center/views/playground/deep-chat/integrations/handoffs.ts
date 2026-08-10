@@ -14,6 +14,7 @@ import {
 
 import {
   clampEffort,
+  DEFAULT_REASONING_PREFS,
   normalizeApiPathId,
   resolveModelCapability,
   shouldShowReasoningControls,
@@ -323,6 +324,8 @@ export function applyThreadTuningToSession(container: HTMLElement | null): void 
   }
   updateTemperatureTrack(temperatureInput);
   syncDeepChatReasoningControlsFromThread(container);
+  // 模型选择框同步线程生效模型（Spec-02）：切会话/挂载/重置三场景全覆盖
+  uiHooks.syncThreadModelToSession(container);
 }
 
 export function resolveSessionReasoningUiState(
@@ -351,6 +354,21 @@ const REASONING_EFFORT_LABELS: Record<ReasoningEffortLevel, string> = {
   xhigh: '极高 (xhigh)',
   max: '最高 (max)',
 };
+
+/**
+ * 模型切换通知文案：'切换至{model} · {effort key|推理关}'。
+ * 示例：切换至gpt-5.6-sol · medium / 切换至grok-4.5 · 推理关。
+ * 档位用 effort key 原文（与需求示例一致）；关闭或未知时显示「推理关」。
+ */
+export function buildModelSwitchNotice(
+  model: string,
+  reasoning: { enabled: boolean; effort?: ReasoningEffortLevel }
+): string {
+  const effortLabel = reasoning.enabled
+    ? (reasoning.effort ?? DEFAULT_REASONING_PREFS.effort)
+    : '推理关';
+  return `切换至${model} · ${effortLabel}`;
+}
 
 /** 按模型能力重建档位选项；列表未变化时不重绘 DOM */
 function renderReasoningEffortOptions(
@@ -502,10 +520,7 @@ function buildListingCopyFromPrompt(
  * 失败路径 store 合并消息与 DOM 拆分渲染时由线程最新 AI 消息兜底）；
  * ② 正文不含真实 Listing 起始标记（仅推理 / 空正文报错 / DEEP_CHAT_001 错误文案）。
  */
-function resolveKeywordHunterPushBlock(
-  content: string,
-  message?: DeepChatMessage
-): string | null {
+function resolveKeywordHunterPushBlock(content: string, message?: DeepChatMessage): string | null {
   const latestAi = [...getActiveThread().messages].reverse().find(m => m.role === 'ai');
   const incomplete = resolveIncompleteGenerationGuard(message, latestAi);
   if (incomplete) {

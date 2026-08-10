@@ -16,7 +16,9 @@ import {
 import { callLLM, type ChatMessage } from '@/services/llmService';
 import {
   normalizeApiPathId,
+  resolveEffectiveReasoning,
   resolveModelCapability,
+  type ReasoningEffort,
   type ReasoningEffortLevel,
 } from '@/services/modelCapability';
 import {
@@ -54,6 +56,51 @@ import { ValidationError } from '@/common/errors/AppError';
 import { sessionState } from '../session/sessionState';
 
 type DeepChatStreamState = { streamedText: string };
+
+/**
+ * 最高推理档位（clamp 后 === 'max'）请求超时放大：min(base×2, 300s)。
+ * 仅影响 Deep Chat 请求路径；非 max 档 / 推理关闭 / 恢复路径保持不变。
+ */
+export const DEEP_CHAT_MAX_EFFORT_TIMEOUT_FACTOR = 2;
+export const DEEP_CHAT_MAX_EFFORT_TIMEOUT_CAP_MS = 300_000;
+
+export function resolveDeepChatScaledTimeout(
+  baseTimeoutMs: number,
+  effectiveEffort: ReasoningEffort | undefined
+): number {
+  if (effectiveEffort !== 'max') {
+    return baseTimeoutMs;
+  }
+  return Math.min(
+    baseTimeoutMs * DEEP_CHAT_MAX_EFFORT_TIMEOUT_FACTOR,
+    DEEP_CHAT_MAX_EFFORT_TIMEOUT_CAP_MS
+  );
+}
+
+/**
+ * 与 llmTransport 最终映射一致的生效档位（clamp 后），用于超时放大判定。
+ */
+function resolveDeepChatEffectiveEffort(
+  config: LLMProviderConfig,
+  model: string,
+  reasoningOptions: ReturnType<typeof prepareDeepChatReasoningCallOptions>
+): ReasoningEffort | undefined {
+  const apiPath = normalizeApiPathId(
+    (config as { apiPath?: unknown }).apiPath ??
+      StorageService.getLLMConfig(config.provider)?.apiPath
+  );
+  const capability = resolveModelCapability({
+    provider: config.provider,
+    modelId: model,
+    modelsEntry: findConfigModelsEntry(config, model),
+    preferredSurface: apiPath,
+  });
+  return resolveEffectiveReasoning(
+    capability,
+    reasoningOptions.reasoningPrefs,
+    reasoningOptions.reasoningSessionOverride
+  ).effort;
+}
 
 export function prepareDeepChatReasoningCallOptions(): {
   reasoningPrefs?: { enabled: boolean; effort: ReasoningEffortLevel };
@@ -321,8 +368,9 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
   // 仅当轮透传；不进 thread 持久化。
   const visionOptions = visionUserParts && visionUserParts.length > 0 ? { visionUserParts } : {};
 
-  const run = (chain: typeof responsesChain) =>
-    callLLM(messages, config.provider, config.endpoint, config.apiKey, model, {
+  const run = (chain: typeof responsesChain) => {
+    const baseTimeoutMs = getRuntimeDeepChatOptions().timeout;
+    return callLLM(messages, config.provider, config.endpoint, config.apiKey, model, {
       temperature: sessionState.sessionTemperature,
       maxTokens,
       ...(config.serviceTier && { serviceTier: config.serviceTier }),
@@ -332,11 +380,17 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
       modelsEntry: findConfigModelsEntry(config, model),
       retries: 0,
       ...getRuntimeDeepChatOptions(),
+      // max 档推理放大超时（min(base×2, 300s)）；非 max 档/推理关闭保持原值
+      timeout: resolveDeepChatScaledTimeout(
+        baseTimeoutMs,
+        resolveDeepChatEffectiveEffort(config, model, reasoningOptions)
+      ),
       signal: controller.signal,
       stream: true,
       onResponseId: (responseId: string) => persistDeepChatResponseId(model, responseId),
       onStreamUpdate,
     });
+  };
 
   let finalText: string;
   try {

@@ -52,6 +52,8 @@ export const uiHooks = {
   ensureStreamingDeepThinkingBlock: (() => undefined) as HookFn,
   applySkillContextsToSession: (_container: HTMLElement): void => undefined,
   applyThreadTuningToSession: (_container: HTMLElement | null): void => undefined,
+  /** 线程模型恢复到模型选择框（含 fallback 回落与 toast），由 shell 注册。 */
+  syncThreadModelToSession: (_container: HTMLElement | null): void => undefined,
   cloneSkillContexts: (contexts: DeepChatSkillContext[]): DeepChatSkillContext[] =>
     contexts.map(c => ({ ...c })),
   remountDeepThinkingChromeAfterChatReplace: (() => undefined) as HookFn,

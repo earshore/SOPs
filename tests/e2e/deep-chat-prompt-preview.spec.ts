@@ -163,19 +163,69 @@ test.describe('Deep Chat generated prompt preview', () => {
     expect(afterMove.rect).toEqual(initial.rect);
   });
 
-  test('keeps the focus preview accessible and inside the viewport', async ({ page }) => {
+  test('does not show the preview on click or keyboard focus (hover dwell only)', async ({ page }) => {
     await loadDeepChatWithPrompt(page);
 
+    // 键盘聚焦：不弹泡
     await page.locator(PROMPT_SELECTOR).first().focus();
+    await page.waitForTimeout(300);
+    let metrics = await readPreviewMetrics(page);
+    expect(metrics.visible).toBe(false);
+    expect(metrics.ariaHidden).toBe('true');
+
+    // 点击记录（playwright click 会把鼠标移到元素中心，先触发 pointerover 调度 dwell）：
+    // 点击后立即不显示，且 dwell timer 被取消（1.3s 后仍不显示）
+    await page.locator(PROMPT_SELECTOR).first().click();
+    metrics = await readPreviewMetrics(page);
+    expect(metrics.visible).toBe(false);
+    expect(metrics.describedBy).toBe('deep-chat-prompt-preview-popover');
+    await page.waitForTimeout(1300);
+    metrics = await readPreviewMetrics(page);
+    expect(metrics.visible).toBe(false);
+    expect(metrics.ariaHidden).toBe('true');
+  });
+
+  test('hides the preview shortly after the pointer leaves the list', async ({ page }) => {
+    await loadDeepChatWithPrompt(page);
+
+    const pointer = await getPromptHoverPoint(page);
+    await page.mouse.move(pointer.x, pointer.y);
     await page.waitForSelector(`${PREVIEW_SELECTOR}.is-visible`, { timeout: 5000 });
 
+    await page.mouse.move(8, 8);
+    await page.waitForSelector(`${PREVIEW_SELECTOR}.is-visible`, {
+      state: 'detached',
+      timeout: 5000,
+    });
     const metrics = await readPreviewMetrics(page);
-    expect(metrics.visible).toBe(true);
-    expect(metrics.ariaHidden).toBe('false');
-    expect(metrics.describedBy).toBe('deep-chat-prompt-preview-popover');
-    expect(metrics.parentIsBody).toBe(true);
-    expect(metrics.withinViewport).toBe(true);
-    expect(metrics.arrowTop).toBe('28px');
+    expect(metrics.visible).toBe(false);
+    expect(metrics.ariaHidden).toBe('true');
+  });
+
+  test('clicking use hides an already-visible preview and completes the action', async ({ page }) => {
+    await loadDeepChatWithPrompt(page);
+
+    const pointer = await getPromptHoverPoint(page);
+    await page.mouse.move(pointer.x, pointer.y);
+    await page.waitForSelector(`${PREVIEW_SELECTOR}.is-visible`, { timeout: 5000 });
+
+    await page.locator('[data-use-prompt-draft-id]').first().click();
+    const metrics = await readPreviewMetrics(page);
+    expect(metrics.visible).toBe(false);
+    // 使用 Prompt 主操作完成：新会话已创建并填入
+    await expect(page.locator('.deep-chat-prompt-item.is-selected').first()).toBeVisible();
+    await page.waitForTimeout(1300);
+    expect((await readPreviewMetrics(page)).visible).toBe(false);
+  });
+
+  test('clicking delete does not raise the preview', async ({ page }) => {
+    await loadDeepChatWithPrompt(page);
+
+    await page.locator('[data-delete-prompt-draft-id]').first().click();
+    const metrics = await readPreviewMetrics(page);
+    expect(metrics.visible).toBe(false);
+    await page.waitForTimeout(1300);
+    expect((await readPreviewMetrics(page)).visible).toBe(false);
   });
 
   test('clamps the hover preview to the viewport when horizontal space is limited', async ({

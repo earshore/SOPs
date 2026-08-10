@@ -287,21 +287,31 @@ describe('callLLM streaming', () => {
       type: 'function',
       function: { name: 'search', description: 'test', parameters: { type: 'object' } },
     };
-    const text = await callLLM([{ role: 'user', content: 'hi' }], 'new_api', 'https://new.hongecb.store/v1', 'test-key', 'deepseek-v4-flash', {
-      stream: true,
-      retries: 0,
-      apiPath: 'responses',
-      tools: [tool] as never,
-      executeTool: vi.fn(async () => 'tool-out') as never,
-      enableToolLoop: true,
-    });
+    const text = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'deepseek-v4-flash',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'responses',
+        tools: [tool] as never,
+        executeTool: vi.fn(async () => 'tool-out') as never,
+        enableToolLoop: true,
+      }
+    );
 
     expect(text).toBe('fallback ok');
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/responses');
     const fallbackUrl = String(fetchMock.mock.calls[1]?.[0]);
     expect(fallbackUrl).toContain('/chat/completions');
-    const fallbackBody = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as Record<string, unknown>;
+    const fallbackBody = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as Record<
+      string,
+      unknown
+    >;
     // 平级回落：tools 保留（chat tool loop 原生处理），store 剥离（chat 无链式语义）
     expect(fallbackBody.tools).toBeDefined();
     expect(fallbackBody.store).toBeUndefined();
@@ -387,14 +397,21 @@ describe('callLLM streaming', () => {
       type: 'function',
       function: { name: 'search', description: 'test', parameters: { type: 'object' } },
     };
-    const text = await callLLM([{ role: 'user', content: 'hi' }], 'new_api', 'https://new.hongecb.store/v1', 'test-key', 'deepseek-v4-flash', {
-      stream: true,
-      retries: 0,
-      apiPath: 'responses',
-      tools: [tool] as never,
-      executeTool,
-      enableToolLoop: true,
-    });
+    const text = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'deepseek-v4-flash',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'responses',
+        tools: [tool] as never,
+        executeTool,
+        enableToolLoop: true,
+      }
+    );
 
     expect(executeTool).toHaveBeenCalledTimes(1);
     expect(executeTool).toHaveBeenCalledWith(
@@ -418,35 +435,61 @@ describe('callLLM streaming', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(
-      callLLM([{ role: 'user', content: 'hi' }], 'new_api', 'https://new.hongecb.store/v1', 'test-key', 'deepseek-v4-flash', {
-        stream: true,
-        retries: 0,
-        apiPath: 'chat_completions',
-        tools: [{ type: 'function', function: { name: 'search', description: 'test', parameters: { type: 'object' } } }] as never,
-        executeTool: vi.fn(async () => 'tool-out') as never,
-        enableToolLoop: true,
-      })
+      callLLM(
+        [{ role: 'user', content: 'hi' }],
+        'new_api',
+        'https://new.hongecb.store/v1',
+        'test-key',
+        'deepseek-v4-flash',
+        {
+          stream: true,
+          retries: 0,
+          apiPath: 'chat_completions',
+          tools: [
+            {
+              type: 'function',
+              function: { name: 'search', description: 'test', parameters: { type: 'object' } },
+            },
+          ] as never,
+          executeTool: vi.fn(async () => 'tool-out') as never,
+          enableToolLoop: true,
+        }
+      )
     ).rejects.toThrow('not found');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('re-throws the SECOND request error when the chat_completions fallback also fails', async () => {
-    const fetchMock = vi.fn(async () => {
-      return new Response(JSON.stringify({ error: { message: 'not found' } }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    });
+    const fetchMock = vi.fn(
+      async (_url: RequestInfo | URL, _init?: RequestInit): Promise<Response> => {
+        return new Response(JSON.stringify({ error: { message: 'not found' } }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    );
     vi.stubGlobal('fetch', fetchMock);
 
-    const error = await callLLM([{ role: 'user', content: 'hi' }], 'new_api', 'https://new.hongecb.store/v1', 'test-key', 'deepseek-v4-flash', {
-      stream: true,
-      retries: 0,
-      apiPath: 'responses',
-      tools: [{ type: 'function', function: { name: 'search', description: 'test', parameters: { type: 'object' } } }] as never,
-      executeTool: vi.fn(async () => 'tool-out') as never,
-      enableToolLoop: true,
-    }).then(
+    const error = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'deepseek-v4-flash',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'responses',
+        tools: [
+          {
+            type: 'function',
+            function: { name: 'search', description: 'test', parameters: { type: 'object' } },
+          },
+        ] as never,
+        executeTool: vi.fn(async () => 'tool-out') as never,
+        enableToolLoop: true,
+      }
+    ).then(
       () => null,
       errorValue => errorValue
     );
@@ -483,9 +526,7 @@ describe('callLLM streaming', () => {
     expect(isResponsesPathFallbackEligible(notFound, { apiPath: 'anthropic_messages' })).toBe(
       false
     );
-    expect(
-      isResponsesPathFallbackEligible(generic400, { apiPath: 'responses' })
-    ).toBe(false);
+    expect(isResponsesPathFallbackEligible(generic400, { apiPath: 'responses' })).toBe(false);
     expect(isResponsesPathFallbackEligible(new Error('not found'), { apiPath: 'responses' })).toBe(
       false
     );

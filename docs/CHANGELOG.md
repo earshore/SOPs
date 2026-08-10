@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > 功能冻结后的发布候选（Pre-release）。Long-task 运行感知（v3.1）+ 链路收尾（v3.2）+
 > 总览优化；Latest 仍为 `v3.0.12`；上一 GA 与回滚基线均为 `v3.0.11`。
 > 生产目标为 `https://sops.hongecb.store`。
+> 收口后增补 **Deep Chat 会话设置加固**（2026-08-10，随下一候选发布，详见各小节末）。
 
 ### Added（新增）
 
@@ -22,6 +23,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   已完成的维度会自动保存」+ 查看进度入口。
 - 断点恢复后主按钮语义升级：**「继续分析（已完成 a/b）」**；清缓存同步清断点（避免误恢复）。
 - Listing 评审工件摘要注明人工复核位置：**SOP › Listing 极致优化**。
+- **Deep Chat 会话级模型持久化**：`DeepChatThread.model` 字段落库（sanitize 白名单保留），
+  切换模型写回当前会话并在会话内以 system 消息显式通知 `切换至{model} · {effort|推理关}`
+  （推理关闭显示「推理关」），同模型切换不刷屏；切走再切回、刷新页面均恢复该会话模型。
+- **Deep Chat 页面默认参数**：模型/推理等级/temperature/systemPrompt 页面级默认持久化
+  （含 provider 推理指纹，指纹变化自动丢弃失效的推理默认）；新会话自动沿用页面设置，
+  系统设置全局覆盖仍优先；从未改过则跟随全局。
+- **历史会话模型联动**：切换历史会话时模型框自动切换到该会话模型（仅 UI 不写库）；
+  模型不可用时回落全局模型+推理等级并 toast 提示；存量无 model 会话静默跟随全局。
+- **Prompt 预览气泡 hover-only**：仅鼠标驻留 1s 触发，点击记录不再弹泡。
 
 ### Changed（变更）
 
@@ -39,6 +49,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   「分析中」卡片移除。
 - Keyword Hunter 评审启动 toast 改读全局推理档位（原硬编码不匹配实际调用）。
 - 设置健康消息去重：存储占用警告由 quota 警告条独立展示，不进页脚。
+- **Deep Chat 最高推理档位超时放大**：clamp 后 max 档请求超时 ×2（90s→180s，
+  上限 300s），深度思考不再被轻易误杀；恢复路径与其余档位、关闭推理时保持原超时。
+- **Deep Chat Prompt 气泡点击误触修复**：点击 Prompt 记录不再弹出预览气泡遮挡操作，
+  点击后 1s 抑制窗防止残留 over 重放弹泡，点击即隐藏。
+- **Deep Chat Vision 入口挂载修复**（存量）：vendor 输入区重建会抹掉注入的 vision
+  上传节点（且不派发 render 事件），改由 MutationObserver 在挂载期间盯住 shadow 与
+  `#input` 的 childList，root 丢失即重建；顺带修复 vision e2e 的 localStorage
+  SecurityError（seed 改用 addInitScript）与初始化发送竞态（用例等待 vendor 就绪），
+  `deep-chat-send` + `deep-chat-prompt-preview` e2e 26/26 全绿。
 
 ### Removed（移除）
 

@@ -58,6 +58,80 @@ function nextId(): string {
   return `vision-${Date.now()}-${idSeq}`;
 }
 
+/**
+ * deep-chat vendor 的 shadow DOM 在元素挂入文档后异步渲染：初次挂载时
+ * `#input` / `#text-input-container` 可能尚不存在，ensureRoot 会静默失败。
+ * 此处轮询等待结构就绪后补挂载（上限 ~5s，超时放弃不报错）。
+ */
+const VISION_MOUNT_RETRY_INTERVAL_MS = 50;
+const VISION_MOUNT_RETRY_MAX = 100;
+
+let visionMountRetryTimer: number | null = null;
+
+function visionStructureReady(chat: DeepChatElement): boolean {
+  const shadow = chat.shadowRoot;
+  return Boolean(
+    shadow && shadow.querySelector('#input') && shadow.querySelector('#text-input-container')
+  );
+}
+
+function scheduleVisionMountRetry(chat: DeepChatElement, attempts = 0): void {
+  if (attempts >= VISION_MOUNT_RETRY_MAX) {
+    visionMountRetryTimer = null;
+    return;
+  }
+  visionMountRetryTimer = window.setTimeout(() => {
+    visionMountRetryTimer = null;
+    if (state.chat !== chat) {
+      return; // 期间已 unmount / 换成其它 chat
+    }
+    if (!visionStructureReady(chat)) {
+      scheduleVisionMountRetry(chat, attempts + 1);
+      return;
+    }
+    ensureStructure(chat);
+    bindEvents(chat);
+    renderVisionComposerDom();
+  }, VISION_MOUNT_RETRY_INTERVAL_MS);
+}
+
+/**
+ * vendor 在属性/配置变化后会重建输入区 DOM，注入的 vision root 会被抹掉（不派发
+ * render 事件，实测事件不可靠）。挂载期间用 MutationObserver 盯住 shadow 与
+ * #input 的 childList：root 丢失即重建（重建插入自身节点会再触发一次，root 在则
+ * 直接返回，不会循环）。
+ */
+let visionRootObserver: MutationObserver | null = null;
+
+function watchVisionRoot(chat: DeepChatElement): void {
+  if (visionRootObserver) {
+    visionRootObserver.disconnect();
+    visionRootObserver = null;
+  }
+  const shadow = chat.shadowRoot;
+  const input = shadow?.querySelector<HTMLElement>('#input');
+  if (!shadow || !input) {
+    return;
+  }
+  visionRootObserver = new MutationObserver(() => {
+    const current = state.chat;
+    if (!current || current !== chat) {
+      return;
+    }
+    if (!current.shadowRoot?.querySelector(`#${VISION_COMPOSER_ROOT_ID}`)) {
+      ensureStructure(current);
+      bindEvents(current);
+      renderVisionComposerDom();
+    }
+  });
+  visionRootObserver.observe(shadow, { childList: true });
+  visionRootObserver.observe(input, { childList: true });
+  state.cleanups.push(() => {
+    visionRootObserver?.disconnect();
+    visionRootObserver = null;
+  });
+}
+
 export function getStagedVisionFiles(): File[] {
   return state.staged.map(item => item.file);
 }
@@ -494,6 +568,8 @@ function bindEvents(chat: DeepChatElement): void {
   // Paste on host deep-chat element (bubbles from shadow contenteditable in most browsers).
   chat.addEventListener('paste', onPaste);
   state.cleanups.push(() => chat.removeEventListener('paste', onPaste));
+
+  watchVisionRoot(chat);
 }
 
 function unbindEvents(): void {
@@ -520,12 +596,21 @@ export function mountVisionComposer(
   if (typeof opts?.pending === 'boolean') {
     state.pending = opts.pending;
   }
-  ensureStructure(chat);
-  bindEvents(chat);
-  renderVisionComposerDom();
+  if (visionStructureReady(chat)) {
+    ensureStructure(chat);
+    bindEvents(chat);
+    renderVisionComposerDom();
+  } else {
+    // Vendor shadow 初次渲染为异步：结构就绪后补挂载。
+    scheduleVisionMountRetry(chat);
+  }
 }
 
 export function unmountVisionComposer(opts?: { keepStaged?: boolean }): void {
+  if (visionMountRetryTimer !== null) {
+    window.clearTimeout(visionMountRetryTimer);
+    visionMountRetryTimer = null;
+  }
   unbindEvents();
   const chat = state.chat;
   if (chat?.shadowRoot) {

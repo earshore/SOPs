@@ -28,7 +28,7 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本          | 说明                                                               |
 | ---------------------------- | ------------- | ------------------------------------------------------------------ |
 | **GitHub Latest（稳定 GA）** | `v3.0.12`     | 生产推荐版本                                                     |
-| **当前 Pre-release 候选**    | `v3.1.0-rc.1` | 功能冻结后的发布候选（AI 分析取消/运行感知、总览优化）           |
+| **当前 Pre-release 候选**    | `v3.1.0-rc.1` | 功能冻结后的发布候选（AI 分析取消/运行感知、总览优化、Deep Chat 会话设置加固）           |
 | package.json                 | `3.1.0-rc.1`  | 与候选 tag / Release 一致                                        |
 | 上一 GA                      | `v3.0.11`     | 回滚参考                                                         |
 
@@ -36,6 +36,15 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 - **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.1.0-rc.1` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
 - 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.0-rc.1`，上一 GA 为 `v3.0.11`。
+
+`v3.1.0-rc.1`（2026-08-09，Pre-release）收口后增补 **Deep Chat 会话设置加固**（2026-08-10，随下一候选发布）：
+
+- **会话级模型持久化**：模型+调试参数按会话保存（`thread.model` 落库），切走再切回/刷新均恢复；切换模型在会话内显式通知 `切换至{model} · {effort|推理关}`（推理关闭显示「推理关」），同模型不刷屏。
+- **页面默认参数**：模型/推理等级/temperature/systemPrompt 页面级默认持久化（含 provider 推理指纹防失效）；新会话自动沿用页面设置，系统设置全局覆盖仍优先；从未改过则跟随全局。
+- **历史会话模型联动**：切历史会话自动把模型框切到该会话模型（仅 UI 不写库）；不可用时回落全局模型+推理等级并 toast 提示。
+- **最高推理档位超时放大**：clamp 后 max 档请求超时 ×2（90s→180s，上限 300s），深度思考不再轻易超时；恢复路径与其余档位不变。
+- **Prompt 气泡 hover-only**：点击 Prompt 记录不再弹气泡（避免遮挡操作），仅鼠标驻留 1s 触发，点击后 1s 抑制窗 + 点击即隐藏。
+- **Vision 入口修复**（存量）：vendor 输入区重建不再抹掉 vision 上传入口（MutationObserver 兜底重建）；vision e2e 的 localStorage SecurityError 与初始化发送竞态修复，`deep-chat-send`/`prompt-preview` e2e 26/26 全绿。
 
 `v3.0.12`（2026-08-08，稳定 GA）定稿 `v3.0.12-rc.1`…`rc.10` 全部候选增量：
 
