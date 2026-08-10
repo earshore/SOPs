@@ -16,26 +16,39 @@ export function isListingPromptContext(activeContext?: unknown): boolean {
 }
 
 /** 正文起始标记（按出现位置取最早命中；含德语 Titel）。 */
-const TITLE_START_MARKERS = ['1. Title', '**Title**', 'Title:', 'Titel:'] as const;
+const TITLE_START_MARKERS = [
+  '1. Title',
+  '**Title**',
+  '**Titel**',
+  'Title:',
+  'Titel:',
+  'Title：',
+  'Titel：',
+] as const;
 
 /** 行首编号列表起始，例如 "1. Title" / "1) Titel" / "1、Title"。 */
 const LISTING_START_PATTERN = /(?:^|\n)\s*1[.、)．]\s*(?:Title|Titel)/i;
 
 /**
- * 行首独立词 Title / Titel（兼容 grok 实测输出 "Title  \nOrganizer Box…"，无冒号无编号）。
- * 词边界 = 空白或半角/全角冒号或行尾，避免德语连字符构词（如 "Title-Verifikation"）误命中。
+ * 行首 Title / Titel，允许 markdown 标题/加粗包裹。
+ * 覆盖：
+ * - grok: "Title  \nOrganizer…"
+ * - 德语加粗: "**Titel**: Produkt" / "**Titel**\nProdukt"（冒号在 ** 外时 indexOf('Titel:') 会 miss）
+ * - 标题行: "# Title" / "## Titel"
+ * 词边界避免 "Title-Verifikation" 连字符构词误命中。
  */
-const TITLE_WORD_START_PATTERN = /(?:^|\n)\s*(?:Title|Titel)(?=[\s:：]|$)/i;
+const TITLE_LINE_START_PATTERN =
+  /(?:^|\n)\s*(?:#{1,6}\s+)?(?:\*{1,2}|_{1,2})?(?:Title|Titel)(?:\*{1,2}|_{1,2})?(?=[\s:：*]|$)/i;
 
 /**
  * Listing 工作流下判断正文是否包含真实文案起始标记（含放宽的行首 Title/Titel 词）。
  * 用于拦截 DEEP_CHAT_001 错误文案 / 仅推理无正文等无价值推送：
- * 正文只要含 "1. Title" / "Title:" / "**Title**" 或行首独立词 Title/Titel 即视为已生成正文。
+ * 正文只要含 "1. Title" / "Title:" / "**Title**" / "**Titel**" 或行首独立词 Title/Titel 即视为已生成正文。
  * 普通聊天（非 Listing 上下文）不调用本函数，由调用方（handoffs）保证。
  */
 export function hasListingCopyStart(text: string): boolean {
   if (!text) return false;
-  return findCopyStartIndex(text) !== null || TITLE_WORD_START_PATTERN.test(text);
+  return findCopyStartIndex(text) !== null;
 }
 
 /** Numbered section markers used by template-style listing copy. */
@@ -77,6 +90,10 @@ function findCopyStartIndex(text: string): number | null {
   const listMatch = text.match(LISTING_START_PATTERN);
   if (listMatch?.index !== undefined) {
     positions.push(listMatch.index);
+  }
+  const lineMatch = text.match(TITLE_LINE_START_PATTERN);
+  if (lineMatch?.index !== undefined) {
+    positions.push(lineMatch.index);
   }
   return positions.length > 0 ? Math.min(...positions) : null;
 }

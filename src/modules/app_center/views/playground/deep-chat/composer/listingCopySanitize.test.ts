@@ -99,6 +99,25 @@ describe('hasListingCopyStart', () => {
     expect(hasListingCopyStart('Titel\nProduktname')).toBe(true);
   });
 
+  it('德语 markdown 加粗 Titel（冒号在 ** 外）命中 — 实测误拦根因', () => {
+    // indexOf('Titel:') 在 "**Titel**:" 上失败（l 与 : 之间夹着 **）
+    expect(hasListingCopyStart('**Titel**: Kabellose Ohrhörer mit ANC')).toBe(true);
+    expect(hasListingCopyStart('**Titel**\nKabellose Ohrhörer mit ANC')).toBe(true);
+    expect(
+      hasListingCopyStart(
+        'Ich habe die Briefings geprüft.\n\n**Titel**: Kabellose Ohrhörer\n\n**Bullet 1**: …'
+      )
+    ).toBe(true);
+    expect(sanitizeListingCopy('Vorwort.\n\n**Titel**: Produktname')).toBe(
+      '**Titel**: Produktname'
+    );
+  });
+
+  it('markdown 标题行 # Title / ## Titel 命中', () => {
+    expect(hasListingCopyStart('# Title\nWireless earbuds')).toBe(true);
+    expect(hasListingCopyStart('## Titel\nKabellose Ohrhörer')).toBe(true);
+  });
+
   it('全角冒号 Title：命中', () => {
     expect(hasListingCopyStart('Title：Organizer Box')).toBe(true);
   });
