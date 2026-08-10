@@ -55,8 +55,7 @@ export function hasListingCopyStart(text: string): boolean {
  * Strict numbered bullet labels: "2. Bullet 1" / "3) Bullet".
  * Presence of these means the model chose the N. Bullet template — require 5 + description.
  */
-const NUMBERED_BULLET_LABEL =
-  /(?:^|\n)\s*\d+[.)、．]\s*Bullet\b/gi;
+const NUMBERED_BULLET_LABEL = /(?:^|\n)\s*\d+[.)、．]\s*Bullet\b/gi;
 
 /**
  * Description section header (EN/DE), allowing markdown wrappers and optional numbering.

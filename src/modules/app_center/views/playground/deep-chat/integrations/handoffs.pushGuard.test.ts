@@ -16,7 +16,8 @@ vi.mock('@/common/router', () => ({
 }));
 
 vi.mock('@/modules/app_center/listingWorkflowHandoff', async importOriginal => {
-  const actual = await importOriginal<typeof import('@/modules/app_center/listingWorkflowHandoff')>();
+  const actual =
+    await importOriginal<typeof import('@/modules/app_center/listingWorkflowHandoff')>();
   return {
     ...actual,
     saveListingCopy: (copy: unknown) => saveListingCopy(copy),

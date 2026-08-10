@@ -339,9 +339,7 @@ export function updateThreadFields(
     thread => thread.id === sessionState.threadStore.activeThreadId
   );
   sessionState.threadStore = {
-    activeThreadId: activeStillExists
-      ? sessionState.threadStore.activeThreadId
-      : nextThread.id,
+    activeThreadId: activeStillExists ? sessionState.threadStore.activeThreadId : nextThread.id,
     threads: sessionState.threadStore.threads
       .map(thread => (thread.id === nextThread.id ? nextThread : thread))
       .slice(0, getMaxThreadCount()),

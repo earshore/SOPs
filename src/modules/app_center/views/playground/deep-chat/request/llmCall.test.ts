@@ -216,7 +216,9 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     expect(sessionState.threadStore.activeThreadId).toBe('t2');
 
     clearDeepChatResponseChain('t1');
-    expect(sessionState.threadStore.threads.find(t => t.id === 't1')?.lastResponseId).toBeUndefined();
+    expect(
+      sessionState.threadStore.threads.find(t => t.id === 't1')?.lastResponseId
+    ).toBeUndefined();
     expect(sessionState.threadStore.activeThreadId).toBe('t2');
 
     document.body.removeChild(container);

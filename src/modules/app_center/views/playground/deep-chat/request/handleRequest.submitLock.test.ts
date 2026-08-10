@@ -115,7 +115,10 @@ describe('handleDeepChatRequest submit lock', () => {
     );
 
     expect(signalsB.onResponse).toHaveBeenCalled();
-    const rejectPayload = signalsB.onResponse.mock.calls[0]?.[0] as { error?: string; text?: string };
+    const rejectPayload = signalsB.onResponse.mock.calls[0]?.[0] as {
+      error?: string;
+      text?: string;
+    };
     const rejectText = String(rejectPayload?.error || rejectPayload?.text || '');
     expect(rejectText).toMatch(/仍在生成|等待完成/);
 

@@ -96,7 +96,9 @@ describe('Playground request budget', () => {
     expect(on.maxOutputTokens).toBeLessThanOrEqual(16000 - 1000 - 1);
 
     const longListing = 'x'.repeat(off.maxContextChars);
-    expect(getDeepChatMessageBudgetError([{ role: 'user', content: longListing }], on)).not.toBeNull();
+    expect(
+      getDeepChatMessageBudgetError([{ role: 'user', content: longListing }], on)
+    ).not.toBeNull();
   });
 
   it('fail-closes when reasoning output floor would exhaust the context window', () => {
