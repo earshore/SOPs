@@ -6,6 +6,68 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [3.1.0-rc.2] - 2026-08-10
+
+> 承接 rc.1 收口的发布候选：**Deep Chat 会话设置加固** 全部增量（会话级模型持久化、
+> 调参生效审计、切换通知、历史会话联动、超时放大、Prompt 气泡 hover-only、消息区
+> 清空根因修复、复制/编辑完整性）随本候选正式发布（rc.1 节末标注的增补）；含
+> 2026-08-10 验证收尾（build 门禁修复与 smoke 对齐）。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Added（新增）
+
+- **Deep Chat 会话级模型持久化**：`DeepChatThread.model` 字段落库（sanitize 白名单保留），
+  切换模型写回当前会话并在会话内以 system 消息显式通知 `切换至{model} · {effort|推理关}`
+  （推理关闭显示「推理关」），同模型切换不刷屏；切走再切回、刷新页面均恢复该会话模型。
+- **Deep Chat 页面默认参数**：模型/推理等级/temperature/systemPrompt 页面级默认持久化
+  （含 provider 推理指纹，指纹变化自动丢弃失效的推理默认）；新会话自动沿用页面设置，
+  系统设置全局覆盖仍优先；从未改过则跟随全局。
+- **历史会话模型联动**：切换历史会话时模型框自动切换到该会话模型（仅 UI 不写库）；
+  模型不可用时回落全局模型+推理等级并 toast 提示；存量无 model 会话静默跟随全局。
+- **Prompt 预览气泡 hover-only**：仅鼠标驻留 1s 触发，点击记录不再弹泡。
+
+### Fixed（修复）
+
+- **Deep Chat 最高推理档位超时放大**：clamp 后 max 档请求超时 ×2（90s→180s，
+  上限 300s），深度思考不再被轻易误杀；恢复路径与其余档位、关闭推理时保持原超时。
+- **Deep Chat Prompt 气泡点击误触修复**：点击 Prompt 记录不再弹出预览气泡遮挡操作，
+  点击后 1s 抑制窗防止残留 over 重放弹泡，点击即隐藏。
+- **Deep Chat Vision 入口挂载修复**（存量）：vendor 输入区重建会抹掉注入的 vision
+  上传节点（且不派发 render 事件），改由 MutationObserver 在挂载期间盯住 shadow 与
+  `#input` 的 childList，root 丢失即重建；顺带修复 vision e2e 的 localStorage
+  SecurityError（seed 改用 addInitScript）与初始化发送竞态（用例等待 vendor 就绪），
+  `deep-chat-send` + `deep-chat-prompt-preview` e2e 26/26 全绿。
+- **会话级模型设置不再覆盖系统全局设置**：Deep Chat 页面切换模型仅写当前会话
+  （thread.model）与页面默认（`deep_chat_page_defaults.model`，带全局模型指纹，
+  系统设置改动后自动失效跟随全局），不再写工具策略默认 / provider 配置 model；
+  新会话继承页面默认模型。
+- **历史会话恢复最后调用模型**：切历史会话时模型框优先恢复 `thread.model`，无记录时
+  回退 `lastResponseModel`（存量会话最后调用模型）；线程加载清洗白名单补
+  `lastResponseId`/`lastResponseModel` 保留；ModelSelect 新增 `onReady` 钩子，
+  修复挂载时模型列表未就绪导致线程模型恢复失效。
+- **Deep Chat 切换体验打磨**：切换通知改为小字居中无气泡底的系统提示样式（role
+  system 专属 CSS，browser computed style 实测生效），不再与对话消息混淆；生成中
+  切换模型只落数据不实时渲染，生成结束后统一补渲染（记录一条不丢，也不打扰当次
+  生成）；通知渲染带滚动保护、侧栏「仅追加通知」的写回跳过整表重绘；适配线程计数
+  排除 system 通知，侧栏条数与对话消息一致。
+- **修复切换模型消息区清空**（根因+兜底+重放重试）：`applyDeepChatVisionUploadConfig`
+  此前每次调用都重复赋值 `chat.images`（值未变），vendor 属性 setter 响应后异步整层
+  重建 `#chat-view`，新消息区为空且不重放 history——会话内容与切换通知全部消失，切走
+  再切回才恢复。现仅首次赋值；另加 `#container` childList 观察，vendor 自发重建时
+  重放当前会话历史兜底；生成 settle 与切换竞态触发重建时，单次重放会被 vendor 异步
+  重建窗口吞掉，重放改为「验证驱动」限次重试（320ms 检查消息区是否落地，未落地且
+  会话有消息继续重放，最多 6 次）。新增 e2e `deep-chat-model-switch`（消息保留/通知
+  显示样式/记录不冲掉），deep-chat 组 e2e 27/27 全绿。
+- **修复用户消息复制/编辑被 Listing 净化截断**：用户发送的 Listing Prompt 消息含
+  `1. **Title:**` 等结构标记，复制/编辑经 `sanitizeListingCopy` 时被从首个
+  `Title:` 处截断，复制结果与右侧 Prompt 列表填充的完整 Prompt 不一致；该净化只面向
+  AI 生成文案（剥离模型前言），用户自己消息的复制/编辑现原样返回（AI 复制/推送行为
+  不变），新增 `getOutgoingMessageContent` sanitize 门禁单测。
+- **build 门禁与 smoke 对齐修复**：`updateActiveThreadFields` 抽 `isNoticeOnlySystemAppend`
+  /`pruneThreadOptionalFields` 两个辅助函数降至 eslint 复杂度基线（0 警告）内；
+  `index.test.ts` 修复两处类型错误（Promise 泛型与 persistedActiveThread 消息类型）；
+  `release-smoke` 的 Prompt 预览断言由点击触发改为 hover（与 hover-only 产品行为一致）。
+
 ## [3.1.0-rc.1] - 2026-08-09
 
 > 功能冻结后的发布候选（Pre-release）。Long-task 运行感知（v3.1）+ 链路收尾（v3.2）+
