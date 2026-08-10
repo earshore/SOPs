@@ -72,23 +72,45 @@ const SYSTEM_PROMPT_CONTEXT_RATIO = 0.8;
 
 export function resolveDeepChatRequestBudget(
   config: LLMProviderConfig | null,
-  model: string
+  model: string,
+  reasoningEnabled = false
 ): DeepChatRequestBudget {
   const configuredBudget = getDeepChatRequestBudgetDefaults();
   const contextTokens = getModelContextTokens(config, model) || DEFAULT_CONTEXT_WINDOW_TOKENS;
-  const availableInputTokens = Math.max(
-    1000,
-    contextTokens - configuredBudget.maxOutputTokens - CONTEXT_SAFETY_TOKENS
+  const rawEffectiveOutput = resolveDeepChatMaxOutputTokens(
+    configuredBudget.maxOutputTokens,
+    reasoningEnabled
   );
-  const targetInputTokens = Math.min(
-    availableInputTokens,
-    Math.max(MIN_INPUT_CONTEXT_TOKENS, Math.floor(contextTokens * CONTEXT_TARGET_RATIO)),
-    MAX_INPUT_CONTEXT_TOKENS
-  );
-  const maxContextChars = Math.min(
-    configuredBudget.maxContextChars,
-    Math.max(4000, targetInputTokens * APPROX_CHARS_PER_TOKEN)
-  );
+  // Leave at least 1 token of conceptual headroom so output alone cannot claim the full window.
+  const maxOutputCap = Math.max(1, contextTokens - CONTEXT_SAFETY_TOKENS - 1);
+  const effectiveOutputTokens = Math.min(rawEffectiveOutput, maxOutputCap);
+
+  const remainingForInput = contextTokens - effectiveOutputTokens - CONTEXT_SAFETY_TOKENS;
+  // Fail-closed: never invent free input when the window is already exhausted by output+safety.
+  const availableInputTokens = remainingForInput > 0 ? remainingForInput : 0;
+
+  const targetInputTokens =
+    availableInputTokens <= 0
+      ? 0
+      : Math.min(
+          availableInputTokens,
+          Math.max(
+            Math.min(MIN_INPUT_CONTEXT_TOKENS, availableInputTokens),
+            Math.min(availableInputTokens, Math.floor(contextTokens * CONTEXT_TARGET_RATIO))
+          ),
+          MAX_INPUT_CONTEXT_TOKENS
+        );
+
+  const maxContextChars =
+    targetInputTokens <= 0
+      ? 0
+      : Math.min(
+          configuredBudget.maxContextChars,
+          Math.max(
+            Math.min(4000, targetInputTokens * APPROX_CHARS_PER_TOKEN),
+            targetInputTokens * APPROX_CHARS_PER_TOKEN
+          )
+        );
 
   return {
     maxContextChars,
@@ -100,7 +122,7 @@ export function resolveDeepChatRequestBudget(
       configuredBudget.maxSystemPromptChars || Number.MAX_SAFE_INTEGER,
       Math.floor(maxContextChars * SYSTEM_PROMPT_CONTEXT_RATIO)
     ),
-    maxOutputTokens: configuredBudget.maxOutputTokens,
+    maxOutputTokens: effectiveOutputTokens,
   };
 }
 

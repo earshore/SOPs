@@ -20,7 +20,7 @@ import {
   schedulePendingAssistantDisplay,
   syncPendingRequestView,
 } from '../session/pendingRuntime';
-import { callDeepChatLLM } from './llmCall';
+import { callDeepChatLLM, prepareDeepChatReasoningCallOptions } from './llmCall';
 import { reconcileSwitchNotices } from '../chrome/switchNoticeChrome';
 import type { ChatMessage } from '@/services/llmService';
 import type { LLMProviderConfig } from '@/types/state';
@@ -355,7 +355,9 @@ export async function prepareDeepChatRequest(
     return null;
   }
 
-  const requestBudget = resolveDeepChatRequestBudget(config, model);
+  const reasoningOptions = prepareDeepChatReasoningCallOptions();
+  const reasoningEnabled = Boolean(reasoningOptions.reasoningPrefs?.enabled);
+  const requestBudget = resolveDeepChatRequestBudget(config, model, reasoningEnabled);
   const { requestMessages, conversationMessages, messages, droppedMessageCount } =
     createDeepChatRequestMessages(body, requestBudget, {
       allowImageOnly: visionUserParts.length > 0,

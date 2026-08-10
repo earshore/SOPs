@@ -75,6 +75,45 @@ describe('Playground request budget', () => {
     expect(largeModelBudget.maxContextChars).toBe(128000);
   });
 
+  it('tightens input budget when reasoning raises max_output_tokens on small context', () => {
+    const config = {
+      provider: 'new_api',
+      endpoint: 'https://example.com/v1',
+      apiKey: 'test',
+      model: 'small-model',
+      models: [{ id: 'small-model', context: 16000 }],
+      enabled: true,
+    } as const;
+
+    const off = resolveDeepChatRequestBudget(config, 'small-model', false);
+    const on = resolveDeepChatRequestBudget(config, 'small-model', true);
+
+    expect(off.maxContextChars).toBe(48000);
+    expect(on.maxContextChars).toBeLessThan(off.maxContextChars);
+    // effective output must be reflected (clamped to leave room in context)
+    expect(on.maxOutputTokens).toBeGreaterThan(off.maxOutputTokens);
+    expect(on.maxOutputTokens).toBeLessThanOrEqual(16000 - 1000 - 1);
+
+    const longListing = 'x'.repeat(off.maxContextChars);
+    expect(getDeepChatMessageBudgetError([{ role: 'user', content: longListing }], on)).not.toBeNull();
+  });
+
+  it('fail-closes when reasoning output floor would exhaust the context window', () => {
+    const config = {
+      provider: 'new_api',
+      endpoint: 'https://example.com/v1',
+      apiKey: 'test',
+      model: 'tiny',
+      models: [{ id: 'tiny', context: 8000 }],
+      enabled: true,
+    } as const;
+
+    const budget = resolveDeepChatRequestBudget(config, 'tiny', true);
+    // Cannot invent 1000 free input tokens when output already fills the window
+    expect(budget.maxContextChars).toBeLessThanOrEqual(4000);
+    expect(budget.maxOutputTokens + 1000).toBeLessThanOrEqual(8000);
+  });
+
   it('rejects messages and system prompts when an explicit budget limit is configured', () => {
     const messages: ChatMessage[] = [{ role: 'user', content: 'this message is too long' }];
 

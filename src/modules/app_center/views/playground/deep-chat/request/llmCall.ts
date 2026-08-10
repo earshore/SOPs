@@ -45,8 +45,8 @@ import type { LLMProviderConfig } from '@/types/state';
 import { appendPendingDeepChatReasoningText, type PendingDeepChatRequest } from './lifecycle';
 import {
   DEEP_CHAT_RECOVERY_MAX_OUTPUT_TOKENS_FLOOR,
-  getDeepChatRequestBudgetDefaults,
   resolveDeepChatMaxOutputTokens,
+  resolveDeepChatRequestBudget,
 } from './budget';
 import {
   formatToolActivityLabel,
@@ -429,10 +429,8 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
   );
 
   const reasoningEnabled = Boolean(reasoningOptions.reasoningPrefs?.enabled);
-  const maxTokens = resolveDeepChatMaxOutputTokens(
-    getDeepChatRequestBudgetDefaults().maxOutputTokens,
-    reasoningEnabled
-  );
+  // Align with prepare-time budget (includes context clamp / fail-closed effective output).
+  const maxTokens = resolveDeepChatRequestBudget(config, model, reasoningEnabled).maxOutputTokens;
   // 仅当轮透传；不进 thread 持久化。
   const visionOptions = visionUserParts && visionUserParts.length > 0 ? { visionUserParts } : {};
 
