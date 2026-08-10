@@ -265,6 +265,32 @@ export function saveThreadMessages(
   }
 }
 
+/** 仅追加 system 切换通知的 messages 写回：条数计数已排除通知，侧栏无需整表重绘 */
+function isNoticeOnlySystemAppend(
+  thread: DeepChatThread,
+  fields: Partial<DeepChatThread>
+): boolean {
+  return (
+    'messages' in fields &&
+    Array.isArray(fields.messages) &&
+    fields.messages.length === thread.messages.length + 1 &&
+    fields.messages.at(-1)?.role === 'system'
+  );
+}
+
+/** 显式清空时删除可选字段（避免 undefined 持久化为 null 语义） */
+function pruneThreadOptionalFields(
+  nextThread: DeepChatThread,
+  fields: Partial<DeepChatThread>
+): void {
+  if ('skillContexts' in fields && !fields.skillContexts) {
+    delete nextThread.skillContexts;
+  }
+  if ('systemPrompt' in fields && !fields.systemPrompt) {
+    delete nextThread.systemPrompt;
+  }
+}
+
 export function updateActiveThreadFields(
   container: HTMLElement,
   fields: Partial<DeepChatThread>
@@ -290,13 +316,7 @@ export function updateActiveThreadFields(
     updatedAt: bumpsSortOrder ? Date.now() : activeThread.updatedAt,
   };
 
-  // 显式清空时删除可选字段（避免 undefined 持久化为 null 语义）
-  if ('skillContexts' in fields && !fields.skillContexts) {
-    delete nextThread.skillContexts;
-  }
-  if ('systemPrompt' in fields && !fields.systemPrompt) {
-    delete nextThread.systemPrompt;
-  }
+  pruneThreadOptionalFields(nextThread, fields);
 
   // 保持 threads 数组相对顺序，避免仅因写回字段就把当前会话挪到首位
   sessionState.threadStore = {
@@ -309,12 +329,7 @@ export function updateActiveThreadFields(
   // 侧栏只展示标题/条数/时间：仅排序相关字段变化才重绘，调参/模型/链字段写回
   // 不再整表重建；「仅追加 system 切换通知」的 messages 变更同样跳过（条数计数
   // 已排除通知），避免切换模型时侧栏闪烁。
-  const isNoticeOnlyAppend =
-    'messages' in fields &&
-    Array.isArray(fields.messages) &&
-    fields.messages.length === activeThread.messages.length + 1 &&
-    fields.messages.at(-1)?.role === 'system';
-  if (bumpsSortOrder && !isNoticeOnlyAppend) {
+  if (bumpsSortOrder && !isNoticeOnlySystemAppend(activeThread, fields)) {
     renderHistoryThreadList(container);
   }
   uiHooks.refreshChatSearchResultsIfOpen(container);

@@ -3561,8 +3561,8 @@ describe('deep-chat playground session model persistence', () => {
     // 发起生成：callLLM 挂起直到 release
     let release!: () => void;
     mocks.callLLM.mockReturnValueOnce(
-      new Promise<void>(resolve => {
-        release = resolve;
+      new Promise<string>(resolve => {
+        release = () => resolve('');
       })
     );
     const onClose = vi.fn();
@@ -3581,8 +3581,12 @@ describe('deep-chat playground session model persistence', () => {
       }),
       false
     );
+    const persistedMessages = (persistedActiveThread(mocks)?.messages ?? []) as Array<{
+      role?: string;
+      text?: string;
+    }>;
     expect(
-      persistedActiveThread(mocks)?.messages?.some(
+      persistedMessages.some(
         message =>
           message.role === 'system' &&
           typeof message.text === 'string' &&

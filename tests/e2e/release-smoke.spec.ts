@@ -227,8 +227,7 @@ async function seedDeepChatPromptDraftBeforeLoad(page: Page): Promise<void> {
 async function waitForSettingsPanel(page: Page): Promise<void> {
   await page.waitForFunction(() => {
     const root = document.querySelector('[x-data="settingsPanel"]') as
-      | (HTMLElement & { _x_dataStack?: unknown[] })
-      | null;
+      (HTMLElement & { _x_dataStack?: unknown[] }) | null;
     return Array.isArray(root?._x_dataStack);
   });
 }
@@ -993,7 +992,7 @@ test.describe('release candidate smoke', () => {
     const promptButton = page.locator(`[data-preview-prompt-id="${DEEP_CHAT_PROMPT_ID}"]`);
     await expect(promptButton).toBeVisible();
 
-    await promptButton.click();
+    await promptButton.hover();
     await expect(page.locator('#deep-chat-prompt-preview-popover')).toHaveClass(/is-visible/);
     await expect(page.locator('#deep-chat-prompt-preview-popover')).toContainText(
       DEEP_CHAT_PROMPT_MARKER
