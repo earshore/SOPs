@@ -189,12 +189,12 @@ export function getThreadForSave(threadId?: string): DeepChatThread | null {
     return getActiveThread();
   }
 
-  const existingThread = sessionState.threadStore.threads.find(thread => thread.id === threadId);
-  if (existingThread) {
-    return existingThread;
-  }
+  return getThreadById(threadId);
+}
 
-  return null;
+/** Lookup by id only — never falls back to the active thread. */
+export function getThreadById(threadId: string): DeepChatThread | null {
+  return sessionState.threadStore.threads.find(thread => thread.id === threadId) ?? null;
 }
 
 export function threadExists(threadId: string): boolean {
@@ -295,8 +295,23 @@ export function updateActiveThreadFields(
   container: HTMLElement,
   fields: Partial<DeepChatThread>
 ): void {
-  const activeThread = getActiveThread();
-  if (!hasThreadFieldChanges(activeThread, fields)) {
+  updateThreadFields(container, getActiveThread().id, fields);
+}
+
+/**
+ * Write fields to a specific thread. Preserves activeThreadId when the target
+ * is a background thread (must not steal focus during mid-generation switch).
+ */
+export function updateThreadFields(
+  container: HTMLElement,
+  threadId: string,
+  fields: Partial<DeepChatThread>
+): void {
+  const targetThread = getThreadById(threadId);
+  if (!targetThread) {
+    return;
+  }
+  if (!hasThreadFieldChanges(targetThread, fields)) {
     return;
   }
 
@@ -311,16 +326,21 @@ export function updateActiveThreadFields(
   ]);
   const bumpsSortOrder = Object.keys(fields).some(key => THREAD_ACTIVITY_SORT_KEYS.has(key));
   const nextThread: DeepChatThread = {
-    ...activeThread,
+    ...targetThread,
     ...fields,
-    updatedAt: bumpsSortOrder ? Date.now() : activeThread.updatedAt,
+    updatedAt: bumpsSortOrder ? Date.now() : targetThread.updatedAt,
   };
 
   pruneThreadOptionalFields(nextThread, fields);
 
-  // 保持 threads 数组相对顺序，避免仅因写回字段就把当前会话挪到首位
+  // 保持 threads 数组相对顺序；后台线程写回不得改写 activeThreadId
+  const activeStillExists = sessionState.threadStore.threads.some(
+    thread => thread.id === sessionState.threadStore.activeThreadId
+  );
   sessionState.threadStore = {
-    activeThreadId: nextThread.id,
+    activeThreadId: activeStillExists
+      ? sessionState.threadStore.activeThreadId
+      : nextThread.id,
     threads: sessionState.threadStore.threads
       .map(thread => (thread.id === nextThread.id ? nextThread : thread))
       .slice(0, getMaxThreadCount()),
@@ -329,7 +349,7 @@ export function updateActiveThreadFields(
   // 侧栏只展示标题/条数/时间：仅排序相关字段变化才重绘，调参/模型/链字段写回
   // 不再整表重建；「仅追加 system 切换通知」的 messages 变更同样跳过（条数计数
   // 已排除通知），避免切换模型时侧栏闪烁。
-  if (bumpsSortOrder && !isNoticeOnlySystemAppend(activeThread, fields)) {
+  if (bumpsSortOrder && !isNoticeOnlySystemAppend(targetThread, fields)) {
     renderHistoryThreadList(container);
   }
   uiHooks.refreshChatSearchResultsIfOpen(container);

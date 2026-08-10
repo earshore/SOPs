@@ -19,7 +19,9 @@ const { sessionState } = await import('../session/sessionState');
 const {
   buildReasoningOnlyRecoveryMessages,
   DEEP_CHAT_REASONING_ONLY_RECOVERY_PROMPT,
+  clearDeepChatResponseChain,
   mapDeepChatEmptyResponsesMessage,
+  persistDeepChatResponseId,
   resolveDeepChatScaledTimeout,
   resolveDeepChatResponsesChainOptions,
   shouldTypewriteFinalAssistantText,
@@ -178,6 +180,90 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     expect(next[1]?.role).toBe('user');
     expect(next[1]?.content).toBe(DEEP_CHAT_REASONING_ONLY_RECOVERY_PROMPT);
     expect(String(next[1]?.content)).toMatch(/最终答案|可见/);
+  });
+
+  it('writes onResponseId only to the origin thread when another thread is active', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    sessionState.mountedContainer = container;
+    sessionState.threadStore = {
+      activeThreadId: 't2',
+      threads: [
+        {
+          id: 't1',
+          title: 'Origin',
+          messages: [],
+          createdAt: 1,
+          updatedAt: 1,
+        },
+        {
+          id: 't2',
+          title: 'Active',
+          messages: [],
+          createdAt: 2,
+          updatedAt: 2,
+        },
+      ],
+    };
+
+    persistDeepChatResponseId('gpt-5.5', 'resp_from_t1', 't1');
+
+    const t1 = sessionState.threadStore.threads.find(t => t.id === 't1');
+    const t2 = sessionState.threadStore.threads.find(t => t.id === 't2');
+    expect(t1?.lastResponseId).toBe('resp_from_t1');
+    expect(t1?.lastResponseModel).toBe('gpt-5.5');
+    expect(t2?.lastResponseId).toBeUndefined();
+    expect(sessionState.threadStore.activeThreadId).toBe('t2');
+
+    clearDeepChatResponseChain('t1');
+    expect(sessionState.threadStore.threads.find(t => t.id === 't1')?.lastResponseId).toBeUndefined();
+    expect(sessionState.threadStore.activeThreadId).toBe('t2');
+
+    document.body.removeChild(container);
+    sessionState.mountedContainer = null;
+  });
+
+  it('tool getThread resolves the origin thread, not the active one', async () => {
+    sessionState.threadStore = {
+      activeThreadId: 't2',
+      threads: [
+        {
+          id: 't1',
+          title: 'Origin listing',
+          messages: [{ role: 'user', text: 'origin user q' }],
+          createdAt: 1,
+          updatedAt: 1,
+        },
+        {
+          id: 't2',
+          title: 'Other session',
+          messages: [{ role: 'user', text: 'other user q' }],
+          createdAt: 2,
+          updatedAt: 2,
+        },
+      ],
+    };
+
+    const config = {
+      provider: 'new_api',
+      endpoint: 'https://example.test/v1',
+      apiKey: 'k',
+      model: 'gpt-5.5',
+      apiPath: 'responses',
+    } as LLMProviderConfig;
+
+    const opts = resolveDeepChatResponsesChainOptions(
+      config,
+      'gpt-5.5',
+      { enableBusinessTools: true },
+      't1'
+    );
+    expect(typeof opts.executeTool).toBe('function');
+    const summary = JSON.parse(
+      await opts.executeTool!({ name: 'get_session_summary', arguments: '{}', callId: 'c1' })
+    );
+    expect(summary.threadId).toBe('t1');
+    expect(summary.title).toBe('Origin listing');
   });
 });
 

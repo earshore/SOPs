@@ -4,7 +4,13 @@ import {
   parseReasoningEffortValue,
   type DeepChatReasoningSessionOverride,
 } from '../session/uiHooks';
-import { getActiveThread, updateActiveThreadFields } from '../session/threadStore';
+import {
+  getActiveThread,
+  getThreadById,
+  updateActiveThreadFields,
+  updateThreadFields,
+} from '../session/threadStore';
+import type { DeepChatThread } from '../types';
 import {
   appendPendingAssistantText,
   emitPendingAssistantDelta,
@@ -139,12 +145,28 @@ type DeepChatChainOptions = {
   maxToolRounds?: number;
 };
 
-function getPendingForActiveThread(): PendingDeepChatRequest | undefined {
-  return sessionState.pendingRequests.get(getActiveThread().id);
+function getPendingForThread(threadId: string): PendingDeepChatRequest | undefined {
+  return sessionState.pendingRequests.get(threadId);
 }
 
-function recordToolActivityStart(name: string, argsJson: string, callId: string): void {
-  const pending = getPendingForActiveThread();
+/** Fail-closed snapshot when origin thread was deleted mid-generation. */
+function emptyThreadSnapshot(threadId: string): DeepChatThread {
+  return {
+    id: threadId,
+    title: '',
+    messages: [],
+    createdAt: 0,
+    updatedAt: 0,
+  };
+}
+
+function recordToolActivityStart(
+  name: string,
+  argsJson: string,
+  callId: string,
+  threadId: string
+): void {
+  const pending = getPendingForThread(threadId);
   if (!pending) return;
   const steps = pending.preReplySteps ?? [];
   pending.preReplySteps = upsertPreReplyActivityStep(steps, {
@@ -164,9 +186,10 @@ function recordToolActivityEnd(
   name: string,
   callId: string,
   output: string,
-  status: 'done' | 'error'
+  status: 'done' | 'error',
+  threadId: string
 ): void {
-  const pending = getPendingForActiveThread();
+  const pending = getPendingForThread(threadId);
   if (!pending) return;
   const steps = pending.preReplySteps ?? [];
   const existing = steps.find(s => s.id === callId);
@@ -187,13 +210,19 @@ function buildDeepChatToolOptions(
   config: LLMProviderConfig,
   model: string,
   supportsTools: boolean,
-  toolPrefs?: { enableBusinessTools?: boolean }
+  toolPrefs?: { enableBusinessTools?: boolean },
+  threadId?: string
 ): Pick<DeepChatChainOptions, 'tools' | 'executeTool' | 'enableToolLoop' | 'maxToolRounds'> {
   if (!supportsTools || !isDeepChatBusinessToolsEnabled(toolPrefs)) {
     return {};
   }
+  const originThreadId = threadId;
   const baseExecute = createDeepChatBusinessToolExecutor({
-    getThread: () => getActiveThread(),
+    // Production: never fall back to active thread (cross-session leak).
+    getThread: () =>
+      originThreadId
+        ? (getThreadById(originThreadId) ?? emptyThreadSnapshot(originThreadId))
+        : getActiveThread(),
     getModel: () => model,
     getProvider: () => config.provider,
   });
@@ -201,14 +230,21 @@ function buildDeepChatToolOptions(
     tools: DEEP_CHAT_BUSINESS_TOOLS,
     executeTool: async call => {
       const callId = call.callId || `tool_${Date.now()}`;
-      recordToolActivityStart(call.name, call.arguments, callId);
+      const activityThreadId = originThreadId || getActiveThread().id;
+      recordToolActivityStart(call.name, call.arguments, callId, activityThreadId);
       try {
         const output = await baseExecute({ ...call, callId });
-        recordToolActivityEnd(call.name, callId, String(output ?? ''), 'done');
+        recordToolActivityEnd(call.name, callId, String(output ?? ''), 'done', activityThreadId);
         return output;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        recordToolActivityEnd(call.name, callId, JSON.stringify({ error: message }), 'error');
+        recordToolActivityEnd(
+          call.name,
+          callId,
+          JSON.stringify({ error: message }),
+          'error',
+          activityThreadId
+        );
         throw error;
       }
     },
@@ -220,9 +256,13 @@ function buildDeepChatToolOptions(
 
 function resolveResponsesChainFlags(
   model: string,
-  cap: ReturnType<typeof resolveModelCapability>
+  cap: ReturnType<typeof resolveModelCapability>,
+  threadId?: string
 ): Pick<DeepChatChainOptions, 'previousResponseId' | 'store'> {
-  const thread = getActiveThread();
+  const thread = threadId ? getThreadById(threadId) : getActiveThread();
+  if (!thread) {
+    return { store: false };
+  }
   const previousResponseId =
     thread.lastResponseModel === model && thread.lastResponseId ? thread.lastResponseId : undefined;
   const canChain =
@@ -236,7 +276,9 @@ export function resolveDeepChatResponsesChainOptions(
   config: LLMProviderConfig,
   model: string,
   /** Optional tool prefs override (tests / explicit callers). Runtime default is fail-closed. */
-  toolPrefs?: { enableBusinessTools?: boolean }
+  toolPrefs?: { enableBusinessTools?: boolean },
+  /** Origin thread for chain + tools; omit only for legacy/test paths. */
+  threadId?: string
 ): DeepChatChainOptions {
   const apiPath = normalizeApiPathId(
     (config as { apiPath?: unknown }).apiPath ??
@@ -253,7 +295,13 @@ export function resolveDeepChatResponsesChainOptions(
     modelId: model,
     preferredSurface: apiPath,
   });
-  const toolOptions = buildDeepChatToolOptions(config, model, cap.supportsTools, toolPrefs);
+  const toolOptions = buildDeepChatToolOptions(
+    config,
+    model,
+    cap.supportsTools,
+    toolPrefs,
+    threadId
+  );
 
   if (apiPath === 'chat_completions') {
     return { apiPath, ...toolOptions };
@@ -261,18 +309,27 @@ export function resolveDeepChatResponsesChainOptions(
 
   return {
     apiPath,
-    ...resolveResponsesChainFlags(model, cap),
+    ...resolveResponsesChainFlags(model, cap, threadId),
     ...toolOptions,
   };
 }
 
-export function persistDeepChatResponseId(model: string, responseId: string): void {
+export function persistDeepChatResponseId(
+  model: string,
+  responseId: string,
+  threadId?: string
+): void {
   const container = getMountedRenderContainer();
   if (!container) return;
-  updateActiveThreadFields(container, {
+  const fields = {
     lastResponseId: responseId,
     lastResponseModel: model,
-  });
+  };
+  if (threadId) {
+    updateThreadFields(container, threadId, fields);
+    return;
+  }
+  updateActiveThreadFields(container, fields);
 }
 
 export function isResponsesChainUnsupportedError(error: unknown): boolean {
@@ -287,13 +344,18 @@ export function isResponsesChainUnsupportedError(error: unknown): boolean {
   );
 }
 
-export function clearDeepChatResponseChain(): void {
+export function clearDeepChatResponseChain(threadId?: string): void {
   const container = getMountedRenderContainer();
   if (!container) return;
-  updateActiveThreadFields(container, {
+  const fields = {
     lastResponseId: undefined,
     lastResponseModel: undefined,
-  });
+  };
+  if (threadId) {
+    updateThreadFields(container, threadId, fields);
+    return;
+  }
+  updateActiveThreadFields(container, fields);
 }
 
 export function stripResponsesChainForRetry(
@@ -351,8 +413,14 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
     visionUserParts,
   } = context;
   const streamState: DeepChatStreamState = { streamedText: '' };
+  const originThreadId = pendingRequest.threadId;
   const reasoningOptions = prepareDeepChatReasoningCallOptions();
-  let responsesChain = resolveDeepChatResponsesChainOptions(config, model);
+  let responsesChain = resolveDeepChatResponsesChainOptions(
+    config,
+    model,
+    undefined,
+    originThreadId
+  );
   const onStreamUpdate = createDeepChatStreamHandler(
     pendingRequest,
     signals,
@@ -387,7 +455,8 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
       ),
       signal: controller.signal,
       stream: true,
-      onResponseId: (responseId: string) => persistDeepChatResponseId(model, responseId),
+      onResponseId: (responseId: string) =>
+        persistDeepChatResponseId(model, responseId, originThreadId),
       onStreamUpdate,
     });
   };
@@ -399,7 +468,7 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
     if (!isResponsesChainUnsupportedError(error) || responsesChain.apiPath !== 'responses') {
       throw error;
     }
-    clearDeepChatResponseChain();
+    clearDeepChatResponseChain(originThreadId);
     responsesChain = stripResponsesChainForRetry(responsesChain);
     streamState.streamedText = '';
     finalText = await run(responsesChain);
