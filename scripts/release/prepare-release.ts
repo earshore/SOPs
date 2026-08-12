@@ -269,6 +269,24 @@ ${preNote}
 - 部署步骤：docs/DEPLOYMENT.md
 - 发布策略：docs/RELEASE_POLICY.md（禁止删减历史发版叙述；CHANGELOG 为 SSOT）
 
+### 发版后冒烟（OPS — 提交 Release 前确认）
+
+- [ ] \`https://sops.hongecb.store\`（或本版部署目标）可打开
+- [ ] 浏览器控制台无致命红错
+- [ ] 系统设置可打开；侧栏一级/二级可点
+- [ ] AI 连接：测试连接（值班自有 Key）
+- [ ] 一处工具主路径冒烟（如 Deep Chat 发一句或打开分析页）
+- [ ] CSP \`connect-src\` 仍含网关域（\`new.hongecb.store\`）
+- [ ] 自动化：\`npm run test:e2e:smoke\`（CI 或本地）已绿
+
+### 无障碍发版抽检（A11y — RC 建议 / GA 必做）
+
+- [ ] Tab 可达顶栏 → 主内容；focus-visible 可见
+- [ ] 系统设置：Esc / 脏数据确认可用键盘
+- [ ] 确认弹层：焦点在对话框内，关闭后焦点不丢
+- [ ] 至少一处业务主 CTA 可键盘触发
+- [ ] 图标按钮有 accessible name（抽检）
+
 ### 完整变更
 
 以下正文直接摘自 \`docs/CHANGELOG.md\` 的 \`${version}\` 章节（**完整保留，不压缩**）。  

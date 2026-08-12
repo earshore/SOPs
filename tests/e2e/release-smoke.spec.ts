@@ -446,6 +446,35 @@ async function switchTabFromHome(page: Page, tab: string): Promise<void> {
 }
 
 test.describe('release candidate smoke', () => {
+  test('Home workbench launchpad direct actions open their intended routes', async ({ page }) => {
+    const consoleListener = setupConsoleErrorListener(page);
+    const directRoutes = [
+      'app_center_overview',
+      'sops_overview',
+      'scraper',
+      'playground_deep_chat',
+      'keyword_hunter_input',
+    ] as const;
+
+    for (const routeId of directRoutes) {
+      await openRoute(page, '/#/home');
+      await expectNoRouteErrorText(page);
+
+      const action = page.locator(
+        `#panel-home .workbench-launchpad [data-action="switch-tab"][data-tab="${routeId}"]`
+      );
+      await expect(action).toHaveCount(1);
+      await expect(action).toBeVisible();
+      await action.click();
+      await expect(page.locator('#main-content')).toHaveAttribute('data-current-route', routeId);
+    }
+
+    expect(
+      consoleListener.getErrors(),
+      'Home launchpad direct navigation should not emit console/page errors'
+    ).toEqual([]);
+  });
+
   for (const route of CORE_ROUTES) {
     test(`${route.label} renders without console or route errors`, async ({ page }) => {
       const consoleListener = setupConsoleErrorListener(page);

@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [3.1.1-rc.1] - 2026-08-13
+
+> 功能冻结后的发布候选（Pre-release）。本候选以 `v3.1.0` GA 为稳定基线，聚焦首页亚马逊运营工作台入口重构；GitHub Latest 仍为 `v3.1.0`，回滚基线为 `v3.1.0`。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Added（新增）
+
+- **首页运营工作台 Launchpad**：新增“亚马逊运营工作台”主入口，将最近作业、SOPs 流程中心及 Master Analysis、Playground、Keyword Hunter 三条日常任务直达路径集中呈现；所有入口继续复用既有 `switch-tab` 路由动作，不新增外部依赖或权限边界。
+
+### Changed（变更）
+
+- **首页信息架构与响应式布局**：桌面端改为品牌主视觉与工作台并列布局；860px 以下切换为纵向任务流，520px 以下工具卡单列展示。保留现有浮动工作台及 PPC Tools 快捷入口，确保熟悉用户的既有入口不消失。
+- **交互与可访问性**：主 CTA、SOP 链接和任务工具卡均使用语义化 `button`、可见焦点样式及既有动作协议；小屏幕保留明确的图标辅助与阅读顺序。
+
+### Fixed（修复）
+
+- **发布候选回归覆盖**：`release-smoke` 新增首页 Launchpad 五条直达路径（App Center、SOPs、Master Analysis、Playground、Keyword Hunter）的实际点击验证，并检查路由落点与控制台错误，防止首页改版后入口路由退化。
+
+### Docs（文档）
+
+- 发布元数据同步至 `v3.1.1-rc.1`；候选通道、回滚基线和自动化验证结果以本章节及 GitHub Release 为准。
+
 ## [3.1.0] - 2026-08-12
 
 > 正式 GA。发布后 GitHub Latest 指向 `v3.1.0`；上一 GA 与生产回滚基线均为 `v3.0.12`。

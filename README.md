@@ -25,17 +25,24 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-| 通道                         | 版本          | 说明                                                               |
-| ---------------------------- | ------------- | ------------------------------------------------------------------ |
-| **GitHub Latest（稳定 GA）** | `v3.1.0`      | 生产推荐版本                                                     |
-| **当前 Pre-release 候选**    | —            | `v3.1.0` GA 已收口候选线（rc.1…rc.3）                            |
-| package.json                 | `3.1.0`       | 与 GA tag / Release 一致                                        |
-| 上一 GA                      | `v3.0.12`     | 回滚参考（Latest 稳定 GA 为 `v3.1.0`）                           |
+| 通道                         | 版本             | 说明                                                                 |
+| ---------------------------- | ---------------- | -------------------------------------------------------------------- |
+| **GitHub Latest（稳定 GA）** | `v3.1.0`         | 生产推荐版本；保持 Latest                                           |
+| **当前 Pre-release 候选**    | `v3.1.1-rc.1`    | 首页亚马逊运营工作台 Launchpad 候选；必须标记为 Pre-release          |
+| package.json                 | `3.1.1-rc.1`     | 与候选 tag / Release 一致                                            |
+| **回滚基线（GA）**           | `v3.1.0`         | RC 验证失败时回退至当前稳定版本                                      |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
 - **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.1.0` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.0`（GA），上一 GA 为 `v3.0.12`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.0`（GA），当前候选为 `v3.1.1-rc.1`。
+
+`v3.1.1-rc.1`（2026-08-13，Pre-release）聚焦**首页亚马逊运营工作台 Launchpad**：
+
+- **统一入口**：将最近作业、SOPs 流程中心及 Master Analysis、Playground、Keyword Hunter 的日常任务直达路径集中呈现；保留浮动工作台及 PPC Tools 快捷入口。
+- **响应式信息架构**：桌面端使用主视觉与工作台并列布局；平板及移动端切换为纵向任务流，工具卡在窄屏单列展示。
+- **可访问性与回归**：主入口均保留语义化按钮、可见焦点和既有路由协议；`release-smoke` 新增五条首页直达路径的实际点击与路由落点验证。
+- GitHub Latest **仍指向** `v3.1.0`；RC 回滚基线为 `v3.1.0`；生产目标 `https://sops.hongecb.store`。
 
 `v3.1.0`（2026-08-12，稳定 GA）定稿 `v3.1.0-rc.1`…`rc.3` 全部候选增量并纳入 GA 定稿修复：
 
