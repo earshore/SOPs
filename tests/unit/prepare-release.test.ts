@@ -173,7 +173,7 @@ describe('release archive cleanup', () => {
   });
 });
 
-describe('v3.0.12-rc.3 release metadata', () => {
+describe('v3.1.0 release metadata', () => {
   it('locks package and lockfile root versions to the current release version', () => {
     const packageLock = JSON.parse(readRepoFile('package-lock.json')) as {
       version: string;
@@ -184,28 +184,28 @@ describe('v3.0.12-rc.3 release metadata', () => {
     expect(packageLock.packages['']?.version).toBe(CURRENT_VERSION);
   });
 
-  it('places current RC notes before the prior candidate section', () => {
+  it('places current release notes before the prior candidate section', () => {
     const changelog = readRepoFile('docs/CHANGELOG.md');
-    const rcStart = changelog.indexOf(`## [${CURRENT_VERSION}] - `);
-    const priorCandidateStart = changelog.indexOf('## [3.0.12-rc.2] - 2026-07-28');
-    const nextReleaseStart = changelog.indexOf('\n## [', rcStart + 1);
+    const releaseStart = changelog.indexOf(`## [${CURRENT_VERSION}] - `);
+    const priorCandidateStart = changelog.indexOf('## [3.1.0-rc.3] - 2026-08-10');
+    const nextReleaseStart = changelog.indexOf('\n## [', releaseStart + 1);
 
-    expect(rcStart).toBeGreaterThan(-1);
-    expect(priorCandidateStart).toBeGreaterThan(rcStart);
-    expect(nextReleaseStart).toBeGreaterThan(rcStart);
+    expect(releaseStart).toBeGreaterThan(-1);
+    expect(priorCandidateStart).toBeGreaterThan(releaseStart);
+    expect(nextReleaseStart).toBeGreaterThan(releaseStart);
 
-    const rcSection = changelog.slice(rcStart, nextReleaseStart);
-    expect(rcSection).toMatch(IS_PRE_RELEASE ? /Pre-release|生产验证候选/ : /正式 GA|稳定 GA/);
-    expect(rcSection).toMatch(/`v3\.0\.11`/);
-    expect(rcSection).toContain('https://sops.hongecb.store');
-    expect(rcSection).toContain('### Changed');
-    expect(rcSection).toContain('### Fixed');
+    const releaseSection = changelog.slice(releaseStart, nextReleaseStart);
+    expect(releaseSection).toMatch(IS_PRE_RELEASE ? /Pre-release|生产验证候选/ : /正式 GA|稳定 GA/);
+    expect(releaseSection).toMatch(/`v3\.0\.12`/);
+    expect(releaseSection).toContain('https://sops.hongecb.store');
+    expect(releaseSection).toContain('### Changed');
+    expect(releaseSection).toContain('### Fixed');
   });
 
-  it('publishes the current GA, package RC, and previous GA in README', () => {
+  it('publishes the current GA, package version, and previous GA in README', () => {
     const readme = readRepoFile('README.md');
 
-    expect(readme).toMatch(/\|\s*\*\*GitHub Latest（稳定 GA）\*\*\s*\|\s*`v3\.0\.12`\s*\|/);
+    expect(readme).toMatch(/\|\s*\*\*GitHub Latest（稳定 GA）\*\*\s*\|\s*`v3\.1\.0`\s*\|/);
     if (IS_PRE_RELEASE) {
       expect(readme).toMatch(
         new RegExp(`\\|\\s*\\*\\*当前 Pre-release 候选\\*\\*\\s*\\|\\s*\`v${CURRENT_VERSION_RE}\`\\s*\\|`)
@@ -216,7 +216,7 @@ describe('v3.0.12-rc.3 release metadata', () => {
     expect(readme).toMatch(
       new RegExp(`\\|\\s*package\\.json\\s*\\|\\s*\`${CURRENT_VERSION_RE}\`\\s*\\|`)
     );
-    expect(readme).toMatch(/\|\s*上一 GA\s*\|\s*`v3\.0\.11`\s*\|/);
+    expect(readme).toMatch(/\|\s*上一 GA\s*\|\s*`v3\.0\.12`\s*\|/);
     expect(readme).toContain(`\`0.1.0\`…\`${CURRENT_VERSION}\``);
     expect(readme).toContain(`当前稳定版为 \`v${CURRENT_VERSION}\``);
   });
@@ -224,8 +224,8 @@ describe('v3.0.12-rc.3 release metadata', () => {
   it('declares the current GA and candidate line in release policy', () => {
     const policy = readRepoFile('docs/RELEASE_POLICY.md');
 
-    expect(policy).toMatch(/`v3\.0\.12`.*2026-08-08.*当前 GA/);
-    expect(policy).toMatch(/`v3\.0\.11`.*2026-07-27.*上一 GA/);
+    expect(policy).toMatch(/`v3\.1\.0`.*2026-08-12.*当前 GA/);
+    expect(policy).toMatch(/`v3\.0\.12`.*2026-08-08.*上一 GA/);
     if (IS_PRE_RELEASE) {
       expect(policy).toContain(`当前候选线为 \`v${CURRENT_VERSION}-rc.*\``);
     } else {
