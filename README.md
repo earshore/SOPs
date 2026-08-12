@@ -27,15 +27,24 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 | 通道                         | 版本          | 说明                                                               |
 | ---------------------------- | ------------- | ------------------------------------------------------------------ |
-| **GitHub Latest（稳定 GA）** | `v3.0.12`     | 生产推荐版本                                                     |
-| **当前 Pre-release 候选**    | `v3.1.0-rc.3` | Deep Chat 请求链路可靠性 + 会话设置加固（rc.1/rc.2 线延续）      |
-| package.json                 | `3.1.0-rc.3`  | 与候选 tag / Release 一致                                        |
-| 上一 GA                      | `v3.0.11`     | 回滚参考（Latest 稳定 GA 为 `v3.0.12`）                           |
+| **GitHub Latest（稳定 GA）** | `v3.1.0`      | 生产推荐版本                                                     |
+| **当前 Pre-release 候选**    | 无            | `v3.1.0` GA 已收口候选线（rc.1…rc.3）                            |
+| package.json                 | `3.1.0`       | 与 GA tag / Release 一致                                        |
+| 上一 GA                      | `v3.0.12`     | 回滚参考（Latest 稳定 GA 为 `v3.1.0`）                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.1.0-rc.3` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.1.0` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.0-rc.3`（Pre-release 候选；生产 Latest 仍为 `v3.0.12`），上一 GA 为 `v3.0.11`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.0`（GA），上一 GA 为 `v3.0.12`。
+
+`v3.1.0`（2026-08-12，稳定 GA）定稿 `v3.1.0-rc.1`…`rc.3` 全部候选增量并纳入 GA 定稿修复：
+
+- **模型选择作用域隔离**：ModelSelect 目录刷新仅刷新目录；持久化显式 system/app/none 三档且默认 none；SEO 流程不再覆盖系统全局回退模型与生效 provider；Deep Chat 新线程不再继承页面默认模型；AI 分析证据深度与调度偏好成对持久化。
+- **AI 智能分析重复 toast 修复**：离开页面时「分析仍在后台进行」toast 只弹一次（Alpine 双重 destroy 触发收敛为一次）。
+- **Deep Chat 请求链路可靠性**：跨会话串线、删除中会话复活、预算预检、KH 推送门禁误拦、双提交占坑、输入跨刷新持久化（rc.3）。
+- **Deep Chat 会话设置加固**：会话级模型持久化、历史会话模型联动、超时放大、Prompt 气泡 hover-only 等（rc.2）。
+- **AI 分析取消与长任务运行感知**、应用中心总览优化（rc.1）。
+- GitHub Latest **指向** `v3.1.0`；回滚基线为 `v3.0.12`；生产目标 `https://sops.hongecb.store`。
 
 `v3.1.0-rc.3`（2026-08-10，Pre-release）**Deep Chat 请求链路可靠性**：
 

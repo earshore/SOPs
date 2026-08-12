@@ -6,6 +6,50 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [3.1.0] - 2026-08-12
+
+> 正式 GA。发布后 GitHub Latest 指向 `v3.1.0`；上一 GA 与生产回滚基线均为 `v3.0.12`。
+> 生产目标为 `https://sops.hongecb.store`。
+> 本版定稿 `v3.1.0-rc.1`…`rc.3` 的全部候选增量：AI 分析取消与长任务运行感知、
+> 应用中心总览优化、Deep Chat 会话设置加固与请求链路可靠性（跨会话串线/删除复活/
+> 预算预检/推送门禁），并纳入 GA 定稿修复：模型选择作用域隔离与 AI 分析离开页面的
+> 重复 toast。
+
+### Added（新增）
+
+- Deep Chat 会话级模型持久化与页面默认参数（模型/推理等级/temperature/systemPrompt
+  页面级默认持久化，含 provider 推理指纹防失效）；新会话自动沿用页面设置，系统设置
+  全局覆盖仍优先（详见 rc.2）。
+- Keyword Hunter 输入跨刷新恢复：`copyInputText` / `keywordsInputText` 纳入 persist
+  切片（单字段上限 200_000 字符），其余运行时工作数据仍刷新清空（详见 rc.3）。
+
+### Changed（变更）
+
+- AI 分析取消与长任务运行感知：取消二次确认、运行中状态/进度展示完善（详见 rc.1）。
+- 应用中心总览优化（详见 rc.1）。
+- Deep Chat 会话设置加固全量（详见 rc.2）：切换模型会话内显式通知、历史会话模型联动、
+  最高推理档位超时放大、Prompt 气泡 hover-only、消息区清空根因修复、复制/编辑完整性。
+
+### Fixed（修复）
+
+- **模型选择作用域隔离**：ModelSelect 目录刷新仅刷新目录；持久化显式 system/app/none
+  三档且默认 none；Keyword Hunter SEO 流程只写应用作用域，不再覆盖系统全局回退模型
+  与当前生效 provider；Deep Chat 新线程不再继承页面默认模型，历史会话恢复自身模型；
+  AI 分析证据深度与调度偏好成对持久化，移除「仅本次生效」误导文案，预设指纹匹配
+  保持三档命名档位一致。
+- **AI 智能分析离开页面重复 toast**：Alpine x-data 清理与模块卸载双重触发 `destroy()`
+  导致「分析仍在后台进行，已完成的维度会自动保存」toast 弹出两次；统一由 Alpine
+  `destroyTree` 触发一次销毁并加幂等保护，重复触发也只弹一次。
+- **Deep Chat 请求链路可靠性（详见 rc.3）**：跨会话串线、删除生成中会话不再复活、
+  预算预检与推理输出上限对齐、Keyword Hunter 推送完整性门禁（超时 partial 拦截、
+  markdown/德语标题兼容）、同会话双提交占坑。
+
+### Docs（文档）
+
+- Spec / Plan：`docs/superpowers/specs/2026-08-12-model-handoff-performance-fixes.md`、
+  `docs/superpowers/specs/2026-08-10-deep-chat-request-reliability-fix-spec.md` 等
+  （模型选择作用域隔离 / Deep Chat 请求链路可靠性）。
+
 ## [3.1.0-rc.3] - 2026-08-10
 
 > 生产验证候选（Pre-release）。承接 rc.2：**Deep Chat 请求链路可靠性**（跨会话串线、
