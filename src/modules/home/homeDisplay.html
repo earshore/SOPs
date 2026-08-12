@@ -23,27 +23,114 @@
           把<span>混乱</span>变成<span>秩序</span>， 把<span>经验</span>变成<span>指令</span>。
         </p>
 
-        <div class="home-primary-actions" aria-label="首页主入口">
+        <section class="workbench-launchpad" aria-labelledby="workbench-launchpad-title">
+          <div class="workbench-launchpad__header">
+            <div>
+              <div class="workbench-launchpad__eyebrow">
+                <span class="workbench-launchpad__signal" aria-hidden="true"></span>
+                从这里开始今日运营
+              </div>
+              <h2 id="workbench-launchpad-title">亚马逊运营工作台</h2>
+              <p>统一进入日常作业、工具总览与流程规范，不必记住每个功能的位置。</p>
+            </div>
+            <span class="workbench-launchpad__badge">
+              <i class="fas fa-star" aria-hidden="true"></i>
+              推荐入口
+            </span>
+          </div>
+
+          <div class="workbench-launchpad__action-area">
             <button
               type="button"
-              class="home-primary-action home-primary-action--main"
+              class="workbench-launchpad__primary-action"
               data-action="switch-tab"
               data-tab="app_center_overview"
             >
-              <i class="fas fa-cubes" aria-hidden="true"></i>
-              <span>打开运营工作台</span>
+              <span class="workbench-launchpad__primary-icon" aria-hidden="true">
+                <i class="fas fa-layer-group"></i>
+              </span>
+              <span class="workbench-launchpad__primary-content">
+                <span class="workbench-launchpad__primary-meta">一站式运营中枢</span>
+                <span class="workbench-launchpad__primary-title">进入运营工作台</span>
+                <span class="workbench-launchpad__primary-description"
+                  >查看工具总览，从当前任务继续开始</span
+                >
+              </span>
+              <i
+                class="fas fa-arrow-right workbench-launchpad__primary-arrow"
+                aria-hidden="true"
+              ></i>
             </button>
             <button
-            type="button"
-            class="home-primary-action"
-            data-action="switch-tab"
-            data-tab="sops_overview"
-          >
-            <i class="fas fa-diagram-project" aria-hidden="true"></i>
-            <span>进入 SOP 流程中心</span>
-          </button>
+              type="button"
+              class="workbench-launchpad__sop-link"
+              data-action="switch-tab"
+              data-tab="sops_overview"
+            >
+              <i class="fas fa-diagram-project" aria-hidden="true"></i>
+              <span><strong>需要规范作业？</strong>进入 SOPs 流程中心</span>
+              <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
 
-        </div>
+          <div class="workbench-launchpad__tools" aria-label="运营工具快捷入口">
+            <div class="workbench-launchpad__tools-heading">
+              <span>直接开始一项任务</span>
+              <span>或从上方进入工作台总览</span>
+            </div>
+            <button
+              type="button"
+              class="workbench-tool"
+              data-action="switch-tab"
+              data-tab="scraper"
+            >
+              <i class="fas fa-cubes-stacked" aria-hidden="true"></i>
+              <span class="workbench-tool__content">
+                <span class="workbench-tool__meta">01 · 数据洞察</span>
+                <span class="workbench-tool__title">Master Analysis</span>
+                <span class="workbench-tool__description">采集并分析竞品 ASIN</span>
+              </span>
+              <i
+                class="fas fa-arrow-up-right-from-square workbench-tool__arrow"
+                aria-hidden="true"
+              ></i>
+            </button>
+            <button
+              type="button"
+              class="workbench-tool"
+              data-action="switch-tab"
+              data-tab="playground_deep_chat"
+            >
+              <i class="fas fa-paper-plane" aria-hidden="true"></i>
+              <span class="workbench-tool__content">
+                <span class="workbench-tool__meta">02 · 内容生成</span>
+                <span class="workbench-tool__title">Playground</span>
+                <span class="workbench-tool__description">验证 Prompt，生成产品文案</span>
+              </span>
+              <i
+                class="fas fa-arrow-up-right-from-square workbench-tool__arrow"
+                aria-hidden="true"
+              ></i>
+            </button>
+            <button
+              type="button"
+              class="workbench-tool"
+              data-action="switch-tab"
+              data-tab="keyword_hunter_input"
+            >
+              <i class="fas fa-search" aria-hidden="true"></i>
+              <span class="workbench-tool__content">
+                <span class="workbench-tool__meta">03 · SEO 复核</span>
+                <span class="workbench-tool__title">Keyword Hunter</span>
+                <span class="workbench-tool__description">梳理关键词覆盖与 Listing</span>
+              </span>
+              <i
+                class="fas fa-arrow-up-right-from-square workbench-tool__arrow"
+                aria-hidden="true"
+              ></i>
+            </button>
+          </div>
+        </section>
 
         <div class="ai-status">
           <div class="status-dot-inner"></div>
