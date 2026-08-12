@@ -7,6 +7,7 @@ import { getCacheStatsAsync, clearAnalysisCacheAsync } from '../services/paralle
 import {
   getRuntimeMasterAnalysisOptions,
   getRuntimeStrategySettings,
+  MASTER_ANALYSIS_SCHEDULING_BY_EVIDENCE_DEPTH,
   saveRuntimeStrategySettings,
 } from '@/services/runtimeStrategyService';
 import {
@@ -195,6 +196,7 @@ function createPerformanceSettingsActions(): PanelMixin<{
         savePerformanceSettings({
           ...this.settings,
           evidenceDepth: depth,
+          schedulingPreference: MASTER_ANALYSIS_SCHEDULING_BY_EVIDENCE_DEPTH[depth],
         });
         this.refreshSettingsFromRuntime();
         const label = depth === 'fast' ? '快速' : depth === 'deep' ? '深入' : '均衡';

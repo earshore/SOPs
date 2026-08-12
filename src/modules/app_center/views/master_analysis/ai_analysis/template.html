@@ -829,7 +829,7 @@
                     @change="selectEvidenceDepth($event.target.value)"
                     :disabled="isAnalyzing"
                     aria-label="证据深度"
-                    title="证据深度仅影响本次 AI 分析，不改变全局模型与推理等级；快速更省时，深入更完整"
+                    title="证据深度会同步调整性能策略并保存到运行时设置；快速更省时，深入更完整"
                   >
                     <template x-for="depthOption in evidenceDepthOptions" :key="depthOption.value">
                       <option :value="depthOption.value" x-text="depthOption.label"></option>
@@ -1671,7 +1671,10 @@
             <h3 class="text-lg font-bold text-rose-900" x-text="analysisFailureSummaryText"></h3>
             <p class="mt-1.5 text-sm text-rose-700 leading-relaxed">
               目标模型在最大推理强度下未返回正文，已自动重试仍失败。
-              可仅对失败目标重新发起分析：<span class="font-semibold" x-text="failedTargetLabels"></span>
+              可仅对失败目标重新发起分析：<span
+                class="font-semibold"
+                x-text="failedTargetLabels"
+              ></span>
             </p>
             <div class="mt-4">
               <button

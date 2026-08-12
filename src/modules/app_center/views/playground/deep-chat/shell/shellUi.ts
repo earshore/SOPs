@@ -89,7 +89,6 @@ import { renderPromptDraftList, renderThreadList } from './renderers';
 import { disconnectChatViewRebuildWatch, watchChatViewRebuild } from '../chrome/chatViewChrome';
 import {
   clearPageDefaults,
-  resolveModelFingerprint,
   resolveReasoningFingerprint,
   writePageDefaults,
 } from '../session/pageDefaults';
@@ -251,7 +250,7 @@ function resolveGlobalReasoningPrefs(provider: string): NonNullable<DeepChatThre
 }
 
 /**
- * 线程模型可恢复目标：线程模型在列表内直接用，否则回落全局（与 refreshLLMConfig 同源）。
+ * 线程模型可恢复目标：线程模型在列表内直接用，否则回落应用 → 系统（与 refreshLLMConfig 同源）。
  * 优先 thread.model（会话显式设置）；存量会话无 model 时回退 lastResponseModel
  * （该会话最后调用模型的设置）。
  */
@@ -269,7 +268,7 @@ function resolveThreadModelTarget(config: LLMProviderConfig | null, threadModel:
  * 线程模型恢复到模型选择框（applyThreadTuningToSession 末尾调用，覆盖切会话/挂载/重置）：
  * - thread.model（无则回退 lastResponseModel）在当前 config.models 中 → setModel(target)
  *   （UI-only，不写任何持久化）；
- * - 否则（含空）→ 回落全局模型（与 refreshLLMConfig 同源）；
+ * - 否则（含空）→ 回落应用 → 系统模型（与 refreshLLMConfig 同源）；
  * - 线程有 model 记录但不可用 → 覆盖线程推理为全局 prefs + 清 Responses 链 + warning toast。
  */
 export function syncThreadModelToSession(container: HTMLElement | null): void {
@@ -297,7 +296,7 @@ export function syncThreadModelToSession(container: HTMLElement | null): void {
       lastResponseModel: undefined,
       reasoning: resolveGlobalReasoningPrefs(config.provider),
     });
-    showToast('该会话的模型当前不可用，已切换至全局默认模型', { type: 'warning' });
+    showToast('该会话的模型当前不可用，已切换至应用默认模型', { type: 'warning' });
   }
   syncDeepChatReasoningControlsFromThread(container);
   applyDeepChatVisionUploadConfig(getChat(container));
@@ -308,14 +307,7 @@ export function bindModelControls(refs: ModelControlRefs): void {
 
   const onModelChange = (nextModel: string): void => {
     applyEffectiveModelSwitch(container, nextModel);
-    // 页面默认模型：仅写会话 + 页面默认（deep_chat_page_defaults），
-    // 不覆盖系统全局设置（工具策略默认 / provider 配置 model）。
-    // 指纹记录全局生效模型，系统设置改动后页面默认自动失效跟随全局。
-    const provider = resolveActiveModelProvider();
-    writePageDefaults({
-      model: nextModel,
-      modelFingerprint: resolveModelFingerprint(provider),
-    });
+    // 模型选择仅属于当前会话；新会话继续按应用 → 系统 fallback 解析。
     const chat = getChat(container);
     // Capability-gated controls must re-evaluate when the model changes.
     // Vision composer shows modelSwitch toast when staged files + vision lost.
@@ -324,7 +316,7 @@ export function bindModelControls(refs: ModelControlRefs): void {
 
   // Image paste is handled by host visionComposer (stage when vision; toast when not).
 
-  // 刷新成功（组件已真调 /models 并写盘）后：同步会话状态与能力控件。
+  // 刷新成功后按会话 → 应用 → 系统重新解析；不可把目录临时回退写成会话选择。
   const onRefresh = async ({
     selectedModel,
   }: {
@@ -333,10 +325,9 @@ export function bindModelControls(refs: ModelControlRefs): void {
   }): Promise<void> => {
     // 先重读含 key 的完整配置（组件写盘时密钥走 secure 存储），供能力解析与后续请求使用。
     sessionState.currentConfig = await StorageService.getLLMConfigWithKey();
+    void selectedModel;
     renderLLMConfigState(container);
-    applyEffectiveModelSwitch(container, selectedModel);
-    syncDeepChatReasoningControlsFromThread(container);
-    applyDeepChatVisionUploadConfig(getChat(container));
+    syncThreadModelToSession(container);
   };
 
   const tracked = {

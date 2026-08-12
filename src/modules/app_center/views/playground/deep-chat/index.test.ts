@@ -333,6 +333,13 @@ function createDeepChatStorageService(options: ImportOptions) {
         unknown
       >;
     }),
+    setLLMModelCatalog: vi.fn((_provider: string, next: Record<string, unknown>) => {
+      const previousKey = (llmConfig as { apiKey?: string } | null)?.apiKey ?? '';
+      llmConfig = { ...(next ?? {}), apiKey: next.apiKey || previousKey } as Record<
+        string,
+        unknown
+      >;
+    }),
     set: vi.fn((key: string, value: unknown) => {
       if (key === deepChatStorageKeys.TOOL_STRATEGY_SETTINGS) {
         strategySettings = value as typeof strategySettings;
@@ -3055,17 +3062,15 @@ describe('deep-chat playground model refresh', () => {
     });
 
     expect(queryRequired<HTMLSelectElement>(container, '[data-model-select]').value).toBe('gpt-4o');
-    // 组件刷新写盘：provider config + 工具策略默认模型。
-    expect(mocks.storageService.setLLMConfig).toHaveBeenCalled();
-    expect(mocks.storageService.set).toHaveBeenCalledWith(
+    // 刷新只更新目录，不可跨层改写 provider fallback 或 Deep Chat 应用策略。
+    expect(mocks.storageService.setLLMConfig).not.toHaveBeenCalled();
+    expect(mocks.storageService.setLLMModelCatalog).toHaveBeenCalledWith(
+      'openai',
+      expect.objectContaining({ models: [{ id: 'gpt-4o' }, { id: 'gpt-4.1-mini' }] })
+    );
+    expect(mocks.storageService.set).not.toHaveBeenCalledWith(
       'tool_strategy_settings',
-      expect.objectContaining({
-        targets: expect.objectContaining({
-          'playground-deep-chat': expect.objectContaining({
-            defaultModelsByProvider: expect.objectContaining({ openai: 'gpt-4o' }),
-          }),
-        }),
-      })
+      expect.anything()
     );
     expect(mocks.toast).toHaveBeenCalledWith('成功同步 2 个模型', { type: 'success' });
 
@@ -3438,7 +3443,8 @@ describe('deep-chat playground session model persistence', () => {
     modelSelect.value = 'gpt-4.1';
     modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
 
-    const thread = persistedActiveThread(mocks);
+    await vi.waitFor(() => expect(systemNotices(persistedActiveThread(mocks))).toHaveLength(1));
+    const thread = persistedActiveThread(mocks)!;
     expect(thread?.model).toBe('gpt-4.1');
     // Responses 多轮链跨模型失效
     expect(thread?.lastResponseId).toBeUndefined();
@@ -3485,7 +3491,7 @@ describe('deep-chat playground session model persistence', () => {
     unmount();
   });
 
-  it('user model change writes session + page defaults only, never global strategy or provider config', async () => {
+  it('user model change writes only the session, never page defaults, strategy, or provider config', async () => {
     const { unmount, mocks, modelSelect } = await mountWithModels({
       storedThreadStore: structuredClone(storedThreadStore),
     });
@@ -3497,14 +3503,11 @@ describe('deep-chat playground session model persistence', () => {
 
     // 会话级：thread.model
     expect(persistedActiveThread(mocks)?.model).toBe('gpt-4.1');
-    // 页面默认：deep_chat_page_defaults.model + 指纹
+    // 模型不创建页面默认，避免成为隐藏的第四层。
     const pageDefaultsCall = mocks.storageService.set.mock.calls.find(
       ([key]) => key === deepChatStorageKeys.DEEP_CHAT_PAGE_DEFAULTS
     );
-    expect(pageDefaultsCall?.[1]).toMatchObject({
-      model: 'gpt-4.1',
-      modelFingerprint: expect.any(String),
-    });
+    expect(pageDefaultsCall).toBeUndefined();
     // 不覆盖系统全局设置：不写工具策略默认、不写 provider 配置 model
     expect(
       mocks.storageService.set.mock.calls.some(
@@ -3530,7 +3533,7 @@ describe('deep-chat playground session model persistence', () => {
     unmount();
   });
 
-  it('new thread inherits the page-default model', async () => {
+  it('new thread ignores the legacy page-default model and follows the application fallback', async () => {
     const { container, unmount, modelSelect } = await mountWithModels({
       storedThreadStore: structuredClone(storedThreadStore),
       pageDefaults: { model: 'gpt-4.1', modelFingerprint: 'o3-mini' },
@@ -3538,7 +3541,7 @@ describe('deep-chat playground session model persistence', () => {
 
     queryRequired<HTMLButtonElement>(container, '#deep-chat-clear-chat').click();
     await vi.waitFor(() => {
-      expect(modelSelect.value).toBe('gpt-4.1');
+      expect(modelSelect.value).toBe('o3-mini');
     });
 
     unmount();
@@ -3591,6 +3594,13 @@ describe('deep-chat playground session model persistence', () => {
       }),
       false
     );
+    await vi.waitFor(() =>
+      expect(
+        systemNotices(persistedActiveThread(mocks)).some(message =>
+          message.text?.includes('切换至gpt-4.1')
+        )
+      ).toBe(true)
+    );
     const persistedMessages = (persistedActiveThread(mocks)?.messages ?? []) as Array<{
       role?: string;
       text?: string;
@@ -3629,7 +3639,7 @@ describe('deep-chat playground session model persistence', () => {
     modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
     modelSelect.value = 'gpt-4.1';
     modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    expect(systemNotices(persistedActiveThread(mocks))).toHaveLength(1);
+    await vi.waitFor(() => expect(systemNotices(persistedActiveThread(mocks))).toHaveLength(1));
 
     modelSelect.value = 'o3-mini';
     modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
@@ -3637,6 +3647,7 @@ describe('deep-chat playground session model persistence', () => {
     modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
 
     // 序列 B(同值忽略) → B → O → B：通知 = B, O, B 共 3 条
+    await vi.waitFor(() => expect(systemNotices(persistedActiveThread(mocks))).toHaveLength(3));
     const notices = systemNotices(persistedActiveThread(mocks));
     expect(notices).toHaveLength(3);
     expect(notices[0]?.text).toBe('切换至gpt-4.1 · 推理关');
@@ -3646,29 +3657,80 @@ describe('deep-chat playground session model persistence', () => {
     unmount();
   });
 
-  it('notices and updates thread.model when refresh falls back to a different model', async () => {
-    const { container, unmount, mocks } = await mountWithModels({
-      storedThreadStore: structuredClone(storedThreadStore),
+  it('keeps the historical thread model when refresh falls back to the application model', async () => {
+    const stored = structuredClone(storedThreadStore);
+    (stored.threads[0] as Record<string, unknown>).model = 'o3-mini';
+    const { container, unmount, mocks, modelSelect } = await mountWithModels({
+      storedThreadStore: stored,
+      toolStrategySettings: {
+        version: 2,
+        targets: {
+          'playground-deep-chat': { defaultModelsByProvider: { openai: 'gpt-4.1' } },
+        },
+      },
     });
 
-    mocks.fetchModelsFromApi.mockResolvedValue([{ id: 'gpt-5.6-sol' }]);
+    mocks.fetchModelsFromApi.mockResolvedValue([{ id: 'gpt-4.1' }, { id: 'gpt-5.6-sol' }]);
     queryRequired<HTMLButtonElement>(container, '[data-model-select-refresh]').click();
     await vi.waitFor(() => {
       expect(mocks.fetchModelsFromApi).toHaveBeenCalled();
     });
 
     const thread = persistedActiveThread(mocks);
-    expect(thread?.model).toBe('gpt-5.6-sol');
-    expect(systemNotices(thread).at(-1)?.text).toBe('切换至gpt-5.6-sol · 推理关');
+    expect(modelSelect.value).toBe('gpt-4.1');
+    expect(thread?.model).toBe('o3-mini');
+    expect(mocks.toast).toHaveBeenCalledWith('该会话的模型当前不可用，已切换至应用默认模型', {
+      type: 'warning',
+    });
 
-    // 回落相同模型：不追加新通知
-    const noticesBefore = systemNotices(thread).length;
-    mocks.fetchModelsFromApi.mockResolvedValue([{ id: 'gpt-5.6-sol' }]);
+    unmount();
+  });
+
+  it('keeps a valid historical thread model after refresh when app and system defaults differ', async () => {
+    const stored = structuredClone(storedThreadStore);
+    (stored.threads[0] as Record<string, unknown>).model = 'gpt-4.1-mini';
+    const { container, unmount, mocks, modelSelect } = await mountWithModels({
+      storedThreadStore: stored,
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'gpt-4.1',
+        models: ['gpt-4.1', 'gpt-4.1-mini'],
+      },
+      toolStrategySettings: {
+        version: 2,
+        targets: {
+          'playground-deep-chat': { defaultModelsByProvider: { openai: 'gpt-4.1' } },
+        },
+      },
+    });
+    mocks.localDataStore.set.mockClear();
+    mocks.toast.mockClear();
+    mocks.callLLM.mockClear();
+    mocks.fetchModelsFromApi.mockResolvedValue([{ id: 'gpt-4.1' }, { id: 'gpt-4.1-mini' }]);
+
     queryRequired<HTMLButtonElement>(container, '[data-model-select-refresh]').click();
     await vi.waitFor(() => {
-      expect(mocks.fetchModelsFromApi.mock.calls.length).toBe(2);
+      expect(mocks.fetchModelsFromApi).toHaveBeenCalled();
+      expect(modelSelect.value).toBe('gpt-4.1-mini');
     });
-    expect(systemNotices(persistedActiveThread(mocks)).length).toBe(noticesBefore);
+
+    expect(mocks.localDataStore.set).not.toHaveBeenCalled();
+    expect(mocks.toast).not.toHaveBeenCalledWith('该会话的模型当前不可用，已切换至应用默认模型', {
+      type: 'warning',
+    });
+
+    const onClose = vi.fn();
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Keep the historical model' }] },
+      { onResponse: vi.fn(), onClose }
+    );
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+    expect(mocks.callLLM.mock.calls[0]?.[4]).toBe('gpt-4.1-mini');
 
     unmount();
   });
@@ -3794,17 +3856,25 @@ describe('deep-chat playground thread model sync', () => {
     unmount();
   });
 
-  it('falls back to the global model and reasoning with a warning toast when thread model is unavailable', async () => {
+  it('falls back to the application model and reasoning with a warning toast when thread model is unavailable', async () => {
     const stored = structuredClone(storedThreadStore);
     (stored.threads[0] as Record<string, unknown>).model = 'zzz-removed';
     (stored.threads[0] as Record<string, unknown>).lastResponseId = 'resp-1';
     (stored.threads[0] as Record<string, unknown>).lastResponseModel = 'zzz-removed';
     (stored.threads[1] as Record<string, unknown>).model = 'gpt-4.1';
-    const { container, unmount, mocks } = await mountSync({ storedThreadStore: stored });
+    const { container, unmount, mocks } = await mountSync({
+      storedThreadStore: stored,
+      toolStrategySettings: {
+        version: 2,
+        targets: {
+          'playground-deep-chat': { defaultModelsByProvider: { openai: 'gpt-4.1' } },
+        },
+      },
+    });
 
-    // 挂载（active=thread-1）：线程模型不可用 → 回落全局 + toast
-    expect(modelSelect(container).value).toBe('o3-mini');
-    expect(mocks.toast).toHaveBeenCalledWith('该会话的模型当前不可用，已切换至全局默认模型', {
+    // 挂载（active=thread-1）：线程模型不可用 → 先回落应用模型 + toast
+    expect(modelSelect(container).value).toBe('gpt-4.1');
+    expect(mocks.toast).toHaveBeenCalledWith('该会话的模型当前不可用，已切换至应用默认模型', {
       type: 'warning',
     });
     const thread1 = persistedThreadById(mocks, 'thread-1');
@@ -3819,7 +3889,7 @@ describe('deep-chat playground thread model sync', () => {
 
     // 切回受损会话：再次 fallback toast
     threadButton(container, 'thread-1').click();
-    expect(modelSelect(container).value).toBe('o3-mini');
+    expect(modelSelect(container).value).toBe('gpt-4.1');
     expect(mocks.toast.mock.calls.length).toBe(toastCount + 1);
 
     unmount();
@@ -4032,12 +4102,18 @@ describe('deep-chat playground reasoning timeout scaling', () => {
     expect(systemPromptInput.value).toBe('');
     expect(temperatureInput.value).toBe('0.3');
     expect(mocks.toast).toHaveBeenCalledWith('Deep Chat 调试参数已重置', { type: 'success' });
-    const last = mocks.localDataStore.set.mock.calls
-      .filter(([key]) => key === 'user:playground_deep_chat_threads_v1')
-      .at(-1)?.[1] as { threads: Array<Record<string, unknown> & { id?: string }> };
-    const activeThread = last?.threads.find(
-      thread => thread.id === (last as { activeThreadId?: string }).activeThreadId
-    );
+    let activeThread: Record<string, unknown> | undefined;
+    await vi.waitFor(() => {
+      const last = mocks.localDataStore.set.mock.calls
+        .filter(([key]) => key === 'user:playground_deep_chat_threads_v1')
+        .at(-1)?.[1] as { threads: Array<Record<string, unknown> & { id?: string }> };
+      activeThread = last?.threads.find(
+        thread => thread.id === (last as { activeThreadId?: string }).activeThreadId
+      );
+      expect(activeThread?.systemPrompt).toBeUndefined();
+      expect(activeThread?.temperature).toBe(0.3);
+      expect(activeThread?.reasoning).toBeUndefined();
+    });
     expect(activeThread?.systemPrompt).toBeUndefined();
     expect(activeThread?.temperature).toBe(0.3);
     expect(activeThread?.reasoning).toBeUndefined();

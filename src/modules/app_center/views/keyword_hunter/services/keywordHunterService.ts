@@ -10,7 +10,8 @@ import {
   ANALYSIS_PROMPT_TEMPLATE,
   TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2,
 } from '../constants/prompts';
-import { resolveToolLlmConfig, resolveToolLlmPublicConfig } from '@/services/llmToolBridge';
+import { resolveToolLlmPublicConfig } from '@/services/llmToolBridge';
+import { StorageService } from '@/services/storageService';
 import {
   buildLlmRequestCacheKey,
   getTimedLocalCacheValue,
@@ -404,6 +405,7 @@ async function bridgeCallLLM(
 ): Promise<string> {
   const { onStatus, bypassCache, ...requestOptions } = options;
   const strategyTargetId = requestOptions.strategyTargetId || 'keyword-hunter-seo-process';
+  // Cache identity, in-flight dedupe, and the eventual LLM call use one snapshot.
   const publicConfig = resolveToolLlmPublicConfig(strategyTargetId, {
     module: 'KeywordHunterService',
   });
@@ -448,25 +450,33 @@ async function bridgeCallLLM(
   const { value, fromInFlight } = await runWithInFlightDedup(
     keywordHunterInFlightLlmRequests,
     cacheKey,
-    () =>
-      resolveToolLlmConfig(strategyTargetId, {
-        module: 'KeywordHunterService',
-      }).then(config =>
-        callAndCacheKeywordHunterLlm({
-          messages,
-          provider: config.provider,
-          endpoint: config.endpoint,
-          apiKey: config.apiKey,
-          model: config.model,
-          options: {
-            ...finalOptions,
-            ...(config.serviceTier && { serviceTier: config.serviceTier }),
-          },
-          cacheKey,
-          enableCache: runtimeOptions.enableLlmCache,
-          onStatus,
-        })
-      )
+    async () => {
+      const secureConfig = await StorageService.getLLMConfigWithKey(publicConfig.provider);
+      if (!secureConfig?.apiKey) {
+        throw new ValidationError(
+          '所选提供商未配置 API Key',
+          'ERR_LLM_API_KEY_MISSING',
+          undefined,
+          undefined,
+          {
+            module: 'KeywordHunterService',
+            action: 'bridgeCallLLM',
+            provider: publicConfig.provider,
+          }
+        );
+      }
+      return callAndCacheKeywordHunterLlm({
+        messages,
+        provider: publicConfig.provider,
+        endpoint: publicConfig.endpoint,
+        apiKey: secureConfig.apiKey,
+        model: publicConfig.model,
+        options: finalOptions,
+        cacheKey,
+        enableCache: runtimeOptions.enableLlmCache,
+        onStatus,
+      });
+    }
   );
   if (fromInFlight) {
     onStatus?.({ stage: 'in-flight' });

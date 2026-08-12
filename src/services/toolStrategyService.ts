@@ -211,7 +211,7 @@ export function resolveToolTargetModel(
   const targetModel = getToolTargetDefaultModel(targetId, provider);
 
   if (hasModel(config.models, targetModel)) return targetModel;
-  if (config.model) return config.model;
+  if (hasModel(config.models, config.model || '')) return config.model || '';
   return getFirstModel(config.models);
 }
 

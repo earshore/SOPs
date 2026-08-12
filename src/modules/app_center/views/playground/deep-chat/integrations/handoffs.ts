@@ -6,6 +6,7 @@ import {
 } from '../session/uiHooks';
 import {
   createThread,
+  flushThreadStore,
   getActiveListingPromptContext,
   getActiveThread,
   renderPromptDraftsForActiveThread,
@@ -46,7 +47,11 @@ import { chooseWithModal, confirmWithModal } from '../infra/confirmModal';
 import { getDeepChatSystemPromptBudgetError } from '../request/budget';
 
 import { getPromptDrafts } from '../composer/promptDrafts';
-import { hasListingCopyStart, isCompleteListingCopy } from '../composer/listingCopySanitize';
+import {
+  hasListingCopyStart,
+  isCompleteListingCopy,
+  sanitizeListingCopy,
+} from '../composer/listingCopySanitize';
 import { resolveIncompleteGenerationGuard } from '../composer/pushGuard';
 
 import type { DeepChatMessage, DeepChatSkillContext } from '../types';
@@ -538,6 +543,33 @@ function resolveKeywordHunterPushBlock(content: string, message?: DeepChatMessag
   return null;
 }
 
+/**
+ * The rendered Deep Chat bubble can be rebuilt while a reply settles.  Its text
+ * is useful only as a fallback; the matched stored assistant message is the
+ * authoritative copy and survives navigation and remounts.
+ */
+function resolveKeywordHunterCopyContent(content: string, message?: DeepChatMessage): string {
+  const storedText = typeof message?.text === 'string' ? message.text.trim() : '';
+  const visibleText = content.trim();
+  const storedListing = sanitizeListingCopy(storedText).trim();
+  const visibleListing = sanitizeListingCopy(visibleText).trim();
+
+  // `findStoredMessageForToolbar()` deliberately falls back by role to preserve
+  // status badges. That fallback may be an earlier assistant reply, however,
+  // so only use stored text when it represents the visible Listing as well.
+  if (
+    storedListing &&
+    visibleListing &&
+    (storedListing === visibleListing ||
+      storedListing.includes(visibleListing) ||
+      visibleListing.includes(storedListing))
+  ) {
+    return storedListing;
+  }
+
+  return visibleListing || storedListing;
+}
+
 export async function sendAssistantCopyToKeywordHunter(
   content: string,
   message?: DeepChatMessage
@@ -554,7 +586,7 @@ export async function sendAssistantCopyToKeywordHunter(
     return;
   }
 
-  const trimmedContent = content.trim();
+  const trimmedContent = resolveKeywordHunterCopyContent(content, message);
   if (!trimmedContent) return;
 
   const blockReason = resolveKeywordHunterPushBlock(trimmedContent, message);
@@ -575,6 +607,10 @@ export async function sendAssistantCopyToKeywordHunter(
       asinOrSku: copy.asinOrSku,
       sourceRoute: 'keyword_hunter_input',
     });
+
+    if (!(await flushThreadStore())) {
+      return;
+    }
 
     const didNavigate = await navigateToRouteId('keyword_hunter_input');
     showToast(

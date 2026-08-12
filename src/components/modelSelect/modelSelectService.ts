@@ -42,8 +42,8 @@ export function dedupeModels(models: ModelOption[]): ModelOption[] {
 }
 
 /**
- * 选项构建唯一公式：configured + preset 合并，再并入 strategyModel / fallbackModel
- * （若不在列表内，保证选中项可见），最后按 id 去重保序。
+ * 选项构建唯一公式：configured + preset 合并并按 id 去重保序。
+ * 失效的策略/系统模型不回插为可选项，交由统一回退选择器处理。
  */
 export function buildModelOptions(input: {
   configured: ModelOption[] | undefined;
@@ -51,28 +51,24 @@ export function buildModelOptions(input: {
   strategyModel: string;
   fallbackModel: string;
 }): ModelOption[] {
-  const { configured = [], preset = [], strategyModel, fallbackModel } = input;
+  const { configured = [], preset = [] } = input;
   const merged: ModelOption[] = [...configured, ...preset];
-
-  const ensureVisible = (modelId: string): void => {
-    if (!modelId) return;
-    if (merged.some(model => getModelId(model) === modelId)) return;
-    merged.push(modelId);
-  };
-  ensureVisible(strategyModel);
-  ensureVisible(fallbackModel);
 
   return dedupeModels(merged);
 }
 
-/** 选中优先级：strategyModel > configModel > models[0]。 */
+/** 选中优先级：有效 strategyModel > 有效 configModel > models[0]。 */
 export function resolveSelectedModel(input: {
   strategyModel: string;
   configModel: string;
   models: ModelOption[];
 }): string {
-  if (input.strategyModel) return input.strategyModel;
-  if (input.configModel) return input.configModel;
+  if (input.models.some(model => getModelId(model) === input.strategyModel)) {
+    return input.strategyModel;
+  }
+  if (input.models.some(model => getModelId(model) === input.configModel)) {
+    return input.configModel;
+  }
   const first = input.models[0];
   return first ? getModelId(first) : '';
 }
@@ -119,8 +115,8 @@ function pickNextModel(models: ModelOption[], strategyModel: string, configModel
 }
 
 /**
- * 刷新核心：真正调用 `/models`（fetchModelsFromApi），归一化结果并写回
- * provider config（apiKey 留空串，密钥走 secure 存储）+ 工具策略默认模型。
+ * 刷新核心：真正调用 `/models`（fetchModelsFromApi），归一化结果并仅写回
+ * provider catalog。刷新不得改写系统 fallback、active provider 或工具目标默认模型。
  */
 export async function refreshModelCatalog(
   source: ModelSelectSource
@@ -152,33 +148,30 @@ export async function refreshModelCatalog(
       : getToolTargetDefaultModel(targetId as ToolStrategyTargetId, provider);
   const nextModel = pickNextModel(models, strategyModel, config.model);
 
-  // 写回 provider config（密钥走 secure 存储，此处仅存空串占位）
-  StorageService.setLLMConfig(provider, {
+  // 写回 provider catalog（密钥走 secure 存储，此处仅存空串占位）。
+  // 保留原系统 fallback，避免应用刷新越权切换全局 provider/model。
+  StorageService.setLLMModelCatalog(provider, {
     ...config,
     provider,
     endpoint: config.endpoint,
     apiKey: '',
-    model: nextModel,
     models,
     enabled: true,
   });
-
-  if (targetId !== 'llm-global') {
-    setToolTargetDefaultModel(targetId as ToolStrategyTargetId, provider, nextModel);
-  }
 
   return { models, nextModel };
 }
 
 /**
  * 选中模型持久化：
- * - targetId !== 'llm-global'：立即写工具策略默认模型（'dirty' 模式同样写入，工具目标没有宿主表单兜底）；
- * - persist 'strategy'（默认）：额外写回 provider config.model（'dirty' 时不写，由宿主表单保存）。
+ * - persist 'app'：仅写当前工具策略目标；
+ * - persist 'system'：仅写 provider config.model；
+ * - persist 'none'（默认）：不写任何存储。
  */
 export function persistSelectedModel(
   source: ModelSelectSource,
   model: string,
-  persist: ModelSelectHooks['persist'] = 'strategy'
+  persist: ModelSelectHooks['persist'] = 'none'
 ): void {
   const { targetId, provider } = source;
   if (!provider || !model) return;
@@ -186,11 +179,11 @@ export function persistSelectedModel(
   // 'none'：宿主自行处理会话/页面级持久化，组件不写任何全局存储。
   if (persist === 'none') return;
 
-  if (targetId !== 'llm-global') {
+  if (persist === 'app' && targetId !== 'llm-global') {
     setToolTargetDefaultModel(targetId as ToolStrategyTargetId, provider, model);
   }
 
-  if (persist !== 'strategy') return;
+  if (persist !== 'system') return;
 
   const config = StorageService.getLLMConfig(provider);
   if (!config) return;

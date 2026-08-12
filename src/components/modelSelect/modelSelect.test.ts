@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => ({
   getLLMConfigWithKey: vi.fn(),
   getLLMConfig: vi.fn(),
   setLLMConfig: vi.fn(),
+  setLLMModelCatalog: vi.fn(),
   getToolTargetDefaultModel: vi.fn(),
   setToolTargetDefaultModel: vi.fn(),
   fetchModelsFromApi: vi.fn(),
@@ -33,6 +34,7 @@ vi.mock('@/services/storageService', () => ({
     getLLMConfigWithKey: mocks.getLLMConfigWithKey,
     getLLMConfig: mocks.getLLMConfig,
     setLLMConfig: mocks.setLLMConfig,
+    setLLMModelCatalog: mocks.setLLMModelCatalog,
   },
 }));
 
@@ -120,17 +122,17 @@ describe('modelSelectService helpers', () => {
     expect(options.map(getModelId)).toEqual(['a', 'b', 'c']);
   });
 
-  it('buildModelOptions ensures strategyModel and fallbackModel stay visible', () => {
+  it('buildModelOptions leaves stale strategy and fallback models out of the catalog', () => {
     const options = buildModelOptions({
       configured: [{ id: 'a' }],
       preset: [],
       strategyModel: 'strategy-x',
       fallbackModel: 'fallback-y',
     });
-    expect(options.map(getModelId)).toEqual(['a', 'strategy-x', 'fallback-y']);
+    expect(options.map(getModelId)).toEqual(['a']);
   });
 
-  it('buildModelOptions does not duplicate ensured ids already present', () => {
+  it('buildModelOptions retains configured items without duplication', () => {
     const options = buildModelOptions({
       configured: ['a', 'strategy-x'],
       preset: [],
@@ -140,10 +142,20 @@ describe('modelSelectService helpers', () => {
     expect(options.map(getModelId)).toEqual(['a', 'strategy-x']);
   });
 
-  it('resolveSelectedModel prioritizes strategy > config > first', () => {
-    expect(resolveSelectedModel({ strategyModel: 's', configModel: 'c', models: ['f'] })).toBe('s');
-    expect(resolveSelectedModel({ strategyModel: '', configModel: 'c', models: ['f'] })).toBe('c');
+  it('resolveSelectedModel prioritizes valid strategy > valid config > first', () => {
+    expect(
+      resolveSelectedModel({ strategyModel: 's', configModel: 'c', models: ['s', 'c', 'f'] })
+    ).toBe('s');
+    expect(resolveSelectedModel({ strategyModel: '', configModel: 'c', models: ['c', 'f'] })).toBe(
+      'c'
+    );
     expect(resolveSelectedModel({ strategyModel: '', configModel: '', models: ['f'] })).toBe('f');
+  });
+
+  it('resolves an invalid configured model to the first catalog item', () => {
+    expect(
+      resolveSelectedModel({ strategyModel: '', configModel: 'removed', models: ['first'] })
+    ).toBe('first');
   });
 });
 
@@ -169,7 +181,7 @@ describe('modelSelectService data layer', () => {
     expect(mocks.getToolTargetDefaultModel).not.toHaveBeenCalled();
   });
 
-  it('refreshModelCatalog fetches, keeps strategy selected, and writes back', async () => {
+  it('refreshModelCatalog fetches, keeps strategy selected, and only updates the catalog', async () => {
     const result = await refreshModelCatalog({
       targetId: 'keyword-hunter-seo-process',
       provider: 'new_api',
@@ -181,13 +193,13 @@ describe('modelSelectService data layer', () => {
       'https://llm.example/v1',
       'secret'
     );
-    expect(mocks.setLLMConfig).toHaveBeenCalledWith(
+    expect(mocks.setLLMModelCatalog).toHaveBeenCalledWith(
       'new_api',
       expect.objectContaining({
         provider: 'new_api',
         endpoint: 'https://llm.example/v1',
         apiKey: '',
-        model: 'b',
+        model: 'old',
         models: [
           { id: 'a', context: 1024, features: [] },
           { id: 'b', context: 2048, features: [] },
@@ -195,11 +207,7 @@ describe('modelSelectService data layer', () => {
         enabled: true,
       })
     );
-    expect(mocks.setToolTargetDefaultModel).toHaveBeenCalledWith(
-      'keyword-hunter-seo-process',
-      'new_api',
-      'b'
-    );
+    expect(mocks.setToolTargetDefaultModel).not.toHaveBeenCalled();
   });
 
   it('refreshModelCatalog falls back to config.model then first model', async () => {
@@ -266,7 +274,7 @@ describe('modelSelectService data layer', () => {
     );
   });
 
-  it('persistSelectedModel writes strategy + provider config in strategy mode', () => {
+  it('persistSelectedModel defaults to no persistence', () => {
     mocks.getLLMConfig.mockReturnValue({
       provider: 'new_api',
       endpoint: 'https://llm.example/v1',
@@ -276,25 +284,32 @@ describe('modelSelectService data layer', () => {
       { targetId: 'keyword-hunter-seo-process', provider: 'new_api' },
       'new-model'
     );
-    expect(mocks.setToolTargetDefaultModel).toHaveBeenCalledWith(
-      'keyword-hunter-seo-process',
-      'new_api',
-      'new-model'
+    expect(mocks.setToolTargetDefaultModel).not.toHaveBeenCalled();
+    expect(mocks.setLLMConfig).not.toHaveBeenCalled();
+  });
+
+  it('persistSelectedModel app scope writes only the target override', () => {
+    persistSelectedModel(
+      { targetId: 'keyword-hunter-seo-process', provider: 'new_api' },
+      'new-model',
+      'app'
     );
+    expect(mocks.setToolTargetDefaultModel).toHaveBeenCalledTimes(1);
+    expect(mocks.setLLMConfig).not.toHaveBeenCalled();
+  });
+
+  it('persistSelectedModel system scope writes only the provider fallback', () => {
+    mocks.getLLMConfig.mockReturnValue({
+      provider: 'new_api',
+      endpoint: 'https://llm.example/v1',
+      model: 'old-model',
+    });
+    persistSelectedModel({ targetId: 'llm-global', provider: 'new_api' }, 'new-model', 'system');
+    expect(mocks.setToolTargetDefaultModel).not.toHaveBeenCalled();
     expect(mocks.setLLMConfig).toHaveBeenCalledWith(
       'new_api',
       expect.objectContaining({ model: 'new-model', apiKey: '' })
     );
-  });
-
-  it('persistSelectedModel dirty mode skips provider config but writes strategy', () => {
-    persistSelectedModel(
-      { targetId: 'keyword-hunter-seo-process', provider: 'new_api' },
-      'new-model',
-      'dirty'
-    );
-    expect(mocks.setToolTargetDefaultModel).toHaveBeenCalledTimes(1);
-    expect(mocks.setLLMConfig).not.toHaveBeenCalled();
   });
 
   it('persistSelectedModel skips strategy write for llm-global', () => {
@@ -473,15 +488,11 @@ describe('modelSelectController', () => {
 
     expect([...select.options].map(o => o.value)).toEqual(['fresh-a', 'fresh-b']);
     expect(select.value).toBe('fresh-a'); // strategy 原值失效 → 取列表第一个
-    expect(mocks.setLLMConfig).toHaveBeenCalledWith(
+    expect(mocks.setLLMModelCatalog).toHaveBeenCalledWith(
       'new_api',
-      expect.objectContaining({ model: 'fresh-a', apiKey: '', enabled: true })
+      expect.objectContaining({ model: 'old-model', apiKey: '', enabled: true })
     );
-    expect(mocks.setToolTargetDefaultModel).toHaveBeenCalledWith(
-      'keyword-hunter-seo-process',
-      'new_api',
-      'fresh-a'
-    );
+    expect(mocks.setToolTargetDefaultModel).not.toHaveBeenCalled();
   });
 
   it('calls onRefresh with models and selectedModel after successful refresh', async () => {
@@ -505,7 +516,7 @@ describe('modelSelectController', () => {
     expect(result?.selectedModel).toBe('fresh-a');
   });
 
-  it('persists selection and calls onModelChange on change', async () => {
+  it('defaults to session-owned selection and calls onModelChange on change', async () => {
     const onModelChange = vi.fn();
     const { controller, select } = mount(
       { targetId: 'keyword-hunter-seo-process', provider: 'new_api' },
@@ -517,15 +528,8 @@ describe('modelSelectController', () => {
     select.dispatchEvent(new Event('change', { bubbles: true }));
 
     expect(onModelChange).toHaveBeenCalledWith('other');
-    expect(mocks.setToolTargetDefaultModel).toHaveBeenCalledWith(
-      'keyword-hunter-seo-process',
-      'new_api',
-      'other'
-    );
-    expect(mocks.setLLMConfig).toHaveBeenCalledWith(
-      'new_api',
-      expect.objectContaining({ model: 'other' })
-    );
+    expect(mocks.setToolTargetDefaultModel).not.toHaveBeenCalled();
+    expect(mocks.setLLMConfig).not.toHaveBeenCalled();
   });
 
   it('stops reacting to events after destroy', async () => {
@@ -615,11 +619,14 @@ describe('modelSelectController', () => {
       expect(mocks.setLLMConfig).not.toHaveBeenCalled();
     });
 
-    it('persists strategy + provider config when opts.persist is true', async () => {
-      const { controller } = mount({
-        targetId: 'keyword-hunter-seo-process',
-        provider: 'new_api',
-      });
+    it('persists only the explicit app scope when opts.persist is true', async () => {
+      const { controller } = mount(
+        {
+          targetId: 'keyword-hunter-seo-process',
+          provider: 'new_api',
+        },
+        { persist: 'app' }
+      );
       await controller.setProvider('new_api');
 
       controller.setModel('other', { persist: true });
@@ -628,10 +635,7 @@ describe('modelSelectController', () => {
         'new_api',
         'other'
       );
-      expect(mocks.setLLMConfig).toHaveBeenCalledWith(
-        'new_api',
-        expect.objectContaining({ model: 'other' })
-      );
+      expect(mocks.setLLMConfig).not.toHaveBeenCalled();
     });
 
     it('no-ops for a model that is not in the current options', async () => {

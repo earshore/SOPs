@@ -127,6 +127,69 @@ it('separates cached Listing analysis by configured model', async () => {
   expect(firstCacheKey).not.toBe(secondCacheKey);
 });
 
+it('keeps the provider and model snapshot stable when the active provider changes during cache lookup', async () => {
+  const configs = {
+    openai: {
+      provider: 'openai',
+      endpoint: 'https://openai.example.test',
+      apiKey: 'openai-key',
+      model: 'openai-model',
+    },
+    anthropic: {
+      provider: 'anthropic',
+      endpoint: 'https://anthropic.example.test',
+      apiKey: 'anthropic-key',
+      model: 'anthropic-model',
+    },
+  };
+  mockedStorage.getLLMConfig.mockImplementation(
+    provider => configs[(provider as keyof typeof configs) || activeProvider || 'openai'] as never
+  );
+  mockedStorage.getLLMConfigWithKey.mockImplementation(
+    async provider =>
+      configs[(provider as keyof typeof configs) || activeProvider || 'openai'] as never
+  );
+  mockedLocalDataStore.get.mockImplementationOnce(async () => {
+    activeProvider = 'anthropic';
+    return null;
+  });
+  mockedCallLLM.mockResolvedValueOnce('【1】 Translation');
+
+  await expect(fetchImmersionTranslation('Source paragraph')).resolves.toEqual([
+    { original: 'Source paragraph', translation: 'Translation' },
+  ]);
+
+  expect(mockedStorage.getLLMConfigWithKey).toHaveBeenCalledWith('openai');
+  expect(mockedCallLLM).toHaveBeenCalledWith(
+    expect.any(Array),
+    'openai',
+    'https://openai.example.test',
+    'openai-key',
+    'openai-model',
+    expect.any(Object)
+  );
+});
+
+it('keeps the resolved service tier in the LLM request snapshot', async () => {
+  mockedStorage.getLLMConfig.mockReturnValue({
+    endpoint: 'https://api.example.test',
+    model: 'gpt-test',
+    serviceTier: 'priority',
+  } as never);
+  mockedCallLLM.mockResolvedValueOnce('analysis result');
+
+  await fetchListingAnalysis(validListing, [], [], []);
+
+  expect(mockedCallLLM).toHaveBeenCalledWith(
+    expect.any(Array),
+    'openai',
+    'https://api.example.test',
+    'test-key',
+    'gpt-test',
+    expect.objectContaining({ serviceTier: 'priority' })
+  );
+});
+
 it('deduplicates concurrent identical Listing analysis requests in flight', async () => {
   const deferred = createDeferred<string>();
   mockedCallLLM.mockReturnValueOnce(deferred.promise);

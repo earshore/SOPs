@@ -130,6 +130,33 @@ describe('PerformanceSettings', () => {
     );
   });
 
+  it.each([
+    ['fast', 'speed'],
+    ['balanced', 'recommended'],
+    ['deep', 'reliability'],
+  ] as const)(
+    'aligns %s evidence depth with %s scheduling when selected in the workbench',
+    (evidenceDepth, schedulingPreference) => {
+      vi.mocked(StorageService.get).mockReturnValue({
+        version: 2,
+        masterAnalysis: {
+          evidenceDepth: evidenceDepth === 'fast' ? 'deep' : 'fast',
+          schedulingPreference: 'speed',
+        },
+      });
+      const panel = createPerformanceSettingsPanel();
+
+      panel.setEvidenceDepth(evidenceDepth);
+
+      expect(StorageService.set).toHaveBeenLastCalledWith(
+        STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS,
+        expect.objectContaining({
+          masterAnalysis: expect.objectContaining({ evidenceDepth, schedulingPreference }),
+        })
+      );
+    }
+  );
+
   it('template exposes minimal clear-cache control and simple evidence-depth select', () => {
     const template = readFileSync(
       'src/modules/app_center/views/master_analysis/ai_analysis/template.html',
@@ -154,5 +181,6 @@ describe('PerformanceSettings', () => {
     expect(template).not.toContain('perfSettings.toggleSettings()');
     expect(template).not.toContain('在系统设置中配置');
     expect(template).not.toContain('perfSettings.saveSettings()');
+    expect(template).not.toContain('仅影响本次 AI 分析');
   });
 });

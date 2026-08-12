@@ -841,6 +841,11 @@ class StorageServiceClass implements IStorageService {
     this.set(STORAGE_KEYS.LLM_ACTIVE_PROVIDER, provider);
   }
 
+  /** Updates a provider catalog without changing the active system provider. */
+  setLLMModelCatalog(provider: string, config: LLMProviderConfig): void {
+    this.set(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, stripLLMSecret(config));
+  }
+
   private async migrateLegacyPlainLLMKey(provider: string): Promise<string> {
     const legacyKey = getLLMCredentialKey(provider);
     const raw = localStorage.getItem(legacyKey);

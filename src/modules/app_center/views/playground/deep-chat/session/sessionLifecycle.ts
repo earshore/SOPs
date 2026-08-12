@@ -1,6 +1,7 @@
 import { uiHooks } from './uiHooks';
 import {
   createDefaultThreadStore,
+  clearPersistedThreadStore,
   renderHistoryThreadList,
   renderPromptDraftsForActiveThread,
 } from './threadStore';
@@ -11,8 +12,6 @@ import {
 } from './pendingRuntime';
 
 import { StorageService } from '@/services/storageService';
-
-import { LocalDataStore } from '@/services/localDataStore';
 
 import { THREAD_STORAGE_KEY } from '../constants';
 
@@ -36,7 +35,7 @@ export async function clearDeepChatThreadStore(): Promise<void> {
   draftPersistController.cancel();
   sessionState.threadStore = createDefaultThreadStore();
 
-  await LocalDataStore.remove(`user:${THREAD_STORAGE_KEY}`);
+  await clearPersistedThreadStore();
   StorageService.remove(THREAD_STORAGE_KEY);
   StorageService.remove(`${THREAD_STORAGE_KEY}_migrated_to_indexeddb`);
 

@@ -489,6 +489,42 @@ describe('TD-SET-01 contract: Alpine panel data keys (AC-4)', () => {
     expect(Object.keys(panel.localData).sort()).toEqual(LOCAL_DATA_STATE_KEYS);
   });
 
+  it.each([
+    ['recommended', 'balanced'],
+    ['reliability', 'deep'],
+    ['speed', 'fast'],
+  ] as const)(
+    'keeps %s performance preference and %s evidence depth together in system settings',
+    (schedulingPreference, evidenceDepth) => {
+      const panel = createPanel();
+
+      panel.setMasterAnalysisSchedulePreference(schedulingPreference);
+
+      expect(panel.runtimeStrategy.settings.masterAnalysis).toMatchObject({
+        schedulingPreference,
+        evidenceDepth,
+      });
+    }
+  );
+
+  it.each([
+    ['fast', 'speed'],
+    ['balanced', 'recommended'],
+    ['deep', 'reliability'],
+  ] as const)(
+    'keeps %s evidence depth and %s performance preference together in system settings',
+    (evidenceDepth, schedulingPreference) => {
+      const panel = createPanel();
+
+      panel.setMasterAnalysisEvidenceDepth(evidenceDepth);
+
+      expect(panel.runtimeStrategy.settings.masterAnalysis).toMatchObject({
+        evidenceDepth,
+        schedulingPreference,
+      });
+    }
+  );
+
   it('面板打开时对外 API openSettings/closeSettings 仅走 EventBus 桥', () => {
     const open = vi.fn();
     const close = vi.fn();
@@ -513,7 +549,6 @@ describe('TD-SET-01 contract: Alpine panel data keys (AC-4)', () => {
     unsubscribeOpen();
     unsubscribeClose();
   });
-
 });
 
 describe('TD-SYS-01 contract: HTML 外壳语义 (AC-4)', () => {
@@ -535,5 +570,3 @@ describe('TD-SYS-01 contract: HTML 外壳语义 (AC-4)', () => {
     expect(template).toContain('id="settings-section-performance"');
   });
 });
-
-

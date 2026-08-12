@@ -1747,10 +1747,14 @@ class KeywordHunterProcessModule extends BaseModule {
       // 4. 挂载 ModelSelect 组件（模板已由 render() 渲染完成，组件内部异步加载模型选项）
       const modelSelectRoot =
         container.querySelector<HTMLElement>('[data-model-select-root]') ?? container;
-      translationModelSelect = createModelSelect(modelSelectRoot, {
-        targetId: 'keyword-hunter-seo-process',
-        provider: getActiveLlmProvider() || '',
-      });
+      translationModelSelect = createModelSelect(
+        modelSelectRoot,
+        {
+          targetId: 'keyword-hunter-seo-process',
+          provider: getActiveLlmProvider() || '',
+        },
+        { persist: 'app' }
+      );
 
       // 5. 从内存 state 恢复状态（不自动回填历史快照）
       restoreProcessStateFromState();

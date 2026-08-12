@@ -40,12 +40,12 @@ export interface ModelSelectHooks {
   /** 模型列表加载完成（初始化 / 切换 provider 后）：宿主可在此重放线程级选中。 */
   onReady?(): void;
   /**
-   * 持久化模式（默认 'strategy'）：
-   * - 'strategy': 立即写 provider config + 工具策略默认模型；
-   * - 'dirty': provider config 由宿主表单保存，组件仍负责工具策略写入；
-   * - 'none': 组件不写任何全局存储，持久化完全由宿主（onModelChange）负责。
+   * 选择持久化范围（默认 'none'）：
+   * - 'system': 写 provider config.model（系统全局 fallback）；
+   * - 'app': 仅写当前工具目标的默认模型；
+   * - 'none': 组件不写存储，由宿主保存会话等更低层状态。
    */
-  persist?: 'strategy' | 'dirty' | 'none';
+  persist?: 'system' | 'app' | 'none';
   /**
    * 覆盖成功 toast 与兜底提示（默认走 showToast）。
    * showLlmFailureToast 的错误 UX 不替换。

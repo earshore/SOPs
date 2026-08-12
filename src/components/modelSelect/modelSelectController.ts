@@ -44,7 +44,7 @@ interface ModelSelectRuntime {
   statusEl: HTMLElement | null;
   source: ModelSelectSource;
   hooks: ModelSelectHooks;
-  persist: 'strategy' | 'dirty' | 'none';
+  persist: 'system' | 'app' | 'none';
   state: ModelSelectState;
 }
 
@@ -152,7 +152,7 @@ export function createModelSelect(
     statusEl: root.querySelector<HTMLElement>('[data-model-select-status]'),
     source,
     hooks,
-    persist: hooks.persist ?? 'strategy',
+    persist: hooks.persist ?? 'none',
     state: createInitialState(source.provider),
   };
   const abort = new AbortController();

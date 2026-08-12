@@ -155,6 +155,7 @@ vi.mock('@/services/storageService', () => ({
     getLLMConfig: vi.fn(),
     getLLMConfigWithKey: vi.fn(),
     setLLMConfig: vi.fn(),
+    setLLMModelCatalog: vi.fn(),
   },
 }));
 
@@ -278,6 +279,13 @@ beforeEach(() => {
       apiKey: '',
     };
   });
+  mockedStorage.setLLMModelCatalog.mockImplementation((_provider, config) => {
+    processMocks.llmConfig = {
+      ...processMocks.llmConfig,
+      ...(config as typeof processMocks.llmConfig),
+      apiKey: '',
+    };
+  });
   mockedCallLLM.mockResolvedValue('【1】 无线耳机翻译');
   mockedFetchModelsFromApi.mockResolvedValue([
     { id: 'gpt-fast', context: 128000, features: [] },
@@ -385,9 +393,9 @@ it('mounts template content, renders highlighted copy, stats, and floating keywo
   expect(document.querySelector('#keyword-hunter-tab-matched-count')?.textContent).toBe('1');
   expect(document.querySelector('#keyword-hunter-tab-unmatched-count')?.textContent).toBe('1');
   expect(document.querySelector('#keyword-hunter-minimized-badge')?.textContent).toBe('2');
-  expect(
-    document.querySelector<HTMLButtonElement>('#keyword-hunter-translate-btn')?.disabled
-  ).toBe(false);
+  expect(document.querySelector<HTMLButtonElement>('#keyword-hunter-translate-btn')?.disabled).toBe(
+    false
+  );
 
   await vi.waitFor(() => {
     expect(document.querySelector<HTMLSelectElement>('#keyword-hunter-model-select')?.value).toBe(
@@ -399,7 +407,7 @@ it('mounts template content, renders highlighted copy, stats, and floating keywo
   );
 });
 
-it('refreshes available translation models and persists the selected model', async () => {
+it('refreshes available translation models without changing the SEO or system model selection', async () => {
   await mountProcess();
 
   // 等待组件异步初始化完成（选项加载后 select 才有值）
@@ -425,33 +433,21 @@ it('refreshes available translation models and persists the selected model', asy
     );
   });
 
-  expect(mockedStorage.setLLMConfig).toHaveBeenCalledWith(
+  expect(mockedStorage.setLLMModelCatalog).toHaveBeenCalledWith(
     'openai',
     expect.objectContaining({
-      model: 'gpt-fast',
+      model: 'gpt-test',
       models: [
         { id: 'gpt-fast', context: 128000, features: [] },
         { id: 'gpt-quality', context: 128000, features: [] },
       ],
     })
   );
-  expect(mockedStorage.set).toHaveBeenCalledWith(
-    'tool_strategy_settings',
-    expect.objectContaining({
-      version: 2,
-      targets: expect.objectContaining({
-        'keyword-hunter-seo-process': {
-          defaultModelsByProvider: {
-            openai: 'gpt-fast',
-          },
-        },
-      }),
-    })
-  );
+  expect(mockedStorage.set).not.toHaveBeenCalledWith('tool_strategy_settings', expect.anything());
   expect(showToast).toHaveBeenCalledWith('成功同步 2 个模型', { type: 'success' });
 });
 
-it('uses the model selected in the SEO process page for immersion translation', async () => {
+it('uses the model selected in the SEO process page without changing the system fallback', async () => {
   await mountProcess();
 
   // 等待组件异步初始化完成后再切换模型
@@ -468,10 +464,7 @@ it('uses the model selected in the SEO process page for immersion translation', 
     expect(mockedCallLLM).toHaveBeenCalled();
   });
 
-  expect(mockedStorage.setLLMConfig).toHaveBeenCalledWith(
-    'openai',
-    expect.objectContaining({ model: 'gpt-fast' })
-  );
+  expect(mockedStorage.setLLMConfig).not.toHaveBeenCalled();
   expect(mockedStorage.set).toHaveBeenCalledWith(
     'tool_strategy_settings',
     expect.objectContaining({

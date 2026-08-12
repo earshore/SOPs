@@ -4,6 +4,25 @@ export type MasterAnalysisSchedulingPreference = 'recommended' | 'reliability' |
 /** Evidence pack depth: trade analysis completeness for speed/cost. */
 export type MasterAnalysisEvidenceDepth = 'fast' | 'balanced' | 'deep';
 
+/** The three user-facing Master Analysis profiles must always move as a pair. */
+export const MASTER_ANALYSIS_SCHEDULING_BY_EVIDENCE_DEPTH: Record<
+  MasterAnalysisEvidenceDepth,
+  MasterAnalysisSchedulingPreference
+> = {
+  fast: 'speed',
+  balanced: 'recommended',
+  deep: 'reliability',
+};
+
+export const MASTER_ANALYSIS_EVIDENCE_DEPTH_BY_SCHEDULING: Record<
+  MasterAnalysisSchedulingPreference,
+  MasterAnalysisEvidenceDepth
+> = {
+  speed: 'fast',
+  recommended: 'balanced',
+  reliability: 'deep',
+};
+
 export interface PpcSearchTermsThresholds {
   targetAcos: number;
   highAcos: number;

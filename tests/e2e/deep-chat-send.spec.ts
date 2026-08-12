@@ -15,6 +15,28 @@ const GENERATED_PROMPT_ID = 'deep-chat-generated-prompt-send-test';
 const GENERATED_PROMPT_MARKER = 'PLAYWRIGHT_GENERATED_PROMPT_LONG_DRAFT';
 const GENERATED_PROMPT_REPLY = 'Prompt 生成链路发送正常';
 const GENERATED_PROMPT = createLongGeneratedPrompt();
+const LISTING_HANDOFF_PROMPT_ID = 'deep-chat-listing-handoff-persistence-test';
+const LISTING_HANDOFF_PROMPT_MARKER = 'PLAYWRIGHT_LISTING_HANDOFF_PERSISTENCE_PROMPT';
+const LISTING_HANDOFF_PROMPT = [
+  '# LISTING HANDOFF E2E',
+  LISTING_HANDOFF_PROMPT_MARKER,
+  'Generate a complete Amazon Listing with one title, five numbered bullets, and a description.',
+].join('\n');
+const LISTING_HANDOFF_TAIL = 'E2E_HANDOFF_PERSISTENCE_TAIL_7Q';
+const LISTING_HANDOFF_REPLY = [
+  '1. Title: Stackable Waterproof Storage Bins',
+  '2. Bullet 1: Durable waterproof storage for everyday organization.',
+  '3. Bullet 2: Stackable design saves room in closets and shelves.',
+  '4. Bullet 3: Clear construction keeps stored supplies visible.',
+  '5. Bullet 4: Secure lids protect household items from dust.',
+  '6. Bullet 5: Flexible use for home, garage, office, and travel.',
+  `7. Description: A practical organization solution for every room. ${LISTING_HANDOFF_TAIL}`,
+].join('\n');
+const LISTING_HANDOFF_PUSHED_COPY = LISTING_HANDOFF_REPLY.replace(/^\d+\.\s*/gm, '');
+const LISTING_HANDOFF_PROFILE = {
+  keywordsTier1: 'stapelbar, wasserdicht',
+  keywordsTier2: 'platzsparend',
+};
 const DECORATED_SKILL_ID = 'amazon-advertising-strategy';
 const DECORATED_SKILL_TITLE = 'Amazon Advertising Strategy 📢';
 const DECORATED_SKILL_VISIBLE_TITLE = 'Amazon Advertising Strategy';
@@ -111,10 +133,12 @@ function createLongGeneratedPrompt(): string {
 async function seedMockProviderStorage(
   page: Page,
   promptDraft?: string,
-  endpoint = MOCK_ENDPOINT
+  endpoint = MOCK_ENDPOINT,
+  promptProfile?: typeof LISTING_HANDOFF_PROFILE,
+  promptId = GENERATED_PROMPT_ID
 ): Promise<void> {
   await page.addInitScript(
-    ({ apiKey, endpoint, model, promptDraft, provider }) => {
+    ({ apiKey, endpoint, model, promptDraft, promptId, promptProfile, provider }) => {
       window.localStorage.clear();
       window.localStorage.setItem('llm_active_provider', JSON.stringify(provider));
       window.localStorage.setItem(`llm_key_${provider}`, JSON.stringify(apiKey));
@@ -140,8 +164,9 @@ async function seedMockProviderStorage(
                   {
                     asins: ['B0PROMPT001'],
                     generatedAt: new Date(now).toISOString(),
-                    id: 'deep-chat-generated-prompt-send-test',
+                    id: promptId,
                     marketplace: 'US',
+                    ...(promptProfile ? { profile: promptProfile } : {}),
                     prompt: promptDraft,
                     promptType: 'listing',
                     response: '',
@@ -160,6 +185,8 @@ async function seedMockProviderStorage(
       endpoint,
       model: MOCK_MODEL,
       promptDraft,
+      promptId,
+      promptProfile,
       provider: MOCK_PROVIDER,
     }
   );
@@ -366,10 +393,7 @@ async function getDualButtonGeometry(page: Page): Promise<DualButtonGeometry | n
       helper && getComputedStyle(helper).display !== 'none' && !helper.hasAttribute('hidden')
     );
     const visionAboveCard =
-      uploadVisible &&
-      uploadRect &&
-      visionRoot &&
-      uploadRect.bottom <= textRect.top + 2;
+      uploadVisible && uploadRect && visionRoot && uploadRect.bottom <= textRect.top + 2;
 
     return {
       bottomDelta: null,
@@ -627,7 +651,9 @@ test('renders precise empty and sendable states, then sends with the phone-width
   });
 
   const requestPromise = page.waitForRequest('**/mock-llm/chat/completions');
-  const submitButton = page.locator('#deep-chat-view .input-button.inside-end:not(#upload-images-button)');
+  const submitButton = page.locator(
+    '#deep-chat-view .input-button.inside-end:not(#upload-images-button)'
+  );
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
@@ -655,7 +681,9 @@ test('keeps unavailable submit controls out of Tab order and sends with Space', 
   await openDeepChatAndRefreshMockConfig(page);
 
   const chatInput = page.locator('#deep-chat-view #text-input');
-  const submitButton = page.locator('#deep-chat-view .input-button.inside-end:not(#upload-images-button)');
+  const submitButton = page.locator(
+    '#deep-chat-view .input-button.inside-end:not(#upload-images-button)'
+  );
   await expect(chatInput).toBeVisible();
   await expect
     .poll(() =>
@@ -743,8 +771,7 @@ test('preserves a decorated Skill Chip through send, reload, edit refill, and a 
 
   const inputWasRebuilt = await page.evaluate(() => {
     const chat = document.querySelector('#deep-chat-view') as
-      | (HTMLElement & { onRender?: () => void })
-      | null;
+      (HTMLElement & { onRender?: () => void }) | null;
     const inputBeforeRender = chat?.shadowRoot?.querySelector('#input');
     chat?.onRender?.();
     return Boolean(
@@ -965,7 +992,9 @@ test('keeps the desktop send button inside the text input throughout rail-width 
       new Promise<Array<{ bottomGap: number; rightGap: number; withinInput: boolean }>>(resolve => {
         const root = document.querySelector('#deep-chat-view')?.shadowRoot;
         const toggle = document.querySelector<HTMLButtonElement>('#deep-chat-toggle-rail');
-        const button = root?.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
+        const button = root?.querySelector<HTMLElement>(
+          '.input-button.inside-end:not(#upload-images-button)'
+        );
         const textInput = root?.querySelector<HTMLElement>('#text-input-container');
         if (!toggle || !button || !textInput) {
           throw new Error('Deep Chat desktop rail or composer is missing');
@@ -1040,8 +1069,7 @@ test('keeps the desktop send button inside a non-empty Skill composer after Deep
         }>;
       }>(resolve => {
         const chat = document.querySelector('#deep-chat-view') as
-          | (HTMLElement & { onRender?: () => void })
-          | null;
+          (HTMLElement & { onRender?: () => void }) | null;
         const root = chat?.shadowRoot;
         const inputBeforeRender = root?.querySelector<HTMLElement>('#input');
         if (!chat || !root || !inputBeforeRender || typeof chat.onRender !== 'function') {
@@ -1058,7 +1086,9 @@ test('keeps the desktop send button inside a non-empty Skill composer after Deep
         }> = [];
         let frame = 0;
         const capture = (): void => {
-          const button = root.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
+          const button = root.querySelector<HTMLElement>(
+            '.input-button.inside-end:not(#upload-images-button)'
+          );
           const textInput = root.querySelector<HTMLElement>('#text-input-container');
           if (!button || !textInput) {
             samples.push({
@@ -1171,7 +1201,9 @@ test('keeps the phone-height composer and send button inside the viewport', asyn
       page.evaluate(() => {
         const root = document.querySelector('#deep-chat-view')?.shadowRoot;
         const textInputContainer = root?.querySelector<HTMLElement>('#text-input-container');
-        const button = root?.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
+        const button = root?.querySelector<HTMLElement>(
+          '.input-button.inside-end:not(#upload-images-button)'
+        );
         if (!textInputContainer || !button) {
           return false;
         }
@@ -1197,7 +1229,9 @@ test('keeps preflight loading distinct from an active stop control', async ({ pa
   await page.evaluate(() => {
     const button = document
       .querySelector('#deep-chat-view')
-      ?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
+      ?.shadowRoot?.querySelector<HTMLElement>(
+        '.input-button.inside-end:not(#upload-images-button)'
+      );
     if (!button) {
       throw new Error('Deep Chat submit button is missing');
     }
@@ -1210,7 +1244,9 @@ test('keeps preflight loading distinct from an active stop control', async ({ pa
       page.evaluate(() => {
         const button = document
           .querySelector('#deep-chat-view')
-          ?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
+          ?.shadowRoot?.querySelector<HTMLElement>(
+            '.input-button.inside-end:not(#upload-images-button)'
+          );
         if (!button) {
           return null;
         }
@@ -1354,6 +1390,53 @@ test('uses a generated Prompt draft and sends it with the raised budget', async 
   );
 });
 
+test('retains a pushed Listing in Deep Chat after returning from Keyword Hunter and reloading', async ({
+  page,
+}) => {
+  await seedMockProviderStorage(
+    page,
+    LISTING_HANDOFF_PROMPT,
+    MOCK_ENDPOINT,
+    LISTING_HANDOFF_PROFILE,
+    LISTING_HANDOFF_PROMPT_ID
+  );
+  await mockLLMStream(page, [LISTING_HANDOFF_REPLY]);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  const usePromptButton = page.locator(`[data-use-prompt-draft-id="${LISTING_HANDOFF_PROMPT_ID}"]`);
+  await expect(usePromptButton).toBeVisible();
+  await usePromptButton.click();
+
+  const chatInput = page.locator('#deep-chat-view #text-input');
+  await expect(chatInput).toContainText(LISTING_HANDOFF_PROMPT_MARKER, { timeout: 5000 });
+  await chatInput.press('Enter');
+
+  const chat = page.locator('#deep-chat-view');
+  await expect(chat).toContainText(LISTING_HANDOFF_TAIL, { timeout: 10000 });
+
+  const pushButton = page.locator('#deep-chat-view [data-toolbar-action="keyword-hunter"]');
+  await expect(pushButton).toBeEnabled({ timeout: 10000 });
+  await pushButton.click();
+
+  await expect(page).toHaveURL(/#\/app-center\/keyword-hunter\/input$/, { timeout: 10000 });
+  await expect(page.locator('#keyword-hunter-copy-input')).toHaveValue(LISTING_HANDOFF_PUSHED_COPY);
+  await expect(page.locator('#keyword-hunter-keywords-input')).toHaveValue(
+    'stapelbar\nwasserdicht\nplatzsparend'
+  );
+
+  await page.goto(DEEP_CHAT_ROUTE, { waitUntil: 'domcontentloaded' });
+  await page.locator('#deep-chat-refresh-config').click();
+  await expect(page.locator('#deep-chat-view')).toContainText(
+    'Title: Stackable Waterproof Storage Bins',
+    {
+      timeout: 10000,
+    }
+  );
+  await expect(page.locator('#deep-chat-view')).toContainText(LISTING_HANDOFF_TAIL, {
+    timeout: 10000,
+  });
+});
+
 test('renders a visible error when the model stream returns no content', async ({ page }) => {
   await seedMockProviderStorage(page);
   await mockLLMStream(page, []);
@@ -1436,7 +1519,9 @@ test('turns the send button into a stop button and aborts the active response', 
     });
   const stopButtonVisualState = await page.evaluate(() => {
     const root = document.querySelector('#deep-chat-view')?.shadowRoot;
-    const submitButton = root?.querySelector<HTMLElement>('.input-button.inside-end:not(#upload-images-button)');
+    const submitButton = root?.querySelector<HTMLElement>(
+      '.input-button.inside-end:not(#upload-images-button)'
+    );
     if (!submitButton) {
       throw new Error('Deep Chat submit button is missing');
     }
@@ -1614,7 +1699,9 @@ test('hides host vision entry by default when enableVision is off', async ({ pag
   await expect
     .poll(async () => {
       const geometry = await getDualButtonGeometry(page);
-      return geometry && geometry.uploadVisible === false && Math.abs(geometry.sendRightGap - 11) <= 2;
+      return (
+        geometry && geometry.uploadVisible === false && Math.abs(geometry.sendRightGap - 11) <= 2
+      );
     })
     .toBe(true);
 });

@@ -14,7 +14,7 @@ type RuntimePresetOverlay = {
   llm: Pick<RuntimeStrategySettings['llm'], 'maxRetries' | 'analysisTimeoutMs'>;
   masterAnalysis: Pick<
     RuntimeStrategySettings['masterAnalysis'],
-    'schedulingPreference' | 'enableCache'
+    'schedulingPreference' | 'evidenceDepth' | 'enableCache'
   >;
   scraper: Pick<RuntimeStrategySettings['scraper'], 'maxConcurrent' | 'maxRetries'>;
   ppcSearchTerms: Pick<
@@ -33,6 +33,7 @@ const PRESET_OVERLAYS: Record<RuntimePresetId, RuntimePresetOverlay> = {
     },
     masterAnalysis: {
       schedulingPreference: DEFAULT_RUNTIME_STRATEGY_SETTINGS.masterAnalysis.schedulingPreference,
+      evidenceDepth: DEFAULT_RUNTIME_STRATEGY_SETTINGS.masterAnalysis.evidenceDepth,
       enableCache: DEFAULT_RUNTIME_STRATEGY_SETTINGS.masterAnalysis.enableCache,
     },
     scraper: {
@@ -50,21 +51,29 @@ const PRESET_OVERLAYS: Record<RuntimePresetId, RuntimePresetOverlay> = {
   },
   reliability: {
     llm: { maxRetries: 3, analysisTimeoutMs: 180000 },
-    masterAnalysis: { schedulingPreference: 'reliability', enableCache: true },
+    masterAnalysis: {
+      schedulingPreference: 'reliability',
+      evidenceDepth: 'deep',
+      enableCache: true,
+    },
     scraper: { maxConcurrent: 1, maxRetries: 4 },
     ppcSearchTerms: { maxConcurrentBatches: 1, enableLlmCache: true },
     deepChat: { maxOutputTokens: 2000, enableBusinessTools: true },
   },
   speed: {
     llm: { maxRetries: 1, analysisTimeoutMs: 90000 },
-    masterAnalysis: { schedulingPreference: 'speed', enableCache: true },
+    masterAnalysis: { schedulingPreference: 'speed', evidenceDepth: 'fast', enableCache: true },
     scraper: { maxConcurrent: 3, maxRetries: 1 },
     ppcSearchTerms: { maxConcurrentBatches: 3, enableLlmCache: true },
     deepChat: { maxOutputTokens: 1500, enableBusinessTools: true },
   },
   cost: {
     llm: { maxRetries: 1, analysisTimeoutMs: 120000 },
-    masterAnalysis: { schedulingPreference: 'recommended', enableCache: true },
+    masterAnalysis: {
+      schedulingPreference: 'recommended',
+      evidenceDepth: 'balanced',
+      enableCache: true,
+    },
     scraper: { maxConcurrent: 2, maxRetries: 2 },
     ppcSearchTerms: { maxConcurrentBatches: 1, enableLlmCache: true },
     deepChat: { maxOutputTokens: 1200, enableBusinessTools: true },
@@ -73,21 +82,20 @@ const PRESET_OVERLAYS: Record<RuntimePresetId, RuntimePresetOverlay> = {
 
 const PRESET_MATCH_ORDER: RuntimePresetId[] = ['reliability', 'speed', 'cost', 'default'];
 
+function presetSectionEquals<T extends object>(actual: T, overlay: T): boolean {
+  return (Object.keys(overlay) as (keyof T)[]).every(key => actual[key] === overlay[key]);
+}
+
 function presetFingerprintMatches(
   settings: RuntimeStrategySettings,
   overlay: RuntimePresetOverlay
 ): boolean {
   return (
-    settings.llm.maxRetries === overlay.llm.maxRetries &&
-    settings.llm.analysisTimeoutMs === overlay.llm.analysisTimeoutMs &&
-    settings.masterAnalysis.schedulingPreference === overlay.masterAnalysis.schedulingPreference &&
-    settings.masterAnalysis.enableCache === overlay.masterAnalysis.enableCache &&
-    settings.scraper.maxConcurrent === overlay.scraper.maxConcurrent &&
-    settings.scraper.maxRetries === overlay.scraper.maxRetries &&
-    settings.ppcSearchTerms.maxConcurrentBatches === overlay.ppcSearchTerms.maxConcurrentBatches &&
-    settings.ppcSearchTerms.enableLlmCache === overlay.ppcSearchTerms.enableLlmCache &&
-    settings.deepChat.maxOutputTokens === overlay.deepChat.maxOutputTokens &&
-    settings.deepChat.enableBusinessTools === overlay.deepChat.enableBusinessTools
+    presetSectionEquals(settings.llm, overlay.llm) &&
+    presetSectionEquals(settings.masterAnalysis, overlay.masterAnalysis) &&
+    presetSectionEquals(settings.scraper, overlay.scraper) &&
+    presetSectionEquals(settings.ppcSearchTerms, overlay.ppcSearchTerms) &&
+    presetSectionEquals(settings.deepChat, overlay.deepChat)
   );
 }
 

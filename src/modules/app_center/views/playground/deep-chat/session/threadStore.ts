@@ -38,6 +38,8 @@ import {
   draftPersistController,
 } from './sessionState';
 
+let threadStorePersistQueue: Promise<boolean> | null = null;
+
 export async function loadThreadStore(): Promise<DeepChatThreadStore> {
   const indexedKey = `user:${THREAD_STORAGE_KEY}`;
   const stored =
@@ -68,22 +70,70 @@ export async function loadThreadStore(): Promise<DeepChatThreadStore> {
 }
 
 export function persistThreadStore(): void {
-  void LocalDataStore.set(
-    `user:${THREAD_STORAGE_KEY}`,
-    getPersistableThreadStore(),
-    'user-data'
-  ).then(saved => {
-    if (!saved) {
-      showToast('Deep Chat 会话保存失败：空间不足，请导出备份后清理缓存', {
-        type: 'error',
-      });
-    }
-  });
+  void queueThreadStorePersist(getPersistableThreadStore());
 }
 
 export function persistThreadStoreNow(): void {
   draftPersistController.cancel();
   persistThreadStore();
+}
+
+/** Queue the latest snapshot and wait until IndexedDB has acknowledged it. */
+export function flushThreadStore(): Promise<boolean> {
+  draftPersistController.cancel();
+  return queueThreadStorePersist(getPersistableThreadStore());
+}
+
+/** Remove stored threads only after all earlier snapshots have settled. */
+export function clearPersistedThreadStore(): Promise<void> {
+  const remove = async (): Promise<boolean> => {
+    try {
+      await LocalDataStore.remove(`user:${THREAD_STORAGE_KEY}`);
+      return true;
+    } catch (error) {
+      console.error('[Deep Chat] 会话清除失败:', error);
+      return false;
+    }
+  };
+  const cleared = threadStorePersistQueue ? threadStorePersistQueue.then(remove) : remove();
+  threadStorePersistQueue = cleared;
+  void cleared.finally(() => {
+    if (threadStorePersistQueue === cleared) {
+      threadStorePersistQueue = null;
+    }
+  });
+  return cleared.then(() => undefined);
+}
+
+function queueThreadStorePersist(store: DeepChatThreadStore): Promise<boolean> {
+  const snapshot = structuredClone(store);
+  const write = async (): Promise<boolean> => {
+    try {
+      const saved = await LocalDataStore.set(`user:${THREAD_STORAGE_KEY}`, snapshot, 'user-data');
+      if (!saved) {
+        showThreadStorePersistFailure();
+      }
+      return saved;
+    } catch (error) {
+      console.error('[Deep Chat] 会话保存失败:', error);
+      showThreadStorePersistFailure();
+      return false;
+    }
+  };
+  const persist = threadStorePersistQueue ? threadStorePersistQueue.then(write) : write();
+  threadStorePersistQueue = persist;
+  void persist.finally(() => {
+    if (threadStorePersistQueue === persist) {
+      threadStorePersistQueue = null;
+    }
+  });
+  return persist;
+}
+
+function showThreadStorePersistFailure(): void {
+  showToast('Deep Chat 会话保存失败：空间不足，请导出备份后清理缓存', {
+    type: 'error',
+  });
 }
 
 export function getPersistableThreadStore(): DeepChatThreadStore {
@@ -553,12 +603,11 @@ export function applyDeepChatThreadResume(store: DeepChatThreadStore): DeepChatT
   return { ...store, activeThreadId: threadId };
 }
 
-/** 页面默认继承字段（线程显式字段优先；model 继承页面默认，无则跟随全局）。 */
+/** 页面默认继承字段（模型不属于页面默认，会话缺省时跟随应用/系统层）。 */
 function createInheritedThreadDefaults(
   pageDefaults: DeepChatPageDefaults
 ): Partial<DeepChatThread> {
   return {
-    ...(pageDefaults.model ? { model: pageDefaults.model } : {}),
     ...(pageDefaults.systemPrompt ? { systemPrompt: pageDefaults.systemPrompt } : {}),
     ...(typeof pageDefaults.temperature === 'number'
       ? { temperature: pageDefaults.temperature }

@@ -2,6 +2,8 @@
 import {
   DEFAULT_RUNTIME_STRATEGY_SETTINGS,
   getRuntimeStrategySettings,
+  MASTER_ANALYSIS_EVIDENCE_DEPTH_BY_SCHEDULING,
+  MASTER_ANALYSIS_SCHEDULING_BY_EVIDENCE_DEPTH,
   normalizeRuntimeStrategySettings,
   saveRuntimeStrategySettings,
   type MasterAnalysisEvidenceDepth,
@@ -428,6 +430,8 @@ export const toolStrategySectionBehavior: SettingsPanelPart = {
   setMasterAnalysisSchedulePreference(preference: SchedulingPreference): void {
     if (!isSchedulingPreference(preference)) return;
     this.runtimeStrategy.settings.masterAnalysis.schedulingPreference = preference;
+    this.runtimeStrategy.settings.masterAnalysis.evidenceDepth =
+      MASTER_ANALYSIS_EVIDENCE_DEPTH_BY_SCHEDULING[preference];
     this.schedulePreferenceMenuOpen = false;
     this.syncActiveRuntimePresetFromSettings();
     void this.persistRuntimeStrategySettings({ toast: '性能设置已保存' });
@@ -436,6 +440,8 @@ export const toolStrategySectionBehavior: SettingsPanelPart = {
   setMasterAnalysisEvidenceDepth(depth: MasterAnalysisEvidenceDepth): void {
     if (depth !== 'fast' && depth !== 'balanced' && depth !== 'deep') return;
     this.runtimeStrategy.settings.masterAnalysis.evidenceDepth = depth;
+    this.runtimeStrategy.settings.masterAnalysis.schedulingPreference =
+      MASTER_ANALYSIS_SCHEDULING_BY_EVIDENCE_DEPTH[depth];
     this.syncActiveRuntimePresetFromSettings();
     void this.persistRuntimeStrategySettings({ toast: '证据深度已保存' });
   },
