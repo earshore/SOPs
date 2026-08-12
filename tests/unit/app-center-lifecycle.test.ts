@@ -42,7 +42,8 @@ describe('App Center Alpine lifecycle', () => {
     document.body.innerHTML = `<div x-data="${componentName}"></div>`;
     const componentElement = document.querySelector(`[x-data="${componentName}"]`) as Element;
     const destroy = vi.fn();
-    const destroyTree = vi.fn();
+    // 模拟 Alpine v3 的 x-data 清理：destroyTree 会自行调用 data.destroy()
+    const destroyTree = vi.fn(() => destroy());
 
     Object.defineProperty(window, 'Alpine', {
       configurable: true,
@@ -55,6 +56,7 @@ describe('App Center Alpine lifecycle', () => {
 
     unmount();
 
+    // destroy() 由 Alpine 的 destroyTree 触发且只执行一次；destroyAlpineComponent 不应再手动调用
     expect(destroy).toHaveBeenCalledTimes(1);
     expect(destroyTree).toHaveBeenCalledWith(componentElement);
     expect(registryMock.unregister).toHaveBeenCalledWith(componentName);

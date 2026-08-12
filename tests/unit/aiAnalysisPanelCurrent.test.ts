@@ -115,6 +115,7 @@ const panelMocks = vi.hoisted(() => {
     copyMarkdown: vi.fn(),
     downloadJson: vi.fn(),
     navigateToRouteId: vi.fn(async () => true),
+    showToast: vi.fn(),
     runAnalysisAction: vi.fn(async () => undefined),
     restoreInterruptedAnalysis: vi.fn(async () => false),
   };
@@ -185,6 +186,10 @@ vi.mock('@/common/router/initRouter', () => ({
   navigateToRouteId: panelMocks.navigateToRouteId,
 }));
 
+vi.mock('@/common/ui', () => ({
+  showToast: panelMocks.showToast,
+}));
+
 vi.mock(
   '@/modules/app_center/views/master_analysis/ai_analysis/components/computedProperties',
   () => ({
@@ -243,6 +248,23 @@ it('initializes synced state, default targets, loaders, and cleanup hooks', () =
 
   expect(cleanupSubscriptions).toHaveBeenCalledWith(expect.any(Array));
   expect(removeSpy).toHaveBeenCalledWith('app:navigate-to-scraper', expect.any(Function));
+});
+
+it('shows the background-analysis toast only once across repeated destroys', () => {
+  const panel = createPanel();
+  panel.init();
+  panel.isAnalyzing = true;
+  panel.progress = 40;
+
+  panel.destroy();
+  panel.destroy();
+
+  expect(panelMocks.showToast).toHaveBeenCalledTimes(1);
+  expect(panelMocks.showToast).toHaveBeenCalledWith(
+    '分析仍在后台进行，已完成的维度会自动保存',
+    expect.objectContaining({ type: 'info', duration: 5000 })
+  );
+  expect(panelMocks.cleanupSubscriptions).toHaveBeenCalledTimes(1);
 });
 
 it('computes selection, target, prompt, and visual class branches', () => {

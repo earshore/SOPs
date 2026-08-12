@@ -69,6 +69,7 @@ type AiAnalysisPanelState = Pick<
   _navigationHandler: EventListener | null;
   _baseTabTitle: string | null;
   perfSettings: ReturnType<typeof createPerformanceSettingsPanel>;
+  _destroyed: boolean;
 };
 
 type AnalysisRunSummary = NonNullable<AnalysisReportMetadata['runSummary']>;
@@ -350,6 +351,7 @@ function createAiAnalysisPanelState(): AiAnalysisPanelState {
     _navigationHandler: null,
     _baseTabTitle: null,
     perfSettings: createPerformanceSettingsPanel(),
+    _destroyed: false,
   };
 }
 
@@ -470,7 +472,11 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   // ========== 清理 ==========
-  destroy(this: AiAnalysisPanelContext) {
+  destroy(this: AiAnalysisPanelContext & { _destroyed?: boolean }) {
+    // 幂等保护：Alpine x-data 清理与模块卸载可能重复触发 destroy()，避免重复弹 toast
+    if (this._destroyed) return;
+    this._destroyed = true;
+
     // 清理状态同步订阅
     if (Array.isArray(this._unsubscribes)) {
       cleanupSubscriptions(this._unsubscribes);
