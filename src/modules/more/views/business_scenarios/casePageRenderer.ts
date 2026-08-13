@@ -355,25 +355,15 @@ interface PageShell {
   close: string;
 }
 
-function findOpeningDivWithClass(templateHtml: string, className: string): string | null {
-  const pattern = new RegExp(
-    `<div\\b(?=[^>]*\\bclass=(["'])[^"']*\\b${className}\\b[^"']*\\1)[^>]*>`,
-    'i'
-  );
-  return templateHtml.match(pattern)?.[0].trim() ?? null;
-}
-
 function renderModuleShell(templateHtml: string): PageShell {
-  const fadeShell = findOpeningDivWithClass(templateHtml, 'view-fade-in');
-  const moduleShell =
-    findOpeningDivWithClass(templateHtml, 'module-container') ||
-    '<div class="module-container py-6">';
-  const openings =
-    fadeShell && fadeShell !== moduleShell ? [fadeShell, moduleShell] : [moduleShell];
+  const moduleShellMatch = templateHtml.match(
+    /<div\b(?=[^>]*\bclass=(["'])[^"']*\bmodule-container\b[^"']*\1)[^>]*>/i
+  );
+  const moduleShell = moduleShellMatch?.[0].trim() || '<div class="module-container py-6">';
 
   return {
-    open: openings.join('\n'),
-    close: openings.map(() => '</div>').join('\n'),
+    open: moduleShell,
+    close: '</div>',
   };
 }
 

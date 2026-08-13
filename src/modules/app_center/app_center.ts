@@ -15,7 +15,6 @@ const moduleLoader: ModuleLoader = createModuleLoader({
   moduleMap: MODULE_MAP,
   loaderColor: 'rose',
   moduleName: 'AppCenter',
-  contentEnterAnimation: true,
 });
 
 /**

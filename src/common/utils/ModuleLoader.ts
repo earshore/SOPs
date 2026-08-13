@@ -13,17 +13,8 @@ import {
   renderTimeout,
 } from '../../components/ErrorBoundary';
 import { ValidationError } from '@/common/errors/AppError';
-import { TransitionLoader } from '@/common/components/TransitionLoader';
 import type { DIContainer } from '../di/Container';
-import {
-  applyPageEnterAnimation,
-  clearPageEnterAnimation,
-  preparePageEnterAnimation,
-} from './pageEnterAnimation';
 
-const LEGACY_CONTENT_ENTER_ANIMATION_CLASS = 'fade-in';
-const MODULE_LOADING_DELAY_MS = 300;
-const MODULE_LOADING_HOST_CLASS = 'route-loading-skeleton-host';
 
 // ==================== 类型定义 ====================
 
@@ -59,8 +50,6 @@ export interface ModuleLoaderConfig {
   moduleName?: string;
   /** DI容器实例（可选，默认使用全局容器） */
   container?: DIContainer;
-  /** 是否在子模块内容挂载完成后应用统一入口动画 */
-  contentEnterAnimation?: boolean;
 }
 
 /**
@@ -92,9 +81,6 @@ export class ModuleLoader {
   private isLoading: boolean; // 🔧 新增：标记是否正在加载
   private pendingRouteId: string | null;
   private loadSequence: number;
-  private contentEnterAnimation: boolean;
-  private loadingTimer: number | null;
-  private loadingTimerLoadId: number | null;
   private retryTimer: number | null;
   private retryTimerLoadId: number | null;
   private mountAttempts: Map<number, MountAttempt>;
@@ -116,9 +102,6 @@ export class ModuleLoader {
     this.isLoading = false; // 🔧 初始化
     this.pendingRouteId = null;
     this.loadSequence = 0;
-    this.contentEnterAnimation = config.contentEnterAnimation || false;
-    this.loadingTimer = null;
-    this.loadingTimerLoadId = null;
     this.retryTimer = null;
     this.retryTimerLoadId = null;
     this.mountAttempts = new Map();
@@ -211,7 +194,6 @@ export class ModuleLoader {
    * @private
    */
   private unmountCurrentModule(): void {
-    this.clearDelayedLoading();
     this.clearRetry();
     const module = this.currentModule;
     const currentMountLoadId = this.currentMountLoadId;
@@ -226,58 +208,10 @@ export class ModuleLoader {
       this.retireMountAttempt(currentMountLoadId);
     }
     if (this.currentContainer) {
-      this.currentContainer.classList.remove(MODULE_LOADING_HOST_CLASS);
       this.currentContainer.replaceChildren();
     }
     this.currentContainer = null;
     this.currentRouteId = null; // 🔧 清除路由ID记录
-  }
-
-  /**
-   * 渲染加载动画
-   * @param container - 容器元素
-   * @private
-   */
-  private renderLoading(container: HTMLElement, routeId: string): void {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'route-loading-transition';
-    wrapper.setAttribute('role', 'status');
-    wrapper.setAttribute('aria-live', 'polite');
-    wrapper.setAttribute('aria-label', '页面加载中');
-    wrapper.dataset.routeId = routeId;
-
-    // 使用全新的 TransitionLoader 替换旧的骨架屏
-    const loader = TransitionLoader.render();
-    wrapper.appendChild(loader);
-
-    container.classList.add(MODULE_LOADING_HOST_CLASS);
-    container.replaceChildren(wrapper);
-  }
-
-  private scheduleDelayedLoading(container: HTMLElement, loadId: number, routeId: string): void {
-    this.clearDelayedLoading();
-    this.loadingTimerLoadId = loadId;
-    this.loadingTimer = window.setTimeout(() => {
-      this.loadingTimer = null;
-      this.loadingTimerLoadId = null;
-      if (this.isStaleLoad(loadId) || !this.isLoading) {
-        return;
-      }
-
-      this.renderLoading(container, routeId);
-    }, MODULE_LOADING_DELAY_MS);
-  }
-
-  private clearDelayedLoading(loadId?: number): void {
-    if (loadId !== undefined && this.loadingTimerLoadId !== loadId) {
-      return;
-    }
-
-    if (this.loadingTimer) {
-      window.clearTimeout(this.loadingTimer);
-      this.loadingTimer = null;
-      this.loadingTimerLoadId = null;
-    }
   }
 
   private clearRetry(loadId?: number): void {
@@ -299,7 +233,6 @@ export class ModuleLoader {
    * @private
    */
   private renderNotRegistered(container: HTMLElement, routeId: string): void {
-    container.classList.remove(MODULE_LOADING_HOST_CLASS);
     renderNotRegistered(container, routeId);
   }
 
@@ -311,7 +244,6 @@ export class ModuleLoader {
    * @private
    */
   private renderErrorBoundary(container: HTMLElement, routeId: string, error: Error): void {
-    container.classList.remove(MODULE_LOADING_HOST_CLASS);
     renderErrorBoundary(container, error, {
       title: '模块加载失败',
       color: this.loaderColor,
@@ -351,12 +283,10 @@ export class ModuleLoader {
     this.cleanUpStaleMountAttempts();
     this.isLoading = false;
     this.pendingRouteId = null;
-    this.clearDelayedLoading();
     this.clearRetry();
   }
 
   private clearLoading(loadId: number): void {
-    this.clearDelayedLoading(loadId);
     if (this.isStaleLoad(loadId)) {
       return;
     }
@@ -386,8 +316,6 @@ export class ModuleLoader {
     }
 
     this.currentContainer = container;
-    this.clearContentEnterAnimation(container);
-    this.scheduleDelayedLoading(container, loadId, routeId);
     return container;
   }
 
@@ -397,7 +325,6 @@ export class ModuleLoader {
   ): (() => Promise<IModule>) | null {
     const loader = this.moduleMap[routeId];
     if (!loader) {
-      this.clearDelayedLoading();
       this.renderNotRegistered(container, routeId);
       return null;
     }
@@ -406,42 +333,10 @@ export class ModuleLoader {
   }
 
   private prepareContainerForMount(container: HTMLElement): void {
-    this.clearDelayedLoading();
-    this.clearContentEnterAnimation(container);
-    container.classList.remove(MODULE_LOADING_HOST_CLASS);
     container.replaceChildren();
-    this.prepareContentEnterAnimation(container);
-    void container.offsetHeight;
-  }
-
-  private clearContentEnterAnimation(container: HTMLElement): void {
-    if (!this.contentEnterAnimation) {
-      return;
-    }
-
-    clearPageEnterAnimation(container);
-    container.classList.remove(LEGACY_CONTENT_ENTER_ANIMATION_CLASS);
-  }
-
-  private applyContentEnterAnimation(container: HTMLElement): void {
-    if (!this.contentEnterAnimation) {
-      return;
-    }
-
-    container.classList.remove(LEGACY_CONTENT_ENTER_ANIMATION_CLASS);
-    applyPageEnterAnimation(container);
-  }
-
-  private prepareContentEnterAnimation(container: HTMLElement): void {
-    if (!this.contentEnterAnimation) {
-      return;
-    }
-
-    preparePageEnterAnimation(container);
   }
 
   private renderRetryLoading(container: HTMLElement): void {
-    container.classList.remove(MODULE_LOADING_HOST_CLASS);
     const wrapper = document.createElement('div');
     wrapper.className = 'p-10 text-center';
 
@@ -589,7 +484,6 @@ export class ModuleLoader {
     this.currentMountLoadId = loadId;
     this.currentRouteId = routeId;
     this.retireStaleMountAttemptsAbsorbedByCurrent(module, loadId);
-    this.applyContentEnterAnimation(container);
   }
 
   private async scheduleRetry(routeId: string, retryCount: number, loadId: number): Promise<void> {
@@ -599,8 +493,6 @@ export class ModuleLoader {
     }
 
     if (container) {
-      this.clearDelayedLoading(loadId);
-      this.clearContentEnterAnimation(container);
       this.renderRetryLoading(container);
     }
 
@@ -636,8 +528,6 @@ export class ModuleLoader {
       return;
     }
     if (container) {
-      this.clearDelayedLoading(loadId);
-      this.clearContentEnterAnimation(container);
       this.renderErrorBoundary(container, routeId, err as Error);
     }
   }

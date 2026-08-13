@@ -53,7 +53,6 @@ import { registerAllServices } from '@/common/di/services';
 
 // 🎯 短期优化：导入 LoadingManager
 import { loadingManager } from '@/common/utils/LoadingManager';
-import { TransitionLoader } from '@/common/components/TransitionLoader';
 
 // 🎯 微交互动画系统：导入动画管理器和状态管理
 import { animationManager } from '@/services/animation-manager';
@@ -397,13 +396,8 @@ function initializeStartupUtilities(): void {
 
   const globalLoading = document.getElementById('global-loading');
   if (globalLoading) {
-    // 注入全新的转场动效 SVG
-    const target = document.getElementById('transition-loader-target');
-    if (target) {
-      target.appendChild(TransitionLoader.render());
-    }
     loadingManager.setGlobalLoadingElement(globalLoading);
-    mainLogger.info('LoadingManager initialized with TransitionLoader');
+    mainLogger.info('LoadingManager initialized');
   }
 
   try {

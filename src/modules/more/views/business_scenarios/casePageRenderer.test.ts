@@ -31,7 +31,7 @@ describe('renderBusinessScenarioPage', () => {
     expect(html).toContain('<h1>使用 OpenClaw 前必读 · 两条关键须知</h1>');
   });
 
-  it('keeps the module container when loadTemplate has wrapped the template', () => {
+  it('uses the module container directly when a legacy template contains a fade wrapper', () => {
     const html = renderBusinessScenarioPage(
       `
                 <div class="view-fade-in-initial view-fade-in">
@@ -43,9 +43,7 @@ describe('renderBusinessScenarioPage', () => {
       'bad_review_response'
     );
 
-    expect(html).toContain(
-      '<div class="view-fade-in-initial view-fade-in">\n<div class="module-container py-6">'
-    );
+    expect(html).not.toContain('view-fade-in');
     expect(html.match(/class="module-container py-6"/g)).toHaveLength(1);
     expect(html.match(/class="ziniao-case-shell"/g)).toHaveLength(1);
   });

@@ -20,21 +20,12 @@ describe('viewLoader', () => {
     vi.restoreAllMocks();
   });
 
-  it('loads a known template by normalized path and applies fade-in wrapper by default', async () => {
+  it('loads a known template by normalized path without a page-enter wrapper', async () => {
     const { loadTemplate } = await importViewLoader();
 
     const html = await loadTemplate('src/modules/home/homeDisplay.html');
 
-    expect(html).toContain('view-fade-in');
-    expect(html.length).toBeGreaterThan(100);
-  });
-
-  it('can load templates without the fade-in wrapper', async () => {
-    const { loadTemplate } = await importViewLoader();
-
-    const html = await loadTemplate('/src/modules/home/homeDisplay.html', { disableFadeIn: true });
-
-    expect(html).not.toContain('view-fade-in-initial');
+    expect(html).not.toContain('view-fade-in');
     expect(html.length).toBeGreaterThan(100);
   });
 
@@ -68,12 +59,12 @@ describe('viewLoader', () => {
     await expect(ensureViewLoaded('unknown-route')).resolves.toBeUndefined();
   });
 
-  it('does not leave route loading skeleton after a shell view loads', async () => {
+  it('loads a shell view without creating a route transition node', async () => {
     const { ensureViewLoaded } = await importViewLoader();
 
     await ensureViewLoaded('app_center_overview');
 
-    expect(document.querySelector('#route-loading-skeleton')).toBeNull();
+    expect(document.querySelector('.route-loading-transition')).toBeNull();
     expect(document.querySelector('main')?.innerHTML.length).toBeGreaterThan(100);
   });
 

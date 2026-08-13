@@ -10,7 +10,6 @@ const moduleLoader: ModuleLoader = createModuleLoader({
   moduleMap: MODULE_MAP,
   loaderColor: 'indigo',
   moduleName: 'SOPs',
-  contentEnterAnimation: true,
 });
 
 /**

@@ -10,20 +10,12 @@ import { StorageService, CACHE_PREFIXES } from '@/services/storageService';
 import { getViewPathByRoute } from '../config/menuConfig';
 import { SystemError } from '@/common/errors/AppError';
 import { createSafeFragment, escapeHtml } from '@/common/utils/security';
-import {
-  ROUTE_TRANSITION_DELAY_MS,
-  RouteTransitionController,
-} from '@/common/components/RouteTransition';
-import { wrapWithPageEnterAnimation } from '@/common/utils/pageEnterAnimation';
 import { assembleSettingsTemplate } from '@/components/settings/loader';
 
 const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
 const LEGACY_CACHE_PREFIX = 'view_cache_';
 const VIEW_CACHE_SCHEMA_VERSION = 'view-v3';
 const VIEW_CACHE_VERSION = `${APP_VERSION}:${VIEW_CACHE_SCHEMA_VERSION}`;
-const ROUTE_LOADING_DELAY_MS = ROUTE_TRANSITION_DELAY_MS;
-const ROUTE_LOADING_ID = 'route-loading-transition';
-const routeTransition = new RouteTransitionController();
 let hasCleanedOldViewCache = false;
 
 /**
@@ -65,6 +57,8 @@ export interface CacheStats {
 export interface ViewLoadOptions {
   useCache?: boolean;
   forceReload?: boolean;
+  /** @deprecated 页面进入动画已移除；保留该字段以兼容历史调用。 */
+  disableFadeIn?: boolean;
 }
 
 /**
@@ -225,42 +219,6 @@ const VIEW_REGISTRY: ViewRegistry = {
   app_center: { path: '/src/modules/app_center/app_center.html', target: 'main', isLoaded: false },
 };
 
-function getMainContentContainer(): HTMLElement | null {
-  return document.getElementById('main-content') ?? document.querySelector<HTMLElement>('main');
-}
-
-function showRouteLoading(routeId: string): void {
-  if (document.getElementById(ROUTE_LOADING_ID)) {
-    return;
-  }
-
-  const container = getMainContentContainer();
-  if (!container) {
-    return;
-  }
-
-  routeTransition.show(container, routeId, ROUTE_LOADING_ID);
-}
-
-async function hideRouteLoading(): Promise<void> {
-  await routeTransition.hide();
-}
-
-function scheduleRouteLoading(routeId: string): () => Promise<void> {
-  let timer: number | null = window.setTimeout(() => {
-    timer = null;
-    showRouteLoading(routeId);
-  }, ROUTE_LOADING_DELAY_MS);
-
-  return async () => {
-    if (timer !== null) {
-      window.clearTimeout(timer);
-      timer = null;
-    }
-    await hideRouteLoading();
-  };
-}
-
 /**
  * 渲染错误占位视图
  */
@@ -403,12 +361,7 @@ export async function ensureViewLoaded(routeId: string): Promise<void> {
 
   if (moduleKey && VIEW_REGISTRY[moduleKey]) {
     if (!VIEW_REGISTRY[moduleKey].isLoaded) {
-      const cancelRouteLoading = scheduleRouteLoading(routeId);
-      try {
-        await loadHtml(moduleKey);
-      } finally {
-        await cancelRouteLoading();
-      }
+      await loadHtml(moduleKey);
     }
   }
 }
@@ -424,12 +377,8 @@ export function registerView(_viewConfig: Partial<ViewConfig>): void {
  * 通用：根据路径加载模版（解决子模块 fetch 404 问题）
  * @param path - 相对 src 的路径, e.g., 'src/modules/sops/views/growth/npi_tracker/template.html'
  * @param options - 加载选项
- * @param options.disableFadeIn - 是否禁用淡入动画（默认false，即启用动画）
  */
-export async function loadTemplate(
-  path: string,
-  options?: ViewLoadOptions & { disableFadeIn?: boolean }
-): Promise<string> {
+export async function loadTemplate(path: string, options?: ViewLoadOptions): Promise<string> {
   // 尝试标准化路径
   if (!path.startsWith('/')) path = '/' + path;
 
@@ -465,12 +414,6 @@ export async function loadTemplate(
         setCache(path, html);
       }
     }
-  }
-
-  // 2. 自动包裹淡入动画容器（系统级通用功能）
-  // 除非明确禁用，否则所有页面都应用淡入动画
-  if (!options?.disableFadeIn) {
-    html = wrapWithPageEnterAnimation(html);
   }
 
   return html;

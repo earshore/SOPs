@@ -110,7 +110,7 @@ async function flushAsyncWork(): Promise<void> {
     }
   });
 
-  it('shows a module loading skeleton after a route waits longer than 300ms', async () => {
+  it('keeps a slow module load free of skeleton and transition nodes', async () => {
     vi.useFakeTimers();
     const content = document.getElementById('content') as HTMLElement;
     const pending = deferred<IModule>();
@@ -120,9 +120,9 @@ async function flushAsyncWork(): Promise<void> {
       containerId: 'content',
       shellId: 'shell',
       moduleMap: {
-        slow_route: loaderFn
+        slow_route: loaderFn,
       },
-      moduleName: 'TestLoader'
+      moduleName: 'TestLoader',
     });
 
     try {
@@ -131,24 +131,15 @@ async function flushAsyncWork(): Promise<void> {
       await flushAsyncWork();
       expect(loaderFn).toHaveBeenCalledTimes(1);
 
-      await vi.advanceTimersByTimeAsync(299);
+      await vi.advanceTimersByTimeAsync(500);
       expect(content.textContent).toBe('');
-
-      await vi.advanceTimersByTimeAsync(1);
-      const skeleton = content.querySelector('.route-loading-skeleton') as HTMLElement;
-      expect(skeleton).not.toBeNull();
-      expect(content.classList.contains('route-loading-skeleton-host')).toBe(true);
-      expect(skeleton.dataset.routeId).toBe('slow_route');
-      expect(skeleton.getAttribute('role')).toBe('status');
-      expect(skeleton.getAttribute('aria-live')).toBe('polite');
-      expect(skeleton.getAttribute('aria-label')).toBe('页面加载中');
+      expect(content.querySelector('.route-loading-skeleton')).toBeNull();
+      expect(content.querySelector('.route-loading-transition')).toBeNull();
 
       pending.resolve(module);
       await load;
 
       expect(content.textContent).toBe('Slow');
-      expect(content.querySelector('.route-loading-skeleton')).toBeNull();
-      expect(content.classList.contains('route-loading-skeleton-host')).toBe(false);
     } finally {
       vi.useRealTimers();
     }
@@ -1110,83 +1101,22 @@ async function flushAsyncWork(): Promise<void> {
     }
   });
 
-  it('applies content enter animation when enabled', async () => {
+  it('mounts module content directly without page-enter animation classes', async () => {
     const content = document.getElementById('content') as HTMLElement;
     content.classList.add('fade-in');
-    const module = createModule('Animated');
+    const module = createModule('Direct content');
     const loader = new ModuleLoader({
       containerId: 'content',
       shellId: 'shell',
       moduleMap: {
-        app_route: vi.fn(() => Promise.resolve(module))
+        app_route: vi.fn(() => Promise.resolve(module)),
       },
       moduleName: 'TestLoader',
-      contentEnterAnimation: true
     });
 
     await loader.loadModule('app_route');
 
-    expect(content.classList.contains('view-fade-in-initial')).toBe(true);
-    expect(content.classList.contains('view-fade-in')).toBe(true);
-    expect(content.classList.contains('fade-in')).toBe(false);
-  });
-
-  it('keeps async mounted content hidden until the content enter animation starts', async () => {
-    const content = document.getElementById('content') as HTMLElement;
-    const mountPending = deferred<void>();
-    const module: IModule = {
-      mount: vi.fn((container: HTMLElement) => {
-        container.textContent = 'Async content';
-        return mountPending.promise;
-      })
-    };
-    const loader = new ModuleLoader({
-      containerId: 'content',
-      shellId: 'shell',
-      moduleMap: {
-        app_route: vi.fn(() => Promise.resolve(module))
-      },
-      moduleName: 'TestLoader',
-      contentEnterAnimation: true
-    });
-
-    const load = loader.loadModule('app_route');
-    await vi.waitFor(() => expect(module.mount).toHaveBeenCalledTimes(1));
-
-    expect(content.textContent).toBe('Async content');
-    expect(content.classList.contains('view-fade-in-initial')).toBe(true);
-    expect(content.classList.contains('view-fade-in')).toBe(false);
-
-    mountPending.resolve();
-    await load;
-
-    expect(content.classList.contains('view-fade-in-initial')).toBe(true);
-    expect(content.classList.contains('view-fade-in')).toBe(true);
-  });
-
-  it('does not duplicate content enter animation when the module already renders it', async () => {
-    const content = document.getElementById('content') as HTMLElement;
-    const module: IModule = {
-      mount: vi.fn((container: HTMLElement) => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'view-fade-in-initial view-fade-in';
-        wrapper.textContent = 'PPC style wrapper';
-        container.appendChild(wrapper);
-      })
-    };
-    const loader = new ModuleLoader({
-      containerId: 'content',
-      shellId: 'shell',
-      moduleMap: {
-        app_route: vi.fn(() => Promise.resolve(module))
-      },
-      moduleName: 'TestLoader',
-      contentEnterAnimation: true
-    });
-
-    await loader.loadModule('app_route');
-
+    expect(content.textContent).toContain('Direct content');
     expect(content.classList.contains('view-fade-in-initial')).toBe(false);
     expect(content.classList.contains('view-fade-in')).toBe(false);
-    expect(content.firstElementChild?.classList.contains('view-fade-in')).toBe(true);
   });

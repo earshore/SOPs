@@ -857,63 +857,6 @@
   }
 }
 
-.view-fade-in {
-  animation: pageViewFadeIn var(--duration-slower) var(--ease-smooth) forwards;
-}
-
-.view-fade-in-initial {
-  opacity: 0;
-}
-
-/* Welcome Banner 优先淡入 */
-.view-fade-in > *:first-child:has(.rounded-2xl) {
-  opacity: 0;
-  animation: welcomeBannerFadeIn var(--duration-slow) var(--ease-smooth) forwards;
-}
-
-/* 主内容区域延迟淡入 */
-.view-fade-in > *:not(:first-child),
-.view-fade-in > *:first-child:not(:has(.rounded-2xl)) {
-  opacity: 0;
-  animation: mainContentFadeIn var(--duration-slower) var(--ease-smooth) 0.15s forwards;
-}
-
-.view-fade-in:not(:has(> *:first-child .rounded-2xl)) > * {
-  opacity: 0;
-  animation: mainContentFadeIn var(--duration-slower) var(--ease-smooth) 0.1s forwards;
-}
-
-/* --- 页面路由过渡 --- */
-@keyframes pageEnter {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes pageLeave {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.99);
-  }
-}
-
-.page-enter {
-  animation: pageEnter var(--duration-slow) var(--ease-smooth) forwards;
-}
-
-.page-leave {
-  animation: pageLeave var(--duration-normal) var(--ease-in) forwards;
-}
-
 /* ========================================
    11. 骨架屏 & 加载动画
    ======================================== */
