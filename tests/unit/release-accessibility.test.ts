@@ -68,10 +68,11 @@ describe('release accessibility contract', () => {
     expect(activeRule).not.toMatch(/color:\s*var\(--color-primary-darker/);
 
     expect(headerCss).toContain('border-left-color: color-mix(in srgb, #fff 8%, transparent);');
-    expect(headerCss).toContain('.dark .version-card.tip-card');
-    expect(headerCss).toContain('var(--surface-card, #1e293b) 92%');
     expect(headerCss).toContain('.dark .quick-access-item:hover');
     expect(headerCss).toContain('var(--color-green-400, #4ade80) 18%');
+    // 快速访问版本卡已迁移至系统设置底部 footer，Header CSS 中不再保留
+    expect(headerCss).not.toContain('version-card');
+    expect(headerCss).not.toContain('tip-card');
   });
 
   it('keeps the PromptLab missing-report notice one level below its card heading', () => {

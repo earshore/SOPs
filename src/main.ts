@@ -102,7 +102,6 @@ import {
   showToast,
 } from '@/common/ui';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
-import { APP_VERSION } from '@/common/constants/constants';
 import { openAmazonInsightPluginDownload } from '@/common/utils/openAmazonInsightPluginDownload';
 import { initHomeSplash } from './modules/home/homeDisplay';
 
@@ -199,12 +198,6 @@ function isClosableModalElement(element: Element | null): element is ClosableMod
   );
 }
 
-function updateAppVersionLabel(): void {
-  const versionEl = document.getElementById('app-version-more');
-  if (versionEl) {
-    versionEl.textContent = `V ${APP_VERSION}`;
-  }
-}
 
 async function loadMainStyles(): Promise<void> {
   try {
@@ -594,7 +587,6 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
     }
 
     await mainStylesReady;
-    updateAppVersionLabel();
     const bootstrap = createServiceBootstrap();
 
     // ================================================================

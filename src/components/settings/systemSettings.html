@@ -516,7 +516,19 @@
         ></div>
         <span class="settings-panel-footer__label" x-text="settingsFooterStatusText"></span>
       </div>
-      <span class="settings-panel-footer__version" x-text="settingsAppVersionLabel"></span>
+      <span class="settings-panel-footer__version">
+        <span x-text="settingsAppVersionLabel"></span>
+        <a
+          class="settings-panel-footer__release-link"
+          href="https://github.com/earshore/SOPs/releases"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="打开 GitHub Releases"
+          title="打开 GitHub Releases"
+        >
+          <i class="fab fa-github" aria-hidden="true"></i>
+        </a>
+      </span>
     </div>
   </div>
 </div>
