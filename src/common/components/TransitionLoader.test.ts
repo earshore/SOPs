@@ -9,6 +9,7 @@ describe('TransitionLoader', () => {
     expect(loader.querySelector('.main-container')).not.toBeNull();
     expect(loader.querySelector('.shimmer')).not.toBeNull();
     expect(loader.querySelector('.progress-bar-inner')).not.toBeNull();
+    expect(loader.querySelector('animate')).toBeNull();
   });
 
   it('includes the complete non-overlapping easter-egg message set', () => {

@@ -10,7 +10,10 @@ import { StorageService, CACHE_PREFIXES } from '@/services/storageService';
 import { getViewPathByRoute } from '../config/menuConfig';
 import { SystemError } from '@/common/errors/AppError';
 import { createSafeFragment, escapeHtml } from '@/common/utils/security';
-import { TransitionLoader } from '@/common/components/TransitionLoader';
+import {
+  ROUTE_TRANSITION_DELAY_MS,
+  RouteTransitionController,
+} from '@/common/components/RouteTransition';
 import { wrapWithPageEnterAnimation } from '@/common/utils/pageEnterAnimation';
 import { assembleSettingsTemplate } from '@/components/settings/loader';
 
@@ -18,8 +21,9 @@ const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
 const LEGACY_CACHE_PREFIX = 'view_cache_';
 const VIEW_CACHE_SCHEMA_VERSION = 'view-v3';
 const VIEW_CACHE_VERSION = `${APP_VERSION}:${VIEW_CACHE_SCHEMA_VERSION}`;
-const ROUTE_LOADING_DELAY_MS = 300;
-const ROUTE_LOADING_ID = 'route-loading-skeleton';
+const ROUTE_LOADING_DELAY_MS = ROUTE_TRANSITION_DELAY_MS;
+const ROUTE_LOADING_ID = 'route-loading-transition';
+const routeTransition = new RouteTransitionController();
 let hasCleanedOldViewCache = false;
 
 /**
@@ -225,21 +229,6 @@ function getMainContentContainer(): HTMLElement | null {
   return document.getElementById('main-content') ?? document.querySelector<HTMLElement>('main');
 }
 
-function createRouteLoadingSkeleton(routeId: string): HTMLElement {
-  const wrapper = document.createElement('div');
-  wrapper.id = ROUTE_LOADING_ID;
-  wrapper.className = 'route-loading-transition';
-  wrapper.setAttribute('role', 'status');
-  wrapper.setAttribute('aria-live', 'polite');
-  wrapper.setAttribute('aria-label', '页面加载中');
-  wrapper.dataset.routeId = routeId;
-
-  // 使用全新的 TransitionLoader
-  wrapper.appendChild(TransitionLoader.render());
-
-  return wrapper;
-}
-
 function showRouteLoading(routeId: string): void {
   if (document.getElementById(ROUTE_LOADING_ID)) {
     return;
@@ -250,25 +239,25 @@ function showRouteLoading(routeId: string): void {
     return;
   }
 
-  container.appendChild(createRouteLoadingSkeleton(routeId));
+  routeTransition.show(container, routeId, ROUTE_LOADING_ID);
 }
 
-function hideRouteLoading(): void {
-  document.getElementById(ROUTE_LOADING_ID)?.remove();
+async function hideRouteLoading(): Promise<void> {
+  await routeTransition.hide();
 }
 
-function scheduleRouteLoading(routeId: string): () => void {
+function scheduleRouteLoading(routeId: string): () => Promise<void> {
   let timer: number | null = window.setTimeout(() => {
     timer = null;
     showRouteLoading(routeId);
   }, ROUTE_LOADING_DELAY_MS);
 
-  return () => {
-    if (timer) {
+  return async () => {
+    if (timer !== null) {
       window.clearTimeout(timer);
       timer = null;
     }
-    hideRouteLoading();
+    await hideRouteLoading();
   };
 }
 
@@ -418,7 +407,7 @@ export async function ensureViewLoaded(routeId: string): Promise<void> {
       try {
         await loadHtml(moduleKey);
       } finally {
-        cancelRouteLoading();
+        await cancelRouteLoading();
       }
     }
   }

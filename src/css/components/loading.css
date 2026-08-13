@@ -609,33 +609,66 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg-primary, #ffffff);
-  animation: transition-fade-in 0.4s ease-out forwards;
+  overflow: hidden;
+  pointer-events: auto;
+  background: color-mix(in srgb, var(--color-bg-primary, #ffffff) 90%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: scale(0.992);
+  transition:
+    opacity 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 220ms ease;
+}
+
+.route-loading-transition--entered {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.route-loading-transition--leaving {
+  opacity: 0;
+  transform: scale(1.008);
 }
 
 .dark .route-loading-transition,
 [data-color-mode-resolved='dark'] .route-loading-transition {
-  background: var(--color-bg-primary, #0f172a);
+  background: color-mix(in srgb, var(--color-bg-primary, #0f172a) 88%, transparent);
 }
 
 .transition-loader-wrapper {
-  width: 100%;
-  max-width: 400px;
-  height: 400px;
+  width: min(400px, 72vw);
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: translateY(8px);
+  transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@keyframes transition-fade-in {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
+.route-loading-transition--entered .transition-loader-wrapper {
+  transform: translateY(0);
+}
+
+.route-loading-transition--leaving .transition-loader-wrapper {
+  transform: translateY(-8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-loading-transition,
+  .transition-loader-wrapper {
+    transition: none;
+    transform: none;
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+}
+
+[data-animations='disabled'] .route-loading-transition,
+.no-loading-animations .route-loading-transition,
+[data-animations='disabled'] .transition-loader-wrapper,
+.no-loading-animations .transition-loader-wrapper {
+  transition: none;
+  transform: none;
 }
 
 /* 全局加载转场容器 */

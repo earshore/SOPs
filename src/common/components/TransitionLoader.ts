@@ -6,19 +6,7 @@
 
 import { setSafeHtml } from '@/common/utils/security';
 
-/**
- * 转场加载器
- */
-export class TransitionLoader {
-  /**
-   * 生成转场动画 DOM 结构
-   */
-  static render(): HTMLElement {
-    const container = document.createElement('div');
-    container.className = 'transition-loader-wrapper';
-    
-    // 静态模板经项目安全工具净化后插入，确保即时渲染且不引入不受信任内容。
-    setSafeHtml(container, `
+const TRANSITION_SVG_TEMPLATE = `
 <svg width="100%" height="100%" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="transition-svg">
   <style>
     .transition-svg { display: block; margin: auto; max-width: 400px; }
@@ -78,6 +66,18 @@ export class TransitionLoader {
     .msg-3 { animation-delay: 8s; }
     .msg-4 { animation-delay: 12s; }
 
+    .progress-bar-inner {
+      transform-box: fill-box;
+      transform-origin: left center;
+      animation: progress-sweep 3s ease-in-out infinite;
+    }
+
+    @keyframes progress-sweep {
+      0% { transform: translateX(0) scaleX(0.08); }
+      50% { transform: translateX(0) scaleX(1); }
+      100% { transform: translateX(100px) scaleX(0.08); }
+    }
+
     /* Disable animations if requested */
     [data-animations='disabled'] .main-container,
     [data-animations='disabled'] .content-line,
@@ -121,12 +121,23 @@ export class TransitionLoader {
   </g>
   
   <rect x="150" y="365" width="100" height="2" rx="1" fill="var(--color-bg-tertiary, #f1f5f9)" />
-  <rect class="progress-bar-inner" x="150" y="365" width="30" height="2" rx="1" fill="var(--color-primary, #0ea5e9)">
-    <animate attributeName="width" values="0;100;0" dur="3s" repeatCount="indefinite" />
-    <animate attributeName="x" values="150;150;250" dur="3s" repeatCount="indefinite" />
-  </rect>
+  <rect class="progress-bar-inner" x="150" y="365" width="100" height="2" rx="1" fill="var(--color-primary, #0ea5e9)" />
 </svg>
-    `);
+`;
+
+/**
+ * 转场加载器
+ */
+export class TransitionLoader {
+  /**
+   * 生成转场动画 DOM 结构
+   */
+  static render(): HTMLElement {
+    const container = document.createElement('div');
+    container.className = 'transition-loader-wrapper';
+
+    // 静态模板经项目安全工具净化后插入，确保即时渲染且不引入不受信任内容。
+    setSafeHtml(container, TRANSITION_SVG_TEMPLATE);
 
     return container;
   }
