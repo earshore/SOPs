@@ -598,3 +598,82 @@
 .loading-complete .progress-bar {
   will-change: auto;
 }
+
+
+/* 极简路由加载指示器：不遮挡内容，仅在慢加载时显示。 */
+.minimal-loading-indicator {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transform: translateX(-50%);
+  color: var(--color-text-secondary, #64748b);
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.minimal-loading-indicator__dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.minimal-loading-indicator__dots i {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.35;
+  animation: minimal-loading-dot 900ms ease-in-out infinite;
+}
+
+.minimal-loading-indicator__dots i:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.minimal-loading-indicator__dots i:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.minimal-loading-indicator__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes minimal-loading-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.75);
+  }
+  30% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .minimal-loading-indicator__dots i {
+    animation: none;
+    opacity: 0.58;
+    transform: none;
+  }
+}
+
+[data-animations='disabled'] .minimal-loading-indicator__dots i,
+.no-loading-animations .minimal-loading-indicator__dots i {
+  animation: none;
+  opacity: 0.58;
+  transform: none;
+}

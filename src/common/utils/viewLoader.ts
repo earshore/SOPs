@@ -10,6 +10,7 @@ import { StorageService, CACHE_PREFIXES } from '@/services/storageService';
 import { getViewPathByRoute } from '../config/menuConfig';
 import { SystemError } from '@/common/errors/AppError';
 import { createSafeFragment, escapeHtml } from '@/common/utils/security';
+import { beginMinimalLoading } from '@/common/components/MinimalLoadingIndicator';
 import { assembleSettingsTemplate } from '@/components/settings/loader';
 
 const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
@@ -361,7 +362,12 @@ export async function ensureViewLoaded(routeId: string): Promise<void> {
 
   if (moduleKey && VIEW_REGISTRY[moduleKey]) {
     if (!VIEW_REGISTRY[moduleKey].isLoaded) {
-      await loadHtml(moduleKey);
+      const stopLoading = beginMinimalLoading(routeId);
+      try {
+        await loadHtml(moduleKey);
+      } finally {
+        stopLoading();
+      }
     }
   }
 }

@@ -110,7 +110,7 @@ async function flushAsyncWork(): Promise<void> {
     }
   });
 
-  it('keeps a slow module load free of skeleton and transition nodes', async () => {
+  it('uses minimal dots for a slow module load instead of a skeleton or transition overlay', async () => {
     vi.useFakeTimers();
     const content = document.getElementById('content') as HTMLElement;
     const pending = deferred<IModule>();
@@ -135,11 +135,15 @@ async function flushAsyncWork(): Promise<void> {
       expect(content.textContent).toBe('');
       expect(content.querySelector('.route-loading-skeleton')).toBeNull();
       expect(content.querySelector('.route-loading-transition')).toBeNull();
+      const indicator = document.getElementById('minimal-route-loading-indicator');
+      expect(indicator).not.toBeNull();
+      expect(indicator?.querySelectorAll('.minimal-loading-indicator__dots i')).toHaveLength(3);
 
       pending.resolve(module);
       await load;
 
       expect(content.textContent).toBe('Slow');
+      expect(document.getElementById('minimal-route-loading-indicator')).toBeNull();
     } finally {
       vi.useRealTimers();
     }

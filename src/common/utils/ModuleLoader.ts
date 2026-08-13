@@ -13,6 +13,7 @@ import {
   renderTimeout,
 } from '../../components/ErrorBoundary';
 import { ValidationError } from '@/common/errors/AppError';
+import { beginMinimalLoading } from '@/common/components/MinimalLoadingIndicator';
 import type { DIContainer } from '../di/Container';
 
 
@@ -340,14 +341,12 @@ export class ModuleLoader {
     const wrapper = document.createElement('div');
     wrapper.className = 'p-10 text-center';
 
-    const icon = document.createElement('i');
-    icon.className = 'fas fa-circle-notch fa-spin text-orange-500';
 
     const message = document.createElement('span');
     message.className = 'ml-2 text-slate-500';
     message.textContent = '连接超时，正在重试...';
 
-    wrapper.append(icon, message);
+    wrapper.append(message);
     container.replaceChildren(wrapper);
   }
 
@@ -547,6 +546,7 @@ export class ModuleLoader {
     }
 
     const loadId = this.startLoad(routeId);
+    const stopLoading = beginMinimalLoading(routeId);
 
     try {
       const container = await this.prepareContainer(routeId, loadId);
@@ -570,6 +570,7 @@ export class ModuleLoader {
     } catch (err) {
       await this.handleLoadError(routeId, retryCount, loadId, err);
     } finally {
+      stopLoading();
       this.clearLoading(loadId);
     }
   }
