@@ -169,7 +169,10 @@ export function setSafeHtml(element: HTMLElement | null, html: string): void {
   if (!element) return;
   // ✅ 安全: 清空元素后使用createSafeFragment安全插入HTML
   element.replaceChildren();
-  element.appendChild(createSafeFragment(html));
+  // 移除 UTF-8 BOM（\uFEFF）：部分模板文件带 BOM，会被 DOMParser 解析成
+  // 文本节点留在文档流中，把挂载容器撑出约 21px 的底部“横条”；在源头切掉
+  const cleaned = html.startsWith('\uFEFF') ? html.slice(1) : html.replace(/\uFEFF/g, '');
+  element.appendChild(createSafeFragment(cleaned));
   normalizeWelcomeBanners(element);
 }
 

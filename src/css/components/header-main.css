@@ -472,7 +472,7 @@
 }
 
 /* ========================================
-   Settings Gear (migrated from header quick access)
+   Settings Gear (header shortcut)
    ======================================== */
 .settings-gear-btn {
   display: inline-flex;
@@ -507,6 +507,33 @@
 .settings-gear-btn:active {
   transform: rotate(45deg) scale(0.95);
 }
+/**
+ * T3 gear button dark adaptation — the header settings gear rendered
+ * light-only slate fallbacks (#f8fafc bg / #e2e8f0 border) in dark mode and
+ * stood out against the dark header. Scoped dual-safe overrides follow the
+ * same selector family as .model-status dark variants.
+ */
+.dark .settings-gear-btn,
+[data-color-mode-resolved='dark'] .settings-gear-btn,
+[data-theme='dark'] .settings-gear-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--color-slate-300, #cbd5e1);
+}
+.dark .settings-gear-btn:hover,
+[data-color-mode-resolved='dark'] .settings-gear-btn:hover,
+[data-theme='dark'] .settings-gear-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--color-slate-100, #f1f5f9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+.dark .settings-gear-btn:focus-visible,
+[data-color-mode-resolved='dark'] .settings-gear-btn:focus-visible,
+[data-theme='dark'] .settings-gear-btn:focus-visible {
+  outline-color: var(--color-primary, #3b82f6);
+}
+
 
 /* ========================================
    Model Status

@@ -958,6 +958,97 @@
   }
 }
 
+/**
+ * Dark-mode adaptation for the workbench launchpad card — the light-first
+ * section used hard-coded slate/blue values (fallback colors never follow
+ * Theme tokens), so eyebrow text, the recommended-entry badge, SOP quick
+ * links and tool cards became barely readable on the dark panel. Dual-safe
+ * selectors (.dark + [data-color-mode-resolved='dark']) match the rest of
+ * the codebase and only restyle colors/borders without touching layout.
+ */
+.dark .workbench-launchpad,
+[data-color-mode-resolved='dark'] .workbench-launchpad {
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 94%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 30%, rgba(148, 163, 184, 0.35));
+}
+.dark .workbench-launchpad::before,
+[data-color-mode-resolved='dark'] .workbench-launchpad::before {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(in srgb, var(--color-cyan-400, #22d3ee) 18%, transparent),
+      transparent 45%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-primary, #3b82f6) 10%, transparent),
+      transparent 55%
+    );
+}
+.dark .workbench-launchpad__eyebrow,
+[data-color-mode-resolved='dark'] .workbench-launchpad__eyebrow {
+  color: var(--color-slate-200, #e2e8f0);
+}
+.dark .workbench-launchpad__badge,
+[data-color-mode-resolved='dark'] .workbench-launchpad__badge {
+  background: color-mix(in srgb, var(--color-primary, #3b82f6) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 36%, transparent);
+  color: var(--color-slate-100, #f1f5f9);
+}
+.dark .workbench-launchpad__badge .fas,
+[data-color-mode-resolved='dark'] .workbench-launchpad__badge .fas {
+  color: var(--color-cyan-400, #22d3ee);
+}
+.dark .workbench-launchpad__sop-link,
+[data-color-mode-resolved='dark'] .workbench-launchpad__sop-link {
+  color: var(--color-slate-300, #cbd5e1);
+}
+.dark .workbench-launchpad__sop-link > .fas:first-child,
+[data-color-mode-resolved='dark'] .workbench-launchpad__sop-link > .fas:first-child {
+  background: color-mix(in srgb, var(--color-primary, #3b82f6) 20%, transparent);
+  color: var(--color-blue-400, #60a5fa);
+}
+.dark .workbench-launchpad__sop-link > .fas:last-child,
+[data-color-mode-resolved='dark'] .workbench-launchpad__sop-link > .fas:last-child {
+  color: var(--color-blue-400, #60a5fa);
+}
+.dark .workbench-launchpad__sop-link:hover,
+[data-color-mode-resolved='dark'] .workbench-launchpad__sop-link:hover {
+  color: var(--color-slate-100, #f1f5f9);
+}
+.dark .workbench-launchpad__tools-heading span:last-child,
+[data-color-mode-resolved='dark'] .workbench-launchpad__tools-heading span:last-child {
+  color: var(--color-slate-400, #94a3b8);
+}
+.dark .workbench-launchpad__tools,
+[data-color-mode-resolved='dark'] .workbench-launchpad__tools {
+  border-top-color: rgba(148, 163, 184, 0.28);
+}
+.dark .workbench-tool,
+[data-color-mode-resolved='dark'] .workbench-tool {
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 86%, transparent);
+  border-color: rgba(148, 163, 184, 0.35);
+}
+.dark .workbench-tool > .fas:not(.workbench-tool__arrow),
+[data-color-mode-resolved='dark'] .workbench-tool > .fas:not(.workbench-tool__arrow) {
+  background: color-mix(in srgb, var(--color-primary, #3b82f6) 20%, transparent);
+  color: var(--color-blue-400, #60a5fa);
+}
+.dark .workbench-tool__meta,
+.dark .workbench-tool__description,
+[data-color-mode-resolved='dark'] .workbench-tool__meta,
+[data-color-mode-resolved='dark'] .workbench-tool__description {
+  color: var(--color-slate-400, #94a3b8);
+}
+.dark .workbench-tool:hover,
+[data-color-mode-resolved='dark'] .workbench-tool:hover {
+  background: var(--color-slate-800, #1e293b);
+  border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 40%, transparent);
+}
+.dark .workbench-tool:hover .workbench-tool__arrow,
+[data-color-mode-resolved='dark'] .workbench-tool:hover .workbench-tool__arrow {
+  color: var(--color-blue-400, #60a5fa);
+}
 @media (prefers-reduced-motion: reduce) {
   .workbench-launchpad__primary-action,
   .workbench-launchpad__primary-arrow,
