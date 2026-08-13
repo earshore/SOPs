@@ -87,6 +87,68 @@
   box-shadow: var(--settings-focus-ring);
 }
 
+/* ===== 抽屉动画：backdrop 淡入/淡出 ===== */
+.settings-panel-root[data-state='open'] .settings-panel-backdrop {
+  animation: settingsBackdropIn 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.settings-panel-root[data-state='closing'] .settings-panel-backdrop {
+  animation: settingsBackdropOut 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ===== 抽屉动画：sheet 从右侧滑入/回滑出 ===== */
+.settings-panel-root[data-state='open'] .settings-panel-sheet {
+  animation: settingsSheetIn 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.settings-panel-root[data-state='closing'] .settings-panel-sheet {
+  animation: settingsSheetOut 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes settingsSheetIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes settingsSheetOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes settingsBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes settingsBackdropOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* 减少动画偏好：禁用抽屉进出场动画（面板立即显隐，仍由 :hidden 控制） */
+@media (prefers-reduced-motion: reduce) {
+  .settings-panel-root[data-state='open'] .settings-panel-backdrop,
+  .settings-panel-root[data-state='closing'] .settings-panel-backdrop,
+  .settings-panel-root[data-state='open'] .settings-panel-sheet,
+  .settings-panel-root[data-state='closing'] .settings-panel-sheet {
+    animation: none;
+  }
+}
+
 /* Drawer shell: panel elevation + soft footer gradient (not hard white). */
 .settings-panel-shell {
   background: linear-gradient(

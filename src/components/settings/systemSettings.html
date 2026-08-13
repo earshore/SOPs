@@ -7,16 +7,20 @@
   :hidden="!isOpen"
   :aria-hidden="(!isOpen).toString()"
   data-state="closed"
-  :data-state="isOpen ? 'open' : 'closed'"
+  :data-state="panelSheetState"
   class="settings-panel-root fixed inset-0 z-50 flex items-center justify-end"
   data-testid="settings-panel"
 >
   <!-- Backdrop with blur -->
-  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="close()"></div>
+  <div
+    class="settings-panel-backdrop absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+    @click="close()"
+  ></div>
 
   <!-- Modal Panel -->
   <div
-    class="settings-panel-shell relative h-full w-full max-w-[min(860px,calc(100vw-48px))] overflow-hidden flex flex-col"
+    class="settings-panel-sheet relative h-full w-full max-w-[min(860px,calc(100vw-48px))] overflow-hidden flex flex-col"
+    @animationend.self="onSheetAnimationEnd"
   >
     <!-- Decorative top accent line (Appearance primary) -->
     <div class="settings-panel-chrome-bar" aria-hidden="true"></div>

@@ -526,30 +526,44 @@
   flex: 1;
 }
 
+/* wb-header 与下载图标并列时两端分布 */
+.wb-header:has(.wb-plugin-download) {
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 标题/文本区允许收缩，不顶占下载图标空间 */
+.wb-header:has(.wb-plugin-download) > .wb-text {
+  min-width: 0;
+}
+
 /* ===== 极简下载采集插件图标（原 header 快速访问按钮迁移） ===== */
 .wb-plugin-download {
   position: relative;
   flex-shrink: 0;
   align-self: center;
-  margin-left: auto;
-  width: var(--wb-download-icon-size, 2.125rem);
-  height: var(--wb-download-icon-size, 2.125rem);
+  width: var(--wb-download-icon-size, 2.5rem);
+  height: var(--wb-download-icon-size, 2.5rem);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--rounded-full, 9999px);
-  color: rgba(255, 255, 255, 0.72);
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(8px);
+  color: #ffffff;
+  background: color-mix(in srgb, var(--wb-theme-accent-strong, var(--color-indigo-600, #4338ca)) 92%, transparent);
+  box-shadow: 0 4px 14px -6px rgba(67, 56, 202, 0.55);
   text-decoration: none;
   transition:
     color 0.2s ease,
     background 0.2s ease,
+    box-shadow 0.2s ease,
     transform 0.2s ease;
 }
+.wb-plugin-download i {
+  font-size: 0.875rem;
+}
 .wb-plugin-download:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.24);
+  background: var(--wb-theme-accent-strong, var(--color-indigo-600, #4338ca));
+  box-shadow: 0 6px 18px -7px rgba(67, 56, 202, 0.7);
   transform: translateY(-1px);
 }
 .wb-plugin-download:focus-visible {

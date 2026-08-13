@@ -245,8 +245,10 @@ describe('apiEndpoints inline style policy', () => {
     expect(readSettingsTemplate()).not.toMatch(inlineStyleBinding);
     expect(readAiAnalysisTemplate()).not.toMatch(inlineStyleBinding);
     expect(readScraperTemplate()).not.toMatch(inlineStyleBinding);
+    // Drawer 动画由三态机 panelSheetState 驱动（'closed' | 'closing' | 'open'）；
+    // 面板显隐仍由 :hidden="!isOpen" 决定，不使用 x-show/x-transition。
     expect(readSettingsTemplate()).toContain('data-state="closed"');
-    expect(readSettingsTemplate()).toContain(":data-state=\"isOpen ? 'open' : 'closed'\"");
+    expect(readSettingsTemplate()).toContain(':data-state="panelSheetState"');
   });
 
   it('keeps migrated assets free of static style attributes', () => {

@@ -6,6 +6,7 @@ import {
   openPerformanceMonitor,
   openSettings,
   updateModelStatus,
+  SettingsSheetAnimation,
 } from '@/components/settings/systemSettings';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import eventBus from '@/common/EventBus';
@@ -15,6 +16,21 @@ import { showToast } from '@/common/ui';
 import { LocalDataStore } from '@/services/localDataStore';
 import { ErrorService } from '@/services/errorService';
 import { performanceMonitor } from '@/common/devtools/PerformanceMonitor';
+
+/**
+ * 推进设置面板离场过渡态：flush close() 兜底定时器（CLOSING_MAX_MS）。
+ * 离场动画结束后 close() 的兜底定时器会把 _closing 置回 false 并卸载。
+ * 依赖 vi.useFakeTimers() 的真实定时器；测试中 close() 后的 await
+ * 会让微任务跑完，这里只需要推进剩余宏任务即可。
+ */
+async function flushClosingTimer() {
+  // close() 的兜底定时器使用 window.setTimeout（真实宏任务），
+  // 直接等待其触发后再让一个微任务跑完即可收敛状态。
+  await new Promise<void>(resolve => {
+    window.setTimeout(resolve, SettingsSheetAnimation.CLOSING_MAX_MS + 50);
+  });
+  await new Promise(resolve => setTimeout(resolve, 0));
+}
 
 const deps = vi.hoisted(() => {
   const values = new Map<string, unknown>();
@@ -293,6 +309,9 @@ it('registers Alpine settings and initializes subscriptions', async () => {
   expect(panel.isOpen).toBe(true);
 
   eventBus.emit(APP_EVENTS.SETTINGS_CLOSE);
+  // 离场动画过渡态：close 后先 _closing=true（sheet 回滑中），收敛后才卸载。
+  expect(panel._closing).toBe(true);
+  await flushClosingTimer();
   expect(panel.isOpen).toBe(false);
 
   panel.destroy();
@@ -1797,6 +1816,8 @@ it('UT-P0-06 close confirms when runtime dirty and stays open on cancel', async 
   panel.runtimeStrategy.settings.llm.maxRetries = 9;
   await panel.close();
   expect(deps.confirmWithModal).toHaveBeenCalled();
+  // 取消关闭时不会进入离场过渡态：isOpen 保持 true、_closing=false。
+  expect(panel._closing).toBe(false);
   expect(panel.isOpen).toBe(true);
 });
 
@@ -1807,6 +1828,7 @@ it('UT-P0-06b close discards when confirmed', async () => {
   panel.captureSettingsBaseline();
   panel.runtimeStrategy.settings.llm.maxRetries = 9;
   await panel.close();
+  await flushClosingTimer();
   expect(panel.isOpen).toBe(false);
 });
 
@@ -1817,6 +1839,7 @@ it('UT-P0-06c close without dirty skips confirm', async () => {
   panel.captureSettingsBaseline();
   await panel.close();
   expect(deps.confirmWithModal).not.toHaveBeenCalled();
+  await flushClosingTimer();
   expect(panel.isOpen).toBe(false);
 });
 
@@ -1829,6 +1852,7 @@ it('UT-P0-06d dirty then saveRuntimeStrategy then close does not confirm', async
   await panel.saveRuntimeStrategy();
   await panel.close();
   expect(deps.confirmWithModal).not.toHaveBeenCalled();
+  await flushClosingTimer();
   expect(panel.isOpen).toBe(false);
 });
 
@@ -1839,8 +1863,11 @@ it('UT-P0-06e second close after discard does not re-prompt', async () => {
   panel.captureSettingsBaseline();
   panel.runtimeStrategy.settings.llm.maxRetries = 9;
   await panel.close();
+  await flushClosingTimer();
   expect(panel.isOpen).toBe(false);
   deps.confirmWithModal.mockClear();
   await panel.close();
+  await flushClosingTimer();
   expect(deps.confirmWithModal).not.toHaveBeenCalled();
+  expect(panel.isOpen).toBe(false);
 });

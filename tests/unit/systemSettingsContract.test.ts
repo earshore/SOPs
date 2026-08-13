@@ -202,6 +202,8 @@ function createPanel(): TestPanel {
  * 拆分前后该清单必须完全一致（仅允许新增并同步收紧本条测试）。
  */
 const PANEL_DATA_KEYS: string[] = [
+  '_closing',
+  '_closingTimer',
   '_navScrollPauseUntil',
   '_navScrollUnbind',
   '_runtimeHealthNormalized',
@@ -309,8 +311,10 @@ const PANEL_DATA_KEYS: string[] = [
   'navOpenGroup',
   'navigateToNavTarget',
   'onSettingsSearch',
+  'onSheetAnimationEnd',
   'open',
   'openPerformanceMonitor',
+  'panelSheetState',
   'persistRuntimeStrategySettings',
   'ppcThresholdItems',
   'proxy',

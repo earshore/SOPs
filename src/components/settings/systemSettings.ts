@@ -90,6 +90,8 @@ function createSettingsState(): Pick<
   | 'activeRuntimePresetId'
   | '_unsubscribers'
   | '_subscriptionsInitialized'
+  | '_closing'
+  | '_closingTimer'
   | '_settingsBaseline'
   | '_runtimeHealthNormalized'
   | 'healthMessages'
@@ -110,6 +112,9 @@ function createSettingsState(): Pick<
 > {
   return {
     isOpen: false,
+    // Drawer 离场动画过渡态（true 时 data-state="closing"，动画结束再真正关闭）
+    _closing: false,
+    _closingTimer: null as unknown as number,
 
     searchQuery: '',
     searchHitId: '',
@@ -130,7 +135,6 @@ function createSettingsState(): Pick<
     // EventBus / window 订阅清理
     _unsubscribers: [],
     _subscriptionsInitialized: false,
-
     _settingsBaseline: null,
 
     _runtimeHealthNormalized: false,
@@ -259,6 +263,7 @@ const settingsPanelShell: SettingsPanelPart = {
 
   async open(options?: SettingsOpenOptions) {
     this.isOpen = true;
+    this._closing = false;
     this.searchQuery = '';
     this.searchHitId = '';
     this.searchHits = [];
@@ -350,6 +355,32 @@ const settingsPanelShell: SettingsPanelPart = {
     }
     this.unbindSettingsNavScrollSpy();
     this.activeNavTargetId = null;
+    this._closing = true;
+    // 离场动画（backdrop fade + sheet 回滑）结束后才真正卸载面板，
+    // 由模板 @animationend 调用 onSheetAnimationEnd 完成。
+    // prefers-reduced-motion 下动画时长为 0，animationend 会立即触发。
+    this._closingTimer = window.setTimeout(() => {
+      this._closingTimer = null;
+      this._closing = false;
+      this.isOpen = false;
+    }, SettingsSheetAnimation.CLOSING_MAX_MS);
+  },
+
+  get panelSheetState() {
+    if (!this.isOpen && !this._closing) return 'closed';
+    if (this._closing) return 'closing';
+    return 'open';
+  },
+
+  onSheetAnimationEnd() {
+    // closing 态的 sheet/backdrop 动画播放完毕后立即收敛状态，
+    // 兜底定时器之外再确保一次确定性收尾。
+    if (!this._closing) return;
+    if (this._closingTimer !== null) {
+      window.clearTimeout(this._closingTimer);
+      this._closingTimer = null;
+    }
+    this._closing = false;
     this.isOpen = false;
   },
 
@@ -650,3 +681,14 @@ export async function openPerformanceMonitor(): Promise<void> {
     showToast('打开监控面板失败', { type: 'error' });
   }
 }
+
+/**
+ * 设置面板抽屉动画常量（与 systemSettings.css 中 sheet/backdrop 动画时长一致）。
+ * CLOSING_MAX_MS 必须大于 sheet 离场动画最长时长，作为 animationend 未触达时的兜底。
+ */
+export const SettingsSheetAnimation = {
+  OPEN_MS: 300,
+  CLOSING_SHEET_MS: 260,
+  CLOSING_BACKDROP_MS: 180,
+  CLOSING_MAX_MS: 340,
+} as const;

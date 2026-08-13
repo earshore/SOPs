@@ -83,6 +83,14 @@ export interface RuntimeStrategyState {
 
 export interface SettingsPanelData {
   isOpen: boolean;
+  /** 离场动画过渡态，true 时面板 data-state="closing" */
+  _closing: boolean;
+  /** 离场动画兜底收敛定时器（非 Alpine 观察字段） */
+  _closingTimer: number | null;
+  /** 面板 sheet 状态机：'closed' | 'closing' | 'open' */
+  panelSheetState: string;
+  /** sheet/backdrop animationend 回调 */
+  onSheetAnimationEnd(): void;
   /** In-panel search query (P1-3) */
   searchQuery: string;
   /** Last search hit id (section or focus target) */
