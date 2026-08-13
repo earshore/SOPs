@@ -580,7 +580,8 @@
   font-size: var(--text-xs, 0.75rem);
   font-weight: var(--font-medium, 500);
   line-height: 1.25;
-  color: var(--color-text-primary, #f8fafc);
+  /* 提示浮层为固定深色底，文字统一浅色，避免浅色模式下继承深色文字导致看不清 */
+  color: #f8fafc;
   background: rgba(15, 23, 42, 0.92);
   border-radius: var(--rounded-md, 6px);
   box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.15));

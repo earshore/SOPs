@@ -88,18 +88,21 @@
 }
 
 /* ===== 抽屉动画：backdrop 淡入/淡出 ===== */
-.settings-panel-root[data-state='open'] .settings-panel-backdrop {
+/* 动画绑定到一次性 class（由 TS 在 open/close 时加、animationend 后移除），
+ * 不用 :data-state 属性选择器：Alpine 重应用绑定属性会短暂断开选择器匹配，
+ * 导致主题切换等 reactivity 场景下抽屉动画误重播。 */
+.settings-panel-root .settings-panel-backdrop--anim-in {
   animation: settingsBackdropIn 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.settings-panel-root[data-state='closing'] .settings-panel-backdrop {
+.settings-panel-root .settings-panel-backdrop--anim-out {
   animation: settingsBackdropOut 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* ===== 抽屉动画：sheet 从右侧滑入/回滑出 ===== */
-.settings-panel-root[data-state='open'] .settings-panel-sheet {
+.settings-panel-root .settings-panel-sheet--anim-in {
   animation: settingsSheetIn 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.settings-panel-root[data-state='closing'] .settings-panel-sheet {
+.settings-panel-root .settings-panel-sheet--anim-out {
   animation: settingsSheetOut 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -141,10 +144,10 @@
 
 /* 减少动画偏好：禁用抽屉进出场动画（面板立即显隐，仍由 :hidden 控制） */
 @media (prefers-reduced-motion: reduce) {
-  .settings-panel-root[data-state='open'] .settings-panel-backdrop,
-  .settings-panel-root[data-state='closing'] .settings-panel-backdrop,
-  .settings-panel-root[data-state='open'] .settings-panel-sheet,
-  .settings-panel-root[data-state='closing'] .settings-panel-sheet {
+  .settings-panel-root .settings-panel-backdrop--anim-in,
+  .settings-panel-root .settings-panel-backdrop--anim-out,
+  .settings-panel-root .settings-panel-sheet--anim-in,
+  .settings-panel-root .settings-panel-sheet--anim-out {
     animation: none;
   }
 }

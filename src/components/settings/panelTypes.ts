@@ -91,6 +91,12 @@ export interface SettingsPanelData {
   panelSheetState: string;
   /** sheet/backdrop animationend 回调 */
   onSheetAnimationEnd(): void;
+  /** 给 sheet/backdrop 挂一次性进出场动画 class（避免 Alpine 重应用 :data-state 导致主题切换时动画误重播） */
+  applySheetAnimationClass(kind: 'sheet-in' | 'sheet-out'): void;
+  /** 清除 sheet/backdrop 上的进出场动画 class */
+  clearSheetAnimationClass(): void;
+  /** Alpine 组件根元素引用 */
+  $root?: HTMLElement;
   /** In-panel search query (P1-3) */
   searchQuery: string;
   /** Last search hit id (section or focus target) */

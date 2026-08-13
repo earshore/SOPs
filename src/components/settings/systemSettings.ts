@@ -264,6 +264,14 @@ const settingsPanelShell: SettingsPanelPart = {
   async open(options?: SettingsOpenOptions) {
     this.isOpen = true;
     this._closing = false;
+    // 一次性入场动画 class（绑定到 class 而非 :data-state 属性，避免 Alpine
+    // 重应用属性导致主题切换等场景下动画误重播）。
+    this.applySheetAnimationClass('sheet-in');
+    // 入场动画播放完毕后立即移除 anim-in class（final state 已由
+    // animation-fill: both 定型）。后续 Alpine 重应用 :data-state 属性时
+    // sheet/backdrop 不再匹配任何动画规则，避免主题切换等 reactivity 场景
+    // 下抽屉动画误重播。
+    window.setTimeout(() => this.clearSheetAnimationClass(), SettingsSheetAnimation.OPEN_MS + 20);
     this.searchQuery = '';
     this.searchHitId = '';
     this.searchHits = [];
@@ -356,6 +364,8 @@ const settingsPanelShell: SettingsPanelPart = {
     this.unbindSettingsNavScrollSpy();
     this.activeNavTargetId = null;
     this._closing = true;
+    // 一次性离场动画 class（逻辑同 open，见 applySheetAnimationClass 注释）。
+    this.applySheetAnimationClass('sheet-out');
     // 离场动画（backdrop fade + sheet 回滑）结束后才真正卸载面板，
     // 由模板 @animationend 调用 onSheetAnimationEnd 完成。
     // prefers-reduced-motion 下动画时长为 0，animationend 会立即触发。
@@ -382,6 +392,41 @@ const settingsPanelShell: SettingsPanelPart = {
     }
     this._closing = false;
     this.isOpen = false;
+    // 面板已隐藏，一次性动画 class 随之清除。
+    this.clearSheetAnimationClass();
+  },
+
+  /**
+   * 给面板 sheet/backdrop 挂一次性动画 class（sheet-in/out / backdrop-in/out）。
+   * 与同名 class 同时存在时不重复添加；动画结束后由 onSheetAnimationEnd
+   *（closing 路径）或下次 open（面板仍处于 open 态，入场动画结束后自然停止）清理。
+   * 注：入场动画结束后可安全保留（animation-fill: both 已定型），下次
+   * applySheetAnimationClass('sheet-out') 前会先清掉 sheet-in。
+   */
+  applySheetAnimationClass(kind: 'sheet-in' | 'sheet-out'): void {
+    const root = this.$root as HTMLElement | undefined;
+    if (!root) return;
+    this.clearSheetAnimationClass();
+    const suffix = kind === 'sheet-in' ? 'in' : 'out';
+    const sheet = root.querySelector('.settings-panel-sheet') as HTMLElement | null;
+    const backdrop = root.querySelector('.settings-panel-backdrop') as HTMLElement | null;
+    sheet?.classList.add(`settings-panel-sheet--anim-${suffix}`);
+    backdrop?.classList.add(`settings-panel-backdrop--anim-${suffix}`);
+  },
+
+  clearSheetAnimationClass(): void {
+    const root = this.$root as HTMLElement | undefined;
+    if (!root) return;
+    root
+      .querySelectorAll('.settings-panel-sheet--anim-in, .settings-panel-sheet--anim-out')
+      .forEach(el => el.classList.remove('settings-panel-sheet--anim-in', 'settings-panel-sheet--anim-out'));
+    root
+      .querySelectorAll(
+        '.settings-panel-backdrop--anim-in, .settings-panel-backdrop--anim-out'
+      )
+      .forEach(el =>
+        el.classList.remove('settings-panel-backdrop--anim-in', 'settings-panel-backdrop--anim-out')
+      );
   },
 
   destroy() {
