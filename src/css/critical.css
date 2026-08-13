@@ -356,12 +356,6 @@ body {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.more-menu-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 32px;
-}
-
 .header-actions {
   display: flex;
   align-items: center;
@@ -419,10 +413,6 @@ body {
 @media (max-width: 1024px) {
   .mega-menu-grid--5 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .more-menu-layout {
-    grid-template-columns: 1fr;
   }
 }
 

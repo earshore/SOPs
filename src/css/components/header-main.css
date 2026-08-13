@@ -472,15 +472,6 @@
 }
 
 /* ========================================
-   更多菜单布局
-   ======================================== */
-.more-menu-layout {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 32px;
-}
-
-/* ========================================
    Settings Gear (migrated from header quick access)
    ======================================== */
 .settings-gear-btn {
@@ -642,10 +633,6 @@
 @media (max-width: 1024px) {
   .mega-menu-grid--5 {
     grid-template-columns: repeat(3, 1fr);
-  }
-
-  .more-menu-layout {
-    grid-template-columns: 1fr;
   }
 }
 
