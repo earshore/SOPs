@@ -41,11 +41,8 @@
     "checkJs": false,
     "types": [
       "vite/client",
-      "node"
-    ],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/types"
+      "node",
+      "vitest/globals"
     ]
   },
   "include": [

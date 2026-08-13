@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
   beginMinimalLoading,
   MINIMAL_LOADING_DELAY_MS,
@@ -27,14 +29,14 @@ describe('MinimalLoadingIndicator', () => {
     expect(document.getElementById('minimal-route-loading-indicator')).toBeNull();
   });
 
-  it('renders exactly three dots for a slow load and removes them immediately when complete', async () => {
+  it('renders exactly five dots for a slow load and removes them immediately when complete', async () => {
     const stopLoading = beginMinimalLoading('sops_overview');
 
     await vi.advanceTimersByTimeAsync(MINIMAL_LOADING_DELAY_MS);
     const indicator = document.getElementById('minimal-route-loading-indicator');
     expect(indicator).not.toBeNull();
     expect(indicator?.getAttribute('role')).toBe('status');
-    expect(indicator?.querySelectorAll('.minimal-loading-indicator__dots i')).toHaveLength(3);
+    expect(indicator?.querySelectorAll('.minimal-loading-indicator__dots i')).toHaveLength(5);
 
     stopLoading();
     expect(document.getElementById('minimal-route-loading-indicator')).toBeNull();

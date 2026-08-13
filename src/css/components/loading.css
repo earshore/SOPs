@@ -599,8 +599,7 @@
   will-change: auto;
 }
 
-
-/* 极简路由加载指示器：不遮挡内容，仅在慢加载时显示。 */
+/* 极简路由加载指示器：仅在路由切换空档的慢加载中显示。 */
 .minimal-loading-indicator {
   position: fixed;
   top: 50%;
@@ -638,6 +637,14 @@
 
 .minimal-loading-indicator__dots i:nth-child(3) {
   animation-delay: 240ms;
+}
+
+.minimal-loading-indicator__dots i:nth-child(4) {
+  animation-delay: 360ms;
+}
+
+.minimal-loading-indicator__dots i:nth-child(5) {
+  animation-delay: 480ms;
 }
 
 .minimal-loading-indicator__label {

@@ -137,7 +137,7 @@ async function flushAsyncWork(): Promise<void> {
       expect(content.querySelector('.route-loading-transition')).toBeNull();
       const indicator = document.getElementById('minimal-route-loading-indicator');
       expect(indicator).not.toBeNull();
-      expect(indicator?.querySelectorAll('.minimal-loading-indicator__dots i')).toHaveLength(3);
+      expect(indicator?.querySelectorAll('.minimal-loading-indicator__dots i')).toHaveLength(5);
 
       pending.resolve(module);
       await load;

@@ -24,7 +24,7 @@ function renderIndicator(routeId: string): HTMLElement {
 
   setSafeHtml(
     element,
-    `<span class="minimal-loading-indicator__dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="minimal-loading-indicator__label">页面加载中</span>`
+    `<span class="minimal-loading-indicator__dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span class="minimal-loading-indicator__label">页面加载中</span>`
   );
 
   return element;

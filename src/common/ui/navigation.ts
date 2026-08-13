@@ -245,13 +245,22 @@ function getTargetPanelId(fullConfig: RouteFullConfig | null): string {
   return fullConfig?.route.panelId || 'panel-home';
 }
 
-function emitPanelUnloadIfNeeded(targetPanelId: string): void {
-  if (currentActivePanel && currentActivePanel !== targetPanelId) {
-    emitAppEvent(APP_EVENTS.MODULE_UNLOAD, {
-      panelId: currentActivePanel,
-      nextPanelId: targetPanelId,
-    });
+function prepareRoutePanelHandoff(targetPanelId: string): void {
+  const visiblePanel = document.querySelector<HTMLElement>('.panel:not(.hidden)');
+  const previousPanelId = currentActivePanel ?? visiblePanel?.id ?? null;
+
+  if (!previousPanelId || previousPanelId === targetPanelId) {
+    return;
   }
+
+  emitAppEvent(APP_EVENTS.MODULE_UNLOAD, {
+    panelId: previousPanelId,
+    nextPanelId: targetPanelId,
+  });
+
+  // 在等待新视图的懒加载资源时立即退出旧面板，避免加载指示器覆盖旧页面内容。
+  document.querySelectorAll('.panel').forEach(panel => panel.classList.add('hidden'));
+  currentActivePanel = null;
 }
 
 function showRoutePanel(targetPanelId: string): HTMLElement | null {
@@ -283,22 +292,21 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   const cleanTab = String(routeId).trim();
 
   try {
-    // 按需加载视图
+    const fullConfig = getRouteFullConfig(cleanTab);
+    const targetPanelId = getTargetPanelId(fullConfig);
+
+    // 在等待懒加载视图前先退出旧面板，确保慢加载指示器只出现于路由切换空档。
+    prepareRoutePanelHandoff(targetPanelId);
     await loadRouteView(cleanTab);
 
     // 更新全局状态
     appStore.getState().setCurrentTab(cleanTab);
-    const fullConfig = getRouteFullConfig(cleanTab);
 
     // 渲染侧边栏
     const targetModuleId = fullConfig ? fullConfig.module.id : null;
     renderSidebar(targetModuleId);
 
-    // 面板显隐
-    const targetPanelId = getTargetPanelId(fullConfig);
-
-    // 主模块生命周期管理
-    emitPanelUnloadIfNeeded(targetPanelId);
+    // 新视图已就绪后再显示目标面板。
     currentActivePanel = targetPanelId;
 
     const visiblePanel = showRoutePanel(targetPanelId);
