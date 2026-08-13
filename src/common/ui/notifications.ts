@@ -102,7 +102,21 @@ export function showToast(title: string, options: ToastOptions = {}): void {
 
   container.appendChild(toast);
 
+  // 入场动画（0.4s slideRight）结束后立即移除触发 class：class 若一直保留，
+  // 主题切换等后续 DOM 更新会令 slideRight 重播，toast 会重新从右侧滑入。
+  let slideOutPlanned = false;
+  toast.addEventListener(
+    'animationend',
+    () => {
+      if (slideOutPlanned) return;
+      slideOutPlanned = true;
+      toast.classList.remove('toast-slide-in');
+    },
+    { once: true, passive: true }
+  );
+
   setTimeout(() => {
+    slideOutPlanned = true;
     toast.classList.remove('toast-slide-in');
     toast.classList.add('toast-slide-out');
     setTimeout(() => toast.remove(), 400);

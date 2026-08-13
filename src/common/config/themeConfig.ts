@@ -259,11 +259,15 @@ export class ThemeManager {
     if (this.modeSwitchTimer) {
       clearTimeout(this.modeSwitchTimer);
     }
-    // Two frames after token flip is enough; small timeout is a safe fallback.
+    // Two frames after token flip is enough in theory, but Alpine effect
+    // flushes and the resulting style recalc can land ~100ms later; 300ms
+    // keeps CSS transitions snappy while fully suppressing any animation
+    // restart triggered by the recalc (infinite logo glows, status pulse,
+    // progress pulse, etc.).
     this.modeSwitchTimer = setTimeout(() => {
       root.classList.remove('color-mode-switching');
       this.modeSwitchTimer = null;
-    }, 64);
+    }, 300);
   }
 
   /**

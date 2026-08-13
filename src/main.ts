@@ -40,6 +40,7 @@ import { appStore } from '@/stores/useAppStore';
 import { ThemeManager } from '@/common/config/themeConfig';
 
 import { container } from '@/common/di/Container';
+import { installOnceAnimationCleanup } from '@/common/utils/onceAnimationCleanup';
 import { initDeferredViews, initHomeView } from '@/common/utils/viewLoader';
 
 // ✅ 导入 Web Components
@@ -571,6 +572,10 @@ if (import.meta.env.DEV) {
 
 document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
   mainLogger.info('System: Application Booting...');
+
+  // 🎨 一次性动画自清：动画结束后移除触发 class，避免主题切换等后续 DOM
+  //    更新导致入场/提示动画重播（见 onceAnimationCleanup.ts）。
+  installOnceAnimationCleanup();
 
   let shouldWaitForHomeView = isInitialHomeRoute();
   const homeViewReady = initHomeView();

@@ -287,11 +287,14 @@ describe('ThemeManager', () => {
     expect(ThemeManager.getResolvedColorMode()).toBe('light');
   });
 
-  it('applyColorMode attaches a short transition-suppression class when theme is ready', () => {
+  it('applyColorMode attaches a transition-suppression class long enough for the Alpine effect-flush window when theme is ready', () => {
     document.documentElement.setAttribute('data-theme-ready', '1');
     ThemeManager.applyColorMode('dark');
     expect(document.documentElement.classList.contains('color-mode-switching')).toBe(true);
-    vi.advanceTimersByTime(64);
+    // Still suppressed at 100ms (Alpine effect flushes ~100ms after the flip).
+    vi.advanceTimersByTime(100);
+    expect(document.documentElement.classList.contains('color-mode-switching')).toBe(true);
+    vi.advanceTimersByTime(300);
     expect(document.documentElement.classList.contains('color-mode-switching')).toBe(false);
   });
 
