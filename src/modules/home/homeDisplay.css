@@ -287,12 +287,12 @@
   align-items: center;
   gap: 13px;
   padding: 16px;
-  border: 1px solid color-mix(in srgb, var(--color-primary, #3b82f6) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary, #3b82f6) 15%, transparent);
   border-radius: 18px;
   background: linear-gradient(
     120deg,
     var(--color-primary-dark, #1d4ed8),
-    var(--color-primary, #2563eb) 58%,
+    var(--color-primary, #2563eb) 66%,
     var(--color-cyan-500, #06b6d4)
   );
   box-shadow: 0 18px 34px -24px color-mix(in srgb, var(--color-primary, #3b82f6) 78%, transparent);
