@@ -603,15 +603,15 @@
 /* 极简路由加载指示器：不遮挡内容，仅在慢加载时显示。 */
 .minimal-loading-indicator {
   position: fixed;
-  top: 16px;
+  top: 50%;
   left: 50%;
   z-index: 90;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  transform: translateX(-50%);
+  gap: clamp(7px, 0.7vw, 10px);
+  transform: translate(-50%, -50%);
   color: var(--color-text-secondary, #64748b);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
   pointer-events: none;
 }
@@ -619,16 +619,16 @@
 .minimal-loading-indicator__dots {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: clamp(5px, 0.45vw, 7px);
 }
 
 .minimal-loading-indicator__dots i {
   display: block;
-  width: 4px;
-  height: 4px;
+  width: clamp(7px, 0.7vw, 10px);
+  height: clamp(7px, 0.7vw, 10px);
   border-radius: 999px;
   background: currentColor;
-  opacity: 0.35;
+  opacity: 0.42;
   animation: minimal-loading-dot 900ms ease-in-out infinite;
 }
 
