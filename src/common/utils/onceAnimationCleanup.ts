@@ -33,7 +33,7 @@ export function installOnceAnimationCleanup(): void {
 
   document.addEventListener(
     'animationstart',
-    (e) => {
+    e => {
       const target = e.target as HTMLElement;
       if (!target || !target.classList) return;
 

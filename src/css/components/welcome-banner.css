@@ -549,7 +549,11 @@
   justify-content: center;
   border-radius: var(--rounded-full, 9999px);
   color: #ffffff;
-  background: color-mix(in srgb, var(--wb-theme-accent-strong, var(--color-indigo-600, #4338ca)) 92%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--wb-theme-accent-strong, var(--color-indigo-600, #4338ca)) 92%,
+    transparent
+  );
   box-shadow: 0 4px 14px -6px rgba(67, 56, 202, 0.55);
   text-decoration: none;
   transition:

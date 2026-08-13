@@ -75,6 +75,60 @@ function registerSettingsWatchers(panel: SettingsPanelData & AlpineWatchContext)
   });
 }
 
+function createConnectionSettingsState(): Pick<SettingsPanelData, 'llm' | 'proxy'> {
+  return {
+    llm: {
+      provider: DEFAULT_LLM_PROVIDER_ID,
+      endpoint: DEFAULT_NEW_API_ENDPOINT,
+      apiKey: '',
+      model: '',
+      models: [],
+      serviceTier: undefined,
+      reasoningPrefs: { ...DEFAULT_REASONING_PREFS },
+      // OpenAI family default: /responses (runtime falls back to chat/completions).
+      apiPath: apiPathIdForFamily('openai'),
+      showKey: false,
+      isFetching: false,
+      isTesting: false,
+    },
+    proxy: {
+      type: DEFAULT_SCRAPER_PROXY_TYPE,
+      customUrl: '',
+      showKey: false,
+      savedKeyMap: {},
+      isTesting: false,
+      testError: '',
+      testMessage: '',
+      status: '',
+    },
+  };
+}
+
+function createRuntimeSettingsState(): Pick<
+  SettingsPanelData,
+  'toolStrategy' | 'runtimeStrategy' | 'developerDiagnostics' | 'localData'
+> {
+  return {
+    toolStrategy: {
+      targetModels: createEmptyToolTargetModels(),
+      isSaving: false,
+    },
+    runtimeStrategy: {
+      settings: getRuntimeStrategySettings(),
+      isSaving: false,
+    },
+    developerDiagnostics: getDeveloperDiagnosticSettings(),
+    localData: {
+      usage: null,
+      isBusy: false,
+      clearingBucketId: null,
+      cleanupItemsExpanded: false,
+      // 默认全选（勾选 = 纳入导出）；用户按需取消勾选即可只导出所需分类。
+      selectedExportBuckets: [...LOCAL_DATA_BUCKET_IDS],
+    },
+  };
+}
+
 function createSettingsState(): Pick<
   SettingsPanelData,
   | 'isOpen'
@@ -147,54 +201,8 @@ function createSettingsState(): Pick<
     llmApiPathMenuOpen: false,
     schedulePreferenceMenuOpen: false,
 
-    // LLM Config State
-    llm: {
-      provider: DEFAULT_LLM_PROVIDER_ID,
-      endpoint: DEFAULT_NEW_API_ENDPOINT,
-      apiKey: '',
-      model: '',
-      models: [],
-      serviceTier: undefined,
-      reasoningPrefs: { ...DEFAULT_REASONING_PREFS },
-      // OpenAI family default: /responses (runtime falls back to chat/completions).
-      apiPath: apiPathIdForFamily('openai'),
-      showKey: false,
-      isFetching: false,
-      isTesting: false,
-    },
-
-    // Proxy Config State
-    proxy: {
-      type: DEFAULT_SCRAPER_PROXY_TYPE,
-      customUrl: '',
-      showKey: false,
-      savedKeyMap: {},
-      isTesting: false,
-      testError: '',
-      testMessage: '',
-      status: '',
-    },
-
-    toolStrategy: {
-      targetModels: createEmptyToolTargetModels(),
-      isSaving: false,
-    },
-
-    runtimeStrategy: {
-      settings: getRuntimeStrategySettings(),
-      isSaving: false,
-    },
-
-    developerDiagnostics: getDeveloperDiagnosticSettings(),
-
-    localData: {
-      usage: null,
-      isBusy: false,
-      clearingBucketId: null,
-      cleanupItemsExpanded: false,
-      // 默认全选（勾选 = 纳入导出）；用户按需取消勾选即可只导出所需分类。
-      selectedExportBuckets: [...LOCAL_DATA_BUCKET_IDS],
-    },
+    ...createConnectionSettingsState(),
+    ...createRuntimeSettingsState(),
   };
 }
 
@@ -419,11 +427,11 @@ const settingsPanelShell: SettingsPanelPart = {
     if (!root) return;
     root
       .querySelectorAll('.settings-panel-sheet--anim-in, .settings-panel-sheet--anim-out')
-      .forEach(el => el.classList.remove('settings-panel-sheet--anim-in', 'settings-panel-sheet--anim-out'));
+      .forEach(el =>
+        el.classList.remove('settings-panel-sheet--anim-in', 'settings-panel-sheet--anim-out')
+      );
     root
-      .querySelectorAll(
-        '.settings-panel-backdrop--anim-in, .settings-panel-backdrop--anim-out'
-      )
+      .querySelectorAll('.settings-panel-backdrop--anim-in, .settings-panel-backdrop--anim-out')
       .forEach(el =>
         el.classList.remove('settings-panel-backdrop--anim-in', 'settings-panel-backdrop--anim-out')
       );

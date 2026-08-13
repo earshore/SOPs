@@ -1,15 +1,11 @@
 import type { Config } from 'lighthouse';
 
-const CATEGORY_IDS = ['performance', 'accessibility', 'best-practices', 'seo'] as const;
-const AUDIT_IDS = [
-  'first-contentful-paint',
-  'largest-contentful-paint',
-  'cumulative-layout-shift',
-  'total-blocking-time',
-] as const;
-
-type CategoryId = (typeof CATEGORY_IDS)[number];
-type AuditId = (typeof AUDIT_IDS)[number];
+type CategoryId = 'performance' | 'accessibility' | 'best-practices' | 'seo';
+type AuditId =
+  | 'first-contentful-paint'
+  | 'largest-contentful-paint'
+  | 'cumulative-layout-shift'
+  | 'total-blocking-time';
 
 interface LighthouseResultLike {
   categories?: Partial<Record<CategoryId, { score?: number | null }>>;
@@ -145,11 +141,21 @@ export function median(values: readonly number[]): number {
   const sorted = [...values].sort((left, right) => left - right);
   const middle = Math.floor(sorted.length / 2);
 
-  if (sorted.length % 2 === 1) {
-    return sorted[middle]!;
+  const middleValue = sorted[middle];
+  if (middleValue === undefined) {
+    throw new Error('Cannot calculate the median of an invalid sample');
   }
 
-  return (sorted[middle - 1]! + sorted[middle]!) / 2;
+  if (sorted.length % 2 === 1) {
+    return middleValue;
+  }
+
+  const lowerMiddleValue = sorted[middle - 1];
+  if (lowerMiddleValue === undefined) {
+    throw new Error('Cannot calculate the median of an invalid sample');
+  }
+
+  return (lowerMiddleValue + middleValue) / 2;
 }
 
 export function extractMetrics(result: LighthouseResultLike): LighthouseMetrics {

@@ -16,7 +16,6 @@ import { ValidationError } from '@/common/errors/AppError';
 import { beginMinimalLoading } from '@/common/components/MinimalLoadingIndicator';
 import type { DIContainer } from '../di/Container';
 
-
 // ==================== 类型定义 ====================
 
 /**
@@ -340,7 +339,6 @@ export class ModuleLoader {
   private renderRetryLoading(container: HTMLElement): void {
     const wrapper = document.createElement('div');
     wrapper.className = 'p-10 text-center';
-
 
     const message = document.createElement('span');
     message.className = 'ml-2 text-slate-500';

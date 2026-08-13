@@ -199,7 +199,6 @@ function isClosableModalElement(element: Element | null): element is ClosableMod
   );
 }
 
-
 async function loadMainStyles(): Promise<void> {
   try {
     await import('./css/main.css');
