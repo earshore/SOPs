@@ -318,19 +318,11 @@
       aria-busy="false"
       aria-hidden="true"
     >
-      <div class="loading-card">
-        <!-- Spinner -->
-        <div class="loading-spinner">
-          <div class="loading-spinner-track"></div>
-          <div class="loading-spinner-fill"></div>
-          <div class="loading-spinner-dot"></div>
-        </div>
-        <div class="loading-text">
-          <p data-loading-message class="loading-text-main">加载中</p>
-          <div class="loading-text-sub">
-            <span>请稍候</span>
-            <span class="loading-dots"></span>
-          </div>
+      <div class="loading-transition-container">
+        <!-- Unified Transition Loader -->
+        <div id="transition-loader-target"></div>
+        <div class="loading-text-overlay">
+          <p data-loading-message class="loading-text-main">系统初始化中</p>
         </div>
       </div>
     </div>

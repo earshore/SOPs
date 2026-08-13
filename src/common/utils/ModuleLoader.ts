@@ -13,7 +13,7 @@ import {
   renderTimeout,
 } from '../../components/ErrorBoundary';
 import { ValidationError } from '@/common/errors/AppError';
-import { createSafeFragment } from '@/common/utils/security';
+import { TransitionLoader } from '@/common/components/TransitionLoader';
 import type { DIContainer } from '../di/Container';
 import {
   applyPageEnterAnimation,
@@ -240,38 +240,15 @@ export class ModuleLoader {
    */
   private renderLoading(container: HTMLElement, routeId: string): void {
     const wrapper = document.createElement('div');
-    wrapper.className = 'route-loading-skeleton';
+    wrapper.className = 'route-loading-transition';
     wrapper.setAttribute('role', 'status');
     wrapper.setAttribute('aria-live', 'polite');
     wrapper.setAttribute('aria-label', '页面加载中');
     wrapper.dataset.routeId = routeId;
 
-    wrapper.appendChild(
-      createSafeFragment(`
-        <div class="route-loading-skeleton__card">
-          <div class="route-loading-skeleton__header">
-            <div class="loading-skeleton route-loading-skeleton__icon" aria-hidden="true"></div>
-            <div class="route-loading-skeleton__heading">
-              <div class="loading-skeleton route-loading-skeleton__line route-loading-skeleton__line--title"></div>
-              <div class="loading-skeleton route-loading-skeleton__line route-loading-skeleton__line--subtitle"></div>
-            </div>
-          </div>
-          <div class="route-loading-skeleton__grid">
-            <div class="loading-skeleton route-loading-skeleton__block"></div>
-            <div class="loading-skeleton route-loading-skeleton__block"></div>
-            <div class="loading-skeleton route-loading-skeleton__block"></div>
-            <div class="loading-skeleton route-loading-skeleton__block"></div>
-          </div>
-          <div class="route-loading-skeleton__table">
-            <div class="loading-skeleton route-loading-skeleton__line route-loading-skeleton__line--wide"></div>
-            <div class="loading-skeleton route-loading-skeleton__line"></div>
-            <div class="loading-skeleton route-loading-skeleton__line"></div>
-            <div class="loading-skeleton route-loading-skeleton__line"></div>
-          </div>
-          <span class="sr-only">页面加载中</span>
-        </div>
-      `)
-    );
+    // 使用全新的 TransitionLoader 替换旧的骨架屏
+    const loader = TransitionLoader.render();
+    wrapper.appendChild(loader);
 
     container.classList.add(MODULE_LOADING_HOST_CLASS);
     container.replaceChildren(wrapper);
