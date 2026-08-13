@@ -8,6 +8,7 @@ const aiAnalysis = read('src/modules/app_center/views/master_analysis/ai_analysi
 const promptlab = read('src/modules/app_center/views/master_analysis/promptlab/template.html');
 const scraper = read('src/modules/app_center/views/master_analysis/scraper/template.html');
 const headerCss = read('src/css/components/header-main.css');
+const wbCss = read('src/css/components/welcome-banner.css');
 
 function firstHeadingLevelAfterH1(html: string): number | undefined {
   const afterH1 = html.slice(html.indexOf('</h1>') + '</h1>'.length);
@@ -67,12 +68,28 @@ describe('release accessibility contract', () => {
     expect(activeRule).not.toContain('--color-primary-light');
     expect(activeRule).not.toMatch(/color:\s*var\(--color-primary-darker/);
 
-    expect(headerCss).toContain('border-left-color: color-mix(in srgb, #fff 8%, transparent);');
-    expect(headerCss).toContain('.dark .quick-access-item:hover');
-    expect(headerCss).toContain('var(--color-green-400, #4ade80) 18%');
-    // 快速访问版本卡已迁移至系统设置底部 footer，Header CSS 中不再保留
+    // 快速访问整体已迁移：版本卡去系统设置底部 footer，设置入口为 header 齿轮按钮，
+    // 插件下载入口去数据采集页 welcome banner，Header CSS 中不再保留这些类
+    expect(headerCss).toContain('.settings-gear-btn');
     expect(headerCss).not.toContain('version-card');
     expect(headerCss).not.toContain('tip-card');
+    expect(headerCss).not.toContain('quick-access');
+    expect(headerCss).not.toContain('more-menu-sidebar');
+  });
+
+  it('offers the plugin download as a minimal icon in the Scraper welcome banner', () => {
+    // 快速访问“采集插件下载”已迁移至数据采集页 welcome banner 右侧：
+    // 极简下载图标、hover 显示“下载采集插件”、点击跳转 GitHub Releases
+    const downloadIcon = scraper.match(/<a[^>]*class="wb-plugin-download"[^>]*>[\s\S]*?<\/a>/)?.[0];
+    expect(downloadIcon).toBeTruthy();
+    expect(downloadIcon).toContain('href="https://github.com/earshore/Amazon-Scraper/releases"');
+    expect(downloadIcon).toContain('target="_blank"');
+    expect(downloadIcon).toContain('rel="noopener noreferrer"');
+    expect(downloadIcon).toContain('aria-label="下载采集插件（Amazon Product Insight Chrome 扩展）"');
+    expect(downloadIcon).toContain('title="下载采集插件"');
+    expect(downloadIcon).toContain('fa-download');
+    expect(wbCss).toContain('.wb-plugin-download');
+    expect(wbCss).toContain('content: attr(title);');
   });
 
   it('keeps the PromptLab missing-report notice one level below its card heading', () => {

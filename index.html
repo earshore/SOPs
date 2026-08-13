@@ -230,43 +230,6 @@
                     </div>
                   </div>
 
-                  <!-- Quick Access Sidebar -->
-                  <div class="more-menu-sidebar">
-                    <div>
-                      <h3 class="quick-access-title">
-                        <i class="fas fa-bolt"></i>
-                        快速访问
-                      </h3>
-                      <ul class="quick-access-list">
-                        <li>
-                          <button
-                            type="button"
-                            data-action="openSettings"
-                            class="quick-access-item"
-                          >
-                            <div class="quick-access-icon">
-                              <i class="fas fa-cog"></i>
-                            </div>
-                            <span>全局设置</span>
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            type="button"
-                            data-action="downloadAmazonInsightPlugin"
-                            class="quick-access-item"
-                            title="前往 GitHub 下载 Amazon Product Insight 插件 Latest 版本"
-                          >
-                            <div class="quick-access-icon">
-                              <i class="fab fa-chrome" aria-hidden="true"></i>
-                            </div>
-                            <span>采集插件下载（Chrome）</span>
-                          </button>
-                        </li>
-                      </ul>
-                    </div>
-
-                  </div>
                 </div>
               </div>
             </div>
@@ -275,6 +238,16 @@
 
         <!-- ===== Right Actions ===== -->
         <div class="header-actions">
+          <!-- Open System Settings (migrated from header quick access) -->
+          <button
+            type="button"
+            class="settings-gear-btn"
+            aria-label="系统设置"
+            title="系统设置"
+            data-action="openSettings"
+          >
+            <i class="fas fa-gear" aria-hidden="true"></i>
+          </button>
           <!-- Model Status -->
           <div id="model-status" class="model-status">
             <span class="status-dot status-pending pulse-dot"></span>

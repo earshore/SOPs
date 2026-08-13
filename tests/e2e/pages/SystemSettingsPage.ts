@@ -18,8 +18,11 @@ export class SystemSettingsPage {
         | null;
       return Array.isArray(root?._x_dataStack);
     });
-    await this.page.locator('#nav-more').click();
-    await this.page.getByRole('button', { name: '全局设置' }).click();
+    // 设置入口已迁移为 header 右端的齿轮按钮（aria-label="系统设置"）
+    await this.page
+      .getByRole('button', { name: '系统设置' })
+      .first()
+      .click();
     await expect(this.page.getByRole('heading', { name: '系统设置' })).toBeVisible();
   }
 

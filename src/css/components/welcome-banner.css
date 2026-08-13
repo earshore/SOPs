@@ -523,6 +523,65 @@
   display: flex;
   align-items: flex-start;
   gap: var(--spacing-lg, 1.5rem);
+  flex: 1;
+}
+
+/* ===== 极简下载采集插件图标（原 header 快速访问按钮迁移） ===== */
+.wb-plugin-download {
+  position: relative;
+  flex-shrink: 0;
+  align-self: center;
+  margin-left: auto;
+  width: var(--wb-download-icon-size, 2.125rem);
+  height: var(--wb-download-icon-size, 2.125rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rounded-full, 9999px);
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+.wb-plugin-download:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
+}
+.wb-plugin-download:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+.wb-plugin-download::after {
+  content: attr(title);
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  white-space: nowrap;
+  padding: 0.375rem 0.625rem;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: var(--font-medium, 500);
+  line-height: 1.25;
+  color: var(--color-text-primary, #f8fafc);
+  background: rgba(15, 23, 42, 0.92);
+  border-radius: var(--rounded-md, 6px);
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.15));
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+  z-index: 20;
+}
+.wb-plugin-download:hover::after,
+.wb-plugin-download:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ===== 图标徽章样式 ===== */

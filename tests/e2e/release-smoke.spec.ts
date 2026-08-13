@@ -237,8 +237,11 @@ async function openGlobalSettings(page: Page): Promise<void> {
   await expectNoRouteErrorText(page);
   await waitForSettingsPanel(page);
 
-  await page.locator('#nav-more').click();
-  await page.getByRole('button', { name: '全局设置' }).click();
+  // 设置入口已迁移为 header 右端的齿轮按钮（aria-label="系统设置"）
+  await page
+    .getByRole('button', { name: '系统设置' })
+    .first()
+    .click();
 
   await expect(page.getByRole('heading', { name: '系统设置' })).toBeVisible();
   await expect(
