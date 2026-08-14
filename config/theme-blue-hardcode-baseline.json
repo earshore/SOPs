@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-14T12:41:36.996Z",
+  "updatedAt": "2026-08-14T12:58:06.210Z",
   "shell": {
     "total": 13,
     "filesScanned": 26,
@@ -11,7 +11,7 @@
   },
   "modules": {
     "filesScanned": 390,
-    "filesWithHits": 31,
+    "filesWithHits": 24,
     "families": {
       "sops": {
         "total": 65,
@@ -58,18 +58,10 @@
         }
       },
       "more": {
-        "total": 40,
+        "total": 0,
         "filesScanned": 30,
-        "filesWithHits": 7,
-        "files": {
-          "src/modules/more/views/explore/workflows/template.html": 17,
-          "src/modules/more/views/explore/agents/template.html": 14,
-          "src/modules/more/views/business_scenarios/review_monitor/template.html": 3,
-          "src/modules/more/views/business_scenarios/amazon_daily_report/template.html": 2,
-          "src/modules/more/views/overview/template.html": 2,
-          "src/modules/more/views/business_scenarios/ad_acos_diagnosis/template.html": 1,
-          "src/modules/more/views/explore/skills/template.html": 1
-        }
+        "filesWithHits": 0,
+        "files": {}
       },
       "other": {
         "total": 0,
