@@ -146,6 +146,6 @@ contentDiv.innerHTML = this.renderOverview();
 
 ## 🔖 参考资源
 
-- [XSS 扫描报告](../../docs/XSS_SCAN_REPORT.md)
+- [XSS 扫描报告](/docs/XSS_SCAN_REPORT.md)
 - ESLint 报告：构建输出（历史记录）
 - [总体计划](./DEBT_ELIMINATION_PLAN.md)

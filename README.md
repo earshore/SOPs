@@ -25,17 +25,24 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-| 通道                         | 版本             | 说明                                                                 |
-| ---------------------------- | ---------------- | -------------------------------------------------------------------- |
-| **GitHub Latest（稳定 GA）** | `v3.1.0`         | 生产推荐版本；保持 Latest                                           |
-| **当前 Pre-release 候选**    | `v3.1.1-rc.1`    | 首页亚马逊运营工作台 Launchpad 候选；必须标记为 Pre-release          |
-| package.json                 | `3.1.1-rc.1`     | 与候选 tag / Release 一致                                            |
-| **回滚基线（GA）**           | `v3.1.0`         | RC 验证失败时回退至当前稳定版本                                      |
+| 通道                         | 版本          | 说明                                                                          |
+| ---------------------------- | ------------- | ----------------------------------------------------------------------------- |
+| **GitHub Latest（稳定 GA）** | `v3.1.0`      | 生产推荐版本；保持 Latest                                                     |
+| **当前 Pre-release 候选**    | `v3.1.1-rc.2` | 加载视觉系统 + 深色模式收敛 + AI 分析提示词常量化候选；必须标记为 Pre-release |
+| package.json                 | `3.1.1-rc.2`  | 与候选 tag / Release 一致                                                     |
+| **回滚基线（GA）**           | `v3.1.0`      | RC 验证失败时回退至当前稳定版本                                               |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
 - **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.1.0` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.0`（GA），当前候选为 `v3.1.1-rc.1`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.0`（GA），当前候选为 `v3.1.1-rc.2`。
+
+`v3.1.1-rc.2`（2026-08-14，Pre-release）聚焦**加载视觉收敛、深色模式修复与 AI 分析提示词集中化**：
+
+- **统一加载视觉**：页面级转场动画整体移除（性能治理），新增路由加载点状指示器 `MinimalLoadingIndicator`；工作台 / PPC 等页面进入改为静态直达。
+- **深色模式修复**：三处遗留深色缺口修复（modal / badge / form 暗色覆盖）。
+- **AI 分析提示词常量化**：主分析 system prompt 提取为 `MASTER_ANALYSIS_SYSTEM_PROMPT` 常量（`analysisPrompts.ts`）；Map-Reduce 管线全部 15 处内联模板提取为 `pipelinePrompts.ts` 常量与工厂函数，消除重复并统一插值上下文；`ci:quality` 与 smoke 30/30 回归通过。
+- GitHub Latest **仍指向** `v3.1.0`；RC 回滚基线为 `v3.1.0`；生产目标 `https://sops.hongecb.store`。
 
 `v3.1.1-rc.1`（2026-08-13，Pre-release）聚焦**首页亚马逊运营工作台 Launchpad**：
 

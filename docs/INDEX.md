@@ -2,33 +2,34 @@
 
 本文档只维护当前可作为开发依据的文档入口。阶段性计划、一次性审计和历史执行记录请从归档入口查阅，**不应直接作为当前任务清单**。
 
-**最后更新**: 2026-07-26  
+**最后更新**: 2026-08-14  
 **维护者**: sops 开发团队
 
 ---
 
 ## 30 秒决策树（先读这个）
 
-| 你要做的事 | 先读 |
-| --- | --- |
-| 判断产品该不该做 / 体验底线 | **[PRODUCT_PRINCIPLES.md](./PRODUCT_PRINCIPLES.md)** |
-| 改用户可见文案 / Toast / 空状态措辞 | **[CONTENT_DESIGN.md](./CONTENT_DESIGN.md)** |
-| 改颜色、Appearance、暗色、归属色 | **[THEME_SYSTEM_GUIDELINES.md](./THEME_SYSTEM_GUIDELINES.md)** |
-| 改页面布局、Banner、视觉风格 | **[VISUAL_DESIGN_GUIDELINES.md](./VISUAL_DESIGN_GUIDELINES.md)** |
-| 改按钮/表单/Toast/空状态/卡片 | **[COMPONENT_GUIDELINES.md](./COMPONENT_GUIDELINES.md)** |
-| 改弹窗/确认/抽屉 | **[MODAL_DEVELOPMENT_GUIDELINES.md](./MODAL_DEVELOPMENT_GUIDELINES.md)** |
-| 改浮层 / z-index / 遮挡问题 | **[Z_INDEX_LAYERING_GUIDELINES.md](./Z_INDEX_LAYERING_GUIDELINES.md)** |
-| 键盘焦点 / a11y 底线 | **[ACCESSIBILITY.md](./ACCESSIBILITY.md)** |
-| 改 CSS 变量 / token / Tailwind 色 | **[guides/css/CSS-ARCHITECTURE-README.md](./guides/css/CSS-ARCHITECTURE-README.md)** + 主题宪法 |
-| 写/改测试、问测什么 | **[TESTING_STRATEGY.md](./TESTING_STRATEGY.md)** |
-| 发版 / tag / RC / GA | **[RELEASE_POLICY.md](./RELEASE_POLICY.md)** |
-| 部署 Cloudflare / CSP | **[DEPLOYMENT.md](./DEPLOYMENT.md)** |
-| 线上故障 / 回滚 / 白屏 / LLM 挂 | **[OPS_RUNBOOK.md](./OPS_RUNBOOK.md)** |
-| 安全报告 / 密钥边界 | **[SECURITY.md](../SECURITY.md)** |
-| 威胁模型 / 安全验收清单 | **[SECURITY_PLAYBOOK.md](./SECURITY_PLAYBOOK.md)** |
-| 查当前技术债 | **[TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)**（活） |
-| 做新功能设计 | `docs/superpowers/specs/` + 触及的上述宪法 |
-| 历史审计/旧计划 | `docs/archive/`（**只读**） |
+| 你要做的事                          | 先读                                                                                                                                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 判断产品该不该做 / 体验底线         | **[PRODUCT_PRINCIPLES.md](./PRODUCT_PRINCIPLES.md)**                                                                                                                                                          |
+| 改用户可见文案 / Toast / 空状态措辞 | **[CONTENT_DESIGN.md](./CONTENT_DESIGN.md)**                                                                                                                                                                  |
+| 改颜色、Appearance、暗色、归属色    | **[THEME_SYSTEM_GUIDELINES.md](./THEME_SYSTEM_GUIDELINES.md)**                                                                                                                                                |
+| 改页面布局、Banner、视觉风格        | **[VISUAL_DESIGN_GUIDELINES.md](./VISUAL_DESIGN_GUIDELINES.md)**                                                                                                                                              |
+| 改页面加载视觉 / 动画策略           | **[VISUAL_DESIGN_GUIDELINES.md](./VISUAL_DESIGN_GUIDELINES.md)** + `MinimalLoadingIndicator`（页面转场动画已整体移除，历史规范见 [PAGE_ENTRY_ANIMATION_GUIDELINES.md](./PAGE_ENTRY_ANIMATION_GUIDELINES.md)） |
+| 改按钮/表单/Toast/空状态/卡片       | **[COMPONENT_GUIDELINES.md](./COMPONENT_GUIDELINES.md)**                                                                                                                                                      |
+| 改弹窗/确认/抽屉                    | **[MODAL_DEVELOPMENT_GUIDELINES.md](./MODAL_DEVELOPMENT_GUIDELINES.md)**                                                                                                                                      |
+| 改浮层 / z-index / 遮挡问题         | **[Z_INDEX_LAYERING_GUIDELINES.md](./Z_INDEX_LAYERING_GUIDELINES.md)**                                                                                                                                        |
+| 键盘焦点 / a11y 底线                | **[ACCESSIBILITY.md](./ACCESSIBILITY.md)**                                                                                                                                                                    |
+| 改 CSS 变量 / token / Tailwind 色   | **[guides/css/CSS-ARCHITECTURE-README.md](./guides/css/CSS-ARCHITECTURE-README.md)** + 主题宪法                                                                                                               |
+| 写/改测试、问测什么                 | **[TESTING_STRATEGY.md](./TESTING_STRATEGY.md)**                                                                                                                                                              |
+| 发版 / tag / RC / GA                | **[RELEASE_POLICY.md](./RELEASE_POLICY.md)**                                                                                                                                                                  |
+| 部署 Cloudflare / CSP               | **[DEPLOYMENT.md](./DEPLOYMENT.md)**                                                                                                                                                                          |
+| 线上故障 / 回滚 / 白屏 / LLM 挂     | **[OPS_RUNBOOK.md](./OPS_RUNBOOK.md)**                                                                                                                                                                        |
+| 安全报告 / 密钥边界                 | **[SECURITY.md](../SECURITY.md)**                                                                                                                                                                             |
+| 威胁模型 / 安全验收清单             | **[SECURITY_PLAYBOOK.md](./SECURITY_PLAYBOOK.md)**                                                                                                                                                            |
+| 查当前技术债                        | **[TECH_DEBT_BOARD.md](./TECH_DEBT_BOARD.md)**（活）                                                                                                                                                          |
+| 做新功能设计                        | `docs/superpowers/specs/` + 触及的上述宪法                                                                                                                                                                    |
+| 历史审计/旧计划                     | `docs/archive/`（**只读**）                                                                                                                                                                                   |
 
 **冲突裁决顺序（高 → 低）：**  
 PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTENT / A11Y / TESTING / SECURITY_PLAYBOOK / OPS / RELEASE）→ 功能 Spec → 实现代码注释。
@@ -46,7 +47,7 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTE
 - [视觉设计规范指南](./VISUAL_DESIGN_GUIDELINES.md) — 页面与组件视觉执行细则。
 - [组件开发规范](./COMPONENT_GUIDELINES.md) — 按钮/表单/反馈/卡片/数据表/清单。
 - [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md)
-- [页面访问动画规范](./PAGE_ENTRY_ANIMATION_GUIDELINES.md)
+- [页面访问动画规范](./PAGE_ENTRY_ANIMATION_GUIDELINES.md) — **已过期，仅供历史参考**（页面转场动画整体移除，加载视觉以 `MinimalLoadingIndicator` 为准）
 
 ### 工程与共享能力
 
@@ -137,7 +138,7 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTE
 - [图表规范](./CHART_GUIDELINES.md)
 - [组件开发规范](./COMPONENT_GUIDELINES.md)
 - [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md)
-- [页面访问动画规范](./PAGE_ENTRY_ANIMATION_GUIDELINES.md)
+- [页面访问动画规范](./PAGE_ENTRY_ANIMATION_GUIDELINES.md) — **已过期，仅供历史参考**（页面转场动画整体移除，加载视觉以 `MinimalLoadingIndicator` 为准）
 
 ---
 
@@ -161,9 +162,9 @@ PRODUCT_PRINCIPLES → 领域宪法（THEME / VISUAL / COMPONENT / MODAL / CONTE
 
 ## 规范文档状态标签（约定）
 
-| 标签 | 含义 |
-| --- | --- |
-| **active · SSOT** | 必须遵守；冲突时优先 |
+| 标签              | 含义                   |
+| ----------------- | ---------------------- |
+| **active · SSOT** | 必须遵守；冲突时优先   |
 | **active · plan** | 执行计划，完成后可归档 |
-| **historical** | 只读；不指导新开发 |
-| **proposal** | 讨论中，未强制 |
+| **historical**    | 只读；不指导新开发     |
+| **proposal**      | 讨论中，未强制         |

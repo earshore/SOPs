@@ -1,7 +1,7 @@
 # 架构债务修复进度报告
 
 > **HISTORICAL as of 2026-07-11 — do not treat as current debt SSOT.**  
-> Current planning / debt / design authority: [`docs/superpowers/`](../../docs/superpowers/), [`docs/TECH_DEBT_AUDIT.md`](../../docs/TECH_DEBT_AUDIT.md), [`docs/INDEX.md`](../../docs/INDEX.md).  
+> Current planning / debt / design authority: [`docs/superpowers/`](../../../../docs/superpowers/), [`docs/TECH_DEBT_AUDIT.md`](../../../../docs/TECH_DEBT_AUDIT.md), [`docs/INDEX.md`](../../../../docs/INDEX.md).  
 > See also [`.kiro/README.md`](../README.md).
 
 **项目**: 架构债务系统性消除

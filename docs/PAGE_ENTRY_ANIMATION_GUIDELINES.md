@@ -1,12 +1,18 @@
 # 页面访问动画规范
 
-**适用范围**: 所有通过路由访问的页面、主模块子页面和静态模板页面  
-**更新时间**: 2026-06-12  
-**参考实现**: 工作台 / PPC Tools / PPC 搜索词分析器页面进入动画
+> ⚠️ **本规范已过时（Deprecated / 只读历史）**
+>
+> **v3.1.1-rc.2（2026-08-14）起不再适用**：页面级进入/切换动画已于 `f1374ed5`（2026-08-13）整体移除（性能治理），取而代之的是 `30c29579` 引入的路由加载点状指示器 [`MinimalLoadingIndicator`](../src/common/components/MinimalLoadingIndicator.ts)。新的加载与动画策略以「加载视觉 + 静态渲染」为准，见该组件注释与 [VISUAL_DESIGN_GUIDELINES.md](./VISUAL_DESIGN_GUIDELINES.md)；`view-fade-in` 类名仍保留于 `keyframes.css` 仅供局部内容/旧页面兼容，**不得再作为页面进入动画标准**。
+>
+> 本文件仅作历史参考，若其中条目与现行代码或宪法规范冲突，一律以代码与宪法规范为准。
+
+**适用范围**: 所有通过路由访问的页面、主模块子页面和静态模板页面（**已失效**）  
+**更新时间**: 2026-06-12（最后一次实质性更新）；**过时标注**: 2026-08-14  
+**参考实现**: 工作台 / PPC Tools / PPC 搜索词分析器页面进入动画（历史）
 
 ---
 
-## 1. 动画审计结论
+## 1. 动画审计结论（历史）
 
 当前项目存在三类页面进入路径：
 
@@ -70,7 +76,7 @@ createModuleLoader({
   containerId: 'example_content_area',
   shellId: 'panel-example',
   moduleMap: MODULE_MAP,
-  contentEnterAnimation: true
+  contentEnterAnimation: true,
 });
 ```
 
@@ -87,14 +93,14 @@ createModuleLoader({
 
 所有页面访问路径必须落入以下任一机制：
 
-| 页面类型 | 标准接入点 |
-| --- | --- |
-| 首页 | `navigation.ts` 显示 `panel-home` 后触发 |
-| SOPs 子页面 | `sops.ts` 的 `ModuleLoader.contentEnterAnimation` |
-| 工作台子页面 | `app_center.ts` 的 `ModuleLoader.contentEnterAnimation` |
-| Amazon 智库子页面 | `amz_hub.ts` 的 `ModuleLoader.contentEnterAnimation` |
-| 更多子页面 | `more.ts` 的 `ModuleLoader.contentEnterAnimation` |
-| 独立静态模板 | `loadTemplate()` 默认包装 |
+| 页面类型                | 标准接入点                                                                                   |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| 首页                    | `navigation.ts` 显示 `panel-home` 后触发                                                     |
+| SOPs 子页面             | `sops.ts` 的 `ModuleLoader.contentEnterAnimation`                                            |
+| 工作台子页面            | `app_center.ts` 的 `ModuleLoader.contentEnterAnimation`                                      |
+| Amazon 智库子页面       | `amz_hub.ts` 的 `ModuleLoader.contentEnterAnimation`                                         |
+| 更多子页面              | `more.ts` 的 `ModuleLoader.contentEnterAnimation`                                            |
+| 独立静态模板            | `loadTemplate()` 默认包装                                                                    |
 | `SafeModuleLoader` 页面 | 页面挂载到主模块内容区后由外层 `ModuleLoader` 触发，或模板显式使用 `loadTemplate()` 默认包装 |
 
 ---

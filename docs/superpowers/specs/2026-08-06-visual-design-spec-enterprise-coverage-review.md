@@ -201,4 +201,4 @@
 4. G4 视觉回归 D12 人工首 8 张完成签收（Visual Yellow → 按 XO 结论转 Green 或登记债务）。
 5. 必跑验证：`npm run ci:quality`（门禁不红）+ 文档链接自检 + `git diff --check`。
 
-落地顺序与责任人拆分见 [视觉设计规范补齐计划](./plans/2026-08-06-visual-design-spec-completion-plan.md)。
+落地顺序与责任人拆分见 [视觉设计规范补齐计划](../plans/2026-08-06-visual-design-spec-completion-plan.md)。
