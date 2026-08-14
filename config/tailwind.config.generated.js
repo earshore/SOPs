@@ -2,7 +2,7 @@
  * Tailwind 配置 - 自动生成文件
  * ⚠️ 请勿手动编辑此文件！
  * 修改 src/common/config/design-tokens.ts 后运行 npm run generate:tokens
- * 生成时间: 2026-08-14T13:38:42.823Z
+ * 生成时间: 2026-08-14T14:15:28.794Z
  */
 
 /** @type {import('tailwindcss').Config} */

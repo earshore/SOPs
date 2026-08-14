@@ -441,7 +441,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .to-green-50\/50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-green-400) 6%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-green-500:not(.twb-keep) { --tw-gradient-to: var(--color-green-500) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-green-600:not(.twb-keep) { --tw-gradient-to: var(--color-green-600) var(--tw-gradient-to-position); }
-:is(.dark, [data-color-mode-resolved="dark"]) .to-indigo-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-indigo-400) 12%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-indigo-600:not(.twb-keep) { --tw-gradient-to: var(--color-indigo-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-orange-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-orange-400) 12%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-orange-500:not(.twb-keep) { --tw-gradient-to: var(--color-orange-500) var(--tw-gradient-to-position); }
