@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-14T10:32:34.343Z",
+  "updatedAt": "2026-08-14T11:58:55.628Z",
   "shell": {
     "total": 13,
     "filesScanned": 26,
@@ -11,33 +11,20 @@
   },
   "modules": {
     "filesScanned": 390,
-    "filesWithHits": 50,
+    "filesWithHits": 37,
     "families": {
       "sops": {
-        "total": 334,
+        "total": 65,
         "filesScanned": 52,
-        "filesWithHits": 22,
+        "filesWithHits": 9,
         "files": {
-          "src/modules/sops/views/growth/ppc_advertising/template.html": 57,
-          "src/modules/sops/views/safety/eu_gpsr_compliance/template.html": 40,
-          "src/modules/sops/views/service/email_templates/template.html": 30,
-          "src/modules/sops/views/service/negative_review/template.html": 27,
-          "src/modules/sops/views/service/qa_maintenance/template.html": 24,
-          "src/modules/sops/views/growth/restricted_words/template.html": 23,
-          "src/modules/sops/views/safety/product_compliance/template.html": 21,
-          "src/modules/sops/views/backend/procurement_qc/template.html": 19,
-          "src/modules/sops/views/overview/template.html": 17,
           "src/modules/sops/views/growth/listing_seo/template.html": 15,
           "src/modules/sops/views/growth/competitor_monitoring/template.html": 12,
           "src/modules/sops/views/safety/brand_infringement/template.html": 9,
           "src/modules/sops/views/backend/inventory_replenishment/template.html": 8,
           "src/modules/sops/views/growth/promotion_submission/template.html": 7,
           "src/modules/sops/views/safety/performance_notification/template.html": 7,
-          "src/modules/sops/sops_style.css": 4,
           "src/modules/sops/views/backend/fba_shipping/template.html": 3,
-          "src/modules/sops/views/growth/npi_tracker/template.html": 3,
-          "src/modules/sops/views/growth/npi_tracker/data/mockData.ts": 2,
-          "src/modules/sops/views/growth/npi_tracker/index.ts": 2,
           "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 2,
           "src/modules/sops/views/safety/permission_management/template.html": 2
         }

@@ -436,7 +436,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:to-rose-500:not(.twb-keep):hover { --tw-gradient-to: var(--color-rose-500) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-amber-100:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-amber-400) 18%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-amber-500:not(.twb-keep) { --tw-gradient-to: var(--color-amber-500) var(--tw-gradient-to-position); }
-:is(.dark, [data-color-mode-resolved="dark"]) .to-blue-100:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-blue-400) 18%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-blue-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-blue-400) 12%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-blue-600:not(.twb-keep) { --tw-gradient-to: var(--color-blue-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-cyan-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-cyan-400) 12%, transparent) var(--tw-gradient-to-position); }

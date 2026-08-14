@@ -145,10 +145,10 @@
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-y-8 gap-x-4">
         <!-- Step 1: Research -->
         <div
-          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-blue-400 transition duration-200 relative group"
+          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-[var(--module-accent)] transition duration-200 relative group"
         >
           <div
-            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-blue-500 rounded-full flex items-center justify-center text-xl text-blue-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-blue-500 group-hover:text-white transition-colors z-10 relative"
+            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-[var(--module-accent)] rounded-full flex items-center justify-center text-xl text-[var(--module-accent-text)] font-bold mb-3 shadow-sm mx-auto group-hover:bg-[var(--module-accent)] group-hover:text-white transition-colors z-10 relative"
           >
             <i class="fas fa-magnifying-glass"></i>
           </div>
@@ -162,10 +162,10 @@
         </div>
         <!-- Step 2: Listing -->
         <div
-          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-indigo-400 transition duration-200 relative group"
+          class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-[var(--module-accent)] transition duration-200 relative group"
         >
           <div
-            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-indigo-500 rounded-full flex items-center justify-center text-xl text-indigo-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-indigo-500 group-hover:text-white transition-colors z-10 relative"
+            class="w-14 h-14 bg-[var(--surface-card,#ffffff)] border-2 border-[var(--module-accent)] rounded-full flex items-center justify-center text-xl text-[var(--module-accent-text)] font-bold mb-3 shadow-sm mx-auto group-hover:bg-[var(--module-accent)] group-hover:text-white transition-colors z-10 relative"
           >
             <i class="fas fa-pen-nib"></i>
           </div>
@@ -397,7 +397,7 @@
           <ul class="text-xs text-slate-700 space-y-2">
             <li class="flex items-start gap-2">
               <span
-                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                class="w-5 h-5 bg-[var(--module-accent)] text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                 >CE</span
               >
               <div>
@@ -408,7 +408,7 @@
             </li>
             <li class="flex items-start gap-2">
               <span
-                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                class="w-5 h-5 bg-[var(--module-accent)] text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                 >🗑️</span
               >
               <div>
@@ -418,14 +418,14 @@
             </li>
             <li class="flex items-start gap-2">
               <span
-                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                class="w-5 h-5 bg-[var(--module-accent)] text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                 >🔋</span
               >
               <div><strong>电池法 (BattG)：</strong>含电池产品需完成电池注册，提供回收方案。</div>
             </li>
             <li class="flex items-start gap-2">
               <span
-                class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                class="w-5 h-5 bg-[var(--module-accent)] text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                 >⚡</span
               >
               <div><strong>ErP能效标签：</strong>灯具/家电需EPREL数据库注册，显示A-G能效等级。</div>
@@ -720,7 +720,8 @@
   <!-- Category 6: Textiles -->
   <div class="ui-card p-6 mb-6">
     <h2 class="ui-card__title text-lg font-bold mb-2 flex items-center gap-2">
-      <i class="fas fa-shirt text-indigo-600"></i>六、纺织品/服装类 — Textile Regulation
+      <i class="fas fa-shirt text-[var(--module-accent-text)]"></i>六、纺织品/服装类 — Textile
+      Regulation
     </h2>
     <p class="ui-card__muted text-xs mb-4">典型产品：服装、床上用品、毛巾、袜子、内衣、窗帘</p>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -731,28 +732,28 @@
           <ul class="text-xs text-slate-700 space-y-2">
             <li class="flex items-start gap-2">
               <span
-                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                class="w-5 h-5 bg-[var(--module-accent)] text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                 >1</span
               >
               <div><strong>成分标签：</strong>必须按EU 1007/2011法规标注纤维成分百分比。</div>
             </li>
             <li class="flex items-start gap-2">
               <span
-                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                class="w-5 h-5 bg-[var(--module-accent)] text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                 >2</span
               >
               <div><strong>REACH合规：</strong>SVHC高关注物质 + 附件XVII限制物质测试。</div>
             </li>
             <li class="flex items-start gap-2">
               <span
-                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                class="w-5 h-5 bg-[var(--module-accent)] text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                 >3</span
               >
               <div><strong>德国EPR：</strong>纺织品需在德国VerpackG + 纺织品回收系统注册。</div>
             </li>
             <li class="flex items-start gap-2">
               <span
-                class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                class="w-5 h-5 bg-[var(--module-accent)] text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                 >4</span
               >
               <div><strong>护理标签：</strong>洗涤/烘干/熨烫图标，多语言说明。</div>
@@ -789,8 +790,10 @@
       </div>
       <!-- Right: Sales Advice -->
       <div class="space-y-4">
-        <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-          <h4 class="font-bold text-indigo-800 mb-3">💡 头部卖家销售建议</h4>
+        <div
+          class="p-4 bg-[var(--wash-indigo)] rounded-lg border border-[var(--module-accent-border)]"
+        >
+          <h4 class="font-bold text-[var(--module-accent-text)] mb-3">💡 头部卖家销售建议</h4>
           <ul class="text-xs text-slate-700 space-y-2">
             <li>• <strong>工厂要求：</strong>下单时要求成分检测报告 + 甲醛测试 + AZO染料测试。</li>
             <li>
@@ -823,7 +826,7 @@
         </ul>
       </div>
       <div class="bg-white/10 rounded-lg p-4">
-        <h4 class="font-bold text-blue-300 mb-2">✍️ 创建Listing时</h4>
+        <h4 class="font-bold text-[var(--module-accent-soft)] mb-2">✍️ 创建Listing时</h4>
         <ul class="space-y-1 text-white/80">
           <li>□ 标题/五点禁用违规词</li>
           <li>□ 填写合规属性字段</li>

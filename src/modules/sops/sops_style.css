@@ -1200,16 +1200,6 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     background-color: var(--surface-card, #ffffff) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*='from-blue-50']),
-  #sops_content_area .module-container > * + * :where([class*='from-blue-50']) {
-    background-color: var(--wash-blue, #eff6ff) !important;
-  }
-
-  #sops_content_area .module-container > * + *:where([class*='from-indigo-50']),
-  #sops_content_area .module-container > * + * :where([class*='from-indigo-50']) {
-    background-color: var(--wash-indigo, #eef2ff) !important;
-  }
-
   #sops_content_area .module-container > * + *:where([class*='from-emerald-50']),
   #sops_content_area .module-container > * + * :where([class*='from-emerald-50']) {
     background-color: var(--wash-emerald, #ecfdf5) !important;

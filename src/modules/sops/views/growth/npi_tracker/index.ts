@@ -220,7 +220,7 @@ function renderNextStepTags(steps: string[]): string {
   return steps
     .map(
       (step: string) =>
-        `<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">${safeText(step)}</span>`
+        `<span class="px-2 py-0.5 bg-[var(--wash-blue)] text-[var(--module-accent-text)] rounded text-xs">${safeText(step)}</span>`
     )
     .join('');
 }
