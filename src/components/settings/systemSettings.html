@@ -93,7 +93,7 @@
         </div>
       </div>
       <p
-        class="settings-search-empty"
+        class="settings-search-empty empty-state"
         :hidden="!searchQuery || searchHits.length > 0"
         role="status"
       >
@@ -481,28 +481,28 @@
         </nav>
         <div class="settings-panel-sections space-y-7">
           <!-- Section 1: AI Model Connection -->
-<!--settings-slot:llmSection-->
+          <!--settings-slot:llmSection-->
 
           <div class="settings-section-sep" role="separator" aria-hidden="true"></div>
 
           <!-- Section 2: Tool Strategy -->
-<!--settings-slot:toolStrategySection-->
+          <!--settings-slot:toolStrategySection-->
 
           <div class="settings-section-sep" role="separator" aria-hidden="true"></div>
 
           <!-- Section 4: Data and Backup -->
-<!--settings-slot:dataSection-->
+          <!--settings-slot:dataSection-->
 
           <div class="settings-section-sep" role="separator" aria-hidden="true"></div>
 
           <!-- Section 5: Appearance & Experience -->
 
-<!--settings-slot:appearanceSection-->
+          <!--settings-slot:appearanceSection-->
 
           <div class="settings-section-sep" role="separator" aria-hidden="true"></div>
 
           <!-- Section 6: Developer Diagnostics -->
-<!--settings-slot:diagnosticsSection-->
+          <!--settings-slot:diagnosticsSection-->
 
           <!-- Bottom spacer for comfortable scrolling -->
           <div class="h-2"></div>
@@ -536,4 +536,3 @@
     </div>
   </div>
 </div>
-

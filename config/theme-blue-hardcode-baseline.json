@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-07T03:37:35.110Z",
+  "updatedAt": "2026-08-14T10:32:34.343Z",
   "shell": {
     "total": 13,
     "filesScanned": 26,
@@ -10,8 +10,8 @@
     }
   },
   "modules": {
-    "filesScanned": 380,
-    "filesWithHits": 49,
+    "filesScanned": 390,
+    "filesWithHits": 50,
     "families": {
       "sops": {
         "total": 334,
@@ -44,7 +44,7 @@
       },
       "app_center": {
         "total": 39,
-        "filesScanned": 254,
+        "filesScanned": 264,
         "filesWithHits": 5,
         "files": {
           "src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanel.ts": 24,
@@ -55,9 +55,9 @@
         }
       },
       "amz_hub": {
-        "total": 162,
+        "total": 163,
         "filesScanned": 40,
-        "filesWithHits": 15,
+        "filesWithHits": 16,
         "files": {
           "src/modules/amz_hub/views/practice/quality_listing/template.html": 71,
           "src/modules/amz_hub/views/advanced/mature_phase/template.html": 17,
@@ -73,7 +73,8 @@
           "src/modules/amz_hub/views/practice/quality_listing/styles.css": 4,
           "src/modules/amz_hub/views/advanced/conversion_optimization/styles.css": 3,
           "src/modules/amz_hub/views/advanced/mature_phase/styles.css": 3,
-          "src/modules/amz_hub/views/advanced/new_product_30days/styles.css": 3
+          "src/modules/amz_hub/views/advanced/new_product_30days/styles.css": 3,
+          "src/modules/amz_hub/views/practice/promo_activities/template.html": 1
         }
       },
       "more": {
