@@ -16,10 +16,7 @@ import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService'
 import { sanitizePromptInput } from '@/common/utils/promptSanitizer';
 import { isObject } from '@/common/utils/typeGuards';
 import type { Product } from '../config/sampleData';
-import {
-  generateAnalysisPrompt,
-  MASTER_ANALYSIS_SYSTEM_PROMPT,
-} from '../prompts/analysisPrompts';
+import { generateAnalysisPrompt, MASTER_ANALYSIS_SYSTEM_PROMPT } from '../prompts/analysisPrompts';
 import { parseAnalysisResponse } from './analysisResultParser';
 import {
   getMasterAnalysisReasoningMultiplier,
