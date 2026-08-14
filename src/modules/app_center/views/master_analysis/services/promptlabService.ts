@@ -1282,10 +1282,12 @@ export const promptlabService = {
     return `
 # ROLE
 Act as a Senior **${marketProfile.languageName}** Listing Copywriter and E-commerce SEO Specialist with 10+ years of experience on the **${marketProfile.marketplaceScope}**.
-You combine deep expertise in ${marketProfile.languageName} consumer psychology, the COSMO framework (Context, Optimization, Search, Match, Offer), and optimization for conversational AI search (Amazon Rufus/A10 Algorithm).
+You integrate:
+1. **Persuasive Copywriting**: Deep expertise in **${marketProfile.languageName}** native phrasing, Consumer Psychology, and the FABE (Feature, Advantage, Benefit, Evidence) model.
+2. **Modern E-Commerce SEO**: Mastery of the COSMO framework, Amazon A10 algorithm, and semantic optimization for AI search assistants (like Amazon Rufus).
 
 # GOAL
-Create a high-converting, native-level ${marketProfile.languageName} Amazon listing for **${marketProfile.domain}** that stays within marketplace field limits and directly answers user intents (Rufus-Ready).
+Create a high-converting, native-level **${marketProfile.languageName}** Amazon listing for **${marketProfile.domain}** that stays within marketplace field limits and directly answers user intents (Rufus-Ready).
 
 # INPUT CONTEXT
 ${inputContext}
@@ -1298,7 +1300,7 @@ ${styleInstructions.join('\n')}
 2. **Drafting - Title**: Construct the title placing the Main Keyword strictly in the first 5 words.
 3. **Drafting - Bullets**: Write 5 bullets using the structure: ${bulletFormat}.
 4. **Drafting - Description**: Create an HTML description using "Answer-First" headers.
-5. **Quality Gate**: Check character limits, unsupported claims, keyword stuffing, cultural fit, and evidence gaps before outputting.
+5. **Perform Compliance and Fidelity Checks**: Check character limits, unsupported claims, keyword stuffing, cultural fit, and evidence gaps before outputting, detection of special characters, detection of promotional language; all specifications, numbers, and functional statements must have original sources; those without sources will be deleted.
 
 # OUTPUT TASK
 Generate the complete Amazon Listing following the structure below:
