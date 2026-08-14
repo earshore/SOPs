@@ -4,9 +4,12 @@
  * Two enforcement lanes sharing one baseline file:
  *
  *   shell   (scope, default) — global chrome. Blue-only pattern (unchanged
- *     from the Phase 0 D6 baseline, shell total today: 13) so Appearance
- *     migrations "only go down". Sources: css/components shell list +
- *     common/ui + components/modal.
+ *     from the Phase 0 D6 baseline) so Appearance migrations "only go
+ *     down". Sources: css/components shell list + common/ui +
+ *     components/modal + common-layer renderers & settings domain
+ *     (common/components, components/settings; added 2026-08-14). Per-file
+ *     counts are enforced in gate mode too (no add-N/remove-N offsetting).
+ *     Shell total today after expansion: 42 (megaMenu 13 + common 29).
  *
  *   modules (scope)          — business pages under src/modules, counted per
  *     module family: sops / app_center / amz_hub / more / other (any
@@ -160,6 +163,11 @@ const SOURCE_EXTENSIONS = new Set(['.css', '.html', '.js', '.jsx', '.ts', '.tsx'
 /**
  * Shell scope: Appearance-visible global chrome.
  * CSS list from Phase 0 D6 + adjacent shell components + shell UI sources.
+ * Expanded 2026-08-14 (Phase C follow-up): common-layer renderers and
+ * settings domain files were outside every lane (33 unmanaged hits found in
+ * --scope all), so `src/common/components` and `src/components/settings`
+ * now join the shell lane as `common` slot baseline subtotals — still
+ * "only goes down".
  */
 const SHELL_FILES = [
   // Phase 0 shell CSS whitelist
@@ -185,6 +193,10 @@ const SHELL_DIRS = [
   // Global shell UI that renders header / nav / search / toast chrome
   'src/common/ui',
   'src/components/modal',
+  // Common-layer renderers + settings domain (Phase C follow-up expansion;
+  // e.g. OverviewRenderer.ts, localDataCopy.ts were previously uncovered)
+  'src/common/components',
+  'src/components/settings',
 ] as const;
 
 function normalizePath(filePath: string): string {
@@ -325,7 +337,7 @@ function scanAll(): ScanResult {
 function scanModules(): ModulesScan {
   const root = join(srcRoot, 'modules');
   const families = Object.fromEntries(
-    MODULE_FAMILIES.map((f) => [f, { total: 0, filesScanned: 0, filesWithHits: 0, files: [] }])
+    MODULE_FAMILIES.map(f => [f, { total: 0, filesScanned: 0, filesWithHits: 0, files: [] }])
   ) as Record<ModuleFamily, FamilyScan>;
   let filesScanned = 0;
   let filesWithHits = 0;
@@ -337,9 +349,7 @@ function scanModules(): ModulesScan {
       if (!statSync(full).isDirectory()) {
         continue;
       }
-      const family: ModuleFamily = NAMED_MODULE_DIRS.has(entry)
-        ? (entry as ModuleFamily)
-        : 'other';
+      const family: ModuleFamily = NAMED_MODULE_DIRS.has(entry) ? (entry as ModuleFamily) : 'other';
       const bucket = families[family];
       const dirFiles = collectFilesInDir(full);
       bucket.filesScanned = dirFiles.length;
@@ -446,7 +456,11 @@ function printModulesReport(modules: ModulesScan, baseline: BaselineFile | null)
   console.log('═'.repeat(72));
 }
 
-function printAllReport(all: ScanResult, modules: ModulesScan, baseline: BaselineFile | null): void {
+function printAllReport(
+  all: ScanResult,
+  modules: ModulesScan,
+  baseline: BaselineFile | null
+): void {
   console.log('═'.repeat(72));
   console.log('Theme hardcode baseline (D6) — all source (blue + indigo)');
   console.log('═'.repeat(72));
@@ -478,7 +492,7 @@ function writeBaseline(shell: ScanResult, modules: ModulesScan): void {
   };
 
   const families = Object.fromEntries(
-    MODULE_FAMILIES.map((family) => {
+    MODULE_FAMILIES.map(family => {
       const f = modules.families[family];
       return [
         family,
@@ -522,7 +536,7 @@ function writeBaseline(shell: ScanResult, modules: ModulesScan): void {
 }
 
 function missingFamilies(baseline: BaselineFile): ModuleFamily[] {
-  return MODULE_FAMILIES.filter((family) => baseline.modules.families[family] === undefined);
+  return MODULE_FAMILIES.filter(family => baseline.modules.families[family] === undefined);
 }
 
 /** Gate: shell + every module family "only goes down" vs baseline. */
@@ -537,11 +551,23 @@ function checkGate(shell: ScanResult, modules: ModulesScan, baseline: BaselineFi
 
   const failures: string[] = [];
 
-  // Shell lane — unchanged Phase 0 logic.
+  // Shell lane — unchanged Phase 0 logic, plus per-file increase check.
+  // Total-only comparison allowed "add N, remove N elsewhere" to pass; every
+  // per-file count must now be <= its baseline record (new files add to the
+  // shell total, so a family-wide increase still fails at the total check).
   if (shell.total > baseline.shell.total) {
     failures.push(
       `shell total ${shell.total} > baseline ${baseline.shell.total} (+${shell.total - baseline.shell.total})`
     );
+  }
+  const baseShellFiles = baseline.shell.files ?? {};
+  for (const hit of shell.files) {
+    const base = baseShellFiles[hit.file];
+    if (base !== undefined && hit.count > base) {
+      failures.push(
+        `shell per-file ${hit.file}: ${hit.count} > baseline ${base} (+${hit.count - base})`
+      );
+    }
   }
 
   // Modules lane — per-family "only goes down".
@@ -558,7 +584,20 @@ function checkGate(shell: ScanResult, modules: ModulesScan, baseline: BaselineFi
       continue; // already reported as missing
     }
     if (actual > base.total) {
-      failures.push(`module ${family}: ${actual} > baseline ${base.total} (+${actual - base.total})`);
+      failures.push(
+        `module ${family}: ${actual} > baseline ${base.total} (+${actual - base.total})`
+      );
+    }
+    // Per-file increase check: closes the "add N, remove N elsewhere in the
+    // same family" hole while keeping per-file records report-grade.
+    const baseFiles = base.files ?? {};
+    for (const hit of modules.families[family].files) {
+      const bf = baseFiles[hit.file];
+      if (bf !== undefined && hit.count > bf) {
+        failures.push(
+          `module ${family} per-file ${hit.file}: ${hit.count} > baseline ${bf} (+${hit.count - bf})`
+        );
+      }
     }
   }
 
@@ -573,7 +612,7 @@ function checkGate(shell: ScanResult, modules: ModulesScan, baseline: BaselineFi
     process.exit(1);
   }
 
-  const familyStatus = MODULE_FAMILIES.map((family) => {
+  const familyStatus = MODULE_FAMILIES.map(family => {
     const base = baseline.modules.families[family]!.total;
     const actual = modules.families[family].total;
     const delta = actual - base;
