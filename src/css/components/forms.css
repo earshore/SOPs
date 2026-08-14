@@ -92,8 +92,7 @@
 /* ========================================
    2. 现代输入框
    ======================================== */
-.form-input,
-.editor-input-modern {
+.form-input {
   width: 100%;
   min-height: var(--field-height);
   padding: 0.5rem 0.75rem;
@@ -112,8 +111,7 @@
   overflow: hidden;
 }
 
-.form-input:focus,
-.editor-input-modern:focus {
+.form-input:focus {
   outline: none;
   /* Requirements 6.1: 聚焦时边框颜色过渡到主色调 */
   border-color: var(--field-focus);
@@ -121,48 +119,14 @@
   background: var(--field-bg);
 }
 
-.form-input:hover,
-.editor-input-modern:hover {
+.form-input:hover {
   border-color: var(--field-border-hover);
 }
 
-.form-input:disabled,
-.editor-input-modern:disabled {
+.form-input:disabled {
   background: var(--color-bg-disabled, var(--field-bg-muted));
   color: var(--color-text-disabled, var(--color-slate-400));
   cursor: not-allowed;
-}
-
-/* ========================================
-   3. 文本域 (Textarea)
-   ======================================== */
-.form-textarea {
-  resize: vertical;
-  min-height: 120px;
-  max-height: 600px;
-  font-size: 0.875rem;
-  line-height: 1.75;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--field-border);
-  border-radius: var(--field-radius);
-  /* Requirements 6.1: 输入框聚焦边框过渡 - 200ms */
-  transition:
-    border-color var(--micro-duration-smooth) var(--ease-smooth),
-    box-shadow var(--micro-duration-smooth) var(--ease-smooth),
-    background-color var(--duration-normal) var(--ease-smooth);
-  background: var(--field-bg);
-  color: var(--field-text);
-}
-
-.form-textarea:focus {
-  outline: none;
-  /* Requirements 6.1: 聚焦时边框颜色过渡到主色调 */
-  border-color: var(--field-focus);
-  box-shadow: 0 0 0 3px var(--field-focus-ring);
-}
-
-.form-textarea:hover {
-  border-color: var(--field-border-hover);
 }
 
 /* ========================================
@@ -183,7 +147,7 @@
 }
 
 /* ========================================
-   4. Textarea 容器（带统计信息）
+   4. Textarea 容器
    ======================================== */
 .textarea-wrapper {
   position: relative;
@@ -191,31 +155,9 @@
   flex-direction: column;
 }
 
-.textarea-stats {
-  position: absolute;
-  bottom: 0.75rem;
-  right: 0.75rem;
-  z-index: 10;
-  display: flex;
-  gap: 0.5rem;
-}
-
 /* ========================================
    5. 表单标签
    ======================================== */
-.form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text-primary, var(--color-slate-700));
-  margin-bottom: 0.5rem;
-}
-
-.form-label-required::after {
-  content: '*';
-  color: var(--color-red-500);
-  margin-left: 0.25rem;
-}
 
 /* Requirements 6.2: Label上浮动画 */
 .form-label-float {
@@ -259,36 +201,10 @@
 /* ========================================
    6. 表单帮助文本
    ======================================== */
-.form-help {
-  font-size: 0.8125rem;
-  color: var(--color-text-secondary, var(--color-slate-500));
-  margin-top: 0.375rem;
-}
 
 /* ========================================
    7. 表单状态
    ======================================== */
-
-/* --- Error --- */
-.form-input.error,
-.form-textarea.error {
-  /* --color-error 浅色 = red-500 / 深色自动翻 400 档（§5.1） */
-  border-color: var(--color-error);
-}
-
-.form-input.error:focus,
-.form-textarea.error:focus {
-  border-color: var(--color-error);
-  /* 对齐 --field-focus-ring 的 color-mix 手法 */
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 18%, transparent);
-}
-
-/* Requirements 6.3: 输入验证失败时的抖动动画 */
-.form-input-error,
-.form-input.error.shake,
-.form-textarea.error.shake {
-  animation: input-shake 500ms var(--ease-smooth);
-}
 
 .form-error {
   font-size: 0.8125rem;
@@ -304,33 +220,6 @@
   display: none;
 }
 
-/* --- Success --- */
-.form-input.success,
-.form-textarea.success {
-  /* --color-success 浅色 = green-500 / 深色自动翻 400 档 */
-  border-color: var(--color-success);
-  position: relative;
-}
-
-.form-input.success:focus,
-.form-textarea.success:focus {
-  border-color: var(--color-success);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-success) 18%, transparent);
-}
-
-/* Requirements 6.4: 输入验证成功时的勾选图标动画 */
-.form-input-success-icon,
-.form-success-icon {
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  color: var(--color-success);
-  opacity: 1;
-}
-
 .form-input-success-icon--animated {
   opacity: 0;
   animation: fade-in-scale var(--micro-duration-smooth) var(--micro-ease-button) forwards;
@@ -344,77 +233,6 @@
 .form-group-success .form-input,
 .form-group-success .form-textarea {
   padding-right: 2.5rem;
-}
-
-/* SVG勾选图标样式 */
-.form-input-success-icon svg,
-.form-success-icon svg {
-  width: 100%;
-  height: 100%;
-  stroke-dasharray: 20;
-  stroke-dashoffset: 0;
-}
-
-.form-input-success-icon--animated svg {
-  stroke-dashoffset: 20;
-  animation: checkmark-draw 300ms var(--ease-smooth) 100ms forwards;
-}
-
-/* ========================================
-   8. 表单组 & 布局
-   ======================================== */
-.form-group {
-  margin-bottom: 1.25rem;
-}
-
-.form-group:last-child {
-  margin-bottom: 0;
-}
-
-.form-inline {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-end;
-}
-
-.form-inline .form-group {
-  margin-bottom: 0;
-  flex: 1;
-}
-
-/* ========================================
-   9. Select 下拉框
-   ======================================== */
-.form-select {
-  width: 100%;
-  min-height: var(--field-height);
-  padding: 0.5rem 2rem 0.5rem 0.75rem;
-  border: 1px solid var(--field-border);
-  border-radius: var(--field-radius);
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: var(--field-text);
-  background: var(--field-bg)
-    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")
-    no-repeat right 0.5rem center/1.25rem 1.25rem;
-  appearance: none;
-  cursor: pointer;
-  /* Requirements 6.1: 输入框聚焦边框过渡 - 200ms */
-  transition:
-    border-color var(--micro-duration-smooth) var(--ease-smooth),
-    box-shadow var(--micro-duration-smooth) var(--ease-smooth),
-    background-color var(--duration-normal) var(--ease-smooth);
-}
-
-.form-select:focus {
-  outline: none;
-  /* Requirements 6.1: 聚焦时边框颜色过渡到主色调 */
-  border-color: var(--field-focus);
-  box-shadow: 0 0 0 3px var(--field-focus-ring);
-}
-
-.form-select:hover {
-  border-color: var(--field-border-hover);
 }
 
 /* ========================================
@@ -592,21 +410,17 @@
 }
 
 /* ========================================
-   10. Checkbox 复选框
+   10. 原生 Checkbox / Radio 重置（无类名依赖，settings-control 与 npi 均引用）
    ======================================== */
-
-/* -----------------------------------------
-   10.1 基础复选框
-   ----------------------------------------- */
-.form-checkbox,
-input[type='checkbox'] {
+input[type='checkbox'],
+input[type='radio'] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--check-size);
-  height: var(--check-size);
+  width: var(--check-size, 16px);
+  height: var(--check-size, 16px);
   border: 1.5px solid var(--check-border);
-  border-radius: var(--check-radius);
+  border-radius: var(--check-radius, 3px);
   background: var(--check-bg);
   cursor: pointer;
   flex-shrink: 0;
@@ -624,33 +438,10 @@ input[type='checkbox'] {
     box-shadow var(--duration-fast, 200ms) var(--ease-smooth);
 }
 
-/* -----------------------------------------
-   10.2 勾选图标 (CSS 伪元素)
-   ----------------------------------------- */
-.form-checkbox::after {
-  content: '';
-  display: block;
-  width: 10px;
-  height: 6px;
-  border-left: 2px solid #ffffff;
-  border-bottom: 2px solid #ffffff;
-  transform: rotate(-45deg) translate(0, -1px);
-  opacity: 0;
-  transition:
-    opacity var(--duration-fast, 200ms) var(--ease-smooth),
-    transform var(--duration-fast, 200ms) var(--ease-spring);
-}
-
-/* -----------------------------------------
-   10.3 勾选图标 (SVG 背景, 用于 input[type="checkbox"])
-   ----------------------------------------- */
-input[type='checkbox']:checked {
-  background-color: currentColor;
-  border-color: transparent;
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+input[type='radio'] {
+  border-radius: 50%;
+  width: var(--radio-size, 16px);
+  height: var(--radio-size, 16px);
 }
 
 input[type='checkbox'][class*='text-blue'],
@@ -695,38 +486,16 @@ input[type='radio'][class*='accent-amber'] {
   color: var(--color-amber-600, #d97706);
 }
 
-/* -----------------------------------------
-   10.4 选中状态
-   ----------------------------------------- */
-.form-checkbox:checked {
-  background-color: var(--check-color-active);
-  border-color: var(--check-color-active);
+/* 选中 / 半选 / 禁用（原生重置，无类名依赖） */
+input[type='checkbox']:checked {
+  background-color: currentColor;
+  border-color: transparent;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
 }
 
-.form-checkbox:checked::after {
-  opacity: 1;
-}
-
-/* -----------------------------------------
-   10.5 半选 / 不确定状态 (Indeterminate)
-   ----------------------------------------- */
-.form-checkbox:indeterminate,
-input[type='checkbox']:indeterminate {
-  background-color: var(--check-color-active);
-  border-color: var(--check-color-active);
-}
-
-/* 伪元素样式 */
-.form-checkbox:indeterminate::after {
-  width: 8px;
-  height: 0;
-  border-left: none;
-  border-bottom: 2px solid #ffffff;
-  transform: none;
-  opacity: 1;
-}
-
-/* SVG 背景样式 */
 input[type='checkbox']:indeterminate {
   background-color: currentColor;
   border-color: transparent;
@@ -736,617 +505,6 @@ input[type='checkbox']:indeterminate {
   background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3crect x='3.5' y='7' width='9' height='2' rx='1'/%3e%3c/svg%3e");
 }
 
-/* -----------------------------------------
-   10.6 交互状态 (Hover / Focus / Disabled)
-   ----------------------------------------- */
-.form-checkbox:hover:not(:disabled):not(:checked),
-input[type='checkbox']:hover:not(:disabled):not(:checked) {
-  border-color: var(--check-border-hover);
-}
-
-.form-checkbox:hover:checked:not(:disabled),
-input[type='checkbox']:hover:checked:not(:disabled) {
-  background-color: var(--color-primary-dark, #2563eb);
-  border-color: var(--color-primary-dark, #2563eb);
-}
-
-.form-checkbox:focus,
-.form-checkbox:focus-visible,
-input[type='checkbox']:focus,
-input[type='checkbox']:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--check-ring-focus);
-}
-
-.form-checkbox:active:not(:disabled),
-input[type='checkbox']:active:not(:disabled) {
-  transform: scale(0.92);
-}
-
-.form-checkbox:disabled,
-input[type='checkbox']:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: var(--color-bg-disabled, var(--color-slate-100, #f1f5f9));
-}
-
-.form-checkbox:disabled:checked,
-input[type='checkbox']:disabled:checked {
-  background-color: var(--color-text-disabled, var(--color-slate-400, #94a3b8));
-  border-color: var(--color-text-disabled, var(--color-slate-400, #94a3b8));
-}
-
-/* -----------------------------------------
-   10.7 尺寸变体
-   ----------------------------------------- */
-
-/* 小号 */
-.form-checkbox-sm,
-.form-checkbox--sm {
-  --check-size: var(--check-size-sm, 14px);
-  --check-radius: 3px;
-}
-
-.form-checkbox-sm::after,
-.form-checkbox--sm::after {
-  width: 8px;
-  height: 5px;
-  border-width: 1.5px;
-}
-
-/* 大号 */
-.form-checkbox-lg,
-.form-checkbox--lg {
-  --check-size: var(--check-size-lg, 22px);
-  --check-radius: 6px;
-}
-
-.form-checkbox-lg::after,
-.form-checkbox--lg::after {
-  width: 12px;
-  height: 7px;
-  border-width: 2.5px;
-}
-
-/* -----------------------------------------
-   10.8 颜色变体
-   ----------------------------------------- */
-
-/* 绿色 / 成功 */
-.form-checkbox--success:checked,
-.form-checkbox--green:checked {
-  background-color: var(--color-success, #22c55e);
-  border-color: var(--color-success, #22c55e);
-}
-
-.form-checkbox--success:hover:checked:not(:disabled),
-.form-checkbox--green:hover:checked:not(:disabled) {
-  background-color: var(--color-green-600, #16a34a);
-  border-color: var(--color-green-600, #16a34a);
-}
-
-.form-checkbox--success:focus,
-.form-checkbox--green:focus {
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
-}
-
-/* 红色 / 危险 */
-.form-checkbox--danger:checked,
-.form-checkbox--red:checked {
-  background-color: var(--color-error, #ef4444);
-  border-color: var(--color-error, #ef4444);
-}
-
-.form-checkbox--danger:hover:checked:not(:disabled),
-.form-checkbox--red:hover:checked:not(:disabled) {
-  background-color: var(--color-red-600, #dc2626);
-  border-color: var(--color-red-600, #dc2626);
-}
-
-.form-checkbox--danger:focus,
-.form-checkbox--red:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
-}
-
-/* 橙色 / 警告 */
-.form-checkbox--warning:checked,
-.form-checkbox--amber:checked {
-  background-color: var(--color-warning, #f59e0b);
-  border-color: var(--color-warning, #f59e0b);
-}
-
-.form-checkbox--warning:hover:checked:not(:disabled),
-.form-checkbox--amber:hover:checked:not(:disabled) {
-  background-color: var(--color-amber-600, #d97706);
-  border-color: var(--color-amber-600, #d97706);
-}
-
-.form-checkbox--warning:focus,
-.form-checkbox--amber:focus {
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
-}
-
-/* 紫色 */
-.form-checkbox--purple:checked {
-  background-color: var(--color-purple-500, #a855f7);
-  border-color: var(--color-purple-500, #a855f7);
-}
-
-.form-checkbox--purple:hover:checked:not(:disabled) {
-  background-color: var(--color-purple-600, #9333ea);
-  border-color: var(--color-purple-600, #9333ea);
-}
-
-.form-checkbox--purple:focus {
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
-}
-
-/* 青色 / Teal */
-.form-checkbox--teal:checked {
-  background-color: var(--color-teal-500, #14b8a6);
-  border-color: var(--color-teal-500, #14b8a6);
-}
-
-.form-checkbox--teal:hover:checked:not(:disabled) {
-  background-color: var(--color-teal-600, #0d9488);
-  border-color: var(--color-teal-600, #0d9488);
-}
-
-.form-checkbox--teal:focus {
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
-}
-
-/* -----------------------------------------
-   10.9 Checkbox + Label 组合
-   ----------------------------------------- */
-.form-checkbox-label {
-  display: inline-flex;
-  align-items: flex-start;
-  gap: var(--spacing-xs, 8px);
-  cursor: pointer;
-  font-size: 0.875rem;
-  color: var(--color-text-primary, var(--color-slate-700, #334155));
-  line-height: 1.4;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* 对齐勾选框与文字基线 */
-.form-checkbox-label .form-checkbox,
-.form-checkbox-label input[type='checkbox'] {
-  margin-top: 2px;
-}
-
-/* 标签文字容器 */
-.form-checkbox-label-text {
-  flex: 1;
-  min-width: 0;
-}
-
-/* 附加描述 */
-.form-checkbox-label-description {
-  display: block;
-  font-size: 0.8125rem;
-  font-weight: 400;
-  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
-  margin-top: 2px;
-  line-height: 1.4;
-}
-
-/* 禁用标签 */
-.form-checkbox-label:has(:disabled) {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* -----------------------------------------
-   10.10 Checkbox 组 (垂直 / 水平)
-   ----------------------------------------- */
-.form-checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm, 12px);
-}
-
-.form-checkbox-group--horizontal {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: var(--spacing-md, 16px);
-}
-
-/* 紧凑组 */
-.form-checkbox-group--compact {
-  gap: var(--spacing-xs, 8px);
-}
-
-/* 间距宽松组 */
-.form-checkbox-group--spacious {
-  gap: var(--spacing-md, 16px);
-}
-
-/* 网格布局 */
-.form-checkbox-group--grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: var(--spacing-sm, 12px);
-}
-
-/* 带边框包裹 */
-.form-checkbox-group--bordered {
-  border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  padding: var(--spacing-md, 16px);
-}
-
-/* 分隔线 */
-.form-checkbox-group--divided > .form-checkbox-label + .form-checkbox-label {
-  padding-top: var(--spacing-sm, 12px);
-  border-top: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-}
-
-/* -----------------------------------------
-   10.11 卡片式复选框
-   ----------------------------------------- */
-.form-checkbox-card {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-sm, 12px);
-  padding: var(--spacing-md, 16px);
-  border: 1.5px solid var(--color-border-default, var(--color-slate-200, #e2e8f0));
-  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  background: var(--surface-panel, var(--color-bg-elevated, #ffffff));
-  cursor: pointer;
-  position: relative;
-  transition:
-    border-color var(--duration-fast, 200ms) var(--ease-smooth),
-    background-color var(--duration-fast, 200ms) var(--ease-smooth),
-    box-shadow var(--duration-fast, 200ms) var(--ease-smooth);
-}
-
-.form-checkbox-card:hover {
-  border-color: var(--color-border-strong, var(--color-slate-300, #cbd5e1));
-  background: var(--surface-card-hover, var(--color-bg-secondary, #f8fafc));
-}
-
-/* 选中状态 */
-.form-checkbox-card:has(.form-checkbox:checked),
-.form-checkbox-card:has(input[type='checkbox']:checked),
-.form-checkbox-card.is-checked {
-  border-color: var(--color-primary, #3b82f6);
-  background: color-mix(in srgb, var(--color-primary, #3b82f6) 4%, transparent);
-}
-
-.form-checkbox-card:has(.form-checkbox:checked):hover,
-.form-checkbox-card:has(input[type='checkbox']:checked):hover,
-.form-checkbox-card.is-checked:hover {
-  border-color: var(--color-primary-dark, #2563eb);
-  background: color-mix(in srgb, var(--color-primary, #3b82f6) 6%, transparent);
-}
-
-/* 焦点状态 */
-.form-checkbox-card:has(.form-checkbox:focus-visible),
-.form-checkbox-card:has(input[type='checkbox']:focus-visible) {
-  box-shadow: 0 0 0 3px var(--check-ring-focus);
-}
-
-/* 禁用状态 */
-.form-checkbox-card:has(:disabled) {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background: var(--color-bg-disabled, var(--color-bg-secondary, #f8fafc));
-}
-
-.form-checkbox-card:has(:disabled):hover {
-  border-color: var(--color-border-default, var(--color-slate-200, #e2e8f0));
-  background: var(--color-bg-disabled, var(--color-bg-secondary, #f8fafc));
-}
-
-/* 卡片内容 */
-.form-checkbox-card-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.form-checkbox-card-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text-primary, var(--color-slate-700, #334155));
-  line-height: 1.4;
-  margin: 0;
-}
-
-.form-checkbox-card-description {
-  font-size: 0.8125rem;
-  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
-  line-height: 1.4;
-  margin-top: 2px;
-}
-
-/* 卡片右侧额外内容 (如价格 / 图标) */
-.form-checkbox-card-meta {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs, 8px);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text-primary, var(--color-slate-700, #334155));
-}
-
-/* 选中时的勾选角标 */
-.form-checkbox-card--with-badge:has(.form-checkbox:checked)::before,
-.form-checkbox-card--with-badge:has(input[type='checkbox']:checked)::before {
-  content: '✓';
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  width: 22px;
-  height: 22px;
-  border-radius: 0 var(--workbench-radius, 8px) 0 var(--workbench-radius, 8px);
-  background: var(--color-primary, #3b82f6);
-  color: white;
-  font-size: 0.625rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-  animation: scaleIn var(--duration-fast, 200ms)
-    var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) forwards;
-}
-
-/* 卡片式 — 图标变体 (Icon + Title + Description) */
-.form-checkbox-card--icon {
-  padding: var(--spacing-lg, 24px);
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--spacing-sm, 12px);
-}
-
-.form-checkbox-card--icon .form-checkbox,
-.form-checkbox-card--icon input[type='checkbox'] {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.form-checkbox-card-icon {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--rounded-lg, 12px);
-  background: var(--color-bg-tertiary, var(--color-slate-100, #f1f5f9));
-  font-size: 1.25rem;
-  color: var(--color-text-tertiary, var(--color-slate-500, #64748b));
-  transition:
-    background-color var(--duration-fast, 200ms) var(--ease-smooth),
-    color var(--duration-fast, 200ms) var(--ease-smooth);
-}
-
-.form-checkbox-card--icon:has(:checked) .form-checkbox-card-icon {
-  background: var(
-    --color-primary-light,
-    color-mix(in srgb, var(--color-primary, #3b82f6) 10%, transparent)
-  );
-  color: var(--color-primary, #3b82f6);
-}
-
-/* -----------------------------------------
-   10.12 开关式复选框 (Toggle Checkbox)
-   ----------------------------------------- */
-.form-checkbox-switch {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-sm, 12px);
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.form-checkbox-switch input[type='checkbox'] {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* 轨道 */
-.form-checkbox-switch-track {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  border-radius: 9999px;
-  background: var(--color-border-strong, var(--color-slate-300, #cbd5e1));
-  flex-shrink: 0;
-  transition: background-color var(--duration-fast, 200ms) var(--ease-smooth);
-}
-
-/* 滑块 */
-.form-checkbox-switch-track::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.1),
-    0 1px 2px rgba(0, 0, 0, 0.06);
-  transition: transform var(--duration-fast, 200ms) var(--ease-spring);
-}
-
-/* 选中 */
-.form-checkbox-switch input:checked + .form-checkbox-switch-track {
-  background: var(--color-primary, #3b82f6);
-}
-
-.form-checkbox-switch input:checked + .form-checkbox-switch-track::after {
-  transform: translateX(20px);
-}
-
-/* 焦点 */
-.form-checkbox-switch input:focus-visible + .form-checkbox-switch-track {
-  box-shadow: 0 0 0 3px var(--check-ring-focus);
-}
-
-/* 禁用 */
-.form-checkbox-switch input:disabled + .form-checkbox-switch-track {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* 悬停 */
-.form-checkbox-switch:hover input:not(:disabled) + .form-checkbox-switch-track {
-  background: var(--color-text-tertiary, var(--color-slate-400, #94a3b8));
-}
-
-.form-checkbox-switch:hover input:checked:not(:disabled) + .form-checkbox-switch-track {
-  background: var(--color-primary-dark, #2563eb);
-}
-
-/* 开关标签文字 */
-.form-checkbox-switch-text {
-  font-size: 0.875rem;
-  color: var(--color-text-primary, var(--color-slate-700, #334155));
-  line-height: 1.4;
-}
-
-/* 小号开关 */
-.form-checkbox-switch--sm .form-checkbox-switch-track {
-  width: 36px;
-  height: 20px;
-}
-
-.form-checkbox-switch--sm .form-checkbox-switch-track::after {
-  width: 14px;
-  height: 14px;
-}
-
-.form-checkbox-switch--sm input:checked + .form-checkbox-switch-track::after {
-  transform: translateX(16px);
-}
-
-/* 大号开关 */
-.form-checkbox-switch--lg .form-checkbox-switch-track {
-  width: 52px;
-  height: 28px;
-}
-
-.form-checkbox-switch--lg .form-checkbox-switch-track::after {
-  width: 22px;
-  height: 22px;
-}
-
-.form-checkbox-switch--lg input:checked + .form-checkbox-switch-track::after {
-  transform: translateX(24px);
-}
-
-/* -----------------------------------------
-   10.13 全选 / 批量操作栏
-   ----------------------------------------- */
-.form-checkbox-select-all {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs, 8px);
-  padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
-  border-bottom: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  margin-bottom: var(--spacing-sm, 12px);
-}
-
-.form-checkbox-select-all-text {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-text-secondary, var(--color-slate-600, #475569));
-}
-
-/* 已选计数 */
-.form-checkbox-selected-count {
-  font-size: 0.75rem;
-  color: var(--color-primary, #3b82f6);
-  font-weight: 500;
-  margin-left: auto;
-}
-
-/* 批量操作工具栏 (表格上方) */
-.form-checkbox-bulk-bar {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm, 12px);
-  padding: var(--spacing-xs, 8px) var(--spacing-md, 16px);
-  background: var(
-    --color-primary-light,
-    color-mix(in srgb, var(--color-primary, #3b82f6) 6%, transparent)
-  );
-  border: 1px solid color-mix(in srgb, var(--color-primary, #3b82f6) 15%, transparent);
-  border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  font-size: 0.8125rem;
-  color: var(--color-primary, #3b82f6);
-  animation: fadeInUp var(--duration-fast, 200ms) var(--ease-spring) forwards;
-}
-
-.form-checkbox-bulk-bar-count {
-  font-weight: 600;
-}
-
-.form-checkbox-bulk-bar-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs, 8px);
-  margin-left: auto;
-}
-
-/* ========================================
-   11. Radio 单选框
-   ======================================== */
-.form-radio,
-input[type='radio'] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--radio-size);
-  height: var(--radio-size);
-  border: 1.5px solid var(--check-border);
-  border-radius: 50%;
-  background: var(--check-bg);
-  cursor: pointer;
-  flex-shrink: 0;
-  vertical-align: middle;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-origin: border-box;
-  user-select: none;
-  color: var(--check-color-active);
-  position: relative;
-  transition:
-    background-color var(--duration-fast, 200ms) var(--ease-smooth),
-    border-color var(--duration-fast, 200ms) var(--ease-smooth),
-    box-shadow var(--duration-fast, 200ms) var(--ease-smooth);
-}
-
-/* 选中圆点 — 伪元素 */
-.form-radio::after {
-  content: '';
-  display: block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ffffff;
-  opacity: 0;
-  transform: scale(0);
-  transition:
-    opacity var(--duration-fast, 200ms) var(--ease-smooth),
-    transform var(--duration-fast, 200ms) var(--ease-spring);
-}
-
-/* 选中圆点 — SVG 背景 */
 input[type='radio']:checked {
   background-color: currentColor;
   border-color: transparent;
@@ -1356,68 +514,51 @@ input[type='radio']:checked {
   background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");
 }
 
-.form-radio:checked {
-  background-color: var(--check-color-active);
-  border-color: var(--check-color-active);
-}
-
-.form-radio:checked::after {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.form-radio:hover:not(:disabled):not(:checked),
+input[type='checkbox']:hover:not(:disabled):not(:checked),
 input[type='radio']:hover:not(:disabled):not(:checked) {
   border-color: var(--check-border-hover);
 }
 
-.form-radio:focus,
-.form-radio:focus-visible,
+input[type='checkbox']:hover:checked:not(:disabled) {
+  background-color: var(--color-primary-dark, #2563eb);
+  border-color: var(--color-primary-dark, #2563eb);
+}
+
+input[type='checkbox']:focus,
+input[type='checkbox']:focus-visible,
 input[type='radio']:focus,
 input[type='radio']:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--check-ring-focus);
 }
 
-.form-radio:disabled,
+input[type='checkbox']:focus:not(:focus-visible),
+input[type='radio']:focus:not(:focus-visible) {
+  box-shadow: none;
+}
+
+input[type='checkbox']:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+input[type='checkbox']:disabled,
 input[type='radio']:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background-color: var(--color-bg-disabled, var(--color-slate-100, #f1f5f9));
 }
 
-/* ========================================
-   12. 表单尺寸变体
-   ======================================== */
-.form-input-sm,
-.form-textarea-sm {
-  padding: 0.375rem 0.625rem;
-  font-size: 0.8125rem;
+input[type='checkbox']:disabled:checked {
+  background-color: var(--color-text-disabled, var(--color-slate-400, #94a3b8));
+  border-color: var(--color-text-disabled, var(--color-slate-400, #94a3b8));
 }
 
-.form-input-lg,
-.form-textarea-lg {
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-}
-
-/* ========================================
-   13. 暗色模式
-   字段/checkbox 主色路径依赖 :root 语义 token（global dark 翻转）；
-   仅保留无法由 surface 自动消化的细节补丁。
-   ======================================== */
-
-/* Checkbox/Radio：暗色下 unchecked 面更软（不是 hard white elevated） */
-.dark .form-checkbox,
+/* 暗色下 unchecked 面更软（不是 hard white elevated） */
 .dark input[type='checkbox'],
-.dark .form-radio,
 .dark input[type='radio'],
-[data-color-mode-resolved='dark'] .form-checkbox,
 [data-color-mode-resolved='dark'] input[type='checkbox'],
-[data-color-mode-resolved='dark'] .form-radio,
 [data-color-mode-resolved='dark'] input[type='radio'],
-[data-theme='dark'] .form-checkbox,
 [data-theme='dark'] input[type='checkbox'],
-[data-theme='dark'] .form-radio,
 [data-theme='dark'] input[type='radio'] {
   --check-bg: var(--color-bg-tertiary, rgba(255, 255, 255, 0.04));
   --check-ring-focus: color-mix(
@@ -1427,175 +568,59 @@ input[type='radio']:disabled {
   );
 }
 
-.dark .form-checkbox:disabled:checked,
 .dark input[type='checkbox']:disabled:checked,
-[data-color-mode-resolved='dark'] .form-checkbox:disabled:checked,
+.dark input[type='radio']:disabled:checked,
 [data-color-mode-resolved='dark'] input[type='checkbox']:disabled:checked,
-[data-theme='dark'] .form-checkbox:disabled:checked,
-[data-theme='dark'] input[type='checkbox']:disabled:checked {
+[data-color-mode-resolved='dark'] input[type='radio']:disabled:checked,
+[data-theme='dark'] input[type='checkbox']:disabled:checked,
+[data-theme='dark'] input[type='radio']:disabled:checked {
   background-color: var(--color-bg-active, rgba(255, 255, 255, 0.15));
   border-color: var(--color-border-strong, rgba(255, 255, 255, 0.15));
 }
 
-/* Select chevron 在暗色下需更亮的 stroke（data-uri 无法跟 token） */
-.dark .form-select,
-[data-color-mode-resolved='dark'] .form-select,
-[data-theme='dark'] .form-select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-}
-
 /* ========================================
-   14. 响应式适配
+   11. 无障碍 & 减少动画
    ======================================== */
-@media (max-width: 639px) {
-  /* 复选框组移动端转为单列 */
-  .form-checkbox-group--horizontal {
-    flex-direction: column;
-    gap: var(--spacing-sm, 12px);
-  }
-
-  /* 网格单列 */
-  .form-checkbox-group--grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* 卡片最小触摸目标 */
-  .form-checkbox-card {
-    min-height: 44px;
-  }
-
-  /* 内联表单转为垂直 */
-  .form-inline {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  /* 防止 iOS 缩放 */
-  .form-input,
-  .form-textarea,
-  .form-select {
-    font-size: 16px;
-  }
-
-  /* 批量操作栏换行 */
-  .form-checkbox-bulk-bar {
-    flex-wrap: wrap;
-  }
-}
-
-/* ========================================
-   15. 无障碍 & 减少动画
-   ======================================== */
-
-/* --- 焦点可见性 --- */
-.form-checkbox:focus-visible,
-input[type='checkbox']:focus-visible,
-.form-radio:focus-visible,
-input[type='radio']:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--check-ring-focus);
-}
-
-.form-checkbox:focus:not(:focus-visible),
-input[type='checkbox']:focus:not(:focus-visible),
-.form-radio:focus:not(:focus-visible),
-input[type='radio']:focus:not(:focus-visible) {
-  box-shadow: none;
-}
-
-.form-input:focus-visible,
-.form-textarea:focus-visible,
-.form-select:focus-visible {
-  outline: none;
-  border-color: var(--field-focus);
-  box-shadow: 0 0 0 3px var(--field-focus-ring);
-}
-
-/* --- 减少动画 --- */
 @media (prefers-reduced-motion: reduce) {
   .form-input,
   .form-textarea,
-  .form-select,
-  .form-checkbox,
-  .form-radio,
   input[type='checkbox'],
-  input[type='radio'],
-  .form-checkbox::after,
-  .form-radio::after,
-  .form-checkbox-card,
-  .form-checkbox-switch-track,
-  .form-checkbox-switch-track::after,
-  .form-checkbox-card-icon {
+  input[type='radio'] {
     transition: none !important;
   }
 
-  .form-checkbox:active:not(:disabled),
   input[type='checkbox']:active:not(:disabled) {
     transform: none !important;
-  }
-
-  .form-checkbox-card--with-badge:has(:checked)::before {
-    animation: none !important;
-  }
-
-  .form-checkbox-bulk-bar {
-    animation: none !important;
   }
 }
 
 /* --- 高对比度 --- */
 @media (forced-colors: active) {
-  .form-checkbox,
   input[type='checkbox'],
-  .form-radio,
   input[type='radio'] {
     border: 2px solid CanvasText;
     background: Canvas;
     forced-color-adjust: none;
   }
 
-  .form-checkbox:checked,
   input[type='checkbox']:checked,
-  .form-radio:checked,
   input[type='radio']:checked {
     background: Highlight;
     border-color: Highlight;
   }
 
-  .form-checkbox:disabled,
   input[type='checkbox']:disabled,
-  .form-radio:disabled,
   input[type='radio']:disabled {
     border-color: GrayText;
   }
 
-  .form-checkbox-card {
-    border: 2px solid CanvasText;
-  }
-
-  .form-checkbox-card:has(:checked) {
-    border-color: Highlight;
-  }
-
-  .form-checkbox-switch-track {
-    border: 2px solid CanvasText;
-    forced-color-adjust: none;
-  }
-
-  .form-checkbox-switch input:checked + .form-checkbox-switch-track {
-    background: Highlight;
-    border-color: Highlight;
-  }
-
   .form-input,
-  .form-textarea,
-  .form-select {
+  .form-textarea {
     border: 2px solid CanvasText;
   }
 
   .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
+  .form-textarea:focus {
     outline: 2px solid Highlight;
     outline-offset: 1px;
     box-shadow: none;
