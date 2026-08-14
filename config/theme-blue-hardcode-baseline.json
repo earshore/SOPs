@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-14T14:58:08.588Z",
+  "updatedAt": "2026-08-14T15:18:14.287Z",
   "shell": {
     "total": 37,
     "filesScanned": 71,
@@ -15,15 +15,13 @@
   },
   "modules": {
     "filesScanned": 390,
-    "filesWithHits": 1,
+    "filesWithHits": 0,
     "families": {
       "sops": {
-        "total": 2,
+        "total": 0,
         "filesScanned": 52,
-        "filesWithHits": 1,
-        "files": {
-          "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 2
-        }
+        "filesWithHits": 0,
+        "files": {}
       },
       "app_center": {
         "total": 0,
