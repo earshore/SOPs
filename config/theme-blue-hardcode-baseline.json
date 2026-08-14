@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-14T12:58:06.210Z",
+  "updatedAt": "2026-08-14T13:13:52.045Z",
   "shell": {
     "total": 13,
     "filesScanned": 26,
@@ -11,7 +11,7 @@
   },
   "modules": {
     "filesScanned": 390,
-    "filesWithHits": 24,
+    "filesWithHits": 9,
     "families": {
       "sops": {
         "total": 65,
@@ -36,26 +36,10 @@
         "files": {}
       },
       "amz_hub": {
-        "total": 146,
+        "total": 0,
         "filesScanned": 40,
-        "filesWithHits": 15,
-        "files": {
-          "src/modules/amz_hub/views/practice/quality_listing/template.html": 71,
-          "src/modules/amz_hub/views/knowledge/seo_strategy/template.html": 11,
-          "src/modules/amz_hub/views/advanced/new_product_30days/template.html": 9,
-          "src/modules/amz_hub/views/overview/template.html": 9,
-          "src/modules/amz_hub/views/knowledge/ecosystem/template.html": 8,
-          "src/modules/amz_hub/views/advanced/conversion_optimization/template.html": 7,
-          "src/modules/amz_hub/views/knowledge/eu_insights/template.html": 5,
-          "src/modules/amz_hub/views/knowledge/ecosystem/styles.css": 4,
-          "src/modules/amz_hub/views/knowledge/eu_insights/styles.css": 4,
-          "src/modules/amz_hub/views/knowledge/seo_strategy/styles.css": 4,
-          "src/modules/amz_hub/views/practice/quality_listing/styles.css": 4,
-          "src/modules/amz_hub/views/advanced/conversion_optimization/styles.css": 3,
-          "src/modules/amz_hub/views/advanced/mature_phase/styles.css": 3,
-          "src/modules/amz_hub/views/advanced/new_product_30days/styles.css": 3,
-          "src/modules/amz_hub/views/practice/promo_activities/template.html": 1
-        }
+        "filesWithHits": 0,
+        "files": {}
       },
       "more": {
         "total": 0,

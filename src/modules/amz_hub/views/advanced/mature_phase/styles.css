@@ -3,7 +3,6 @@
     > :nth-child(n + 2):where(
       .bg-white,
       .bg-slate-50,
-      .bg-blue-50,
       .bg-emerald-50,
       .bg-rose-50,
       .bg-orange-50,
@@ -34,7 +33,6 @@
     :is([class^='p-'], [class*=' p-']):where(
       .bg-white,
       .bg-slate-50,
-      .bg-blue-50,
       .bg-emerald-50,
       .bg-rose-50,
       .bg-orange-50,
@@ -51,7 +49,6 @@
     > :nth-child(n + 2)
     :is([class^='p-'], [class*=' p-']):where(
       .bg-slate-50,
-      .bg-blue-50,
       .bg-emerald-50,
       .bg-rose-50,
       .bg-orange-50,

@@ -12,12 +12,10 @@
     :is([class^='p-'], [class*=' p-']):where(
       .bg-white,
       .bg-slate-50,
-      .bg-blue-50,
       .bg-emerald-50,
       .bg-purple-50,
       .bg-orange-50,
       .bg-amber-50,
-      .bg-indigo-50,
       .bg-teal-50
     ) {
     border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32)) !important;
@@ -29,12 +27,10 @@
     > :nth-child(n + 2)
     :is([class^='p-'], [class*=' p-']):where(
       .bg-slate-50,
-      .bg-blue-50,
       .bg-emerald-50,
       .bg-purple-50,
       .bg-orange-50,
       .bg-amber-50,
-      .bg-indigo-50,
       .bg-teal-50
     ) {
     background: var(--surface-card-hover, var(--color-slate-50)) !important;
