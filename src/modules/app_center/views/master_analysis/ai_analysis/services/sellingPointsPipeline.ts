@@ -16,6 +16,10 @@ import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService'
 import { sanitizePromptInput } from '@/common/utils/promptSanitizer';
 import { isObject } from '@/common/utils/typeGuards';
 import type { Product } from '../config/sampleData';
+import {
+  buildSellingPointsMapPrompt,
+  buildSellingPointsReducePrompt,
+} from '../prompts/pipelinePrompts';
 import { generateAnalysisPrompt, MASTER_ANALYSIS_SYSTEM_PROMPT } from '../prompts/analysisPrompts';
 import { parseAnalysisResponse } from './analysisResultParser';
 import {
@@ -215,37 +219,13 @@ function buildMapPrompt(slice: SourceProductSlice, language: string, globalOffse
     )
     .join('\n');
 
-  return `
-You are a Data Extraction Engine for Amazon listing bullet analysis.
-Output ONLY valid JSON (no markdown). Language for analysis fields: **${language}**.
-
-## Task (Map)
-Parse EACH bullet below into function / scene / pain-point fields.
-Do NOT invent market facts. Keep bullet_index equal to the number prefix.
-
-## Inputs
-- ASIN: ${sanitizePromptInput(slice.asin)}
-- Title: ${sanitizePromptInput(slice.productTitle)}
-- Bullets:
-${lines}
-
-## Strict Output Schema
-{
-  "selling-points": {
-    "bullet_analysis": [
-      {
-        "bullet_index": 1,
-        "original_text_summary": "string",
-        "functions": ["string"],
-        "scenes": ["string"],
-        "pain_points_addressed": ["string"],
-        "differentiation_angle": "string",
-        "credibility_score": "high|medium|low"
-      }
-    ]
-  }
-}
-`;
+  return buildSellingPointsMapPrompt({
+    language,
+    asin: sanitizePromptInput(slice.asin),
+    productTitle: sanitizePromptInput(slice.productTitle),
+    bulletLines: lines,
+    mappedEvidenceJson: '',
+  });
 }
 
 function compactBulletsForReduce(bullets: unknown[]): unknown[] {
@@ -274,40 +254,13 @@ function buildReducePrompt(product: Product, language: string, bulletAnalysis: u
     null,
     2
   );
-  return `
-You are a Data Extraction Engine for Amazon listing strategy synthesis.
-Output ONLY valid JSON (no markdown). Language for analysis fields: **${language}**.
-
-## Task (Reduce)
-Using the already-extracted bullet_analysis JSON below (full multi-ASIN coverage), produce:
-1) overall_strategy
-2) function_scene_matrix
-Do NOT re-list every bullet. Do NOT invent unsupported claims.
-
-## Product
-- ASINs: ${sanitizePromptInput(product.asin)}
-- Titles: ${sanitizePromptInput(product.productTitle)}
-
-## Mapped bullet_analysis
-${compact}
-
-## Strict Output Schema
-{
-  "selling-points": {
-    "overall_strategy": {
-      "primary_differentiation": "string",
-      "target_positioning": "string",
-      "emotional_hooks": ["string"],
-      "missing_elements": ["string"]
-    },
-    "function_scene_matrix": {
-      "functions": ["string"],
-      "scenes": ["string"],
-      "pain_points": ["string"]
-    }
-  }
-}
-`;
+  return buildSellingPointsReducePrompt({
+    language,
+    asin: sanitizePromptInput(product.asin),
+    productTitle: sanitizePromptInput(product.productTitle),
+    bulletLines: '',
+    mappedEvidenceJson: compact,
+  });
 }
 
 function emptyOverallStrategy(): Record<string, unknown> {

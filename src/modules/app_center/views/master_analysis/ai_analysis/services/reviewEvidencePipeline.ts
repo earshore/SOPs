@@ -16,6 +16,21 @@ import { sanitizePromptInput } from '@/common/utils/promptSanitizer';
 import { isObject } from '@/common/utils/typeGuards';
 import type { Product, Review } from '../config/sampleData';
 import { generateAnalysisPrompt, MASTER_ANALYSIS_SYSTEM_PROMPT } from '../prompts/analysisPrompts';
+import {
+  buildFatalFlawsMapPrompt,
+  buildFatalFlawsReducePrompt,
+  buildHesitationPointsMapPrompt,
+  buildHesitationPointsReducePrompt,
+  buildBuyerProfileMapPrompt,
+  buildBuyerProfileReducePrompt,
+  buildPromiseRealityMapPrompt,
+  buildPromiseRealityReducePrompt,
+  buildSharedGeneralMapPrompt as buildSharedGeneralMapPromptTpl,
+  buildVocabGapMapPrompt,
+  buildVocabGapReducePrompt,
+  buildWowMomentsMapPrompt,
+  buildWowMomentsReducePrompt,
+} from '../prompts/pipelinePrompts';
 import { parseAnalysisResponse } from './analysisResultParser';
 import { parseLlmJson } from '@/common/utils/parseLlmJson';
 import {
@@ -368,51 +383,20 @@ const TARGET_HANDLERS: Record<ReviewEvidenceTargetId, TargetHandler> = {
       asObjectArray(mapped.critical_issues).length > 0 ||
       asStringArray(mapped.return_triggers).length > 0,
     normalize: normalizeFatalFlawsResult,
-    buildMapPrompt: (slice, language, offset) => `
-You are a Data Extraction Engine for Amazon low-star review flaws.
-Output ONLY valid JSON (no markdown). Analysis language: **${language}**.
-
-## Task (Map)
-From 1–3★ reviews only: extract product defects / expectation gaps (ignore pure logistics).
-
-## Inputs
-- ASIN: ${sanitizePromptInput(slice.asin)}
-- Title: ${sanitizePromptInput(slice.productTitle)}
-- Reviews:
-${buildReviewBlock(slice, offset)}
-
-## Strict Output Schema
-{
-  "fatal-flaws": {
-    "critical_issues": [{"issue":"string","frequency":"string","user_quotes":["string"],"severity":"critical|major|minor","category":"quality|performance|value|authenticity|other"}],
-    "return_triggers": ["string"],
-    "expectation_gaps": [{"expected":"string","reality":"string","disappointment_level":"high|medium|low"}]
-  }
-}
-`,
-    buildReducePrompt: (product, language, mapped) => `
-You synthesize multi-ASIN fatal-flaws maps into one report.
-Output ONLY valid JSON. Language: **${language}**.
-Merge/de-duplicate issues; add risk_assessment + actionable_fixes. Do not invent issues.
-
-## Product
-ASINs: ${sanitizePromptInput(product.asin)}
-Titles: ${sanitizePromptInput(product.productTitle)}
-
-## Mapped evidence
-${JSON.stringify(mapped, null, 2)}
-
-## Strict Output Schema
-{
-  "fatal-flaws": {
-    "critical_issues": [{"issue":"string","frequency":"string","user_quotes":["string"],"severity":"critical|major|minor","category":"quality|performance|value|authenticity|other"}],
-    "return_triggers": ["string"],
-    "expectation_gaps": [{"expected":"string","reality":"string","disappointment_level":"high|medium|low"}],
-    "actionable_fixes": ["string"],
-    "risk_assessment": {"overall_risk_level":"high|medium|low","primary_concern":"string"}
-  }
-}
-`,
+    buildMapPrompt: (slice, language, offset) =>
+      buildFatalFlawsMapPrompt({
+        language,
+        asin: sanitizePromptInput(slice.asin),
+        productTitle: sanitizePromptInput(slice.productTitle),
+        reviewBlock: buildReviewBlock(slice, offset),
+      }),
+    buildReducePrompt: (product, language, mapped) =>
+      buildFatalFlawsReducePrompt({
+        language,
+        asin: sanitizePromptInput(product.asin),
+        productTitle: sanitizePromptInput(product.productTitle),
+        mappedEvidenceJson: JSON.stringify(mapped, null, 2),
+      }),
     mergeReduce: (mapped, reduced) =>
       normalizeFatalFlawsResult({
         ...mapped,
@@ -440,50 +424,20 @@ ${JSON.stringify(mapped, null, 2)}
     },
     hasMapSignal: mapped => asObjectArray(mapped.moments).length > 0,
     normalize: normalizeWowMomentsResult,
-    buildMapPrompt: (slice, language, offset) => `
-You extract 5★ wow moments. Output ONLY valid JSON. Language: **${language}**.
-
-## Task (Map)
-Specific "exceeded expectations" moments (not generic praise).
-
-## Inputs
-- ASIN: ${sanitizePromptInput(slice.asin)}
-- Title: ${sanitizePromptInput(slice.productTitle)}
-- Reviews:
-${buildReviewBlock(slice, offset)}
-
-## Strict Output Schema
-{
-  "wow-moments": {
-    "moments": [{"moment_description":"string","user_quote":"string","emotion_type":"surprise|delight|relief|amazement","aspect":"quality|smell|packaging|value|performance","marketing_potential":"high|medium|low"}],
-    "emotional_triggers": ["string"],
-    "high_conversion_phrases": ["string"],
-    "unexpected_benefits": ["string"]
-  }
-}
-`,
-    buildReducePrompt: (product, language, mapped) => `
-You synthesize multi-ASIN wow-moments. Output ONLY valid JSON. Language: **${language}**.
-Merge moments/phrases; add copywriting_angles. Do not invent quotes.
-
-## Product
-ASINs: ${sanitizePromptInput(product.asin)}
-Titles: ${sanitizePromptInput(product.productTitle)}
-
-## Mapped evidence
-${JSON.stringify(mapped, null, 2)}
-
-## Strict Output Schema
-{
-  "wow-moments": {
-    "moments": [{"moment_description":"string","user_quote":"string","emotion_type":"surprise|delight|relief|amazement","aspect":"quality|smell|packaging|value|performance","marketing_potential":"high|medium|low"}],
-    "emotional_triggers": ["string"],
-    "high_conversion_phrases": ["string"],
-    "unexpected_benefits": ["string"],
-    "copywriting_angles": ["string"]
-  }
-}
-`,
+    buildMapPrompt: (slice, language, offset) =>
+      buildWowMomentsMapPrompt({
+        language,
+        asin: sanitizePromptInput(slice.asin),
+        productTitle: sanitizePromptInput(slice.productTitle),
+        reviewBlock: buildReviewBlock(slice, offset),
+      }),
+    buildReducePrompt: (product, language, mapped) =>
+      buildWowMomentsReducePrompt({
+        language,
+        asin: sanitizePromptInput(product.asin),
+        productTitle: sanitizePromptInput(product.productTitle),
+        mappedEvidenceJson: JSON.stringify(mapped, null, 2),
+      }),
     mergeReduce: (mapped, reduced) =>
       normalizeWowMomentsResult({
         ...mapped,
@@ -511,46 +465,20 @@ ${JSON.stringify(mapped, null, 2)}
       asObjectArray(mapped.hesitations).length > 0 ||
       asStringArray(mapped.common_doubts).length > 0,
     normalize: normalizeHesitationResult,
-    buildMapPrompt: (slice, language, offset) => `
-Extract pre-purchase hesitation patterns from reviews. Output ONLY valid JSON. Language: **${language}**.
-
-## Inputs
-- ASIN: ${sanitizePromptInput(slice.asin)}
-- Title: ${sanitizePromptInput(slice.productTitle)}
-- Reviews:
-${buildReviewBlock(slice, offset)}
-
-## Strict Output Schema
-{
-  "hesitation-points": {
-    "hesitations": [{"pre_purchase_worry":"string","post_purchase_resolution":"string","user_evidence":"string","qa_recommendation":"string"}],
-    "common_doubts": ["string"],
-    "trust_builders": ["string"],
-    "qa_optimization_items": [{"question":"string","suggested_answer":"string"}]
-  }
-}
-`,
-    buildReducePrompt: (product, language, mapped) => `
-Merge multi-ASIN hesitation-points maps. Output ONLY valid JSON. Language: **${language}**.
-De-duplicate; prefer concrete Q&A items.
-
-## Product
-ASINs: ${sanitizePromptInput(product.asin)}
-Titles: ${sanitizePromptInput(product.productTitle)}
-
-## Mapped evidence
-${JSON.stringify(mapped, null, 2)}
-
-## Strict Output Schema
-{
-  "hesitation-points": {
-    "hesitations": [{"pre_purchase_worry":"string","post_purchase_resolution":"string","user_evidence":"string","qa_recommendation":"string"}],
-    "common_doubts": ["string"],
-    "trust_builders": ["string"],
-    "qa_optimization_items": [{"question":"string","suggested_answer":"string"}]
-  }
-}
-`,
+    buildMapPrompt: (slice, language, offset) =>
+      buildHesitationPointsMapPrompt({
+        language,
+        asin: sanitizePromptInput(slice.asin),
+        productTitle: sanitizePromptInput(slice.productTitle),
+        reviewBlock: buildReviewBlock(slice, offset),
+      }),
+    buildReducePrompt: (product, language, mapped) =>
+      buildHesitationPointsReducePrompt({
+        language,
+        asin: sanitizePromptInput(product.asin),
+        productTitle: sanitizePromptInput(product.productTitle),
+        mappedEvidenceJson: JSON.stringify(mapped, null, 2),
+      }),
     mergeReduce: (mapped, reduced) =>
       normalizeHesitationResult({
         ...mapped,
@@ -586,48 +514,20 @@ ${JSON.stringify(mapped, null, 2)}
     hasMapSignal: mapped =>
       asObjectArray(mapped.buyer_types).length > 0 || asObjectArray(mapped.usage_scenes).length > 0,
     normalize: normalizeBuyerProfileResult,
-    buildMapPrompt: (slice, language, offset) => `
-Infer buyer profile signals from reviews. Output ONLY valid JSON. Language: **${language}**.
-
-## Inputs
-- ASIN: ${sanitizePromptInput(slice.asin)}
-- Title: ${sanitizePromptInput(slice.productTitle)}
-- Reviews:
-${buildReviewBlock(slice, offset)}
-
-## Strict Output Schema
-{
-  "buyer-profile": {
-    "demographics": {"likely_gender":"male|female|mixed","age_range_estimate":"string","lifestyle_indicators":["string"]},
-    "buyer_types": [{"type":"string","percentage_estimate":"string","evidence":"string"}],
-    "usage_scenes": [{"scene":"string","frequency":"daily|weekly|occasional|special","context":"string"}],
-    "purchase_motivations": ["string"],
-    "geographic_insights": {}
-  }
-}
-`,
-    buildReducePrompt: (product, language, mapped) => `
-Synthesize multi-ASIN buyer-profile maps into one profile. Output ONLY valid JSON. Language: **${language}**.
-Reconcile conflicting demographics carefully; keep evidence-backed types/scenes.
-
-## Product
-ASINs: ${sanitizePromptInput(product.asin)}
-Titles: ${sanitizePromptInput(product.productTitle)}
-
-## Mapped evidence
-${JSON.stringify(mapped, null, 2)}
-
-## Strict Output Schema
-{
-  "buyer-profile": {
-    "demographics": {"likely_gender":"male|female|mixed","age_range_estimate":"string","lifestyle_indicators":["string"]},
-    "buyer_types": [{"type":"string","percentage_estimate":"string","evidence":"string"}],
-    "usage_scenes": [{"scene":"string","frequency":"daily|weekly|occasional|special","context":"string"}],
-    "purchase_motivations": ["string"],
-    "geographic_insights": {}
-  }
-}
-`,
+    buildMapPrompt: (slice, language, offset) =>
+      buildBuyerProfileMapPrompt({
+        language,
+        asin: sanitizePromptInput(slice.asin),
+        productTitle: sanitizePromptInput(slice.productTitle),
+        reviewBlock: buildReviewBlock(slice, offset),
+      }),
+    buildReducePrompt: (product, language, mapped) =>
+      buildBuyerProfileReducePrompt({
+        language,
+        asin: sanitizePromptInput(product.asin),
+        productTitle: sanitizePromptInput(product.productTitle),
+        mappedEvidenceJson: JSON.stringify(mapped, null, 2),
+      }),
     mergeReduce: (mapped, reduced) =>
       normalizeBuyerProfileResult({
         ...mapped,
@@ -657,48 +557,22 @@ ${JSON.stringify(mapped, null, 2)}
       asStringArray(mapped.buyer_terms).length > 0 ||
       asObjectArray(mapped.uncovered_buyer_terms).length > 0,
     normalize: normalizeVocabGapResult,
-    buildMapPrompt: (slice, language, offset, product) => `
-Compare seller listing vocabulary vs buyer review language. Output ONLY valid JSON. Language: **${language}**.
-
-## Listing bullets (full set)
-${formatBullets(product)}
-
-## Reviews (shard)
-- ASIN: ${sanitizePromptInput(slice.asin)}
-- Title: ${sanitizePromptInput(slice.productTitle)}
-${buildReviewBlock(slice, offset)}
-
-## Strict Output Schema
-{
-  "vocab-gap": {
-    "seller_terms": ["string"],
-    "buyer_terms": ["string"],
-    "uncovered_buyer_terms": [{"term":"string","frequency":"high|medium|low","context":"string","recommendation":"add to title|add to bullets|add to description"}],
-    "term_translations": [{"seller_term":"string","buyer_term":"string"}]
-  }
-}
-`,
-    buildReducePrompt: (product, language, mapped) => `
-Merge multi-ASIN vocab-gap maps. Output ONLY valid JSON. Language: **${language}**.
-De-duplicate terms; keep high-value uncovered buyer terms; add listing_optimization if useful.
-
-## Listing bullets
-${formatBullets(product)}
-
-## Mapped evidence
-${JSON.stringify(mapped, null, 2)}
-
-## Strict Output Schema
-{
-  "vocab-gap": {
-    "seller_terms": ["string"],
-    "buyer_terms": ["string"],
-    "uncovered_buyer_terms": [{"term":"string","frequency":"high|medium|low","context":"string","recommendation":"add to title|add to bullets|add to description"}],
-    "term_translations": [{"seller_term":"string","buyer_term":"string"}],
-    "listing_optimization": {}
-  }
-}
-`,
+    buildMapPrompt: (slice, language, offset, product) =>
+      buildVocabGapMapPrompt({
+        language,
+        asin: sanitizePromptInput(slice.asin),
+        productTitle: sanitizePromptInput(slice.productTitle),
+        bulletLines: formatBullets(product),
+        reviewBlock: buildReviewBlock(slice, offset),
+      }),
+    buildReducePrompt: (product, language, mapped) =>
+      buildVocabGapReducePrompt({
+        language,
+        asin: sanitizePromptInput(product.asin),
+        productTitle: sanitizePromptInput(product.productTitle),
+        bulletLines: formatBullets(product),
+        mappedEvidenceJson: JSON.stringify(mapped, null, 2),
+      }),
     mergeReduce: (mapped, reduced) =>
       normalizeVocabGapResult({
         ...mapped,
@@ -727,47 +601,22 @@ ${JSON.stringify(mapped, null, 2)}
     hasMapSignal: mapped =>
       asObjectArray(mapped.gaps).length > 0 || asStringArray(mapped.verified_claims).length > 0,
     normalize: normalizePromiseRealityResult,
-    buildMapPrompt: (slice, language, offset, product) => `
-Find listing promise vs review reality gaps. Output ONLY valid JSON. Language: **${language}**.
-
-## Listing bullets
-${formatBullets(product)}
-
-## Reviews (shard)
-- ASIN: ${sanitizePromptInput(slice.asin)}
-- Title: ${sanitizePromptInput(slice.productTitle)}
-${buildReviewBlock(slice, offset)}
-
-## Strict Output Schema
-{
-  "promise-reality": {
-    "gaps": [{"listing_claim":"string","review_reality":"string","contradiction_severity":"severe|moderate|minor","evidence_quotes":["string"],"false_advertising_risk":"high|medium|low","recommended_action":"string"}],
-    "verified_claims": ["string"],
-    "unverified_claims": ["string"]
-  }
-}
-`,
-    buildReducePrompt: (product, language, mapped) => `
-Merge multi-ASIN promise-reality maps. Output ONLY valid JSON. Language: **${language}**.
-De-duplicate gaps; produce overall_credibility + listing_revision_suggestions.
-
-## Listing bullets
-${formatBullets(product)}
-
-## Mapped evidence
-${JSON.stringify(mapped, null, 2)}
-
-## Strict Output Schema
-{
-  "promise-reality": {
-    "gaps": [{"listing_claim":"string","review_reality":"string","contradiction_severity":"severe|moderate|minor","evidence_quotes":["string"],"false_advertising_risk":"high|medium|low","recommended_action":"string"}],
-    "verified_claims": ["string"],
-    "unverified_claims": ["string"],
-    "overall_credibility": {"score":"1-10","summary":"string"},
-    "listing_revision_suggestions": ["string"]
-  }
-}
-`,
+    buildMapPrompt: (slice, language, offset, product) =>
+      buildPromiseRealityMapPrompt({
+        language,
+        asin: sanitizePromptInput(slice.asin),
+        productTitle: sanitizePromptInput(slice.productTitle),
+        bulletLines: formatBullets(product),
+        reviewBlock: buildReviewBlock(slice, offset),
+      }),
+    buildReducePrompt: (product, language, mapped) =>
+      buildPromiseRealityReducePrompt({
+        language,
+        asin: sanitizePromptInput(product.asin),
+        productTitle: sanitizePromptInput(product.productTitle),
+        bulletLines: formatBullets(product),
+        mappedEvidenceJson: JSON.stringify(mapped, null, 2),
+      }),
     mergeReduce: (mapped, reduced) =>
       normalizePromiseRealityResult({
         ...mapped,
@@ -1316,47 +1165,13 @@ function buildSharedGeneralMapPrompt(
   offset: number,
   product: Product
 ): string {
-  return `
-You extract multi-dimension review evidence for Amazon products in ONE pass.
-Output ONLY valid JSON (no markdown). Analysis language: **${language}**.
-Do not invent quotes. Empty arrays are allowed when evidence is missing.
-
-## Listing bullets
-${formatBullets(product)}
-
-## Reviews
-- ASIN: ${sanitizePromptInput(slice.asin)}
-- Title: ${sanitizePromptInput(slice.productTitle)}
-${buildReviewBlock(slice, offset)}
-
-## Strict Output Schema
-{
-  "hesitation-points": {
-    "hesitations": [{"pre_purchase_worry":"string","post_purchase_resolution":"string","user_evidence":"string","qa_recommendation":"string"}],
-    "common_doubts": ["string"],
-    "trust_builders": ["string"],
-    "qa_optimization_items": [{"question":"string","suggested_answer":"string"}]
-  },
-  "buyer-profile": {
-    "demographics": {"likely_gender":"male|female|mixed","age_range_estimate":"string","lifestyle_indicators":["string"]},
-    "buyer_types": [{"type":"string","percentage_estimate":"string","evidence":"string"}],
-    "usage_scenes": [{"scene":"string","frequency":"daily|weekly|occasional|special","context":"string"}],
-    "purchase_motivations": ["string"],
-    "geographic_insights": {}
-  },
-  "vocab-gap": {
-    "seller_terms": ["string"],
-    "buyer_terms": ["string"],
-    "uncovered_buyer_terms": [{"term":"string","frequency":"high|medium|low","context":"string","recommendation":"add to title|add to bullets|add to description"}],
-    "term_translations": [{"seller_term":"string","buyer_term":"string"}]
-  },
-  "promise-reality": {
-    "gaps": [{"listing_claim":"string","review_reality":"string","contradiction_severity":"severe|moderate|minor","evidence_quotes":["string"],"false_advertising_risk":"high|medium|low","recommended_action":"string"}],
-    "verified_claims": ["string"],
-    "unverified_claims": ["string"]
-  }
-}
-`;
+  return buildSharedGeneralMapPromptTpl({
+    language,
+    asin: sanitizePromptInput(slice.asin),
+    productTitle: sanitizePromptInput(slice.productTitle),
+    bulletLines: formatBullets(product),
+    reviewBlock: buildReviewBlock(slice, offset),
+  });
 }
 
 type SharedGeneralMapState = {
