@@ -29,8 +29,10 @@ export const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMe
     label: '系统配置与偏好',
     description: 'AI 连接、工具策略、网络、布局和功能开关',
     icon: 'fa-sliders-h',
-    iconClass: 'bg-[var(--wash-blue)] text-[var(--module-accent-text)] ring-[var(--module-accent-border)]',
-    buttonClass: 'border-[var(--module-accent-border)] bg-[var(--wash-blue)] text-[var(--module-accent-text)] hover:bg-[var(--module-accent-soft)]',
+    iconClass:
+      'bg-[var(--wash-blue)] text-[var(--module-accent-text)] ring-[var(--module-accent-border)]',
+    buttonClass:
+      'border-[var(--module-accent-border)] bg-[var(--wash-blue)] text-[var(--module-accent-text)] hover:bg-[var(--module-accent-soft)]',
     actionLabel: '清理配置',
     confirmMessage: '这会删除模型、网络、布局和偏好配置，保留历史、聊天与缓存。继续？',
   },
@@ -84,8 +86,10 @@ export const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMe
     label: '最近作业记录',
     description: '工作台总览的作业与工件记录（采集/AI 分析/Prompt/文案/评审等）',
     icon: 'fa-clock-rotate-left',
-    iconClass: 'bg-[var(--wash-indigo)] text-[var(--module-accent-text)] ring-[var(--module-accent-border)]',
-    buttonClass: 'border-[var(--module-accent-border)] bg-[var(--wash-indigo)] text-[var(--module-accent-text)] hover:bg-[var(--module-accent-soft)]',
+    iconClass:
+      'bg-[var(--wash-indigo)] text-[var(--module-accent-text)] ring-[var(--module-accent-border)]',
+    buttonClass:
+      'border-[var(--module-accent-border)] bg-[var(--wash-indigo)] text-[var(--module-accent-text)] hover:bg-[var(--module-accent-soft)]',
     actionLabel: '清理作业记录',
     confirmMessage: '这会删除工作台总览的最近作业记录（含置顶/移除偏好），建议先导出备份。继续？',
   },
