@@ -23,6 +23,25 @@
 /* ========================================
    1. CSS 变量
    ======================================== */
+
+/*
+ * TD-CMP-02 批次 1（2026-08-15）：focus-ring 契约固化。
+ * 本文件定义三种 focus 环口径，后续所有表单相关样式必须对齐，禁止新建口径：
+ *
+ *   - 3px 通用口径：通用表单控件（.form-input / .form-textarea / .form-select
+ *     等）用 `box-shadow: 0 0 0 3px var(--field-focus-ring)`，`--field-focus-ring`
+ *     为 14% color-mix 语义 token（:root 变量区），跟随 Appearance primary 翻转；
+ *     完整 box-shadow 语义别名为 `--field-focus-shadow`（见下）。
+ *   - 2px 紧凑/内联控件变体：表格内联编辑与紧凑控件
+ *     （`[data-action='update-field']`、td 内联规则，L557-583）用 2px，与
+ *     buttons.css .action-btn outline 双 2px 保持同一紧凑档位。
+ *   - checkbox/radio 专用：`--check-ring-focus`（10% color-mix）+ 完整
+ *     box-shadow 别名 `--check-focus-shadow`，不直接复用 --field-focus-ring。
+ *
+ * 文档对应：docs/ACCESSIBILITY.md A 级规范（outline 双 2px / 紧凑 2px 单环）；
+ * settings 面板（systemSettings.css）自建 --settings-focus-ring 已同步下沉为
+ * 同一 3px 语义档位（TD-CMP-02 批次 1）。
+ */
 :root {
   /* ---- PC 字段基线（语义 surface/边框：global dark 令牌翻转，T3 dual-theme） ---- */
   --field-height: 40px;
@@ -43,6 +62,12 @@
     var(--color-focus-ring, var(--color-primary, #3b82f6)) 14%,
     transparent
   );
+  /* TD-CMP-02 批次 1（2026-08-15）：focus-ring 契约化，完整 box-shadow 语义
+     别名（命名已入 css:audit componentField / componentCheckFocusShadow 白名单），
+     供跨文件（settings 面板等）对齐三种口径，禁止新建口径。 */
+  --field-focus-shadow: 0 0 0 3px var(--field-focus-ring); /* 3px 通用档位 */
+  --field-focus-shadow-compact: 0 0 0 2px var(--field-focus-ring); /* 2px 紧凑档位 */
+  --check-focus-shadow: 0 0 0 2px var(--check-ring-focus); /* checkbox/radio */
 
   /* ---- 复选框 / 单选框 ---- */
   --check-size: 18px;

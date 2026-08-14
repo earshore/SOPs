@@ -138,8 +138,11 @@ const NAMING_PATTERNS = {
   componentBadge: /^--(badge|status-badge)-[\w-]+$/,
   componentProgress: /^--progress-[\w-]+$/,
   componentIcon: /^--icon-(size|radius|bg|color)$/,
+  // TD-CMP-02 批次 1（2026-08-15）：focus-ring 契约化，完整 box-shadow 语义别名
   componentField:
-    /^--field-(height|height-compact|padding-x|padding-y|radius|border|border-hover|bg|bg-muted|text|placeholder|focus|focus-ring)$/,
+    /^--field-(height|height-compact|padding-x|padding-y|radius|border|border-hover|bg|bg-muted|text|placeholder|focus|focus-ring|focus-shadow|focus-shadow-compact)$/,
+  // checkbox/radio 完整 box-shadow 语义别名（TD-CMP-02 批次 1）
+  componentCheckFocusShadow: /^--check-focus-shadow$/,
   componentCheckRadio:
     /^--(check|radio)-(size|size-sm|size-lg|radius|border|border-hover|bg|color-active|ring-focus)$/,
   componentHeader:
