@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "updatedAt": "2026-08-14T16:27:13.850Z",
+  "version": 3,
+  "updatedAt": "2026-08-14T18:28:08.974Z",
   "shell": {
     "total": 24,
     "filesScanned": 71,
@@ -43,6 +43,37 @@
         "filesWithHits": 0,
         "files": {}
       }
+    }
+  },
+  "semantic": {
+    "total": 4282,
+    "filesScanned": 52,
+    "filesWithHits": 24,
+    "files": {
+      "src/modules/sops/views/growth/restricted_words/template.html": 482,
+      "src/modules/sops/views/service/email_templates/template.html": 476,
+      "src/modules/sops/views/growth/ppc_advertising/template.html": 463,
+      "src/modules/sops/views/service/negative_review/template.html": 348,
+      "src/modules/sops/views/growth/npi_tracker/template.html": 343,
+      "src/modules/sops/views/service/qa_maintenance/template.html": 322,
+      "src/modules/sops/views/growth/promotion_submission/template.html": 228,
+      "src/modules/sops/views/growth/listing_seo/template.html": 209,
+      "src/modules/sops/views/safety/product_compliance/template.html": 185,
+      "src/modules/sops/views/growth/competitor_monitoring/template.html": 163,
+      "src/modules/sops/views/safety/eu_gpsr_compliance/template.html": 152,
+      "src/modules/sops/views/backend/fba_shipping/template.html": 145,
+      "src/modules/sops/views/safety/permission_management/template.html": 124,
+      "src/modules/sops/views/safety/brand_infringement/template.html": 123,
+      "src/modules/sops/views/safety/account_security/template.html": 102,
+      "src/modules/sops/views/backend/inventory_replenishment/template.html": 97,
+      "src/modules/sops/views/backend/procurement_qc/template.html": 91,
+      "src/modules/sops/views/safety/performance_notification/template.html": 74,
+      "src/modules/sops/views/overview/template.html": 63,
+      "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 45,
+      "src/modules/sops/views/growth/npi_tracker/index.ts": 25,
+      "src/modules/sops/sops_style.css": 10,
+      "src/modules/sops/views/growth/npi_tracker/data/mockData.ts": 6,
+      "src/modules/sops/views/growth/promotion_submission/index.ts": 6
     }
   }
 }

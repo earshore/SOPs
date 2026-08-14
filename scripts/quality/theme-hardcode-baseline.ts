@@ -23,6 +23,13 @@
  *
  *   all     (scope, report)  — entire src tree + modules family summary.
  *
+ *   semantic (added 2026-08-15, v3 baseline) — business status color
+ *     families slate/red/emerald/purple/amber in src/modules/sops only.
+ *     Covers the npi_tracker blind spot (CMP-02 B4A assessment): those
+ *     families were outside the D6 blue+indigo pair. Baseline registered
+ *     once after the assessment; the gate locks "only goes down" (total +
+ *     per-file). This is a lock lane, not a migration target.
+ *
  * Usage:
  *   npx tsx scripts/quality/theme-hardcode-baseline.ts                 # shell report
  *   npx tsx scripts/quality/theme-hardcode-baseline.ts --scope modules  # family report
@@ -109,7 +116,7 @@ interface FamilyBaseline {
 }
 
 interface BaselineFile {
-  version: 2;
+  version: 3;
   updatedAt: string;
   shell: ScopeBaseline;
   modules: {
@@ -117,6 +124,14 @@ interface BaselineFile {
     filesWithHits: number;
     families: Record<ModuleFamily, FamilyBaseline>;
   };
+  /**
+   * Semantic lane (added 2026-08-15): business status color families
+   * slate/red/emerald/purple/amber in src/modules/sops (covers npi_tracker,
+   * which is outside the blue+indigo gate). Baseline registered once after
+   * the CMP-02 B4A assessment; gate locks "only goes down" per-file and in
+   * total, closing the five-family blind spot in the D6 family pair.
+   */
+  semantic?: ScopeBaseline;
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -161,6 +176,20 @@ const BLUE_UTIL_RE = new RegExp(
  */
 const HARDCODE_UTIL_RE = new RegExp(
   `(?:${UTIL_PREFIXES.join('|')})-(?:blue|indigo)-(?:\\d{2,3}|black|white)(?:\\/\\d{1,3})?`,
+  'g'
+);
+
+/**
+ * Semantic lane: business status color families (slate/red/emerald/purple/
+ * amber). These are NOT theme colors like blue/indigo — they carry row/badge
+ * status semantics in module tables (pending/failed/done/warning/neutral),
+ * so the semantic lane is a baseline lock ("only goes down"), not a
+ * migration target. Blue+indigo remain the D6 migration families.
+ */
+const SEMANTIC_FAMILIES = ['slate', 'red', 'emerald', 'purple', 'amber'] as const;
+
+const SEMANTIC_UTIL_RE = new RegExp(
+  `(?:${UTIL_PREFIXES.join('|')})-(?:${SEMANTIC_FAMILIES.join('|')})-(?:\\d{2,3}|black|white)(?:\\/\\d{1,3})?`,
   'g'
 );
 
@@ -340,6 +369,40 @@ function scanAll(): ScanResult {
 }
 
 /** src/modules scan grouped by module family (blue + indigo). */
+/**
+ * Semantic lane scan: src/modules/sops only (per CMP-02 B4A assessment;
+ * npi_tracker lives here and its 300+ status colors were the blind spot).
+ * Other module dirs stay on the blue+indigo gate only — a full five-family
+ * baseline across all modules would be ~6k hits and meaningless as a gate.
+ */
+function scanSopsSemantic(): ScopeBaseline {
+  const sopsDir = join(srcRoot, 'modules', 'sops');
+  const files: FileHit[] = [];
+  let total = 0;
+  let filesScanned = 0;
+
+  if (existsSync(sopsDir)) {
+    const dirFiles = collectFilesInDir(sopsDir);
+    filesScanned = dirFiles.length;
+    for (const abs of dirFiles) {
+      const content = readFileSync(abs, 'utf8');
+      const { count, samples } = countUtils(content, SEMANTIC_UTIL_RE);
+      if (count > 0) {
+        files.push({ file: normalizePath(abs), count, samples });
+        total += count;
+      }
+    }
+  }
+
+  sortHits(files);
+  return {
+    total,
+    filesScanned,
+    filesWithHits: files.length,
+    files,
+  };
+}
+
 function scanModules(): ModulesScan {
   const root = join(srcRoot, 'modules');
   const families = Object.fromEntries(
@@ -513,8 +576,10 @@ function writeBaseline(shell: ScanResult, modules: ModulesScan): void {
     })
   ) as Record<ModuleFamily, FamilyBaseline>;
 
+  const semantic = scanSopsSemantic();
+
   const baseline: BaselineFile = {
-    version: 2,
+    version: 3,
     updatedAt: new Date().toISOString(),
     shell: {
       total: shell.total,
@@ -526,6 +591,12 @@ function writeBaseline(shell: ScanResult, modules: ModulesScan): void {
       filesScanned: modules.filesScanned,
       filesWithHits: modules.filesWithHits,
       families,
+    },
+    semantic: {
+      total: semantic.total,
+      filesScanned: semantic.filesScanned,
+      filesWithHits: semantic.filesWithHits,
+      files: toRecord(semantic.files),
     },
   };
 
@@ -540,6 +611,7 @@ function writeBaseline(shell: ScanResult, modules: ModulesScan): void {
   for (const family of MODULE_FAMILIES) {
     console.log(`  module ${family.padEnd(14)}: ${families[family].total}`);
   }
+  console.log(`  semantic (sops):      ${semantic.total}`);
 }
 
 function missingFamilies(baseline: BaselineFile): ModuleFamily[] {
@@ -547,7 +619,12 @@ function missingFamilies(baseline: BaselineFile): ModuleFamily[] {
 }
 
 /** Gate: shell + every module family "only goes down" vs baseline. */
-function checkGate(shell: ScanResult, modules: ModulesScan, baseline: BaselineFile | null): void {
+function checkGate(
+  shell: ScanResult,
+  modules: ModulesScan,
+  semantic: ScopeBaseline,
+  baseline: BaselineFile | null
+): void {
   if (!baseline) {
     console.error(
       `Baseline missing: ${normalizePath(baselinePath)}\n` +
@@ -608,13 +685,39 @@ function checkGate(shell: ScanResult, modules: ModulesScan, baseline: BaselineFi
     }
   }
 
+  // Semantic lane (v3): sops module status color families, "only goes down".
+  // `semantic` is passed from main() so report and gate scans stay in sync.
+  if (baseline.semantic === undefined) {
+    failures.push(
+      'semantic lane missing from baseline (run --update-baseline; added in v3 baseline)'
+    );
+  } else {
+    const semTotal = baseline.semantic.total;
+    if (semantic.total > semTotal) {
+      failures.push(
+        `semantic sops total ${semantic.total} > baseline ${semTotal} (+${semantic.total - semTotal})`
+      );
+    }
+    const baseSemFiles = baseline.semantic.files ?? {};
+    for (const hit of semantic.files) {
+      const base = baseSemFiles[hit.file];
+      if (base !== undefined && hit.count > base) {
+        failures.push(
+          `semantic per-file ${hit.file}: ${hit.count} > baseline ${base} (+${hit.count - base})`
+        );
+      }
+    }
+  }
+
   if (failures.length > 0) {
     console.error('Theme hardcode gate FAILED:');
     for (const failure of failures) {
       console.error(`  - ${failure}`);
     }
     console.error(
-      'Migrate new blue-/indigo-* utilities to semantic/primary tokens, or justify + update baseline.'
+      'Migrate new blue-/indigo-* utilities to semantic/primary tokens, or justify + update baseline.\n' +
+        'For the semantic lane (slate/red/emerald/purple/amber in sops): register the migration\n' +
+        '  plan before adding new inline status colors, or update the baseline on token migration.'
     );
     process.exit(1);
   }
@@ -625,10 +728,14 @@ function checkGate(shell: ScanResult, modules: ModulesScan, baseline: BaselineFi
     const delta = actual - base;
     return `  ${family}: ${actual}/${base}${delta < 0 ? ` (${delta})` : ''}`;
   }).join('\n');
+  const semanticStatus = baseline.semantic
+    ? `  semantic (sops):      ${semantic.total}/${baseline.semantic.total}${semantic.total < baseline.semantic.total ? ` (${semantic.total - baseline.semantic.total})` : ''}`
+    : '';
   console.log(
     'Theme hardcode gate passed (counts only go down):\n' +
       `  shell: ${shell.total}/${baseline.shell.total}\n` +
-      `${familyStatus}`
+      `${familyStatus}\n` +
+      `${semanticStatus}`
   );
 }
 
@@ -641,9 +748,9 @@ Usage:
 Options:
   --scope shell|modules|all  Scan scope (default: shell)
   --update-baseline          Write config/theme-blue-hardcode-baseline.json
-                             (shell scope + all module families)
-  --fail-on-increase         Exit 1 if shell total or any module family
-                             total exceeds baseline (CI)
+                             (shell scope + all module families + semantic)
+  --fail-on-increase         Exit 1 if shell total, any module family total,
+                             or the semantic sops total exceeds baseline (CI)
   --json                     Machine-readable JSON of the report
   --help                     Show this help
 
@@ -653,6 +760,9 @@ Scope notes:
   modules — blue-* + indigo-* in src/modules, per family: sops, app_center,
             amz_hub, more, other (other = remaining dirs like home)
   all     — blue-* + indigo-* across entire src, with module family summary
+  semantic— slate/red/emerald/purple/amber in src/modules/sops (v3 baseline,
+            2026-08-15); npi status colors fall under this lane — new inline
+            additions are gated, migrations drive the count down
 
 npm:
   npm run theme:hardcode-baseline         # shell report
@@ -737,7 +847,8 @@ function main(): void {
   if (opts.failOnIncrease) {
     const shell = scanShell();
     const modules = scanModules();
-    checkGate(shell, modules, baseline);
+    const semantic = scanSopsSemantic();
+    checkGate(shell, modules, semantic, baseline);
     process.exit(0);
   }
 
