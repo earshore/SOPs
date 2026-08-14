@@ -7,8 +7,9 @@
 
 import { readFileSync } from 'node:fs';
 import { chromium, type Browser, type Locator, type Page } from 'playwright';
+import { launchPreviewServer } from './_preview-server';
 
-const baseUrl = process.env.CARD_AUDIT_BASE_URL || 'http://127.0.0.1:5174';
+const baseUrl = process.env.CARD_AUDIT_BASE_URL || 'http://127.0.0.1:5175';
 const hashBase = `${baseUrl.replace(/\/$/, '')}/#`;
 
 const sourceFilesWithoutRawBorderLeft = [
@@ -174,7 +175,9 @@ const markerTargets: MarkerTarget[] = [
 
 function extractInsetRailColor(boxShadow: string): string | null {
   const shadows = boxShadow.split(/,\s(?=(?:rgb|rgba)\()/);
-  const rail = shadows.find((shadow) => shadow.includes('inset') && shadow.includes('4px 0px 0px 0px'));
+  const rail = shadows.find(
+    shadow => shadow.includes('inset') && shadow.includes('4px 0px 0px 0px')
+  );
 
   if (!rail || rail.includes('rgba(0, 0, 0, 0)')) return null;
   return rail.match(/rgba?\([^)]+\)/)?.[0] ?? null;
@@ -182,8 +185,8 @@ function extractInsetRailColor(boxShadow: string): string | null {
 
 async function waitForVisibleTarget(page: Page, selector: string): Promise<void> {
   await page.waitForFunction(
-    (targetSelector) => {
-      return Array.from(document.querySelectorAll<HTMLElement>(targetSelector)).some((element) => {
+    targetSelector => {
+      return Array.from(document.querySelectorAll<HTMLElement>(targetSelector)).some(element => {
         const rect = element.getBoundingClientRect();
         const styles = getComputedStyle(element);
 
@@ -196,12 +199,12 @@ async function waitForVisibleTarget(page: Page, selector: string): Promise<void>
       });
     },
     selector,
-    { timeout: 20000 },
+    { timeout: 20000 }
   );
 }
 
 async function readCallout(locator: Locator): Promise<CalloutState | null> {
-  return locator.evaluate((callout) => {
+  return locator.evaluate(callout => {
     const rect = callout.getBoundingClientRect();
     const styles = getComputedStyle(callout);
 
@@ -244,7 +247,9 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
       continue;
     }
 
-    await callout.evaluate((element) => element.scrollIntoView({ block: 'center', inline: 'nearest' }));
+    await callout.evaluate(element =>
+      element.scrollIntoView({ block: 'center', inline: 'nearest' })
+    );
     const base = await readCallout(callout);
 
     if (!base) {
@@ -274,7 +279,9 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
     }
 
     if (hover?.transform !== 'none') {
-      failures.push(`${target.name} #${index + 1}: expected no hover transform, got ${hover?.transform}`);
+      failures.push(
+        `${target.name} #${index + 1}: expected no hover transform, got ${hover?.transform}`
+      );
     }
   }
 
@@ -282,7 +289,7 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
 }
 
 async function readMarker(locator: Locator): Promise<MarkerState | null> {
-  return locator.evaluate((marker) => {
+  return locator.evaluate(marker => {
     const rect = marker.getBoundingClientRect();
     const styles = getComputedStyle(marker);
 
@@ -332,11 +339,15 @@ async function auditMarkerTarget(page: Page, target: MarkerTarget): Promise<stri
     }
 
     if (state.borderLeftWidth !== '4px') {
-      failures.push(`${target.name} #${index + 1}: expected 4px left marker, got ${state.borderLeftWidth}`);
+      failures.push(
+        `${target.name} #${index + 1}: expected 4px left marker, got ${state.borderLeftWidth}`
+      );
     }
 
     if (state.borderLeftStyle !== 'solid') {
-      failures.push(`${target.name} #${index + 1}: expected solid left marker, got ${state.borderLeftStyle}`);
+      failures.push(
+        `${target.name} #${index + 1}: expected solid left marker, got ${state.borderLeftStyle}`
+      );
     }
 
     if (state.borderLeftColor === 'rgba(0, 0, 0, 0)') {
@@ -345,7 +356,7 @@ async function auditMarkerTarget(page: Page, target: MarkerTarget): Promise<stri
 
     if (state.paddingLeft !== target.expectedPaddingLeft) {
       failures.push(
-        `${target.name} #${index + 1}: expected ${target.expectedPaddingLeft} left padding, got ${state.paddingLeft}`,
+        `${target.name} #${index + 1}: expected ${target.expectedPaddingLeft} left padding, got ${state.paddingLeft}`
       );
     }
   }
@@ -354,6 +365,8 @@ async function auditMarkerTarget(page: Page, target: MarkerTarget): Promise<stri
 }
 
 async function main(): Promise<void> {
+  const server = await launchPreviewServer();
+
   for (const sourcePath of sourceFilesWithoutRawBorderLeft) {
     const source = readFileSync(sourcePath, 'utf8');
 
@@ -371,7 +384,7 @@ async function main(): Promise<void> {
 
     if (rawBorderLeftCount !== allowedRawBorderLeftCount) {
       console.error(
-        `${target.templatePath}: expected ${allowedRawBorderLeftCount} raw border-l-4 occurrences, got ${rawBorderLeftCount}.`,
+        `${target.templatePath}: expected ${allowedRawBorderLeftCount} raw border-l-4 occurrences, got ${rawBorderLeftCount}.`
       );
       process.exitCode = 1;
       return;
@@ -409,17 +422,20 @@ async function main(): Promise<void> {
     }
 
     console.log(
-      `Callout UI audit passed for ${targets.length} migrated PC content target and ${markerTargets.length} semantic marker target.`,
+      `Callout UI audit passed for ${targets.length} migrated PC content target and ${markerTargets.length} semantic marker target.`
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('Callout UI audit could not run.');
     console.error(`Base URL: ${baseUrl}`);
-    console.error('Start the local dev server first, for example: npm run dev:simple');
+    console.error(
+      'Or run with CARD_AUDIT_BASE_URL pointing at a live server (npm run preview / dev:simple).'
+    );
     console.error(message);
     process.exitCode = 1;
   } finally {
     await browser?.close();
+    await server.stop();
   }
 }
 

@@ -7,8 +7,9 @@
 
 import { readFileSync } from 'node:fs';
 import { chromium, type Browser, type Locator, type Page } from 'playwright';
+import { launchPreviewServer } from './_preview-server';
 
-const baseUrl = process.env.CARD_AUDIT_BASE_URL || 'http://127.0.0.1:5174';
+const baseUrl = process.env.CARD_AUDIT_BASE_URL || 'http://127.0.0.1:5175';
 const hashBase = `${baseUrl.replace(/\/$/, '')}/#`;
 
 interface RuntimeTarget {
@@ -44,7 +45,7 @@ const runtimeTargets: RuntimeTarget[] = [
     name: 'Keyword Hunter input workbench panels',
     path: '/app-center/keyword-hunter/input',
     readyText: '关键词与 Listing 文案输入',
-    selector: '.kt-input-card',
+    selector: '.keyword-hunter-input-card',
   },
   {
     expectedMinVisible: 2,
@@ -52,7 +53,7 @@ const runtimeTargets: RuntimeTarget[] = [
     name: 'Keyword Hunter process workbench panels',
     path: '/app-center/keyword-hunter/process',
     readyText: 'SEO 处理中心',
-    selector: '.kt-surface-card',
+    selector: '.keyword-hunter-surface-card',
   },
   {
     expectedMinVisible: 1,
@@ -60,7 +61,7 @@ const runtimeTargets: RuntimeTarget[] = [
     name: 'Keyword Hunter analysis workbench panels',
     path: '/app-center/keyword-hunter/analysis',
     readyText: 'AI 评审报告',
-    selector: '.kt-surface-card',
+    selector: '.keyword-hunter-surface-card',
   },
   {
     expectedMinVisible: 3,
@@ -86,7 +87,7 @@ function escapeRegExp(value: string): string {
 
 function findSelectorBlocks(source: string, selector: string): string[] {
   const pattern = new RegExp(`${escapeRegExp(selector)}\\s*\\{([^}]*)\\}`, 'g');
-  return Array.from(source.matchAll(pattern), (match) => match[1] ?? '');
+  return Array.from(source.matchAll(pattern), match => match[1] ?? '');
 }
 
 function auditScraperSource(): string[] {
@@ -105,13 +106,17 @@ function auditScraperSource(): string[] {
       const transform = block.match(/\btransform\s*:\s*([^;]+);/);
 
       if (transform && transform[1]?.trim() !== 'none') {
-        failures.push(`${scraperStylePath}: ${selector} must not move layout, found transform: ${transform[1].trim()}`);
+        failures.push(
+          `${scraperStylePath}: ${selector} must not move layout, found transform: ${transform[1].trim()}`
+        );
       }
     }
   }
 
   if (/\.history-card::before\s*\{[^}]*content\s*:\s*['"]{2}/s.test(source)) {
-    failures.push(`${scraperStylePath}: .history-card::before must not draw a decorative hover rail`);
+    failures.push(
+      `${scraperStylePath}: .history-card::before must not draw a decorative hover rail`
+    );
   }
 
   return failures;
@@ -127,7 +132,7 @@ function hasOverviewRailShadow(boxShadow: string): boolean {
 }
 
 async function readPanel(locator: Locator): Promise<PanelState | null> {
-  return locator.evaluate((panel) => {
+  return locator.evaluate(panel => {
     const rect = panel.getBoundingClientRect();
     const styles = getComputedStyle(panel);
     const before = getComputedStyle(panel, '::before');
@@ -160,7 +165,7 @@ async function auditRuntimeTarget(page: Page, target: RuntimeTarget): Promise<st
         return false;
       }
 
-      return Array.from(document.querySelectorAll<HTMLElement>(selector)).some((element) => {
+      return Array.from(document.querySelectorAll<HTMLElement>(selector)).some(element => {
         const rect = element.getBoundingClientRect();
         const styles = getComputedStyle(element);
 
@@ -173,7 +178,7 @@ async function auditRuntimeTarget(page: Page, target: RuntimeTarget): Promise<st
       });
     },
     { readyText: target.readyText, selector: target.selector },
-    { timeout: 20000 },
+    { timeout: 40000 }
   );
 
   const panels = page.locator(target.selector);
@@ -188,7 +193,7 @@ async function auditRuntimeTarget(page: Page, target: RuntimeTarget): Promise<st
     }
 
     visibleCount += 1;
-    await panel.evaluate((element) => element.scrollIntoView({ block: 'center', inline: 'nearest' }));
+    await panel.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'nearest' }));
     await page.mouse.move(1, 1);
     await page.waitForTimeout(120);
 
@@ -209,11 +214,15 @@ async function auditRuntimeTarget(page: Page, target: RuntimeTarget): Promise<st
     }
 
     if (parsePixelValue(base.radius) > target.maxRadiusPx) {
-      failures.push(`${target.name} #${index + 1}: expected <=${target.maxRadiusPx}px radius, got ${base.radius}`);
+      failures.push(
+        `${target.name} #${index + 1}: expected <=${target.maxRadiusPx}px radius, got ${base.radius}`
+      );
     }
 
     if (hover.transform !== 'none') {
-      failures.push(`${target.name} #${index + 1}: expected no hover transform, got ${hover.transform}`);
+      failures.push(
+        `${target.name} #${index + 1}: expected no hover transform, got ${hover.transform}`
+      );
     }
 
     if (hasOverviewRailShadow(hover.boxShadow)) {
@@ -221,18 +230,23 @@ async function auditRuntimeTarget(page: Page, target: RuntimeTarget): Promise<st
     }
 
     if (hover.beforeContent !== 'none' && target.selector === '.history-card') {
-      failures.push(`${target.name} #${index + 1}: history workbench panel must not draw a hover rail`);
+      failures.push(
+        `${target.name} #${index + 1}: history workbench panel must not draw a hover rail`
+      );
     }
   }
 
   if (visibleCount < target.expectedMinVisible) {
-    failures.push(`${target.name}: expected at least ${target.expectedMinVisible} visible panels, got ${visibleCount}`);
+    failures.push(
+      `${target.name}: expected at least ${target.expectedMinVisible} visible panels, got ${visibleCount}`
+    );
   }
 
   return failures;
 }
 
 async function main(): Promise<void> {
+  const server = await launchPreviewServer();
   let browser: Browser | null = null;
 
   try {
@@ -258,11 +272,14 @@ async function main(): Promise<void> {
     const message = error instanceof Error ? error.message : String(error);
     console.error('Workbench UI audit could not run.');
     console.error(`Base URL: ${baseUrl}`);
-    console.error('Start the local dev server first, for example: npm run dev:simple');
+    console.error(
+      'Or run with CARD_AUDIT_BASE_URL pointing at a live server (npm run preview / dev:simple).'
+    );
     console.error(message);
     process.exitCode = 1;
   } finally {
     await browser?.close();
+    await server.stop();
   }
 }
 

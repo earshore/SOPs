@@ -133,7 +133,7 @@
     "ci:security": "npm run xss:gate && npm run secret:scan && npm run circular:check",
     "ci:test-quality": "npm run type-check:tests && npm run lint:tests",
     "ci:format": "npm run format:check",
-    "ci:quality": "npm run architecture:audit && npm run css:audit && npm run doc-classnames:audit && npm run z-index:audit && npm run theme:hardcode-baseline:gate && npm run theme:bridge:gate && npm run content-surface:gate && npm run token:override-audit:gate && npm run action-names:audit && npm run import-paths:audit && npm run source-names:audit && npm run type-check && npm run settings-scale && npm run lint && npm run lint:warning-gate && npm run ci:test-quality && npm run ci:format && npm run button-ui:gate",
+    "ci:quality": "npm run architecture:audit && npm run css:audit && npm run doc-classnames:audit && npm run z-index:audit && npm run theme:hardcode-baseline:gate && npm run theme:bridge:gate && npm run content-surface:gate && npm run token:override-audit:gate && npm run action-names:audit && npm run import-paths:audit && npm run source-names:audit && npm run type-check && npm run settings-scale && npm run lint && npm run lint:warning-gate && npm run ci:test-quality && npm run ci:format && npm run button-ui:gate && npm run ci:ui-audit",
     "ci:all": "npm run ci:security && npm run ci:quality && npm run build:app",
     "release:artifact-contract": "tsx scripts/release/static-artifact-contract.ts dist",
     "build:size-gate": "tsx scripts/quality/bundle-size-gate.ts",
@@ -148,7 +148,8 @@
     "release:production-gate": "tsx scripts/release/production-gate.ts",
     "button-ui:audit": "tsx scripts/quality/audit-shared-ui.ts",
     "button-ui:baseline": "tsx scripts/quality/audit-shared-ui.ts --update-baseline",
-    "button-ui:gate": "tsx scripts/quality/audit-shared-ui.ts --fail-on-increase"
+    "button-ui:gate": "tsx scripts/quality/audit-shared-ui.ts --fail-on-increase",
+    "ci:ui-audit": "npm run build:app && npm run card-ui:audit && npm run callout-ui:audit && npm run workbench-ui:audit"
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^8.0.0",

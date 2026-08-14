@@ -9,8 +9,9 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium, type Browser, type Locator, type Page } from 'playwright';
+import { launchPreviewServer } from './_preview-server';
 
-const baseUrl = process.env.CARD_AUDIT_BASE_URL || 'http://127.0.0.1:5174';
+const baseUrl = process.env.CARD_AUDIT_BASE_URL || 'http://127.0.0.1:5175';
 const hashBase = `${baseUrl.replace(/\/$/, '')}/#`;
 
 interface Target {
@@ -95,8 +96,8 @@ function extractRgb(value: string): [number, number, number, number] | null {
 
   const parts = match[1]
     .split(',')
-    .map((part) => Number(part.trim()))
-    .filter((part) => Number.isFinite(part));
+    .map(part => Number(part.trim()))
+    .filter(part => Number.isFinite(part));
 
   if (parts.length < 3) return null;
   return [parts[0], parts[1], parts[2], parts[3] ?? 1];
@@ -109,15 +110,15 @@ function colorDistance(a: string, b: string): number {
   if (!left || !right) return Number.POSITIVE_INFINITY;
 
   return Math.sqrt(
-    (left[0] - right[0]) ** 2 +
-      (left[1] - right[1]) ** 2 +
-      (left[2] - right[2]) ** 2,
+    (left[0] - right[0]) ** 2 + (left[1] - right[1]) ** 2 + (left[2] - right[2]) ** 2
   );
 }
 
 function extractInsetRailColor(boxShadow: string): string | null {
   const shadows = boxShadow.split(/,\s(?=(?:rgb|rgba)\()/);
-  const rail = shadows.find((shadow) => shadow.includes('inset') && shadow.includes(hoverRailShadowSignature));
+  const rail = shadows.find(
+    shadow => shadow.includes('inset') && shadow.includes(hoverRailShadowSignature)
+  );
 
   if (!rail || rail.includes('rgba(0, 0, 0, 0)')) return null;
   return rail.match(/rgba?\([^)]+\)/)?.[0] ?? null;
@@ -125,13 +126,15 @@ function extractInsetRailColor(boxShadow: string): string | null {
 
 function hasTransparentInsetRail(boxShadow: string): boolean {
   const shadows = boxShadow.split(/,\s(?=(?:rgb|rgba)\()/);
-  const rail = shadows.find((shadow) => shadow.includes('inset') && shadow.includes(hoverRailShadowSignature));
+  const rail = shadows.find(
+    shadow => shadow.includes('inset') && shadow.includes(hoverRailShadowSignature)
+  );
 
   return Boolean(rail?.includes('rgba(0, 0, 0, 0)'));
 }
 
 async function readCard(locator: Locator): Promise<CardSample | null> {
-  return locator.evaluate((card) => {
+  return locator.evaluate(card => {
     const rect = card.getBoundingClientRect();
     const styles = getComputedStyle(card);
     const before = getComputedStyle(card, '::before');
@@ -170,7 +173,11 @@ async function readCard(locator: Locator): Promise<CardSample | null> {
   });
 }
 
-async function readHoverState(page: Page, locator: Locator, base: CardSample): Promise<CardSample | null> {
+async function readHoverState(
+  page: Page,
+  locator: Locator,
+  base: CardSample
+): Promise<CardSample | null> {
   let latest: CardSample | null = null;
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -209,8 +216,8 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
   }
   await page
     .waitForFunction(
-      (selector) => {
-        return Array.from(document.querySelectorAll<HTMLElement>(selector)).some((element) => {
+      selector => {
+        return Array.from(document.querySelectorAll<HTMLElement>(selector)).some(element => {
           const rect = element.getBoundingClientRect();
           const styles = getComputedStyle(element);
 
@@ -225,7 +232,7 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
         });
       },
       target.selector,
-      { timeout: 8000 },
+      { timeout: 8000 }
     )
     .catch(() => undefined);
   const cards = page.locator(target.selector);
@@ -245,7 +252,7 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
     }
 
     checkedCount += 1;
-    await card.evaluate((element) => element.scrollIntoView({ block: 'center', inline: 'nearest' }));
+    await card.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'nearest' }));
     await page.mouse.move(1, 1);
     await page.waitForTimeout(250);
 
@@ -271,11 +278,15 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
     }
 
     if (base.state.borderLeftWidth !== '1px') {
-      failures.push(`${cardLabel}: expected default left border width 1px, got ${base.state.borderLeftWidth}`);
+      failures.push(
+        `${cardLabel}: expected default left border width 1px, got ${base.state.borderLeftWidth}`
+      );
     }
 
     if (base.state.beforeContent !== 'none') {
-      failures.push(`${cardLabel}: expected disabled ::before rail, got ${base.state.beforeContent}`);
+      failures.push(
+        `${cardLabel}: expected disabled ::before rail, got ${base.state.beforeContent}`
+      );
     }
 
     if (!hasTransparentInsetRail(base.state.boxShadow)) {
@@ -304,7 +315,7 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
 
     if (railColor && colorDistance(railColor, hover.state.borderColor) > 12) {
       failures.push(
-        `${cardLabel}: hover rail color ${railColor} does not match border ${hover.state.borderColor}`,
+        `${cardLabel}: hover rail color ${railColor} does not match border ${hover.state.borderColor}`
       );
     }
 
@@ -315,13 +326,15 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
       colorDistance(railColor, hover.state.accentReferenceColor) > 12
     ) {
       failures.push(
-        `${cardLabel}: hover rail color ${railColor} does not match card accent ${hover.state.accentReferenceColor}`,
+        `${cardLabel}: hover rail color ${railColor} does not match card accent ${hover.state.accentReferenceColor}`
       );
     }
   }
 
   if (checkedCount === 0) {
-    failures.push(`${target.name}: no visible cards could be checked with selector "${target.selector}"`);
+    failures.push(
+      `${target.name}: no visible cards could be checked with selector "${target.selector}"`
+    );
   }
 
   return failures;
@@ -336,7 +349,9 @@ function auditOverviewSources(): string[] {
     const matches = source.match(rawBorderLeftPattern) ?? [];
 
     if (matches.length > 0) {
-      failures.push(`${sourcePath}: overview cards must use overview-accent-* classes, found ${matches.join(', ')}`);
+      failures.push(
+        `${sourcePath}: overview cards must use overview-accent-* classes, found ${matches.join(', ')}`
+      );
     }
   }
 
@@ -348,7 +363,7 @@ function auditKeywordStatusSource(): string[] {
   const rawBorderLeftPattern = /\bborder-l-(?:\d+|[a-z]+-\d+)\b/;
   const offendingLines = source
     .split(/\r?\n/)
-    .filter((line) => line.includes('keyword-item') && rawBorderLeftPattern.test(line));
+    .filter(line => line.includes('keyword-item') && rawBorderLeftPattern.test(line));
 
   if (offendingLines.length === 0) {
     return [];
@@ -380,7 +395,7 @@ function collectSourceFiles(directory: string): string[] {
 }
 
 function auditProjectRawBorderLeftUtilities(): string[] {
-  const offenders = collectSourceFiles(sourceRoot).filter((sourcePath) => {
+  const offenders = collectSourceFiles(sourceRoot).filter(sourcePath => {
     return /\bborder-l-4\b/.test(readFileSync(sourcePath, 'utf8'));
   });
 
@@ -389,11 +404,13 @@ function auditProjectRawBorderLeftUtilities(): string[] {
   }
 
   return offenders.map(
-    (sourcePath) => `${sourcePath}: raw border-l-4 utility must be replaced with a semantic component class.`,
+    sourcePath =>
+      `${sourcePath}: raw border-l-4 utility must be replaced with a semantic component class.`
   );
 }
 
 async function main(): Promise<void> {
+  const server = await launchPreviewServer();
   let browser: Browser | null = null;
 
   try {
@@ -423,11 +440,14 @@ async function main(): Promise<void> {
     const message = error instanceof Error ? error.message : String(error);
     console.error('Card UI audit could not run.');
     console.error(`Base URL: ${baseUrl}`);
-    console.error('Start the local dev server first, for example: npm run dev:simple');
+    console.error(
+      'Or run with CARD_AUDIT_BASE_URL pointing at a live server (npm run preview / dev:simple).'
+    );
     console.error(message);
     process.exitCode = 1;
   } finally {
     await browser?.close();
+    await server.stop();
   }
 }
 
