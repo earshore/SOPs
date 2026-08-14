@@ -17,6 +17,8 @@
 3. 发版前扫一眼 P0/P1。
 4. 与规范冲突时：**先改规范或先改板，禁止双真相。**
 
+> 收紧路线与实测核验方法：[TECH_DEBT_TIGHTENING_ROADMAP.md](./TECH_DEBT_TIGHTENING_ROADMAP.md)（2026-08-14）
+
 ---
 
 ## Open
