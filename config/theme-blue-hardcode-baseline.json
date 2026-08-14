@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-14T14:15:27.547Z",
+  "updatedAt": "2026-08-14T14:58:08.588Z",
   "shell": {
     "total": 37,
     "filesScanned": 71,
@@ -15,18 +15,14 @@
   },
   "modules": {
     "filesScanned": 390,
-    "filesWithHits": 5,
+    "filesWithHits": 1,
     "families": {
       "sops": {
-        "total": 37,
+        "total": 2,
         "filesScanned": 52,
-        "filesWithHits": 5,
+        "filesWithHits": 1,
         "files": {
-          "src/modules/sops/views/growth/listing_seo/template.html": 15,
-          "src/modules/sops/views/growth/competitor_monitoring/template.html": 12,
-          "src/modules/sops/views/growth/promotion_submission/template.html": 7,
-          "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 2,
-          "src/modules/sops/views/safety/brand_infringement/template.html": 1
+          "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 2
         }
       },
       "app_center": {
