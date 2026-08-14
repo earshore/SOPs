@@ -1,4 +1,7 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
+
+import { PNG } from 'pngjs';
+import pixelmatch from 'pixelmatch';
 
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
@@ -238,10 +241,7 @@ async function openGlobalSettings(page: Page): Promise<void> {
   await waitForSettingsPanel(page);
 
   // 设置入口已迁移为 header 右端的齿轮按钮（aria-label="系统设置"）
-  await page
-    .getByRole('button', { name: '系统设置' })
-    .first()
-    .click();
+  await page.getByRole('button', { name: '系统设置' }).first().click();
 
   await expect(page.getByRole('heading', { name: '系统设置' })).toBeVisible();
   await expect(
@@ -306,6 +306,118 @@ async function expectDocumentThemeState(
   } else if (expected.darkClass === false) {
     await expect(root).not.toHaveClass(/\bdark\b/);
   }
+}
+
+const REGION_CAPTURE_WIDTH = 976;
+const REGION_CAPTURE_HEIGHT = 640;
+
+/**
+ * Capture a stable, fixed-height region of a locator as a PNG buffer.
+ *
+ * Why: `expect(locator).toHaveScreenshot()` silently ignores the `clip`
+ * option, so baselines capture the full locator height (6089px here) and
+ * full-suite sequential runs drift ~16px, failing exact-height matching.
+ * `page.screenshot({ clip })` honors the clip, so we locate the element's
+ * top offset via JS and screenshot a deterministic region instead.
+ */
+async function captureStableRegion(page: Page, locator: Locator): Promise<Buffer> {
+  // Re-rendered route state may still be settling (Alpine transitions);
+  // wait for a stable layout before measuring geometry.
+  await page.evaluate(
+    () =>
+      new Promise(resolve => {
+        if (document.readyState !== 'complete') {
+          window.addEventListener('load', () => resolve(undefined), { once: true });
+          return;
+        }
+        // Two rAF cycles flush pending CSS transitions / layout thrash.
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve(undefined)));
+      })
+  );
+  const rect = await locator.boundingBox();
+  const top = Math.round(rect?.y ?? 0);
+  const vp = page.viewportSize()!;
+  return page.screenshot({
+    clip: {
+      x: 0,
+      y: top,
+      width: Math.min(REGION_CAPTURE_WIDTH, vp.width),
+      height: Math.min(REGION_CAPTURE_HEIGHT, vp.height - top),
+    },
+  }) as unknown as Buffer;
+}
+
+/**
+ * Deterministic pixel diff against a stored PNG baseline under
+ * docs/color-region-baselines/. With `UPDATE_SNAPSHOTS=1` the actual shot is
+ * written as the new baseline (seed the first run).
+ *
+ * Threshold is the ratio of mismatched pixels (pngjs + pixelmatch,
+ * threshold 0.1) over the compared area — the full-page screenshot
+ * matching's `maxDiffPixelRatio` analogue, but driven by a real
+ * fixed-height crop.
+ */
+async function assertPixelDiff(
+  shot: Buffer,
+  baselineName: string,
+  options: { threshold: number } = { threshold: 0.001 }
+): Promise<void> {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  // ESM context: `__dirname` is unavailable; derive it from import.meta.url.
+  const dirname =
+    typeof __dirname !== 'undefined' ? __dirname : path.dirname(new URL(import.meta.url).pathname);
+  // Baselines live under docs/color-region-baselines/ because the repo
+  // `.gitignore` excludes every `tests/**/*.png` (visual snapshots are
+  // CI-local by project convention). The docs/ tree is versioned, so the
+  // pixel-stable baselines travel with the code.
+  const baselineDir = path.join(dirname, '..', '..', 'docs', 'color-region-baselines');
+  fs.mkdirSync(baselineDir, { recursive: true });
+  const baselinePath = path.join(baselineDir, `${baselineName}.png`);
+
+  if (process.env.UPDATE_SNAPSHOTS) {
+    fs.writeFileSync(baselinePath, shot);
+    return;
+  }
+
+  if (!fs.existsSync(baselinePath)) {
+    throw new Error(`No baseline for color-region '${baselineName}'; seed with UPDATE_SNAPSHOTS=1`);
+  }
+
+  // Decode PNG to raw RGBA so the diff is pixel-stable (PNG file size is not:
+  // compression metadata fluctuates run-to-run by a few bytes).
+  const baseline = fs.readFileSync(baselinePath);
+  const baselineImg = PNG.sync.read(baseline);
+  const actualImg = PNG.sync.read(shot);
+  if (baselineImg.width !== actualImg.width || baselineImg.height !== actualImg.height) {
+    throw new Error(
+      `baseline/actual region size mismatch (${baselineImg.width}x${baselineImg.height} vs ${actualImg.width}x${actualImg.height}); re-seed baseline`
+    );
+  }
+  const totalPx = baselineImg.width * baselineImg.height;
+  if (totalPx === 0) {
+    return;
+  }
+  // pixelmatch requires the output buffer to match the FULL RGBA byte length
+  // (width × height × 4), then we downsample to a per-pixel flag array.
+  const diffPx = new Uint8Array(totalPx * 4);
+  // pixelmatch 7.x only accepts plain Uint8Array; pngjs returns Node Buffer
+  // (a Uint8Array subclass whose `instanceof` check can fail across module
+  // resolution boundaries in the Playwright runner). Wrap into a plain view.
+  const baseData = new Uint8Array(baselineImg.data);
+  const actData = new Uint8Array(actualImg.data);
+  // IMPORTANT: pixelmatch returns the number of mismatched pixels; its diff
+  // output buffer gets filled with gray/diff colors for ALL pixels on the
+  // identical-fast-path (opacity blending), so never count diffPx manually.
+  const diffPxCount = pixelmatch(baseData, actData, diffPx, baselineImg.width, baselineImg.height, {
+    threshold: 0.1,
+  });
+  const diffRatio = diffPxCount / totalPx;
+  if (diffRatio > options.threshold) {
+    fs.writeFileSync(path.join(dirname, `color-region-actual-${baselineName}.png`), shot);
+  }
+  // baseline/region metadata available via UPDATE_SNAPSHOTS re-seed; see docs/color-region-baselines/
+  expect(diffRatio, `${baselineName} region pixel diff`).toBeLessThanOrEqual(options.threshold);
 }
 
 /**
@@ -1398,6 +1510,113 @@ test.describe('release candidate smoke', () => {
     expect(
       consoleListener.getErrors(),
       'minimal appearance Promptlab smoke should not emit console/page errors'
+    ).toEqual([]);
+  });
+
+  // TD-CMP-02 + B4A gating anchor: NPI lifecycle table status colors under
+  // the new semantic gate lane (slate/red/emerald/purple/amber). Visual
+  // contract in both color modes — the screenshot baseline locks how the
+  // five status families render (decision badges, inventory/ctr/acoas
+  // flags, clearance/moving price columns) so the semantic lane stays
+  // anchored to a real visual reference while 4B token migration runs.
+  test('NPI lifecycle table status colors render correctly in light and dark mode', async ({
+    page,
+  }) => {
+    const consoleListener = setupConsoleErrorListener(page);
+
+    // Deterministic light start (new-user default is `system`). In a full
+    // sequential suite run, earlier tests may leave theme overrides or a
+    // pending dark color-mode in localStorage, so strip every persisted key
+    // this test cares about and force a hard light reset.
+    await page.addInitScript(() => {
+      window.localStorage.removeItem('app-theme');
+      window.localStorage.removeItem('app-color-mode');
+      window.localStorage.setItem('app-color-mode', JSON.stringify('light'));
+    });
+
+    await switchTabFromHome(page, 'sops_npi_tracker');
+    await expectNoRouteErrorText(page);
+
+    const trackerPage = page.locator('.npi-tracker-page');
+    await expect(trackerPage).toBeVisible({ timeout: 10000 });
+    const tableBody = page.locator('#npi-table-body');
+    await expect(tableBody).toBeVisible();
+
+    // Contract: 5 rows render by default (the 6th mock row is hidden by the
+    // default stage filter; the semantic lane gates the rendered rows).
+    const rows = tableBody.locator('tr');
+    await expect(rows).toHaveCount(5);
+
+    // Text anchors for the status branches the semantic lane gates:
+    //   - kill decision (旧款手机壳): red badge (放弃) + red inventory (95 days)
+    //   - keep decisions (多功能收纳盒/户外背包): emerald badges (保留)
+    //   - ctr<0.5 (便携充电器 0.45): amber flag; acoas>50 (旧款手机壳 85): red flag
+    await expect(rows.locator('td').filter({ hasText: '旧款手机壳' })).toHaveCount(1);
+    await expect(tableBody).toContainText('保留');
+    await expect(tableBody).toContainText('95天');
+
+    // Light-mode screenshot baseline (seeded via UPDATE_SNAPSHOTS=1, stored
+    // in docs/color-region-baselines/ — Playwright's own snapshot tree is
+    // gitignored by project convention, and
+    // `expect(locator).toHaveScreenshot()` silently ignores `clip`, so we
+    // capture a fixed viewport region with `page.screenshot({ clip })` and
+    // assert with a deterministic pixel diff (pngjs + pixelmatch).
+    const lightShot = await captureStableRegion(page, trackerPage);
+    await assertPixelDiff(lightShot, 'npi-table-status-colors-light', { threshold: 0.001 });
+
+    // Dark mode: semantic colors must stay readable on the dark surface.
+    // Note: the settings panel navigates to #/home, so re-enter the NPI route
+    // after switching (route state re-renders the same mock rows).
+    await openGlobalSettings(page);
+    await openAppearanceSettings(page);
+    await page.getByTestId('settings-theme-select').selectOption('default');
+    await page.getByTestId('settings-color-mode-dark').click();
+    await expect(page.getByTestId('settings-color-mode-dark')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+    await expectDocumentThemeState(page, {
+      appearance: 'default',
+      colorMode: 'dark',
+      darkClass: true,
+    });
+    await closeGlobalSettings(page);
+    // Re-enter the NPI route under dark mode (the settings panel navigates to
+    // #/home, so the tracker page must be re-loaded).
+    await page.goto('/#sops_npi_tracker', { waitUntil: 'domcontentloaded' });
+    await expectNoRouteErrorText(page);
+    const trackerPageDark = page.locator('.npi-tracker-page');
+    await expect(trackerPageDark).toBeVisible({ timeout: 10000 });
+
+    // Dark screenshot baseline (seeded alongside the light baseline).
+    const darkShot = await captureStableRegion(page, trackerPageDark);
+    await assertPixelDiff(darkShot, 'npi-table-status-colors-dark', { threshold: 0.001 });
+
+    // Restore light mode so subsequent tests inherit a deterministic state.
+    await openGlobalSettings(page);
+    await openAppearanceSettings(page);
+    await page.getByTestId('settings-theme-select').selectOption('default');
+    await page.getByTestId('settings-color-mode-light').click();
+    await expect(page.getByTestId('settings-color-mode-light')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+    await expectDocumentThemeState(page, {
+      appearance: 'default',
+      colorMode: 'light',
+      darkClass: false,
+    });
+    await closeGlobalSettings(page);
+    // Re-enter the NPI route under light mode so the suite ends in a
+    // deterministic state.
+    await page.goto('/#sops_npi_tracker', { waitUntil: 'domcontentloaded' });
+    await expectNoRouteErrorText(page);
+    const trackerPageLight = page.locator('.npi-tracker-page');
+    await expect(trackerPageLight).toBeVisible({ timeout: 10000 });
+
+    expect(
+      consoleListener.getErrors(),
+      'NPI status-color smoke should not emit console/page errors'
     ).toEqual([]);
   });
 });
