@@ -1,16 +1,12 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-14T15:18:14.287Z",
+  "updatedAt": "2026-08-14T15:37:27.610Z",
   "shell": {
-    "total": 37,
+    "total": 13,
     "filesScanned": 71,
-    "filesWithHits": 5,
+    "filesWithHits": 1,
     "files": {
-      "src/common/components/OverviewRenderer.ts": 14,
-      "src/common/ui/megaMenu.ts": 13,
-      "src/components/settings/domain/localDataCopy.ts": 7,
-      "src/components/settings/sections/llmSection.ts": 2,
-      "src/components/settings/domain/settingsModelStatus.ts": 1
+      "src/common/ui/megaMenu.ts": 13
     }
   },
   "modules": {
