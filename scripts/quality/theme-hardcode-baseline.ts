@@ -3,13 +3,17 @@
  *
  * Two enforcement lanes sharing one baseline file:
  *
- *   shell   (scope, default) — global chrome. Blue-only pattern (unchanged
- *     from the Phase 0 D6 baseline) so Appearance migrations "only go
- *     down". Sources: css/components shell list + common/ui +
- *     components/modal + common-layer renderers & settings domain
+ *   shell   (scope, default) — global chrome. Blue + indigo pattern
+ *     (expanded 2026-08-15: shell lane migrated from blue-only to the same
+ *     blue+indigo family as modules, closing the indigo blind spot found in
+ *     the per-file pressure test S8; Appearance migrations "only go down").
+ *     Sources: css/components shell list + common/ui + components/modal +
+ *     common-layer renderers & settings domain
  *     (common/components, components/settings; added 2026-08-14). Per-file
  *     counts are enforced in gate mode too (no add-N/remove-N offsetting).
- *     Shell total today after expansion: 42 (megaMenu 13 + common 29).
+ *     Shell total today after expansion: 24 (megaMenu: blue 13 + indigo 11;
+ *     all registered as GUI014 glass color palette exemptions or batch-A
+ *     migration carry-overs).
  *
  *   modules (scope)          — business pages under src/modules, counted per
  *     module family: sops / app_center / amz_hub / more / other (any
@@ -140,11 +144,13 @@ const UTIL_PREFIXES = [
 ] as const;
 
 /**
- * Shell lane: blue-* only, unchanged from the Phase 0 D6 baseline so the
- * existing shell gate history keeps meaning.
+ * Shell lane: blue-* AND indigo-*. Originally blue-only (Phase 0 D6
+ * baseline); expanded to the blue+indigo family on 2026-08-15 so the indigo
+ * blind spot in shell files (S8 pressure-test finding) is gated. Indigo is
+ * the pseudo-Appearance sibling of blue; the pair migrates together.
  */
 const BLUE_UTIL_RE = new RegExp(
-  `(?:${UTIL_PREFIXES.join('|')})-blue-(?:\\d{2,3}|black|white)(?:\\/\\d{1,3})?`,
+  `(?:${UTIL_PREFIXES.join('|')})-(?:blue|indigo)-(?:\\d{2,3}|black|white)(?:\\/\\d{1,3})?`,
   'g'
 );
 
@@ -282,7 +288,7 @@ function sortHits(hits: FileHit[]): void {
   hits.sort((a, b) => b.count - a.count || a.file.localeCompare(b.file));
 }
 
-/** Shell lane scan (blue-* only). Logic unchanged from Phase 0 D6. */
+/** Shell lane scan (blue + indigo, expanded 2026-08-15). */
 function scanShell(): ScanResult {
   const files = resolveShellFiles();
   const hits: FileHit[] = [];
@@ -407,7 +413,7 @@ function printFamilySummary(modules: ModulesScan, baseline: BaselineFile | null)
 
 function printShellReport(shell: ScanResult, baseline: BaselineFile | null): void {
   console.log('═'.repeat(72));
-  console.log('Theme hardcode baseline (D6) — shell chrome (blue-*)');
+  console.log('Theme hardcode baseline (D6) — shell chrome (blue + indigo)');
   console.log('═'.repeat(72));
   console.log(`scope:           ${shell.scope}`);
   console.log(`files scanned:   ${shell.filesScanned}`);
@@ -426,7 +432,8 @@ function printShellReport(shell: ScanResult, baseline: BaselineFile | null): voi
   printPerFileHits(shell.files);
   console.log('═'.repeat(72));
   console.log('Patterns: bg|text|border|ring|from|to|via|outline|shadow|');
-  console.log('          decoration|accent|caret|fill|stroke -blue-{shade}');
+  console.log('          decoration|accent|caret|fill|stroke -blue-{shade} |');
+  console.log('          decoration|accent|caret|fill|stroke -indigo-{shade}');
   console.log('Shell paths: css/components shell list + common/ui + components/modal');
   console.log('═'.repeat(72));
 }
@@ -641,7 +648,8 @@ Options:
   --help                     Show this help
 
 Scope notes:
-  shell   — blue-* in global chrome (Phase 0 D6 baseline)
+  shell   — blue-* + indigo-* in global chrome
+            (blue-only until 2026-08-15; shell indigo blind spot closed by S8)
   modules — blue-* + indigo-* in src/modules, per family: sops, app_center,
             amz_hub, more, other (other = remaining dirs like home)
   all     — blue-* + indigo-* across entire src, with module family summary

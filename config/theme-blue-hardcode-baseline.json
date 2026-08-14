@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-14T15:37:27.610Z",
+  "updatedAt": "2026-08-14T16:27:13.850Z",
   "shell": {
-    "total": 13,
+    "total": 24,
     "filesScanned": 71,
     "filesWithHits": 1,
     "files": {
-      "src/common/ui/megaMenu.ts": 13
+      "src/common/ui/megaMenu.ts": 24
     }
   },
   "modules": {
