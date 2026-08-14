@@ -28,8 +28,10 @@ export type { AnalysisSchedulePlan, FailureStrategy, SchedulingPreference, Sched
 export { resolveAnalysisSchedule };
 
 const SCHEDULE_OPTION_ACTIVE_CLASS: Record<SchedulingPreference, string> = {
-  recommended: 'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-sm',
-  reliability: 'border-blue-500 bg-blue-50 text-blue-900 shadow-sm',
+  recommended:
+    'border-[var(--module-accent)] bg-[var(--wash-indigo)] text-[var(--module-accent-text)] shadow-sm',
+  reliability:
+    'border-[var(--module-accent)] bg-[var(--wash-blue)] text-[var(--module-accent-text)] shadow-sm',
   speed: 'border-purple-500 bg-purple-50 text-purple-900 shadow-sm',
 };
 
@@ -37,10 +39,15 @@ const INACTIVE_SCHEDULE_OPTION_CLASS =
   'border-slate-200 bg-white text-slate-600 hover:border-accent-100 hover:bg-accent-100/40';
 const INACTIVE_SCHEDULE_TIER_CLASS = 'border-slate-200 bg-white text-slate-500';
 const SCHEDULE_TIER_CONFIG: Record<ScheduleTier, { label: string; activeClass: string }> = {
-  stable: { label: '稳定', activeClass: 'border-blue-200 bg-blue-50 text-blue-700 shadow-sm' },
+  stable: {
+    label: '稳定',
+    activeClass:
+      'border-[var(--module-accent-border)] bg-[var(--wash-blue)] text-[var(--module-accent-text)] shadow-sm',
+  },
   recommended: {
     label: '推荐',
-    activeClass: 'border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm',
+    activeClass:
+      'border-[var(--module-accent-border)] bg-[var(--wash-indigo)] text-[var(--module-accent-text)] shadow-sm',
   },
   extreme: {
     label: '极速',

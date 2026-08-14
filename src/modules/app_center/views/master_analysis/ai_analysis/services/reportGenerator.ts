@@ -156,6 +156,6 @@ export function highlightJson(json: string): string {
     .replace(/"([^"]+)":/g, '<span class="text-purple-400">"$1"</span>:')
     .replace(/: "([^"]*)"/g, ': <span class="text-emerald-400">"$1"</span>')
     .replace(/: (\d+)/g, ': <span class="text-amber-400">$1</span>')
-    .replace(/: (true|false)/g, ': <span class="text-blue-400">$1</span>')
+    .replace(/: (true|false)/g, ': <span class="text-[var(--module-accent-soft)]">$1</span>')
     .replace(/: (null)/g, ': <span class="text-slate-500">$1</span>');
 }

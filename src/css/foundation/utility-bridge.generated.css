@@ -161,7 +161,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .text-blue-600\/80:not(.twb-keep) { color: color-mix(in srgb, var(--color-blue-400) 80%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-blue-700:not(.twb-keep) { color: var(--color-blue-300); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-blue-800:not(.twb-keep) { color: var(--color-blue-300); }
-:is(.dark, [data-color-mode-resolved="dark"]) .text-blue-900:not(.twb-keep) { color: var(--color-blue-200); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-blue-900\/75:not(.twb-keep) { color: color-mix(in srgb, var(--color-blue-200) 75%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-cyan-500:not(.twb-keep) { color: var(--color-cyan-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-cyan-600:not(.twb-keep) { color: var(--color-cyan-400); }
@@ -192,7 +191,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .text-indigo-600\/80:not(.twb-keep) { color: color-mix(in srgb, var(--color-indigo-400) 80%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-indigo-700:not(.twb-keep) { color: var(--color-indigo-300); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-indigo-800:not(.twb-keep) { color: var(--color-indigo-300); }
-:is(.dark, [data-color-mode-resolved="dark"]) .text-indigo-900:not(.twb-keep) { color: var(--color-indigo-200); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-indigo-900\/75:not(.twb-keep) { color: color-mix(in srgb, var(--color-indigo-200) 75%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-lime-600:not(.twb-keep) { color: var(--color-lime-400); }
 :is(.dark, [data-color-mode-resolved="dark"]) .text-lime-600\/80:not(.twb-keep) { color: color-mix(in srgb, var(--color-lime-400) 80%, transparent); }
