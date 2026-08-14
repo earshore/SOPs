@@ -280,7 +280,7 @@ export const llmSectionBehavior: SettingsPanelPart = {
   },
 
   get fetchModelsIconClass(): string {
-    return this.llm.isFetching ? 'fa-circle-notch fa-spin text-blue-500' : 'fa-sync-alt';
+    return this.llm.isFetching ? 'fa-circle-notch fa-spin text-[var(--module-accent)]' : 'fa-sync-alt';
   },
 
   get fetchModelsText(): string {
@@ -313,7 +313,7 @@ export const llmSectionBehavior: SettingsPanelPart = {
 
   get testConnectionIconClass(): string {
     return this.llm.isTesting
-      ? 'fa-circle-notch fa-spin text-blue-500'
+      ? 'fa-circle-notch fa-spin text-[var(--module-accent)]'
       : 'fa-plug text-emerald-500';
   },
 

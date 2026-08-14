@@ -20,7 +20,7 @@ export async function updateModelStatus(): Promise<void> {
         `
                 <span class="status-dot status-success"></span>
                 <span class="text-slate-600 text-xs font-medium flex items-center gap-1">
-                    ${escapeHtml(providerInfo.name)}: <span class="font-mono text-blue-600">${escapeHtml(config.model)}</span>
+                    ${escapeHtml(providerInfo.name)}: <span class="font-mono text-[var(--module-accent-text)]">${escapeHtml(config.model)}</span>
                 </span>
             `
       );

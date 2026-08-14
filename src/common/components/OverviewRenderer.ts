@@ -144,7 +144,7 @@ export class OverviewRenderer {
     return `
       <header class="text-center mb-8">
         <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
-          <i class="${this.moduleConfig.icon} text-blue-500 mr-3"></i>
+          <i class="${this.moduleConfig.icon} text-[var(--module-accent)] mr-3"></i>
           ${this.moduleConfig.title}
         </h1>
         <p class="text-slate-600 max-w-3xl mx-auto">
@@ -185,9 +185,9 @@ export class OverviewRenderer {
 
     // 默认使用指南
     return `
-      <div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-6 mb-8">
+      <div class="bg-gradient-to-br from-slate-50 to-[var(--wash-blue)] border border-slate-200 rounded-2xl p-6 mb-8">
         <div class="flex items-start gap-4 mb-4">
-          <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white flex-shrink-0">
+          <div class="w-12 h-12 bg-[var(--wash-blue)]0 rounded-xl flex items-center justify-center text-white flex-shrink-0">
             <i class="fas fa-lightbulb text-xl"></i>
           </div>
           <div>
@@ -214,7 +214,7 @@ export class OverviewRenderer {
     return `
       <div class="border-t border-slate-200 pt-4">
         <h4 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-          <i class="fas fa-bolt text-blue-500"></i>
+          <i class="fas fa-bolt text-[var(--module-accent)]"></i>
           快速入口
         </h4>
         <div class="flex gap-3 flex-wrap">
@@ -223,7 +223,7 @@ export class OverviewRenderer {
               route => `
             <button
               type="button"
-              class="px-4 py-2 bg-white text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
+              class="px-4 py-2 bg-white text-[var(--module-accent-text)] border border-[var(--module-accent)] rounded-lg hover:bg-[var(--wash-blue)] transition-colors text-sm font-medium"
               data-action="switch-tab"
               data-tab="${route.id}"
             >
@@ -376,7 +376,7 @@ export class OverviewRenderer {
             data-tab="${route.id}"
             data-category="${route.category || 'all'}"
           >
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
+            <div class="w-12 h-12 bg-[var(--module-accent-soft)] rounded-lg flex items-center justify-center text-[var(--module-accent-text)] flex-shrink-0">
               <i class="${route.icon} text-xl"></i>
             </div>
             <div class="flex-1">
@@ -410,10 +410,10 @@ export class OverviewRenderer {
             data-category="${route.category || 'all'}"
           >
             <div class="flex items-center gap-3 mb-3">
-              <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white">
+              <div class="w-12 h-12 bg-gradient-to-br from-[var(--module-accent)] to-[var(--module-accent)] rounded-xl flex items-center justify-center text-white">
                 <i class="${route.icon} text-xl"></i>
               </div>
-              <h3 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+              <h3 class="font-bold text-slate-800 group-hover:text-[var(--module-accent-text)] transition-colors">
                 ${route.label}
               </h3>
             </div>
@@ -445,11 +445,11 @@ export class OverviewRenderer {
               data-tab="${route.id}"
               data-category="${route.category || 'all'}"
             >
-              <div class="absolute left-0 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white z-10">
+              <div class="absolute left-0 w-12 h-12 bg-[var(--wash-blue)]0 rounded-full flex items-center justify-center text-white z-10">
                 <i class="${route.icon}"></i>
               </div>
               <div class="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-all">
-                <h3 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors mb-1">
+                <h3 class="font-bold text-slate-800 group-hover:text-[var(--module-accent-text)] transition-colors mb-1">
                   ${route.label}
                 </h3>
                 <p class="text-sm text-slate-500">点击进入查看详情</p>
