@@ -58,14 +58,14 @@
 .settings-proxy-form__control.settings-control,
 .settings-control.settings-proxy-form__control {
   width: 100%;
-  min-height: 2.5rem;
-  height: 2.5rem;
+  min-height: var(--field-height, 40px);
+  height: var(--field-height, 40px);
   box-sizing: border-box;
   padding-top: 0;
   padding-bottom: 0;
   padding-left: 0.75rem;
   padding-right: 2rem;
-  border-radius: 0.75rem;
+  border-radius: var(--settings-radius-control, 0.75rem);
   font-size: 0.8125rem;
   line-height: 1.25;
 }
