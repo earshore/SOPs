@@ -379,9 +379,9 @@ function createEmptyWordFrequencyElement(): HTMLElement {
 
   const iconWrap = document.createElement('div');
   iconWrap.className =
-    'w-14 h-14 rounded-2xl bg-accent-100 flex items-center justify-center mb-4 border border-accent-100';
+    'w-14 h-14 rounded-2xl bg-[var(--module-accent-soft)] flex items-center justify-center mb-4 border border-[var(--module-accent-soft)]';
   const icon = document.createElement('i');
-  icon.className = 'fas fa-cloud text-indigo-200 text-xl';
+  icon.className = 'fas fa-cloud text-[var(--module-accent)] text-xl';
   icon.setAttribute('aria-hidden', 'true');
   iconWrap.appendChild(icon);
 

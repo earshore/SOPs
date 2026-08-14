@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-08-14T11:58:55.628Z",
+  "updatedAt": "2026-08-14T12:41:36.996Z",
   "shell": {
     "total": 13,
     "filesScanned": 26,
@@ -11,7 +11,7 @@
   },
   "modules": {
     "filesScanned": 390,
-    "filesWithHits": 37,
+    "filesWithHits": 31,
     "families": {
       "sops": {
         "total": 65,
@@ -30,24 +30,17 @@
         }
       },
       "app_center": {
-        "total": 39,
+        "total": 0,
         "filesScanned": 264,
-        "filesWithHits": 5,
-        "files": {
-          "src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanel.ts": 24,
-          "src/modules/app_center/views/master_analysis/ai_analysis/components/PerformanceSettings.ts": 12,
-          "src/modules/app_center/views/keyword_hunter/process/index.ts": 1,
-          "src/modules/app_center/views/keyword_hunter/process/template.html": 1,
-          "src/modules/app_center/views/master_analysis/ai_analysis/services/reportGenerator.ts": 1
-        }
+        "filesWithHits": 0,
+        "files": {}
       },
       "amz_hub": {
-        "total": 163,
+        "total": 146,
         "filesScanned": 40,
-        "filesWithHits": 16,
+        "filesWithHits": 15,
         "files": {
           "src/modules/amz_hub/views/practice/quality_listing/template.html": 71,
-          "src/modules/amz_hub/views/advanced/mature_phase/template.html": 17,
           "src/modules/amz_hub/views/knowledge/seo_strategy/template.html": 11,
           "src/modules/amz_hub/views/advanced/new_product_30days/template.html": 9,
           "src/modules/amz_hub/views/overview/template.html": 9,
