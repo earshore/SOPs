@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [3.1.1-rc.2] - 2026-08-14
+
+> 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.1` 基线上纳入路由加载视觉系统重构、深色模式与主题切换动画修复，以及 AI 分析提示词集中化重构；GitHub Latest 仍为 `v3.1.0`，回滚基线为 `v3.1.0`。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Added（新增）
+
+- **路由加载视觉系统**：路由切换时展示居中的极简 loading dots，替代既有页面转场动画；加载视觉统一为可缩放的最小化形态，保证长任务导航时主内容区域直接让位而不出现骨架屏抖动。
+
+### Changed（变更）
+
+- **加载与动画策略**：移除页面转场动画（perf：减少无意义的 DOM 重排与动画计算）；主题切换时入场动画、toast 与 infinite 动画不再重播；设置面板抽屉滑入/回滑动画与背景样式保留 settings-panel-shell 体系。
+- **入口信息架构**：快速访问入口迁移——设置齿轮移至 header，插件下载图标移至采集页 banner（并修复可见性），Release 入口迁移至系统设置底部 footer。
+- **AI 分析提示词集中化（refactor）**：主分析 system 提示词提取为 `MASTER_ANALYSIS_SYSTEM_PROMPT` 常量（英文版 + 中文注释）；Map-Reduce 管线 15 处内联提示词模板迁移至 `prompts/pipelinePrompts.ts`（公共前缀 + 11 个 schema 常量 + 14 个工厂函数），JSON 约束与语言要求在多处重复的碎片化写法得到统一；PromptLab listing 指导同步改进。
+
+### Fixed（修复）
+
+- **深色模式三处视觉问题**：齿轮按钮融入深色 header；清除页面底部 modal-container 横条（BOM 文本节点）；workbench-launchpad 在深色模式下的可读性。
+- **首页布局细节**：消除 workbench-launchpad 主按钮两侧细竖线；更多菜单改为三格均匀布局，移除右侧 280px 空白。
+- **质量门禁**：清理构建门禁历史债务；Prettier 格式修复（AI 分析管线文件）；XSS 扫描报告文件数同步。
+
+### Docs（文档）
+
+- 发布元数据同步至 `v3.1.1-rc.2`；候选通道、回滚基线和自动化验证结果以本章节及 GitHub Release 为准。
+
 ## [3.1.1-rc.1] - 2026-08-13
 
 > 功能冻结后的发布候选（Pre-release）。本候选以 `v3.1.0` GA 为稳定基线，聚焦首页亚马逊运营工作台入口重构；GitHub Latest 仍为 `v3.1.0`，回滚基线为 `v3.1.0`。
