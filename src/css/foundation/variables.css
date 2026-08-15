@@ -92,7 +92,7 @@
   --color-success-light: rgba(34, 197, 94, 0.1);
   --color-success-contrast: #ffffff;
 
-  --color-warning-contrast: var(--color-slate-900);
+  --color-warning-contrast: #f8fafc; /* [DARKFIX-CHAIN] 直接写 raw 亮值：warning 上的文字色（不可引已反色键 --color-slate-900） */
 
   --color-error-light: rgba(239, 68, 68, 0.1);
   --color-error-contrast: #ffffff;
@@ -401,7 +401,7 @@
   /* ---- 文字 ---- */
 
   /* ---- 背景 ---- */
-  --color-bg-primary: var(--color-slate-900);
+  --color-bg-primary: #0f172a; /* [DARKFIX-CHAIN] 直接写 raw 暗值：dark 块中 --color-slate-900 已被反色规则覆写为 slate-50，不可再引 */
   --bg-secondary: var(
     --color-slate-800
   ); /* [B4-THM01] dark 翻转：slate-50 → slate-800，与 bg-slate-50 bridge 契约一致 */
@@ -415,7 +415,7 @@
   /* ---- 工作台表面 ---- */
   /* Elevation ladder: workbench < panel < card ≈ elevated < card-hover */
   --surface-workbench: var(--color-slate-950); /* [S2-THM01] dark: slate-950 */
-  --surface-panel: var(--color-slate-900);
+  --surface-panel: #0f172a; /* [DARKFIX-CHAIN] 直接写 raw 暗值（不可引已反色键 --color-slate-900） */
   --surface-card: var(--color-slate-800);
   --surface-card-hover: var(--color-slate-700); /* [S2-THM01] dark: slate-700 */
 
