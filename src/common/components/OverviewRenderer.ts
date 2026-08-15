@@ -185,9 +185,9 @@ export class OverviewRenderer {
 
     // 默认使用指南
     return `
-      <div class="bg-gradient-to-br from-slate-50 to-[var(--wash-blue)] border border-slate-200 rounded-2xl p-6 mb-8">
+      <div class="bg-gradient-to-br from-slate-50 to-[#eff6ff] border border-slate-200 rounded-2xl p-6 mb-8">
         <div class="flex items-start gap-4 mb-4">
-          <div class="w-12 h-12 bg-[var(--wash-blue)]0 rounded-xl flex items-center justify-center text-white flex-shrink-0">
+          <div class="w-12 h-12 bg-[#eff6ff]0 rounded-xl flex items-center justify-center text-white flex-shrink-0">
             <i class="fas fa-lightbulb text-xl"></i>
           </div>
           <div>
@@ -223,7 +223,7 @@ export class OverviewRenderer {
               route => `
             <button
               type="button"
-              class="px-4 py-2 bg-white text-[var(--module-accent-text)] border border-[var(--module-accent)] rounded-lg hover:bg-[var(--wash-blue)] transition-colors text-sm font-medium"
+              class="px-4 py-2 bg-white text-[var(--module-accent-text)] border border-[var(--module-accent)] rounded-lg hover:bg-[#eff6ff] transition-colors text-sm font-medium"
               data-action="switch-tab"
               data-tab="${route.id}"
             >
@@ -445,7 +445,7 @@ export class OverviewRenderer {
               data-tab="${route.id}"
               data-category="${route.category || 'all'}"
             >
-              <div class="absolute left-0 w-12 h-12 bg-[var(--wash-blue)]0 rounded-full flex items-center justify-center text-white z-10">
+              <div class="absolute left-0 w-12 h-12 bg-[#eff6ff]0 rounded-full flex items-center justify-center text-white z-10">
                 <i class="${route.icon}"></i>
               </div>
               <div class="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-all">

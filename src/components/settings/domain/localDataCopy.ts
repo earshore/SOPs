@@ -29,10 +29,9 @@ export const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMe
     label: '系统配置与偏好',
     description: 'AI 连接、工具策略、网络、布局和功能开关',
     icon: 'fa-sliders-h',
-    iconClass:
-      'bg-[var(--wash-blue)] text-[var(--module-accent-text)] ring-[var(--module-accent-border)]',
+    iconClass: 'bg-[#eff6ff] text-[var(--module-accent-text)] ring-[var(--module-accent-border)]',
     buttonClass:
-      'border-[var(--module-accent-border)] bg-[var(--wash-blue)] text-[var(--module-accent-text)] hover:bg-[var(--module-accent-soft)]',
+      'border-[var(--module-accent-border)] bg-[#eff6ff] text-[var(--module-accent-text)] hover:bg-[var(--module-accent-soft)]',
     actionLabel: '清理配置',
     confirmMessage: '这会删除模型、网络、布局和偏好配置，保留历史、聊天与缓存。继续？',
   },

@@ -35,7 +35,6 @@
      ======================================== */
 
   /* ---- Paragraph / Reading Width ---- */
-  --prose-width: 72ch;
 
   /* ========================================
      2. White / Black with Alpha
@@ -44,9 +43,6 @@
      ======================================== */
   --color-white: #ffffff;
   --color-black: #000000;
-  --color-black-alpha-5: rgba(0, 0, 0, 0.05);
-  --color-black-alpha-10: rgba(0, 0, 0, 0.1);
-  --color-black-alpha-20: rgba(0, 0, 0, 0.2);
 
   /* ========================================
      3. 色彩系统 — 语义令牌
@@ -65,12 +61,8 @@
     --color-slate-50
   ); /* [B4-THM01] handwritten 接管：原 --color-bg-secondary 已归档，消费点全量迁移至此键 */
   --color-bg-tertiary: var(--color-slate-100); /* [S2-THM01] -> --color-slate-100 */
-  --color-bg-elevated: #ffffff;
   --color-bg-hover: rgba(0, 0, 0, 0.04);
-  --color-bg-active: rgba(0, 0, 0, 0.08);
   --color-bg-selected: var(--color-primary-light);
-  --color-bg-backdrop: rgba(0, 0, 0, 0.4);
-  --color-bg-overlay: rgba(0, 0, 0, 0.5);
 
   /* ---- 工作台表面 ---- */
   --surface-workbench: var(--color-slate-50); /* [S2-THM01] -> --color-slate-50 */
@@ -89,15 +81,6 @@
   /* ---- 焦点环 ---- */
 
   /* ---- 状态色 ---- */
-  --color-success-light: rgba(34, 197, 94, 0.1);
-  --color-success-contrast: #ffffff;
-
-  --color-warning-contrast: #f8fafc; /* [DARKFIX-CHAIN] 直接写 raw 亮值：warning 上的文字色（不可引已反色键 --color-slate-900） */
-
-  --color-error-light: rgba(239, 68, 68, 0.1);
-  --color-error-contrast: #ffffff;
-
-  --color-info-light: rgba(59, 130, 246, 0.1);
 
   /* ========================================
      4. 间距系统
@@ -110,34 +93,14 @@
      ======================================== */
 
   /* ---- 容器最大宽度 ---- */
-  --container-xs: 480px;
-  --container-sm: 640px;
-  --container-md: 768px;
-  --container-lg: 1024px;
-  --container-xl: 1280px;
-  --container-2xl: 1450px;
-  --container-3xl: 1680px;
-  --container-full: 100%;
-  --container-default: var(--container-2xl);
 
   /* ---- 容器内边距 ---- */
-  --container-padding-x: var(--spacing-md);
-  --container-padding-x-sm: var(--spacing-sm);
-  --container-padding-x-lg: var(--spacing-lg);
 
   /* ---- 侧栏 ---- */
-  --sidebar-width: 260px;
-  --sidebar-width-collapsed: 64px;
-  --sidebar-width-wide: 320px;
 
   /* ---- Header ---- */
-  --header-height: 64px;
-  --header-height-sm: 56px;
 
   /* ---- 区块间距 ---- */
-  --section-gap: var(--spacing-xl);
-  --section-gap-sm: var(--spacing-lg);
-  --section-gap-lg: var(--spacing-12);
 
   /* ========================================
      6. 圆角
@@ -146,8 +109,6 @@
      工作台面板 SSOT：--workbench-radius（见 workbench-radius-decision）。
      ======================================== */
   --workbench-radius: 8px;
-  --workbench-radius-lg: 12px;
-  --rounded-xs: 2px;
   --rounded-sm: 4px;
   --rounded-md: 8px;
   --rounded-lg: 12px;
@@ -175,19 +136,14 @@
   --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.04);
 
   /* 彩色阴影 (主色投影) — follows --color-primary for Appearance */
-  --shadow-primary-sm: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
-  --shadow-primary-md: 0 4px 14px color-mix(in srgb, var(--color-primary) 20%, transparent);
 
   /* 上方阴影 */
 
   /* ========================================
      8. 边框
      ======================================== */
-  --border-width-thin: 1px;
 
   /* 预设边框（--border-light 为纯色 token，由 generated 输出，不再手写简写） */
-  --border-default: var(--border-width-thin) solid var(--color-border-default);
-  --border-strong: var(--border-width-thin) solid var(--color-border-strong);
 
   /* ========================================
      9. 透明度
@@ -199,12 +155,8 @@
      10. Z-index 层级
      规范化层叠顺序，避免 z-index 冲突
      ======================================== */
-  --z-hide: -1;
-  --z-base: 0;
-  --z-raised: 1;
   --z-dropdown: 30;
   --z-sticky: 35;
-  --z-header: 40;
   --z-overlay: 50;
   --z-modal-backdrop: 55;
   --z-modal: 60;
@@ -225,9 +177,6 @@
   --ease-back-out: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   /* ---- 微交互缓动函数 ---- */
-  --micro-ease-button: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --micro-ease-card: cubic-bezier(0.22, 1, 0.36, 1);
-  --micro-ease-modal: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ========================================
      12. 动画时长
@@ -242,29 +191,20 @@
   --duration-2s: 2000ms;
 
   /* ---- 微交互动画时长 ---- */
-  --micro-duration-instant: 100ms;
-  --micro-duration-quick: 150ms;
-  --micro-duration-smooth: 250ms;
-  --micro-duration-gentle: 350ms;
 
   /* ---- PC 交互过渡属性 ---- */
-  --transition-interactive-properties:
-    color, background-color, border-color, fill, stroke, opacity, box-shadow, transform;
 
   /* ========================================
      13. 模糊 & 滤镜
      ======================================== */
 
   /* 背景模糊预设 */
-  --backdrop-blur: blur(var(--blur-lg)) saturate(1.8);
 
   /* 灰度 */
 
   /* ========================================
      14. 渐变预设
      ======================================== */
-  --gradient-primary: linear-gradient(135deg, var(--color-blue-500), var(--color-indigo-500));
-  --gradient-success: linear-gradient(135deg, var(--color-green-400), var(--color-teal-500));
 
   /* 装饰性渐变（--gradient-rainbow 已归档；primary/success/sunset/ocean 保留为显式契约） */
   --gradient-sunset: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
@@ -311,19 +251,11 @@
      ======================================== */
 
   /* ---- PC 页面布局 ---- */
-  --layout-max-width: var(--container-max-width, var(--container-2xl));
-  --layout-wide-width: 1600px;
-  --page-gutter: var(--container-padding-x-lg, 24px);
-  --page-gutter-wide: var(--spacing-xl, 32px);
 
   /* ---- 组件视觉 ---- */
-  --card-bg: var(--surface-card);
   --card-border: var(--border-subtle);
   --card-shadow: var(--shadow-card);
   --card-radius: var(--rounded-card);
-  --panel-bg: var(--surface-panel);
-  --panel-border: var(--border-subtle);
-  --panel-shadow: var(--shadow-panel);
   --panel-radius: var(--rounded-panel);
 
   /* ---- 操作按钮 ---- */
@@ -333,14 +265,7 @@
   --button-primary-fg: var(--color-primary-contrast);
 
   /* ---- 软色 wash（浅色=色阶50，暗色主题重定义为 tint on surface） ---- */
-  --wash-blue: var(--color-blue-50);
   --wash-indigo: var(--color-indigo-50);
-  --wash-emerald: var(--color-emerald-50);
-  --wash-amber: var(--color-amber-50);
-  --wash-red: var(--color-red-50);
-  --wash-purple: var(--color-purple-50);
-  --wash-teal: var(--color-teal-50);
-  --wash-neutral: var(--color-slate-50);
 
   /* ---- 模块强调色 ---- */
   --module-accent: var(--color-accent);
@@ -354,7 +279,6 @@
 
 @media (min-width: 1536px) {
   :root {
-    --page-gutter: var(--page-gutter-wide, 32px);
   }
 }
 
@@ -406,11 +330,7 @@
     --color-slate-800
   ); /* [B4-THM01] dark 翻转：slate-50 → slate-800，与 bg-slate-50 bridge 契约一致 */
   --color-bg-tertiary: rgba(255, 255, 255, 0.06); /* [S2-THM01] dark: rgba 无对等 */
-  --color-bg-elevated: var(--color-slate-800);
   --color-bg-hover: rgba(255, 255, 255, 0.06);
-  --color-bg-active: rgba(255, 255, 255, 0.1);
-  --color-bg-backdrop: rgba(0, 0, 0, 0.6);
-  --color-bg-overlay: rgba(0, 0, 0, 0.7);
 
   /* ---- 工作台表面 ---- */
   /* Elevation ladder: workbench < panel < card ≈ elevated < card-hover */
@@ -428,16 +348,12 @@
 
   /* ---- 状态色 ---- */
   --color-success: var(--color-green-400);
-  --color-success-light: rgba(74, 222, 128, 0.12);
 
   --color-warning: var(--color-amber-400);
-  --color-warning-contrast: var(--color-slate-900);
 
   --color-error: var(--color-red-400);
-  --color-error-light: rgba(248, 113, 113, 0.12);
 
   --color-info: var(--color-blue-400);
-  --color-info-light: rgba(96, 165, 250, 0.12);
 
   /* ---- 阴影 ---- */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -452,18 +368,8 @@
 
   --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.15);
 
-  --shadow-primary-sm: 0 2px 8px color-mix(in srgb, var(--color-primary) 20%, transparent);
-  --shadow-primary-md: 0 4px 14px color-mix(in srgb, var(--color-primary) 25%, transparent);
-
   /* ---- 软色 wash ---- */
-  --wash-blue: color-mix(in srgb, var(--color-blue-400) 12%, var(--surface-card));
   --wash-indigo: color-mix(in srgb, var(--color-indigo-400) 12%, var(--surface-card));
-  --wash-emerald: color-mix(in srgb, var(--color-emerald-400) 12%, var(--surface-card));
-  --wash-amber: color-mix(in srgb, var(--color-amber-400) 12%, var(--surface-card));
-  --wash-red: color-mix(in srgb, var(--color-red-400) 12%, var(--surface-card));
-  --wash-purple: color-mix(in srgb, var(--color-purple-400) 12%, var(--surface-card));
-  --wash-teal: color-mix(in srgb, var(--color-teal-400) 12%, var(--surface-card));
-  --wash-neutral: var(--surface-panel);
 
   /* ---- 滚动条 ---- */
   --scrollbar-thumb: rgba(255, 255, 255, 0.15);

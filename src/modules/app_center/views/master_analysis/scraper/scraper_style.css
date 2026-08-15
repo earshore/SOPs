@@ -116,8 +116,8 @@
 .card-elevated:hover {
   transform: none;
   box-shadow:
-    0 12px 28px -8px var(--color-black-alpha-10),
-    0 4px 10px -4px var(--color-black-alpha-5);
+    0 12px 28px -8px rgba(0, 0, 0, 0.1),
+    0 4px 10px -4px rgba(0, 0, 0, 0.05);
 }
 
 /* ---- Site Selection Buttons ---- */
@@ -202,7 +202,7 @@
   height: 20px;
   background: white;
   border-radius: 50%;
-  box-shadow: 0 1px 4px var(--color-black-alpha-20);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   transition: transform var(--duration-normal) var(--ease-spring);
 }
 .toggle-track.active .toggle-thumb {
@@ -767,7 +767,7 @@
   width: 70%;
   height: 2px;
   background: linear-gradient(90deg, var(--ma-accent, #6257f5), var(--ma-accent-light, #8b5cf6));
-  border-radius: var(--rounded-xs) 2px 0 0;
+  border-radius: 2px 2px 0 0;
   transition:
     background-color var(--duration-normal) var(--ease-smooth),
     transform var(--duration-normal) var(--ease-smooth);

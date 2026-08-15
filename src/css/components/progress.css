@@ -132,7 +132,7 @@
 
 .progress-step.done {
   color: var(--color-success);
-  background: var(--color-success-light);
+  background: rgba(34, 197, 94, 0.1);
 }
 
 .progress-step.done .step-indicator {

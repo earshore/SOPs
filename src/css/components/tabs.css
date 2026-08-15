@@ -171,10 +171,10 @@
 }
 
 .cat-tab.active {
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, var(--color-blue-500), var(--color-indigo-500));
   color: white;
   border-color: transparent;
-  box-shadow: var(--shadow-primary-sm);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
 
 .cat-tab .count {

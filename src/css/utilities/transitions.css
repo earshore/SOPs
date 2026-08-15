@@ -6,13 +6,15 @@
    平滑过渡
    ======================================== */
 .smooth-transition {
-  transition-property: var(--transition-interactive-properties);
+  transition-property:
+    color, background-color, border-color, fill, stroke, opacity, box-shadow, transform;
   transition-duration: 180ms;
   transition-timing-function: var(--ease-smooth);
 }
 
 .smooth-transition-slow {
-  transition-property: var(--transition-interactive-properties);
+  transition-property:
+    color, background-color, border-color, fill, stroke, opacity, box-shadow, transform;
   transition-duration: 300ms;
   transition-timing-function: var(--ease-smooth);
 }
@@ -45,7 +47,8 @@
 }
 
 .transition-all {
-  transition-property: var(--transition-interactive-properties);
+  transition-property:
+    color, background-color, border-color, fill, stroke, opacity, box-shadow, transform;
   transition-duration: var(--duration-normal);
   transition-timing-function: var(--ease-smooth);
 }

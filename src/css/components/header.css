@@ -21,8 +21,6 @@
    1. CSS 变量
    ======================================== */
 :root {
-  --header-height: 64px;
-  --header-height-sm: 56px;
   /* T2 shell neutrals — surface tokens, not white-only glass */
   --header-bg: color-mix(in srgb, var(--surface-panel, #ffffff) 80%, transparent);
   --header-bg-solid: var(--surface-panel, #ffffff);
@@ -86,7 +84,7 @@
 .header-container {
   position: sticky;
   top: 0;
-  z-index: var(--z-header, 40);
+  z-index: 40;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   background: var(--header-bg);
@@ -115,16 +113,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: var(--header-height);
-  max-width: var(--layout-max-width, var(--container-2xl, 1450px));
+  height: 64px;
+  max-width: 1450px;
   margin: 0 auto;
-  padding: 0 var(--page-gutter, var(--spacing-4, 16px));
+  padding: 0 var(--spacing-4, 16px);
 }
 
 /* 小屏幕高度调整 */
 @media (max-width: 639px) {
   .header-content {
-    height: var(--header-height-sm);
+    height: 56px;
     padding: 0 var(--spacing-3, 12px);
   }
 }
@@ -158,7 +156,7 @@
 }
 
 .nav-link:active {
-  background: var(--color-bg-active, rgba(0, 0, 0, 0.08));
+  background: rgba(0, 0, 0, 0.08);
 }
 
 /* 当前页面高亮 */
@@ -212,7 +210,7 @@
   top: calc(100% + 8px);
   left: 0;
   min-width: 200px;
-  background: var(--color-bg-elevated, #ffffff);
+  background: #ffffff;
   border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
   border-radius: var(--rounded-lg, 12px);
   box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.08));
@@ -386,7 +384,7 @@
   top: calc(100% + 8px);
   right: 0;
   min-width: 200px;
-  background: var(--color-bg-elevated, #ffffff);
+  background: #ffffff;
   border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
   border-radius: var(--rounded-lg, 12px);
   box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.08));
@@ -495,7 +493,7 @@
 /* 移动端抽屉 */
 .header-mobile-drawer {
   position: fixed;
-  top: var(--header-height);
+  top: 64px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -526,7 +524,7 @@
 /* 移动端遮罩 */
 .header-mobile-overlay {
   position: fixed;
-  top: var(--header-height);
+  top: 64px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -587,7 +585,7 @@
   top: calc(100% + 8px);
   right: 0;
   width: 320px;
-  background: var(--color-bg-elevated, #ffffff);
+  background: #ffffff;
   border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
   border-radius: var(--rounded-lg, 12px);
   box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.08));
@@ -780,7 +778,7 @@
 .dark .header-user-dropdown-panel,
 [data-color-mode-resolved='dark'] .header-user-dropdown-panel,
 [data-theme='dark'] .header-user-dropdown-panel {
-  background: var(--color-bg-elevated, #1e293b);
+  background: #1e293b;
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
 }
@@ -830,7 +828,7 @@
 .dark .header-notifications-panel,
 [data-color-mode-resolved='dark'] .header-notifications-panel,
 [data-theme='dark'] .header-notifications-panel {
-  background: var(--color-bg-elevated, #1e293b);
+  background: #1e293b;
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
 }

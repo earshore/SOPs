@@ -51,12 +51,12 @@
 .prompt-detail-modal__dialog {
   position: relative;
   margin: auto;
-  max-height: calc(100dvh - var(--header-height, 64px) - clamp(2rem, 4vw, 3rem));
+  max-height: calc(100dvh - 64px - clamp(2rem, 4vw, 3rem));
 }
 
 @supports not (height: 100dvh) {
   .prompt-detail-modal__dialog {
-    max-height: calc(100vh - var(--header-height, 64px) - clamp(2rem, 4vw, 3rem));
+    max-height: calc(100vh - 64px - clamp(2rem, 4vw, 3rem));
   }
 }
 
@@ -113,7 +113,7 @@
 }
 
 .prompt-card:hover {
-  box-shadow: 0 10px 15px -3px var(--color-black-alpha-10);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   border-color: var(--color-violet-300);
 }
 
@@ -156,7 +156,7 @@
   background-color: var(--surface-card, #ffffff);
   color: var(--color-violet-600);
   font-weight: 600;
-  box-shadow: 0 1px 2px 0 var(--color-black-alpha-5);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .lang-btn:disabled {

@@ -157,7 +157,7 @@ type AiAnalysisPanelThis = AiAnalysisPanelContext &
 type AiAnalysisPanelBehavior = Record<string, unknown> & ThisType<AiAnalysisPanelThis>;
 
 const RESULT_HEADER_CLASS_MAP: Record<string, string> = {
-  blue: 'bg-[var(--wash-blue)] border-b border-[var(--module-accent-border)]',
+  blue: 'bg-[#eff6ff] border-b border-[var(--module-accent-border)]',
   cyan: 'bg-cyan-50 border-b border-cyan-100',
   red: 'bg-red-50 border-b border-red-100',
   amber: 'bg-amber-50 border-b border-amber-100',
@@ -168,7 +168,7 @@ const RESULT_HEADER_CLASS_MAP: Record<string, string> = {
 };
 
 const RESULT_ICON_WRAP_CLASS_MAP: Record<string, string> = {
-  blue: 'bg-[var(--wash-blue)] text-[var(--module-accent-text)] border-[var(--module-accent-border)]',
+  blue: 'bg-[#eff6ff] text-[var(--module-accent-text)] border-[var(--module-accent-border)]',
   cyan: 'bg-cyan-100 text-cyan-700 border-cyan-200',
   red: 'bg-red-100 text-red-700 border-red-200',
   amber: 'bg-amber-100 text-amber-700 border-amber-200',
@@ -179,7 +179,7 @@ const RESULT_ICON_WRAP_CLASS_MAP: Record<string, string> = {
 };
 
 const RESULT_CATEGORY_CLASS_MAP: Record<string, string> = {
-  blue: 'bg-[var(--wash-blue)] text-[var(--module-accent-text)] border border-[var(--module-accent-border)]',
+  blue: 'bg-[#eff6ff] text-[var(--module-accent-text)] border border-[var(--module-accent-border)]',
   cyan: 'bg-cyan-50 text-cyan-700 border border-cyan-100',
   red: 'bg-red-50 text-red-700 border border-red-100',
   amber: 'bg-amber-50 text-amber-700 border border-amber-100',
@@ -190,12 +190,12 @@ const RESULT_CATEGORY_CLASS_MAP: Record<string, string> = {
 };
 
 const DEFAULT_LISTING_RESULT_HEADER_CLASS =
-  'bg-[var(--wash-blue)] border-b border-[var(--module-accent-border)]';
+  'bg-[#eff6ff] border-b border-[var(--module-accent-border)]';
 const DEFAULT_REVIEW_RESULT_HEADER_CLASS = 'bg-amber-50 border-b border-amber-100';
 const DEFAULT_RESULT_ICON_WRAP_CLASS =
-  'bg-[var(--wash-blue)] text-[var(--module-accent-text)] border-[var(--module-accent-border)]';
+  'bg-[#eff6ff] text-[var(--module-accent-text)] border-[var(--module-accent-border)]';
 const DEFAULT_RESULT_CATEGORY_CLASS =
-  'bg-[var(--wash-blue)] text-[var(--module-accent-text)] border border-[var(--module-accent-border)]';
+  'bg-[#eff6ff] text-[var(--module-accent-text)] border border-[var(--module-accent-border)]';
 
 type AlpineSafeMath = {
   abs: (value: number) => number;
@@ -1144,7 +1144,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   get reportStatusBadgeClass(): string {
     return this.isAnalyzing
-      ? 'bg-[var(--wash-blue)] text-[var(--module-accent-text)] border-[var(--module-accent-border)]'
+      ? 'bg-[#eff6ff] text-[var(--module-accent-text)] border-[var(--module-accent-border)]'
       : 'bg-emerald-50 text-emerald-700 border-emerald-200';
   },
 
@@ -1268,7 +1268,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
         type === 'success',
       'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border-amber-200':
         type === 'warning',
-      'bg-gradient-to-r from-[var(--wash-blue)] to-[var(--wash-indigo)] text-[var(--module-accent-text)] border-[var(--module-accent-border)]':
+      'bg-gradient-to-r from-[#eff6ff] to-[var(--wash-indigo)] text-[var(--module-accent-text)] border-[var(--module-accent-border)]':
         type === 'info',
     };
   },

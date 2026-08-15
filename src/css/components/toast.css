@@ -33,7 +33,7 @@
    ======================================== */
 .toast {
   padding: 14px 22px;
-  background: var(--color-bg-elevated);
+  background: #ffffff;
   border: 1px solid var(--color-border-default);
   border-radius: var(--rounded-sm);
   color: var(--color-slate-900);
@@ -91,7 +91,7 @@
 
 .toast-action:hover {
   border-color: var(--color-border-strong, var(--color-border-default));
-  background: var(--color-bg-elevated);
+  background: #ffffff;
 }
 
 .toast-action:focus-visible {

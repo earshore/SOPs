@@ -31,7 +31,7 @@ const SCHEDULE_OPTION_ACTIVE_CLASS: Record<SchedulingPreference, string> = {
   recommended:
     'border-[var(--module-accent)] bg-[var(--wash-indigo)] text-[var(--module-accent-text)] shadow-sm',
   reliability:
-    'border-[var(--module-accent)] bg-[var(--wash-blue)] text-[var(--module-accent-text)] shadow-sm',
+    'border-[var(--module-accent)] bg-[#eff6ff] text-[var(--module-accent-text)] shadow-sm',
   speed: 'border-purple-500 bg-purple-50 text-purple-900 shadow-sm',
 };
 
@@ -42,7 +42,7 @@ const SCHEDULE_TIER_CONFIG: Record<ScheduleTier, { label: string; activeClass: s
   stable: {
     label: '稳定',
     activeClass:
-      'border-[var(--module-accent-border)] bg-[var(--wash-blue)] text-[var(--module-accent-text)] shadow-sm',
+      'border-[var(--module-accent-border)] bg-[#eff6ff] text-[var(--module-accent-text)] shadow-sm',
   },
   recommended: {
     label: '推荐',

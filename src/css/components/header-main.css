@@ -14,7 +14,7 @@
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid var(--border-subtle, rgba(226, 232, 240, 0.8));
-  z-index: var(--z-header, 40);
+  z-index: 40;
   box-shadow:
     0 1px 0 color-mix(in srgb, var(--surface-panel, #ffffff) 50%, transparent) inset,
     0 4px 12px color-mix(in srgb, var(--color-slate-900, #0f172a) 3%, transparent);
@@ -785,11 +785,7 @@
 [data-color-mode-resolved='dark'] .mega-menu-inner,
 [data-theme='dark'] .mega-menu-inner {
   /* Avoid white-glass failure: opaque-enough elevated shell */
-  background: color-mix(
-    in srgb,
-    var(--surface-panel, #0f172a) 96%,
-    var(--color-bg-elevated, #1e293b)
-  );
+  background: color-mix(in srgb, var(--surface-panel, #0f172a) 96%, #1e293b);
   border-color: var(--color-border-light, rgba(255, 255, 255, 0.08));
   box-shadow:
     0 24px 60px -24px color-mix(in srgb, #000 65%, transparent),

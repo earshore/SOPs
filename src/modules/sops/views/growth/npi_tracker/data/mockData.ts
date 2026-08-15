@@ -260,7 +260,7 @@ export const MOCK_PRODUCTS: Product[] = [
 export const STAGE_CONFIG: Record<ProductStage, StageConfig> = {
   'new-test': {
     label: '新品-测款',
-    color: 'bg-[var(--wash-blue)] text-[var(--module-accent-text)]',
+    color: 'bg-[#eff6ff] text-[var(--module-accent-text)]',
   },
   growth: { label: '成长期', color: 'npi-status-done npi-status-done-soft' },
   stable: { label: '稳定期', color: 'npi-status-todo npi-status-todo-soft' },

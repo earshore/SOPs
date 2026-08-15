@@ -118,7 +118,7 @@
 
 /* Success */
 .icon-container--success {
-  --icon-bg: var(--color-success-light, rgba(34, 197, 94, 0.1));
+  --icon-bg: rgba(34, 197, 94, 0.1);
   --icon-color: var(--color-success, #22c55e);
 }
 
@@ -131,7 +131,7 @@
 /* Error / Danger */
 .icon-container--error,
 .icon-container--danger {
-  --icon-bg: var(--color-error-light, rgba(239, 68, 68, 0.1));
+  --icon-bg: rgba(239, 68, 68, 0.1);
   --icon-color: var(--color-error, #ef4444);
 }
 
@@ -177,14 +177,14 @@
 
 /* 渐变 - Primary */
 .icon-container--gradient-primary {
-  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6, #6366f1));
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: white;
-  box-shadow: var(--shadow-primary-md);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-primary) 20%, transparent);
 }
 
 /* 渐变 - Success */
 .icon-container--gradient-success {
-  background: var(--gradient-success, linear-gradient(135deg, #4ade80, #14b8a6));
+  background: linear-gradient(135deg, #4ade80, #14b8a6);
   color: white;
   box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
 }

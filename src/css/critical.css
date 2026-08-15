@@ -179,7 +179,7 @@ body {
 .header {
   position: sticky;
   top: 0;
-  z-index: var(--z-header);
+  z-index: 40;
   background: white;
   border-bottom: 1px solid #e2e8f0;
 }

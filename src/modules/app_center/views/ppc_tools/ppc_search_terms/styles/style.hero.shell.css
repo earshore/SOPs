@@ -41,7 +41,7 @@
     var(--ppc-search-terms-cta-bg, #047857),
     var(--color-teal-500)
   );
-  color: var(--color-success-contrast, #ffffff);
+  color: #ffffff;
   box-shadow: var(--ppc-search-terms-shadow-accent, 0 8px 18px -14px rgba(5, 150, 105, 0.72));
   transition:
     box-shadow var(--ppc-search-terms-motion-duration, 170ms)
@@ -75,7 +75,7 @@
   border: 2px solid var(--ppc-search-terms-surface, #ffffff);
   border-radius: var(--rounded-full, 999px);
   background: linear-gradient(135deg, var(--color-teal-400), var(--color-teal-600));
-  color: var(--color-success-contrast, #ffffff);
+  color: #ffffff;
   box-shadow: var(--shadow-xs, 0 6px 12px -9px rgba(20, 184, 166, 0.58));
 }
 

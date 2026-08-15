@@ -221,7 +221,7 @@
 }
 
 .hoverable:active {
-  background-color: var(--color-bg-active, rgba(0, 0, 0, 0.08));
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 /* --- 悬停下划线 --- */
@@ -1176,12 +1176,12 @@
 
 /* --- 锚点偏移（固定 Header 下的锚点定位） --- */
 .anchor-offset {
-  scroll-margin-top: calc(var(--header-height, 64px) + var(--spacing-4, 16px));
+  scroll-margin-top: calc(64px + var(--spacing-4, 16px));
 }
 
 /* --- 锚点高亮 --- */
 :target {
-  scroll-margin-top: calc(var(--header-height, 64px) + var(--spacing-4, 16px));
+  scroll-margin-top: calc(64px + var(--spacing-4, 16px));
 }
 
 .anchor-highlight:target {

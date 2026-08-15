@@ -372,8 +372,7 @@
   border-radius: var(--rounded-full, 9999px);
   transform-origin: left center;
   /* 平滑过渡 */
-  transition: transform var(--micro-duration-gentle, 350ms)
-    var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
   /* GPU加速提示 */
   will-change: transform;
 }

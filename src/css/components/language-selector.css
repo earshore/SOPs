@@ -41,7 +41,7 @@
 .lang-btn.active {
   background: var(--color-primary);
   color: white;
-  box-shadow: var(--shadow-primary-sm);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
 
 .lang-flag {

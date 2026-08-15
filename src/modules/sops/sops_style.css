@@ -1049,7 +1049,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     background-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     border-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     box-shadow var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
-  box-shadow: var(--shadow-card, 0 1px 2px var(--color-black-alpha-5));
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(0, 0, 0, 0.05));
   cursor: pointer;
 }
 
@@ -1364,7 +1364,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 
   #sops_content_area .module-container > * + *:where([class*='from-emerald-50']),
   #sops_content_area .module-container > * + * :where([class*='from-emerald-50']) {
-    background-color: var(--wash-emerald, #ecfdf5) !important;
+    background-color: #ecfdf5 !important;
   }
 
   #sops_content_area
@@ -1376,7 +1376,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where([class*='from-amber-50'], [class*='from-orange-50'], [class*='from-yellow-50']) {
-    background-color: var(--wash-amber, #fffbeb) !important;
+    background-color: #fffbeb !important;
   }
 
   #sops_content_area
@@ -1388,7 +1388,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where([class*='from-red-50'], [class*='from-rose-50']) {
-    background-color: var(--wash-red, #fef2f2) !important;
+    background-color: #fef2f2 !important;
   }
 
   #sops_content_area
@@ -1400,7 +1400,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where([class*='from-purple-50'], [class*='from-pink-50']) {
-    background-color: var(--wash-purple, #faf5ff) !important;
+    background-color: #faf5ff !important;
   }
 
   #sops_content_area
@@ -1412,7 +1412,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where([class*='from-teal-50'], [class*='from-cyan-50']) {
-    background-color: var(--wash-teal, #f0fdfa) !important;
+    background-color: #f0fdfa !important;
   }
 
   #sops_content_area
@@ -1424,7 +1424,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where([class*='from-slate-50'], [class*='from-gray-']) {
-    background-color: var(--wash-neutral, #f8fafc) !important;
+    background-color: #f8fafc !important;
   }
 
   #sops_content_area .module-container > * + *:where([class*='bg-gradient-to-'].text-white),

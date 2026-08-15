@@ -11,7 +11,7 @@
   --modal-text-muted: var(--color-slate-400, var(--color-slate-400, #94a3b8));
   --modal-text-secondary: var(--color-slate-500, var(--color-slate-600, #475569));
   --modal-control-hover-bg: var(--color-bg-hover, var(--color-slate-100, #f1f5f9));
-  --modal-control-active-bg: var(--color-bg-active, var(--color-slate-200, #e2e8f0));
+  --modal-control-active-bg: var(--color-slate-200, #e2e8f0);
   /* Appearance primary chrome (keep CTA/accent on tone axis) */
   --modal-accent: var(--color-primary, #3b82f6);
   --modal-accent-soft: color-mix(in srgb, var(--color-primary, #3b82f6) 15%, transparent);
@@ -26,7 +26,7 @@
   --modal-scrollbar-thumb-hover: var(--scrollbar-thumb-hover, var(--color-slate-400, #94a3b8));
   --modal-focus-ring-offset: var(--modal-bg);
   --modal-focus-ring: var(--modal-accent);
-  --modal-backdrop-bg: var(--color-bg-overlay, rgba(15, 23, 42, 0.5));
+  --modal-backdrop-bg: rgba(15, 23, 42, 0.5);
   --modal-panel-shadow: var(--shadow-panel, 0 25px 50px -12px rgba(0, 0, 0, 0.25));
 }
 

@@ -68,7 +68,7 @@
 }
 
 .markdown-content code {
-  background: var(--color-black-alpha-5);
+  background: rgba(0, 0, 0, 0.05);
   padding: 0.2em 0.4em;
   border-radius: var(--rounded-sm);
   font-size: 0.875em;
@@ -76,7 +76,7 @@
 }
 
 .markdown-content pre {
-  background: var(--color-black-alpha-5);
+  background: rgba(0, 0, 0, 0.05);
   padding: 1em;
   border-radius: var(--rounded-md);
   overflow-x: auto;
@@ -107,7 +107,7 @@
   --app-overview-accent-border: color-mix(in srgb, var(--app-overview-accent) 18%, transparent);
   --app-overview-border: var(--border-subtle, rgba(148, 163, 184, 0.24));
   --app-overview-border-strong: var(--border-muted, rgba(203, 213, 225, 0.72));
-  --app-overview-surface: var(--surface-panel, var(--color-bg-elevated, #ffffff));
+  --app-overview-surface: var(--surface-panel, #ffffff);
   --app-overview-surface-muted: var(--surface-card-hover, var(--color-slate-50, #f8fafc));
   --app-overview-text-primary: var(--color-slate-900, var(--color-slate-900, #0f172a));
   --app-overview-text-secondary: var(--color-slate-500, var(--color-slate-600, #475569));

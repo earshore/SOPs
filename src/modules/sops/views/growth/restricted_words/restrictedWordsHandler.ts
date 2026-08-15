@@ -91,7 +91,7 @@ function appendAffectedSites(container: Element, sites: string[]): void {
   if (sites.includes('EU')) {
     const span = document.createElement('span');
     span.className =
-      'px-1.5 py-0.5 bg-[var(--wash-blue)] text-[var(--module-accent-text)] rounded text-[10px] font-bold';
+      'px-1.5 py-0.5 bg-[#eff6ff] text-[var(--module-accent-text)] rounded text-[10px] font-bold';
     span.textContent = '🇪🇺 EU ALL';
     container.appendChild(span);
     return;

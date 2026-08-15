@@ -451,7 +451,7 @@
 
 /* Toast动画类 */
 .toast-enter {
-  animation: toast-slide-in 400ms var(--micro-ease-modal) forwards;
+  animation: toast-slide-in 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .toast-exit {
@@ -468,7 +468,7 @@
 }
 
 .modal-content-enter {
-  animation: modal-content-in 300ms var(--micro-ease-modal) forwards;
+  animation: modal-content-in 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .modal-content-exit {
@@ -478,7 +478,7 @@
 /* 列表项交错动画类 */
 .list-stagger-item {
   opacity: 0;
-  animation: list-item-fade-in var(--micro-duration-gentle) var(--micro-ease-card) forwards;
+  animation: list-item-fade-in 350ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
   /* 使用CSS变量控制延迟: animation-delay: calc(var(--stagger-index, 0) * 50ms); */
   animation-delay: calc(var(--stagger-index, 0) * 50ms);
 }
@@ -494,7 +494,7 @@
  */
 .list-virtual-scroll .list-virtual-item {
   opacity: 0;
-  animation: list-item-fade-in-fast 200ms var(--micro-ease-card) forwards;
+  animation: list-item-fade-in-fast 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /**
@@ -611,7 +611,7 @@
 
 /* 侧边栏动画类 */
 .sidebar-enter {
-  animation: sidebar-slide-in 300ms var(--micro-ease-card) forwards;
+  animation: sidebar-slide-in 300ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .sidebar-exit {
@@ -620,7 +620,7 @@
 
 /* 下拉菜单动画类 */
 .dropdown-enter {
-  animation: dropdown-expand var(--micro-duration-smooth) var(--micro-ease-button) forwards;
+  animation: dropdown-expand 250ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .dropdown-exit {
@@ -629,7 +629,7 @@
 
 /* 面包屑动画类 */
 .breadcrumb-item-enter {
-  animation: breadcrumb-fade-in var(--micro-duration-smooth) var(--ease-out) forwards;
+  animation: breadcrumb-fade-in 250ms var(--ease-out) forwards;
 }
 
 .breadcrumb-item-exit {
@@ -740,7 +740,7 @@
  * Requirements 8.2: 侧边栏在300ms内从边缘滑入
  */
 .sidebar {
-  transition: transform 300ms var(--micro-ease-card);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 
@@ -754,7 +754,7 @@
 
 /* 右侧侧边栏 */
 .sidebar-right {
-  transition: transform 300ms var(--micro-ease-card);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 
@@ -775,8 +775,8 @@
   transform: translateY(-8px) scale(0.95);
   transform-origin: top;
   transition:
-    opacity var(--micro-duration-smooth) var(--micro-ease-button),
-    transform var(--micro-duration-smooth) var(--micro-ease-button);
+    opacity 250ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: none;
 }
 
@@ -789,8 +789,8 @@
 /* 下拉菜单项 */
 .dropdown-item {
   transition:
-    background-color var(--micro-duration-quick) var(--ease-smooth),
-    color var(--micro-duration-quick) var(--ease-smooth);
+    background-color 150ms var(--ease-smooth),
+    color 150ms var(--ease-smooth);
 }
 
 .dropdown-item:hover {
@@ -798,7 +798,7 @@
 }
 
 .dropdown-item:active {
-  background-color: var(--color-bg-active);
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 /**
@@ -813,8 +813,8 @@
 
 .breadcrumb-item {
   transition:
-    color var(--micro-duration-smooth) var(--ease-smooth),
-    opacity var(--micro-duration-smooth) var(--ease-smooth);
+    color 250ms var(--ease-smooth),
+    opacity 250ms var(--ease-smooth);
 }
 
 .breadcrumb-item:hover {
@@ -828,7 +828,7 @@
 
 .breadcrumb-separator {
   color: var(--color-slate-400);
-  transition: opacity var(--micro-duration-smooth) var(--ease-smooth);
+  transition: opacity 250ms var(--ease-smooth);
 }
 
 /**
@@ -838,8 +838,8 @@
 .nav-link {
   position: relative;
   transition:
-    color var(--micro-duration-smooth) var(--ease-smooth),
-    background-color var(--micro-duration-smooth) var(--ease-smooth);
+    color 250ms var(--ease-smooth),
+    background-color 250ms var(--ease-smooth);
 }
 
 .nav-link:hover {
@@ -854,7 +854,7 @@
   width: 0;
   height: 2px;
   background-color: var(--color-primary);
-  transition: width var(--micro-duration-smooth) var(--micro-ease-button);
+  transition: width 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .nav-link:hover::after,
@@ -872,8 +872,8 @@
 
 .tab-item {
   transition:
-    color var(--micro-duration-smooth) var(--ease-smooth),
-    background-color var(--micro-duration-smooth) var(--ease-smooth);
+    color 250ms var(--ease-smooth),
+    background-color 250ms var(--ease-smooth);
 }
 
 .tab-item:hover {
@@ -892,8 +892,8 @@
   height: 2px;
   background-color: var(--color-primary);
   transition:
-    transform var(--micro-duration-smooth) var(--micro-ease-card),
-    width var(--micro-duration-smooth) var(--micro-ease-card);
+    transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 250ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, width;
 }
 
@@ -909,7 +909,7 @@
   height: 100%;
   background-color: var(--color-bg-primary);
   transform: translateX(-100%);
-  transition: transform 300ms var(--micro-ease-card);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 
@@ -922,8 +922,8 @@
   opacity: 0;
   transform: translateX(-20px);
   transition:
-    opacity var(--micro-duration-gentle) var(--micro-ease-card),
-    transform var(--micro-duration-gentle) var(--micro-ease-card);
+    opacity 350ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .mobile-nav-open .mobile-nav-item {
@@ -973,8 +973,8 @@
   height: 2px;
   background-color: var(--color-slate-900);
   transition:
-    transform var(--micro-duration-smooth) var(--micro-ease-button),
-    opacity var(--micro-duration-smooth) var(--ease-smooth);
+    transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 250ms var(--ease-smooth);
   transform-origin: center;
 }
 

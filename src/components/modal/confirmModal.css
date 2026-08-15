@@ -1,6 +1,6 @@
 .app-confirm-modal-backdrop {
   z-index: var(--z-modal-backdrop, 55);
-  background: var(--color-bg-overlay, rgba(15, 23, 42, 0.5)) !important;
+  background: rgba(15, 23, 42, 0.5) !important;
 }
 
 .app-confirm-modal {
@@ -57,7 +57,7 @@
 
 .app-confirm-modal--danger .app-confirm-modal-confirm {
   background: var(--color-error, #ef4444);
-  color: var(--color-error-contrast, #ffffff);
+  color: #ffffff;
   --tw-ring-color: color-mix(in srgb, var(--color-error, #ef4444) 32%, transparent);
 }
 

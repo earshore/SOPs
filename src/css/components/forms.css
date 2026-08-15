@@ -51,7 +51,7 @@
   --field-radius: 8px;
   --field-border: var(--color-border-default, var(--color-slate-300, #cbd5e1));
   --field-border-hover: var(--color-border-strong, var(--color-slate-400, #94a3b8));
-  --field-bg: var(--color-bg-elevated, var(--surface-panel, #ffffff));
+  --field-bg: var(--surface-panel, #ffffff);
   --field-bg-muted: var(--bg-secondary, var(--color-slate-50, #f8fafc));
   --field-text: var(--color-slate-900, var(--color-slate-700, #334155));
   --field-placeholder: var(--color-slate-400, var(--color-slate-400, #94a3b8));
@@ -76,7 +76,7 @@
   --check-radius: 4px;
   --check-border: var(--color-border-default, var(--color-slate-300, #cbd5e1));
   --check-border-hover: var(--color-border-strong, var(--color-slate-400, #94a3b8));
-  --check-bg: var(--color-bg-elevated, var(--surface-panel, #ffffff));
+  --check-bg: var(--surface-panel, #ffffff);
   --check-color-active: var(--color-primary, #3b82f6);
   --check-ring-focus: color-mix(
     in srgb,
@@ -104,8 +104,8 @@
   background: var(--field-bg);
   /* Requirements 6.1: 输入框聚焦边框过渡 - 200ms */
   transition:
-    border-color var(--micro-duration-smooth) var(--ease-smooth),
-    box-shadow var(--micro-duration-smooth) var(--ease-smooth),
+    border-color 250ms var(--ease-smooth),
+    box-shadow 250ms var(--ease-smooth),
     background-color var(--duration-normal) var(--ease-smooth);
   resize: none;
   overflow: hidden;
@@ -170,9 +170,9 @@
   pointer-events: none;
   /* Requirements 6.5: Label动画在250ms内完成 */
   transition:
-    transform var(--micro-duration-smooth) var(--micro-ease-button),
-    font-size var(--micro-duration-smooth) var(--micro-ease-button),
-    color var(--micro-duration-smooth) var(--ease-smooth);
+    transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    font-size 250ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    color 250ms var(--ease-smooth);
   transform-origin: left top;
 }
 
@@ -222,7 +222,7 @@
 
 .form-input-success-icon--animated {
   opacity: 0;
-  animation: fade-in-scale var(--micro-duration-smooth) var(--micro-ease-button) forwards;
+  animation: fade-in-scale 250ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 /* 成功图标容器 */
@@ -269,8 +269,8 @@
     font-size: 0.875rem;
     line-height: 1.5;
     transition:
-      border-color var(--micro-duration-smooth) var(--ease-smooth),
-      box-shadow var(--micro-duration-smooth) var(--ease-smooth),
+      border-color 250ms var(--ease-smooth),
+      box-shadow 250ms var(--ease-smooth),
       background-color var(--duration-normal) var(--ease-smooth);
   }
 
@@ -574,7 +574,7 @@ input[type='checkbox']:disabled:checked {
 [data-color-mode-resolved='dark'] input[type='radio']:disabled:checked,
 [data-theme='dark'] input[type='checkbox']:disabled:checked,
 [data-theme='dark'] input[type='radio']:disabled:checked {
-  background-color: var(--color-bg-active, rgba(255, 255, 255, 0.15));
+  background-color: rgba(255, 255, 255, 0.15);
   border-color: var(--color-border-strong, rgba(255, 255, 255, 0.15));
 }
 

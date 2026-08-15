@@ -1,7 +1,7 @@
 ﻿/* Settings component semantic tokens — map once to global design tokens (§14.2, accent/focus follow Appearance primary, A2 shell). */
 .settings-panel-root {
   /* Semantic surfaces/text: flip once via global dark tokens (T2 dual-theme). */
-  --settings-surface: var(--color-bg-elevated, var(--surface-panel, #fff));
+  --settings-surface: var(--surface-panel, #fff);
   --settings-surface-muted: var(--bg-secondary, #f8fafc);
   --settings-border: var(--color-border-default, #e2e8f0);
   --settings-text: var(--color-slate-900, #334155);
@@ -11,7 +11,7 @@
   --settings-accent-strong: var(--color-primary-dark, #1d4ed8);
   --settings-danger: var(--color-red-600, #dc2626);
   --settings-radius-card: var(--workbench-radius, var(--panel-radius, 8px));
-  --settings-radius-control: var(--workbench-radius-lg, var(--rounded-lg, 12px));
+  --settings-radius-control: var(--rounded-lg, 12px);
   --settings-focus-color: var(--color-primary, var(--color-primary, #3b82f6));
   /* TD-CMP-02：focus-ring 共享别名（批次 1）；settings-control 基线尺寸/紧凑/标签与阴影/过渡时间单一登记点（批次 3、次序 11 批 1-1）。 */
   --settings-focus-ring: var(--field-focus-shadow);
