@@ -297,6 +297,42 @@
   --npi-status-neutral-soft: #f8fafc;
 }
 
+/* Batch 4B Step 1: `.npi-status-*` convenience classes over the contract.
+ * Consume these classes in templates (never inline Tailwind color
+ * utilities for status colors). Dark flips apply automatically via the
+ * token redefinitions above — no per-class dark selectors needed.
+ */
+.npi-status-todo {
+  color: var(--npi-status-todo);
+}
+.npi-status-todo-soft {
+  background-color: var(--npi-status-todo-soft);
+}
+.npi-status-pending {
+  color: var(--npi-status-pending);
+}
+.npi-status-pending-soft {
+  background-color: var(--npi-status-pending-soft);
+}
+.npi-status-done {
+  color: var(--npi-status-done);
+}
+.npi-status-done-soft {
+  background-color: var(--npi-status-done-soft);
+}
+.npi-status-fail {
+  color: var(--npi-status-fail);
+}
+.npi-status-fail-soft {
+  background-color: var(--npi-status-fail-soft);
+}
+.npi-status-neutral {
+  color: var(--npi-status-neutral);
+}
+.npi-status-neutral-soft {
+  background-color: var(--npi-status-neutral-soft);
+}
+
 .npi-tracker-page p {
   max-width: min(100%, 64rem);
 }

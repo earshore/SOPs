@@ -203,8 +203,8 @@ const rowActionLabel = (row: NPIProductRecord, action: string): string =>
 
 function renderComplianceStatus(compliance: ComplianceStatus): string {
   return compliance.isComplete
-    ? '<span class="text-emerald-600"><i class="fas fa-check-circle"></i></span>'
-    : `<span class="text-amber-500 text-xs">${compliance.completed}/${compliance.total}</span>`;
+    ? '<span class="npi-status-done"><i class="fas fa-check-circle"></i></span>'
+    : `<span class="npi-status-pending text-xs">${compliance.completed}/${compliance.total}</span>`;
 }
 
 function renderAdsOptions(strategy: NPIProductRecord['ads_strategy']): string {
@@ -249,15 +249,17 @@ function buildTableRowContext(row: NPIProductRecord): TableRowRenderContext {
   const compliance = getComplianceStatus(row);
   const domain = siteDomainsMap[row.site] || siteDomainsMap.DE || 'amazon.de';
   const flag = siteFlagsMap[row.site] || row.site;
-  const inventoryClass = row.inventory_days > 60 ? 'text-red-600 font-bold' : '';
+  const inventoryClass = row.inventory_days > 60 ? 'npi-status-fail font-bold' : '';
   const suggestedPriceClass =
     parseFloat(suggestedPrice) < parseFloat(clearancePrice)
-      ? 'text-red-600 font-bold bg-red-50'
-      : 'text-emerald-600 font-bold';
-  const ctrClass = row.ctr_7d < 0.5 ? 'text-amber-600 bg-amber-50' : '';
-  const acoasClass = row.acoas > 50 ? 'text-red-600' : '';
+      ? 'npi-status-fail font-bold npi-status-fail-soft'
+      : 'npi-status-done font-bold';
+  const ctrClass = row.ctr_7d < 0.5 ? 'npi-status-pending npi-status-pending-soft' : '';
+  const acoasClass = row.acoas > 50 ? 'npi-status-fail' : '';
   const decisionClass =
-    row.decision === 'keep' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
+    row.decision === 'keep'
+      ? 'npi-status-done npi-status-done-soft'
+      : 'npi-status-fail npi-status-fail-soft';
 
   return {
     stageConfig,
@@ -309,22 +311,22 @@ function renderComplianceCells(row: NPIProductRecord, compliance: ComplianceStat
             </td>
             <td class="px-3 py-3 text-center">
                 <label class="npi-checkbox-hit" title="${rowFieldLabel(row, 'check_content')}">
-                    <input type="checkbox" ${checkedAttr(row.check_content)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_content" aria-label="${rowFieldLabel(row, 'check_content')}">
+                    <input type="checkbox" ${checkedAttr(row.check_content)} class="w-4 h-4 rounded npi-status-done" data-action="update-field" data-field="check_content" aria-label="${rowFieldLabel(row, 'check_content')}">
                 </label>
             </td>
             <td class="px-3 py-3 text-center">
                 <label class="npi-checkbox-hit" title="${rowFieldLabel(row, 'check_sensitive')}">
-                    <input type="checkbox" ${checkedAttr(row.check_sensitive)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_sensitive" aria-label="${rowFieldLabel(row, 'check_sensitive')}">
+                    <input type="checkbox" ${checkedAttr(row.check_sensitive)} class="w-4 h-4 rounded npi-status-done" data-action="update-field" data-field="check_sensitive" aria-label="${rowFieldLabel(row, 'check_sensitive')}">
                 </label>
             </td>
             <td class="px-3 py-3 text-center">
                 <label class="npi-checkbox-hit" title="${rowFieldLabel(row, 'check_creative')}">
-                    <input type="checkbox" ${checkedAttr(row.check_creative)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_creative" aria-label="${rowFieldLabel(row, 'check_creative')}">
+                    <input type="checkbox" ${checkedAttr(row.check_creative)} class="w-4 h-4 rounded npi-status-done" data-action="update-field" data-field="check_creative" aria-label="${rowFieldLabel(row, 'check_creative')}">
                 </label>
             </td>
             <td class="px-3 py-3 text-center">
                 <label class="npi-checkbox-hit" title="${rowFieldLabel(row, 'check_ebc')}">
-                    <input type="checkbox" ${checkedAttr(row.check_ebc)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_ebc" aria-label="${rowFieldLabel(row, 'check_ebc')}">
+                    <input type="checkbox" ${checkedAttr(row.check_ebc)} class="w-4 h-4 rounded npi-status-done" data-action="update-field" data-field="check_ebc" aria-label="${rowFieldLabel(row, 'check_ebc')}">
                 </label>
             </td>
             <td class="px-3 py-3 text-center">
@@ -341,8 +343,8 @@ function renderPricingCells(row: NPIProductRecord, context: TableRowRenderContex
                     data-action="update-delivery-fee" aria-label="${rowFieldLabel(row, 'delivery_fee')}">
             </td>
             <td class="px-3 py-3 text-center text-sm text-slate-500">${context.deliveryPercent}%</td>
-            <td class="px-3 py-3 text-center text-red-600 font-bold">€${context.clearancePrice}</td>
-            <td class="px-3 py-3 text-center text-amber-600 font-medium">€${context.movingPrice}</td>
+            <td class="px-3 py-3 text-center npi-status-fail font-bold">€${context.clearancePrice}</td>
+            <td class="px-3 py-3 text-center npi-status-pending font-medium">€${context.movingPrice}</td>
             <td class="px-3 py-3 text-center ${context.suggestedPriceClass}">€${context.suggestedPrice}</td>
             <td class="px-3 py-3 text-center text-sm">€${safeText(row.break_even)}</td>`;
 }

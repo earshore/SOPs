@@ -262,9 +262,9 @@ export const STAGE_CONFIG: Record<ProductStage, StageConfig> = {
     label: '新品-测款',
     color: 'bg-[var(--wash-blue)] text-[var(--module-accent-text)]',
   },
-  growth: { label: '成长期', color: 'bg-emerald-100 text-emerald-700' },
-  stable: { label: '稳定期', color: 'bg-purple-100 text-purple-700' },
-  clearance: { label: '清仓期', color: 'bg-red-100 text-red-700' },
+  growth: { label: '成长期', color: 'npi-status-done npi-status-done-soft' },
+  stable: { label: '稳定期', color: 'npi-status-todo npi-status-todo-soft' },
+  clearance: { label: '清仓期', color: 'npi-status-fail npi-status-fail-soft' },
 };
 
 /**
