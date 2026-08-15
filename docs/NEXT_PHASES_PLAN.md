@@ -16,7 +16,7 @@
 
 ## 二、后续次序规划（建议）
 
-### 次序 10：TD-THM-02 降级 + 豁免复审（0.5 工作日）
+### 次序 10：TD-THM-02 降级 + 豁免复审（**已完成**，`44739732`）
 
 TD-THM-02 已是全库最干净的项（modules 576→48 降 92%，清零批次一至四 + 收尾 A/B，per-file 双锁 + S8 边界压测收口）。建议：看板降级 P1→P3，附清零实绩；shell lane glass 色盘 24 处豁免按 `GUI014_GLASS_COLOR_PALETTE.md` 做一次复审登记（专项评审结论已立，复审确认无新增豁免即可冻结）。
 
@@ -31,9 +31,9 @@ TD-CMP-02 剩余主战场：settings-control 类 112 处/14 文件（11 个 sett
 | 批 C：11 个 settings section | 按模块分组 3-4 批（每批 2-3 文件） | 2-3 天 | 每批 ci:quality + build + smoke |
 | 批 D：收尾与降级 | 残留登记 + 看板 TD-CMP-02 降级 P3 | 0.5 天 | 清零闭环 |
 
-### 次序 12：TD-THM-01 覆盖冲突收敛（2-3 工作日）
+### 次序 12：TD-THM-01 覆盖冲突收敛（**已完成**，`fd4463d0`）
 
-generated token 被手写 variables 覆盖 20 处（D1 类），逐个裁决：覆盖方 token 化 or 生成方扩容。需先按文件族摸底裁决表，再分批迁移，模式同 TD-THM-02。
+generated token 被手写 variables 覆盖 20 处（D1 类），逐个裁决：覆盖方 token 化 or 生成方扩容。需先按文件族摸底裁决表，再分批迁移，模式同 TD-THM-02。。**执行结论（`fd4463d0`）**：审计摸底确认 20 处 atomic 冲突全部为产品 intentional override（easing 1 / radius 6 / shadow 7 / z-index 7），已在 `config/token-atomic-override-allowlist.json` 登记理由，统一迁移时机为 workbench migration，故裁决全部保留；同步清理 9 处与 generated 值完全相同的语义色冗余声明（identical 9→0），收敛实绩见 `THM01_CONVERGENCE.md`。。**执行结论（`fd4463d0`）**：审计摸底确认 20 处 atomic 冲突全部为产品 intentional override（easing 1 / radius 6 / shadow 7 / z-index 7），已在 `config/token-atomic-override-allowlist.json` 登记理由，统一迁移时机为 workbench migration，故裁决全部保留；同步清理 9 处与 generated 值完全相同的语义色冗余声明（identical 9→0），收敛实绩见 `THM01_CONVERGENCE.md`。
 
 ### 次序 13：slate 结构性灰调统一化（TD-SOP-NPI-02 候选，独立立项，3-4 工作日）
 
