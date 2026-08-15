@@ -16,8 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **TD-CMP-04 badge 两族合并收官**：40 个 template 双类叠加（37 处 `wb-badge-*` + 三端 overview 45 处 `sop-status-*`），DOM 契约不变、CSS 实现统一收敛至 `.badge`；`app_center/overview` 裸 `wb-badge`（workflow 标记）甄别保留。
 - **TD-CMP-02 降级 P2→P3**：体系 A/B 已收口（structural 2,048 处 100% + 112 处 settings-control），门禁持续防回退；30 天复检窗口至 2026-09-14（`CMP02_DOWNGRADE_TO_P3_SPEC.md`、`CMP02_DOWNGRADE_RECHECK_MONITOR.md`）。
 - **slate structural 专项收官（次序 13）**：1,917 处结构性灰调 100% token 化，剩余 89 处甄别台账（控件边框/状态标签/深色装饰/矩阵占位符）；semantic baseline 4087 → 2128（-1959 累计）。
+### Fixed（修复）
+- **smoke 断言层跨引擎失真修复（TD-E2E-01，次序 14）**：`captureStableRegion` 截图强制 `scale: 'css'` 归一化 CSS 像素输出，消除 webkit 2x dpr 导致的 baseline 尺寸不匹配（1952×1262 vs 976×631）；NPI 表格像素断言升级为 per-engine 基线（firefox/webkit × light/dark 新增 4 个基线，chromium 复用原名），消除三引擎字体光栅化差异导致的误报；`expectRouteReady` 双 rAF 时序隔离消除 webkit 误判；Deep Chat 路由 390px 移动端稳态文本确为 33 字符（webkit 布局折叠的真实差异，非缺陷），登记路由级 `minContentLength` 阈值避免硬编码 `> 40` 一刀切。
+- **验收结果**：全浏览器 smoke **93/93 通过**（31 用例 × 3 引擎），`npm run build` 零错误，`ci:quality` 20 项全绿（semantic 2128/2128 · modules 0/0 · shell 24/24 · settings-scale 1199/1200 · lint 0/0 · bridge gate 通过）。
 ### Docs（文档）
 - 新增 `DEBT_FINAL_TIGHTENING_PLAN.md`、`DEBT_FINAL_TIGHTENING_CLOSURE.md`；看板 `TECH_DEBT_BOARD.md`（TD-CMP-04 已关闭态、TD-CMP-02 P3）、`NEXT_PHASES_PLAN.md` 与 `SOP02_SLATE_PROGRESS_REPORT.md` 同步收官。
+- TD-E2E-01 专项闭环：`SMOKE_BASELINE_FIX_PLAN.md` 第 6 节记录实施与验收结果；TD-CMP-02 复检前置归档文档 `CMP02_DOWNGRADE_RECHECK_PASS.md`（10 步 checklist + 通过判据 + 空执行记录表，2026-09-14 到期人工复检），对照基线快照冻结（semantic 2128/2128 · modules 0/0 · shell 24/24 · settings-scale 1199/1200 · token:override unallowlisted 0）。
 - 发布元数据同步至 `v3.1.1-rc.4`；候选通道、回滚基线和自动化验证结果以本章节及 GitHub Release 为准。
 
 ## [3.1.1-rc.3] - 2026-08-15
