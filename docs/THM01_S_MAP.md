@@ -84,4 +84,4 @@ S3 21 处高频 bridge（surface-card 719 / panel 263 / border-subtle 152 等）
 
 ## 5. 与 B 批、A 档的关系
 
-B 批（`addbc453`）完成零消费 76 处归档后遗留池 164；rc.5-S3（B 批 2，`e44e4b94`）再归档 25 行空壳后遗留池 **141**。本契约 S1/S2 30 处消化后预计降至 134（其中 S3 21 处高频 bridge 回流水台后，真正「遗留」为 A 档台账约 113 处，随 workbench migration 决策）。
+B 批（`addbc453`）完成零消费 76 处归档后遗留池 164；rc.5-S3（B 批 2，`e44e4b94`）再归档 25 行空壳后遗留池 141；rc.5-B3（`31d7f354`）归档 4 token（success-dark / error-dark / spacing-2xl / spacing-3xl，声明移除 8 行）后遗留池 **137**。本契约 S1/S2 30 处消化后预计降至 134（其中 S3 21 处高频 bridge 回流水台后，真正「遗留」为 A 档台账约 113 处，随 workbench migration 决策）。
