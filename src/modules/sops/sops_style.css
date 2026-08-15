@@ -267,6 +267,36 @@
 }
 
 /* ==================== NPI 生命周期主表 ==================== */
+
+/* ---- Batch 4B Step 1: `--npi-status-*` semantic token contract ----
+ * Single registration point for NPI lifecycle-table status colors.
+ * Status mapping (business semantics, do NOT reassign):
+ *   todo     pending/plan    purple  (规划、待办)
+ *   pending  in-progress     amber   (进行中、提醒)
+ *   done     completed/keep  emerald (完成、保留)
+ *   fail     failed/risk     red     (失败、风险)
+ *   neutral  informational   slate   (中性)
+ * Light values mirror the Tailwind color steps currently used by the
+ * template (zero visual delta on migration). Dark flips live in the
+ * "Theme dual-safe" block below (same three-selector trigger pattern).
+ * RULE: templates under npi_tracker must consume these tokens (or the
+ * `.npi-status-*` classes built on them), never inline Tailwind
+ * `{bg|text|border}-(slate|red|emerald|purple|amber)-*` utilities — the
+ * semantic baseline gate will block any new hit.
+ */
+.npi-tracker-page {
+  --npi-status-todo: #a855f7;
+  --npi-status-todo-soft: #faf5ff;
+  --npi-status-pending: #d97706;
+  --npi-status-pending-soft: #fffbeb;
+  --npi-status-done: #059669;
+  --npi-status-done-soft: #ecfdf5;
+  --npi-status-fail: #dc2626;
+  --npi-status-fail-soft: #fef2f2;
+  --npi-status-neutral: #475569;
+  --npi-status-neutral-soft: #f8fafc;
+}
+
 .npi-tracker-page p {
   max-width: min(100%, 64rem);
 }
@@ -1408,6 +1438,29 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 
 /* ==================== 深色主题（Theme dual-safe） ==================== */
 /* Ownership violet 保持色相，soft/surface 改为低明度 color-mix；文字走语义 token */
+
+/* Batch 4B Step 1: dark flips for the `--npi-status-*` contract.
+ * Hue preserved, luminance raised for dark-surface legibility; soft
+ * variants drop to surface-panel mixes (dark-row backgrounds).
+ */
+.dark .npi-tracker-page,
+[data-color-mode-resolved='dark'] .npi-tracker-page,
+[data-theme='dark'] .npi-tracker-page {
+  --npi-status-todo: #c084fc;
+  --npi-status-todo-soft: color-mix(
+    in srgb,
+    var(--sops-qwen-violet, #6257f5) 14%,
+    var(--surface-panel, #0f172a)
+  );
+  --npi-status-pending: #fbbf24;
+  --npi-status-pending-soft: color-mix(in srgb, #d97706 14%, var(--surface-panel, #0f172a));
+  --npi-status-done: #34d399;
+  --npi-status-done-soft: color-mix(in srgb, #059669 14%, var(--surface-panel, #0f172a));
+  --npi-status-fail: #f87171;
+  --npi-status-fail-soft: color-mix(in srgb, #dc2626 14%, var(--surface-panel, #0f172a));
+  --npi-status-neutral: #94a3b8;
+  --npi-status-neutral-soft: color-mix(in srgb, #475569 14%, var(--surface-panel, #0f172a));
+}
 .dark .sops-overview,
 [data-color-mode-resolved='dark'] .sops-overview,
 [data-theme='dark'] .sops-overview {
