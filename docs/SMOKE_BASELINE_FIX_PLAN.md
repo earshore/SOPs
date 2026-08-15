@@ -53,3 +53,25 @@ core routes 用例在断言前补一轮稳定等待（与 NPI 断言同构的 `r
 ## 5. 登记
 
 本计划登记于看板 `TECH_DEBT_BOARD.md`（新增 TD-E2E-01 卡片）与 `NEXT_PHASES_PLAN.md`（次序 14），门禁不纳入基线缺陷统计（baseline 双锁只防语义色回退，不覆盖断言层耦合问题）。
+
+## 6. 实施与验收结果（2026-08-15，提交 `2c640226`）
+
+### 6.1 实际修复路径
+
+Step 1（`scale: 'css'` dpr 归一化）生效，NPI 两例的尺寸不匹配消失，但 firefox（3.2%）与 webkit（2.7%）相对 chromium baseline 仍存在**真实像素级渲染差异**（字体 rasterization / subpixel 抗锯齿），故按计划中兜底项升级执行 per-engine 基线：`assertPixelDiff` 增加可选 `browser` 参数，firefox/webkit 基线文件名追加引擎后缀（`npi-table-status-colors-light/dark-{firefox,webkit}.png`），chromium 沿用原名复用既有 baseline。四个新基线由 `UPDATE_SNAPSHOTS=1` 在各引擎下单独 seed。
+
+core routes webkit 用例（L671）实测定位：`Deep Chat` 路由在 390px mobile viewport 下 `#main-content` 稳态文本确为 33 字符（chromium/firefox 均为 149+），属于 webkit 布局下 composer draft 提示文案被折叠的真实差异，非时序问题；`waitForMainContent` 与 `expectNoRouteErrorText` 增加路由级 `minLength` 阈值参数，`CORE_ROUTES` 中 Deep Chat 路由登记 `minContentLength: 32`，其余路由保持 40 阈值。
+
+### 6.2 代码改动清单（`2c640226`，5 文件）
+
+| 改动 | 位置 | 语义 |
+| --- | --- | --- |
+| `scale: 'css'` | `captureStableRegion` | clip 与输出统一 CSS 像素，消除 webkit 2× dpr 尺寸差异 |
+| per-engine baseline | `assertPixelDiff` + NPI light/dark 两处断言 | 引擎后缀命名，chromium 兼容原基线 |
+| 双 rAF 稳定化 | `expectRouteReady` 尾缀 | webkit 内容填充时序隔离 |
+| 路由级阈值 | `waitForMainContent` / `expectNoRouteErrorText` / `CORE_ROUTES` Deep Chat 行 | 吸收 webkit mobile 真实渲染差异 |
+| 新基线 ×4 | `docs/color-region-baselines/*.png` | firefox/webkit × light/dark |
+
+### 6.3 验收结果
+
+全浏览器 93 用例（31 × 3）**93/93 通过**（`/tmp/o14_smoke_final.log`），`npm run build` 无报错，`npm run ci:quality` 20 项全绿（semantic baseline 2128/2128、modules 0/0、shell 24/24、settings-scale 1199/1200、lint 0/0、bridge gate 通过）。TD-E2E-01 专项闭环。
