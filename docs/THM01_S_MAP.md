@@ -3,7 +3,9 @@
 > 生成日期：2026-08-15（rc.5 B 批完成后）· 数据口径：`audit-token-overrides.ts` @ main `addbc453`
 > B 批结果：76 处零消费 only-handwritten 已归档，遗留池 240 → 164（`THM01_LEGACY_POOL_LEDGER.md` 已销账 `addbc453`）
 >
-> **进度（rc.5-S1，完成）**：本批已消化 13 处映射（text 六族 + focus-ring + spacing 六族），全库 2,434 处消费点迁移至 generated 对等物；variables.css 声明行加 [S1-THM01] 契约注释，值不变、零新增键（settings-scale 1199/1200 未触发）；content-surface 表面基线 -1,318（只降不升）；验收 ci:quality 20/20 · build · smoke 93/93。13 处声明消费清零后将随下次 B 批归档离开 only-handwritten 池（届时 164 → 151）。
+> **进度（rc.5-S1，完成）**：本批已消化 13 处映射（text 六族 + focus-ring + spacing 六族），全库 2,434 处消费点迁移至 generated 对等物；variables.css 声明行加 [S1-THM01] 契约注释，值不变、零新增键（settings-scale 1199/1200 未触发）；content-surface 表面基线 -1,318（只降不升）；验收 ci:quality 20/20 · build · smoke 93/93。
+>
+> **进度（rc.5-S3 / B 批 2，完成）**：S1/S2 零消费空壳归档（25 行）+ focus-ring 衍生链清理 + module-accent-focus 降级（[B2-THM01]），遗留池 164 → 141；bg-secondary/bg-tertiary/surface-card-hover/surface-workbench/success-dark/error-dark/spacing-2xl/spacing-3xl 因 Tailwind arbitrary 消费残留留待下批。DARKFIX：S1 后 dark block 未重定义 slate-* 原子键导致深色模式文字不可见，已新增 4 行反色翻转（slate-900→slate-50、slate-500→slate-400、slate-400→slate-500、slate-300→slate-600），恢复 S1 前等价表现；NPI dark 基线（S1 re-seed 时被 light 截图覆盖）以正确 dark 渲染重 seed 三引擎 6 基线；验收 ci:quality 20/20 · build ✓ · smoke 无新增失败。
 
 ## 1. S 档口径（脚本实测）
 
@@ -82,4 +84,4 @@ S3 21 处高频 bridge（surface-card 719 / panel 263 / border-subtle 152 等）
 
 ## 5. 与 B 批、A 档的关系
 
-B 批（`addbc453`）完成零消费 76 处归档后遗留池 164；本契约 S1/S2 30 处消化后预计降至 134（其中 S3 21 处高频 bridge 回流水台后，真正「遗留」为 A 档台账约 113 处，随 workbench migration 决策）。
+B 批（`addbc453`）完成零消费 76 处归档后遗留池 164；rc.5-S3（B 批 2，`e44e4b94`）再归档 25 行空壳后遗留池 **141**。本契约 S1/S2 30 处消化后预计降至 134（其中 S3 21 处高频 bridge 回流水台后，真正「遗留」为 A 档台账约 113 处，随 workbench migration 决策）。
