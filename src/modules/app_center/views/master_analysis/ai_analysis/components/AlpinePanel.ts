@@ -637,13 +637,13 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     // Surface tokens so dark mode doesn't rely on white/slate-50 light-only washes.
     return this.isTargetSelected(targetId)
       ? 'border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_18%,var(--surface-card))] shadow-sm'
-      : 'border-[color-mix(in_srgb,var(--color-border-default)_100%,transparent)] bg-[var(--surface-card)] hover:border-[color-mix(in_srgb,var(--color-primary)_42%,transparent)] hover:bg-[var(--surface-card-hover)]';
+      : 'border-[color-mix(in_srgb,var(--color-border-default)_100%,transparent)] bg-[var(--surface-card)] hover:border-[color-mix(in_srgb,var(--color-primary)_42%,transparent)] hover:bg-surface-card-hover';
   },
 
   getReviewTargetCardClass(targetId: string): string {
     return this.isTargetSelected(targetId)
       ? 'border-[color-mix(in_srgb,var(--color-amber-400,#fbbf24)_55%,transparent)] bg-[color-mix(in_srgb,var(--color-amber-400,#fbbf24)_16%,var(--surface-card))] shadow-sm'
-      : 'border-[color-mix(in_srgb,var(--color-border-default)_100%,transparent)] bg-[var(--surface-card)] hover:border-[color-mix(in_srgb,var(--color-amber-400,#fbbf24)_45%,transparent)] hover:bg-[var(--surface-card-hover)]';
+      : 'border-[color-mix(in_srgb,var(--color-border-default)_100%,transparent)] bg-[var(--surface-card)] hover:border-[color-mix(in_srgb,var(--color-amber-400,#fbbf24)_45%,transparent)] hover:bg-surface-card-hover';
   },
 
   getListingTargetIconWrapClass(targetId: string): string {

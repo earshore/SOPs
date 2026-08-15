@@ -99,8 +99,8 @@
 }
 
 .action-btn-danger:hover:not(:disabled) {
-  background: var(--color-error-dark);
-  border-color: var(--color-error-dark);
+  background: var(--color-red-600);
+  border-color: var(--color-red-600);
 }
 
 .action-btn-danger:active:not(:disabled) {
@@ -116,8 +116,8 @@
 
 .action-btn-danger-ghost:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-error) 10%, transparent);
-  color: var(--color-error-dark);
-  border-color: var(--color-error-dark);
+  color: var(--color-red-600);
+  border-color: var(--color-red-600);
 }
 
 /* 幽灵按钮 */
@@ -207,7 +207,7 @@
 .qa-action-btn.copied {
   background: var(--color-success-light);
   border-color: var(--color-success);
-  color: var(--color-success-dark);
+  color: var(--color-green-600);
 }
 
 .qa-action-btn i {
@@ -378,8 +378,8 @@
 .dark .action-btn-danger,
 [data-color-mode-resolved='dark'] .action-btn-danger,
 [data-theme='dark'] .action-btn-danger {
-  background: var(--color-error-dark);
-  border-color: var(--color-error-dark);
+  background: var(--color-red-600);
+  border-color: var(--color-red-600);
 }
 
 .dark .action-btn-danger:hover:not(:disabled),

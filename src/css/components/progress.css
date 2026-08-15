@@ -18,7 +18,7 @@
   background: var(--color-bg-primary);
   border: 1.5px solid var(--color-border-default);
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  padding: var(--spacing-3xl) var(--spacing-2xl);
+  padding: var(--spacing-16) var(--spacing-12);
   text-align: center;
   box-shadow: var(--shadow-md);
   animation: borderGlow var(--duration-2s) var(--ease-in-out) infinite;

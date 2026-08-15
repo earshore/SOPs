@@ -54,7 +54,7 @@
   /* 区块间距 */
   --section-gap: var(--spacing-8, 32px);
   --section-gap-sm: var(--spacing-6, 24px);
-  --section-gap-lg: var(--spacing-2xl, 48px);
+  --section-gap-lg: var(--spacing-12, 48px);
 }
 
 /* ----------------------------------------

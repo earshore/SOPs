@@ -183,7 +183,7 @@ function renderDefaultSidebar(
               .join('')}
           </nav>
         </div>
-        <div class="mt-auto p-6 border-t border-[color:var(--border-subtle,rgba(148,163,184,0.24))] bg-[var(--color-bg-secondary,#f8fafc)]">
+        <div class="mt-auto p-6 border-t border-[color:var(--border-subtle,rgba(148,163,184,0.24))] bg-secondary">
           <div class="flex items-center gap-3 text-slate-400 text-xs">
             <i class="${moduleConfig.icon}"></i>
             <span>${moduleConfig.version}</span>

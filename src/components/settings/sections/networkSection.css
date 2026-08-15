@@ -196,7 +196,7 @@
 }
 
 .settings-proxy-form__status.is-ok {
-  color: var(--color-success-dark, #059669);
+  color: var(--color-green-600, #059669);
 }
 
 .settings-proxy-form__status.is-err {

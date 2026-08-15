@@ -36,11 +36,7 @@
 }
 
 .app-confirm-modal--danger .app-confirm-modal-header {
-  background: linear-gradient(
-    135deg,
-    var(--color-error-dark, #b91c1c),
-    var(--color-error, #ef4444)
-  );
+  background: linear-gradient(135deg, var(--color-red-600, #b91c1c), var(--color-error, #ef4444));
 }
 
 .app-confirm-modal--theme .app-confirm-modal-confirm {
@@ -66,7 +62,7 @@
 }
 
 .app-confirm-modal--danger .app-confirm-modal-confirm:hover {
-  background: var(--color-error-dark, #b91c1c);
+  background: var(--color-red-600, #b91c1c);
 }
 
 .app-confirm-modal--danger .app-confirm-modal-confirm:focus-visible {
@@ -91,16 +87,12 @@
    按钮: 对齐共享 .action-btn-danger dark 档（默认 error-dark，hover red-600）。 */
 .dark .app-confirm-modal--danger .app-confirm-modal-header,
 [data-color-mode-resolved='dark'] .app-confirm-modal--danger .app-confirm-modal-header {
-  background: linear-gradient(
-    135deg,
-    var(--color-error-dark, #b91c1c),
-    var(--color-error-dark, #b91c1c)
-  );
+  background: linear-gradient(135deg, var(--color-red-600, #b91c1c), var(--color-red-600, #b91c1c));
 }
 
 .dark .app-confirm-modal--danger .app-confirm-modal-confirm,
 [data-color-mode-resolved='dark'] .app-confirm-modal--danger .app-confirm-modal-confirm {
-  background: var(--color-error-dark, #b91c1c);
+  background: var(--color-red-600, #b91c1c);
 }
 
 .dark .app-confirm-modal--danger .app-confirm-modal-confirm:hover,

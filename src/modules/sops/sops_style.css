@@ -1012,7 +1012,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 
 /* 流程区域容器 */
 .sop-process-section {
-  margin-bottom: var(--spacing-2xl, 3rem);
+  margin-bottom: var(--spacing-12, 3rem);
   padding: 0;
 }
 

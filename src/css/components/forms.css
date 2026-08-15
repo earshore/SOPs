@@ -209,7 +209,7 @@
 .form-error {
   font-size: 0.8125rem;
   /* --color-error-dark = red-600（浅）/ red-500（深），深色面板 ≥4.5:1（§2.1） */
-  color: var(--color-error-dark);
+  color: var(--color-red-600);
   margin-top: 0.375rem;
   display: flex;
   align-items: center;

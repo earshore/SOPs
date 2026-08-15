@@ -505,7 +505,7 @@
 .wb-content {
   position: relative;
   z-index: 10;
-  padding: var(--spacing-8, 2rem) var(--spacing-2xl, 3rem);
+  padding: var(--spacing-8, 2rem) var(--spacing-12, 3rem);
   min-height: auto;
   height: auto;
 }

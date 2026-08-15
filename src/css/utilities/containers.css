@@ -75,7 +75,7 @@
   max-width: var(--layout-max-width, 1450px);
   margin: 0 auto;
   padding: 0 var(--page-gutter, 1rem);
-  margin-bottom: var(--spacing-2xl, 48px);
+  margin-bottom: var(--spacing-12, 48px);
 }
 
 .section-container:last-child {

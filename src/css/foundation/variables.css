@@ -88,13 +88,11 @@
 
   /* ---- 状态色 ---- */
   --color-success-light: rgba(34, 197, 94, 0.1);
-  --color-success-dark: var(--color-green-600); /* [S2-THM01] -> --color-green-600 */
   --color-success-contrast: #ffffff;
 
   --color-warning-contrast: var(--color-slate-900);
 
   --color-error-light: rgba(239, 68, 68, 0.1);
-  --color-error-dark: var(--color-red-600); /* [S2-THM01] -> --color-red-600 */
   --color-error-contrast: #ffffff;
 
   --color-info-light: rgba(59, 130, 246, 0.1);
@@ -104,8 +102,6 @@
      产品语义别名（xs/sm/md…）。
      数字尺度 --spacing-0/1/px 与 generated 相同，已去重复。
      ======================================== */
-  --spacing-2xl: 3rem; /* 48px [S2-THM01] -> --spacing-12 */
-  --spacing-3xl: 4rem; /* 64px [S2-THM01] -> --spacing-16 */
 
   /* ========================================
      5. 布局尺寸
@@ -139,7 +135,7 @@
   /* ---- 区块间距 ---- */
   --section-gap: var(--spacing-xl);
   --section-gap-sm: var(--spacing-lg);
-  --section-gap-lg: var(--spacing-2xl);
+  --section-gap-lg: var(--spacing-12);
 
   /* ========================================
      6. 圆角
@@ -429,14 +425,12 @@
   /* ---- 状态色 ---- */
   --color-success: var(--color-green-400);
   --color-success-light: rgba(74, 222, 128, 0.12);
-  --color-success-dark: var(--color-green-500); /* [S2-THM01] dark: green-500 */
 
   --color-warning: var(--color-amber-400);
   --color-warning-contrast: var(--color-slate-900);
 
   --color-error: var(--color-red-400);
   --color-error-light: rgba(248, 113, 113, 0.12);
-  --color-error-dark: var(--color-red-500); /* [S2-THM01] dark: red-500 */
 
   --color-info: var(--color-blue-400);
   --color-info-light: rgba(96, 165, 250, 0.12);
