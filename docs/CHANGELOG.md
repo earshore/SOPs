@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [3.1.1-rc.3] - 2026-08-15
+> 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.2` 基线上纳入语义色哨兵门禁扩容（semantic lane）、NPI 表格全状态截图断言与批次 4B NPI 五族语义色 token 化专项收官；GitHub Latest 仍为 `v3.1.0`，回滚基线为 `v3.1.0`。
+> 生产目标为 `https://sops.hongecb.store`。
+### Added（新增）
+- **语义色哨兵门禁（semantic lane）**：`theme:hardcode-baseline` 审计扩容 slate/red/emerald/purple/amber 五族，sops 模块 52 文件 baseline 4282 处，total + per-file 双锁只降不升，注入即拦截，堵住 modules lane blue+indigo 双族口径对 NPI 五族的盲区。
+- **NPI 表格全状态截图断言**：release-smoke 新增 light/dark 双 baseline 像素级断言（pixelmatch ≤ 0.001），补齐深色翻转契约盲区；基线随库入库（`docs/color-region-baselines/`）。
+- **`--npi-status-*` 语义色契约**：五档（待办/进行中/完成/失败/中性）× 主色/柔底双槽位 + 透明底 `-subtle` 族（浅色 8% / dark 12% color-mix），深色翻转由 token 重定义自动生效，无需逐类 dark 选择器。
+### Changed（变更）
+- **批次 4B 三批落地**：NPI 表格五族状态色 100% 语义化清零——`index.ts` 25 处、`mockData.ts` 3 处、`template.html` 165 处迁移至 `npi-status-*` 语义类；semantic baseline 4282 → 4087（-195）。
+- **slate 结构性灰调划界**：约 180 处 slate 结构性灰调（hover 行、边框、分隔）明确不在本专项 scope，按契约注释留白，后续如需 slate 统一化另立项。
+### Docs（文档）
+- 新增 `CMP02_BATCH4B_TOKEN_MIGRATION_PLAN.md`（专项方案）与 `CMP02_BATCH4B_COMPLETION_REPORT.md`（收口报告）；看板 `TECH_DEBT_BOARD.md` 与 `TECH_DEBT_TIGHTENING_ROADMAP.md` 同步批次 4B 三批完成状态。
+- 发布元数据同步至 `v3.1.1-rc.3`；候选通道、回滚基线和自动化验证结果以本章节及 GitHub Release 为准。
+
 ## [3.1.1-rc.2] - 2026-08-14
 
 > 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.1` 基线上纳入路由加载视觉系统重构、深色模式与主题切换动画修复，以及 AI 分析提示词集中化重构；GitHub Latest 仍为 `v3.1.0`，回滚基线为 `v3.1.0`。
