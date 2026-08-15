@@ -67,21 +67,21 @@
 
   /* ---- 背景 ---- */
   --color-bg-primary: #ffffff;
-  --color-bg-secondary: var(--color-slate-50);
-  --color-bg-tertiary: var(--color-slate-100);
+  --color-bg-secondary: var(--color-slate-50); /* [S2-THM01] -> --color-slate-50 */
+  --color-bg-tertiary: var(--color-slate-100); /* [S2-THM01] -> --color-slate-100 */
   --color-bg-elevated: #ffffff;
   --color-bg-hover: rgba(0, 0, 0, 0.04);
   --color-bg-active: rgba(0, 0, 0, 0.08);
   --color-bg-selected: var(--color-primary-light);
-  --color-bg-disabled: var(--color-slate-100);
+  --color-bg-disabled: var(--color-slate-100); /* [S2-THM01] -> --color-slate-100 */
   --color-bg-backdrop: rgba(0, 0, 0, 0.4);
   --color-bg-overlay: rgba(0, 0, 0, 0.5);
 
   /* ---- 工作台表面 ---- */
-  --surface-workbench: var(--color-slate-50);
+  --surface-workbench: var(--color-slate-50); /* [S2-THM01] -> --color-slate-50 */
   --surface-panel: #ffffff;
   --surface-card: #ffffff;
-  --surface-card-hover: var(--color-slate-50);
+  --surface-card-hover: var(--color-slate-50); /* [S2-THM01] -> --color-slate-50 */
 
   /* ---- 边框 ---- */
   --color-border-light: rgba(0, 0, 0, 0.06);
@@ -98,33 +98,33 @@
 
   /* ---- 状态色 ---- */
   --color-success-light: rgba(34, 197, 94, 0.1);
-  --color-success-dark: var(--color-green-600);
+  --color-success-dark: var(--color-green-600); /* [S2-THM01] -> --color-green-600 */
   --color-success-contrast: #ffffff;
 
-  --color-warning-dark: var(--color-amber-600);
+  --color-warning-dark: var(--color-amber-600); /* [S2-THM01] -> --color-amber-600 */
   --color-warning-contrast: var(--color-slate-900);
 
   --color-error-light: rgba(239, 68, 68, 0.1);
-  --color-error-dark: var(--color-red-600);
+  --color-error-dark: var(--color-red-600); /* [S2-THM01] -> --color-red-600 */
   --color-error-contrast: #ffffff;
 
   --color-info-light: rgba(59, 130, 246, 0.1);
-  --color-info-dark: var(--color-blue-600);
+  --color-info-dark: var(--color-blue-600); /* [S2-THM01] -> --color-blue-600 */
 
   /* ========================================
      4. 间距系统
      产品语义别名（xs/sm/md…）。
      数字尺度 --spacing-0/1/px 与 generated 相同，已去重复。
      ======================================== */
-  --spacing-0\.5: 0.125rem; /* 2px — 命名与 generated --spacing-0-5 不同，保留 */
+  --spacing-0\.5: 0.125rem; /* 2px — 命名与 generated --spacing-0-5 不同，保留 [S2-THM01] -> --spacing-0-5 */
   --spacing-2xs: 0.375rem; /* 6px [S1-THM01] -> --spacing-1-5 */
   --spacing-xs: 0.5rem; /* 8px [S1-THM01] -> --spacing-2 */
   --spacing-sm: 0.75rem; /* 12px [S1-THM01] -> --spacing-3 */
   --spacing-md: 1rem; /* 16px [S1-THM01] -> --spacing-4 */
   --spacing-lg: 1.5rem; /* 24px [S1-THM01] -> --spacing-6 */
   --spacing-xl: 2rem; /* 32px [S1-THM01] -> --spacing-8 */
-  --spacing-2xl: 3rem; /* 48px */
-  --spacing-3xl: 4rem; /* 64px */
+  --spacing-2xl: 3rem; /* 48px [S2-THM01] -> --spacing-12 */
+  --spacing-3xl: 4rem; /* 64px [S2-THM01] -> --spacing-16 */
 
   /* ========================================
      5. 布局尺寸
@@ -428,21 +428,21 @@
 
   /* ---- 背景 ---- */
   --color-bg-primary: var(--color-slate-900);
-  --color-bg-secondary: var(--color-slate-800);
-  --color-bg-tertiary: rgba(255, 255, 255, 0.06);
+  --color-bg-secondary: var(--color-slate-800); /* [S2-THM01] dark: slate-800 */
+  --color-bg-tertiary: rgba(255, 255, 255, 0.06); /* [S2-THM01] dark: rgba 无对等 */
   --color-bg-elevated: var(--color-slate-800);
   --color-bg-hover: rgba(255, 255, 255, 0.06);
   --color-bg-active: rgba(255, 255, 255, 0.1);
-  --color-bg-disabled: rgba(255, 255, 255, 0.04);
+  --color-bg-disabled: rgba(255, 255, 255, 0.04); /* [S2-THM01] dark: rgba 无对等 */
   --color-bg-backdrop: rgba(0, 0, 0, 0.6);
   --color-bg-overlay: rgba(0, 0, 0, 0.7);
 
   /* ---- 工作台表面 ---- */
   /* Elevation ladder: workbench < panel < card ≈ elevated < card-hover */
-  --surface-workbench: var(--color-slate-950);
+  --surface-workbench: var(--color-slate-950); /* [S2-THM01] dark: slate-950 */
   --surface-panel: var(--color-slate-900);
   --surface-card: var(--color-slate-800);
-  --surface-card-hover: var(--color-slate-700);
+  --surface-card-hover: var(--color-slate-700); /* [S2-THM01] dark: slate-700 */
 
   /* ---- 边框 ---- */
   --color-border-light: rgba(255, 255, 255, 0.06);
@@ -457,19 +457,19 @@
   /* ---- 状态色 ---- */
   --color-success: var(--color-green-400);
   --color-success-light: rgba(74, 222, 128, 0.12);
-  --color-success-dark: var(--color-green-500);
+  --color-success-dark: var(--color-green-500); /* [S2-THM01] dark: green-500 */
 
   --color-warning: var(--color-amber-400);
-  --color-warning-dark: var(--color-amber-500);
+  --color-warning-dark: var(--color-amber-500); /* [S2-THM01] dark: amber-500 */
   --color-warning-contrast: var(--color-slate-900);
 
   --color-error: var(--color-red-400);
   --color-error-light: rgba(248, 113, 113, 0.12);
-  --color-error-dark: var(--color-red-500);
+  --color-error-dark: var(--color-red-500); /* [S2-THM01] dark: red-500 */
 
   --color-info: var(--color-blue-400);
   --color-info-light: rgba(96, 165, 250, 0.12);
-  --color-info-dark: var(--color-blue-500);
+  --color-info-dark: var(--color-blue-500); /* [S2-THM01] dark: blue-500 */
 
   /* ---- 阴影 ---- */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);

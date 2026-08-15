@@ -76,7 +76,7 @@ S3 21 处高频 bridge（surface-card 719 / panel 263 / border-subtle 152 等）
 | 批次 | 内容 | 验收 |
 | --- | --- | --- |
 | S 批 1 | text 族（6 处）+ focus（1 处）+ 高频 spacing（6 处），共 13 处 | **已完成** rc.5-S1：2,434 处消费点迁移，91 文件；ci:quality 20/20 · build · smoke 93/93 ✓ |
-| S 批 2 | bg 族（3 处）+ surface（2 处）+ status（3 处）+ 剩余 spacing（5 处），约 13 处 | 待执行：ci:quality 20/20 · build · smoke 93/93 · only-handwritten 只降不升 |
+| S 批 2 | bg 族（3 处）+ surface（2 处）+ status（3 处）+ 剩余 spacing（5 处），约 13 处 | **已完成（方案 A，契约登记口径）** rc.5-S2：13 处映射在 variables.css 全部 21 个声明行（light+dark 块）加 [S2-THM01] 契约注释；消费点不替换（bg/surface/status-dark 族 dark 翻转值 ≠ 目标 atomic 值，避免深色回退）；dry-run 统计 563 处/64 文件留作下批参考；门禁 ci:quality 20/20 · build ✓ · only-handwritten 164 不变（池消化随下次 B 批归档） |
 
 物理约束：settings-scale 限额 1200（当前 1199/1200），别名过渡期若触及限额需同步注释合并守限额；semantic baseline 2128 只降不升；`token:override-audit:gate` 全程在线。每批沿用「批次独立验证提交」纪律，凭证提交号见 LEDGER。
 
