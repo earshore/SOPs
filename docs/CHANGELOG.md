@@ -5,36 +5,82 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1-rc.5] - 2026-08-15
+
+> 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.4` 基线上纳入 TD-THM-01 遗留池 S 档第一批消化（B 批零消费归档 76 处 + S 档 30 处映射契约）与 S 批 1 迁移落地（text/focus/spacing 六族 13 处映射、2,434 处消费点），S 批 2 完成 bg/surface/status-dark/spacing 契约登记；`v3.1.1` GA 曾短暂发布后因债务消除未完成回退为 `v3.1.1-rc.5`，`v3.1.1` 系列 RC 序列重建（rc.1–rc.4 按真实锚点补发，anchor commit 见各章）；`package.json` version 与 RC 命名对齐（3.1.1-rc.3 → 3.1.1-rc.5，rc.4 锚点历史遗漏已审计登记）。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Added（新增）
+
+- **TD-THM-01 遗留池盘点与 rc.5 规划**：`THM01_LEGACY_POOL_RC5_PLAN.md`（B/S/A 档分档、物理约束、批次计划）+ `THM01_LEGACY_POOL_LEDGER.md`（台账 + 销账记录）；遗留池 240 处 only-handwritten 分档消化。
+- **S 档映射契约**：`THM01_S_MAP.md`：51 处有消费 S 档分三级——S1 name-map 28 处 + S2 value-match 2 处（30 处六族 3,108 次消费）为本批消化清单；S3 alias/bridge 21 处高频（surface-card 719x 居首）回流 A 档台账。
+- **TD-E2E-01 验收记录**：`SMOKE_BASELINE_FIX_PLAN.md` 第 6 节实施与验收结果归档。
+
+### Changed（变更）
+
+- **TD-THM-01 遗留池 B 批归档（rc.5-B）**：76 处零消费 only-handwritten token 从 `variables.css` 移除（85 行），遗留池 240 → 164；全库引用二次确认零误伤；验收 ci:quality 20/20 · build · smoke 93/93（`addbc453`）。
+- **S 批 1 迁移落地（rc.5-S1）**：text 六族（primary/secondary/tertiary/placeholder/disabled/link → slate-900/500/400/300 + primary）+ focus-ring → primary + spacing 六族（2xs–xl → spacing-1-5/2/3/4/6/8），共 13 处映射替换全库 2,434 处消费点（91 文件）；`variables.css` 声明行加 [S1-THM01] 契约注释（值不变、零新增键）；content-surface 表面基线 -1,318（只降不升）（`c017af8e`）。
+- **S 批 2 契约登记（rc.5-S2）**：bg 族 3 + surface 2 + status-dark 3 + 剩余 spacing 5 共 13 处映射，21 个声明行（light 13 + dark 8）加 [S2-THM01] 契约注释（方案 A：消费点不替换，保留 dark 翻转契约，避免深色模式视觉回退）；dry-run 统计 563 处/64 文件留作下批参考（`166a65aa`）。
+- **version bump 对齐（cdc53864）**：`package.json` / `package-lock.json` version 3.1.1-rc.3 → 3.1.1-rc.5（rc.4/GA/rc.5 发布期间遗漏，已审计登记）。
+- **release 序列重建**：`v3.1.1-rc.4` GA 占位回退为 rc.5；rc.1（6dc3e0a3）/rc.2（d6237dd3）/rc.3（03833972）/rc.4（1a71c3a1）按真实锚点重建 release + tag + 产物（zip/build-info/SHA256SUMS）；GitHub Latest 恢复 v3.1.0 GA。
+
+### Fixed（修复）
+
+- **release:audit 鲁棒性修复**：`scripts/release/audit-releases.mjs` 增加 gh API 输出 ANSI 着色序列清洗与 streaming JSON（--paginate 多顶层值）兼容解析，审计工具在带色终端/别名环境恢复可用。
+
+### 门禁验收
+
+- ci:quality 20/20（semantic 2128/2128 · modules 0/0 · shell 24/24 · settings-scale 1199/1200 · lint 0/0）· build 零错误 · smoke 93/93（chromium/firefox/webkit 31 用例 × 3 浏览器）。
+
+### 锚点 commit
+
+- `6dc3e0a3` rc.1 · `d6237dd3` rc.2 · `03833972` rc.3 · `1a71c3a1` rc.4 · `c017af8e` rc.5 主体 · `cdc53864` version bump
 
 ## [3.1.1-rc.4] - 2026-08-15
+
 > 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.3` 基线上纳入剩余技术债收尾收紧专项：TD-CMP-04 badge 统一契约（`.badge` 主类 + 8 模块归属变体 + 3 SOP 状态变体 + 深色翻转，40 个 template 双类叠加）与 slate structural 专项收官后的全库门禁实测；TD-CMP-02 降级 P3（30 天复检窗口至 2026-09-14）；GitHub Latest 仍为 `v3.1.0`，回滚基线为 `v3.1.0`。
 > 生产目标为 `https://sops.hongecb.store`。
+
 ### Added（新增）
+
 - **`.badge` 统一契约**：`badges.css` 新建 `.badge` 主类（控件尺寸/过渡契约）+ 8 模块归属变体（hub/growth/safety/service/supply/analytics/ai/pro）+ 3 SOP 状态变体（semantic 色 token 直引，消除 `sop-status-*` 自设 token 双链冗余）+ 键盘焦点契约 + 深色翻转 8 规则。
 - **剩余技术债收尾收紧方案**：`DEBT_FINAL_TIGHTENING_PLAN.md`（扫描基线、收益排序分批计划）与 `DEBT_FINAL_TIGHTENING_CLOSURE.md`（收官验收报告）；TD-CMP-04 进入已关闭态，TD-CMP-02 降级 P3 复检登记。
+
 ### Changed（变更）
+
 - **TD-CMP-04 badge 两族合并收官**：40 个 template 双类叠加（37 处 `wb-badge-*` + 三端 overview 45 处 `sop-status-*`），DOM 契约不变、CSS 实现统一收敛至 `.badge`；`app_center/overview` 裸 `wb-badge`（workflow 标记）甄别保留。
 - **TD-CMP-02 降级 P2→P3**：体系 A/B 已收口（structural 2,048 处 100% + 112 处 settings-control），门禁持续防回退；30 天复检窗口至 2026-09-14（`CMP02_DOWNGRADE_TO_P3_SPEC.md`、`CMP02_DOWNGRADE_RECHECK_MONITOR.md`）。
 - **slate structural 专项收官（次序 13）**：1,917 处结构性灰调 100% token 化，剩余 89 处甄别台账（控件边框/状态标签/深色装饰/矩阵占位符）；semantic baseline 4087 → 2128（-1959 累计）。
+
 ### Fixed（修复）
+
 - **smoke 断言层跨引擎失真修复（TD-E2E-01，次序 14）**：`captureStableRegion` 截图强制 `scale: 'css'` 归一化 CSS 像素输出，消除 webkit 2x dpr 导致的 baseline 尺寸不匹配（1952×1262 vs 976×631）；NPI 表格像素断言升级为 per-engine 基线（firefox/webkit × light/dark 新增 4 个基线，chromium 复用原名），消除三引擎字体光栅化差异导致的误报；`expectRouteReady` 双 rAF 时序隔离消除 webkit 误判；Deep Chat 路由 390px 移动端稳态文本确为 33 字符（webkit 布局折叠的真实差异，非缺陷），登记路由级 `minContentLength` 阈值避免硬编码 `> 40` 一刀切。
 - **验收结果**：全浏览器 smoke **93/93 通过**（31 用例 × 3 引擎），`npm run build` 零错误，`ci:quality` 20 项全绿（semantic 2128/2128 · modules 0/0 · shell 24/24 · settings-scale 1199/1200 · lint 0/0 · bridge gate 通过）。
+
 ### Docs（文档）
+
 - 新增 `DEBT_FINAL_TIGHTENING_PLAN.md`、`DEBT_FINAL_TIGHTENING_CLOSURE.md`；看板 `TECH_DEBT_BOARD.md`（TD-CMP-04 已关闭态、TD-CMP-02 P3）、`NEXT_PHASES_PLAN.md` 与 `SOP02_SLATE_PROGRESS_REPORT.md` 同步收官。
 - TD-E2E-01 专项闭环：`SMOKE_BASELINE_FIX_PLAN.md` 第 6 节记录实施与验收结果；TD-CMP-02 复检前置归档文档 `CMP02_DOWNGRADE_RECHECK_PASS.md`（10 步 checklist + 通过判据 + 空执行记录表，2026-09-14 到期人工复检），对照基线快照冻结（semantic 2128/2128 · modules 0/0 · shell 24/24 · settings-scale 1199/1200 · token:override unallowlisted 0）。
 - 发布元数据同步至 `v3.1.1-rc.4`；候选通道、回滚基线和自动化验证结果以本章节及 GitHub Release 为准。
 
 ## [3.1.1-rc.3] - 2026-08-15
+
 > 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.2` 基线上纳入语义色哨兵门禁扩容（semantic lane）、NPI 表格全状态截图断言与批次 4B NPI 五族语义色 token 化专项收官；GitHub Latest 仍为 `v3.1.0`，回滚基线为 `v3.1.0`。
 > 生产目标为 `https://sops.hongecb.store`。
+
 ### Added（新增）
+
 - **语义色哨兵门禁（semantic lane）**：`theme:hardcode-baseline` 审计扩容 slate/red/emerald/purple/amber 五族，sops 模块 52 文件 baseline 4282 处，total + per-file 双锁只降不升，注入即拦截，堵住 modules lane blue+indigo 双族口径对 NPI 五族的盲区。
 - **NPI 表格全状态截图断言**：release-smoke 新增 light/dark 双 baseline 像素级断言（pixelmatch ≤ 0.001），补齐深色翻转契约盲区；基线随库入库（`docs/color-region-baselines/`）。
 - **`--npi-status-*` 语义色契约**：五档（待办/进行中/完成/失败/中性）× 主色/柔底双槽位 + 透明底 `-subtle` 族（浅色 8% / dark 12% color-mix），深色翻转由 token 重定义自动生效，无需逐类 dark 选择器。
+
 ### Changed（变更）
+
 - **批次 4B 三批落地**：NPI 表格五族状态色 100% 语义化清零——`index.ts` 25 处、`mockData.ts` 3 处、`template.html` 165 处迁移至 `npi-status-*` 语义类；semantic baseline 4282 → 4087（-195）。
 - **slate 结构性灰调划界**：约 180 处 slate 结构性灰调（hover 行、边框、分隔）明确不在本专项 scope，按契约注释留白，后续如需 slate 统一化另立项。
+
 ### Docs（文档）
+
 - 新增 `CMP02_BATCH4B_TOKEN_MIGRATION_PLAN.md`（专项方案）与 `CMP02_BATCH4B_COMPLETION_REPORT.md`（收口报告）；看板 `TECH_DEBT_BOARD.md` 与 `TECH_DEBT_TIGHTENING_ROADMAP.md` 同步批次 4B 三批完成状态。
 - 发布元数据同步至 `v3.1.1-rc.3`；候选通道、回滚基线和自动化验证结果以本章节及 GitHub Release 为准。
 
@@ -459,7 +505,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API 路径显示稳定：选择 OpenAI 持续显示 `/responses`，切换路径后不再闪回 `/chat/completions`。
 - 恢复 `basicInfoMetaText` / `modelMetaText` 到 `SettingsPanelData` 类型契约，`npm run type-check` 通过。
 - 数据采集历史快照高度与左侧产品导入/手动采集配置列齐平，手动配置展开不再撑高右侧快照。
-
 
 ## [3.0.12-rc.7] - 2026-08-04
 

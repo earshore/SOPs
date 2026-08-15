@@ -11,19 +11,51 @@ import { isTagOnlyArchiveTag } from './release-history-policy.mjs';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 function sh(cmd) {
-  return execSync(cmd, {
+  const raw = execSync(cmd, {
     cwd: ROOT,
     encoding: 'utf8',
     maxBuffer: 20 * 1024 * 1024,
     env: { ...process.env, LANG: 'en_US.UTF-8' },
   });
+  // 去除 gh 别名/终端注入的 ANSI 着色序列，保证 JSON 解析稳定
+  return String(raw).replace(/\x1b\[[0-9;]*m/g, '');
 }
 
-const releases = JSON.parse(
-  sh('gh api "repos/earshore/SOPs/releases?per_page=100" --paginate')
-);
-// paginate may return array of arrays
-const flat = Array.isArray(releases[0]) ? releases.flat() : releases;
+// gh --paginate 输出可能是 streaming JSON（多个顶层值），逐段解码；兼容单值
+function parseStreamingJson(text) {
+  const flat = [];
+  let idx = 0;
+  const s = text.trim();
+  while (idx < s.length) {
+    while (idx < s.length && ' \t\n\r'.includes(s[idx])) idx++;
+    if (idx >= s.length) break;
+    let depth = 0;
+    let inStr = false;
+    let esc = false;
+    const start = idx;
+    for (let i = idx; i < s.length; i++) {
+      const ch = s[i];
+      if (esc) { esc = false; continue; }
+      if (ch === '\\' && inStr) { esc = true; continue; }
+      if (ch === '"') { inStr = !inStr; continue; }
+      if (inStr) continue;
+      if ('{(['.includes(ch)) depth++;
+      else if ('}])'.includes(ch)) {
+        depth--;
+        if (depth === 0) {
+          const obj = JSON.parse(s.slice(start, i + 1));
+          flat.push(...(Array.isArray(obj) ? obj : [obj]));
+          idx = i + 1;
+          break;
+        }
+      }
+    }
+    if (depth !== 0) throw new Error('unbalanced streaming JSON at ' + start);
+  }
+  return flat;
+}
+
+const flat = parseStreamingJson(sh('gh api "repos/earshore/SOPs/releases?per_page=100" --paginate'));
 
 const tags = sh('git tag -l "v*"')
   .split(/\r?\n/)
