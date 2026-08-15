@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [3.1.1-rc.4] - 2026-08-15
+> 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.3` 基线上纳入剩余技术债收尾收紧专项：TD-CMP-04 badge 统一契约（`.badge` 主类 + 8 模块归属变体 + 3 SOP 状态变体 + 深色翻转，40 个 template 双类叠加）与 slate structural 专项收官后的全库门禁实测；TD-CMP-02 降级 P3（30 天复检窗口至 2026-09-14）；GitHub Latest 仍为 `v3.1.0`，回滚基线为 `v3.1.0`。
+> 生产目标为 `https://sops.hongecb.store`。
+### Added（新增）
+- **`.badge` 统一契约**：`badges.css` 新建 `.badge` 主类（控件尺寸/过渡契约）+ 8 模块归属变体（hub/growth/safety/service/supply/analytics/ai/pro）+ 3 SOP 状态变体（semantic 色 token 直引，消除 `sop-status-*` 自设 token 双链冗余）+ 键盘焦点契约 + 深色翻转 8 规则。
+- **剩余技术债收尾收紧方案**：`DEBT_FINAL_TIGHTENING_PLAN.md`（扫描基线、收益排序分批计划）与 `DEBT_FINAL_TIGHTENING_CLOSURE.md`（收官验收报告）；TD-CMP-04 进入已关闭态，TD-CMP-02 降级 P3 复检登记。
+### Changed（变更）
+- **TD-CMP-04 badge 两族合并收官**：40 个 template 双类叠加（37 处 `wb-badge-*` + 三端 overview 45 处 `sop-status-*`），DOM 契约不变、CSS 实现统一收敛至 `.badge`；`app_center/overview` 裸 `wb-badge`（workflow 标记）甄别保留。
+- **TD-CMP-02 降级 P2→P3**：体系 A/B 已收口（structural 2,048 处 100% + 112 处 settings-control），门禁持续防回退；30 天复检窗口至 2026-09-14（`CMP02_DOWNGRADE_TO_P3_SPEC.md`、`CMP02_DOWNGRADE_RECHECK_MONITOR.md`）。
+- **slate structural 专项收官（次序 13）**：1,917 处结构性灰调 100% token 化，剩余 89 处甄别台账（控件边框/状态标签/深色装饰/矩阵占位符）；semantic baseline 4087 → 2128（-1959 累计）。
+### Docs（文档）
+- 新增 `DEBT_FINAL_TIGHTENING_PLAN.md`、`DEBT_FINAL_TIGHTENING_CLOSURE.md`；看板 `TECH_DEBT_BOARD.md`（TD-CMP-04 已关闭态、TD-CMP-02 P3）、`NEXT_PHASES_PLAN.md` 与 `SOP02_SLATE_PROGRESS_REPORT.md` 同步收官。
+- 发布元数据同步至 `v3.1.1-rc.4`；候选通道、回滚基线和自动化验证结果以本章节及 GitHub Release 为准。
+
 ## [3.1.1-rc.3] - 2026-08-15
 > 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.2` 基线上纳入语义色哨兵门禁扩容（semantic lane）、NPI 表格全状态截图断言与批次 4B NPI 五族语义色 token 化专项收官；GitHub Latest 仍为 `v3.1.0`，回滚基线为 `v3.1.0`。
 > 生产目标为 `https://sops.hongecb.store`。
