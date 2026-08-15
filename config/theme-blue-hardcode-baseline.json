@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-08-15T01:05:58.333Z",
+  "updatedAt": "2026-08-15T01:26:08.893Z",
   "shell": {
     "total": 24,
     "filesScanned": 71,
@@ -46,7 +46,7 @@
     }
   },
   "semantic": {
-    "total": 4257,
+    "total": 4087,
     "filesScanned": 52,
     "filesWithHits": 23,
     "files": {
@@ -54,11 +54,11 @@
       "src/modules/sops/views/service/email_templates/template.html": 476,
       "src/modules/sops/views/growth/ppc_advertising/template.html": 463,
       "src/modules/sops/views/service/negative_review/template.html": 348,
-      "src/modules/sops/views/growth/npi_tracker/template.html": 343,
       "src/modules/sops/views/service/qa_maintenance/template.html": 322,
       "src/modules/sops/views/growth/promotion_submission/template.html": 228,
       "src/modules/sops/views/growth/listing_seo/template.html": 209,
       "src/modules/sops/views/safety/product_compliance/template.html": 185,
+      "src/modules/sops/views/growth/npi_tracker/template.html": 173,
       "src/modules/sops/views/growth/competitor_monitoring/template.html": 163,
       "src/modules/sops/views/safety/eu_gpsr_compliance/template.html": 152,
       "src/modules/sops/views/backend/fba_shipping/template.html": 145,

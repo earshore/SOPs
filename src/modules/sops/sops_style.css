@@ -333,6 +333,36 @@
   background-color: var(--npi-status-neutral-soft);
 }
 
+/* Batch 4B Step 1: `-subtle` transparent-tint variants (light 8% / dark
+ * 12% tint over transparent), mirroring the old `bg-{family}-50/30`
+ * inline-utility usage. Dark flips apply automatically via the token
+ * redefinitions above. */
+.npi-status-todo-subtle {
+  background-color: color-mix(in srgb, var(--npi-status-todo) 8%, transparent);
+}
+.npi-status-pending-subtle {
+  background-color: color-mix(in srgb, var(--npi-status-pending) 8%, transparent);
+}
+.npi-status-done-subtle {
+  background-color: color-mix(in srgb, var(--npi-status-done) 8%, transparent);
+}
+.npi-status-fail-subtle {
+  background-color: color-mix(in srgb, var(--npi-status-fail) 8%, transparent);
+}
+
+.dark .npi-status-todo-subtle {
+  background-color: color-mix(in srgb, var(--npi-status-todo) 12%, transparent);
+}
+.dark .npi-status-pending-subtle {
+  background-color: color-mix(in srgb, var(--npi-status-pending) 12%, transparent);
+}
+.dark .npi-status-done-subtle {
+  background-color: color-mix(in srgb, var(--npi-status-done) 12%, transparent);
+}
+.dark .npi-status-fail-subtle {
+  background-color: color-mix(in srgb, var(--npi-status-fail) 12%, transparent);
+}
+
 .npi-tracker-page p {
   max-width: min(100%, 64rem);
 }

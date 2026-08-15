@@ -142,7 +142,7 @@
         </div>
         <div class="content-callout content-callout--success flex items-start gap-2 p-2">
           <div class="flex-1">
-            <span class="font-bold text-emerald-700">成长期 (30-90天)</span>
+            <span class="font-bold npi-status-done">成长期 (30-90天)</span>
             <p class="text-slate-600 mt-0.5">
               积累评价、优化广告。目标：评分≥4.0，ACOS&lt;40%，自然单占比提升。
             </p>
@@ -150,7 +150,7 @@
         </div>
         <div class="content-callout content-callout--purple flex items-start gap-2 p-2">
           <div class="flex-1">
-            <span class="font-bold text-purple-700">稳定期 (90天+)</span>
+            <span class="font-bold npi-status-todo">稳定期 (90天+)</span>
             <p class="text-slate-600 mt-0.5">
               稳定出单，控制广告预算。目标：自然单占比&gt;50%，利润率达标。
             </p>
@@ -158,7 +158,7 @@
         </div>
         <div class="content-callout content-callout--danger flex items-start gap-2 p-2">
           <div class="flex-1">
-            <span class="font-bold text-red-700">清仓期</span>
+            <span class="font-bold npi-status-fail">清仓期</span>
             <p class="text-slate-600 mt-0.5">
               库存周转&gt;60天或持续亏损触发。先用利润表确认止损价，再执行清仓。
             </p>
@@ -169,7 +169,7 @@
     <!-- SOP 合规检查项 -->
     <div class="ui-card p-4">
       <h3 class="ui-card__title font-bold mb-3 flex items-center gap-2">
-        <i class="fas fa-clipboard-check text-purple-500"></i>上架前合规检查 (5项必做)
+        <i class="fas fa-clipboard-check npi-status-todo"></i>上架前合规检查 (5项必做)
       </h3>
       <div class="space-y-2 text-xs">
         <div class="flex items-center gap-2 p-2 bg-slate-50 rounded">
@@ -177,24 +177,24 @@
           <span><strong>泛欧计划</strong>：确认是否启用Pan-EU，影响定价策略</span>
         </div>
         <div class="flex items-center gap-2 p-2 bg-slate-50 rounded">
-          <i class="fas fa-robot text-purple-500 w-4"></i>
+          <i class="fas fa-robot npi-status-todo w-4"></i>
           <span><strong>Rufus优化</strong>：五点+标题包含场景词、解决痛点</span>
         </div>
         <div class="flex items-center gap-2 p-2 bg-slate-50 rounded">
-          <i class="fas fa-ban text-red-500 w-4"></i>
+          <i class="fas fa-ban npi-status-fail w-4"></i>
           <span><strong>敏感词</strong>：禁用侵权词、医疗声明、夸大宣传</span>
         </div>
         <div class="flex items-center gap-2 p-2 bg-slate-50 rounded">
-          <i class="fas fa-image text-emerald-500 w-4"></i>
+          <i class="fas fa-image npi-status-done w-4"></i>
           <span><strong>图片+QA</strong>：主图白底、6张副图、常见QA预埋</span>
         </div>
         <div class="flex items-center gap-2 p-2 bg-slate-50 rounded">
-          <i class="fas fa-plus-square text-amber-500 w-4"></i>
+          <i class="fas fa-plus-square npi-status-pending w-4"></i>
           <span><strong>A+页面</strong>：品牌故事+对比模块+场景展示</span>
         </div>
       </div>
-      <div class="mt-3 p-2 bg-amber-50 rounded-lg border border-amber-200">
-        <p class="text-xs text-amber-700">
+      <div class="mt-3 p-2 npi-status-pending-soft rounded-lg border npi-status-pending">
+        <p class="text-xs npi-status-pending">
           <i class="fas fa-lightbulb mr-1"></i>提示：合规状态显示✓表示全部通过，否则显示完成数/总数
         </p>
       </div>
@@ -202,11 +202,11 @@
     <!-- 决策判断标准 -->
     <div class="ui-card p-4">
       <h3 class="ui-card__title font-bold mb-3 flex items-center gap-2">
-        <i class="fas fa-gavel text-red-500"></i>"保留/放弃"决策标准
+        <i class="fas fa-gavel npi-status-fail"></i>"保留/放弃"决策标准
       </h3>
       <div class="space-y-2 text-xs">
-        <div class="p-2 bg-emerald-50 rounded-lg border border-emerald-200">
-          <span class="font-bold text-emerald-700">✓ 继续保留条件</span>
+        <div class="p-2 npi-status-done-soft rounded-lg border npi-status-done">
+          <span class="font-bold npi-status-done">✓ 继续保留条件</span>
           <ul class="mt-1 text-slate-600 space-y-0.5">
             <li>• ACOS &lt; 目标值 (通常40%)</li>
             <li>• 评分 ≥ 4.0</li>
@@ -214,8 +214,8 @@
             <li>• 库存周转 &lt; 60天</li>
           </ul>
         </div>
-        <div class="p-2 bg-red-50 rounded-lg border border-red-200">
-          <span class="font-bold text-red-700">✗ 建议放弃条件</span>
+        <div class="p-2 npi-status-fail-soft rounded-lg border npi-status-fail">
+          <span class="font-bold npi-status-fail">✗ 建议放弃条件</span>
           <ul class="mt-1 text-slate-600 space-y-0.5">
             <li>• 连续30天ACOS&gt;60%且无改善</li>
             <li>• 评分 &lt; 3.5 且差评无法解决</li>
@@ -229,7 +229,7 @@
   <!-- ==================== 新增：各阶段详细SOP操作手册 ==================== -->
   <div class="ui-card p-6 mb-6">
     <h2 class="ui-card__title text-lg font-bold mb-5 flex items-center gap-2">
-      <i class="fas fa-tasks text-emerald-500"></i>各阶段详细 SOP 操作手册
+      <i class="fas fa-tasks npi-status-done"></i>各阶段详细 SOP 操作手册
     </h2>
     <!-- 测款期 SOP -->
     <div class="mb-6">
@@ -347,19 +347,19 @@
           </h4>
           <div class="space-y-2 text-xs text-slate-700">
             <div class="flex items-start gap-2">
-              <i class="fas fa-gavel text-red-500 mt-0.5 w-3.5"></i>
-              <span class="font-bold text-red-700">30天决策：此SKU是否进入成长期？</span>
+              <i class="fas fa-gavel npi-status-fail mt-0.5 w-3.5"></i>
+              <span class="font-bold npi-status-fail">30天决策：此SKU是否进入成长期？</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-thumbs-up text-emerald-500 mt-0.5 w-3.5"></i>
+              <i class="fas fa-thumbs-up npi-status-done mt-0.5 w-3.5"></i>
               <span>✓ 进入成长期：日均≥1单 + CTR&gt;0.5% + 评分≥4.0</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-thumbs-down text-red-500 mt-0.5 w-3.5"></i>
+              <i class="fas fa-thumbs-down npi-status-fail mt-0.5 w-3.5"></i>
               <span>✗ 直接清仓：零单 或 评分&lt;3.5 或 ACOS&gt;80%无改善空间</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-hourglass-half text-amber-500 mt-0.5 w-3.5"></i>
+              <i class="fas fa-hourglass-half npi-status-pending mt-0.5 w-3.5"></i>
               <span>△ 延长观察：有零星出单但数据不够 → 再给15天，期间不加预算</span>
             </div>
             <div class="flex items-start gap-2">
@@ -379,108 +379,108 @@
         <span class="text-xs text-slate-500">目标：积累评价 &amp; 降低ACOS &amp; 提升自然排名</span>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="border border-emerald-200 rounded-lg p-4 bg-emerald-50/30">
-          <h4 class="font-bold text-emerald-700 text-sm mb-3">
+        <div class="border npi-status-done rounded-lg p-4 npi-status-done-subtle">
+          <h4 class="font-bold npi-status-done text-sm mb-3">
             <i class="fas fa-ad mr-1"></i>广告策略
           </h4>
           <div class="space-y-2 text-xs text-slate-700">
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>广告结构：自动(低竞价收词) + 手动精准(主推词) + 手动广泛(拓词)</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>每周否定一次无效词，周期：每周一执行</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>ACOS&gt;50%的精准词 → 降竞价20% 或 暂停</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>出单好的词 → 开商品投放(ASIN定位)对标竞品</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>预算控制：日预算 = 日均销售额 × 目标ACOS</span>
             </div>
           </div>
         </div>
-        <div class="border border-emerald-200 rounded-lg p-4 bg-emerald-50/30">
-          <h4 class="font-bold text-emerald-700 text-sm mb-3">
+        <div class="border npi-status-done rounded-lg p-4 npi-status-done-subtle">
+          <h4 class="font-bold npi-status-done text-sm mb-3">
             <i class="fas fa-star mr-1"></i>评价管理
           </h4>
           <div class="space-y-2 text-xs text-slate-700">
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>Vine进度跟踪：目标30天内拿到15+评价</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>差评出现 → 48小时内联系买家(Buyer-Seller Message)</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>评分&lt;4.0 → 检查产品缺陷，考虑改包装/说明书后重新发货</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>评分4.0-4.3 → 正常推进，加A+页面对比模块引导认知</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>评分≥4.3 → 可以开始提价至建议价</span>
             </div>
           </div>
         </div>
-        <div class="border border-emerald-200 rounded-lg p-4 bg-emerald-50/30">
-          <h4 class="font-bold text-emerald-700 text-sm mb-3">
+        <div class="border npi-status-done rounded-lg p-4 npi-status-done-subtle">
+          <h4 class="font-bold npi-status-done text-sm mb-3">
             <i class="fas fa-cogs mr-1"></i>Listing优化
           </h4>
           <div class="space-y-2 text-xs text-slate-700">
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>根据出单词优化标题（前80字符包含核心转化词）</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>根据差评优化五点（解决买家真实痛点）</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>补充后台Search Term（从广告报告中提取长尾词）</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>主图A/B Test（每2周测一次，至少跑7天数据）</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-done mt-0.5"></i>
               <span>价格策略：Day30-60保持新品价，Day60+逐步提至建议价</span>
             </div>
           </div>
         </div>
       </div>
       <!-- 成长期60天决策点 -->
-      <div class="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-        <h4 class="font-bold text-amber-800 text-sm mb-2">
+      <div class="mt-4 p-4 npi-status-pending-soft rounded-lg border npi-status-pending">
+        <h4 class="font-bold npi-status-pending text-sm mb-2">
           <i class="fas fa-exclamation-triangle mr-1"></i>60天决策节点（成长期中期检查）
         </h4>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-          <div class="bg-white rounded p-3 border border-emerald-200">
-            <span class="font-bold text-emerald-700">✓ 继续投入</span>
+          <div class="bg-white rounded p-3 border npi-status-done">
+            <span class="font-bold npi-status-done">✓ 继续投入</span>
             <p class="text-slate-600 mt-1">
               ACOS&lt;40% + 自然单占比≥30% + 日均≥3单 → 加大广告预算，备货第二批
             </p>
           </div>
-          <div class="bg-white rounded p-3 border border-amber-200">
-            <span class="font-bold text-amber-700">△ 维持观察</span>
+          <div class="bg-white rounded p-3 border npi-status-pending">
+            <span class="font-bold npi-status-pending">△ 维持观察</span>
             <p class="text-slate-600 mt-1">
               ACOS 40-55% + 有自然单但不稳定 → 维持现状，不加预算，继续优化
             </p>
           </div>
-          <div class="bg-white rounded p-3 border border-red-200">
-            <span class="font-bold text-red-700">✗ 准备退出</span>
+          <div class="bg-white rounded p-3 border npi-status-fail">
+            <span class="font-bold npi-status-fail">✗ 准备退出</span>
             <p class="text-slate-600 mt-1">
               ACOS&gt;55% + 评分&lt;4.0 + 无自然单 → 降价至动销价，不再补货
             </p>
@@ -499,83 +499,83 @@
         >
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="border border-purple-200 rounded-lg p-4 bg-purple-50/30">
-          <h4 class="font-bold text-purple-700 text-sm mb-3">
+        <div class="border npi-status-todo rounded-lg p-4 npi-status-todo-subtle">
+          <h4 class="font-bold npi-status-todo text-sm mb-3">
             <i class="fas fa-euro-sign mr-1"></i>利润优化
           </h4>
           <div class="space-y-2 text-xs text-slate-700">
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>价格提至建议价或以上（评分≥4.3可溢价5-10%）</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>广告预算逐步下调：每周降10%，观察自然单是否稳定</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>只保留ACOS&lt;25%的精准词和品牌词广告</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>自然单占比目标：&gt;50%（理想&gt;70%）</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>Coupon/Deal策略：仅在大促期间使用（Prime Day/黑五）</span>
             </div>
           </div>
         </div>
-        <div class="border border-purple-200 rounded-lg p-4 bg-purple-50/30">
-          <h4 class="font-bold text-purple-700 text-sm mb-3">
+        <div class="border npi-status-todo rounded-lg p-4 npi-status-todo-subtle">
+          <h4 class="font-bold npi-status-todo text-sm mb-3">
             <i class="fas fa-boxes mr-1"></i>库存管理
           </h4>
           <div class="space-y-2 text-xs text-slate-700">
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>补货公式：(日均销量 × 补货周期天数) × 1.2安全系数</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>欧洲站补货周期预估：海运40天 + 上架7天 = 47天提前量</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>库存天数&lt;30天 → 立即触发补货流程</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>库存天数&gt;90天 → 考虑降价促销或跨站点调拨</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>旺季前60天 → 按日均销量×2备货</span>
             </div>
           </div>
         </div>
-        <div class="border border-purple-200 rounded-lg p-4 bg-purple-50/30">
-          <h4 class="font-bold text-purple-700 text-sm mb-3">
+        <div class="border npi-status-todo rounded-lg p-4 npi-status-todo-subtle">
+          <h4 class="font-bold npi-status-todo text-sm mb-3">
             <i class="fas fa-shield-alt mr-1"></i>防御策略
           </h4>
           <div class="space-y-2 text-xs text-slate-700">
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>每周监控竞品价格变动（3个核心竞品）</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>排名下降&gt;20位 → 检查是否被恶意跟卖/差评攻击</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>品牌注册+透明计划（Transparency）防跟卖</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>定期更新A+页面和副图（每季度刷新一次）</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+              <i class="fas fa-caret-right npi-status-todo mt-0.5"></i>
               <span>考虑变体扩展（颜色/尺寸）复用评价权重</span>
             </div>
           </div>
@@ -589,60 +589,60 @@
         <span class="text-xs text-slate-500">目标：最小化亏损 &amp; 尽快回笼资金</span>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="border border-red-200 rounded-lg p-4 bg-red-50/30">
-          <h4 class="font-bold text-red-700 text-sm mb-3">
+        <div class="border npi-status-fail rounded-lg p-4 npi-status-fail-subtle">
+          <h4 class="font-bold npi-status-fail text-sm mb-3">
             <i class="fas fa-exclamation-circle mr-1"></i>触发条件（满足任一即启动）
           </h4>
           <div class="space-y-2 text-xs text-slate-700">
             <div class="flex items-start gap-2">
-              <i class="fas fa-times-circle text-red-500 mt-0.5 w-3.5"></i>
+              <i class="fas fa-times-circle npi-status-fail mt-0.5 w-3.5"></i>
               <span>库存天数 &gt; 90天，且降价后仍无明显改善</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-times-circle text-red-500 mt-0.5 w-3.5"></i>
+              <i class="fas fa-times-circle npi-status-fail mt-0.5 w-3.5"></i>
               <span>评分 &lt; 3.5，差评问题无法通过改品解决</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-times-circle text-red-500 mt-0.5 w-3.5"></i>
+              <i class="fas fa-times-circle npi-status-fail mt-0.5 w-3.5"></i>
               <span>ACOS持续&gt;60%超过30天，且已完成所有优化手段</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-times-circle text-red-500 mt-0.5 w-3.5"></i>
+              <i class="fas fa-times-circle npi-status-fail mt-0.5 w-3.5"></i>
               <span>品类竞争恶化，市场均价已低于利润表止损价</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fas fa-times-circle text-red-500 mt-0.5 w-3.5"></i>
+              <i class="fas fa-times-circle npi-status-fail mt-0.5 w-3.5"></i>
               <span>长期仓储费即将产生（FBA库龄&gt;270天）</span>
             </div>
           </div>
         </div>
-        <div class="border border-red-200 rounded-lg p-4 bg-red-50/30">
-          <h4 class="font-bold text-red-700 text-sm mb-3">
+        <div class="border npi-status-fail rounded-lg p-4 npi-status-fail-subtle">
+          <h4 class="font-bold npi-status-fail text-sm mb-3">
             <i class="fas fa-clipboard-list mr-1"></i>清仓执行步骤
           </h4>
           <div class="space-y-2 text-xs text-slate-700">
             <div class="flex items-start gap-2">
-              <span class="font-bold text-red-600 w-4">①</span>
+              <span class="font-bold npi-status-fail w-4">①</span>
               <span>立即停止所有广告投放，节省广告费</span>
             </div>
             <div class="flex items-start gap-2">
-              <span class="font-bold text-red-600 w-4">②</span>
+              <span class="font-bold npi-status-fail w-4">②</span>
               <span>降价至利润表批准的动销价，观察3天动销情况</span>
             </div>
             <div class="flex items-start gap-2">
-              <span class="font-bold text-red-600 w-4">③</span>
+              <span class="font-bold npi-status-fail w-4">③</span>
               <span>仍无动销 → 触发负责人复核止损价，同时评估 Outlet Deal</span>
             </div>
             <div class="flex items-start gap-2">
-              <span class="font-bold text-red-600 w-4">④</span>
+              <span class="font-bold npi-status-fail w-4">④</span>
               <span>评估是否创建移除订单（Removal Order）运回或销毁</span>
             </div>
             <div class="flex items-start gap-2">
-              <span class="font-bold text-red-600 w-4">⑤</span>
+              <span class="font-bold npi-status-fail w-4">⑤</span>
               <span>移除成本 vs 继续仓储成本对比，选择更低成本方案</span>
             </div>
             <div class="flex items-start gap-2">
-              <span class="font-bold text-red-600 w-4">⑥</span>
+              <span class="font-bold npi-status-fail w-4">⑥</span>
               <span>在看板标记「清仓完成」，归档至历史记录，记录亏损金额</span>
             </div>
           </div>
@@ -672,7 +672,9 @@
       </div>
       <div class="border border-slate-200 rounded-lg p-4">
         <div class="flex items-center gap-2 mb-3">
-          <span class="step-circle h-6 w-6 bg-amber-100 text-amber-700 text-xs">2</span>
+          <span class="step-circle h-6 w-6 npi-status-pending-soft npi-status-pending text-xs"
+            >2</span
+          >
           <h4 class="font-bold text-slate-700 text-sm">检查预警项</h4>
         </div>
         <div class="space-y-1.5 text-xs text-slate-600">
@@ -685,7 +687,7 @@
       </div>
       <div class="border border-slate-200 rounded-lg p-4">
         <div class="flex items-center gap-2 mb-3">
-          <span class="step-circle h-6 w-6 bg-emerald-100 text-emerald-700 text-xs">3</span>
+          <span class="step-circle h-6 w-6 npi-status-done-soft npi-status-done text-xs">3</span>
           <h4 class="font-bold text-slate-700 text-sm">执行广告优化</h4>
         </div>
         <div class="space-y-1.5 text-xs text-slate-600">
@@ -698,7 +700,7 @@
       </div>
       <div class="border border-slate-200 rounded-lg p-4">
         <div class="flex items-center gap-2 mb-3">
-          <span class="step-circle h-6 w-6 bg-red-100 text-red-700 text-xs">4</span>
+          <span class="step-circle h-6 w-6 npi-status-fail-soft npi-status-fail text-xs">4</span>
           <h4 class="font-bold text-slate-700 text-sm">决策 &amp; 记录</h4>
         </div>
         <div class="space-y-1.5 text-xs text-slate-600">
@@ -725,18 +727,18 @@
             <p class="font-mono text-xs mt-1">= 市场均价 × 0.9</p>
             <p class="text-[10px] text-slate-500">低于市场价10%切入</p>
           </div>
-          <div class="bg-white rounded-lg p-3 border border-red-200">
-            <span class="text-red-600 font-bold">配送费红线</span>
+          <div class="bg-white rounded-lg p-3 border npi-status-fail">
+            <span class="npi-status-fail font-bold">配送费红线</span>
             <p class="font-mono text-xs mt-1">= 配送费 ÷ 0.35</p>
-            <p class="text-[10px] text-red-500">配送费已占售价35%，必须人工复核</p>
+            <p class="text-[10px] npi-status-fail">配送费已占售价35%，必须人工复核</p>
           </div>
-          <div class="bg-white rounded-lg p-3 border border-amber-200">
-            <span class="text-amber-600 font-bold">复核价格</span>
+          <div class="bg-white rounded-lg p-3 border npi-status-pending">
+            <span class="npi-status-pending font-bold">复核价格</span>
             <p class="font-mono text-xs mt-1">= 配送费 ÷ 0.30</p>
             <p class="text-[10px] text-slate-500">用于判断低价SKU是否还有空间</p>
           </div>
-          <div class="bg-white rounded-lg p-3 border border-emerald-200">
-            <span class="text-emerald-600 font-bold">参考售价</span>
+          <div class="bg-white rounded-lg p-3 border npi-status-done">
+            <span class="npi-status-done font-bold">参考售价</span>
             <p class="font-mono text-xs mt-1">= 配送费 ÷ 0.25</p>
             <p class="text-[10px] text-slate-500">仍需核算VAT/佣金/广告/退货</p>
           </div>
@@ -746,7 +748,7 @@
   </div>
   <div class="ui-card p-4 mb-6">
     <h3 class="ui-card__title font-bold mb-3 flex items-center gap-2">
-      <i class="fas fa-scale-balanced text-emerald-500"></i>正式定价必须使用欧洲站SKU利润表
+      <i class="fas fa-scale-balanced npi-status-done"></i>正式定价必须使用欧洲站SKU利润表
     </h3>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-600">
       <div class="bg-slate-50 rounded-lg p-3">
@@ -762,13 +764,13 @@
         <p>广告ACOS、Coupon/Deal费用、Vine成本、促销折扣、目标净利率。</p>
       </div>
     </div>
-    <p class="mt-3 text-xs text-red-600 font-semibold">
+    <p class="mt-3 text-xs npi-status-fail font-semibold">
       放行规则：任何新品上架、降价清仓、促销报名和补货决策，都必须附SKU利润表截图或链接；仅凭配送费预警价不得定价。
     </p>
   </div>
   <!-- ==================== 新增：欧洲站特别注意事项 ==================== -->
   <div
-    class="bg-gradient-to-r from-accent-100 to-purple-50 border border-accent-100 rounded-xl p-4 mb-6"
+    class="bg-gradient-to-r from-accent-100 to-[var(--npi-status-todo-soft)] border border-accent-100 rounded-xl p-4 mb-6"
   >
     <div class="flex items-start gap-3">
       <i class="fas fa-flag text-accent-500 text-xl"></i>
@@ -932,28 +934,28 @@
               <i class="fas fa-folder mr-1 opacity-70"></i>基础档案
             </th>
             <th
-              class="px-2 py-1.5 text-xs font-bold text-purple-700 text-center border-r border-slate-100 bg-purple-50/50"
+              class="px-2 py-1.5 text-xs font-bold npi-status-todo text-center border-r border-slate-100 npi-status-todo-subtle"
               colspan="6"
               scope="colgroup"
             >
               <i class="fas fa-clipboard-check mr-1 opacity-70"></i>合规Checklist
             </th>
             <th
-              class="px-2 py-1.5 text-xs font-bold text-emerald-700 text-center border-r border-slate-100 bg-emerald-50/50"
+              class="px-2 py-1.5 text-xs font-bold npi-status-done text-center border-r border-slate-100 npi-status-done-subtle"
               colspan="6"
               scope="colgroup"
             >
               <i class="fas fa-euro-sign mr-1 opacity-70"></i>财务模型
             </th>
             <th
-              class="px-2 py-1.5 text-xs font-bold text-amber-700 text-center border-r border-slate-100 bg-amber-50/50"
+              class="px-2 py-1.5 text-xs font-bold npi-status-pending text-center border-r border-slate-100 npi-status-pending-subtle"
               colspan="5"
               scope="colgroup"
             >
               <i class="fas fa-chart-line mr-1 opacity-70"></i>流量转化
             </th>
             <th
-              class="px-2 py-1.5 text-xs font-bold text-red-700 text-center bg-red-50/50"
+              class="px-2 py-1.5 text-xs font-bold npi-status-fail text-center npi-status-fail-subtle"
               colspan="4"
               scope="colgroup"
             >
@@ -979,9 +981,9 @@
             <th scope="col" class="px-2 py-2 text-center border-r border-slate-100">状态</th>
             <th scope="col" class="px-2 py-2 text-center">配送费</th>
             <th scope="col" class="px-2 py-2 text-center">配送占比</th>
-            <th scope="col" class="px-2 py-2 text-center text-red-600">35%红线</th>
-            <th scope="col" class="px-2 py-2 text-center text-amber-600">30%复核</th>
-            <th scope="col" class="px-2 py-2 text-center text-emerald-600">25%参考</th>
+            <th scope="col" class="px-2 py-2 text-center npi-status-fail">35%红线</th>
+            <th scope="col" class="px-2 py-2 text-center npi-status-pending">30%复核</th>
+            <th scope="col" class="px-2 py-2 text-center npi-status-done">25%参考</th>
             <th scope="col" class="px-2 py-2 text-center border-r border-slate-100">盈亏点</th>
             <th scope="col" class="px-2 py-2 text-center">流量</th>
             <th scope="col" class="px-2 py-2 text-center">CTR</th>
@@ -1061,13 +1063,13 @@
             </th>
             <th
               scope="col"
-              class="px-3 py-2 text-left border border-slate-200 font-bold text-emerald-700"
+              class="px-3 py-2 text-left border border-slate-200 font-bold npi-status-done"
             >
               升级条件 ↑
             </th>
             <th
               scope="col"
-              class="px-3 py-2 text-left border border-slate-200 font-bold text-red-700"
+              class="px-3 py-2 text-left border border-slate-200 font-bold npi-status-fail"
             >
               降级/清仓条件 ↓
             </th>
@@ -1084,11 +1086,11 @@
             <td class="px-3 py-2 border border-slate-200">
               <span class="stage-badge stage-test">测款期</span>
             </td>
-            <td class="px-3 py-2 border border-slate-200 text-emerald-700">
+            <td class="px-3 py-2 border border-slate-200 npi-status-done">
               日均≥1单 + CTR&gt;0.5% + 评分≥4.0<br />
               <span class="text-slate-500">→ 升级为「成长期」</span>
             </td>
-            <td class="px-3 py-2 border border-slate-200 text-red-700">
+            <td class="px-3 py-2 border border-slate-200 npi-status-fail">
               30天零单 或 评分&lt;3.5 或 ACOS&gt;80%<br />
               <span class="text-slate-500">→ 直接进入「清仓期」</span>
             </td>
@@ -1100,11 +1102,11 @@
             <td class="px-3 py-2 border border-slate-200">
               <span class="stage-badge stage-growth">成长期</span>
             </td>
-            <td class="px-3 py-2 border border-slate-200 text-emerald-700">
+            <td class="px-3 py-2 border border-slate-200 npi-status-done">
               自然单占比&gt;50% + ACOS&lt;30% + 日均≥5单<br />
               <span class="text-slate-500">→ 升级为「稳定期」</span>
             </td>
-            <td class="px-3 py-2 border border-slate-200 text-red-700">
+            <td class="px-3 py-2 border border-slate-200 npi-status-fail">
               60天后ACOS&gt;55% + 无自然单 + 评分&lt;4.0<br />
               <span class="text-slate-500">→ 降级为「清仓期」</span>
             </td>
@@ -1116,11 +1118,11 @@
             <td class="px-3 py-2 border border-slate-200">
               <span class="stage-badge stage-stable">稳定期</span>
             </td>
-            <td class="px-3 py-2 border border-slate-200 text-emerald-700">
+            <td class="px-3 py-2 border border-slate-200 npi-status-done">
               保持现状，持续盈利<br />
               <span class="text-slate-500">→ 考虑变体扩展/多站点复制</span>
             </td>
-            <td class="px-3 py-2 border border-slate-200 text-red-700">
+            <td class="px-3 py-2 border border-slate-200 npi-status-fail">
               排名持续下降 + 库存积压&gt;90天<br />
               <span class="text-slate-500">→ 降级为「清仓期」</span>
             </td>
@@ -1134,7 +1136,7 @@
               通常不升级<br />
               <span class="text-slate-500">（除非降价后意外爆单）</span>
             </td>
-            <td class="px-3 py-2 border border-slate-200 text-red-700">
+            <td class="px-3 py-2 border border-slate-200 npi-status-fail">
               库龄&gt;270天 → 移除<br />
               <span class="text-slate-500">→ 归档关闭</span>
             </td>
@@ -1149,7 +1151,7 @@
   <!-- ==================== 新增：广告阶段配置速查 ==================== -->
   <div class="ui-card p-6 mb-6">
     <h2 class="ui-card__title text-lg font-bold mb-4 flex items-center gap-2">
-      <i class="fas fa-bullhorn text-amber-500"></i>广告阶段配置速查（欧洲站实战参数）
+      <i class="fas fa-bullhorn npi-status-pending"></i>广告阶段配置速查（欧洲站实战参数）
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div class="border border-primary-100 rounded-lg p-4 bg-primary-100/20">
@@ -1167,15 +1169,15 @@
             <span>竞价策略</span><span class="font-mono">建议价×0.8</span>
           </div>
           <div class="flex justify-between">
-            <span>ACOS容忍度</span><span class="font-mono text-amber-600">&lt;60%</span>
+            <span>ACOS容忍度</span><span class="font-mono npi-status-pending">&lt;60%</span>
           </div>
           <div class="flex justify-between">
             <span>目标</span><span class="font-bold text-primary-600">收集搜索词</span>
           </div>
         </div>
       </div>
-      <div class="border border-emerald-200 rounded-lg p-4 bg-emerald-50/20">
-        <h4 class="font-bold text-emerald-700 text-sm mb-3 flex items-center gap-1">
+      <div class="border npi-status-done rounded-lg p-4 npi-status-done-subtle">
+        <h4 class="font-bold npi-status-done text-sm mb-3 flex items-center gap-1">
           <span class="stage-badge stage-growth text-[10px]">成长期</span>广告
         </h4>
         <div class="space-y-2 text-xs text-slate-700">
@@ -1189,15 +1191,15 @@
             <span>竞价策略</span><span class="font-mono">出单词+10%</span>
           </div>
           <div class="flex justify-between">
-            <span>ACOS容忍度</span><span class="font-mono text-amber-600">&lt;40%</span>
+            <span>ACOS容忍度</span><span class="font-mono npi-status-pending">&lt;40%</span>
           </div>
           <div class="flex justify-between">
-            <span>目标</span><span class="font-bold text-emerald-600">推排名+出单</span>
+            <span>目标</span><span class="font-bold npi-status-done">推排名+出单</span>
           </div>
         </div>
       </div>
-      <div class="border border-purple-200 rounded-lg p-4 bg-purple-50/20">
-        <h4 class="font-bold text-purple-700 text-sm mb-3 flex items-center gap-1">
+      <div class="border npi-status-todo rounded-lg p-4 npi-status-todo-subtle">
+        <h4 class="font-bold npi-status-todo text-sm mb-3 flex items-center gap-1">
           <span class="stage-badge stage-stable text-[10px]">稳定期</span>广告
         </h4>
         <div class="space-y-2 text-xs text-slate-700">
@@ -1211,20 +1213,20 @@
             <span>竞价策略</span><span class="font-mono">逐步降低</span>
           </div>
           <div class="flex justify-between">
-            <span>ACOS容忍度</span><span class="font-mono text-emerald-600">&lt;25%</span>
+            <span>ACOS容忍度</span><span class="font-mono npi-status-done">&lt;25%</span>
           </div>
           <div class="flex justify-between">
-            <span>目标</span><span class="font-bold text-purple-600">防御+利润</span>
+            <span>目标</span><span class="font-bold npi-status-todo">防御+利润</span>
           </div>
         </div>
       </div>
-      <div class="border border-red-200 rounded-lg p-4 bg-red-50/20">
-        <h4 class="font-bold text-red-700 text-sm mb-3 flex items-center gap-1">
+      <div class="border npi-status-fail rounded-lg p-4 npi-status-fail-subtle">
+        <h4 class="font-bold npi-status-fail text-sm mb-3 flex items-center gap-1">
           <span class="stage-badge stage-clearance text-[10px]">清仓期</span>广告
         </h4>
         <div class="space-y-2 text-xs text-slate-700">
           <div class="flex justify-between">
-            <span>广告类型</span><span class="font-mono font-bold text-red-600">全部暂停</span>
+            <span>广告类型</span><span class="font-mono font-bold npi-status-fail">全部暂停</span>
           </div>
           <div class="flex justify-between">
             <span>日预算</span><span class="font-mono font-bold">€0</span>
@@ -1236,7 +1238,7 @@
             <span>ACOS容忍度</span><span class="font-mono">—</span>
           </div>
           <div class="flex justify-between">
-            <span>目标</span><span class="font-bold text-red-600">零广告费清库存</span>
+            <span>目标</span><span class="font-bold npi-status-fail">零广告费清库存</span>
           </div>
         </div>
       </div>
@@ -1257,50 +1259,57 @@
         >
         <span class="flex items-center gap-1"
           ><span
-            class="inline-block w-3 h-3 bg-emerald-100 rounded border border-emerald-300"
+            class="inline-block w-3 h-3 npi-status-done-soft rounded border npi-status-done"
           ></span
           >成长期</span
         >
         <span class="flex items-center gap-1"
-          ><span class="inline-block w-3 h-3 bg-purple-100 rounded border border-purple-300"></span
+          ><span
+            class="inline-block w-3 h-3 npi-status-todo-soft rounded border npi-status-todo"
+          ></span
           >稳定期</span
         >
         <span class="flex items-center gap-1"
-          ><span class="inline-block w-3 h-3 bg-red-100 rounded border border-red-300"></span
+          ><span
+            class="inline-block w-3 h-3 npi-status-fail-soft rounded border npi-status-fail"
+          ></span
           >清仓期</span
         >
       </div>
       <div class="mt-3 pt-3 border-t border-slate-100">
         <p class="text-xs text-slate-500 mb-1"><strong>决策栏图标：</strong></p>
         <div class="flex items-center gap-4 text-xs">
-          <span><span class="text-emerald-600 font-bold">✓</span> = 保留推进</span>
-          <span><span class="text-amber-500 font-bold">△</span> = 观察中</span>
-          <span><span class="text-red-600 font-bold">✗</span> = 放弃清仓</span>
+          <span><span class="npi-status-done font-bold">✓</span> = 保留推进</span>
+          <span><span class="npi-status-pending font-bold">△</span> = 观察中</span>
+          <span><span class="npi-status-fail font-bold">✗</span> = 放弃清仓</span>
         </div>
       </div>
     </div>
-    <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
-      <h3 class="font-bold text-amber-800 mb-2 flex items-center gap-2">
+    <div class="npi-status-pending-soft rounded-xl border npi-status-pending p-4">
+      <h3 class="font-bold npi-status-pending mb-2 flex items-center gap-2">
         <i class="fas fa-exclamation-triangle"></i>预警规则
       </h3>
       <div class="text-xs text-slate-700 space-y-1">
-        <p><span class="text-red-600 font-bold">库存&gt;60天</span> = 滞销预警，考虑降价或清仓</p>
         <p>
-          <span class="text-amber-600 font-bold">CTR&lt;0.5%</span> = 点击预警，需优化主图或标题
+          <span class="npi-status-fail font-bold">库存&gt;60天</span> = 滞销预警，考虑降价或清仓
         </p>
         <p>
-          <span class="text-red-600 font-bold">售价&lt;利润表止损价</span> =
+          <span class="npi-status-pending font-bold">CTR&lt;0.5%</span> = 点击预警，需优化主图或标题
+        </p>
+        <p>
+          <span class="npi-status-fail font-bold">售价&lt;利润表止损价</span> =
           财务预警，当前定价需负责人复核
         </p>
         <p>
-          <span class="text-red-600 font-bold">合规状态 &lt; 5/5</span> = 合规未完成，暂缓广告投放
+          <span class="npi-status-fail font-bold">合规状态 &lt; 5/5</span> =
+          合规未完成，暂缓广告投放
         </p>
         <p>
-          <span class="text-amber-600 font-bold">配送占比&gt;45%</span> =
+          <span class="npi-status-pending font-bold">配送占比&gt;45%</span> =
           配送费过高，检查包装尺寸是否可优化
         </p>
         <p>
-          <span class="text-red-600 font-bold">ACOS&gt;60%持续2周</span> =
+          <span class="npi-status-fail font-bold">ACOS&gt;60%持续2周</span> =
           广告效率预警，需立即优化或暂停
         </p>
       </div>
@@ -1425,7 +1434,7 @@
             <td class="px-3 py-2 border border-slate-200 text-slate-600">
               总投入（货+头程+广告费）/ 总收入 / 净利润或亏损
             </td>
-            <td class="px-3 py-2 border border-slate-200 text-red-600 font-mono">
+            <td class="px-3 py-2 border border-slate-200 npi-status-fail font-mono">
               投入€1,850 / 收入€1,220 / 亏损€630
             </td>
           </tr>
