@@ -44,18 +44,9 @@
      ======================================== */
   --color-white: #ffffff;
   --color-black: #000000;
-  --color-white-alpha-5: rgba(255, 255, 255, 0.05);
-  --color-white-alpha-10: rgba(255, 255, 255, 0.1);
-  --color-white-alpha-20: rgba(255, 255, 255, 0.2);
-  --color-white-alpha-40: rgba(255, 255, 255, 0.4);
-  --color-white-alpha-60: rgba(255, 255, 255, 0.6);
-  --color-white-alpha-80: rgba(255, 255, 255, 0.8);
   --color-black-alpha-5: rgba(0, 0, 0, 0.05);
   --color-black-alpha-10: rgba(0, 0, 0, 0.1);
   --color-black-alpha-20: rgba(0, 0, 0, 0.2);
-  --color-black-alpha-40: rgba(0, 0, 0, 0.4);
-  --color-black-alpha-60: rgba(0, 0, 0, 0.6);
-  --color-black-alpha-80: rgba(0, 0, 0, 0.8);
 
   /* ========================================
      3. 色彩系统 — 语义令牌
@@ -63,8 +54,6 @@
      ======================================== */
 
   --color-primary-contrast: #ffffff; /* 主色上的文字色 */
-
-  --color-secondary-contrast: #ffffff;
 
   /* ---- 强调色 (Accent) ---- */
 
@@ -74,16 +63,13 @@
   --color-text-tertiary: var(--color-slate-400);
   --color-text-placeholder: var(--color-slate-400);
   --color-text-disabled: var(--color-slate-300);
-  --color-text-inverse: #ffffff;
   --color-text-link: var(--color-primary);
-  --color-text-link-hover: var(--color-primary-dark);
 
   /* ---- 背景 ---- */
   --color-bg-primary: #ffffff;
   --color-bg-secondary: var(--color-slate-50);
   --color-bg-tertiary: var(--color-slate-100);
   --color-bg-elevated: #ffffff;
-  --color-bg-sunken: var(--color-slate-100);
   --color-bg-hover: rgba(0, 0, 0, 0.04);
   --color-bg-active: rgba(0, 0, 0, 0.08);
   --color-bg-selected: var(--color-primary-light);
@@ -98,12 +84,10 @@
   --surface-card-hover: var(--color-slate-50);
 
   /* ---- 边框 ---- */
-  --color-border-lightest: rgba(0, 0, 0, 0.03);
   --color-border-light: rgba(0, 0, 0, 0.06);
   --color-border-default: rgba(0, 0, 0, 0.1);
   --color-border-strong: rgba(0, 0, 0, 0.16);
   --color-border-focus: var(--color-primary);
-  --color-border-error: var(--color-red-500);
   --border-subtle: rgba(148, 163, 184, 0.24);
   --border-muted: rgba(203, 213, 225, 0.72);
 
@@ -126,7 +110,6 @@
 
   --color-info-light: rgba(59, 130, 246, 0.1);
   --color-info-dark: var(--color-blue-600);
-  --color-info-contrast: #ffffff;
 
   /* ========================================
      4. 间距系统
@@ -142,8 +125,6 @@
   --spacing-xl: 2rem; /* 32px */
   --spacing-2xl: 3rem; /* 48px */
   --spacing-3xl: 4rem; /* 64px */
-  --spacing-4xl: 6rem; /* 96px */
-  --spacing-5xl: 8rem; /* 128px */
 
   /* ========================================
      5. 布局尺寸
@@ -213,26 +194,17 @@
 
   /* 内阴影 */
   --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-inner-lg: inset 0 4px 8px rgba(0, 0, 0, 0.06);
 
   /* 彩色阴影 (主色投影) — follows --color-primary for Appearance */
   --shadow-primary-sm: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
   --shadow-primary-md: 0 4px 14px color-mix(in srgb, var(--color-primary) 20%, transparent);
-  --shadow-primary-lg: 0 8px 25px color-mix(in srgb, var(--color-primary) 25%, transparent);
 
   /* 上方阴影 */
-  --shadow-up-sm: 0 -1px 3px rgba(0, 0, 0, 0.06), 0 -1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-up-md: 0 -4px 6px -1px rgba(0, 0, 0, 0.07), 0 -2px 4px -1px rgba(0, 0, 0, 0.04);
 
   /* ========================================
      8. 边框
      ======================================== */
-  --border-width-none: 0;
   --border-width-thin: 1px;
-  --border-width-default: 1px;
-  --border-width-medium: 1.5px;
-  --border-width-thick: 2px;
-  --border-width-heavy: 3px;
 
   /* 预设边框（--border-light 为纯色 token，由 generated 输出，不再手写简写） */
   --border-default: var(--border-width-thin) solid var(--color-border-default);
@@ -241,29 +213,8 @@
   /* ========================================
      9. 透明度
      ======================================== */
-  --opacity-0: 0;
-  --opacity-5: 0.05;
-  --opacity-10: 0.1;
-  --opacity-20: 0.2;
-  --opacity-25: 0.25;
-  --opacity-30: 0.3;
-  --opacity-40: 0.4;
-  --opacity-50: 0.5;
-  --opacity-60: 0.6;
-  --opacity-70: 0.7;
-  --opacity-75: 0.75;
-  --opacity-80: 0.8;
-  --opacity-90: 0.9;
-  --opacity-95: 0.95;
-  --opacity-100: 1;
 
   /* 语义化透明度 */
-  --opacity-disabled: 0.5;
-  --opacity-placeholder: 0.5;
-  --opacity-overlay: 0.5;
-  --opacity-backdrop: 0.4;
-  --opacity-hover: 0.85;
-  --opacity-loading: 0.6;
 
   /* ========================================
      10. Z-index 层级
@@ -302,7 +253,6 @@
   /* ========================================
      12. 动画时长
      ======================================== */
-  --duration-0: 0ms;
   --duration-fastest: 100ms;
   --duration-fast: 200ms;
   --duration-normal: 300ms;
@@ -325,52 +275,23 @@
   /* ========================================
      13. 模糊 & 滤镜
      ======================================== */
-  --blur-none: 0;
-  --blur-sm: 4px;
-  --blur-md: 8px;
-  --blur-lg: 12px;
-  --blur-xl: 16px;
-  --blur-2xl: 24px;
-  --blur-3xl: 40px;
 
   /* 背景模糊预设 */
   --backdrop-blur: blur(var(--blur-lg)) saturate(1.8);
-  --backdrop-blur-sm: blur(var(--blur-sm));
-  --backdrop-blur-lg: blur(var(--blur-xl)) saturate(2);
 
   /* 灰度 */
-  --grayscale-none: grayscale(0);
-  --grayscale-half: grayscale(0.5);
-  --grayscale-full: grayscale(1);
 
   /* ========================================
      14. 渐变预设
      ======================================== */
   --gradient-primary: linear-gradient(135deg, var(--color-blue-500), var(--color-indigo-500));
-  --gradient-secondary: linear-gradient(135deg, var(--color-slate-500), var(--color-slate-700));
   --gradient-success: linear-gradient(135deg, var(--color-green-400), var(--color-teal-500));
-  --gradient-warning: linear-gradient(135deg, var(--color-amber-400), var(--color-orange-500));
-  --gradient-danger: linear-gradient(135deg, var(--color-red-400), var(--color-rose-500));
-  --gradient-info: linear-gradient(135deg, var(--color-cyan-400), var(--color-blue-500));
 
-  /* 装饰性渐变 */
-  --gradient-rainbow: linear-gradient(
-    90deg,
-    #3b82f6 0%,
-    #8b5cf6 25%,
-    #ec4899 50%,
-    #f59e0b 75%,
-    #10b981 100%
-  );
+  /* 装饰性渐变（--gradient-rainbow 已归档；primary/success/sunset/ocean 保留为显式契约） */
   --gradient-sunset: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
   --gradient-ocean: linear-gradient(135deg, #06b6d4, #3b82f6, #8b5cf6);
-  --gradient-forest: linear-gradient(135deg, #22c55e, #14b8a6, #06b6d4);
 
-  /* 玻璃效果背景 */
-  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-
-  /* 文字渐变 */
-  --gradient-text: linear-gradient(135deg, var(--color-blue-500), var(--color-purple-600));
+  /* 玻璃效果背景 / 文字渐变：对应 --gradient-glass / --gradient-text 已归档 */
 
   /* ========================================
      15. 滚动条
@@ -399,11 +320,6 @@
      17. 断点参考值
      仅供 JS 或 calc() 参考，CSS media query 仍需硬编码
      ======================================== */
-  --breakpoint-sm: 640px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
-  --breakpoint-2xl: 1536px;
 
   /* ========================================
      18. 微交互动画变换值
@@ -433,8 +349,6 @@
   --layout-wide-width: 1600px;
   --page-gutter: var(--container-padding-x-lg, 24px);
   --page-gutter-wide: var(--spacing-xl, 32px);
-  --page-content-max-width: var(--layout-max-width);
-  --page-content-wide-width: var(--layout-wide-width);
 
   /* ---- 组件视觉 ---- */
   --card-bg: var(--surface-card);
@@ -511,14 +425,12 @@
   --color-text-tertiary: var(--color-slate-400);
   --color-text-placeholder: var(--color-slate-500);
   --color-text-disabled: var(--color-slate-600);
-  --color-text-inverse: var(--color-slate-900);
 
   /* ---- 背景 ---- */
   --color-bg-primary: var(--color-slate-900);
   --color-bg-secondary: var(--color-slate-800);
   --color-bg-tertiary: rgba(255, 255, 255, 0.06);
   --color-bg-elevated: var(--color-slate-800);
-  --color-bg-sunken: var(--color-slate-950);
   --color-bg-hover: rgba(255, 255, 255, 0.06);
   --color-bg-active: rgba(255, 255, 255, 0.1);
   --color-bg-disabled: rgba(255, 255, 255, 0.04);
@@ -533,11 +445,9 @@
   --surface-card-hover: var(--color-slate-700);
 
   /* ---- 边框 ---- */
-  --color-border-lightest: rgba(255, 255, 255, 0.03);
   --color-border-light: rgba(255, 255, 255, 0.06);
   --color-border-default: rgba(255, 255, 255, 0.1);
   --color-border-strong: rgba(255, 255, 255, 0.16);
-  --color-border-error: var(--color-red-400);
   --border-subtle: rgba(148, 163, 184, 0.18);
   --border-muted: rgba(148, 163, 184, 0.22);
 
@@ -573,14 +483,9 @@
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 
   --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.15);
-  --shadow-inner-lg: inset 0 4px 8px rgba(0, 0, 0, 0.2);
 
   --shadow-primary-sm: 0 2px 8px color-mix(in srgb, var(--color-primary) 20%, transparent);
   --shadow-primary-md: 0 4px 14px color-mix(in srgb, var(--color-primary) 25%, transparent);
-  --shadow-primary-lg: 0 8px 25px color-mix(in srgb, var(--color-primary) 30%, transparent);
-
-  --shadow-up-sm: 0 -1px 3px rgba(0, 0, 0, 0.3), 0 -1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-up-md: 0 -4px 6px -1px rgba(0, 0, 0, 0.35), 0 -2px 4px -1px rgba(0, 0, 0, 0.2);
 
   /* ---- 软色 wash ---- */
   --wash-blue: color-mix(in srgb, var(--color-blue-400) 12%, var(--surface-card));
@@ -596,8 +501,7 @@
   --scrollbar-thumb: rgba(255, 255, 255, 0.15);
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
 
-  /* ---- 玻璃渐变 ---- */
-  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  /* ---- 玻璃渐变（--gradient-glass dark 覆盖已归档） ---- */
 
   /* ---- 焦点环阴影 (暗色 bg 适配) ---- */
   --focus-ring-shadow:
