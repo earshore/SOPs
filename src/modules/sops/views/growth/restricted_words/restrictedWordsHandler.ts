@@ -100,14 +100,14 @@ function appendAffectedSites(container: Element, sites: string[]): void {
   sites.slice(0, maxDisplay).forEach(site => {
     const span = document.createElement('span');
     span.className =
-      'px-1.5 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[10px]';
+      'px-1.5 py-0.5 sops-neutral-surface-raised sops-neutral-text-muted border sops-neutral-divider rounded text-[10px]';
     span.textContent = site;
     container.appendChild(span);
   });
 
   if (sites.length > maxDisplay) {
     const more = document.createElement('span');
-    more.className = 'text-[10px] text-slate-400 flex items-center';
+    more.className = 'text-[10px] sops-neutral-text-faint flex items-center';
     more.textContent = `+${sites.length - maxDisplay}`;
     container.appendChild(more);
   }
@@ -389,13 +389,13 @@ function renderEmptyResults(tbody: HTMLElement): void {
     tbody,
     `
         <tr>
-            <td colspan="6" class="text-center py-12 px-6 text-slate-500">
+            <td colspan="6" class="text-center py-12 px-6 sops-neutral-text-muted">
                 <div class="flex flex-col items-center" role="status" aria-live="polite">
-                    <i class="fas fa-search text-4xl mb-3 text-slate-300"></i>
-                    <p class="text-sm font-semibold text-slate-600">没有找到相关高危词条</p>
-                    <p class="mt-2 text-sm text-slate-500">当前关键词、风险等级、站点或搜索模式组合没有命中词库。</p>
-                    <p class="mt-2 text-xs text-slate-500">推荐操作：清除部分筛选条件，或切换到模糊搜索后重试。</p>
-                    <p class="mt-1 text-xs text-slate-400">使用正则搜索时，请先确认表达式完整且可解析。</p>
+                    <i class="fas fa-search text-4xl mb-3 sops-neutral-text-faint"></i>
+                    <p class="text-sm font-semibold sops-neutral-text-muted">没有找到相关高危词条</p>
+                    <p class="mt-2 text-sm sops-neutral-text-muted">当前关键词、风险等级、站点或搜索模式组合没有命中词库。</p>
+                    <p class="mt-2 text-xs sops-neutral-text-muted">推荐操作：清除部分筛选条件，或切换到模糊搜索后重试。</p>
+                    <p class="mt-1 text-xs sops-neutral-text-faint">使用正则搜索时，请先确认表达式完整且可解析。</p>
                 </div>
             </td>
         </tr>
@@ -427,11 +427,11 @@ function createKeywordCell(word: RestrictedWord): HTMLTableCellElement {
   keywordTd.className = 'px-4 py-3 align-top';
 
   const keywordDiv = document.createElement('div');
-  keywordDiv.className = 'font-bold text-slate-800 text-base mb-0.5 break-all';
+  keywordDiv.className = 'font-bold sops-neutral-text-strong text-base mb-0.5 break-all';
   keywordDiv.textContent = displayKeyword;
 
   const subDiv = document.createElement('div');
-  subDiv.className = 'text-xs text-slate-500 line-clamp-2';
+  subDiv.className = 'text-xs sops-neutral-text-muted line-clamp-2';
   subDiv.textContent = subDisplay || '-';
 
   keywordTd.appendChild(keywordDiv);
@@ -452,7 +452,7 @@ function createCategoryCell(word: RestrictedWord): HTMLTableCellElement {
 
   if (word.subCategory) {
     const subCatDiv = document.createElement('div');
-    subCatDiv.className = 'text-[10px] text-slate-400 mt-1 pl-1';
+    subCatDiv.className = 'text-[10px] sops-neutral-text-faint mt-1 pl-1';
     subCatDiv.textContent = word.subCategory;
     categoryTd.appendChild(subCatDiv);
   }
@@ -495,7 +495,7 @@ function createSitesCell(word: RestrictedWord): HTMLTableCellElement {
 
 function createProductsCell(word: RestrictedWord): HTMLTableCellElement {
   const productsTd = document.createElement('td');
-  productsTd.className = 'px-4 py-3 align-top text-xs text-slate-600';
+  productsTd.className = 'px-4 py-3 align-top text-xs sops-neutral-text-muted';
   const productsDiv = document.createElement('div');
   productsDiv.className = 'line-clamp-2';
   productsDiv.textContent = word.commonProducts.join(', ');
@@ -519,7 +519,7 @@ function createActionCell(word: RestrictedWord): HTMLTableCellElement {
 
 function createResultRow(word: RestrictedWord): HTMLTableRowElement {
   const tr = document.createElement('tr');
-  tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition-colors';
+  tr.className = 'hover:sops-neutral-surface border-b sops-neutral-divider-soft transition-colors';
   tr.appendChild(createKeywordCell(word));
   tr.appendChild(createCategoryCell(word));
   tr.appendChild(createRiskCell(word));
@@ -573,12 +573,12 @@ function createWordDetailHeader(
 
   const infoDiv = document.createElement('div');
   const h3 = document.createElement('h3');
-  h3.className = 'text-xl font-bold text-slate-800 flex items-center gap-3';
+  h3.className = 'text-xl font-bold sops-neutral-text-strong flex items-center gap-3';
   h3.textContent = word.keyword;
   h3.appendChild(
     createDetailBadge(
       `ID: ${word.id}`,
-      'text-xs font-normal text-slate-400 border border-slate-200 rounded px-1.5 py-0.5'
+      'text-xs font-normal sops-neutral-text-faint border sops-neutral-divider rounded px-1.5 py-0.5'
     )
   );
 
@@ -606,10 +606,10 @@ function createWordDetailHeader(
 
 function createLocalizedKeywordsSection(word: RestrictedWord): HTMLDivElement {
   const localizedDiv = document.createElement('div');
-  localizedDiv.className = 'bg-slate-50 p-4 rounded-lg border border-slate-100';
+  localizedDiv.className = 'sops-neutral-surface p-4 rounded-lg border sops-neutral-divider-soft';
 
   const localizedTitle = document.createElement('h4');
-  localizedTitle.className = 'text-xs font-bold text-slate-500 uppercase mb-2';
+  localizedTitle.className = 'text-xs font-bold sops-neutral-text-muted uppercase mb-2';
   localizedTitle.textContent = '站点本地化写法';
   localizedDiv.appendChild(localizedTitle);
 
@@ -618,14 +618,16 @@ function createLocalizedKeywordsSection(word: RestrictedWord): HTMLDivElement {
   const localizedEntries = Object.entries(word.localizedKeywords || {});
 
   if (localizedEntries.length === 0) {
-    localizedContent.appendChild(createDetailBadge('无特定本地化差异', 'text-slate-400 text-sm'));
+    localizedContent.appendChild(
+      createDetailBadge('无特定本地化差异', 'sops-neutral-text-faint text-sm')
+    );
   }
 
   localizedEntries.forEach(([site, localKw]) => {
     const entryDiv = document.createElement('div');
     entryDiv.className = 'flex justify-between text-sm';
-    entryDiv.appendChild(createDetailBadge(`${site}:`, 'font-medium text-slate-600'));
-    entryDiv.appendChild(createDetailBadge(String(localKw), 'text-slate-800 font-bold'));
+    entryDiv.appendChild(createDetailBadge(`${site}:`, 'font-medium sops-neutral-text-muted'));
+    entryDiv.appendChild(createDetailBadge(String(localKw), 'sops-neutral-text-strong font-bold'));
     localizedContent.appendChild(entryDiv);
   });
 
@@ -635,15 +637,15 @@ function createLocalizedKeywordsSection(word: RestrictedWord): HTMLDivElement {
 
 function createVariantsSection(word: RestrictedWord): HTMLDivElement {
   const variantsDiv = document.createElement('div');
-  variantsDiv.className = 'bg-slate-50 p-4 rounded-lg border border-slate-100';
+  variantsDiv.className = 'sops-neutral-surface p-4 rounded-lg border sops-neutral-divider-soft';
 
   const variantsTitle = document.createElement('h4');
-  variantsTitle.className = 'text-xs font-bold text-slate-500 uppercase mb-2';
+  variantsTitle.className = 'text-xs font-bold sops-neutral-text-muted uppercase mb-2';
   variantsTitle.textContent = '其他搜索变体';
   variantsDiv.appendChild(variantsTitle);
 
   const variantsP = document.createElement('p');
-  variantsP.className = 'text-sm text-slate-800 font-mono leading-relaxed';
+  variantsP.className = 'text-sm sops-neutral-text-strong font-mono leading-relaxed';
   variantsP.textContent = word.variants.length ? word.variants.join(', ') : '无';
   variantsDiv.appendChild(variantsP);
   return variantsDiv;
@@ -687,7 +689,7 @@ function createRiskDescriptionSection(word: RestrictedWord): HTMLDivElement {
 function createAlternativesSection(word: RestrictedWord): HTMLDivElement {
   const alternativesDiv = document.createElement('div');
   const altTitle = document.createElement('h4');
-  altTitle.className = 'font-bold text-slate-800 mb-3 flex items-center gap-2';
+  altTitle.className = 'font-bold sops-neutral-text-strong mb-3 flex items-center gap-2';
   appendIcon(altTitle, 'fas fa-check-circle text-green-500');
   altTitle.appendChild(document.createTextNode(' 安全替代方案'));
   alternativesDiv.appendChild(altTitle);
@@ -709,7 +711,7 @@ function createAlternativesSection(word: RestrictedWord): HTMLDivElement {
 function createProductsSection(word: RestrictedWord): HTMLDivElement {
   const productsDiv = document.createElement('div');
   const prodTitle = document.createElement('h4');
-  prodTitle.className = 'font-bold text-slate-800 mb-3 flex items-center gap-2';
+  prodTitle.className = 'font-bold sops-neutral-text-strong mb-3 flex items-center gap-2';
   appendIcon(prodTitle, 'fas fa-bullseye text-primary-500');
   prodTitle.appendChild(document.createTextNode(' 常见触雷场景'));
   productsDiv.appendChild(prodTitle);
@@ -720,7 +722,7 @@ function createProductsSection(word: RestrictedWord): HTMLDivElement {
     prodContainer.appendChild(
       createDetailBadge(
         prod,
-        'px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-xs border border-slate-200'
+        'px-2.5 py-1 sops-neutral-surface-raised sops-neutral-text-muted rounded-full text-xs border sops-neutral-divider'
       )
     );
   });

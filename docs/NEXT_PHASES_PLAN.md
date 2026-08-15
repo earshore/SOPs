@@ -28,9 +28,9 @@ settings-control CSS 契约全量 token 化：systemSettings.css 根 token 块�
 
 generated token 被手写 variables 覆盖 20 处（D1 类），逐个裁决：覆盖方 token 化 or 生成方扩容。需先按文件族摸底裁决表，再分批迁移，模式同 TD-THM-02。。**执行结论（`fd4463d0`）**：审计摸底确认 20 处 atomic 冲突全部为产品 intentional override（easing 1 / radius 6 / shadow 7 / z-index 7），已在 `config/token-atomic-override-allowlist.json` 登记理由，统一迁移时机为 workbench migration，故裁决全部保留；同步清理 9 处与 generated 值完全相同的语义色冗余声明（identical 9→0），收敛实绩见 `THM01_CONVERGENCE.md`。。**执行结论（`fd4463d0`）**：审计摸底确认 20 处 atomic 冲突全部为产品 intentional override（easing 1 / radius 6 / shadow 7 / z-index 7），已在 `config/token-atomic-override-allowlist.json` 登记理由，统一迁移时机为 workbench migration，故裁决全部保留；同步清理 9 处与 generated 值完全相同的语义色冗余声明（identical 9→0），收敛实绩见 `THM01_CONVERGENCE.md`。
 
-### 次序 13：slate 结构性灰调统一化（TD-SOP-NPI-02 候选，独立立项，3-4 工作日）
+### 次序 13：slate 结构性灰调统一化（**已立项**，`SOP02_SLATE_TOKEN_PLAN.md`，2026-08-15）
 
-template/index.ts 约 180 处 slate 结构性灰调（hover 行、边框、分隔）留在 semantic lane baseline 内，属结构性灰调而非状态语义色，TD-CMP-02 4B 明确划界未覆盖。可复用 `-subtle` 族的 color-mix 模式建立 `--sops-neutral-*` 契约，按同样分批纪律推进。
+立项摸底修正旧口径（约 180 处）：实测全 sops 模块 slate 族 **2,048 处 / 21 文件**（19 个 template.html + restrictedWordsHandler.ts 45 + index.ts ×2），全部在 semantic lane baseline 4087 内。专项方案：`--sops-neutral-*` 五档契约族（divider/surface/text/text-muted/text-faint + dark 翻转）在 sops_style.css 建立，按 file-group 分 4 批迁移（批 1 契约+ppc_advertising/restricted_words ≈430 处起步，批 2 service 组 ≈620，批 3 剩余 9 文件 ≈700 分两小批，批 4 TS 端收尾 ≈57）。甄别规则：纯结构性上下文迁移至 token，承担状态语义的 slate 用法甄别保留记表。每批独立验证提交（ci:quality + build + smoke + baseline 刷新双锁）；门禁兼容（只降不升方向，模式复用 CMP-02 4B（-195 零回退实证）。**批 1 已完成（2026-08-15）**：契约族 + growth 最大文件组迁移 450 处（ppc_advertising 237 清零、restricted_words 192 + handler 21），semantic baseline 4087→3600（-487），验收全绿（ci:quality 20 项 / build / smoke 90/93，3 例失败为 NPI pixel 断言的 chromium-only 基线既有缺陷，非回归，归后续路线）。
 
 ## 三、门禁体系后续动作
 
@@ -39,7 +39,7 @@ template/index.ts 约 180 处 slate 结构性灰调（hover 行、边框、分�
 | TD-THM-02 降级 P3      | 次序 10 完成后更新看板与路线                                                                                  |
 | TD-CMP-02 降级 P3      | 次序 11 体系 A 闭环（`4265966d`）已满足触发条件，看板同步更新为“体系 A 闭环”；是否执行 P2→P3 降级由产品侧确认 |
 | 自动化发布流水线回归   | GitHub Actions 月度限额恢复后（v3.1.1-rc.3 为手动发布）                                                       |
-| semantic lane 扩容评审 | 次序 13 slate 专项立项时一并评审（当前只降不升锁 4087）                                                       |
+| semantic lane 扩容评审 | 次序 13 已立项（2026-08-15）；每批迁移后刷新 baseline 保持双锁，专项收官时评审 slate 族是否继续保留于锁 lane  |
 
 ## 四、风险与纪律
 

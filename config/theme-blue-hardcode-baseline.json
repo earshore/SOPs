@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-08-15T01:26:08.893Z",
+  "updatedAt": "2026-08-15T05:16:33.384Z",
   "shell": {
     "total": 24,
     "filesScanned": 71,
@@ -46,16 +46,16 @@
     }
   },
   "semantic": {
-    "total": 4087,
+    "total": 3600,
     "filesScanned": 52,
     "filesWithHits": 23,
     "files": {
-      "src/modules/sops/views/growth/restricted_words/template.html": 482,
       "src/modules/sops/views/service/email_templates/template.html": 476,
-      "src/modules/sops/views/growth/ppc_advertising/template.html": 463,
       "src/modules/sops/views/service/negative_review/template.html": 348,
       "src/modules/sops/views/service/qa_maintenance/template.html": 322,
+      "src/modules/sops/views/growth/restricted_words/template.html": 266,
       "src/modules/sops/views/growth/promotion_submission/template.html": 228,
+      "src/modules/sops/views/growth/ppc_advertising/template.html": 226,
       "src/modules/sops/views/growth/listing_seo/template.html": 209,
       "src/modules/sops/views/safety/product_compliance/template.html": 185,
       "src/modules/sops/views/growth/npi_tracker/template.html": 173,
@@ -69,7 +69,7 @@
       "src/modules/sops/views/backend/procurement_qc/template.html": 91,
       "src/modules/sops/views/safety/performance_notification/template.html": 74,
       "src/modules/sops/views/overview/template.html": 63,
-      "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 45,
+      "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 11,
       "src/modules/sops/sops_style.css": 10,
       "src/modules/sops/views/growth/npi_tracker/index.ts": 6,
       "src/modules/sops/views/growth/promotion_submission/index.ts": 6
