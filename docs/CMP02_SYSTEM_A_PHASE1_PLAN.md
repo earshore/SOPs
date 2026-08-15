@@ -8,9 +8,9 @@
 
 | 层面                      | 残留内容                                                                                      | 规模    | 状态                             |
 | ------------------------- | --------------------------------------------------------------------------------------------- | ------- | -------------------------------- |
-| CSS 选择器残留            | `llmSection.css` 2 处、`networkSection.css` 3 处                                              | 5 处    | 待迁移/合并                      |
-| systemSettings.css 自建值 | `.settings-control` box-shadow 内联值、transition 时间常量、select 的 `padding-right: 2.5rem` | 约 5 处 | 待 token 化或裁决保留            |
-| sections CSS 非 token 值  | appearance 36 / data 48 / diagnostics 78 / llm 76 / network 76 / toolStrategy 78              | 392 处  | 需甄别 settings-control 相关部分 |
+| CSS 选择器残留 | `llmSection.css` 2 处、`networkSection.css` 3 处 | 5 处 | **已甄别**：均为 height/font-size/line-height 布局契约，非自建值，保留 |
+| systemSettings.css 自建值 | `.settings-control` box-shadow 内联值、transition 时间常量、select 的 `padding-right: 2.5rem` | 约 5 处 | **已闭环（批 1-1）**：box-shadow/transition 下沉为登记 token；select padding 裁决保留 |
+| sections CSS 非 token 值 | appearance 36 / data 48 / diagnostics 78 / llm 76 / network 76 / toolStrategy 78 | 392 处 | **已甄别**（批 1-2）：见 §6，非 settings-control 契约 |
 | HTML 类消费               | sections html + systemSettings.html 共 95 处                                                  | 95 处   | DOM 契约不变，保留类名           |
 
 其中 HTML 消费与 CSS 选择器属「DOM 契约层」，按批次 3 既定模式（类名保留、语义下沉）不做重构；第一阶段聚焦 CSS 侧的自建值收敛与选择器合并。
@@ -30,10 +30,8 @@
 
 | 批次           | 范围                                                                | 预估   | 说明                            |
 | -------------- | ------------------------------------------------------------------- | ------ | ------------------------------- |
-| 批 1-1（本批） | systemSettings.css 自建值收敛                                       | 0.5 天 | 单一登记点闭合                  |
-| 批 1-2         | sections CSS 第一组：appearance + data（84 处非 token 值）          | 1-2 天 | 最浅组，建立 section 级迁移模板 |
-| 批 1-3         | sections CSS 第二组：llm + network（152 处，含 5 处残留选择器收口） | 1-2 天 | 选择器合并在此完成              |
-| 批 1-4         | sections CSS 第三组：diagnostics + toolStrategy（156 处）收官       | 1-2 天 | 全组清零                        |
+| 批 1-1 | systemSettings.css 自建值收敛 + toolStrategySection 残留收敛 | **已完成（`4265966d`，2026-08-15）** | 单一登记点闭合 |
+| 批 1-2 | sections CSS 甄别（appearance/data 无 settings-control 契约，非 token 值属布局契约） | **已完成甄别（2026-08-15）** | 见 §6 契约闭环裁决 |
 
 每批纪律不变：独立 commit、`ci:quality + build + smoke` 全绿后推送。
 
@@ -67,3 +65,18 @@
 ## 5. 回滚与风险
 
 本批为纯 CSS token 定义收敛（值不变、选择器不变），视觉零差异风险；`settings-scale` 限额压力已通过批次 3 实测（注释合并回压至 1196 行），本批新增 3 token 预计净增 ≤4 行，若超限额则合并相邻注释行。回滚基线：main `aa046943`，GitHub Latest v3.1.0。
+
+## 6. 体系 A 契约闭环裁决（2026-08-15，批 1-1 完成 + 批 1-2 甄别后）
+
+以提交 `4265966d` 为界，settings-control 契约在 CSS 侧已全量闭环，剩余项全部经甄别归入「布局契约/登记保留」类别：
+
+| 裁决项 | 结论 | 依据 |
+| --- | --- | --- |
+| systemSettings.css 主体契约 | **已 token 化** | 主块 box-shadow/transition 引用登记 token，hover/focus/disabled/--sm/.settings-label 已于批次 3 收敛 |
+| `select.settings-control` padding-right 2.5rem | **登记保留** | chevron 让位属单控件内布局契约，无复用消费，注释已注明 |
+| 5 处 sections 残留选择器（llmSection 2 / networkSection 3） | **布局契约保留** | 均为 min-height/height/font-size/line-height/padding 尺寸覆盖（model-select 2.125rem、proxy-form `--field-height` 行高对齐、secret input 字号），非自建色值/自建阴影，属 DOM+布局契约层 |
+| `.settings-api-path-trigger`（toolStrategySection） | **已收敛**（4265966d） | 自建 200ms transition + rgba 阴影 → 全局 `--settings-control-shadow/-transition` |
+| appearance/data sections 392 处非 token 值 | **不在体系 A 范围** | 两文件无 `.settings-control` 选择器；HTML 中 4 处 settings-control 消费由 systemSettings.css 主块统一供给；剩余值为 gap/padding/font-size/媒体查询/backdrop-filter/grid 等布局契约，非 settings-control 契约 |
+| dataSection.css `#34d399` 状态点 | **status dot 契约** | 非 settings-control 相关，登记于 CMP02_FORM_DEBT_PLAN 其他体系 |
+
+**口径说明**：体系 A 定义（CMP02_FORM_DEBT_PLAN.md §2.1）为「settings-control 类引用的 token 化」。112 处/14 文件的 HTML 类消费属 DOM 契约（保留类名、语义下沉），CSS 实现侧闭环判据为：主体契约全 token 化、六族按钮过渡统一登记、sections 残留选择器甄别为布局契约。本项在 TECH_DEBT_BOARD.md 与路线文档中同步标记为「CSS 契约闭环」。
