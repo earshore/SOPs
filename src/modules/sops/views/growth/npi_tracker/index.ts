@@ -342,7 +342,7 @@ function renderPricingCells(row: NPIProductRecord, context: TableRowRenderContex
                     class="w-16 px-2 py-1 border rounded text-sm text-center"
                     data-action="update-delivery-fee" aria-label="${rowFieldLabel(row, 'delivery_fee')}">
             </td>
-            <td class="px-3 py-3 text-center text-sm text-slate-500">${context.deliveryPercent}%</td>
+            <td class="px-3 py-3 text-center text-sm sops-neutral-text-muted">${context.deliveryPercent}%</td>
             <td class="px-3 py-3 text-center npi-status-fail font-bold">€${context.clearancePrice}</td>
             <td class="px-3 py-3 text-center npi-status-pending font-medium">€${context.movingPrice}</td>
             <td class="px-3 py-3 text-center ${context.suggestedPriceClass}">€${context.suggestedPrice}</td>
@@ -376,7 +376,7 @@ function renderDecisionCells(row: NPIProductRecord, context: TableRowRenderConte
             <td class="px-3 py-3">
                 <div class="flex flex-wrap gap-1">
                     ${renderNextStepTags(row.next_step)}
-                    <button type="button" data-action="open-next-step-editor" class="px-2 py-0.5 border border-dashed border-slate-300 rounded text-xs text-slate-400 hover:border-primary-400 hover:text-primary-500" aria-label="${rowActionLabel(row, '添加 Next Step')}" title="${rowActionLabel(row, '添加 Next Step')}">
+                    <button type="button" data-action="open-next-step-editor" class="px-2 py-0.5 border border-dashed border-slate-300 rounded text-xs sops-neutral-text-faint hover:border-primary-400 hover:text-primary-500" aria-label="${rowActionLabel(row, '添加 Next Step')}" title="${rowActionLabel(row, '添加 Next Step')}">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -387,7 +387,7 @@ function renderTableRow(row: NPIProductRecord, index: number): string {
   const context = buildTableRowContext(row);
 
   return `
-        <tr class="hover:bg-slate-50 border-b border-slate-100" data-index="${index}">
+        <tr class="hover:sops-neutral-surface border-b sops-neutral-divider-soft" data-index="${index}">
             ${renderProfileCells(row, context)}
             ${renderComplianceCells(row, context.compliance)}
             ${renderPricingCells(row, context)}
@@ -493,7 +493,8 @@ function openNextStepEditor(index: number): void {
   checkboxes.textContent = '';
   NEXT_STEP_OPTIONS.forEach(option => {
     const label = document.createElement('label');
-    label.className = 'flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer';
+    label.className =
+      'flex items-center gap-2 p-2 hover:sops-neutral-surface rounded cursor-pointer';
 
     const input = document.createElement('input');
     input.type = 'checkbox';
