@@ -13,9 +13,8 @@
   --settings-radius-card: var(--workbench-radius, var(--panel-radius, 8px));
   --settings-radius-control: var(--workbench-radius-lg, var(--rounded-lg, 12px));
   --settings-focus-color: var(--color-focus-ring, var(--color-primary, #3b82f6));
-  /* TD-CMP-02 批次 1：下沉为 forms.css 共享别名（同一档位）。 */
+  /* TD-CMP-02：focus-ring 共享别名（批次 1）；settings-control 基线尺寸/紧凑/标签与阴影/过渡时间单一登记点（批次 3、次序 11 批 1-1）。 */
   --settings-focus-ring: var(--field-focus-shadow);
-  /* TD-CMP-02 批次 3：settings-control 变体下沉——基线尺寸与紧凑/标签单一登记点。 */
   --settings-control-padding-base: 0.625rem 0.75rem;
   --settings-control-font-size-base: 0.875rem;
   --settings-control-line-height-base: 1.25;
@@ -23,6 +22,11 @@
   --settings-control-padding-sm: 0.5rem 0.75rem;
   --settings-control-font-size-sm: 0.75rem;
   --settings-label-font-size: 0.75rem;
+  /* TD-CMP-02 次序 11 批 1-1：控件浮层阴影与过渡时间单一登记点。 */
+  --settings-control-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --settings-control-transition: 200ms ease;
+  --settings-btn-secondary-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --settings-btn-secondary-transition: 160ms ease;
 }
 
 /* Dark theme: accent soft/strong re-derived from the Accent hue itself —
@@ -837,10 +841,10 @@
   color: var(--settings-text, #475569);
   font-size: var(--settings-control-font-size-base);
   line-height: var(--settings-control-line-height-base);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--settings-control-shadow);
   transition:
-    border-color 200ms ease,
-    box-shadow 200ms ease;
+    border-color var(--settings-control-transition),
+    box-shadow var(--settings-control-transition);
 }
 
 .settings-control:hover {
@@ -867,13 +871,12 @@ select.settings-control {
   cursor: pointer;
 }
 
-/* TD-CMP-02 批次 3：尺寸下沉为 settings 语义 token（单一登记点）。 */
+/* TD-CMP-02 批次 3：--sm 尺寸与标签字号下沉为 settings 语义 token（单一登记点）。 */
 .settings-control--sm {
   font-size: var(--settings-control-font-size-sm);
   padding: var(--settings-control-padding-sm);
 }
 
-/* TD-CMP-02 批次 3：标签字号下沉为 settings 语义 token（同一登记点）。 */
 .settings-label {
   display: block;
   margin-bottom: 0.375rem;
@@ -888,7 +891,7 @@ select.settings-control {
 }
 
 .settings-label--focus-accent {
-  transition: color 200ms ease;
+  transition: color var(--settings-control-transition);
 }
 
 /* Quiet secondary action (fetch models, etc.) — Operational Quiet */
@@ -909,11 +912,11 @@ select.settings-control {
   line-height: 1.2;
   white-space: nowrap;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--settings-btn-secondary-shadow);
   transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    opacity 160ms ease;
+    background-color var(--settings-btn-secondary-transition),
+    border-color var(--settings-btn-secondary-transition),
+    opacity var(--settings-btn-secondary-transition);
 }
 
 .settings-btn-secondary:hover:not(:disabled) {
