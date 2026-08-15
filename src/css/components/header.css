@@ -277,7 +277,7 @@
   font-size: var(--text-base, 0.875rem);
   border: 1px solid var(--color-border-default, rgba(0, 0, 0, 0.1));
   border-radius: var(--rounded-full, 9999px);
-  background: var(--color-bg-secondary, #fafafa);
+  background: var(--bg-secondary, #fafafa);
   color: var(--header-text);
   transition:
     border-color var(--duration-fast, 200ms) var(--ease-smooth),
@@ -319,7 +319,7 @@
   padding: 2px 8px;
   border: 1px solid var(--color-border-default, rgba(0, 0, 0, 0.1));
   border-radius: var(--rounded-sm, 4px);
-  background: var(--color-bg-secondary, #fafafa);
+  background: var(--bg-secondary, #fafafa);
 }
 
 /* 聚焦时隐藏快捷键 */

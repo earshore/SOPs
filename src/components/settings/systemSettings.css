@@ -2,7 +2,7 @@
 .settings-panel-root {
   /* Semantic surfaces/text: flip once via global dark tokens (T2 dual-theme). */
   --settings-surface: var(--color-bg-elevated, var(--surface-panel, #fff));
-  --settings-surface-muted: var(--color-bg-secondary, #f8fafc);
+  --settings-surface-muted: var(--bg-secondary, #f8fafc);
   --settings-border: var(--color-border-default, #e2e8f0);
   --settings-text: var(--color-slate-900, #334155);
   --settings-text-muted: var(--color-slate-500, #64748b);

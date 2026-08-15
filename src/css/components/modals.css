@@ -192,7 +192,7 @@
   gap: 0.75rem;
   padding: 1.25rem 1.5rem;
   border-top: 1px solid var(--border-subtle, var(--color-slate-200));
-  background: var(--surface-card-hover, var(--color-bg-secondary, var(--color-slate-50)));
+  background: var(--surface-card-hover, var(--bg-secondary, var(--color-slate-50)));
   border-radius: 0 0 var(--rounded-2xl) var(--rounded-2xl);
   flex-shrink: 0;
 }

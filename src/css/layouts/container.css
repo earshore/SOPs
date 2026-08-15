@@ -299,7 +299,7 @@
   flex-shrink: 0;
   position: relative;
   border-right: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  background: var(--color-bg-secondary, #fafafa);
+  background: var(--bg-secondary, #fafafa);
   transition: width var(--duration-normal, 300ms) var(--ease-smooth);
   overflow-y: auto;
   overflow-x: hidden;
@@ -463,7 +463,7 @@
   flex-shrink: 0;
   overflow-y: auto;
   border-right: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  background: var(--color-bg-secondary, #fafafa);
+  background: var(--bg-secondary, #fafafa);
   transition: width var(--duration-normal, 300ms) var(--ease-smooth);
 }
 
@@ -621,7 +621,7 @@
 [data-color-mode-resolved='dark'] .layout-app__sidebar,
 [data-theme='dark'] .layout-sidebar__aside,
 [data-theme='dark'] .layout-app__sidebar {
-  background: var(--color-bg-secondary, #1e293b);
+  background: var(--bg-secondary, #1e293b);
   border-color: rgba(255, 255, 255, 0.06);
 }
 

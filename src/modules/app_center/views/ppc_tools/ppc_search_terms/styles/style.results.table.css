@@ -30,14 +30,14 @@
   margin: 0;
   padding: 10px 12px;
   border-bottom: 1px solid var(--border-subtle, rgb(226, 232, 240));
-  background: color-mix(in srgb, var(--color-bg-secondary, #f8fafc) 72%, transparent);
+  background: color-mix(in srgb, var(--bg-secondary, #f8fafc) 72%, transparent);
   color: var(--ppc-search-terms-text-secondary, #475569);
   font-size: 12px;
   font-weight: 600;
 }
 
 .ppc-search-terms-results-table thead tr {
-  background: var(--color-bg-secondary, var(--color-slate-50));
+  background: var(--bg-secondary, var(--color-slate-50));
 }
 
 .ppc-search-terms-action-badge {

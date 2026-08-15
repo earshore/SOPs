@@ -18,7 +18,7 @@
       135deg,
       color-mix(in srgb, var(--color-emerald-500, #10b981) 12%, var(--surface-panel, #ffffff)) 0%,
       color-mix(in srgb, var(--color-teal-500, #14b8a6) 9%, var(--surface-panel, #ffffff)) 46%,
-      var(--color-bg-secondary, #f8fafc) 100%
+      var(--bg-secondary, #f8fafc) 100%
     );
   background-size:
     28px 28px,

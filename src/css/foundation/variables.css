@@ -61,7 +61,9 @@
 
   /* ---- 背景 ---- */
   --color-bg-primary: #ffffff;
-  --color-bg-secondary: var(--color-slate-50); /* [S2-THM01] -> --color-slate-50 */
+  --bg-secondary: var(
+    --color-slate-50
+  ); /* [B4-THM01] handwritten 接管：原 --color-bg-secondary 已归档，消费点全量迁移至此键 */
   --color-bg-tertiary: var(--color-slate-100); /* [S2-THM01] -> --color-slate-100 */
   --color-bg-elevated: #ffffff;
   --color-bg-hover: rgba(0, 0, 0, 0.04);
@@ -400,7 +402,9 @@
 
   /* ---- 背景 ---- */
   --color-bg-primary: var(--color-slate-900);
-  --color-bg-secondary: var(--color-slate-800); /* [S2-THM01] dark: slate-800 */
+  --bg-secondary: var(
+    --color-slate-800
+  ); /* [B4-THM01] dark 翻转：slate-50 → slate-800，与 bg-slate-50 bridge 契约一致 */
   --color-bg-tertiary: rgba(255, 255, 255, 0.06); /* [S2-THM01] dark: rgba 无对等 */
   --color-bg-elevated: var(--color-slate-800);
   --color-bg-hover: rgba(255, 255, 255, 0.06);

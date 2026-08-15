@@ -425,7 +425,7 @@
 .dark .icon-container--with-status::after,
 [data-color-mode-resolved='dark'] .icon-container--with-status::after,
 [data-theme='dark'] .icon-container--with-status::after {
-  border-color: var(--color-bg-secondary, #1e293b);
+  border-color: var(--bg-secondary, #1e293b);
 }
 
 .dark .icon-text-title,

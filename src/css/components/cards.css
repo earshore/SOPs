@@ -391,7 +391,7 @@
 
 .content-callout--neutral {
   --callout-accent: var(--color-slate-400, #94a3b8);
-  --callout-bg: var(--color-bg-secondary, #f8fafc);
+  --callout-bg: var(--bg-secondary, #f8fafc);
   --callout-border: rgba(148, 163, 184, 0.26);
 }
 

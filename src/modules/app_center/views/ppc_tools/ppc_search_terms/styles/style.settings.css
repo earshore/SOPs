@@ -104,7 +104,7 @@
   padding: 10px;
   border: 1px solid var(--border-subtle, var(--color-slate-200, #e2e8f0));
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--ppc-search-terms-ink-strong, rgb(51, 65, 85));
   font-size: 12px;
 }

@@ -31,7 +31,7 @@
   background: linear-gradient(
     90deg,
     var(--surface-card, #ffffff) 0%,
-    color-mix(in srgb, var(--color-bg-secondary, #f8fafc) 82%, transparent) 100%
+    color-mix(in srgb, var(--bg-secondary, #f8fafc) 82%, transparent) 100%
   );
 }
 
@@ -115,7 +115,7 @@
   border-left: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--color-bg-secondary, #f8fafc) 82%, transparent),
+    color-mix(in srgb, var(--bg-secondary, #f8fafc) 82%, transparent),
     var(--surface-card, #ffffff) 56%
   );
 }
@@ -129,7 +129,7 @@
   border-top: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--color-bg-secondary, #f8fafc) 78%, transparent),
+    color-mix(in srgb, var(--bg-secondary, #f8fafc) 78%, transparent),
     var(--surface-card, #ffffff) 58%
   );
 }
@@ -193,7 +193,7 @@
 .ppc-search-terms-app {
   --button-filter-accent: var(--color-primary, var(--color-blue-600, #2563eb));
   --button-filter-border: var(--ppc-search-terms-border-strong, #cbd5e1);
-  --button-filter-hover-bg: var(--color-bg-secondary, #f8fafc);
+  --button-filter-hover-bg: var(--bg-secondary, #f8fafc);
   --button-filter-hover-border: var(--ppc-search-terms-border-strong, #cbd5e1);
   --button-filter-hover-color: var(--color-slate-500, #475569);
 }

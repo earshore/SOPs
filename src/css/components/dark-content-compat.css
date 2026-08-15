@@ -30,7 +30,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .hover\:bg-slate-50:hover {
-  background-color: var(--color-bg-secondary, #1e293b);
+  background-color: var(--bg-secondary, #1e293b);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -73,20 +73,19 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .from-slate-50 {
-  --tw-gradient-from: var(--color-bg-secondary, #1e293b);
+  --tw-gradient-from: var(--bg-secondary, #1e293b);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .to-slate-50 {
-  --tw-gradient-to: var(--color-bg-secondary, #1e293b);
+  --tw-gradient-to: var(--bg-secondary, #1e293b);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .via-slate-50 {
-  --tw-gradient-stops:
-    var(--tw-gradient-from), var(--color-bg-secondary, #1e293b), var(--tw-gradient-to);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--bg-secondary, #1e293b), var(--tw-gradient-to);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -1656,13 +1655,13 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .bg-slate-50\/80 {
-  background-color: color-mix(in srgb, var(--color-bg-secondary, #1e293b) 80%, transparent);
+  background-color: color-mix(in srgb, var(--bg-secondary, #1e293b) 80%, transparent);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .bg-slate-50\/70 {
-  background-color: color-mix(in srgb, var(--color-bg-secondary, #1e293b) 70%, transparent);
+  background-color: color-mix(in srgb, var(--bg-secondary, #1e293b) 70%, transparent);
 }
 
 /* ---- Opacity-suffixed variants (bg-red-50/75, border-slate-200/80, …).
@@ -1672,7 +1671,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   [class*='bg-slate-50/'] {
-  background-color: color-mix(in srgb, var(--color-bg-secondary, #1e293b) 75%, transparent);
+  background-color: color-mix(in srgb, var(--bg-secondary, #1e293b) 75%, transparent);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -1699,13 +1698,13 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   [class*='from-slate-50/'] {
-  --tw-gradient-from: color-mix(in srgb, var(--color-bg-secondary, #1e293b) 80%, transparent);
+  --tw-gradient-from: color-mix(in srgb, var(--bg-secondary, #1e293b) 80%, transparent);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   [class*='to-slate-50/'] {
-  --tw-gradient-to: color-mix(in srgb, var(--color-bg-secondary, #1e293b) 80%, transparent);
+  --tw-gradient-to: color-mix(in srgb, var(--bg-secondary, #1e293b) 80%, transparent);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -2944,7 +2943,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .bg-gray-50 {
-  background-color: var(--color-bg-secondary, #1e293b);
+  background-color: var(--bg-secondary, #1e293b);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])

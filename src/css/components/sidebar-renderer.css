@@ -351,11 +351,7 @@
   background: linear-gradient(
     to bottom,
     var(--surface-panel, #ffffff),
-    color-mix(
-      in srgb,
-      var(--surface-workbench, var(--color-bg-secondary, #f8fafc)) 55%,
-      transparent
-    )
+    color-mix(in srgb, var(--surface-workbench, var(--bg-secondary, #f8fafc)) 55%, transparent)
   ) !important;
   color: var(--color-slate-500, #64748b);
   border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));

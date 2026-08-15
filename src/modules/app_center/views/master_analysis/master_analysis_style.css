@@ -806,7 +806,7 @@
   }
 
   #console-card-inner > div:first-child > div {
-    background: var(--color-bg-secondary, #f8fafc) !important;
+    background: var(--bg-secondary, #f8fafc) !important;
     border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
     border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
@@ -814,7 +814,7 @@
   }
 
   #console-card-inner > div:last-child > div {
-    background: var(--color-bg-secondary, #f8fafc) !important;
+    background: var(--bg-secondary, #f8fafc) !important;
     border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
     border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
@@ -882,13 +882,13 @@
   }
 
   #prompt-output-card {
-    background: var(--color-bg-secondary, #f8fafc) !important;
+    background: var(--bg-secondary, #f8fafc) !important;
     border-color: var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
     box-shadow: none !important;
   }
 
   #prompt-output-card > div:first-child {
-    background: var(--color-bg-secondary, #f8fafc) !important;
+    background: var(--bg-secondary, #f8fafc) !important;
     border-bottom-color: var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
   }
 

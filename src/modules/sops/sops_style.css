@@ -1246,7 +1246,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 .dark .sop-process-step,
 [data-color-mode-resolved='dark'] .sop-process-step,
 [data-theme='dark'] .sop-process-step {
-  background: var(--color-bg-secondary, var(--color-slate-800));
+  background: var(--bg-secondary, var(--color-slate-800));
   border-color: rgba(255, 255, 255, 0.1);
 }
 

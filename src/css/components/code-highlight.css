@@ -1521,7 +1521,7 @@
 /* --- 亮色背景代码块 (嵌入正文) --- */
 .code-block--light {
   --code-bg: var(--color-bg-tertiary, #f8f9fa);
-  --code-bg-header: var(--color-bg-secondary, #f1f5f9);
+  --code-bg-header: var(--bg-secondary, #f1f5f9);
   --code-text: var(--color-slate-900, #1a1a2e);
   --code-border: var(--color-border-default, rgba(0, 0, 0, 0.1));
   --code-gutter: var(--color-slate-400, #9ca3af);

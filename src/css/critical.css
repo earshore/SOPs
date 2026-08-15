@@ -22,7 +22,7 @@
   --z-header: var(--z-40, 40);
   --z-mega-menu: calc(var(--z-overlay, 50) - 1);
   --z-loading: 300;
-  --color-critical-surface: var(--color-bg-secondary, var(--bg-secondary, var(--color-slate-50)));
+  --color-critical-surface: var(--bg-secondary, var(--bg-secondary, var(--color-slate-50)));
   --color-critical-text: var(--color-slate-900, var(--text-primary, var(--color-slate-700)));
   color-scheme: light;
 }
@@ -30,7 +30,7 @@
 .dark,
 [data-color-mode='dark'],
 [data-color-mode-resolved='dark'] {
-  --color-critical-surface: var(--color-bg-secondary, var(--color-slate-900));
+  --color-critical-surface: var(--bg-secondary, var(--color-slate-900));
   --color-critical-text: var(--color-slate-900, var(--color-slate-50));
   color-scheme: dark;
 }

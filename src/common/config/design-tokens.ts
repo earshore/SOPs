@@ -310,7 +310,9 @@ export const SEMANTIC_COLORS = {
   // 背景色
   bg: {
     primary: 'var(--color-white)',
-    secondary: 'var(--color-slate-50)',
+    // [B4-THM01] bg-secondary 已归档：全部消费点迁移至 handwritten
+    // --bg-secondary（variables.css，含 dark 翻转 slate-50→slate-800），
+    // 此键不再参与生成，避免与手写声明冲突
     tertiary: 'var(--color-slate-100)',
     surface: 'var(--color-white)',
     overlay: 'rgba(0, 0, 0, 0.5)',

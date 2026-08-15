@@ -80,7 +80,7 @@
   padding: 4px 10px;
   border-radius: var(--rounded-sm);
   border: 1px solid var(--color-border-default);
-  background: var(--color-bg-secondary, transparent);
+  background: var(--bg-secondary, transparent);
   color: var(--color-slate-900);
   font-size: 12px;
   font-weight: 600;

@@ -1375,7 +1375,7 @@
 .dark .sortable-item.is-dragging,
 [data-color-mode-resolved='dark'] .sortable-item.is-dragging,
 [data-theme='dark'] .sortable-item.is-dragging {
-  background: var(--color-bg-secondary, #1e293b);
+  background: var(--bg-secondary, #1e293b);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 

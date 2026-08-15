@@ -440,3 +440,7 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .to-violet-600:not(.twb-keep) { --tw-gradient-to: var(--color-violet-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-white:not(.twb-keep) { --tw-gradient-to: var(--surface-card) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-yellow-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-yellow-400) 12%, transparent) var(--tw-gradient-to-position); }
+
+/* ── [B4-THM01] bg-secondary 自定义类桥接修正 ── */
+.bg-secondary:not(.twb-keep) { background-color: var(--bg-secondary, #f8fafc); }
+:is(.dark, [data-color-mode-resolved="dark"]) .bg-secondary:not(.twb-keep) { background-color: var(--surface-panel); }

@@ -100,7 +100,7 @@
   gap: var(--spacing-3);
   padding: var(--spacing-3) var(--spacing-4);
   border-radius: var(--rounded-md);
-  background: var(--color-bg-secondary);
+  background: var(--bg-secondary, #f8fafc);
   font-size: var(--text-sm);
   color: var(--color-slate-400);
   transition:

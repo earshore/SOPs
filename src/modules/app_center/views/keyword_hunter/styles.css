@@ -61,7 +61,7 @@
 .keyword-hunter-title-icon-btn:disabled {
   cursor: not-allowed;
   border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--color-slate-300, var(--color-slate-300, #cbd5e1));
   box-shadow: none;
 }
@@ -243,7 +243,7 @@
 }
 
 .keyword-hunter-input-draft-status {
-  --keyword-hunter-status-bg: var(--color-bg-secondary, #f8fafc);
+  --keyword-hunter-status-bg: var(--bg-secondary, #f8fafc);
   --keyword-hunter-status-border: var(--border-subtle, rgba(148, 163, 184, 0.24));
   --keyword-hunter-status-dot: var(--color-slate-400, #94a3b8);
   --keyword-hunter-status-label: var(--color-slate-500, var(--color-slate-600, #475569));
@@ -438,11 +438,7 @@
   margin: 0.875rem 1rem;
   border: 1px dashed var(--border-subtle, rgba(148, 163, 184, 0.24));
   border-radius: var(--workbench-radius, var(--card-radius, 8px));
-  background: linear-gradient(
-    180deg,
-    var(--color-bg-secondary, #f8fafc),
-    var(--surface-card, #ffffff)
-  );
+  background: linear-gradient(180deg, var(--bg-secondary, #f8fafc), var(--surface-card, #ffffff));
   color: var(--color-slate-400, var(--color-slate-400, #94a3b8));
   text-align: center;
 }
@@ -629,7 +625,7 @@
   padding: 0.12rem 0.4rem;
   border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.28));
   border-radius: 0.375rem;
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--color-slate-500, var(--color-slate-600, #475569));
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
@@ -700,7 +696,7 @@
   padding: 0 0.55rem;
   border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
   border-radius: var(--rounded-md);
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
 }
 
 .keyword-hunter-input-snapshot-stats strong {
@@ -759,7 +755,7 @@
   height: 1.75rem;
   flex: 0 0 auto;
   border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--color-slate-400, var(--color-slate-400, #94a3b8));
   font-size: 0.65rem;
 }
@@ -1269,7 +1265,7 @@
 
 .keyword-hunter-analysis-action--disabled {
   border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--color-slate-400, var(--color-slate-400, #94a3b8));
   box-shadow: none;
 }
@@ -1508,7 +1504,7 @@
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--color-bg-secondary, #f8fafc) 84%, transparent) 0%,
+      color-mix(in srgb, var(--bg-secondary, #f8fafc) 84%, transparent) 0%,
       color-mix(in srgb, var(--surface-card, #ffffff) 98%, transparent) 72%
     ),
     var(--surface-card, #ffffff);
@@ -1686,7 +1682,7 @@
   height: 1.5rem;
   border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
   border-radius: 0.375rem;
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--color-slate-500, var(--color-slate-500, #64748b));
   font-size: 0.72rem;
   font-weight: 800;
@@ -1733,7 +1729,7 @@
   border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
   border-left: 0.25rem solid var(--color-slate-400, #94a3b8);
   border-radius: var(--workbench-radius, var(--card-radius, 8px));
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   box-shadow: none;
   color: var(--color-slate-900, var(--color-slate-800, #1e293b));
   font-size: 0.9rem;
@@ -1852,7 +1848,7 @@
 #keyword-hunter-llm-analysis-result.markdown-content.keyword-hunter-report-rendered thead th {
   padding: 0.85rem 1rem;
   border-bottom: 2px solid var(--border-muted, rgba(203, 213, 225, 0.72));
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--color-slate-900, var(--color-slate-800, #1e293b));
   font-size: 0.75rem;
   font-weight: 800;
@@ -1872,7 +1868,7 @@
   tbody
   tr:hover
   td {
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
 }
 
 #keyword-hunter-llm-analysis-result.markdown-content.keyword-hunter-report-rendered
@@ -1884,7 +1880,7 @@
   tr.row-total
   td {
   border-top: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--color-slate-900, var(--color-slate-900, #0f172a));
   font-size: 0.875rem;
   font-weight: 800;
@@ -2046,7 +2042,7 @@
   border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
   border-left: 0.2rem solid var(--border-muted, rgba(203, 213, 225, 0.72));
   border-radius: 0.5rem;
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--color-slate-500, var(--color-slate-700, #334155));
 }
 
@@ -2345,7 +2341,7 @@
   min-width: 0;
   padding: 0.5rem;
   border-radius: var(--workbench-radius, var(--card-radius, 8px));
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
 }
 
@@ -2445,7 +2441,7 @@
 }
 
 .tone-slate {
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));
 }
 

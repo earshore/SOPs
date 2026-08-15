@@ -573,6 +573,21 @@ function generate(): { css: string; ruleCount: number; usedCount: number } {
   }
 
   lines.push('');
+
+  // ── [B4-THM01] bg-secondary 自定义类桥接修正 ──
+  // 存量模板中的 .bg-secondary 原由 Tailwind 生成时错误映射到 var(--color-secondary)
+  // （中性蓝灰），修正为手写语义键 --bg-secondary（slate-50），dark 翻转跟随
+  // bg-slate-50 契约（→ surface-panel）
+  lines.push(
+    '/* ── [B4-THM01] bg-secondary 自定义类桥接修正 ── */',
+  );
+  lines.push(
+    '.bg-secondary:not(.twb-keep) { background-color: var(--bg-secondary, #f8fafc); }',
+  );
+  lines.push(
+    ':is(.dark, [data-color-mode-resolved="dark"]) .bg-secondary:not(.twb-keep) { background-color: var(--surface-panel); }',
+  );
+  lines.push('');
   return { css: lines.join('\n'), ruleCount, usedCount: used.size };
 }
 

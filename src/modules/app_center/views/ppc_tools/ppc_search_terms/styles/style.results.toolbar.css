@@ -121,13 +121,13 @@
 
 .ppc-search-terms-search-clear-btn:hover {
   border-color: var(--color-slate-400, #94a3b8);
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
 }
 
 .ppc-search-terms-search-clear-btn:disabled {
   cursor: not-allowed;
   border-color: var(--border-muted, #cbd5e1);
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--color-slate-500, #64748b);
 }
 
@@ -151,13 +151,13 @@
 
 .ppc-search-terms-export-btn:hover {
   border-color: var(--color-slate-400, #94a3b8);
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
 }
 
 .ppc-search-terms-export-btn:disabled {
   cursor: not-allowed;
   border-color: var(--border-muted, #cbd5e1);
-  background: var(--color-bg-secondary, #f8fafc);
+  background: var(--bg-secondary, #f8fafc);
   color: var(--color-slate-500, #64748b);
 }
 

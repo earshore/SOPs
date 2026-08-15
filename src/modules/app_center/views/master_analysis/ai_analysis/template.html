@@ -539,7 +539,7 @@
                   <button
                     type="button"
                     @click="togglePromptPanel()"
-                    class="w-full flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-[color:var(--color-bg-secondary)] px-4 py-4 text-sm text-[color:var(--color-slate-400)] transition duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:bg-[color:var(--color-bg-hover)] hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2"
+                    class="w-full flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-[color:var(--bg-secondary, #f8fafc)] px-4 py-4 text-sm text-[color:var(--color-slate-400)] transition duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:bg-[color:var(--color-bg-hover)] hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2"
                   >
                     <div class="flex items-center gap-3 min-w-0">
                       <div
@@ -987,7 +987,7 @@
           class="relative overflow-hidden rounded-xl border border-[color:var(--border-subtle,rgba(148,163,184,0.24))] bg-[var(--surface-card,#ffffff)] shadow-sm"
         >
           <div
-            class="absolute inset-0 bg-gradient-to-r from-[var(--surface-card,#ffffff)] via-[var(--color-bg-secondary,#f8fafc)] to-[var(--surface-card,#ffffff)]"
+            class="absolute inset-0 bg-gradient-to-r from-[var(--surface-card,#ffffff)] via-[var(--bg-secondary,#f8fafc)] to-[var(--surface-card,#ffffff)]"
           ></div>
           <div class="relative p-6">
             <div class="flex items-center justify-between">
@@ -1016,7 +1016,7 @@
                     <span :hidden="!analysisNotRunning">
                       <template x-if="hasEvidenceHygieneSummary">
                         <span
-                          class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-[color:var(--color-bg-secondary)] px-2 py-0.5 text-xs text-[color:var(--color-slate-400)]"
+                          class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-[color:var(--bg-secondary, #f8fafc)] px-2 py-0.5 text-xs text-[color:var(--color-slate-400)]"
                           data-testid="ma-analysis-hygiene-report"
                         >
                           <i
@@ -1092,7 +1092,7 @@
             <!-- 统计概览栏 -->
             <div class="mt-5 pt-5 border-t border-slate-200 grid grid-cols-5 gap-4">
               <div
-                class="bg-[color:var(--color-bg-secondary)] rounded-xl p-4 border border-slate-200"
+                class="bg-[color:var(--bg-secondary, #f8fafc)] rounded-xl p-4 border border-slate-200"
               >
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
@@ -1108,7 +1108,7 @@
                 </div>
               </div>
               <div
-                class="bg-[color:var(--color-bg-secondary)] rounded-xl p-4 border border-slate-200"
+                class="bg-[color:var(--bg-secondary, #f8fafc)] rounded-xl p-4 border border-slate-200"
               >
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
@@ -1124,7 +1124,7 @@
                 </div>
               </div>
               <div
-                class="bg-[color:var(--color-bg-secondary)] rounded-xl p-4 border border-slate-200"
+                class="bg-[color:var(--bg-secondary, #f8fafc)] rounded-xl p-4 border border-slate-200"
               >
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -1140,7 +1140,7 @@
                 </div>
               </div>
               <div
-                class="bg-[color:var(--color-bg-secondary)] rounded-xl p-4 border border-slate-200"
+                class="bg-[color:var(--bg-secondary, #f8fafc)] rounded-xl p-4 border border-slate-200"
               >
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
@@ -1154,7 +1154,7 @@
               </div>
               <!-- 置信度卡片 -->
               <div
-                class="bg-[color:var(--color-bg-secondary)] rounded-xl p-4 border border-slate-200"
+                class="bg-[color:var(--bg-secondary, #f8fafc)] rounded-xl p-4 border border-slate-200"
                 :hidden="!hasConfidenceData"
                 role="status"
                 aria-live="polite"
@@ -1265,7 +1265,7 @@
                         </div>
                         <!-- 统计数据 -->
                         <div
-                          class="p-5 bg-[color-mix(in_srgb,var(--color-bg-secondary,#f8fafc)_70%,transparent)] border-b border-[color:var(--border-subtle,rgba(148,163,184,0.24))]"
+                          class="p-5 bg-[color-mix(in_srgb,var(--bg-secondary,#f8fafc)_70%,transparent)] border-b border-[color:var(--border-subtle,rgba(148,163,184,0.24))]"
                         >
                           <div class="flex items-center gap-2 mb-4">
                             <div
@@ -1349,7 +1349,7 @@
                                 <div class="flex flex-wrap gap-2">
                                   <template :key="index" x-for="(item, index) in detail.items">
                                     <span
-                                      class="inline-block px-3 py-2 bg-[color:var(--color-bg-secondary)] text-slate-700 text-xs rounded-lg cursor-default border border-slate-200 font-medium"
+                                      class="inline-block px-3 py-2 bg-[color:var(--bg-secondary, #f8fafc)] text-slate-700 text-xs rounded-lg cursor-default border border-slate-200 font-medium"
                                       x-text="item"
                                     ></span>
                                   </template>
@@ -1432,7 +1432,7 @@
                         </div>
                         <!-- 统计数据 -->
                         <div
-                          class="p-5 bg-[color-mix(in_srgb,var(--color-bg-secondary,#f8fafc)_70%,transparent)] border-b border-[color:var(--border-subtle,rgba(148,163,184,0.24))]"
+                          class="p-5 bg-[color-mix(in_srgb,var(--bg-secondary,#f8fafc)_70%,transparent)] border-b border-[color:var(--border-subtle,rgba(148,163,184,0.24))]"
                         >
                           <div class="flex items-center gap-2 mb-4">
                             <div
@@ -1516,7 +1516,7 @@
                                 <div class="flex flex-wrap gap-2">
                                   <template :key="index" x-for="(item, index) in detail.items">
                                     <span
-                                      class="inline-block px-3 py-2 bg-[color:var(--color-bg-secondary)] text-slate-700 text-xs rounded-lg cursor-default border border-slate-200 font-medium"
+                                      class="inline-block px-3 py-2 bg-[color:var(--bg-secondary, #f8fafc)] text-slate-700 text-xs rounded-lg cursor-default border border-slate-200 font-medium"
                                       x-text="item"
                                     ></span>
                                   </template>
