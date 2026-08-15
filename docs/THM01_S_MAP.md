@@ -5,7 +5,7 @@
 >
 > **进度（rc.5-S1，完成）**：本批已消化 13 处映射（text 六族 + focus-ring + spacing 六族），全库 2,434 处消费点迁移至 generated 对等物；variables.css 声明行加 [S1-THM01] 契约注释，值不变、零新增键（settings-scale 1199/1200 未触发）；content-surface 表面基线 -1,318（只降不升）；验收 ci:quality 20/20 · build · smoke 93/93。
 >
-> **进度（rc.5-S3 / B 批 2，完成）**：S1/S2 零消费空壳归档（25 行）+ focus-ring 衍生链清理 + module-accent-focus 降级（[B2-THM01]），遗留池 164 → 141；bg-secondary/bg-tertiary/surface-card-hover/surface-workbench/success-dark/error-dark/spacing-2xl/spacing-3xl 因 Tailwind arbitrary 消费残留留待下批。DARKFIX：S1 后 dark block 未重定义 slate-* 原子键导致深色模式文字不可见，已新增 4 行反色翻转（slate-900→slate-50、slate-500→slate-400、slate-400→slate-500、slate-300→slate-600），恢复 S1 前等价表现；NPI dark 基线（S1 re-seed 时被 light 截图覆盖）以正确 dark 渲染重 seed 三引擎 6 基线；验收 ci:quality 20/20 · build ✓ · smoke 无新增失败。
+> **进度（rc.5-S3 / B 批 2，完成）**：S1/S2 零消费空壳归档（25 行）+ focus-ring 衍生链清理 + module-accent-focus 降级（[B2-THM01]），遗留池 164 → 141；bg-secondary/bg-tertiary/surface-card-hover/surface-workbench/success-dark/error-dark/spacing-2xl/spacing-3xl 因 Tailwind arbitrary 消费残留留待下批。DARKFIX：S1 后 dark block 未重定义 slate-* 原子键导致深色模式文字不可见，已新增 4 行反色翻转（slate-900→slate-50、slate-500→slate-400、slate-400→slate-500、slate-300→slate-600），恢复 S1 前等价表现；NPI dark 基线（S1 re-seed 时被 light 截图覆盖）以正确 dark 渲染重 seed 三引擎 6 基线；验收 ci:quality 20/20 · build ✓ · smoke 无新增失败。rc.5-B4（`b1949f2f`）：bg-secondary 归档——151 处消费点迁移至手写键 --bg-secondary（light slate-50 / dark slate-800，dark 翻转与 bg-slate-50 bridge 契约一致），26 处 Tailwind 类错误映射桥接修正，design-tokens.ts 剔除 bg.secondary 键；验收 ci:quality 20/20 · build ✓ · smoke 93/93。
 
 ## 1. S 档口径（脚本实测）
 
@@ -29,7 +29,7 @@ S3 21 处高频 bridge（surface-card 719 / panel 263 / border-subtle 152 等）
 | text | --color-text-placeholder | 13 | --color-slate-400 |
 | text | --color-text-disabled | 12 | --color-slate-300 |
 | text | --color-text-link | — | --color-primary |
-| bg | --color-bg-secondary | 107 | --color-slate-50 |
+| bg | --color-bg-secondary | 107 | --color-slate-50（**已归档 rc.5-B4**：迁移至手写 --bg-secondary，design-tokens 键已剔除） |
 | bg | --color-bg-tertiary | 46 | --color-slate-100 |
 | bg | --color-bg-disabled | — | --color-slate-100 |
 | surface | --surface-card-hover | 52 | --color-slate-50 |
@@ -84,4 +84,4 @@ S3 21 处高频 bridge（surface-card 719 / panel 263 / border-subtle 152 等）
 
 ## 5. 与 B 批、A 档的关系
 
-B 批（`addbc453`）完成零消费 76 处归档后遗留池 164；rc.5-S3（B 批 2，`e44e4b94`）再归档 25 行空壳后遗留池 141；rc.5-B3（`31d7f354`）归档 4 token（success-dark / error-dark / spacing-2xl / spacing-3xl，声明移除 8 行）后遗留池 **137**。本契约 S1/S2 30 处消化后预计降至 134（其中 S3 21 处高频 bridge 回流水台后，真正「遗留」为 A 档台账约 113 处，随 workbench migration 决策）。
+B 批（`addbc453`）完成零消费 76 处归档后遗留池 164；rc.5-S3（B 批 2，`e44e4b94`）再归档 25 行空壳后遗留池 141；rc.5-B3（`31d7f354`）归档 4 token（success-dark / error-dark / spacing-2xl / spacing-3xl，声明移除 8 行）后遗留池 137；rc.5-B4（`b1949f2f`）bg-secondary 归档（原 --color-bg-secondary 消费全量迁移至手写 --bg-secondary，design-tokens 键剔除）。S3 水台 21 处高频 bridge（surface-card 719x 居首）+ A 档台账约 113 处留待 workbench migration / surface 契约专项决策。
