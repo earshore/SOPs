@@ -62,18 +62,11 @@
      组件层通过语义变量引用，切换主题只需覆盖本节
      ======================================== */
 
-  /* ---- 主色 (Primary) ---- */
-  --color-primary: var(--color-blue-500);
-  --color-primary-dark: var(--color-blue-600);
-  --color-primary-darker: var(--color-blue-700);
   --color-primary-contrast: #ffffff; /* 主色上的文字色 */
 
-  /* ---- 次要色 (Secondary) ---- */
   --color-secondary-contrast: #ffffff;
 
   /* ---- 强调色 (Accent) ---- */
-  --color-accent: var(--color-indigo-500);
-  --color-accent-dark: var(--color-indigo-600);
 
   /* ---- 文字 ---- */
   --color-text-primary: var(--color-slate-900);
@@ -120,21 +113,17 @@
   --focus-ring-soft: color-mix(in srgb, var(--color-focus-ring) 16%, transparent);
 
   /* ---- 状态色 ---- */
-  --color-success: var(--color-green-500);
   --color-success-light: rgba(34, 197, 94, 0.1);
   --color-success-dark: var(--color-green-600);
   --color-success-contrast: #ffffff;
 
-  --color-warning: var(--color-amber-500);
   --color-warning-dark: var(--color-amber-600);
   --color-warning-contrast: var(--color-slate-900);
 
-  --color-error: var(--color-red-500);
   --color-error-light: rgba(239, 68, 68, 0.1);
   --color-error-dark: var(--color-red-600);
   --color-error-contrast: #ffffff;
 
-  --color-info: var(--color-blue-500);
   --color-info-light: rgba(59, 130, 246, 0.1);
   --color-info-dark: var(--color-blue-600);
   --color-info-contrast: #ffffff;
