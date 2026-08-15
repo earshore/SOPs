@@ -12,7 +12,7 @@
 | TD-THM-01       | P2     | generated token 被手写 variables 覆盖 20 处，实测修正进行中                                                                                                                  |
 | TD-OPS-02       | P2     | Sentry 默认关（产品决策，保持）                                                                                                                                              |
 | TD-REL-01       | P3     | RC 前 notes 整理（CHANGELOG 已覆盖）                                                                                                                                         |
-| TD-CMP-04/05/06 | P2→P3  | 已收敛完成                                                                                                                                                                   |
+| TD-CMP-04/05/06 | 关闭   | 已收敛完成；2026-08-15 收尾专项完成 `.badge` 统一契约合并（卡片进入已关闭态）                                                                                                |
 
 ## 二、后续次序规划（建议）
 

@@ -124,6 +124,109 @@
 }
 
 /* ========================================
+   TD-CMP-04 badge 统一契约
+   单一 .badge 主类 + 变体（模块归属 --hub/--growth/--safety/--service/--supply/--analytics/--pro/--ai、
+   状态 --status-active/--draft/--pending、动画 --animated），两族旧类叠加兼容
+   ======================================== */
+.badge {
+  --badge-gap: 5px;
+  --badge-icon-size: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--badge-gap, 5px);
+  padding: 0.125rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  min-height: 1.375rem;
+  white-space: nowrap;
+  box-shadow: none;
+  letter-spacing: 0;
+  text-transform: none;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+.badge i {
+  flex: 0 0 auto;
+  width: var(--badge-icon-size, 9px);
+  font-size: var(--badge-icon-size, 9px);
+  color: var(--badge-icon-color, currentColor);
+  text-align: center;
+}
+/* 模块归属变体（工作中心八模块） */
+.badge--hub {
+  color: var(--color-slate-700, #334155);
+  background: color-mix(in srgb, var(--color-slate-50, #f8fafc) 90%, transparent);
+  border-color: color-mix(in srgb, var(--color-slate-600, #475569) 16%, transparent);
+}
+.badge--growth {
+  color: var(--color-emerald-700, #047857);
+  background: color-mix(in srgb, var(--color-emerald-50, #ecfdf5) 88%, transparent);
+  border-color: color-mix(in srgb, var(--color-emerald-600, #059669) 22%, transparent);
+}
+.badge--safety {
+  color: var(--color-red-700, #b91c1c);
+  background: color-mix(in srgb, var(--color-red-50, #fef2f2) 90%, transparent);
+  border-color: color-mix(in srgb, var(--color-red-600, #dc2626) 24%, transparent);
+}
+.badge--service {
+  color: var(--color-teal-700, #0f766e);
+  background: color-mix(in srgb, var(--color-teal-50, #f0fdfa) 88%, transparent);
+  border-color: color-mix(in srgb, var(--color-teal-500, #14b8a6) 22%, transparent);
+}
+.badge--supply {
+  color: var(--color-amber-700, #b45309);
+  background: color-mix(in srgb, var(--color-amber-50, #fffbeb) 90%, transparent);
+  border-color: color-mix(in srgb, var(--color-amber-600, #d97706) 20%, transparent);
+}
+.badge--analytics {
+  color: var(--color-cyan-700, #0e7490);
+  background: color-mix(in srgb, var(--color-cyan-50, #ecfeff) 88%, transparent);
+  border-color: color-mix(in srgb, var(--color-cyan-600, #0891b2) 20%, transparent);
+}
+.badge--ai {
+  color: var(--color-blue-700, #1d4ed8);
+  background: color-mix(in srgb, var(--color-blue-50, #eff6ff) 86%, transparent);
+  border-color: color-mix(in srgb, var(--color-blue-600, #2563eb) 18%, transparent);
+}
+.badge--pro {
+  color: var(--color-violet-700, #6d28d9);
+  background: color-mix(in srgb, var(--color-violet-50, #f5f3ff) 88%, transparent);
+  border-color: color-mix(in srgb, var(--color-violet-600, #7c3aed) 20%, transparent);
+}
+/* 状态变体（SOP 状态语义，替代 sop-status-{active,draft,pending}） */
+.badge--status-active {
+  color: var(--color-green-600);
+  background: var(--color-green-100);
+  border-color: currentColor;
+}
+.badge--status-draft {
+  color: var(--color-amber-600);
+  background: var(--color-amber-100);
+  border-color: currentColor;
+}
+.badge--status-pending {
+  color: var(--color-indigo-600);
+  background: var(--color-indigo-100);
+  border-color: currentColor;
+}
+/* 键盘焦点契约（wb-badge focus-visible 下沉） */
+.badge:focus-visible {
+  outline: 2px solid var(--wb-theme-accent, var(--color-primary, #3b82f6));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--wb-theme-accent, var(--color-primary, #3b82f6)) 30%, transparent);
+}
+.badge:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+/* ========================================
    模块旧类名兼容徽章
    ======================================== */
 
@@ -942,4 +1045,58 @@
   --wb-badge-bg: color-mix(in srgb, var(--color-slate-500, #64748b) 16%, transparent);
   --wb-badge-color: var(--color-slate-300, #cbd5e1);
   --wb-badge-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 32%, transparent);
+}
+
+/* TD-CMP-04 badge 统一契约：深色翻转 */
+.dark .badge--hub,
+[data-color-mode-resolved='dark'] .badge--hub,
+[data-theme='dark'] .badge--hub {
+  color: var(--color-slate-300, #cbd5e1);
+  background: color-mix(in srgb, var(--color-slate-500, #64748b) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-slate-400, #94a3b8) 32%, transparent);
+}
+.dark .badge--growth,
+[data-color-mode-resolved='dark'] .badge--growth,
+[data-theme='dark'] .badge--growth {
+  color: var(--color-emerald-300, #6ee7b7);
+  background: color-mix(in srgb, var(--color-emerald-500, #10b981) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-emerald-400, #34d399) 32%, transparent);
+}
+.dark .badge--safety,
+[data-color-mode-resolved='dark'] .badge--safety,
+[data-theme='dark'] .badge--safety {
+  color: var(--color-red-300, #fca5a5);
+  background: color-mix(in srgb, var(--color-red-500, #ef4444) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-red-400, #f87171) 32%, transparent);
+}
+.dark .badge--service,
+[data-color-mode-resolved='dark'] .badge--service,
+[data-theme='dark'] .badge--service {
+  color: var(--color-teal-300, #5eead4);
+  background: color-mix(in srgb, var(--color-teal-500, #14b8a6) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-teal-400, #2dd4bf) 32%, transparent);
+}
+.dark .badge--supply,
+.dark .badge--pro,
+[data-color-mode-resolved='dark'] .badge--supply,
+[data-color-mode-resolved='dark'] .badge--pro,
+[data-theme='dark'] .badge--supply,
+[data-theme='dark'] .badge--pro {
+  color: var(--color-amber-300, #fcd34d);
+  background: color-mix(in srgb, var(--color-amber-500, #f59e0b) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-amber-400, #fbbf24) 32%, transparent);
+}
+.dark .badge--analytics,
+[data-color-mode-resolved='dark'] .badge--analytics,
+[data-theme='dark'] .badge--analytics {
+  color: var(--color-cyan-300, #67e8f9);
+  background: color-mix(in srgb, var(--color-cyan-500, #06b6d4) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-cyan-400, #22d3ee) 32%, transparent);
+}
+.dark .badge--ai,
+[data-color-mode-resolved='dark'] .badge--ai,
+[data-theme='dark'] .badge--ai {
+  color: var(--color-blue-300, #93c5fd);
+  background: color-mix(in srgb, var(--color-blue-500, #3b82f6) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-blue-400, #60a5fa) 32%, transparent);
 }
