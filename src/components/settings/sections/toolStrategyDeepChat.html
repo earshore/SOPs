@@ -1,303 +1,298 @@
-                <details
-                  class="settings-pref-fold"
-                  data-settings-focus="playground-deep-chat"
-                  data-settings-nav-id="playground-deep-chat"
-                  data-settings-nav-group="tool"
+<details
+  class="settings-pref-fold"
+  data-settings-focus="playground-deep-chat"
+  data-settings-nav-id="playground-deep-chat"
+  data-settings-nav-group="tool"
+>
+  <summary class="settings-pref-row settings-pref-row--fold">
+    <div class="settings-pref-row__meta">
+      <span class="settings-pref-row__icon" aria-hidden="true">
+        <i class="fas fa-comments"></i>
+      </span>
+      <div class="min-w-0">
+        <h4 class="settings-pref-row__title">Playground · Deep Chat</h4>
+        <p class="settings-pref-row__hint">默认模型、业务工具与限额</p>
+      </div>
+    </div>
+    <i
+      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+      aria-hidden="true"
+    ></i>
+  </summary>
+  <div class="settings-pref-fold__body">
+    <div class="settings-tool-page mt-3">
+      <div
+        class="settings-pref-list"
+        data-testid="settings-dc-tools-pref-list"
+        id="deep-chat-business-tools-title"
+        data-settings-nav-id="deep-chat-business-tools-title"
+        data-settings-nav-group="tool"
+      >
+        <template
+          x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
+          :key="item.id"
+        >
+          <div class="settings-pref-row">
+            <div class="settings-pref-row__meta">
+              <div class="min-w-0">
+                <label class="settings-pref-row__title" :for="'tool-strategy-model-' + item.id"
+                  >默认模型</label
                 >
-                  <summary class="settings-pref-row settings-pref-row--fold">
-                    <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true">
-                        <i class="fas fa-comments"></i>
-                      </span>
-                      <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">Playground · Deep Chat</h4>
-                        <p class="settings-pref-row__hint">默认模型、业务工具与限额</p>
-                      </div>
-                    </div>
-                    <i
-                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
-                      aria-hidden="true"
-                    ></i>
-                  </summary>
-                  <div class="settings-pref-fold__body">
-                    <div class="settings-tool-page mt-3">
-                      <div
-                        class="settings-pref-list"
-                        data-testid="settings-dc-tools-pref-list"
-                        id="deep-chat-business-tools-title"
-                        data-settings-nav-id="deep-chat-business-tools-title"
-                        data-settings-nav-group="tool"
-                      >
-                        <template
-                          x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
-                          :key="item.id"
-                        >
-                          <div class="settings-pref-row">
-                            <div class="settings-pref-row__meta">
-                              <div class="min-w-0">
-                                <label
-                                  class="settings-pref-row__title"
-                                  :for="'tool-strategy-model-' + item.id"
-                                  >默认模型</label
-                                >
-                                <p
-                                  class="settings-pref-row__hint"
-                                  x-text="item.model ? '覆盖全局模型' : '跟随全局模型'"
-                                ></p>
-                              </div>
-                            </div>
-                            <div
-                              class="settings-pref-row__control settings-pref-row__control--model"
-                            >
-                              <div class="settings-tool-page__model">
-                                <select
-                                  :id="'tool-strategy-model-' + item.id"
-                                  :name="'tool-strategy-model-' + item.id"
-                                  :value="item.model"
-                                  @change="setToolTargetModel(item.id, $event)"
-                                  :disabled="toolStrategyModelSelectDisabled"
-                                  class="settings-control settings-control--sm settings-tool-page__model-select"
-                                >
-                                  <option value="" x-text="item.followGlobalOptionLabel"></option>
-                                  <template x-for="model in llm.models" :key="getModelValue(model)">
-                                    <option
-                                      :value="getModelValue(model)"
-                                      x-text="getToolStrategyModelOptionLabel(model)"
-                                    ></option>
-                                  </template>
-                                </select>
-                                <span class="settings-tool-page__model-chevron" aria-hidden="true">
-                                  <i class="fas fa-chevron-down"></i>
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </template>
+                <p
+                  class="settings-pref-row__hint"
+                  x-text="item.model ? '覆盖全局模型' : '跟随全局模型'"
+                ></p>
+              </div>
+            </div>
+            <div class="settings-pref-row__control settings-pref-row__control--model">
+              <div class="settings-tool-page__model">
+                <select
+                  :id="'tool-strategy-model-' + item.id"
+                  :name="'tool-strategy-model-' + item.id"
+                  :value="item.model"
+                  @change="setToolTargetModel(item.id, $event)"
+                  :disabled="toolStrategyModelSelectDisabled"
+                  class="settings-control settings-control--sm settings-tool-page__model-select"
+                >
+                  <option value="" x-text="item.followGlobalOptionLabel"></option>
+                  <template x-for="model in llm.models" :key="getModelValue(model)">
+                    <option
+                      :value="getModelValue(model)"
+                      x-text="getToolStrategyModelOptionLabel(model)"
+                    ></option>
+                  </template>
+                </select>
+                <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                  <i class="fas fa-chevron-down"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </template>
 
-                        <div class="settings-pref-divider" role="separator"></div>
+        <div class="settings-pref-divider" role="separator"></div>
 
-                        <div class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <h4 class="settings-pref-row__title">业务工具</h4>
-                              <p class="settings-pref-row__hint">
-                                网页搜索 / 搜索 X / 会话只读；是否调用由模型决定
-                              </p>
-                            </div>
-                          </div>
-                          <label class="settings-switch">
-                            <span class="sr-only">业务工具</span>
-                            <input
-                              id="runtime-deep-chat-enable-business-tools"
-                              type="checkbox"
-                              :checked="runtimeStrategy.settings.deepChat.enableBusinessTools"
-                              @change="setRuntimeBoolean('deepChat.enableBusinessTools', $event)"
-                            />
-                            <span class="settings-switch__track" aria-hidden="true"></span>
-                          </label>
-                        </div>
+        <div class="settings-pref-row">
+          <div class="settings-pref-row__meta">
+            <div class="min-w-0">
+              <h4 class="settings-pref-row__title">业务工具</h4>
+              <p class="settings-pref-row__hint">
+                网页搜索 / 搜索 X / 会话只读；是否调用由模型决定
+              </p>
+            </div>
+          </div>
+          <label class="settings-switch">
+            <span class="sr-only">业务工具</span>
+            <input
+              id="runtime-deep-chat-enable-business-tools"
+              type="checkbox"
+              :checked="runtimeStrategy.settings.deepChat.enableBusinessTools"
+              @change="setRuntimeBoolean('deepChat.enableBusinessTools', $event)"
+            />
+            <span class="settings-switch__track" aria-hidden="true"></span>
+          </label>
+        </div>
 
-                        <div class="settings-pref-divider" role="separator"></div>
+        <div class="settings-pref-divider" role="separator"></div>
 
-                        <label class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <span class="settings-pref-row__title">请求超时</span>
-                              <p class="settings-pref-row__hint">秒</p>
-                            </div>
-                          </div>
-                          <div class="settings-pref-row__control">
-                            <input
-                              type="number"
-                              min="30"
-                              max="300"
-                              step="5"
-                              :value="runtimeDeepChatTimeoutSeconds"
-                              @input="setRuntimeNumber('deepChat.requestTimeoutMs', $event, 1000)"
-                              class="settings-control settings-control--sm"
-                            />
-                          </div>
-                        </label>
+        <label class="settings-pref-row">
+          <div class="settings-pref-row__meta">
+            <div class="min-w-0">
+              <span class="settings-pref-row__title">请求超时</span>
+              <p class="settings-pref-row__hint">秒</p>
+            </div>
+          </div>
+          <div class="settings-pref-row__control">
+            <input
+              type="number"
+              min="30"
+              max="300"
+              step="5"
+              :value="runtimeDeepChatTimeoutSeconds"
+              @input="setRuntimeNumber('deepChat.requestTimeoutMs', $event, 1000)"
+              class="settings-control settings-control--sm"
+            />
+          </div>
+        </label>
 
-                        <div class="settings-pref-divider" role="separator"></div>
+        <div class="settings-pref-divider" role="separator"></div>
 
-                        <label class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <span class="settings-pref-row__title">输出 Token</span>
-                            </div>
-                          </div>
-                          <div class="settings-pref-row__control">
-                            <input
-                              type="number"
-                              min="256"
-                              max="16000"
-                              step="256"
-                              :value="runtimeStrategy.settings.deepChat.maxOutputTokens"
-                              @input="setRuntimeNumber('deepChat.maxOutputTokens', $event)"
-                              class="settings-control settings-control--sm"
-                            />
-                          </div>
-                        </label>
+        <label class="settings-pref-row">
+          <div class="settings-pref-row__meta">
+            <div class="min-w-0">
+              <span class="settings-pref-row__title">输出 Token</span>
+            </div>
+          </div>
+          <div class="settings-pref-row__control">
+            <input
+              type="number"
+              min="256"
+              max="16000"
+              step="256"
+              :value="runtimeStrategy.settings.deepChat.maxOutputTokens"
+              @input="setRuntimeNumber('deepChat.maxOutputTokens', $event)"
+              class="settings-control settings-control--sm"
+            />
+          </div>
+        </label>
 
-                        <div class="settings-pref-divider" role="separator"></div>
+        <div class="settings-pref-divider" role="separator"></div>
 
-                        <label class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <span class="settings-pref-row__title">上下文字符</span>
-                            </div>
-                          </div>
-                          <div class="settings-pref-row__control">
-                            <input
-                              type="number"
-                              min="4000"
-                              max="512000"
-                              step="1000"
-                              :value="runtimeStrategy.settings.deepChat.maxContextChars"
-                              @input="setRuntimeNumber('deepChat.maxContextChars', $event)"
-                              class="settings-control settings-control--sm"
-                            />
-                          </div>
-                        </label>
+        <label class="settings-pref-row">
+          <div class="settings-pref-row__meta">
+            <div class="min-w-0">
+              <span class="settings-pref-row__title">上下文字符</span>
+            </div>
+          </div>
+          <div class="settings-pref-row__control">
+            <input
+              type="number"
+              min="4000"
+              max="512000"
+              step="1000"
+              :value="runtimeStrategy.settings.deepChat.maxContextChars"
+              @input="setRuntimeNumber('deepChat.maxContextChars', $event)"
+              class="settings-control settings-control--sm"
+            />
+          </div>
+        </label>
 
-                        <div class="settings-pref-divider" role="separator"></div>
+        <div class="settings-pref-divider" role="separator"></div>
 
-                        <label class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <span class="settings-pref-row__title">会话保留数</span>
-                            </div>
-                          </div>
-                          <div class="settings-pref-row__control">
-                            <input
-                              type="number"
-                              min="1"
-                              max="200"
-                              step="1"
-                              :value="runtimeStrategy.settings.deepChat.maxThreadCount"
-                              @input="setRuntimeNumber('deepChat.maxThreadCount', $event)"
-                              class="settings-control settings-control--sm"
-                            />
-                          </div>
-                        </label>
+        <label class="settings-pref-row">
+          <div class="settings-pref-row__meta">
+            <div class="min-w-0">
+              <span class="settings-pref-row__title">会话保留数</span>
+            </div>
+          </div>
+          <div class="settings-pref-row__control">
+            <input
+              type="number"
+              min="1"
+              max="200"
+              step="1"
+              :value="runtimeStrategy.settings.deepChat.maxThreadCount"
+              @input="setRuntimeNumber('deepChat.maxThreadCount', $event)"
+              class="settings-control settings-control--sm"
+            />
+          </div>
+        </label>
 
-                        <div class="settings-pref-divider" role="separator"></div>
+        <div class="settings-pref-divider" role="separator"></div>
 
-                        <label class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <span class="settings-pref-row__title">单条消息字符</span>
-                            </div>
-                          </div>
-                          <div class="settings-pref-row__control">
-                            <input
-                              type="number"
-                              min="1000"
-                              max="512000"
-                              step="1000"
-                              :value="runtimeStrategy.settings.deepChat.maxMessageChars"
-                              @input="setRuntimeNumber('deepChat.maxMessageChars', $event)"
-                              class="settings-control settings-control--sm"
-                            />
-                          </div>
-                        </label>
+        <label class="settings-pref-row">
+          <div class="settings-pref-row__meta">
+            <div class="min-w-0">
+              <span class="settings-pref-row__title">单条消息字符</span>
+            </div>
+          </div>
+          <div class="settings-pref-row__control">
+            <input
+              type="number"
+              min="1000"
+              max="512000"
+              step="1000"
+              :value="runtimeStrategy.settings.deepChat.maxMessageChars"
+              @input="setRuntimeNumber('deepChat.maxMessageChars', $event)"
+              class="settings-control settings-control--sm"
+            />
+          </div>
+        </label>
 
-                        <div class="settings-pref-divider" role="separator"></div>
+        <div class="settings-pref-divider" role="separator"></div>
 
-                        <label class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <span class="settings-pref-row__title">系统提示词字符</span>
-                            </div>
-                          </div>
-                          <div class="settings-pref-row__control">
-                            <input
-                              type="number"
-                              min="1000"
-                              max="512000"
-                              step="1000"
-                              :value="runtimeStrategy.settings.deepChat.maxSystemPromptChars"
-                              @input="setRuntimeNumber('deepChat.maxSystemPromptChars', $event)"
-                              class="settings-control settings-control--sm"
-                            />
-                          </div>
-                        </label>
+        <label class="settings-pref-row">
+          <div class="settings-pref-row__meta">
+            <div class="min-w-0">
+              <span class="settings-pref-row__title">系统提示词字符</span>
+            </div>
+          </div>
+          <div class="settings-pref-row__control">
+            <input
+              type="number"
+              min="1000"
+              max="512000"
+              step="1000"
+              :value="runtimeStrategy.settings.deepChat.maxSystemPromptChars"
+              @input="setRuntimeNumber('deepChat.maxSystemPromptChars', $event)"
+              class="settings-control settings-control--sm"
+            />
+          </div>
+        </label>
 
-                        <div class="settings-pref-divider" role="separator"></div>
+        <div class="settings-pref-divider" role="separator"></div>
 
-                        <label class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <span class="settings-pref-row__title">每会话消息数</span>
-                            </div>
-                          </div>
-                          <div class="settings-pref-row__control">
-                            <input
-                              type="number"
-                              min="10"
-                              max="500"
-                              step="10"
-                              :value="runtimeStrategy.settings.deepChat.maxThreadMessageCount"
-                              @input="setRuntimeNumber('deepChat.maxThreadMessageCount', $event)"
-                              class="settings-control settings-control--sm"
-                            />
-                          </div>
-                        </label>
+        <label class="settings-pref-row">
+          <div class="settings-pref-row__meta">
+            <div class="min-w-0">
+              <span class="settings-pref-row__title">每会话消息数</span>
+            </div>
+          </div>
+          <div class="settings-pref-row__control">
+            <input
+              type="number"
+              min="10"
+              max="500"
+              step="10"
+              :value="runtimeStrategy.settings.deepChat.maxThreadMessageCount"
+              @input="setRuntimeNumber('deepChat.maxThreadMessageCount', $event)"
+              class="settings-control settings-control--sm"
+            />
+          </div>
+        </label>
 
-                        <div class="settings-pref-divider" role="separator"></div>
+        <div class="settings-pref-divider" role="separator"></div>
 
-                        <label class="settings-pref-row">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <span class="settings-pref-row__title">Prompt 草稿数</span>
-                            </div>
-                          </div>
-                          <div class="settings-pref-row__control">
-                            <input
-                              type="number"
-                              min="1"
-                              max="100"
-                              step="1"
-                              :value="runtimeStrategy.settings.deepChat.maxPromptDraftCount"
-                              @input="setRuntimeNumber('deepChat.maxPromptDraftCount', $event)"
-                              class="settings-control settings-control--sm"
-                            />
-                          </div>
-                        </label>
+        <label class="settings-pref-row">
+          <div class="settings-pref-row__meta">
+            <div class="min-w-0">
+              <span class="settings-pref-row__title">Prompt 草稿数</span>
+            </div>
+          </div>
+          <div class="settings-pref-row__control">
+            <input
+              type="number"
+              min="1"
+              max="100"
+              step="1"
+              :value="runtimeStrategy.settings.deepChat.maxPromptDraftCount"
+              @input="setRuntimeNumber('deepChat.maxPromptDraftCount', $event)"
+              class="settings-control settings-control--sm"
+            />
+          </div>
+        </label>
 
-                        <div class="settings-pref-divider" role="separator"></div>
+        <div class="settings-pref-divider" role="separator"></div>
 
-                        <div class="settings-pref-row" data-testid="settings-dc-vision-pref-list">
-                          <div class="settings-pref-row__meta">
-                            <div class="min-w-0">
-                              <div class="settings-pref-row__title-row">
-                                <h4 class="settings-pref-row__title">启用 Vision</h4>
-                                <span
-                                  class="settings-badge settings-badge--alpha"
-                                  title="Alpha：功能仍在迭代，体验可能不稳定"
-                                  >Alpha</span
-                                >
-                              </div>
-                              <p class="settings-pref-row__hint">
-                                在 Deep Chat
-                                显示图片上传入口；默认关闭，仅当轮发送、不落盘原图。Alpha
-                                阶段行为可能变化。
-                              </p>
-                            </div>
-                          </div>
-                          <label class="settings-switch">
-                            <span class="sr-only">启用 Vision（Alpha）</span>
-                            <input
-                              id="runtime-deep-chat-enable-vision"
-                              type="checkbox"
-                              :checked="runtimeStrategy.settings.deepChat.enableVision"
-                              @change="setRuntimeBoolean('deepChat.enableVision', $event)"
-                            />
-                            <span class="settings-switch__track" aria-hidden="true"></span>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </details>
+        <div class="settings-pref-row" data-testid="settings-dc-vision-pref-list">
+          <div class="settings-pref-row__meta">
+            <div class="min-w-0">
+              <div class="settings-pref-row__title-row">
+                <h4 class="settings-pref-row__title">启用 Vision</h4>
+                <span
+                  class="settings-badge settings-badge--alpha"
+                  title="Alpha：功能仍在迭代，体验可能不稳定"
+                  >Alpha</span
+                >
+              </div>
+              <p class="settings-pref-row__hint">
+                在 Deep Chat 显示图片上传入口；默认关闭，仅当轮发送、不落盘原图。Alpha
+                阶段行为可能变化。
+              </p>
+            </div>
+          </div>
+          <label class="settings-switch">
+            <span class="sr-only">启用 Vision（Alpha）</span>
+            <input
+              id="runtime-deep-chat-enable-vision"
+              type="checkbox"
+              :checked="runtimeStrategy.settings.deepChat.enableVision"
+              @change="setRuntimeBoolean('deepChat.enableVision', $event)"
+            />
+            <span class="settings-switch__track" aria-hidden="true"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</details>

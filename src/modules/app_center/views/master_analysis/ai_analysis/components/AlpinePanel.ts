@@ -582,7 +582,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   get selectionPanelChevronClass(): string {
-    return `fa-solid fa-chevron-${this.showSelectionPanel ? 'up' : 'down'} text-[color:var(--color-text-tertiary)] text-base`;
+    return `fa-solid fa-chevron-${this.showSelectionPanel ? 'up' : 'down'} text-[color:var(--color-slate-400)] text-base`;
   },
 
   get promptPanelChevronClass(): string {
@@ -590,7 +590,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   getPromptItemChevronClass(index: number): string {
-    return `fa-solid fa-chevron-${this.expandedPromptIndex === index ? 'up' : 'down'} text-[color:var(--color-text-tertiary)]`;
+    return `fa-solid fa-chevron-${this.expandedPromptIndex === index ? 'up' : 'down'} text-[color:var(--color-slate-400)]`;
   },
 
   getTargetById(targetId: string) {
@@ -630,7 +630,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   getAsinTextClass(asin: string): string {
     return this.selectedAsins.includes(asin)
       ? 'text-[var(--color-primary-dark,var(--color-primary))]'
-      : 'text-[color:var(--color-text-tertiary)]';
+      : 'text-[color:var(--color-slate-400)]';
   },
 
   getListingTargetCardClass(targetId: string): string {
@@ -752,17 +752,17 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
   },
 
   get analysisHeroTextClass(): string {
-    return this.analysisHeroIsStrong ? 'text-white' : 'text-[color:var(--color-text-primary)]';
+    return this.analysisHeroIsStrong ? 'text-white' : 'text-[color:var(--color-slate-900)]';
   },
 
   get analysisHeroSubtextClass(): string {
-    return this.analysisHeroIsStrong ? 'text-white/70' : 'text-[color:var(--color-text-secondary)]';
+    return this.analysisHeroIsStrong ? 'text-white/70' : 'text-[color:var(--color-slate-500)]';
   },
 
   get analysisHeroMetricPillClass(): string {
     return this.analysisHeroIsStrong
       ? 'bg-white/20 text-white'
-      : 'bg-slate-100 text-[color:var(--color-text-tertiary)] border border-slate-200';
+      : 'bg-slate-100 text-[color:var(--color-slate-400)] border border-slate-200';
   },
 
   get analysisPerfButtonClass(): string {
@@ -775,7 +775,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     if (this.analysisHeroIsComplete)
       return 'w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm';
     if (!this.analysisHeroIsStrong)
-      return 'w-14 h-14 rounded-xl bg-slate-100 text-[color:var(--color-text-secondary)] border border-slate-200 shadow-sm';
+      return 'w-14 h-14 rounded-xl bg-slate-100 text-[color:var(--color-slate-500)] border border-slate-200 shadow-sm';
     return this.isAnalyzing
       ? 'w-16 h-16 rounded-2xl bg-white/20 text-white border border-white/20 backdrop-blur-sm shadow-lg'
       : 'w-16 h-16 rounded-2xl bg-white/10 text-white border border-white/20 backdrop-blur-sm shadow-lg';
@@ -1006,11 +1006,11 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
       return 'bg-white/15 text-white cursor-wait backdrop-blur-sm border border-white/30 shadow-2xl';
     if (this.canRunAnalysis && !this.analysisHeroIsStrong) {
       // Appearance primary (not ownership indigo) for default workbench CTA.
-      return 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border border-transparent shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2';
+      return 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border border-transparent shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2';
     }
     return this.canRunAnalysis
-      ? 'bg-white/25 text-white hover:bg-white/35 border border-white/50 shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2'
-      : 'bg-[color:var(--color-bg-tertiary)] text-[color:var(--color-text-tertiary)] cursor-not-allowed border border-[color:var(--border-subtle)] shadow-none';
+      ? 'bg-white/25 text-white hover:bg-white/35 border border-white/50 shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2'
+      : 'bg-[color:var(--color-bg-tertiary)] text-[color:var(--color-slate-400)] cursor-not-allowed border border-[color:var(--border-subtle)] shadow-none';
   },
 
   get analysisHeroBodyClass(): string {

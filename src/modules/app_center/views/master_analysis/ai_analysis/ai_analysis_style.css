@@ -10,7 +10,7 @@
 /* Workbench focus chrome follows Appearance (D6 sample #3); ownership banner stays indigo. */
 .ai-analysis-wrapper
   :where(button, a, input, select, textarea).ai-analysis-focus-primary:focus-visible {
-  outline: 2px solid var(--color-focus-ring, var(--color-primary));
+  outline: 2px solid var(--color-primary, var(--color-primary));
   outline-offset: 2px;
 }
 
@@ -156,7 +156,7 @@
   border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.35));
   border-radius: 0.75rem;
   background: var(--surface-card, #ffffff);
-  color: var(--color-text-primary, #0f172a);
+  color: var(--color-slate-900, #0f172a);
   font-size: 0.8125rem;
   font-weight: 700;
   line-height: 1.25;
@@ -193,7 +193,7 @@
 [data-theme='dark'] .ai-analysis-depth-control__select {
   border-color: rgba(148, 163, 184, 0.28);
   background-color: color-mix(in srgb, var(--surface-card, #0f172a) 88%, #000000);
-  color: var(--color-text-primary, #e2e8f0);
+  color: var(--color-slate-900, #e2e8f0);
 }
 
 /* Strong gradient hero：select 切换为半透明白底 + 白边框 + 白字，与 hero 上的主按钮契合 */
@@ -334,7 +334,7 @@ pre code {
 /* ========== Focus 样式 ========== */
 /* Workbench focus chrome follows Appearance (D6 sample #19); ownership banner stays indigo. */
 .ai-analysis-wrapper :focus-visible {
-  outline: 2px solid var(--color-focus-ring, var(--color-primary));
+  outline: 2px solid var(--color-primary, var(--color-primary));
   outline-offset: 2px;
 }
 

@@ -339,7 +339,7 @@
 .icon-text-group {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm, 12px);
+  gap: var(--spacing-3, 12px);
 }
 
 .icon-text-group .icon-container {
@@ -354,13 +354,13 @@
 .icon-text-title {
   font-size: var(--text-base, 0.875rem);
   font-weight: var(--font-semibold, 600);
-  color: var(--color-text-primary, #1a1a2e);
-  margin-bottom: var(--spacing-2xs, 4px);
+  color: var(--color-slate-900, #1a1a2e);
+  margin-bottom: var(--spacing-1-5, 4px);
 }
 
 .icon-text-description {
   font-size: var(--text-sm, 0.8125rem);
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-slate-500, #6b7280);
   line-height: var(--leading-relaxed, 1.625);
 }
 
@@ -368,20 +368,20 @@
 .icon-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: var(--spacing-md, 16px);
+  gap: var(--spacing-4, 16px);
 }
 
 .icon-grid-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xs, 8px);
+  gap: var(--spacing-2, 8px);
   text-align: center;
 }
 
 .icon-grid-label {
   font-size: var(--text-xs, 0.75rem);
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-slate-500, #6b7280);
 }
 
 /* ========================================
@@ -401,7 +401,7 @@
 
   .icon-grid {
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: var(--spacing-sm, 12px);
+    gap: var(--spacing-3, 12px);
   }
 }
 
@@ -431,19 +431,19 @@
 .dark .icon-text-title,
 [data-color-mode-resolved='dark'] .icon-text-title,
 [data-theme='dark'] .icon-text-title {
-  color: var(--color-text-primary, #f9fafb);
+  color: var(--color-slate-900, #f9fafb);
 }
 
 .dark .icon-text-description,
 [data-color-mode-resolved='dark'] .icon-text-description,
 [data-theme='dark'] .icon-text-description {
-  color: var(--color-text-secondary, #d1d5db);
+  color: var(--color-slate-500, #d1d5db);
 }
 
 .dark .icon-grid-label,
 [data-color-mode-resolved='dark'] .icon-grid-label,
 [data-theme='dark'] .icon-grid-label {
-  color: var(--color-text-secondary, #d1d5db);
+  color: var(--color-slate-500, #d1d5db);
 }
 
 /* ========================================

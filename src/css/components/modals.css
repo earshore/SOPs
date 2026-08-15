@@ -127,7 +127,7 @@
 .modal-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
   margin: 0;
 }
 
@@ -138,7 +138,7 @@
   width: 2rem;
   height: 2rem;
   border-radius: var(--rounded-md);
-  color: var(--color-text-tertiary, var(--color-slate-400));
+  color: var(--color-slate-400, var(--color-slate-400));
   background: transparent;
   border: none;
   cursor: pointer;
@@ -151,7 +151,7 @@
 
 .modal-close:hover {
   background: var(--color-bg-hover, var(--color-slate-100));
-  color: var(--color-text-secondary, var(--color-slate-600));
+  color: var(--color-slate-500, var(--color-slate-600));
 }
 
 /* ========================================

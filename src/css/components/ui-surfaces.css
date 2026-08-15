@@ -6,32 +6,32 @@
 
 .ui-card {
   background: var(--surface-card);
-  color: var(--color-text-primary);
+  color: var(--color-slate-900);
   border: 1px solid var(--color-border-default, var(--border-subtle));
   border-radius: var(--workbench-radius, var(--rounded-md, 8px));
   box-shadow: var(--shadow-card);
 }
 
 .ui-card__title {
-  color: var(--color-text-primary);
+  color: var(--color-slate-900);
 }
 
 .ui-card__muted {
-  color: var(--color-text-secondary);
+  color: var(--color-slate-500);
 }
 
 .ui-panel {
   background: var(--surface-panel);
-  color: var(--color-text-primary);
+  color: var(--color-slate-900);
   border: 1px solid var(--color-border-default, var(--border-subtle));
   border-radius: var(--workbench-radius, var(--rounded-md, 8px));
   box-shadow: var(--shadow-panel, var(--shadow-card));
 }
 
 .ui-panel__title {
-  color: var(--color-text-primary);
+  color: var(--color-slate-900);
 }
 
 .ui-panel__muted {
-  color: var(--color-text-secondary);
+  color: var(--color-slate-500);
 }

@@ -69,10 +69,10 @@
               <i class="fa-solid fa-sliders text-white"></i>
             </div>
             <div class="text-left">
-              <h2 class="text-lg font-semibold text-[color:var(--color-text-primary)]">
+              <h2 class="text-lg font-semibold text-[color:var(--color-slate-900)]">
                 选择 ASIN 与分析目标
               </h2>
-              <p class="text-sm text-[color:var(--color-text-secondary)] mt-0.5">
+              <p class="text-sm text-[color:var(--color-slate-500)] mt-0.5">
                 展开后可一站式完成产品与分析维度配置
               </p>
             </div>
@@ -146,10 +146,10 @@
                       <i class="fa-solid fa-barcode text-accent-600"></i>
                     </div>
                     <div>
-                      <h2 class="text-lg font-semibold text-[color:var(--color-text-primary)]">
+                      <h2 class="text-lg font-semibold text-[color:var(--color-slate-900)]">
                         选择 ASIN
                       </h2>
-                      <p class="text-sm text-[color:var(--color-text-secondary)]">
+                      <p class="text-sm text-[color:var(--color-slate-500)]">
                         选择或输入产品标识符
                       </p>
                     </div>
@@ -177,7 +177,7 @@
                         type="button"
                         :disabled="isAnalyzing"
                         @click="clearAllAsins()"
-                        class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-bg-tertiary)] hover:text-slate-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                        class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-[color:var(--color-slate-500)] hover:bg-[color:var(--color-bg-tertiary)] hover:text-slate-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <i class="fa-solid fa-xmark"></i>
                         清空
@@ -191,7 +191,7 @@
                     <!-- 可用 ASIN 列表（复选框） -->
                     <template x-if="hasAvailableAsins">
                       <div class="mt-3">
-                        <!-- <p class="text-xs text-[color:var(--color-text-secondary)] mb-3 font-medium">已加载的产品（<span x-text="availableAsins.length"></span> 个）：
+                        <!-- <p class="text-xs text-[color:var(--color-slate-500)] mb-3 font-medium">已加载的产品（<span x-text="availableAsins.length"></span> 个）：
                 </p> -->
                         <div class="space-y-2 max-h-48 overflow-y-auto">
                           <template :key="asinItem" x-for="asinItem in availableAsins">
@@ -203,7 +203,7 @@
                                 :checked="selectedAsins.includes(asinItem)"
                                 :disabled="isAnalyzing"
                                 @change="toggleAsin(asinItem)"
-                                class="w-4 h-4 text-[var(--color-primary)] border-slate-300 rounded focus:ring-[var(--color-focus-ring,var(--color-primary))]"
+                                class="w-4 h-4 text-[var(--color-primary)] border-slate-300 rounded focus:ring-[var(--color-primary,var(--color-primary))]"
                                 type="checkbox"
                               />
                               <span
@@ -227,7 +227,7 @@
                       class="mt-4 p-4 bg-gradient-to-r from-slate-50 to-accent-100/50 rounded-xl border border-slate-100"
                     >
                       <h4
-                        class="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5"
+                        class="text-xs font-semibold text-[color:var(--color-slate-500)] uppercase tracking-wider mb-2 flex items-center gap-1.5"
                       >
                         <i class="fa-solid fa-box-open"></i>
                         已加载产品信息
@@ -243,13 +243,13 @@
                               x-text="product.asin"
                             ></span>
                             <p
-                              class="text-[color:var(--color-text-tertiary)] line-clamp-1 mt-0.5"
+                              class="text-[color:var(--color-slate-400)] line-clamp-1 mt-0.5"
                               x-text="product.productTitle"
                             ></p>
                           </div>
                         </template>
                         <template x-if="hasMoreCurrentProducts">
-                          <p class="text-xs text-[color:var(--color-text-secondary)] italic">
+                          <p class="text-xs text-[color:var(--color-slate-500)] italic">
                             还有
                             <span x-text="currentProducts.length - 2"></span>
                             个产品...
@@ -257,7 +257,7 @@
                         </template>
                       </div>
                       <div
-                        class="flex items-center gap-4 mt-3 text-xs text-[color:var(--color-text-secondary)] pt-2 border-t border-slate-200"
+                        class="flex items-center gap-4 mt-3 text-xs text-[color:var(--color-slate-500)] pt-2 border-t border-slate-200"
                       >
                         <span class="flex items-center gap-1">
                           <i class="fa-solid fa-list text-primary-500"></i>
@@ -363,10 +363,10 @@
                     </div>
                     <div class="flex items-start justify-between gap-4 w-full">
                       <div>
-                        <h2 class="text-lg font-semibold text-[color:var(--color-text-primary)]">
+                        <h2 class="text-lg font-semibold text-[color:var(--color-slate-900)]">
                           选择分析目标
                         </h2>
-                        <p class="text-sm text-[color:var(--color-text-secondary)]">
+                        <p class="text-sm text-[color:var(--color-slate-500)]">
                           选择需要执行的 AI 分析维度
                         </p>
                       </div>
@@ -401,7 +401,7 @@
                         type="button"
                         :disabled="isAnalyzing"
                         @click="clearAllTargets()"
-                        class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-bg-tertiary)] hover:text-slate-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                        class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-[color:var(--color-slate-500)] hover:bg-[color:var(--color-bg-tertiary)] hover:text-slate-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <i class="fa-solid fa-xmark"></i>
                         清空
@@ -426,7 +426,7 @@
                         <i class="fa-solid fa-box-open"></i>
                         Listings 分析
                       </div>
-                      <span class="text-xs text-[color:var(--color-text-tertiary)]"
+                      <span class="text-xs text-[color:var(--color-slate-400)]"
                         >基于标题与五点描述</span
                       >
                     </div>
@@ -439,7 +439,7 @@
                           :class="getListingTargetCardClass(target.id)"
                           :disabled="isAnalyzing"
                           @click="toggleTarget(target.id)"
-                          class="relative p-4 rounded-xl border-2 text-left transition duration-200 group hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2"
+                          class="relative p-4 rounded-xl border-2 text-left transition duration-200 group hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2"
                         >
                           <div class="flex items-start gap-3">
                             <div
@@ -450,11 +450,11 @@
                             </div>
                             <div class="flex-1 min-w-0">
                               <h4
-                                class="font-semibold text-sm text-[color:var(--color-text-primary)]"
+                                class="font-semibold text-sm text-[color:var(--color-slate-900)]"
                                 x-text="target.name"
                               ></h4>
                               <p
-                                class="text-xs text-[color:var(--color-text-secondary)] mt-1 line-clamp-2 leading-relaxed"
+                                class="text-xs text-[color:var(--color-slate-500)] mt-1 line-clamp-2 leading-relaxed"
                                 x-text="target.description"
                               ></p>
                             </div>
@@ -481,7 +481,7 @@
                         <i class="fa-solid fa-star"></i>
                         Reviews 分析
                       </div>
-                      <span class="text-xs text-[color:var(--color-text-tertiary)]"
+                      <span class="text-xs text-[color:var(--color-slate-400)]"
                         >基于用户评论数据</span
                       >
                     </div>
@@ -505,11 +505,11 @@
                             </div>
                             <div class="flex-1 min-w-0">
                               <h4
-                                class="font-semibold text-sm text-[color:var(--color-text-primary)]"
+                                class="font-semibold text-sm text-[color:var(--color-slate-900)]"
                                 x-text="target.name"
                               ></h4>
                               <p
-                                class="text-xs text-[color:var(--color-text-secondary)] mt-1 line-clamp-2 leading-relaxed"
+                                class="text-xs text-[color:var(--color-slate-500)] mt-1 line-clamp-2 leading-relaxed"
                                 x-text="target.description"
                               ></p>
                             </div>
@@ -539,7 +539,7 @@
                   <button
                     type="button"
                     @click="togglePromptPanel()"
-                    class="w-full flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-[color:var(--color-bg-secondary)] px-4 py-4 text-sm text-[color:var(--color-text-tertiary)] transition duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:bg-[color:var(--color-bg-hover)] hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2"
+                    class="w-full flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-[color:var(--color-bg-secondary)] px-4 py-4 text-sm text-[color:var(--color-slate-400)] transition duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:bg-[color:var(--color-bg-hover)] hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2"
                   >
                     <div class="flex items-center gap-3 min-w-0">
                       <div
@@ -548,10 +548,10 @@
                         <i class="fa-solid fa-code text-accent-600"></i>
                       </div>
                       <div class="text-left min-w-0">
-                        <h3 class="text-sm font-semibold text-[color:var(--color-text-primary)]">
+                        <h3 class="text-sm font-semibold text-[color:var(--color-slate-900)]">
                           任务预览
                         </h3>
-                        <p class="text-xs text-[color:var(--color-text-secondary)] mt-0.5">
+                        <p class="text-xs text-[color:var(--color-slate-500)] mt-0.5">
                           在执行分析前预览各任务 Prompt 内容
                         </p>
                       </div>
@@ -607,7 +607,7 @@
                                   x-text="getTargetName(targetId)"
                                 ></h4>
                                 <p
-                                  class="text-xs text-[color:var(--color-text-tertiary)]"
+                                  class="text-xs text-[color:var(--color-slate-400)]"
                                   x-text="getTargetDescription(targetId)"
                                 ></p>
                               </div>
@@ -621,7 +621,7 @@
                                   class="text-xs font-mono font-semibold text-emerald-400"
                                   x-text="getFormattedTokenCount(targetId)"
                                 ></span>
-                                <span class="text-xs text-[color:var(--color-text-secondary)]"
+                                <span class="text-xs text-[color:var(--color-slate-500)]"
                                   >tokens</span
                                 >
                               </div>
@@ -634,7 +634,7 @@
                                 class="flex items-center justify-between px-4 py-2 bg-slate-800/50"
                               >
                                 <div
-                                  class="flex items-center gap-2 text-xs text-[color:var(--color-text-tertiary)]"
+                                  class="flex items-center gap-2 text-xs text-[color:var(--color-slate-400)]"
                                 >
                                   <i class="fa-solid fa-file-code"></i>
                                   <span>Prompt Template</span>
@@ -661,14 +661,14 @@
                                       <i
                                         class="fa-solid fa-calculator text-emerald-400 text-xs"
                                       ></i>
-                                      <span class="text-xs text-[color:var(--color-text-tertiary)]"
+                                      <span class="text-xs text-[color:var(--color-slate-400)]"
                                         >Token 统计:</span
                                       >
                                       <span
                                         class="text-sm font-mono font-bold text-emerald-400"
                                         x-text="getPromptTokenCountText(targetId)"
                                       ></span>
-                                      <span class="text-xs text-[color:var(--color-text-secondary)]"
+                                      <span class="text-xs text-[color:var(--color-slate-500)]"
                                         >tokens</span
                                       >
                                     </div>
@@ -676,7 +676,7 @@
                                       <i
                                         class="fa-solid fa-align-left text-primary-400 text-xs"
                                       ></i>
-                                      <span class="text-xs text-[color:var(--color-text-tertiary)]"
+                                      <span class="text-xs text-[color:var(--color-slate-400)]"
                                         >字符数:</span
                                       >
                                       <span
@@ -685,7 +685,7 @@
                                       ></span>
                                     </div>
                                   </div>
-                                  <div class="text-xs text-[color:var(--color-text-secondary)]">
+                                  <div class="text-xs text-[color:var(--color-slate-500)]">
                                     <i class="fa-solid fa-info-circle"></i>
                                     <span>基于 GPT-4 token 估算</span>
                                   </div>
@@ -759,7 +759,7 @@
                   <span :hidden="!isAnalysisComplete" x-text="analysisCompleteTitle"></span>
                   <span
                     :hidden="!isAnalysisComplete"
-                    class="text-xs text-[color:var(--color-text-secondary)] font-normal ml-1"
+                    class="text-xs text-[color:var(--color-slate-500)] font-normal ml-1"
                     >分析完成于 <span x-text="reportCompletedAtText"></span
                   ></span>
                   <span :hidden="!isAnalysisRunning">AI 正在分析中</span>
@@ -1006,7 +1006,7 @@
                   ></h2>
 
                   <p
-                    class="text-[color:var(--color-text-secondary)] text-sm mt-1 flex items-center gap-2 flex-wrap"
+                    class="text-[color:var(--color-slate-500)] text-sm mt-1 flex items-center gap-2 flex-wrap"
                   >
                     <span :hidden="!isAnalyzing">
                       已输出 <span x-text="reportResults.length"></span> /
@@ -1016,11 +1016,11 @@
                     <span :hidden="!analysisNotRunning">
                       <template x-if="hasEvidenceHygieneSummary">
                         <span
-                          class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-[color:var(--color-bg-secondary)] px-2 py-0.5 text-xs text-[color:var(--color-text-tertiary)]"
+                          class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-[color:var(--color-bg-secondary)] px-2 py-0.5 text-xs text-[color:var(--color-slate-400)]"
                           data-testid="ma-analysis-hygiene-report"
                         >
                           <i
-                            class="fa-solid fa-filter text-[color:var(--color-text-tertiary)]"
+                            class="fa-solid fa-filter text-[color:var(--color-slate-400)]"
                             aria-hidden="true"
                           ></i>
                           <span x-text="evidenceHygieneShortText"></span>
@@ -1071,7 +1071,7 @@
                       x-text="reportResults.length"
                     ></div>
                     <div
-                      class="text-[color:var(--color-text-secondary)] text-xs uppercase tracking-wider mt-1"
+                      class="text-[color:var(--color-slate-500)] text-xs uppercase tracking-wider mt-1"
                     >
                       分析维度
                     </div>
@@ -1103,9 +1103,7 @@
                       class="text-xl font-bold text-slate-900"
                       x-text="reportListingsResults.length"
                     ></div>
-                    <div class="text-xs text-[color:var(--color-text-secondary)]">
-                      Listings 维度
-                    </div>
+                    <div class="text-xs text-[color:var(--color-slate-500)]">Listings 维度</div>
                   </div>
                 </div>
               </div>
@@ -1121,7 +1119,7 @@
                       class="text-xl font-bold text-slate-900"
                       x-text="reportReviewsResults.length"
                     ></div>
-                    <div class="text-xs text-[color:var(--color-text-secondary)]">Reviews 维度</div>
+                    <div class="text-xs text-[color:var(--color-slate-500)]">Reviews 维度</div>
                   </div>
                 </div>
               </div>
@@ -1137,7 +1135,7 @@
                       class="text-xl font-bold text-slate-900"
                       x-text="reportTotalHighlights"
                     ></div>
-                    <div class="text-xs text-[color:var(--color-text-secondary)]">核心发现</div>
+                    <div class="text-xs text-[color:var(--color-slate-500)]">核心发现</div>
                   </div>
                 </div>
               </div>
@@ -1150,7 +1148,7 @@
                   </div>
                   <div>
                     <div class="text-xl font-bold text-slate-900" x-text="reportTotalDetails"></div>
-                    <div class="text-xs text-[color:var(--color-text-secondary)]">分析细项</div>
+                    <div class="text-xs text-[color:var(--color-slate-500)]">分析细项</div>
                   </div>
                 </div>
               </div>
@@ -1191,7 +1189,7 @@
                         x-text="getConfidenceLevel(overallConfidencePercent)"
                       ></span>
                     </div>
-                    <div class="text-xs text-[color:var(--color-text-secondary)]">总体置信度</div>
+                    <div class="text-xs text-[color:var(--color-slate-500)]">总体置信度</div>
                     <span class="sr-only" x-text="overallConfidenceLevelText"></span>
                   </div>
                 </div>
@@ -1210,7 +1208,7 @@
                     </div>
                     <div class="flex-1 h-px bg-slate-200"></div>
                     <span
-                      class="text-sm text-[color:var(--color-text-secondary)] font-semibold bg-[color:var(--color-bg-tertiary)] px-3 py-1 rounded-lg"
+                      class="text-sm text-[color:var(--color-slate-500)] font-semibold bg-[color:var(--color-bg-tertiary)] px-3 py-1 rounded-lg"
                       x-text="getListingsResultCountText()"
                     ></span>
                   </div>
@@ -1241,7 +1239,7 @@
                               ></h3>
                               <div class="flex items-center gap-2 mt-1">
                                 <span
-                                  class="text-xs px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-slate-200 font-medium text-[color:var(--color-text-tertiary)]"
+                                  class="text-xs px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-slate-200 font-medium text-[color:var(--color-slate-400)]"
                                   x-text="result.source"
                                 ></span>
                                 <!-- 置信度徽章 -->
@@ -1276,7 +1274,7 @@
                               <i class="fa-solid fa-chart-bar text-accent-600"></i>
                             </div>
                             <span
-                              class="text-xs font-bold text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
+                              class="text-xs font-bold text-[color:var(--color-slate-400)] uppercase tracking-wider"
                               >数据概览</span
                             >
                           </div>
@@ -1286,11 +1284,11 @@
                                 class="relative bg-[var(--surface-card,#ffffff)] rounded-lg p-4 text-center border border-[color:var(--border-subtle,rgba(148,163,184,0.24))]"
                               >
                                 <div
-                                  class="text-xl font-extrabold text-[color:var(--color-text-primary,#0f172a)]"
+                                  class="text-xl font-extrabold text-[color:var(--color-slate-900,#0f172a)]"
                                   x-text="stat.value"
                                 ></div>
                                 <div
-                                  class="text-xs text-[color:var(--color-text-secondary,#64748b)] mt-1 font-medium"
+                                  class="text-xs text-[color:var(--color-slate-500,#64748b)] mt-1 font-medium"
                                   x-text="stat.label"
                                 ></div>
                               </div>
@@ -1306,7 +1304,7 @@
                               <i class="fa-solid fa-lightbulb text-amber-600"></i>
                             </div>
                             <span
-                              class="text-xs font-bold text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
+                              class="text-xs font-bold text-[color:var(--color-slate-400)] uppercase tracking-wider"
                               >核心发现</span
                             >
                           </div>
@@ -1331,12 +1329,10 @@
                             <div
                               class="w-6 h-6 bg-[color:var(--color-bg-tertiary)] rounded-lg flex items-center justify-center"
                             >
-                              <i
-                                class="fa-solid fa-list text-[color:var(--color-text-tertiary)]"
-                              ></i>
+                              <i class="fa-solid fa-list text-[color:var(--color-slate-400)]"></i>
                             </div>
                             <span
-                              class="text-xs font-bold text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
+                              class="text-xs font-bold text-[color:var(--color-slate-400)] uppercase tracking-wider"
                               >详细分析</span
                             >
                           </div>
@@ -1379,7 +1375,7 @@
                     </div>
                     <div class="flex-1 h-px bg-slate-200"></div>
                     <span
-                      class="text-sm text-[color:var(--color-text-secondary)] font-semibold bg-[color:var(--color-bg-tertiary)] px-3 py-1 rounded-lg"
+                      class="text-sm text-[color:var(--color-slate-500)] font-semibold bg-[color:var(--color-bg-tertiary)] px-3 py-1 rounded-lg"
                       x-text="getReviewsResultCountText()"
                     ></span>
                   </div>
@@ -1410,7 +1406,7 @@
                               ></h3>
                               <div class="flex items-center gap-2 mt-1">
                                 <span
-                                  class="text-xs px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-slate-200 font-medium text-[color:var(--color-text-tertiary)]"
+                                  class="text-xs px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-slate-200 font-medium text-[color:var(--color-slate-400)]"
                                   x-text="result.source"
                                 ></span>
                                 <!-- 置信度徽章 -->
@@ -1445,7 +1441,7 @@
                               <i class="fa-solid fa-chart-bar text-accent-600"></i>
                             </div>
                             <span
-                              class="text-xs font-bold text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
+                              class="text-xs font-bold text-[color:var(--color-slate-400)] uppercase tracking-wider"
                               >数据概览</span
                             >
                           </div>
@@ -1455,11 +1451,11 @@
                                 class="relative bg-[var(--surface-card,#ffffff)] rounded-lg p-4 text-center border border-[color:var(--border-subtle,rgba(148,163,184,0.24))]"
                               >
                                 <div
-                                  class="text-xl font-extrabold text-[color:var(--color-text-primary,#0f172a)]"
+                                  class="text-xl font-extrabold text-[color:var(--color-slate-900,#0f172a)]"
                                   x-text="stat.value"
                                 ></div>
                                 <div
-                                  class="text-xs text-[color:var(--color-text-secondary,#64748b)] mt-1 font-medium"
+                                  class="text-xs text-[color:var(--color-slate-500,#64748b)] mt-1 font-medium"
                                   x-text="stat.label"
                                 ></div>
                               </div>
@@ -1475,7 +1471,7 @@
                               <i class="fa-solid fa-lightbulb text-amber-600"></i>
                             </div>
                             <span
-                              class="text-xs font-bold text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
+                              class="text-xs font-bold text-[color:var(--color-slate-400)] uppercase tracking-wider"
                               >核心发现</span
                             >
                           </div>
@@ -1500,12 +1496,10 @@
                             <div
                               class="w-6 h-6 bg-[color:var(--color-bg-tertiary)] rounded-lg flex items-center justify-center"
                             >
-                              <i
-                                class="fa-solid fa-list text-[color:var(--color-text-tertiary)]"
-                              ></i>
+                              <i class="fa-solid fa-list text-[color:var(--color-slate-400)]"></i>
                             </div>
                             <span
-                              class="text-xs font-bold text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
+                              class="text-xs font-bold text-[color:var(--color-slate-400)] uppercase tracking-wider"
                               >详细分析</span
                             >
                           </div>
@@ -1558,7 +1552,7 @@
                             >ANALYSIS REPORT</span
                           >
                         </h4>
-                        <p class="text-xs text-[color:var(--color-text-tertiary)]">
+                        <p class="text-xs text-[color:var(--color-slate-400)]">
                           <span x-text="selectedTargets.length"></span>
                           个分析维度 ·
                           <span x-text="getReportJsonKbText()"></span> KB
@@ -1616,13 +1610,13 @@
                         class="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-t border-slate-700/30"
                       >
                         <div
-                          class="flex items-center gap-2 text-xs text-[color:var(--color-text-tertiary)]"
+                          class="flex items-center gap-2 text-xs text-[color:var(--color-slate-400)]"
                         >
                           <i class="fa-solid fa-file-code"></i>
                           <span>analysis_report.json</span>
                         </div>
                         <div
-                          class="flex items-center gap-4 text-xs text-[color:var(--color-text-secondary)]"
+                          class="flex items-center gap-4 text-xs text-[color:var(--color-slate-500)]"
                         >
                           <span>tokens: <span x-text="getReportJsonTokenText()"></span></span>
                           <span>字符: <span x-text="getReportJsonCharText()"></span></span>
@@ -1638,7 +1632,7 @@
                   <template x-if="jsonViewerCollapsed">
                     <div class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30">
                       <div
-                        class="flex items-center gap-2 text-xs text-[color:var(--color-text-secondary)]"
+                        class="flex items-center gap-2 text-xs text-[color:var(--color-slate-500)]"
                       >
                         <i class="fa-solid fa-code"></i>
                         <span class="font-mono truncate"
@@ -1698,7 +1692,7 @@
         <div
           class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl mb-8 shadow-inner"
         >
-          <i class="fa-solid fa-lightbulb text-[color:var(--color-text-tertiary)] text-4xl"></i>
+          <i class="fa-solid fa-lightbulb text-[color:var(--color-slate-400)] text-4xl"></i>
         </div>
         <h3
           class="text-2xl font-bold text-slate-700 mb-3"
@@ -1706,18 +1700,18 @@
         ></h3>
         <p
           :hidden="hasNoAnalysisData"
-          class="text-[color:var(--color-text-secondary)] max-w-lg mx-auto leading-relaxed"
+          class="text-[color:var(--color-slate-500)] max-w-lg mx-auto leading-relaxed"
         >
           选择分析目标并确认 ASIN，点击"开始分析"按钮，<br />
           AI 将自动提取 Listings 和 Reviews 中的关键洞察
         </p>
         <p
           :hidden="!hasNoAnalysisData"
-          class="text-[color:var(--color-text-secondary)] max-w-lg mx-auto leading-relaxed"
+          class="text-[color:var(--color-slate-500)] max-w-lg mx-auto leading-relaxed"
         >
           当前没有可分析的产品数据。推荐操作：先完成数据采集或导入，再回到这里生成 Listings 与
           Reviews 洞察。
-          <span class="block mt-2 text-sm text-[color:var(--color-text-tertiary)]">
+          <span class="block mt-2 text-sm text-[color:var(--color-slate-400)]">
             数据准备完成后，这里会展示可导出的 AI 分析报告。
           </span>
         </p>
@@ -1733,7 +1727,7 @@
           </button>
         </div>
         <div :hidden="hasNoAnalysisData" class="mt-10 flex items-center justify-center gap-8">
-          <div class="flex items-center gap-3 text-[color:var(--color-text-secondary)]">
+          <div class="flex items-center gap-3 text-[color:var(--color-slate-500)]">
             <div
               class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center border border-primary-100"
             >
@@ -1741,11 +1735,11 @@
             </div>
             <div class="text-left">
               <div class="font-semibold text-slate-700">Listings 分析</div>
-              <div class="text-xs text-[color:var(--color-text-tertiary)]">标题与卖点洞察</div>
+              <div class="text-xs text-[color:var(--color-slate-400)]">标题与卖点洞察</div>
             </div>
           </div>
           <div class="w-px h-10 bg-slate-200"></div>
-          <div class="flex items-center gap-3 text-[color:var(--color-text-secondary)]">
+          <div class="flex items-center gap-3 text-[color:var(--color-slate-500)]">
             <div
               class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center border border-amber-200"
             >
@@ -1753,7 +1747,7 @@
             </div>
             <div class="text-left">
               <div class="font-semibold text-slate-700">Reviews 分析</div>
-              <div class="text-xs text-[color:var(--color-text-tertiary)]">用户评论深度挖掘</div>
+              <div class="text-xs text-[color:var(--color-slate-400)]">用户评论深度挖掘</div>
             </div>
           </div>
         </div>

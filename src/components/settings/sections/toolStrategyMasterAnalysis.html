@@ -1,301 +1,266 @@
-                <details
-                  class="settings-pref-fold"
-                  data-settings-focus="master-analysis"
-                  data-settings-nav-id="master-analysis"
-                  data-settings-nav-group="tool"
+<details
+  class="settings-pref-fold"
+  data-settings-focus="master-analysis"
+  data-settings-nav-id="master-analysis"
+  data-settings-nav-group="tool"
+>
+  <summary class="settings-pref-row settings-pref-row--fold">
+    <div class="settings-pref-row__meta">
+      <span class="settings-pref-row__icon" aria-hidden="true">
+        <i class="fas fa-chart-pie"></i>
+      </span>
+      <div class="min-w-0">
+        <h4 class="settings-pref-row__title">Master Analysis</h4>
+        <p class="settings-pref-row__hint">数据采集 → AI 智能分析</p>
+      </div>
+    </div>
+    <i
+      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+      aria-hidden="true"
+    ></i>
+  </summary>
+  <div class="settings-pref-fold__body">
+    <div class="settings-tool-l3-stack">
+      <!-- Product page: 数据采集 (proxy + scrape runtime) -->
+      <!--settings-slot:networkSection-->
+
+      <!-- Product page: AI 智能分析 -->
+      <div
+        class="settings-tool-l3 settings-tool-l3--static"
+        data-settings-focus="master-analysis-ai"
+        data-settings-nav-id="master-analysis-ai"
+        data-settings-nav-group="tool"
+      >
+        <div class="settings-tool-l3__summary">
+          <div class="min-w-0">
+            <h5 class="settings-card__title">AI 智能分析</h5>
+            <p class="settings-tool-page__hint">默认模型、性能设置与输出预算</p>
+          </div>
+        </div>
+        <div class="settings-tool-page settings-tool-l3__body">
+          <div class="settings-pref-list" data-testid="settings-ma-cache-pref-list">
+            <template
+              x-for="item in toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])"
+              :key="item.id"
+            >
+              <div class="settings-pref-row">
+                <div class="settings-pref-row__meta">
+                  <div class="min-w-0">
+                    <label class="settings-pref-row__title" :for="'tool-strategy-model-' + item.id"
+                      >默认模型</label
+                    >
+                    <p
+                      class="settings-pref-row__hint"
+                      x-text="item.model ? '覆盖全局模型' : '跟随全局模型'"
+                    ></p>
+                  </div>
+                </div>
+                <div class="settings-pref-row__control settings-pref-row__control--model">
+                  <div class="settings-tool-page__model">
+                    <select
+                      :id="'tool-strategy-model-' + item.id"
+                      :name="'tool-strategy-model-' + item.id"
+                      :value="item.model"
+                      @change="setToolTargetModel(item.id, $event)"
+                      :disabled="toolStrategyModelSelectDisabled"
+                      class="settings-control settings-control--sm settings-tool-page__model-select"
+                    >
+                      <option value="" x-text="item.followGlobalOptionLabel"></option>
+                      <template x-for="model in llm.models" :key="getModelValue(model)">
+                        <option
+                          :value="getModelValue(model)"
+                          x-text="getToolStrategyModelOptionLabel(model)"
+                        ></option>
+                      </template>
+                    </select>
+                    <span class="settings-tool-page__model-chevron" aria-hidden="true">
+                      <i class="fas fa-chevron-down"></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <div class="settings-pref-divider" role="separator"></div>
+
+            <div class="settings-pref-row">
+              <div class="settings-pref-row__meta">
+                <div class="min-w-0">
+                  <span class="settings-pref-row__title">性能设置</span>
+                  <p class="settings-pref-row__hint">并发 / 缓存 / 失败策略</p>
+                </div>
+              </div>
+              <div class="settings-pref-row__control">
+                <div
+                  class="settings-schedule-select relative"
+                  @keydown.escape.window="schedulePreferenceMenuOpen = false"
+                  @click.outside="schedulePreferenceMenuOpen = false"
                 >
-                  <summary class="settings-pref-row settings-pref-row--fold">
-                    <div class="settings-pref-row__meta">
-                      <span class="settings-pref-row__icon" aria-hidden="true">
-                        <i class="fas fa-chart-pie"></i>
-                      </span>
-                      <div class="min-w-0">
-                        <h4 class="settings-pref-row__title">Master Analysis</h4>
-                        <p class="settings-pref-row__hint">数据采集 → AI 智能分析</p>
-                      </div>
-                    </div>
+                  <button
+                    type="button"
+                    class="settings-control settings-control--sm settings-schedule-select__trigger"
+                    data-testid="settings-schedule-preference"
+                    :aria-expanded="schedulePreferenceMenuOpen.toString()"
+                    aria-haspopup="listbox"
+                    @click="schedulePreferenceMenuOpen = !schedulePreferenceMenuOpen"
+                  >
+                    <span class="settings-schedule-select__value min-w-0 flex-1 text-left">
+                      <span
+                        class="settings-schedule-select__label"
+                        x-text="masterAnalysisScheduleSelectedLabel"
+                      ></span>
+                      <span
+                        class="settings-schedule-select__hint"
+                        x-text="masterAnalysisScheduleSelectedHint"
+                      ></span>
+                    </span>
                     <i
-                      class="settings-pref-fold__chevron fas fa-chevron-down text-[10px] text-slate-400"
+                      class="fas fa-chevron-down text-[9px] text-slate-400 shrink-0"
                       aria-hidden="true"
                     ></i>
-                  </summary>
-                  <div class="settings-pref-fold__body">
-                    <div class="settings-tool-l3-stack">
-                      <!-- Product page: 数据采集 (proxy + scrape runtime) -->
-<!--settings-slot:networkSection-->
-
-                      <!-- Product page: AI 智能分析 -->
-                      <div
-                        class="settings-tool-l3 settings-tool-l3--static"
-                        data-settings-focus="master-analysis-ai"
-                        data-settings-nav-id="master-analysis-ai"
-                        data-settings-nav-group="tool"
-                      >
-                        <div class="settings-tool-l3__summary">
-                          <div class="min-w-0">
-                            <h5 class="settings-card__title">AI 智能分析</h5>
-                            <p class="settings-tool-page__hint">默认模型、性能设置与输出预算</p>
-                          </div>
-                        </div>
-                        <div class="settings-tool-page settings-tool-l3__body">
-                          <div class="settings-pref-list" data-testid="settings-ma-cache-pref-list">
-                            <template
-                              x-for="item in toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])"
-                              :key="item.id"
-                            >
-                              <div class="settings-pref-row">
-                                <div class="settings-pref-row__meta">
-                                  <div class="min-w-0">
-                                    <label
-                                      class="settings-pref-row__title"
-                                      :for="'tool-strategy-model-' + item.id"
-                                      >默认模型</label
-                                    >
-                                    <p
-                                      class="settings-pref-row__hint"
-                                      x-text="item.model ? '覆盖全局模型' : '跟随全局模型'"
-                                    ></p>
-                                  </div>
-                                </div>
-                                <div
-                                  class="settings-pref-row__control settings-pref-row__control--model"
-                                >
-                                  <div class="settings-tool-page__model">
-                                    <select
-                                      :id="'tool-strategy-model-' + item.id"
-                                      :name="'tool-strategy-model-' + item.id"
-                                      :value="item.model"
-                                      @change="setToolTargetModel(item.id, $event)"
-                                      :disabled="toolStrategyModelSelectDisabled"
-                                      class="settings-control settings-control--sm settings-tool-page__model-select"
-                                    >
-                                      <option
-                                        value=""
-                                        x-text="item.followGlobalOptionLabel"
-                                      ></option>
-                                      <template
-                                        x-for="model in llm.models"
-                                        :key="getModelValue(model)"
-                                      >
-                                        <option
-                                          :value="getModelValue(model)"
-                                          x-text="getToolStrategyModelOptionLabel(model)"
-                                        ></option>
-                                      </template>
-                                    </select>
-                                    <span
-                                      class="settings-tool-page__model-chevron"
-                                      aria-hidden="true"
-                                    >
-                                      <i class="fas fa-chevron-down"></i>
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </template>
-
-                            <div class="settings-pref-divider" role="separator"></div>
-
-                            <div class="settings-pref-row">
-                              <div class="settings-pref-row__meta">
-                                <div class="min-w-0">
-                                  <span class="settings-pref-row__title">性能设置</span>
-                                  <p class="settings-pref-row__hint">并发 / 缓存 / 失败策略</p>
-                                </div>
-                              </div>
-                              <div class="settings-pref-row__control">
-                                <div
-                                  class="settings-schedule-select relative"
-                                  @keydown.escape.window="schedulePreferenceMenuOpen = false"
-                                  @click.outside="schedulePreferenceMenuOpen = false"
-                                >
-                                  <button
-                                    type="button"
-                                    class="settings-control settings-control--sm settings-schedule-select__trigger"
-                                    data-testid="settings-schedule-preference"
-                                    :aria-expanded="schedulePreferenceMenuOpen.toString()"
-                                    aria-haspopup="listbox"
-                                    @click="schedulePreferenceMenuOpen = !schedulePreferenceMenuOpen"
-                                  >
-                                    <span
-                                      class="settings-schedule-select__value min-w-0 flex-1 text-left"
-                                    >
-                                      <span
-                                        class="settings-schedule-select__label"
-                                        x-text="masterAnalysisScheduleSelectedLabel"
-                                      ></span>
-                                      <span
-                                        class="settings-schedule-select__hint"
-                                        x-text="masterAnalysisScheduleSelectedHint"
-                                      ></span>
-                                    </span>
-                                    <i
-                                      class="fas fa-chevron-down text-[9px] text-slate-400 shrink-0"
-                                      aria-hidden="true"
-                                    ></i>
-                                  </button>
-                                  <ul
-                                    class="settings-schedule-select__menu"
-                                    role="listbox"
-                                    :hidden="!schedulePreferenceMenuOpen"
-                                  >
-                                    <template
-                                      x-for="opt in masterAnalysisScheduleOptions"
-                                      :key="opt.value"
-                                    >
-                                      <li role="option">
-                                        <button
-                                          type="button"
-                                          class="settings-schedule-select__option"
-                                          :class="{
+                  </button>
+                  <ul
+                    class="settings-schedule-select__menu"
+                    role="listbox"
+                    :hidden="!schedulePreferenceMenuOpen"
+                  >
+                    <template x-for="opt in masterAnalysisScheduleOptions" :key="opt.value">
+                      <li role="option">
+                        <button
+                          type="button"
+                          class="settings-schedule-select__option"
+                          :class="{
                                           'is-active':
                                             runtimeStrategy.settings.masterAnalysis
                                               .schedulingPreference === opt.value,
                                         }"
-                                          :aria-selected="(
+                          :aria-selected="(
                                           runtimeStrategy.settings.masterAnalysis
                                             .schedulingPreference === opt.value
                                         ).toString()"
-                                          @click="setMasterAnalysisSchedulePreference(opt.value)"
-                                        >
-                                          <span
-                                            class="settings-schedule-select__label"
-                                            x-text="opt.label"
-                                          ></span>
-                                          <span
-                                            class="settings-schedule-select__hint"
-                                            x-text="opt.hint"
-                                          ></span>
-                                        </button>
-                                      </li>
-                                    </template>
-                                  </ul>
-                                </div>
-                              </div>
-                            </div>
+                          @click="setMasterAnalysisSchedulePreference(opt.value)"
+                        >
+                          <span class="settings-schedule-select__label" x-text="opt.label"></span>
+                          <span class="settings-schedule-select__hint" x-text="opt.hint"></span>
+                        </button>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </div>
+            </div>
 
-                            <div class="settings-pref-divider" role="separator"></div>
+            <div class="settings-pref-divider" role="separator"></div>
 
-                            <div class="settings-pref-row">
-                              <div class="settings-pref-row__meta">
-                                <div class="min-w-0">
-                                  <h4 class="settings-pref-row__title">证据深度</h4>
-                                  <p class="settings-pref-row__hint">
-                                    控制评论/要点采样量：快速更省时，深入更完整
-                                  </p>
-                                </div>
-                              </div>
-                              <div class="settings-pref-row__control">
-                                <select
-                                  class="settings-control settings-control--sm"
-                                  data-testid="settings-evidence-depth"
-                                  :value="runtimeStrategy.settings.masterAnalysis.evidenceDepth || 'balanced'"
-                                  @change="setMasterAnalysisEvidenceDepth($event.target.value)"
-                                >
-                                  <template
-                                    x-for="opt in masterAnalysisEvidenceDepthOptions"
-                                    :key="opt.value"
-                                  >
-                                    <option
-                                      :value="opt.value"
-                                      x-text="opt.label + ' — ' + opt.hint"
-                                    ></option>
-                                  </template>
-                                </select>
-                              </div>
-                            </div>
+            <div class="settings-pref-row">
+              <div class="settings-pref-row__meta">
+                <div class="min-w-0">
+                  <h4 class="settings-pref-row__title">证据深度</h4>
+                  <p class="settings-pref-row__hint">控制评论/要点采样量：快速更省时，深入更完整</p>
+                </div>
+              </div>
+              <div class="settings-pref-row__control">
+                <select
+                  class="settings-control settings-control--sm"
+                  data-testid="settings-evidence-depth"
+                  :value="runtimeStrategy.settings.masterAnalysis.evidenceDepth || 'balanced'"
+                  @change="setMasterAnalysisEvidenceDepth($event.target.value)"
+                >
+                  <template x-for="opt in masterAnalysisEvidenceDepthOptions" :key="opt.value">
+                    <option :value="opt.value" x-text="opt.label + ' — ' + opt.hint"></option>
+                  </template>
+                </select>
+              </div>
+            </div>
 
-                            <div class="settings-pref-divider" role="separator"></div>
+            <div class="settings-pref-divider" role="separator"></div>
 
-                            <label class="settings-pref-row">
-                              <div class="settings-pref-row__meta">
-                                <div class="min-w-0">
-                                  <span class="settings-pref-row__title">完整报告 Token</span>
-                                </div>
-                              </div>
-                              <div class="settings-pref-row__control">
-                                <input
-                                  type="number"
-                                  min="4096"
-                                  max="64000"
-                                  step="1024"
-                                  :value="runtimeStrategy.settings.masterAnalysis.fullReportMaxTokens"
-                                  @input="setRuntimeNumber('masterAnalysis.fullReportMaxTokens', $event)"
-                                  class="settings-control settings-control--sm"
-                                />
-                              </div>
-                            </label>
+            <label class="settings-pref-row">
+              <div class="settings-pref-row__meta">
+                <div class="min-w-0">
+                  <span class="settings-pref-row__title">完整报告 Token</span>
+                </div>
+              </div>
+              <div class="settings-pref-row__control">
+                <input
+                  type="number"
+                  min="4096"
+                  max="64000"
+                  step="1024"
+                  :value="runtimeStrategy.settings.masterAnalysis.fullReportMaxTokens"
+                  @input="setRuntimeNumber('masterAnalysis.fullReportMaxTokens', $event)"
+                  class="settings-control settings-control--sm"
+                />
+              </div>
+            </label>
 
-                            <div class="settings-pref-divider" role="separator"></div>
+            <div class="settings-pref-divider" role="separator"></div>
 
-                            <label class="settings-pref-row">
-                              <div class="settings-pref-row__meta">
-                                <div class="min-w-0">
-                                  <span class="settings-pref-row__title">翻译报告 Token</span>
-                                </div>
-                              </div>
-                              <div class="settings-pref-row__control">
-                                <input
-                                  type="number"
-                                  min="4096"
-                                  max="64000"
-                                  step="1024"
-                                  :value="runtimeStrategy.settings.masterAnalysis.translationMaxTokens"
-                                  @input="setRuntimeNumber('masterAnalysis.translationMaxTokens', $event)"
-                                  class="settings-control settings-control--sm"
-                                />
-                              </div>
-                            </label>
+            <label class="settings-pref-row">
+              <div class="settings-pref-row__meta">
+                <div class="min-w-0">
+                  <span class="settings-pref-row__title">翻译报告 Token</span>
+                </div>
+              </div>
+              <div class="settings-pref-row__control">
+                <input
+                  type="number"
+                  min="4096"
+                  max="64000"
+                  step="1024"
+                  :value="runtimeStrategy.settings.masterAnalysis.translationMaxTokens"
+                  @input="setRuntimeNumber('masterAnalysis.translationMaxTokens', $event)"
+                  class="settings-control settings-control--sm"
+                />
+              </div>
+            </label>
 
-                            <div class="settings-pref-divider" role="separator"></div>
+            <div class="settings-pref-divider" role="separator"></div>
 
-                            <div class="settings-pref-row">
-                              <div class="settings-pref-row__meta">
-                                <div class="min-w-0">
-                                  <h4 class="settings-pref-row__title">启用分析缓存</h4>
-                                  <p class="settings-pref-row__hint">主分析 LLM 结果缓存</p>
-                                </div>
-                              </div>
-                              <label class="settings-switch">
-                                <span class="sr-only">启用分析缓存</span>
-                                <input
-                                  type="checkbox"
-                                  :checked="runtimeStrategy.settings.masterAnalysis.enableCache"
-                                  @change="setRuntimeBoolean('masterAnalysis.enableCache', $event)"
-                                />
-                                <span class="settings-switch__track" aria-hidden="true"></span>
-                              </label>
-                            </div>
+            <div class="settings-pref-row">
+              <div class="settings-pref-row__meta">
+                <div class="min-w-0">
+                  <h4 class="settings-pref-row__title">启用分析缓存</h4>
+                  <p class="settings-pref-row__hint">主分析 LLM 结果缓存</p>
+                </div>
+              </div>
+              <label class="settings-switch">
+                <span class="sr-only">启用分析缓存</span>
+                <input
+                  type="checkbox"
+                  :checked="runtimeStrategy.settings.masterAnalysis.enableCache"
+                  @change="setRuntimeBoolean('masterAnalysis.enableCache', $event)"
+                />
+                <span class="settings-switch__track" aria-hidden="true"></span>
+              </label>
+            </div>
 
-                            <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
-                              <div>
-                                <div class="settings-pref-divider" role="separator"></div>
-                                <label class="settings-pref-row">
-                                  <div class="settings-pref-row__meta">
-                                    <div class="min-w-0">
-                                      <span
-                                        class="settings-pref-row__title"
-                                        x-text="item.label"
-                                      ></span>
-                                    </div>
-                                  </div>
-                                  <div class="settings-pref-row__control">
-                                    <input
-                                      type="number"
-                                      :min="item.min"
-                                      :max="item.max"
-                                      :step="item.step"
-                                      :value="item.value"
-                                      @input="setRuntimeNumber(item.path, $event)"
-                                      class="settings-control settings-control--sm"
-                                    />
-                                  </div>
-                                </label>
-                              </div>
-                            </template>
-                          </div>
-                        </div>
-                      </div>
+            <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
+              <div>
+                <div class="settings-pref-divider" role="separator"></div>
+                <label class="settings-pref-row">
+                  <div class="settings-pref-row__meta">
+                    <div class="min-w-0">
+                      <span class="settings-pref-row__title" x-text="item.label"></span>
                     </div>
                   </div>
-                </details>
+                  <div class="settings-pref-row__control">
+                    <input
+                      type="number"
+                      :min="item.min"
+                      :max="item.max"
+                      :step="item.step"
+                      :value="item.value"
+                      @input="setRuntimeNumber(item.path, $event)"
+                      class="settings-control settings-control--sm"
+                    />
+                  </div>
+                </label>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</details>

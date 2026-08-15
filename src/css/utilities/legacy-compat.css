@@ -9,7 +9,7 @@
   /* 映射到 .card 样式（工作台壳层 → workbench radius SSOT） */
   background: white;
   border-radius: var(--workbench-radius, var(--card-radius, 8px));
-  padding: var(--spacing-lg, 1.5rem);
+  padding: var(--spacing-6, 1.5rem);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition-property: box-shadow, transform;
   transition-duration: var(--duration-normal, 300ms);
@@ -64,7 +64,7 @@
   /* 映射到 .card-grid 样式 */
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-lg, 1.5rem);
+  gap: var(--spacing-6, 1.5rem);
 }
 
 /* ==================== 图标容器兼容 ==================== */
@@ -111,9 +111,9 @@
 
 .app-center-search-box:focus-within,
 .sop-search-box:focus-within {
-  border-color: var(--color-focus-ring, var(--color-primary, #3b82f6));
+  border-color: var(--color-primary, var(--color-primary, #3b82f6));
   box-shadow: 0 0 0 3px
-    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 14%, transparent);
+    color-mix(in srgb, var(--color-primary, var(--color-primary, #3b82f6)) 14%, transparent);
 }
 
 .app-center-search-box input,

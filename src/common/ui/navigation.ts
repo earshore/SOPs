@@ -169,12 +169,12 @@ function renderDefaultSidebar(
                 const isActive = currentTab === route.id;
                 const activeClasses = isActive
                   ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)] font-semibold'
-                  : 'text-[color:var(--color-text-secondary,#475569)] hover:bg-[var(--color-bg-hover,rgba(0,0,0,0.04))] hover:text-[color:var(--color-text-primary,#0f172a)]';
+                  : 'text-[color:var(--color-slate-500,#475569)] hover:bg-[var(--color-bg-hover,rgba(0,0,0,0.04))] hover:text-[color:var(--color-slate-900,#0f172a)]';
 
                 return `
                 <button type="button" data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
                   ${isActive ? 'aria-current="page"' : ''}
-                  class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${activeClasses} transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2">
+                  class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${activeClasses} transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2">
                   <i class="${route.icon} w-5 text-center"></i> 
                   ${route.label}
                 </button>

@@ -200,6 +200,6 @@
 }
 
 .pc-action-button:focus-visible {
-  outline: 2px solid var(--color-focus-ring, var(--color-primary, #3b82f6));
+  outline: 2px solid var(--color-primary, var(--color-primary, #3b82f6));
   outline-offset: 2px;
 }

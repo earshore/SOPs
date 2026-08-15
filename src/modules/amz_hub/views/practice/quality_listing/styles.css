@@ -1,6 +1,6 @@
 @media (min-width: 1024px) {
   .ql-page {
-    color: var(--color-text-primary, var(--color-slate-900));
+    color: var(--color-slate-900, var(--color-slate-900));
   }
 
   .ql-page > :nth-child(n + 2) {
@@ -12,7 +12,7 @@
 
   .ql-page > :nth-child(n + 2).text-white,
   .ql-page > :nth-child(n + 2).text-white :where(h1, h2, h3, h4, p, div) {
-    color: var(--color-text-primary, var(--color-slate-900)) !important;
+    color: var(--color-slate-900, var(--color-slate-900)) !important;
   }
 
   .ql-page > :nth-child(n + 2).text-white :where(strong, [class*='text-amber']) {
@@ -21,7 +21,7 @@
 
   .ql-page > :nth-child(n + 2).text-white :where(.bg-white, [class*='bg-white']) {
     background: var(--surface-card-hover, var(--color-slate-50)) !important;
-    color: var(--color-text-secondary, var(--color-slate-600)) !important;
+    color: var(--color-slate-500, var(--color-slate-600)) !important;
   }
 
   .ql-page > :nth-child(n + 2) :where(.rounded-xl, .rounded-lg) {

@@ -70,7 +70,7 @@
   border: 1px solid var(--ppc-search-terms-border-strong, #cbd5e1);
   border-radius: var(--workbench-radius, var(--panel-radius, 8px));
   background: color-mix(in srgb, var(--surface-panel, #ffffff) 86%, transparent);
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-slate-500, #64748b);
   transition:
     border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     box-shadow 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
@@ -81,7 +81,7 @@
   border-color: var(--color-primary, var(--color-blue-600, #2563eb));
   background: var(--surface-card, #ffffff);
   box-shadow: 0 0 0 3px
-    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 16%, transparent);
+    color-mix(in srgb, var(--color-primary, var(--color-primary, #3b82f6)) 16%, transparent);
 }
 
 .ppc-search-terms-action-search input {
@@ -89,14 +89,14 @@
   min-height: 38px;
   border: 0;
   background: transparent;
-  color: var(--color-text-primary, #0f172a);
+  color: var(--color-slate-900, #0f172a);
   font-size: 13px;
   font-weight: 700;
   outline: none;
 }
 
 .ppc-search-terms-action-search input::placeholder {
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
   font-weight: 600;
 }
 
@@ -110,7 +110,7 @@
   border: 1px solid var(--color-border-strong, #d1d5db);
   border-radius: 8px;
   background: var(--surface-card, #ffffff);
-  color: var(--color-text-primary, #334155);
+  color: var(--color-slate-900, #334155);
   font-size: 13px;
   font-weight: 800;
   transition:
@@ -120,7 +120,7 @@
 }
 
 .ppc-search-terms-search-clear-btn:hover {
-  border-color: var(--color-text-tertiary, #94a3b8);
+  border-color: var(--color-slate-400, #94a3b8);
   background: var(--color-bg-secondary, #f8fafc);
 }
 
@@ -128,7 +128,7 @@
   cursor: not-allowed;
   border-color: var(--border-muted, #cbd5e1);
   background: var(--color-bg-secondary, #f8fafc);
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-slate-500, #64748b);
 }
 
 .ppc-search-terms-export-btn {
@@ -140,7 +140,7 @@
   border: 1px solid var(--color-border-strong, #d1d5db);
   border-radius: 8px;
   background: var(--surface-card, #ffffff);
-  color: var(--color-text-primary, #334155);
+  color: var(--color-slate-900, #334155);
   font-size: 13px;
   font-weight: 700;
   transition:
@@ -150,7 +150,7 @@
 }
 
 .ppc-search-terms-export-btn:hover {
-  border-color: var(--color-text-tertiary, #94a3b8);
+  border-color: var(--color-slate-400, #94a3b8);
   background: var(--color-bg-secondary, #f8fafc);
 }
 
@@ -158,7 +158,7 @@
   cursor: not-allowed;
   border-color: var(--border-muted, #cbd5e1);
   background: var(--color-bg-secondary, #f8fafc);
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-slate-500, #64748b);
 }
 
 @media (max-width: 640px) {
@@ -182,26 +182,26 @@
 /* ==================== 暗色模式适配 ==================== */
 .dark .ppc-search-terms-resume-review,
 [data-color-mode-resolved='dark'] .ppc-search-terms-resume-review {
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .ppc-search-terms-resume-review p,
 [data-color-mode-resolved='dark'] .ppc-search-terms-resume-review p {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .ppc-search-terms-resume-review-note,
 [data-color-mode-resolved='dark'] .ppc-search-terms-resume-review-note {
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
   background: var(--surface-card, #1e293b);
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .ppc-search-terms-action-search,
 [data-color-mode-resolved='dark'] .ppc-search-terms-action-search {
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
   background: color-mix(in srgb, var(--surface-card, #1e293b) 86%, transparent);
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .dark .ppc-search-terms-action-search:focus-within,
@@ -211,12 +211,12 @@
 
 .dark .ppc-search-terms-action-search input,
 [data-color-mode-resolved='dark'] .ppc-search-terms-action-search input {
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .ppc-search-terms-action-search input::placeholder,
 [data-color-mode-resolved='dark'] .ppc-search-terms-action-search input::placeholder {
-  color: var(--color-text-placeholder, #64748b);
+  color: var(--color-slate-400, #64748b);
 }
 
 .dark .ppc-search-terms-search-clear-btn,
@@ -225,7 +225,7 @@
 [data-color-mode-resolved='dark'] .ppc-search-terms-export-btn {
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
   background: var(--surface-card, #1e293b);
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .ppc-search-terms-search-clear-btn:hover,
@@ -242,5 +242,5 @@
 [data-color-mode-resolved='dark'] .ppc-search-terms-export-btn:disabled {
   border-color: var(--color-border-light, rgba(255, 255, 255, 0.06));
   background: var(--color-bg-disabled, rgba(255, 255, 255, 0.04));
-  color: var(--color-text-disabled, #475569);
+  color: var(--color-slate-300, #475569);
 }

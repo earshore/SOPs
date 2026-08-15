@@ -151,7 +151,7 @@
 }
 
 .sops-collapsible-summary:focus-visible {
-  outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
+  outline: 2px solid var(--module-accent, var(--color-primary, #3b82f6));
   outline-offset: 3px;
 }
 
@@ -220,7 +220,7 @@
 .sop-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--spacing-lg);
+  gap: var(--spacing-6);
 }
 
 /* ==================== 页面内语义标记 ==================== */
@@ -445,7 +445,7 @@
 }
 
 .npi-next-step-modal-title {
-  color: var(--color-text-primary, #0f172a);
+  color: var(--color-slate-900, #0f172a);
 }
 
 .npi-lifecycle-table-card {
@@ -457,7 +457,7 @@
   padding: 0.625rem 0.875rem;
   border-bottom: 1px solid var(--border-subtle, var(--color-slate-200));
   background: rgba(248, 250, 252, 0.72);
-  color: var(--color-text-secondary, var(--color-slate-600));
+  color: var(--color-slate-500, var(--color-slate-600));
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -473,7 +473,7 @@
 }
 
 .npi-lifecycle-table-scroll:focus-visible {
-  outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
+  outline: 2px solid var(--module-accent, var(--color-primary, #3b82f6));
   outline-offset: -2px;
 }
 
@@ -496,7 +496,7 @@
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
-  color: var(--color-text-primary, var(--color-slate-700));
+  color: var(--color-slate-900, var(--color-slate-700));
   font-size: 0.8125rem;
   line-height: 1.45;
 }
@@ -538,7 +538,7 @@
 
 .npi-lifecycle-table thead tr:nth-child(2) th {
   background: var(--surface-card, #ffffff);
-  color: var(--color-text-secondary, var(--color-slate-600));
+  color: var(--color-slate-500, var(--color-slate-600));
   font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
@@ -681,13 +681,13 @@
 [data-theme='dark'] .npi-lifecycle-table-help {
   background: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, #000);
   border-bottom-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .npi-lifecycle-table,
 [data-color-mode-resolved='dark'] .npi-lifecycle-table,
 [data-theme='dark'] .npi-lifecycle-table {
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .npi-lifecycle-table th,
@@ -746,7 +746,7 @@
 [data-color-mode-resolved='dark'] .npi-lifecycle-table thead tr:nth-child(2) th,
 [data-theme='dark'] .npi-lifecycle-table thead tr:nth-child(2) th {
   background: var(--surface-card, #1e293b);
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .npi-lifecycle-table tbody tr:nth-child(even) td:not([class*='bg-']),
@@ -778,7 +778,7 @@
 [data-theme='dark'] .npi-lifecycle-table tbody td:first-child,
 [data-theme='dark'] .npi-lifecycle-table tbody td:nth-child(2) {
   background: var(--surface-card, #1e293b);
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .npi-lifecycle-table tbody tr:nth-child(even) td:first-child,
@@ -822,7 +822,7 @@
 [data-theme='dark'] .npi-lifecycle-table select {
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.14));
   background: color-mix(in srgb, var(--surface-panel, #0f172a) 90%, #000);
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .npi-lifecycle-table-scroll,
@@ -851,7 +851,7 @@
 [data-color-mode-resolved='dark'] #npi-review-archive-table,
 [data-theme='dark'] #npi-stage-rules-table,
 [data-theme='dark'] #npi-review-archive-table {
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark #npi-stage-rules-table th,
@@ -867,7 +867,7 @@
 [data-theme='dark'] #npi-review-archive-table th,
 [data-theme='dark'] #npi-review-archive-table td {
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark #npi-stage-rules-table thead th,
@@ -877,7 +877,7 @@
 [data-theme='dark'] #npi-stage-rules-table thead th,
 [data-theme='dark'] #npi-review-archive-table thead th {
   background: color-mix(in srgb, var(--surface-panel, #0f172a) 80%, var(--surface-card, #1e293b));
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark #npi-stage-rules-table tbody tr:nth-child(even),
@@ -976,7 +976,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-search-box:focus-within {
-  border-color: var(--color-focus-ring, var(--module-accent, #3b82f6));
+  border-color: var(--color-primary, var(--module-accent, #3b82f6));
   box-shadow: 0 0 0 3px var(--module-accent-focus, var(--focus-ring-soft));
 }
 
@@ -1021,8 +1021,8 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-md, 1rem);
-  padding: var(--spacing-xl, 2rem) 0;
+  gap: var(--spacing-4, 1rem);
+  padding: var(--spacing-8, 2rem) 0;
   overflow-x: auto;
   overflow-y: visible;
   /* 隐藏滚动条但保持滚动功能 */
@@ -1043,7 +1043,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   background: var(--color-bg-primary, #ffffff);
   border: 1px solid var(--border-subtle, var(--color-border-default, rgba(0, 0, 0, 0.1)));
   border-radius: var(--rounded-card, 8px);
-  padding: var(--spacing-lg, 1.5rem) var(--spacing-md, 1rem);
+  padding: var(--spacing-6, 1.5rem) var(--spacing-4, 1rem);
   text-align: center;
   transition:
     background-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
@@ -1054,7 +1054,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:hover {
-  border-color: var(--module-accent, var(--color-focus-ring, #3b82f6));
+  border-color: var(--module-accent, var(--color-primary, #3b82f6));
   background: var(--surface-card-hover, var(--color-slate-50));
   box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
 }
@@ -1063,9 +1063,9 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 .sop-step-number {
   width: 40px;
   height: 40px;
-  margin: 0 auto var(--spacing-sm, 0.75rem);
+  margin: 0 auto var(--spacing-3, 0.75rem);
   border-radius: 50%;
-  background: var(--module-accent, var(--color-focus-ring, #3b82f6));
+  background: var(--module-accent, var(--color-primary, #3b82f6));
   color: white;
   font-size: var(--text-md, 1rem);
   font-weight: var(--font-bold, 700);
@@ -1078,21 +1078,21 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:hover .sop-step-number {
-  background: var(--module-accent-text, var(--module-accent, var(--color-focus-ring, #3b82f6)));
+  background: var(--module-accent-text, var(--module-accent, var(--color-primary, #3b82f6)));
 }
 
 /* 步骤内容 */
 .sop-step-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs, 0.5rem);
+  gap: var(--spacing-2, 0.5rem);
 }
 
 /* 步骤标题 */
 .sop-step-title {
   font-size: var(--text-base, 0.9375rem);
   font-weight: var(--font-semibold, 600);
-  color: var(--color-text-primary, #0f172a);
+  color: var(--color-slate-900, #0f172a);
   line-height: 1.4;
   margin: 0;
   transition: color var(--duration-fast, var(--duration-fast))
@@ -1100,13 +1100,13 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:hover .sop-step-title {
-  color: var(--module-accent, var(--color-focus-ring, #3b82f6));
+  color: var(--module-accent, var(--color-primary, #3b82f6));
 }
 
 /* 步骤描述 */
 .sop-step-desc {
   font-size: var(--text-xs, 0.75rem);
-  color: var(--color-text-secondary, var(--color-slate-500));
+  color: var(--color-slate-500, var(--color-slate-500));
   line-height: 1.6;
   margin: 0;
   white-space: pre-line;
@@ -1120,7 +1120,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-tertiary, var(--color-slate-400));
+  color: var(--color-slate-400, var(--color-slate-400));
   font-size: var(--text-sm, 0.875rem);
   transition:
     color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
@@ -1135,7 +1135,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 /* 当相邻步骤悬停时，箭头也有动画效果 */
 .sop-process-step:hover + .sop-process-arrow,
 .sop-process-arrow:has(+ .sop-process-step:hover) {
-  color: var(--module-accent, var(--color-focus-ring, #3b82f6));
+  color: var(--module-accent, var(--color-primary, #3b82f6));
 }
 
 .sop-process-step:hover + .sop-process-arrow i,
@@ -1169,13 +1169,13 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 /* 平板 (≤1024px) */
 @media (max-width: 1024px) {
   .sop-process-container {
-    gap: var(--spacing-sm, 0.75rem);
+    gap: var(--spacing-3, 0.75rem);
   }
 
   .sop-process-step {
     min-width: 160px;
     max-width: 200px;
-    padding: var(--spacing-md, 1rem) var(--spacing-sm, 0.75rem);
+    padding: var(--spacing-4, 1rem) var(--spacing-3, 0.75rem);
   }
 
   .sop-step-number {
@@ -1198,8 +1198,8 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   .sop-process-container {
     flex-direction: column;
     align-items: stretch;
-    gap: var(--spacing-md, 1rem);
-    padding: var(--spacing-lg, 1.5rem) 0;
+    gap: var(--spacing-4, 1rem);
+    padding: var(--spacing-6, 1.5rem) 0;
   }
 
   .sop-process-step {
@@ -1223,14 +1223,14 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 /* 小屏移动端 (≤480px) */
 @media (max-width: 480px) {
   .sop-process-step {
-    padding: var(--spacing-md, 1rem);
+    padding: var(--spacing-4, 1rem);
   }
 
   .sop-step-number {
     width: 32px;
     height: 32px;
     font-size: var(--text-xs, 0.75rem);
-    margin-bottom: var(--spacing-xs, 0.5rem);
+    margin-bottom: var(--spacing-2, 0.5rem);
   }
 
   .sop-step-title {
@@ -1259,19 +1259,19 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 .dark .sop-step-title,
 [data-color-mode-resolved='dark'] .sop-step-title,
 [data-theme='dark'] .sop-step-title {
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
 }
 
 .dark .sop-step-desc,
 [data-color-mode-resolved='dark'] .sop-step-desc,
 [data-theme='dark'] .sop-step-desc {
-  color: var(--color-text-secondary, var(--color-slate-300));
+  color: var(--color-slate-500, var(--color-slate-300));
 }
 
 .dark .sop-process-arrow,
 [data-color-mode-resolved='dark'] .sop-process-arrow,
 [data-theme='dark'] .sop-process-arrow {
-  color: var(--color-text-tertiary, var(--color-slate-500));
+  color: var(--color-slate-400, var(--color-slate-500));
 }
 
 .dark .sop-process-step:hover + .sop-process-arrow,
@@ -1309,7 +1309,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 @media print {
   .sop-process-container {
     flex-direction: row;
-    gap: var(--spacing-sm, 0.75rem);
+    gap: var(--spacing-3, 0.75rem);
   }
 
   .sop-process-step {
@@ -1617,13 +1617,13 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 .dark .sops-overview-scope-note h3,
 [data-color-mode-resolved='dark'] .sops-overview-scope-note h3,
 [data-theme='dark'] .sops-overview-scope-note h3 {
-  color: var(--color-text-primary, #f8fafc) !important;
+  color: var(--color-slate-900, #f8fafc) !important;
 }
 
 .dark .sops-overview-scope-note p,
 [data-color-mode-resolved='dark'] .sops-overview-scope-note p,
 [data-theme='dark'] .sops-overview-scope-note p {
-  color: var(--color-text-secondary, #cbd5e1) !important;
+  color: var(--color-slate-500, #cbd5e1) !important;
 }
 
 .dark .sops-overview-scope-note i,
@@ -1642,7 +1642,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 [data-color-mode-resolved='dark'] .sops-collapsible-action,
 [data-theme='dark'] .sops-collapsible-action {
   background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.06));
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .sops-overview .wb-container--simple,

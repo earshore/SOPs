@@ -15,7 +15,7 @@
   background: var(--sop-card-bg, var(--surface-card, #ffffff));
   border-radius: var(--sop-card-radius, var(--rounded-card, 8px));
   border: 1px solid var(--sop-card-border, var(--border-subtle, var(--color-slate-200)));
-  padding: var(--sop-card-padding, var(--spacing-lg));
+  padding: var(--sop-card-padding, var(--spacing-6));
   box-shadow: var(--sop-card-shadow, var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)));
   transition:
     background-color var(--duration-fast, 200ms) var(--ease-smooth),
@@ -404,7 +404,7 @@
 [data-theme='dark'] .content-callout {
   --callout-bg: color-mix(in srgb, var(--callout-accent) 14%, var(--surface-card, #1e293b));
   --callout-border: color-mix(in srgb, var(--callout-accent) 32%, transparent);
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
 }
 
 /* --- 浮动卡片（强阴影） --- */

@@ -79,17 +79,17 @@
 }
 
 .ma-marketplace-modal .ma-marketplace-option-label {
-  color: var(--color-text-primary, var(--color-slate-700, #334155));
+  color: var(--color-slate-900, var(--color-slate-700, #334155));
 }
 
 /* Cancel: token colors (hover must stay styleable, so CSS-owned, mirrors
    .app-confirm-modal [id^='btn-cancel-'] in components/modal/confirmModal.css) */
 .ma-marketplace-modal [id^='btn-cancel-'] {
-  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
+  color: var(--color-slate-500, var(--color-slate-500, #64748b));
 }
 
 .ma-marketplace-modal [id^='btn-cancel-']:hover {
-  color: var(--color-text-primary, var(--color-slate-700, #334155));
+  color: var(--color-slate-900, var(--color-slate-700, #334155));
   background: var(--color-bg-hover, var(--color-slate-100, #f1f5f9));
 }
 
@@ -534,7 +534,7 @@
     padding: 0.875rem 1rem;
     border: 1px solid var(--border-muted, var(--color-slate-200));
     border-radius: var(--workbench-radius, var(--card-radius, 8px));
-    color: var(--color-text-secondary, var(--color-slate-600));
+    color: var(--color-slate-500, var(--color-slate-600));
     background: var(--surface-card-hover, var(--color-slate-50));
     appearance: none;
     cursor: pointer;
@@ -548,7 +548,7 @@
   }
 
   .ma-workflow-step:hover {
-    color: var(--color-text-primary, var(--color-slate-800));
+    color: var(--color-slate-900, var(--color-slate-800));
     border-color: var(--ma-accent-muted);
     background: var(--ma-accent-soft);
   }
@@ -572,7 +572,7 @@
     justify-content: center;
     flex: 0 0 auto;
     border-radius: 999px;
-    color: var(--color-text-secondary, var(--color-slate-500));
+    color: var(--color-slate-500, var(--color-slate-500));
     background: var(--color-white);
     border: 1px solid var(--color-slate-200);
     font-size: 0.75rem;
@@ -599,7 +599,7 @@
   .ma-workflow-meta {
     display: block;
     margin-top: 0.125rem;
-    color: var(--color-text-secondary, var(--color-slate-500));
+    color: var(--color-slate-500, var(--color-slate-500));
     font-size: 0.75rem;
     line-height: 1rem;
     white-space: nowrap;
@@ -810,7 +810,7 @@
     border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
     border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
-    color: var(--color-text-primary, #334155) !important;
+    color: var(--color-slate-900, #334155) !important;
   }
 
   #console-card-inner > div:last-child > div {
@@ -818,7 +818,7 @@
     border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
     border-radius: var(--workbench-radius, 8px) !important;
     box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
-    color: var(--color-text-primary, #334155) !important;
+    color: var(--color-slate-900, #334155) !important;
   }
 
   #console-card-inner :where(.absolute[class*='blur-'][class*='rounded-full'], .absolute.inset-0),
@@ -827,12 +827,12 @@
   }
 
   #console-card-inner > div > div > .pr-28 h3 {
-    color: var(--color-text-primary, #334155) !important;
+    color: var(--color-slate-900, #334155) !important;
     font-size: 0.875rem !important;
   }
 
   #console-card-inner > div > div > .pr-28 :where(span, p) {
-    color: var(--color-text-secondary, #64748b) !important;
+    color: var(--color-slate-500, #64748b) !important;
   }
 
   #embed-toggle-container {
@@ -893,12 +893,12 @@
   }
 
   #prompt-output-card #output-preview-title {
-    color: var(--color-text-secondary, #64748b) !important;
+    color: var(--color-slate-500, #64748b) !important;
     font-weight: 600 !important;
   }
 
   #prompt-output-card #final-prompt-output {
-    color: var(--color-text-secondary, #475569) !important;
+    color: var(--color-slate-500, #475569) !important;
   }
 }
 
@@ -944,17 +944,17 @@
   [data-color-mode-resolved='dark'] #console-card-inner > div:last-child > div {
     background: var(--surface-card) !important;
     border-color: var(--border-subtle) !important;
-    color: var(--color-text-secondary) !important;
+    color: var(--color-slate-500) !important;
   }
 
   .dark #console-card-inner > div > div > .pr-28 h3,
   [data-color-mode-resolved='dark'] #console-card-inner > div > div > .pr-28 h3 {
-    color: var(--color-text-primary) !important;
+    color: var(--color-slate-900) !important;
   }
 
   .dark #console-card-inner > div > div > .pr-28 :where(span, p),
   [data-color-mode-resolved='dark'] #console-card-inner > div > div > .pr-28 :where(span, p) {
-    color: var(--color-text-secondary) !important;
+    color: var(--color-slate-500) !important;
   }
 
   .dark #embed-toggle-container,
@@ -989,12 +989,12 @@
 
   .dark #prompt-output-card #output-preview-title,
   [data-color-mode-resolved='dark'] #prompt-output-card #output-preview-title {
-    color: var(--color-text-secondary) !important;
+    color: var(--color-slate-500) !important;
   }
 
   .dark #prompt-output-card #final-prompt-output,
   [data-color-mode-resolved='dark'] #prompt-output-card #final-prompt-output {
-    color: var(--color-text-primary) !important;
+    color: var(--color-slate-900) !important;
   }
 
   /* WCAG lift: violet accent-as-ink + purple labels readable on dark canvas */

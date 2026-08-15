@@ -7,9 +7,9 @@
   --modal-bg: var(--surface-panel, #ffffff);
   --modal-bg-muted: var(--surface-card-hover, var(--color-bg-secondary, #fafbfc));
   --modal-border: var(--border-subtle, var(--color-border-light, #f1f5f9));
-  --modal-text-primary: var(--color-text-primary, var(--color-slate-800, #1e293b));
-  --modal-text-muted: var(--color-text-tertiary, var(--color-slate-400, #94a3b8));
-  --modal-text-secondary: var(--color-text-secondary, var(--color-slate-600, #475569));
+  --modal-text-primary: var(--color-slate-900, var(--color-slate-800, #1e293b));
+  --modal-text-muted: var(--color-slate-400, var(--color-slate-400, #94a3b8));
+  --modal-text-secondary: var(--color-slate-500, var(--color-slate-600, #475569));
   --modal-control-hover-bg: var(--color-bg-hover, var(--color-slate-100, #f1f5f9));
   --modal-control-active-bg: var(--color-bg-active, var(--color-slate-200, #e2e8f0));
   /* Appearance primary chrome (keep CTA/accent on tone axis) */

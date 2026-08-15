@@ -26,11 +26,11 @@ var(--color-amber-500)  /* #f59e0b - 警告 */
 ### 间距
 
 ```css
-var(--spacing-xs)   /* 8px */
-var(--spacing-sm)   /* 12px */
-var(--spacing-md)   /* 16px */
-var(--spacing-lg)   /* 24px */
-var(--spacing-xl)   /* 32px */
+var(--spacing-2)   /* 8px */
+var(--spacing-3)   /* 12px */
+var(--spacing-4)   /* 16px */
+var(--spacing-6)   /* 24px */
+var(--spacing-8)   /* 32px */
 ```
 
 ### 圆角
@@ -150,7 +150,7 @@ var(--duration-slow)    /* 400ms */
 
   /* 使用CSS变量 */
   background: linear-gradient(135deg, var(--color-blue-50), var(--color-purple-50));
-  padding: var(--spacing-xl);
+  padding: var(--spacing-8);
   border-radius: var(--rounded-2xl);
 }
 ```
@@ -159,12 +159,12 @@ var(--duration-slow)    /* 400ms */
 
 ```css
 .my-element {
-  padding: var(--spacing-md);
+  padding: var(--spacing-4);
 }
 
 @media (max-width: 768px) {
   .my-element {
-    padding: var(--spacing-sm);
+    padding: var(--spacing-3);
   }
 }
 ```

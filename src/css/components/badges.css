@@ -667,7 +667,7 @@
 }
 
 .wb-description {
-  color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
+  color: var(--wb-text-secondary, var(--color-slate-500, #64748b));
   font-size: var(--wb-description-size, var(--text-base, 0.875rem));
   line-height: var(--wb-description-line-height, var(--leading-normal, 1.5));
   max-width: 74ch;
@@ -681,8 +681,8 @@
 .wb-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xs, 0.5rem);
-  margin-top: var(--spacing-md, 1rem);
+  gap: var(--spacing-2, 0.5rem);
+  margin-top: var(--spacing-4, 1rem);
   padding: 0;
   list-style: none;
 }
@@ -691,14 +691,14 @@
 .wb-meta > span {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs, 0.5rem);
+  gap: var(--spacing-2, 0.5rem);
   padding: var(--wb-tag-padding, 5px 10px);
   border-radius: var(--wb-tag-radius, var(--rounded-full, 9999px));
   background: var(--wb-tag-bg, color-mix(in srgb, var(--surface-panel, #ffffff) 70%, transparent));
   border: 1px solid var(--wb-tag-border, var(--color-border-default, rgba(0, 0, 0, 0.1)));
   backdrop-filter: none;
   font-size: var(--wb-tag-text-size, var(--text-xs, 0.75rem));
-  color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
+  color: var(--wb-text-secondary, var(--color-slate-500, #64748b));
   font-weight: var(--wb-tag-text-weight, var(--font-medium, 500));
   line-height: var(--leading-normal, 1.5);
   transition:
@@ -811,13 +811,13 @@
 /* ===== 响应式样式 ===== */
 @media (max-width: 768px) {
   .wb-content {
-    padding: var(--spacing-md, 1rem);
+    padding: var(--spacing-4, 1rem);
   }
 
   .wb-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--spacing-sm, 0.75rem);
+    gap: var(--spacing-3, 0.75rem);
   }
 
   .wb-icon-main {
@@ -846,8 +846,8 @@
 
   .wb-tags,
   .wb-meta {
-    gap: var(--spacing-xs, 0.5rem);
-    margin-top: var(--spacing-sm, 0.75rem);
+    gap: var(--spacing-2, 0.5rem);
+    margin-top: var(--spacing-3, 0.75rem);
   }
 
   .wb-tag,
@@ -936,8 +936,8 @@
 :root {
   /* UI-P1-04: wb 局部 token 的全局映射登记见 docs/THEME_SYSTEM_GUIDELINES.md §6.1。 */
   /* 浅色模式默认值 */
-  --wb-text-primary: var(--color-text-primary, #0f172a);
-  --wb-text-secondary: var(--color-text-secondary, var(--color-slate-600, #475569));
+  --wb-text-primary: var(--color-slate-900, #0f172a);
+  --wb-text-secondary: var(--color-slate-500, var(--color-slate-600, #475569));
   --wb-border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));
   --wb-card-bg: color-mix(in srgb, var(--surface-panel, #ffffff) 94%, transparent);
   --wb-card-shadow: var(--shadow-panel, 0 10px 28px -24px rgba(15, 23, 42, 0.48));
@@ -963,8 +963,8 @@
 [data-color-mode-resolved='dark'],
 [data-theme='dark'] {
   /* 暗色模式变量覆盖 */
-  --wb-text-primary: var(--color-text-primary, var(--color-slate-50, #f8fafc));
-  --wb-text-secondary: var(--color-text-secondary, var(--color-slate-300, #cbd5e1));
+  --wb-text-primary: var(--color-slate-900, var(--color-slate-50, #f8fafc));
+  --wb-text-secondary: var(--color-slate-500, var(--color-slate-300, #cbd5e1));
   --wb-border-color: var(--border-muted, rgba(148, 163, 184, 0.22));
   --wb-card-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 94%, transparent);
   --wb-tag-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 78%, transparent);

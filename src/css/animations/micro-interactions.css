@@ -808,7 +808,7 @@
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-2);
 }
 
 .breadcrumb-item {
@@ -822,12 +822,12 @@
 }
 
 .breadcrumb-item.breadcrumb-active {
-  color: var(--color-text-primary);
+  color: var(--color-slate-900);
   font-weight: var(--font-medium);
 }
 
 .breadcrumb-separator {
-  color: var(--color-text-tertiary);
+  color: var(--color-slate-400);
   transition: opacity var(--micro-duration-smooth) var(--ease-smooth);
 }
 
@@ -971,7 +971,7 @@
 .hamburger-line {
   width: 24px;
   height: 2px;
-  background-color: var(--color-text-primary);
+  background-color: var(--color-slate-900);
   transition:
     transform var(--micro-duration-smooth) var(--micro-ease-button),
     opacity var(--micro-duration-smooth) var(--ease-smooth);

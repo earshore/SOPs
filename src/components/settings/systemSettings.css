@@ -4,15 +4,15 @@
   --settings-surface: var(--color-bg-elevated, var(--surface-panel, #fff));
   --settings-surface-muted: var(--color-bg-secondary, #f8fafc);
   --settings-border: var(--color-border-default, #e2e8f0);
-  --settings-text: var(--color-text-primary, #334155);
-  --settings-text-muted: var(--color-text-secondary, #64748b);
+  --settings-text: var(--color-slate-900, #334155);
+  --settings-text-muted: var(--color-slate-500, #64748b);
   --settings-accent: var(--color-primary, #3b82f6);
   --settings-accent-soft: var(--color-primary-light, #dbeafe);
   --settings-accent-strong: var(--color-primary-dark, #1d4ed8);
   --settings-danger: var(--color-red-600, #dc2626);
   --settings-radius-card: var(--workbench-radius, var(--panel-radius, 8px));
   --settings-radius-control: var(--workbench-radius-lg, var(--rounded-lg, 12px));
-  --settings-focus-color: var(--color-focus-ring, var(--color-primary, #3b82f6));
+  --settings-focus-color: var(--color-primary, var(--color-primary, #3b82f6));
   /* TD-CMP-02：focus-ring 共享别名（批次 1）；settings-control 基线尺寸/紧凑/标签与阴影/过渡时间单一登记点（批次 3、次序 11 批 1-1）。 */
   --settings-focus-ring: var(--field-focus-shadow);
   --settings-control-padding-base: 0.625rem 0.75rem;
@@ -179,16 +179,16 @@
 }
 
 .settings-panel-title {
-  color: var(--color-text-primary, var(--settings-text));
+  color: var(--color-slate-900, var(--settings-text));
 }
 
 .settings-panel-close-btn {
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
   background: transparent;
 }
 
 .settings-panel-close-btn:hover {
-  color: var(--color-text-secondary, var(--settings-text-muted));
+  color: var(--color-slate-500, var(--settings-text-muted));
   background: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
 }
 
@@ -265,7 +265,7 @@
 .settings-section-frame {
   border: 1px solid color-mix(in srgb, var(--settings-border) 85%, transparent);
   border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 4%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-slate-900, #0f172a) 4%, transparent);
   padding: 1rem;
   background: linear-gradient(
     180deg,
@@ -350,7 +350,7 @@
   font-size: 0.6875rem;
   font-weight: 400;
   line-height: 1.4;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
   max-width: 42rem;
 }
 
@@ -371,7 +371,7 @@
   border: 0;
   border-radius: 9999px;
   background: transparent;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
   font-size: 0.6875rem;
   cursor: help;
   padding: 0;
@@ -398,7 +398,7 @@
   border-radius: 0.5rem;
   border: 1px solid var(--settings-border);
   background: var(--settings-surface);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text-primary, #0f172a) 10%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-slate-900, #0f172a) 10%, transparent);
   font-size: 0.6875rem;
   font-weight: 400;
   line-height: 1.45;
@@ -442,7 +442,7 @@
   border: 1px solid color-mix(in srgb, var(--settings-border) 95%, transparent);
   border-radius: var(--settings-radius-card, var(--workbench-radius, 8px));
   background: color-mix(in srgb, var(--settings-surface) 88%, transparent);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 3%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-slate-900, #0f172a) 3%, transparent);
   padding: 0.75rem;
 }
 
@@ -500,7 +500,7 @@
   font-size: 0.625rem;
   font-weight: 400;
   line-height: 1.45;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .settings-card__badge {
@@ -718,7 +718,7 @@
   color: var(--settings-accent-strong, var(--settings-accent));
   font-weight: 650;
   box-shadow:
-    0 1px 2px color-mix(in srgb, var(--color-text-primary, #0f172a) 10%, transparent),
+    0 1px 2px color-mix(in srgb, var(--color-slate-900, #0f172a) 10%, transparent),
     0 0 0 1px color-mix(in srgb, var(--settings-accent) 28%, transparent);
 }
 
@@ -746,7 +746,7 @@
   transform: translateY(-50%);
   align-items: center;
   justify-content: center;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
   font-size: 0.75rem;
 }
 
@@ -759,7 +759,7 @@
 .settings-search-empty {
   margin: 0;
   font-size: 0.6875rem;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .settings-search-results {
@@ -825,7 +825,7 @@
   flex: 0 0 auto;
   font-size: 0.6875rem;
   line-height: 1.2;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
   white-space: nowrap;
 }
 
@@ -860,7 +860,7 @@
 
 .settings-control:disabled {
   background: var(--settings-surface-muted, #f8fafc);
-  color: var(--color-text-disabled, #94a3b8);
+  color: var(--color-slate-300, #94a3b8);
   cursor: not-allowed;
 }
 
@@ -960,7 +960,7 @@ select.settings-control {
 
 .settings-capability-badge.is-off {
   background: color-mix(in srgb, var(--settings-surface-muted) 88%, transparent);
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--settings-border) 85%, transparent);
 }
 

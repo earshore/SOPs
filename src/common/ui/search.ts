@@ -75,7 +75,7 @@ function appendSearchMatches(
     button.dataset.tab = route.id;
     button.dataset.clearSearch = clearSearchKey;
     button.className =
-      'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-[var(--color-primary-light)] hover:text-[var(--color-primary)] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-1';
+      'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-[var(--color-primary-light)] hover:text-[var(--color-primary)] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-1';
 
     const icon = document.createElement('i');
     icon.className = `${route.icon || 'fas fa-circle'} w-4 text-center`;

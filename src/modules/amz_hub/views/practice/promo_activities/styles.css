@@ -20,13 +20,13 @@
 .amzpa_card_title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
   line-height: 1.35;
 }
 
 .amzpa_text {
   font-size: 1rem;
-  color: var(--color-text-secondary, #475569);
+  color: var(--color-slate-500, #475569);
   line-height: 1.85;
   margin-bottom: 20px;
 }
@@ -61,7 +61,7 @@
   margin: 0;
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
 }
 
 .amzpa_dual_desc {
@@ -69,7 +69,7 @@
   max-width: 780px;
   font-size: 0.92rem;
   line-height: 1.75;
-  color: var(--color-text-secondary, var(--color-slate-500));
+  color: var(--color-slate-500, var(--color-slate-500));
 }
 
 .amzpa_dual_grid {
@@ -133,14 +133,14 @@
   font-size: 1.02rem;
   font-weight: 700;
   line-height: 1.5;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
 }
 
 .amzpa_dual_card_desc {
   margin: 0;
   font-size: 0.92rem;
   line-height: 1.75;
-  color: var(--color-text-secondary, var(--color-slate-500));
+  color: var(--color-slate-500, var(--color-slate-500));
 }
 
 .amzpa_dual_points {
@@ -155,7 +155,7 @@
   padding: 6px 10px;
   border-radius: 999px;
   background: #f1f5f9;
-  color: var(--color-text-secondary, #475569);
+  color: var(--color-slate-500, #475569);
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -204,7 +204,7 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
   line-height: 1.35;
 }
 
@@ -224,7 +224,7 @@
   border-radius: 14px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  color: var(--color-text-secondary, #475569);
+  color: var(--color-slate-500, #475569);
   font-size: 0.82rem;
   font-weight: 600;
   white-space: nowrap;
@@ -352,13 +352,13 @@
   margin-bottom: 6px;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
   line-height: 1.4;
 }
 
 .amzpa_nav_step_desc {
   font-size: 0.84rem;
-  color: var(--color-text-secondary, var(--color-slate-500));
+  color: var(--color-slate-500, var(--color-slate-500));
   line-height: 1.65;
 }
 
@@ -400,7 +400,7 @@
   display: block;
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
   margin-bottom: 8px;
 }
 
@@ -426,7 +426,7 @@
 .amzpa_section_header {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
   margin-top: 28px;
   margin-bottom: 14px;
   display: flex;
@@ -489,14 +489,14 @@
 .amzpa_sub_title {
   font-weight: 700;
   font-size: 1.08rem;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
   line-height: 1.4;
 }
 
 .amzpa_minor_title {
   font-size: 0.92rem;
   font-weight: 700;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
   margin: 10px 0 8px;
 }
 
@@ -527,7 +527,7 @@
   flex-direction: column;
   gap: 10px;
   font-size: 0.94rem;
-  color: var(--color-text-secondary, #475569);
+  color: var(--color-slate-500, #475569);
 }
 
 .amzpa_list li {
@@ -595,7 +595,7 @@
   margin: 0 0 10px;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
   line-height: 1.5;
 }
 
@@ -847,7 +847,7 @@
 
 .dark .amzpa_highlight_box,
 [data-color-mode-resolved='dark'] .amzpa_highlight_box {
-  color: var(--color-text-primary);
+  color: var(--color-slate-900);
 }
 
 .dark .amzpa_card_header,
@@ -898,7 +898,7 @@
 }
 
 .amzpa_panel_title {
-  color: var(--color-text-primary, #1e293b);
+  color: var(--color-slate-900, #1e293b);
 }
 
 .amzpa_panel--success {
@@ -932,16 +932,16 @@
 }
 
 .amzpa_combo_card {
-  color: var(--color-text-primary, #1e293b);
+  color: var(--color-slate-900, #1e293b);
   border: 1px solid color-mix(in srgb, var(--color-slate-500, #64748b) 26%, transparent);
 }
 
 .amzpa_combo_title {
-  color: var(--color-text-primary, #1e293b);
+  color: var(--color-slate-900, #1e293b);
 }
 
 .amzpa_combo_desc {
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-slate-500, #64748b);
 }
 
 .amzpa_combo_card--slate {
@@ -1006,11 +1006,11 @@
 }
 
 .amzpa_checklist_title {
-  color: var(--color-text-primary, #1e293b);
+  color: var(--color-slate-900, #1e293b);
 }
 
 .amzpa_checklist_section label {
-  color: var(--color-text-secondary, #475569);
+  color: var(--color-slate-500, #475569);
 }
 
 .amzpa_myth_section {
@@ -1036,11 +1036,11 @@
 }
 
 .amzpa_myth_card_title {
-  color: var(--color-text-primary, #1e293b);
+  color: var(--color-slate-900, #1e293b);
 }
 
 .amzpa_myth_card_desc {
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-slate-500, #64748b);
 }
 
 /* ========================================
@@ -1057,7 +1057,7 @@
 
 .dark .amzpa_panel_title,
 [data-color-mode-resolved='dark'] .amzpa_panel_title {
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
 }
 
 .dark .amzpa_panel--success,
@@ -1099,7 +1099,7 @@
 /* ---- 组合卡 ---- */
 .dark .amzpa_combo_card,
 [data-color-mode-resolved='dark'] .amzpa_combo_card {
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
   border-color: color-mix(in srgb, var(--color-slate-400, #94a3b8) 30%, transparent);
 }
 
@@ -1183,12 +1183,12 @@
 
 .dark .amzpa_checklist_title,
 [data-color-mode-resolved='dark'] .amzpa_checklist_title {
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
 }
 
 .dark .amzpa_checklist_section label,
 [data-color-mode-resolved='dark'] .amzpa_checklist_section label {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .amzpa_checklist_section .fa-list-check,
@@ -1223,18 +1223,18 @@
 
 .dark .amzpa_myth_card_title,
 [data-color-mode-resolved='dark'] .amzpa_myth_card_title {
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
 }
 
 .dark .amzpa_myth_card_desc,
 [data-color-mode-resolved='dark'] .amzpa_myth_card_desc {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 /* ---- 既有遗漏补丁（原浅色硬编码，深色下无覆盖） ---- */
 .dark .amzpa_anchor_desc,
 [data-color-mode-resolved='dark'] .amzpa_anchor_desc {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .amzpa_dual_cta,
@@ -1254,7 +1254,7 @@
 
 .dark .amzpa_nav_step::after,
 [data-color-mode-resolved='dark'] .amzpa_nav_step::after {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
 }
 
@@ -1265,24 +1265,24 @@
 
 .dark .amzpa_nav_step_meta,
 [data-color-mode-resolved='dark'] .amzpa_nav_step_meta {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .amzpa_metric_label,
 [data-color-mode-resolved='dark'] .amzpa_metric_label,
 .dark .amzpa_metric_desc,
 [data-color-mode-resolved='dark'] .amzpa_metric_desc {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .amzpa_sub_desc,
 [data-color-mode-resolved='dark'] .amzpa_sub_desc {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .amzpa_timeline_step p,
 [data-color-mode-resolved='dark'] .amzpa_timeline_step p {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .amzpa_tag,
@@ -1301,7 +1301,7 @@
 [data-color-mode-resolved='dark'] .amzpa_callout {
   background: color-mix(in srgb, var(--color-cyan-400, #22d3ee) 10%, var(--surface-card, #1e293b));
   border-color: color-mix(in srgb, var(--color-cyan-400, #22d3ee) 30%, transparent);
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
 }
 
 .dark .amzpa_stats_box,
@@ -1312,5 +1312,5 @@
 
 .dark .amzpa_stats_text,
 [data-color-mode-resolved='dark'] .amzpa_stats_text {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }

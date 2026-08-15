@@ -352,9 +352,9 @@ function createMarketplaceSelectionContent(sites: string[], modalId: string): st
                 </div>
                 
                 <div class="p-6">
-                    <p id="${descriptionId}" class="text-sm mb-4 font-medium" style="color: var(--color-text-secondary, #475569)">
+                    <p id="${descriptionId}" class="text-sm mb-4 font-medium" style="color: var(--color-slate-500, #475569)">
                         请选择一个<span class="ma-marketplace-modal-accent font-bold">主站点</span>：
-                        <br/><span class="text-xs font-normal" style="color: var(--color-text-tertiary, #94a3b8)">我们将保留主站点的标题、五点描述、Review，并自动合并其他站点的Review。</span>
+                        <br/><span class="text-xs font-normal" style="color: var(--color-slate-400, #94a3b8)">我们将保留主站点的标题、五点描述、Review，并自动合并其他站点的Review。</span>
                     </p>
                     
                     <div class="space-y-3 mb-6">
@@ -365,7 +365,7 @@ function createMarketplaceSelectionContent(sites: string[], modalId: string): st
                                 <input type="radio" name="site_choice" value="${site}" ${index === 0 ? 'checked' : ''}
                                     class="ma-marketplace-option-input w-4 h-4">
                                 <span class="ma-marketplace-option-label ml-3 font-bold"> ${MARKETPLACE_SITE_NAME_MAP[site] || site} - ${site} </span>
-                                <span class="ml-auto text-xs px-2 py-1 rounded border shadow-sm" style="background: var(--surface-card, #ffffff); color: var(--color-text-tertiary, #94a3b8); border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));">
+                                <span class="ml-auto text-xs px-2 py-1 rounded border shadow-sm" style="background: var(--surface-card, #ffffff); color: var(--color-slate-400, #94a3b8); border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));">
                                     ${getFlag(site)}
                                 </span>
                             </label>

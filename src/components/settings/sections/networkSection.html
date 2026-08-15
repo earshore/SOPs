@@ -1,293 +1,281 @@
-                      <div
-                        class="settings-tool-l3 settings-tool-l3--static"
-                        id="settings-section-network"
-                        data-settings-focus="master-analysis-scrape"
-                        data-settings-nav-id="master-analysis-scrape"
-                        data-settings-nav-group="tool"
-                      >
-                        <div class="settings-tool-l3__summary">
-                          <div class="min-w-0">
-                            <h5 class="settings-card__title">数据采集</h5>
-                            <p class="settings-tool-page__hint">代理连接与采集运行策略</p>
-                          </div>
-                        </div>
-                        <div class="settings-tool-page settings-tool-l3__body">
-                          <div class="mt-3 space-y-3">
-                            <!--
+<div
+  class="settings-tool-l3 settings-tool-l3--static"
+  id="settings-section-network"
+  data-settings-focus="master-analysis-scrape"
+  data-settings-nav-id="master-analysis-scrape"
+  data-settings-nav-group="tool"
+>
+  <div class="settings-tool-l3__summary">
+    <div class="min-w-0">
+      <h5 class="settings-card__title">数据采集</h5>
+      <p class="settings-tool-page__hint">代理连接与采集运行策略</p>
+    </div>
+  </div>
+  <div class="settings-tool-page settings-tool-l3__body">
+    <div class="mt-3 space-y-3">
+      <!--
                         连接方式 | 密钥 始终双列并排；
                         无需密钥时右侧禁用占位，避免并排塌陷
                       -->
-                            <div class="settings-proxy-form">
-                              <div class="settings-proxy-form__fields">
-                                <div class="settings-proxy-form__col">
-                                  <label for="proxy-type" class="settings-label">连接方式</label>
-                                  <div class="settings-proxy-form__control-wrap">
-                                    <select
-                                      id="proxy-type"
-                                      name="proxy-type"
-                                      :value="proxy.type"
-                                      @change="setProxyType($event)"
-                                      class="settings-control settings-proxy-form__control"
-                                    >
-                                      <optgroup label="商业 API (高成功率)">
-                                        <template
-                                          x-for="option in commercialProxyOptions"
-                                          :key="option.type"
-                                        >
-                                          <option
-                                            :value="option.type"
-                                            x-text="option.displayName"
-                                          ></option>
-                                        </template>
-                                      </optgroup>
-                                      <optgroup label="直连">
-                                        <template
-                                          x-for="option in directProxyOptions"
-                                          :key="option.type"
-                                        >
-                                          <option
-                                            :value="option.type"
-                                            x-text="option.displayName"
-                                          ></option>
-                                        </template>
-                                      </optgroup>
-                                    </select>
-                                    <span class="settings-proxy-form__chevron" aria-hidden="true">
-                                      <i class="fas fa-chevron-down"></i>
-                                    </span>
-                                  </div>
-                                </div>
+      <div class="settings-proxy-form">
+        <div class="settings-proxy-form__fields">
+          <div class="settings-proxy-form__col">
+            <label for="proxy-type" class="settings-label">连接方式</label>
+            <div class="settings-proxy-form__control-wrap">
+              <select
+                id="proxy-type"
+                name="proxy-type"
+                :value="proxy.type"
+                @change="setProxyType($event)"
+                class="settings-control settings-proxy-form__control"
+              >
+                <optgroup label="商业 API (高成功率)">
+                  <template x-for="option in commercialProxyOptions" :key="option.type">
+                    <option :value="option.type" x-text="option.displayName"></option>
+                  </template>
+                </optgroup>
+                <optgroup label="直连">
+                  <template x-for="option in directProxyOptions" :key="option.type">
+                    <option :value="option.type" x-text="option.displayName"></option>
+                  </template>
+                </optgroup>
+              </select>
+              <span class="settings-proxy-form__chevron" aria-hidden="true">
+                <i class="fas fa-chevron-down"></i>
+              </span>
+            </div>
+          </div>
 
-                                <div class="settings-proxy-form__col">
-                                  <label
-                                    for="proxy-custom-url"
-                                    class="settings-label"
-                                    x-text="proxyNeedsInput ? proxyInputLabel : 'API Key'"
-                                  ></label>
-                                  <div
-                                    class="settings-proxy-form__control-wrap"
-                                    :class="{ 'is-disabled': !proxyNeedsInput }"
-                                  >
-                                    <input
-                                      :type="proxyNeedsInput ? proxyInputType : 'text'"
-                                      id="proxy-custom-url"
-                                      name="proxy-custom-url"
-                                      :value="proxyNeedsInput ? proxy.customUrl : ''"
-                                      @input="setProxyCustomUrl($event)"
-                                      :disabled="!proxyNeedsInput"
-                                      class="settings-control settings-proxy-form__control settings-proxy-form__secret"
-                                      :class="{ 'is-masked': proxyNeedsInput }"
-                                      :placeholder="proxyNeedsInput ? proxyInputPlaceholder : '当前方式无需密钥'"
-                                      autocomplete="off"
-                                    />
-                                    <button
-                                      type="button"
-                                      :hidden="!proxyNeedsInput"
-                                      @click="toggleProxyKeyVisibility()"
-                                      :aria-label="proxyKeyVisibilityLabel"
-                                      :title="proxyKeyVisibilityLabel"
-                                      class="settings-proxy-form__eye"
-                                    >
-                                      <i class="fas text-xs" :class="proxyKeyIconClass"></i>
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
+          <div class="settings-proxy-form__col">
+            <label
+              for="proxy-custom-url"
+              class="settings-label"
+              x-text="proxyNeedsInput ? proxyInputLabel : 'API Key'"
+            ></label>
+            <div
+              class="settings-proxy-form__control-wrap"
+              :class="{ 'is-disabled': !proxyNeedsInput }"
+            >
+              <input
+                :type="proxyNeedsInput ? proxyInputType : 'text'"
+                id="proxy-custom-url"
+                name="proxy-custom-url"
+                :value="proxyNeedsInput ? proxy.customUrl : ''"
+                @input="setProxyCustomUrl($event)"
+                :disabled="!proxyNeedsInput"
+                class="settings-control settings-proxy-form__control settings-proxy-form__secret"
+                :class="{ 'is-masked': proxyNeedsInput }"
+                :placeholder="proxyNeedsInput ? proxyInputPlaceholder : '当前方式无需密钥'"
+                autocomplete="off"
+              />
+              <button
+                type="button"
+                :hidden="!proxyNeedsInput"
+                @click="toggleProxyKeyVisibility()"
+                :aria-label="proxyKeyVisibilityLabel"
+                :title="proxyKeyVisibilityLabel"
+                class="settings-proxy-form__eye"
+              >
+                <i class="fas text-xs" :class="proxyKeyIconClass"></i>
+              </button>
+            </div>
+          </div>
+        </div>
 
-                              <!-- 测试连接 | 保存配置：等宽并排 -->
-                              <div class="settings-proxy-form__actions">
-                                <button
-                                  type="button"
-                                  data-testid="settings-test-proxy"
-                                  @click="testProxyConnection()"
-                                  :disabled="proxy.isTesting"
-                                  class="settings-proxy-form__btn settings-proxy-form__btn--test"
-                                >
-                                  <i
-                                    class="fas text-[11px]"
-                                    :class="proxy.isTesting ? 'fa-circle-notch fa-spin' : 'fa-plug'"
-                                    aria-hidden="true"
-                                  ></i>
-                                  <span x-text="proxy.isTesting ? '测试中...' : '测试连接'"></span>
-                                </button>
-                                <button
-                                  type="button"
-                                  data-testid="settings-save-proxy"
-                                  @click="saveProxyConfig()"
-                                  class="settings-proxy-form__btn settings-proxy-form__btn--save"
-                                >
-                                  <i class="fas fa-check text-[11px]" aria-hidden="true"></i>
-                                  <span>保存配置</span>
-                                </button>
-                              </div>
+        <!-- 测试连接 | 保存配置：等宽并排 -->
+        <div class="settings-proxy-form__actions">
+          <button
+            type="button"
+            data-testid="settings-test-proxy"
+            @click="testProxyConnection()"
+            :disabled="proxy.isTesting"
+            class="settings-proxy-form__btn settings-proxy-form__btn--test"
+          >
+            <i
+              class="fas text-[11px]"
+              :class="proxy.isTesting ? 'fa-circle-notch fa-spin' : 'fa-plug'"
+              aria-hidden="true"
+            ></i>
+            <span x-text="proxy.isTesting ? '测试中...' : '测试连接'"></span>
+          </button>
+          <button
+            type="button"
+            data-testid="settings-save-proxy"
+            @click="saveProxyConfig()"
+            class="settings-proxy-form__btn settings-proxy-form__btn--save"
+          >
+            <i class="fas fa-check text-[11px]" aria-hidden="true"></i>
+            <span>保存配置</span>
+          </button>
+        </div>
 
-                              <p
-                                class="settings-proxy-form__status"
-                                :class="proxy.status === 'ok' ? 'is-ok' : 'is-err'"
-                                hidden
-                                :hidden="!proxy.testMessage"
-                                x-text="proxy.testMessage"
-                                data-testid="settings-proxy-test-message"
-                              ></p>
-                            </div>
+        <p
+          class="settings-proxy-form__status"
+          :class="proxy.status === 'ok' ? 'is-ok' : 'is-err'"
+          hidden
+          :hidden="!proxy.testMessage"
+          x-text="proxy.testMessage"
+          data-testid="settings-proxy-test-message"
+        ></p>
+      </div>
 
-                            <!-- 采集运行策略：同一 pref-list，保存合入底部「保存工具与运行策略」 -->
-                            <div class="settings-scrape-runtime">
-                              <div class="settings-scrape-runtime__head">
-                                <h5 class="settings-scrape-runtime__title">采集运行策略</h5>
-                                <span class="settings-badge settings-badge--scrape">影响采集</span>
-                              </div>
-                              <div class="settings-pref-list">
-                                <label class="settings-pref-row">
-                                  <div class="settings-pref-row__meta">
-                                    <div class="min-w-0">
-                                      <span class="settings-pref-row__title">请求超时</span>
-                                      <p class="settings-pref-row__hint">秒</p>
-                                    </div>
-                                  </div>
-                                  <div class="settings-pref-row__control">
-                                    <input
-                                      type="number"
-                                      min="5"
-                                      max="120"
-                                      step="5"
-                                      :value="getRuntimeNumber('scraper.requestTimeoutMs', 1000)"
-                                      @input="setRuntimeNumber('scraper.requestTimeoutMs', $event, 1000)"
-                                      class="settings-control settings-control--sm"
-                                    />
-                                  </div>
-                                </label>
+      <!-- 采集运行策略：同一 pref-list，保存合入底部「保存工具与运行策略」 -->
+      <div class="settings-scrape-runtime">
+        <div class="settings-scrape-runtime__head">
+          <h5 class="settings-scrape-runtime__title">采集运行策略</h5>
+          <span class="settings-badge settings-badge--scrape">影响采集</span>
+        </div>
+        <div class="settings-pref-list">
+          <label class="settings-pref-row">
+            <div class="settings-pref-row__meta">
+              <div class="min-w-0">
+                <span class="settings-pref-row__title">请求超时</span>
+                <p class="settings-pref-row__hint">秒</p>
+              </div>
+            </div>
+            <div class="settings-pref-row__control">
+              <input
+                type="number"
+                min="5"
+                max="120"
+                step="5"
+                :value="getRuntimeNumber('scraper.requestTimeoutMs', 1000)"
+                @input="setRuntimeNumber('scraper.requestTimeoutMs', $event, 1000)"
+                class="settings-control settings-control--sm"
+              />
+            </div>
+          </label>
 
-                                <div class="settings-pref-divider" role="separator"></div>
+          <div class="settings-pref-divider" role="separator"></div>
 
-                                <label class="settings-pref-row">
-                                  <div class="settings-pref-row__meta">
-                                    <div class="min-w-0">
-                                      <span class="settings-pref-row__title">最大并发</span>
-                                    </div>
-                                  </div>
-                                  <div class="settings-pref-row__control">
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      max="10"
-                                      step="1"
-                                      :value="runtimeStrategy.settings.scraper.maxConcurrent"
-                                      @input="setRuntimeNumber('scraper.maxConcurrent', $event)"
-                                      class="settings-control settings-control--sm"
-                                    />
-                                  </div>
-                                </label>
+          <label class="settings-pref-row">
+            <div class="settings-pref-row__meta">
+              <div class="min-w-0">
+                <span class="settings-pref-row__title">最大并发</span>
+              </div>
+            </div>
+            <div class="settings-pref-row__control">
+              <input
+                type="number"
+                min="1"
+                max="10"
+                step="1"
+                :value="runtimeStrategy.settings.scraper.maxConcurrent"
+                @input="setRuntimeNumber('scraper.maxConcurrent', $event)"
+                class="settings-control settings-control--sm"
+              />
+            </div>
+          </label>
 
-                                <div class="settings-pref-divider" role="separator"></div>
+          <div class="settings-pref-divider" role="separator"></div>
 
-                                <label class="settings-pref-row">
-                                  <div class="settings-pref-row__meta">
-                                    <div class="min-w-0">
-                                      <span class="settings-pref-row__title">最大重试</span>
-                                    </div>
-                                  </div>
-                                  <div class="settings-pref-row__control">
-                                    <input
-                                      type="number"
-                                      min="0"
-                                      max="10"
-                                      step="1"
-                                      :value="runtimeStrategy.settings.scraper.maxRetries"
-                                      @input="setRuntimeNumber('scraper.maxRetries', $event)"
-                                      class="settings-control settings-control--sm"
-                                    />
-                                  </div>
-                                </label>
+          <label class="settings-pref-row">
+            <div class="settings-pref-row__meta">
+              <div class="min-w-0">
+                <span class="settings-pref-row__title">最大重试</span>
+              </div>
+            </div>
+            <div class="settings-pref-row__control">
+              <input
+                type="number"
+                min="0"
+                max="10"
+                step="1"
+                :value="runtimeStrategy.settings.scraper.maxRetries"
+                @input="setRuntimeNumber('scraper.maxRetries', $event)"
+                class="settings-control settings-control--sm"
+              />
+            </div>
+          </label>
 
-                                <div class="settings-pref-divider" role="separator"></div>
+          <div class="settings-pref-divider" role="separator"></div>
 
-                                <label class="settings-pref-row">
-                                  <div class="settings-pref-row__meta">
-                                    <div class="min-w-0">
-                                      <span class="settings-pref-row__title">重试间隔</span>
-                                      <p class="settings-pref-row__hint">秒</p>
-                                    </div>
-                                  </div>
-                                  <div class="settings-pref-row__control">
-                                    <input
-                                      type="number"
-                                      min="0.1"
-                                      max="30"
-                                      step="0.1"
-                                      :value="getRuntimeNumber('scraper.retryDelayMs', 1000)"
-                                      @input="setRuntimeNumber('scraper.retryDelayMs', $event, 1000)"
-                                      class="settings-control settings-control--sm"
-                                    />
-                                  </div>
-                                </label>
+          <label class="settings-pref-row">
+            <div class="settings-pref-row__meta">
+              <div class="min-w-0">
+                <span class="settings-pref-row__title">重试间隔</span>
+                <p class="settings-pref-row__hint">秒</p>
+              </div>
+            </div>
+            <div class="settings-pref-row__control">
+              <input
+                type="number"
+                min="0.1"
+                max="30"
+                step="0.1"
+                :value="getRuntimeNumber('scraper.retryDelayMs', 1000)"
+                @input="setRuntimeNumber('scraper.retryDelayMs', $event, 1000)"
+                class="settings-control settings-control--sm"
+              />
+            </div>
+          </label>
 
-                                <div class="settings-pref-divider" role="separator"></div>
+          <div class="settings-pref-divider" role="separator"></div>
 
-                                <label class="settings-pref-row">
-                                  <div class="settings-pref-row__meta">
-                                    <div class="min-w-0">
-                                      <span class="settings-pref-row__title">批次大小</span>
-                                    </div>
-                                  </div>
-                                  <div class="settings-pref-row__control">
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      max="50"
-                                      step="1"
-                                      :value="runtimeStrategy.settings.scraper.batchSize"
-                                      @input="setRuntimeNumber('scraper.batchSize', $event)"
-                                      class="settings-control settings-control--sm"
-                                    />
-                                  </div>
-                                </label>
+          <label class="settings-pref-row">
+            <div class="settings-pref-row__meta">
+              <div class="min-w-0">
+                <span class="settings-pref-row__title">批次大小</span>
+              </div>
+            </div>
+            <div class="settings-pref-row__control">
+              <input
+                type="number"
+                min="1"
+                max="50"
+                step="1"
+                :value="runtimeStrategy.settings.scraper.batchSize"
+                @input="setRuntimeNumber('scraper.batchSize', $event)"
+                class="settings-control settings-control--sm"
+              />
+            </div>
+          </label>
 
-                                <div class="settings-pref-divider" role="separator"></div>
+          <div class="settings-pref-divider" role="separator"></div>
 
-                                <label class="settings-pref-row">
-                                  <div class="settings-pref-row__meta">
-                                    <div class="min-w-0">
-                                      <span class="settings-pref-row__title">批次间隔</span>
-                                      <p class="settings-pref-row__hint">秒</p>
-                                    </div>
-                                  </div>
-                                  <div class="settings-pref-row__control">
-                                    <input
-                                      type="number"
-                                      min="0"
-                                      max="60"
-                                      step="0.5"
-                                      :value="getRuntimeNumber('scraper.batchDelayMs', 1000)"
-                                      @input="setRuntimeNumber('scraper.batchDelayMs', $event, 1000)"
-                                      class="settings-control settings-control--sm"
-                                    />
-                                  </div>
-                                </label>
+          <label class="settings-pref-row">
+            <div class="settings-pref-row__meta">
+              <div class="min-w-0">
+                <span class="settings-pref-row__title">批次间隔</span>
+                <p class="settings-pref-row__hint">秒</p>
+              </div>
+            </div>
+            <div class="settings-pref-row__control">
+              <input
+                type="number"
+                min="0"
+                max="60"
+                step="0.5"
+                :value="getRuntimeNumber('scraper.batchDelayMs', 1000)"
+                @input="setRuntimeNumber('scraper.batchDelayMs', $event, 1000)"
+                class="settings-control settings-control--sm"
+              />
+            </div>
+          </label>
 
-                                <div class="settings-pref-divider" role="separator"></div>
+          <div class="settings-pref-divider" role="separator"></div>
 
-                                <label class="settings-pref-row">
-                                  <div class="settings-pref-row__meta">
-                                    <div class="min-w-0">
-                                      <span class="settings-pref-row__title">缓存时长</span>
-                                      <p class="settings-pref-row__hint">小时</p>
-                                    </div>
-                                  </div>
-                                  <div class="settings-pref-row__control">
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      max="720"
-                                      step="1"
-                                      :value="getRuntimeNumber('scraper.cacheDurationMs', 3600000)"
-                                      @input="setRuntimeNumber('scraper.cacheDurationMs', $event, 3600000)"
-                                      class="settings-control settings-control--sm"
-                                    />
-                                  </div>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+          <label class="settings-pref-row">
+            <div class="settings-pref-row__meta">
+              <div class="min-w-0">
+                <span class="settings-pref-row__title">缓存时长</span>
+                <p class="settings-pref-row__hint">小时</p>
+              </div>
+            </div>
+            <div class="settings-pref-row__control">
+              <input
+                type="number"
+                min="1"
+                max="720"
+                step="1"
+                :value="getRuntimeNumber('scraper.cacheDurationMs', 3600000)"
+                @input="setRuntimeNumber('scraper.cacheDurationMs', $event, 3600000)"
+                class="settings-control settings-control--sm"
+              />
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

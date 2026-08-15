@@ -138,7 +138,7 @@
 [data-color-mode-resolved='dark'] .ppc-search-terms-threshold-grid label {
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
   background: var(--surface-card, #1e293b);
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .ppc-search-terms-threshold-grid input,
@@ -150,7 +150,7 @@
 [data-color-mode-resolved='dark'] .ppc-search-terms-context-fields input,
 [data-color-mode-resolved='dark'] .ppc-search-terms-context-fields textarea {
   background: var(--surface-card, #1e293b);
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .ppc-search-terms-threshold-grid input:focus,
@@ -168,14 +168,14 @@
 
 .dark .ppc-search-terms-threshold-helper,
 [data-color-mode-resolved='dark'] .ppc-search-terms-threshold-helper {
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .dark .ppc-search-terms-threshold-toggle,
 [data-color-mode-resolved='dark'] .ppc-search-terms-threshold-toggle {
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
   background: var(--surface-card, #1e293b);
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .ppc-search-terms-threshold-toggle:hover,
@@ -198,7 +198,7 @@
 [data-color-mode-resolved='dark'] .ppc-search-terms-check-row {
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
   background: var(--surface-card, #1e293b);
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .ppc-search-terms-check-row input,

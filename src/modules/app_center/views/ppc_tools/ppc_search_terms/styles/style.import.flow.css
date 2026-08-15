@@ -54,7 +54,7 @@
 [data-color-mode-resolved='dark'] .ppc-search-terms-flow-steps li {
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
   background: var(--surface-card, #1e293b);
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .ppc-search-terms-flow-steps span,

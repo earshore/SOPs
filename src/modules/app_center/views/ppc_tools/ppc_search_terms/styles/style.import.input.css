@@ -83,7 +83,7 @@
   height: auto;
   min-height: 188px;
   background: var(--surface-card, #ffffff);
-  color: var(--color-text-primary, #0f172a);
+  color: var(--color-slate-900, #0f172a);
   line-height: 1.6;
   resize: vertical;
   transition:
@@ -101,7 +101,7 @@
 
 .ppc-search-terms-field-label {
   margin-bottom: 8px;
-  color: var(--color-text-primary, #334155);
+  color: var(--color-slate-900, #334155);
   font-size: 12px;
   font-weight: 800;
 }
@@ -175,7 +175,7 @@
 
 .ppc-search-terms-field-helper {
   margin-top: 8px;
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-slate-500, #64748b);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -226,12 +226,12 @@
 
 .dark .ppc-search-terms-dropzone-title,
 [data-color-mode-resolved='dark'] .ppc-search-terms-dropzone-title {
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .ppc-search-terms-dropzone-meta,
 [data-color-mode-resolved='dark'] .ppc-search-terms-dropzone-meta {
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .dark .ppc-search-terms-app .ppc-search-terms-paste-column .ppc-search-terms-textarea,
@@ -240,7 +240,7 @@
   .ppc-search-terms-paste-column
   .ppc-search-terms-textarea {
   background: var(--surface-card, #1e293b);
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .ppc-search-terms-app .ppc-search-terms-paste-column .ppc-search-terms-textarea:focus,
@@ -254,12 +254,12 @@
 
 .dark .ppc-search-terms-field-label,
 [data-color-mode-resolved='dark'] .ppc-search-terms-field-label {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .ppc-search-terms-field-helper,
 [data-color-mode-resolved='dark'] .ppc-search-terms-field-helper {
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .dark .ppc-search-terms-field-error,

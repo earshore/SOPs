@@ -363,7 +363,7 @@
   cursor: grab;
   padding: 4px;
   border-radius: var(--rounded-sm, 4px);
-  color: var(--color-text-tertiary, #9ca3af);
+  color: var(--color-slate-400, #9ca3af);
   touch-action: none;
   transition:
     color var(--duration-fast, 200ms) var(--ease-smooth),
@@ -371,20 +371,20 @@
 }
 
 .drag-handle:hover {
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-slate-500, #6b7280);
   background: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
 }
 
 .drag-handle:active {
   cursor: grabbing;
-  color: var(--color-text-primary, #1a1a2e);
+  color: var(--color-slate-900, #1a1a2e);
 }
 
 /* --- 拖拽目标区域 --- */
 .drop-zone {
   border: 2px dashed var(--color-border-default, rgba(0, 0, 0, 0.1));
   border-radius: var(--rounded-lg, 12px);
-  padding: var(--spacing-xl, 32px);
+  padding: var(--spacing-8, 32px);
   text-align: center;
   transition:
     border-color var(--duration-fast, 200ms) var(--ease-smooth),
@@ -407,7 +407,7 @@
 .sortable-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs, 8px);
+  gap: var(--spacing-2, 8px);
 }
 
 .sortable-item {
@@ -442,7 +442,7 @@
 
 /* --- 统一焦点环 --- */
 .focus-ring:focus-visible {
-  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline: 2px solid var(--color-primary, #3b82f6);
   outline-offset: 2px;
 }
 
@@ -452,7 +452,7 @@
 
 /* --- 内嵌焦点环 --- */
 .focus-ring-inset:focus-visible {
-  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline: 2px solid var(--color-primary, #3b82f6);
   outline-offset: -2px;
 }
 
@@ -461,7 +461,7 @@
   outline: none;
   box-shadow:
     0 0 0 2px var(--color-bg-primary, #ffffff),
-    0 0 0 4px var(--color-focus-ring, #3b82f6);
+    0 0 0 4px var(--color-primary, #3b82f6);
 }
 
 /* --- 焦点时高亮背景 --- */
@@ -986,13 +986,13 @@
 }
 
 .keyboard-focus:focus-visible {
-  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline: 2px solid var(--color-primary, #3b82f6);
   outline-offset: 2px;
 }
 
 /* --- Tab 键序列指示 --- */
 [tabindex]:focus-visible {
-  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline: 2px solid var(--color-primary, #3b82f6);
   outline-offset: 2px;
 }
 
@@ -1010,9 +1010,9 @@
 .nav-focus.is-focused {
   background: var(
     --color-primary-light,
-    color-mix(in srgb, var(--color-primary, var(--color-focus-ring)) 8%, transparent)
+    color-mix(in srgb, var(--color-primary, var(--color-primary)) 8%, transparent)
   );
-  outline: 2px solid var(--color-focus-ring, var(--color-primary));
+  outline: 2px solid var(--color-primary, var(--color-primary));
   outline-offset: -2px;
 }
 
@@ -1051,7 +1051,7 @@
   align-items: center;
   justify-content: center;
   min-height: 120px;
-  color: var(--color-text-tertiary, #9ca3af);
+  color: var(--color-slate-400, #9ca3af);
   font-size: 0.875rem;
 }
 
@@ -1176,12 +1176,12 @@
 
 /* --- 锚点偏移（固定 Header 下的锚点定位） --- */
 .anchor-offset {
-  scroll-margin-top: calc(var(--header-height, 64px) + var(--spacing-md, 16px));
+  scroll-margin-top: calc(var(--header-height, 64px) + var(--spacing-4, 16px));
 }
 
 /* --- 锚点高亮 --- */
 :target {
-  scroll-margin-top: calc(var(--header-height, 64px) + var(--spacing-md, 16px));
+  scroll-margin-top: calc(var(--header-height, 64px) + var(--spacing-4, 16px));
 }
 
 .anchor-highlight:target {
@@ -1275,7 +1275,7 @@
 .dark .drag-handle:hover,
 [data-color-mode-resolved='dark'] .drag-handle:hover,
 [data-theme='dark'] .drag-handle:hover {
-  color: var(--color-text-secondary, #d1d5db);
+  color: var(--color-slate-500, #d1d5db);
   background: rgba(255, 255, 255, 0.06);
 }
 

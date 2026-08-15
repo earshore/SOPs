@@ -109,9 +109,9 @@
   --app-overview-border-strong: var(--border-muted, rgba(203, 213, 225, 0.72));
   --app-overview-surface: var(--surface-panel, var(--color-bg-elevated, #ffffff));
   --app-overview-surface-muted: var(--surface-card-hover, var(--color-slate-50, #f8fafc));
-  --app-overview-text-primary: var(--color-text-primary, var(--color-slate-900, #0f172a));
-  --app-overview-text-secondary: var(--color-text-secondary, var(--color-slate-600, #475569));
-  --app-overview-text-muted: var(--color-text-tertiary, var(--color-slate-400, #94a3b8));
+  --app-overview-text-primary: var(--color-slate-900, var(--color-slate-900, #0f172a));
+  --app-overview-text-secondary: var(--color-slate-500, var(--color-slate-600, #475569));
+  --app-overview-text-muted: var(--color-slate-400, var(--color-slate-400, #94a3b8));
   --app-overview-text-inverse: var(--color-primary-contrast, #ffffff);
   --app-overview-radius: var(--rounded-xl, 16px);
   --app-overview-pill-radius: var(--rounded-full, 999px);
@@ -139,7 +139,7 @@
   --button-filter-active-border: var(--app-overview-accent-border);
   --button-filter-active-color: var(--app-overview-accent-strong);
   --button-filter-active-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-  --button-filter-focus-color: var(--module-accent, var(--color-focus-ring, #3b82f6));
+  --button-filter-focus-color: var(--module-accent, var(--color-primary, #3b82f6));
   --button-filter-focus-ring: var(--app-overview-focus-ring);
 }
 
@@ -306,13 +306,13 @@
   --button-filter-active-bg: var(--app-overview-accent);
   --button-filter-active-border: var(--app-overview-accent);
   --button-filter-active-color: var(--app-overview-text-inverse);
-  --button-filter-focus-color: var(--module-accent, var(--color-focus-ring, #3b82f6));
+  --button-filter-focus-color: var(--module-accent, var(--color-primary, #3b82f6));
   --button-filter-focus-ring: var(--app-overview-focus-ring);
 }
 
 .app-overview-eyebrow {
   margin: 0.25rem 0 0;
-  color: var(--color-text-secondary, var(--color-slate-500));
+  color: var(--color-slate-500, var(--color-slate-500));
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.5;
@@ -387,7 +387,7 @@
 }
 
 .app-overview-collapsible-summary:focus-visible {
-  outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
+  outline: 2px solid var(--module-accent, var(--color-primary, #3b82f6));
   outline-offset: 3px;
 }
 
@@ -590,7 +590,7 @@
 }
 
 .app-flow-copy small {
-  color: var(--color-text-secondary, var(--color-slate-500));
+  color: var(--color-slate-500, var(--color-slate-500));
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.4;
@@ -1905,7 +1905,7 @@
 .app-overview-filter-panel .category-filter-btn:focus-visible,
 .app-card-primary-link:focus-visible,
 .app-child-link:focus-visible {
-  outline: 2px solid var(--module-accent, var(--color-focus-ring, #3b82f6));
+  outline: 2px solid var(--module-accent, var(--color-primary, #3b82f6));
   outline-offset: 2px;
 }
 
@@ -1913,7 +1913,7 @@
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   grid-auto-rows: 1fr;
   align-items: stretch;
-  gap: var(--spacing-lg, 1.5rem);
+  gap: var(--spacing-6, 1.5rem);
 }
 
 .app-overview-card {
@@ -1931,7 +1931,7 @@
   flex-direction: column;
   height: 100%;
   min-height: 180px;
-  padding: var(--spacing-lg, 1.5rem);
+  padding: var(--spacing-6, 1.5rem);
   cursor: default;
   overflow: visible;
 }
@@ -2052,7 +2052,7 @@
 
 .app-card-title-row p {
   margin: 0.25rem 0 0;
-  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
+  color: var(--color-slate-500, var(--color-slate-500, #64748b));
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.35;
@@ -2096,7 +2096,7 @@
 
 .app-card-desc {
   margin: 0 0 0.75rem;
-  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
+  color: var(--color-slate-500, var(--color-slate-500, #64748b));
   font-size: 0.875rem;
   line-height: 1.5;
   min-height: 3.9rem;
@@ -2317,7 +2317,7 @@
 }
 
 .app-overview-empty-title {
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
   font-size: 0.9375rem;
   font-weight: 800;
 }
@@ -2568,7 +2568,7 @@
   --module-accent-text: color-mix(in srgb, var(--app-overview-accent) 55%, #ffffff);
   /* badge/count ink: minimax red lifted for dark canvas (was #a91f3a, 2.5:1) */
   --app-overview-accent-strong: color-mix(in srgb, var(--app-overview-accent) 45%, #ffffff);
-  --app-overview-text-inverse: var(--color-text-primary, #f8fafc);
+  --app-overview-text-inverse: var(--color-slate-900, #f8fafc);
 }
 
 .dark .app-overview-hero .wb-badge,

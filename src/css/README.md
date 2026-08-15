@@ -37,7 +37,7 @@ src/css/
 ```css
 .my-element {
   color: var(--color-blue-500);
-  padding: var(--spacing-md);
+  padding: var(--spacing-4);
   border-radius: var(--rounded-lg);
   transition: all var(--duration-normal) var(--ease-smooth);
 }

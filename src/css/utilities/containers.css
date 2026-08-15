@@ -110,7 +110,7 @@
   }
 
   .section-container {
-    margin-bottom: var(--spacing-xl, 32px);
+    margin-bottom: var(--spacing-8, 32px);
   }
 }
 

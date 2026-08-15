@@ -48,7 +48,7 @@
 
 [contenteditable='true']:hover {
   background: var(--color-bg-hover, rgba(241, 245, 249, 0.8));
-  border-bottom-color: var(--color-text-tertiary, var(--color-slate-400));
+  border-bottom-color: var(--color-slate-400, var(--color-slate-400));
 }
 
 /* 聚焦时的呼吸光环 */
@@ -107,7 +107,7 @@
    ---------------------------------------- */
 .amz-hub-overview {
   position: relative;
-  color: var(--color-text-primary, var(--color-slate-900));
+  color: var(--color-slate-900, var(--color-slate-900));
 }
 
 .amz-hub-overview .amz-hub-hero {
@@ -178,12 +178,12 @@
 }
 
 .amz-hub-overview .amz-hub-hero .wb-description {
-  color: var(--color-text-secondary, var(--color-slate-500)) !important;
+  color: var(--color-slate-500, var(--color-slate-500)) !important;
   line-height: var(--wb-description-line-height, 1.5);
 }
 
 .amz-hub-overview .hub-module-section p {
-  color: var(--color-text-secondary, var(--color-slate-500)) !important;
+  color: var(--color-slate-500, var(--color-slate-500)) !important;
   line-height: 1.6;
 }
 
@@ -366,7 +366,7 @@
    ---------------------------------------- */
 .dark .amz-hub-overview,
 [data-color-mode-resolved='dark'] .amz-hub-overview {
-  color: var(--color-text-primary);
+  color: var(--color-slate-900);
 }
 
 .dark .amz-hub-overview .amz-hub-hero,
@@ -381,8 +381,8 @@
       color-mix(in srgb, var(--color-red-400) 8%, var(--surface-card))
     ) !important;
   box-shadow: var(--shadow-panel, 0 18px 42px -34px rgba(0, 0, 0, 0.6));
-  --wb-text-primary: var(--color-text-primary) !important;
-  --wb-text-secondary: var(--color-text-secondary) !important;
+  --wb-text-primary: var(--color-slate-900) !important;
+  --wb-text-secondary: var(--color-slate-500) !important;
   --wb-tag-bg: rgba(255, 255, 255, 0.06) !important;
   --wb-tag-border: rgba(248, 113, 113, 0.28) !important;
   --wb-tag-hover-border: rgba(248, 113, 113, 0.42) !important;
@@ -390,14 +390,14 @@
 
 .dark .amz-hub-overview .amz-hub-hero .wb-title,
 [data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-title {
-  color: var(--color-text-primary) !important;
+  color: var(--color-slate-900) !important;
 }
 
 .dark .amz-hub-overview .amz-hub-hero .wb-description,
 [data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-description,
 .dark .amz-hub-overview .hub-module-section p,
 [data-color-mode-resolved='dark'] .amz-hub-overview .hub-module-section p {
-  color: var(--color-text-secondary) !important;
+  color: var(--color-slate-500) !important;
 }
 
 .dark .amz-hub-overview .amz-hub-hero .wb-badge,
@@ -418,7 +418,7 @@
 .dark .amz-hub-overview,
 [data-color-mode-resolved='dark'] .amz-hub-overview,
 [data-theme='dark'] .amz-hub-overview {
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .amz-hub-overview .amz-hub-hero,
@@ -436,15 +436,15 @@
       var(--surface-panel, #0f172a) 54%,
       color-mix(in srgb, var(--color-red-600, #dc2626) 10%, var(--surface-panel, #0f172a))
     ) !important;
-  --wb-text-primary: var(--color-text-primary, #f8fafc) !important;
-  --wb-text-secondary: var(--color-text-secondary, #cbd5e1) !important;
+  --wb-text-primary: var(--color-slate-900, #f8fafc) !important;
+  --wb-text-secondary: var(--color-slate-500, #cbd5e1) !important;
   --wb-tag-bg: color-mix(in srgb, var(--surface-card, #1e293b) 78%, transparent) !important;
 }
 
 .dark .amz-hub-overview .amz-hub-hero .wb-title,
 [data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-title,
 [data-theme='dark'] .amz-hub-overview .amz-hub-hero .wb-title {
-  color: var(--color-text-primary, #f8fafc) !important;
+  color: var(--color-slate-900, #f8fafc) !important;
 }
 
 .dark .amz-hub-overview .amz-hub-hero .wb-badge,

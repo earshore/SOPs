@@ -53,13 +53,13 @@
   --field-border-hover: var(--color-border-strong, var(--color-slate-400, #94a3b8));
   --field-bg: var(--color-bg-elevated, var(--surface-panel, #ffffff));
   --field-bg-muted: var(--color-bg-secondary, var(--color-slate-50, #f8fafc));
-  --field-text: var(--color-text-primary, var(--color-slate-700, #334155));
-  --field-placeholder: var(--color-text-placeholder, var(--color-slate-400, #94a3b8));
+  --field-text: var(--color-slate-900, var(--color-slate-700, #334155));
+  --field-placeholder: var(--color-slate-400, var(--color-slate-400, #94a3b8));
   /* Brand chrome: track Appearance primary / focus ring (not raw blue palette). */
-  --field-focus: var(--color-focus-ring, var(--color-primary, #3b82f6));
+  --field-focus: var(--color-primary, var(--color-primary, #3b82f6));
   --field-focus-ring: color-mix(
     in srgb,
-    var(--color-focus-ring, var(--color-primary, #3b82f6)) 14%,
+    var(--color-primary, var(--color-primary, #3b82f6)) 14%,
     transparent
   );
   /* TD-CMP-02 批次 1（2026-08-15）：focus-ring 契约化，完整 box-shadow 语义
@@ -80,7 +80,7 @@
   --check-color-active: var(--color-primary, #3b82f6);
   --check-ring-focus: color-mix(
     in srgb,
-    var(--color-focus-ring, var(--color-primary, #3b82f6)) 10%,
+    var(--color-primary, var(--color-primary, #3b82f6)) 10%,
     transparent
   );
 
@@ -125,7 +125,7 @@
 
 .form-input:disabled {
   background: var(--color-bg-disabled, var(--field-bg-muted));
-  color: var(--color-text-disabled, var(--color-slate-400));
+  color: var(--color-slate-300, var(--color-slate-400));
   cursor: not-allowed;
 }
 
@@ -138,7 +138,7 @@
 .keyword-hunter-input-workspace input,
 .keyword-hunter-input-workspace textarea {
   background: var(--surface-card, #ffffff);
-  color: var(--color-text-primary, #334155);
+  color: var(--color-slate-900, #334155);
 }
 
 .keyword-hunter-input-workspace input:focus,
@@ -166,7 +166,7 @@
   top: 0.5rem;
   font-size: 0.875rem;
   font-weight: 400;
-  color: var(--color-text-secondary, var(--color-slate-500));
+  color: var(--color-slate-500, var(--color-slate-500));
   pointer-events: none;
   /* Requirements 6.5: Label动画在250ms内完成 */
   transition:
@@ -549,8 +549,8 @@ input[type='radio']:disabled {
 }
 
 input[type='checkbox']:disabled:checked {
-  background-color: var(--color-text-disabled, var(--color-slate-400, #94a3b8));
-  border-color: var(--color-text-disabled, var(--color-slate-400, #94a3b8));
+  background-color: var(--color-slate-300, var(--color-slate-400, #94a3b8));
+  border-color: var(--color-slate-300, var(--color-slate-400, #94a3b8));
 }
 
 /* 暗色下 unchecked 面更软（不是 hard white elevated） */
@@ -563,7 +563,7 @@ input[type='checkbox']:disabled:checked {
   --check-bg: var(--color-bg-tertiary, rgba(255, 255, 255, 0.04));
   --check-ring-focus: color-mix(
     in srgb,
-    var(--color-focus-ring, var(--color-primary)) 15%,
+    var(--color-primary, var(--color-primary)) 15%,
     transparent
   );
 }

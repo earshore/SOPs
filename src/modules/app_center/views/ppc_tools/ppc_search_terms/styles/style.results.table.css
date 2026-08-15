@@ -241,7 +241,7 @@
 .dark .ppc-search-terms-action-observe,
 [data-color-mode-resolved='dark'] .ppc-search-terms-action-observe {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .ppc-search-terms-results-row,

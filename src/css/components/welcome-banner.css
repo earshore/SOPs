@@ -94,9 +94,9 @@
  * CSS 变量 (来自 src/css/foundation/variables.css):
  * - 颜色: --color-primary, --color-primary-light, --color-success-light,
  *         --color-amber-400, --color-green-400/500/100, --color-teal-500/100,
- *         --color-cyan-500/100, --color-pink-300, --color-text-primary/secondary/tertiary,
+ *         --color-cyan-500/100, --color-pink-300, --color-slate-900/secondary/tertiary,
  *         --color-bg-primary/secondary/tertiary, --color-border-default/light
- * - 间距: --spacing-xs/sm/md/lg/xl/2xl/3xl
+ * - 间距: --spacing-2/sm/md/lg/xl/2xl/3xl
  * - 字体: --text-xs/sm/base/md/xl/2xl, --font-medium/semibold/bold/extrabold,
  *         --leading-tight/snug/relaxed, --tracking-tight/wide/wider
  * - 圆角: --rounded-sm/md/lg/xl/2xl/full
@@ -141,7 +141,7 @@
 
 /* ===== 容器样式 ===== */
 .wb-container {
-  margin-bottom: var(--spacing-xl, 2rem);
+  margin-bottom: var(--spacing-8, 2rem);
   max-width: 100%;
   overflow-x: hidden;
   --wb-title-size: var(--text-xl, 1.25rem);
@@ -193,7 +193,7 @@
 }
 
 .wb-container.mb-8 {
-  margin-bottom: var(--spacing-lg, 1.5rem);
+  margin-bottom: var(--spacing-6, 1.5rem);
 }
 
 .wb-container--card {
@@ -505,7 +505,7 @@
 .wb-content {
   position: relative;
   z-index: 10;
-  padding: var(--spacing-xl, 2rem) var(--spacing-2xl, 3rem);
+  padding: var(--spacing-8, 2rem) var(--spacing-2xl, 3rem);
   min-height: auto;
   height: auto;
 }
@@ -513,7 +513,7 @@
 .wb-header {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-lg, 1.5rem);
+  gap: var(--spacing-6, 1.5rem);
   flex: 1;
 }
 
@@ -680,15 +680,15 @@
 .wb-title-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs, 0.5rem);
-  margin-bottom: var(--spacing-xs, 0.5rem);
+  gap: var(--spacing-2, 0.5rem);
+  margin-bottom: var(--spacing-2, 0.5rem);
   flex-wrap: wrap;
 }
 
 .wb-title {
   font-size: var(--wb-title-size, var(--text-xl, 1.25rem));
   font-weight: var(--wb-title-weight, var(--font-bold, 700));
-  color: var(--wb-text-primary, var(--color-text-primary, #0f172a));
+  color: var(--wb-text-primary, var(--color-slate-900, #0f172a));
   letter-spacing: 0;
   line-height: var(--wb-title-line-height, var(--leading-snug, 1.375));
   white-space: normal;
@@ -788,8 +788,8 @@
     color-mix(in srgb, var(--surface-panel, #ffffff) 94%, transparent)
   );
   box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.48);
-  margin-bottom: var(--spacing-xl, 2rem);
-  padding: var(--spacing-lg, 1.5rem);
+  margin-bottom: var(--spacing-8, 2rem);
+  padding: var(--spacing-6, 1.5rem);
   transition:
     border-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -905,7 +905,7 @@
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto auto auto;
-  column-gap: var(--spacing-md, 1rem);
+  column-gap: var(--spacing-4, 1rem);
   row-gap: 0;
   align-items: start;
   padding: 0;
@@ -1003,7 +1003,7 @@
 .wb-container--simple .wb-title-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs, 0.5rem);
+  gap: var(--spacing-2, 0.5rem);
   margin-bottom: 0.375rem;
   flex-wrap: wrap;
 }
@@ -1012,7 +1012,7 @@
 .wb-container--simple .wb-title {
   font-size: var(--wb-title-size, var(--text-xl, 1.25rem));
   font-weight: var(--wb-title-weight, var(--font-bold, 700));
-  color: var(--wb-text-primary, var(--color-text-primary, #0f172a));
+  color: var(--wb-text-primary, var(--color-slate-900, #0f172a));
   letter-spacing: 0;
   line-height: var(--wb-title-line-height, var(--leading-snug, 1.375));
   margin: 0;
@@ -1054,11 +1054,11 @@
 
 /* 简化版本的描述 */
 .wb-container--simple .wb-description {
-  color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
+  color: var(--wb-text-secondary, var(--color-slate-500, #64748b));
   font-size: var(--wb-description-size, var(--text-base, 0.875rem));
   line-height: var(--wb-description-line-height, var(--leading-normal, 1.5));
   max-width: 74ch;
-  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
+  margin: 0 0 var(--spacing-3, 0.75rem) 0;
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -1068,21 +1068,21 @@
 .wb-container--simple .wb-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xs, 0.5rem);
+  gap: var(--spacing-2, 0.5rem);
   margin: 0;
 }
 
 .wb-container--simple .wb-meta > span {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs, 0.5rem);
+  gap: var(--spacing-2, 0.5rem);
   padding: var(--wb-tag-padding, 5px 10px);
   border-radius: var(--wb-tag-radius, var(--rounded-full, 9999px));
   background: var(--wb-tag-bg, rgba(255, 255, 255, 0.78));
   border: 1px solid var(--wb-tag-border, rgba(148, 163, 184, 0.22));
   backdrop-filter: none;
   font-size: var(--wb-tag-text-size, var(--text-xs, 0.75rem));
-  color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
+  color: var(--wb-text-secondary, var(--color-slate-500, #64748b));
   font-weight: var(--wb-tag-text-weight, var(--font-medium, 500));
   transition:
     background-color var(--duration-normal, 300ms)
@@ -1109,13 +1109,13 @@
 /* 简化版本的响应式 */
 @media (max-width: 768px) {
   .wb-container--simple {
-    padding: var(--spacing-md, 1rem);
+    padding: var(--spacing-4, 1rem);
   }
 
   .wb-container--simple .wb-content {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto;
-    row-gap: var(--spacing-xs, 0.5rem);
+    row-gap: var(--spacing-2, 0.5rem);
   }
 
   .wb-container--simple .wb-icon {
@@ -1150,7 +1150,7 @@
 
 @media (max-width: 480px) {
   .wb-container--simple {
-    padding: var(--spacing-md, 1rem);
+    padding: var(--spacing-4, 1rem);
   }
 
   .wb-container--simple .wb-icon {
@@ -1186,7 +1186,7 @@
 @media (min-width: 769px) {
   .wb-container,
   .wb-container--simple {
-    margin-bottom: var(--spacing-lg, 1.5rem);
+    margin-bottom: var(--spacing-6, 1.5rem);
     border-radius: var(--rounded-lg, 12px);
   }
 
@@ -1204,7 +1204,7 @@
   }
 
   .wb-card .wb-header {
-    gap: var(--spacing-md, 1rem);
+    gap: var(--spacing-4, 1rem);
   }
 
   .wb-card .wb-icon-main {
@@ -1278,7 +1278,7 @@
   }
 
   .wb-container--simple .wb-content {
-    column-gap: var(--spacing-md, 1rem);
+    column-gap: var(--spacing-4, 1rem);
     padding: 0;
   }
 

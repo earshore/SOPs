@@ -128,7 +128,7 @@ body {
   line-height: var(--leading-normal, 1.6);
 
   /* 颜色 */
-  color: var(--color-text-primary, #1a1a2e);
+  color: var(--color-slate-900, #1a1a2e);
   background-color: var(--color-bg-primary, #ffffff);
 
   /* 渲染 */
@@ -263,7 +263,7 @@ figure {
 
 figcaption {
   font-size: 0.875em;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-slate-500, #6b7280);
   margin-top: 0.5em;
 }
 
@@ -723,22 +723,22 @@ q {
    14. 占位符样式
    ======================================== */
 ::placeholder {
-  color: var(--color-text-placeholder, #9ca3af);
+  color: var(--color-slate-400, #9ca3af);
   opacity: 1; /* Firefox 默认 opacity < 1 */
   font-weight: var(--font-regular, 400);
 }
 
 ::-webkit-input-placeholder {
-  color: var(--color-text-placeholder, #9ca3af);
+  color: var(--color-slate-400, #9ca3af);
 }
 
 ::-moz-placeholder {
-  color: var(--color-text-placeholder, #9ca3af);
+  color: var(--color-slate-400, #9ca3af);
   opacity: 1;
 }
 
 :-ms-input-placeholder {
-  color: var(--color-text-placeholder, #9ca3af);
+  color: var(--color-slate-400, #9ca3af);
 }
 
 /* ========================================
@@ -754,12 +754,12 @@ textarea:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--color-text-primary, #1a1a2e);
+  -webkit-text-fill-color: var(--color-slate-900, #1a1a2e);
   -webkit-box-shadow: 0 0 0 1000px var(--color-bg-primary, #ffffff) inset;
   transition:
     background-color 600000s 0s,
     color 600000s 0s;
-  caret-color: var(--color-text-primary, #1a1a2e);
+  caret-color: var(--color-slate-900, #1a1a2e);
 }
 
 /* ========================================
@@ -807,7 +807,7 @@ select:-webkit-autofill:focus {
 
 /* 键盘焦点 */
 :focus-visible {
-  outline: var(--focus-ring-width, 2px) solid var(--color-focus-ring, #3b82f6);
+  outline: var(--focus-ring-width, 2px) solid var(--color-primary, #3b82f6);
   outline-offset: var(--focus-ring-offset, 2px);
 }
 
@@ -969,7 +969,7 @@ a {
 .dark ::placeholder,
 [data-color-mode-resolved='dark'] ::placeholder,
 [data-theme='dark'] ::placeholder {
-  color: var(--color-text-placeholder, #6b7280);
+  color: var(--color-slate-400, #6b7280);
 }
 
 /* 暗色模式下的自动填充 */
@@ -982,9 +982,9 @@ a {
 [data-theme='dark'] input:-webkit-autofill,
 [data-theme='dark'] textarea:-webkit-autofill,
 [data-theme='dark'] select:-webkit-autofill {
-  -webkit-text-fill-color: var(--color-text-primary, #f9fafb);
+  -webkit-text-fill-color: var(--color-slate-900, #f9fafb);
   -webkit-box-shadow: 0 0 0 1000px var(--color-bg-primary, #0f172a) inset;
-  caret-color: var(--color-text-primary, #f9fafb);
+  caret-color: var(--color-slate-900, #f9fafb);
 }
 
 /* 暗色模式下的滚动条 */
@@ -1039,7 +1039,7 @@ a {
 .dark figcaption,
 [data-color-mode-resolved='dark'] figcaption,
 [data-theme='dark'] figcaption {
-  color: var(--color-text-secondary, #d1d5db);
+  color: var(--color-slate-500, #d1d5db);
 }
 
 /* ========================================

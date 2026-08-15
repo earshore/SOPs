@@ -6,7 +6,7 @@
 .app-confirm-modal {
   /* T2 confirm shell: dual-theme panel surface (no light-only bg-white) */
   background: var(--surface-panel, #ffffff) !important;
-  color: var(--color-text-primary, var(--color-slate-900, #0f172a));
+  color: var(--color-slate-900, var(--color-slate-900, #0f172a));
   border: 1px solid color-mix(in srgb, var(--color-primary, #6257f5) 24%, transparent);
   box-shadow:
     0 24px 64px -32px color-mix(in srgb, var(--color-primary, #6257f5) 42%, transparent),
@@ -15,15 +15,15 @@
 
 .app-confirm-modal .text-slate-600,
 .app-confirm-modal .text-slate-500 {
-  color: var(--color-text-secondary, var(--color-slate-600, #475569));
+  color: var(--color-slate-500, var(--color-slate-600, #475569));
 }
 
 .app-confirm-modal [id^='btn-cancel-'] {
-  color: var(--color-text-secondary, var(--color-slate-500, #64748b));
+  color: var(--color-slate-500, var(--color-slate-500, #64748b));
 }
 
 .app-confirm-modal [id^='btn-cancel-']:hover {
-  color: var(--color-text-primary, var(--color-slate-700, #334155));
+  color: var(--color-slate-900, var(--color-slate-700, #334155));
   background: var(--color-bg-hover, var(--color-slate-100, #f1f5f9));
 }
 
@@ -56,7 +56,7 @@
   box-shadow:
     0 0 0 2px var(--surface-panel, #ffffff),
     0 0 0 4px
-      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #6257f5)) 35%, transparent);
+      color-mix(in srgb, var(--color-primary, var(--color-primary, #6257f5)) 35%, transparent);
 }
 
 .app-confirm-modal--danger .app-confirm-modal-confirm {
@@ -81,7 +81,7 @@
 
 .app-confirm-modal-checkbox:focus-visible {
   outline: 2px solid
-    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #6257f5)) 45%, transparent);
+    color-mix(in srgb, var(--color-primary, var(--color-primary, #6257f5)) 45%, transparent);
   outline-offset: 2px;
 }
 

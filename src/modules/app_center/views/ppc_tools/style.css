@@ -10,9 +10,9 @@
   --ppc-search-terms-surface-muted: var(--surface-card-hover, var(--color-slate-50, #f8fafc));
   --ppc-search-terms-border: var(--border-subtle, rgba(148, 163, 184, 0.24));
   --ppc-search-terms-border-muted: var(--border-muted, rgba(203, 213, 225, 0.72));
-  --ppc-search-terms-text-primary: var(--color-text-primary, var(--color-slate-900, #0f172a));
-  --ppc-search-terms-text-secondary: var(--color-text-secondary, var(--color-slate-600, #475569));
-  --ppc-search-terms-text-muted: var(--color-text-tertiary, var(--color-slate-400, #94a3b8));
+  --ppc-search-terms-text-primary: var(--color-slate-900, var(--color-slate-900, #0f172a));
+  --ppc-search-terms-text-secondary: var(--color-slate-500, var(--color-slate-600, #475569));
+  --ppc-search-terms-text-muted: var(--color-slate-400, var(--color-slate-400, #94a3b8));
   --ppc-search-terms-ink-strong: var(--color-slate-700, #334155);
   --ppc-search-terms-ink: var(--color-slate-600, #475569);
   --ppc-search-terms-ink-soft: var(--color-slate-500, #64748b);

@@ -195,7 +195,7 @@
   --button-filter-border: var(--ppc-search-terms-border-strong, #cbd5e1);
   --button-filter-hover-bg: var(--color-bg-secondary, #f8fafc);
   --button-filter-hover-border: var(--ppc-search-terms-border-strong, #cbd5e1);
-  --button-filter-hover-color: var(--color-text-secondary, #475569);
+  --button-filter-hover-color: var(--color-slate-500, #475569);
 }
 
 /* Primary CTA：模块绿经 --button-primary-* token 保留。
@@ -226,12 +226,12 @@
   color: var(--ppc-search-terms-accent-strong, #15803d);
 }
 
-/* 共享 focus 风格（outline 2px var(--color-focus-ring)）；
+/* 共享 focus 风格（outline 2px var(--color-primary)）；
    已迁移按钮的 focus 由 .action-btn / .category-filter-btn 自带 */
 .ppc-search-terms-threshold-toggle:focus-visible,
 .ppc-search-terms-export-btn:focus-visible,
 .ppc-search-terms-search-clear-btn:focus-visible {
-  outline: 2px solid var(--color-focus-ring, var(--color-primary));
+  outline: 2px solid var(--color-primary, var(--color-primary));
   outline-offset: 2px;
 }
 
@@ -350,7 +350,7 @@
 
 .dark .ppc-search-terms-card-title,
 [data-color-mode-resolved='dark'] .ppc-search-terms-card-title {
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .ppc-search-terms-card-title-icon-emerald,

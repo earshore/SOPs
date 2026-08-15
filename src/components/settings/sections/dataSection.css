@@ -33,7 +33,7 @@
   margin: 0;
   font-size: 0.6875rem;
   line-height: 1.45;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 /* Narrow: stack primary full width under secondaries */
@@ -134,7 +134,7 @@
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .settings-stat-tile__value {
@@ -150,7 +150,7 @@
   display: block;
   margin-top: 0.125rem;
   font-size: 0.625rem;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .settings-panel-body {

@@ -115,7 +115,7 @@
   --deep-chat-hairline-strong: rgba(148, 163, 184, 0.4);
   --deep-chat-hairline-soft: rgba(148, 163, 184, 0.24);
   --deep-chat-highlight: rgba(255, 255, 255, 0.05);
-  --deep-chat-input-placeholder: var(--color-text-placeholder);
+  --deep-chat-input-placeholder: var(--color-slate-400);
   --deep-chat-focus-ring: rgba(var(--deep-chat-accent-rgb), 0.28);
   --deep-chat-surface-hover: color-mix(in srgb, var(--deep-chat-accent) 10%, var(--surface-card));
   --deep-chat-bg: var(--surface-panel);
@@ -166,9 +166,9 @@
     transparent 100%
   );
   --deep-chat-code-bg: var(--surface-workbench);
-  --deep-chat-ink: var(--color-text-primary);
+  --deep-chat-ink: var(--color-slate-900);
   --deep-chat-ink-strong: var(--color-slate-200);
-  --deep-chat-ink-secondary: var(--color-text-secondary);
+  --deep-chat-ink-secondary: var(--color-slate-500);
   --deep-chat-ink-label: var(--color-slate-300);
   --deep-chat-ink-muted: var(--color-slate-400);
   --deep-chat-ink-faint: var(--color-slate-500);
@@ -583,7 +583,7 @@
 .deep-chat-thread-name-input:focus-visible {
   border-color: var(--color-primary, #3b82f6);
   box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 18%, transparent);
+    color-mix(in srgb, var(--color-primary, var(--color-primary, #3b82f6)) 18%, transparent);
 }
 
 .deep-chat-thread-meta {
@@ -1323,7 +1323,7 @@
 .deep-chat-reset-tuning:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px
-    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 22%, transparent);
+    color-mix(in srgb, var(--color-primary, var(--color-primary, #3b82f6)) 22%, transparent);
 }
 
 /* Brand-adjacent shell chrome keeps Playground terracotta focus ring. */
@@ -1372,7 +1372,7 @@
 .deep-chat-select:focus-visible {
   border-color: var(--color-primary, #3b82f6);
   box-shadow: 0 0 0 3px
-    color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 20%, transparent);
+    color-mix(in srgb, var(--color-primary, var(--color-primary, #3b82f6)) 20%, transparent);
 }
 
 .deep-chat-select:disabled {
@@ -2422,7 +2422,7 @@
   .deep-chat-reset-tuning:hover {
     background: var(--deep-chat-surface-hover);
     border-color: var(--deep-chat-border);
-    color: var(--color-text-primary, var(--color-slate-900));
+    color: var(--color-slate-900, var(--color-slate-900));
   }
 
   .deep-chat-thread-item.is-active,

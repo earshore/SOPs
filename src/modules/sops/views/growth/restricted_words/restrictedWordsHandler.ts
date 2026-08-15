@@ -510,7 +510,7 @@ function createActionCell(word: RestrictedWord): HTMLTableCellElement {
   const detailBtn = document.createElement('button');
   detailBtn.type = 'button';
   detailBtn.className =
-    'px-3 py-1.5 bg-white border border-primary-100 text-primary-600 hover:bg-primary-100 hover:border-primary-100 rounded-md text-xs font-medium transition duration-200 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1';
+    'px-3 py-1.5 bg-white border border-primary-100 text-primary-600 hover:bg-primary-100 hover:border-primary-100 rounded-md text-xs font-medium transition duration-200 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1';
   detailBtn.textContent = '详情';
   detailBtn.addEventListener('click', () => showWordDetail(word.id));
   actionTd.appendChild(detailBtn);

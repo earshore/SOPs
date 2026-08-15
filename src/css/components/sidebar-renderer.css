@@ -357,25 +357,25 @@
       transparent
     )
   ) !important;
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-slate-500, #64748b);
   border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));
 }
 
 /* Muted chrome (overrides light-only Tailwind slate utilities in dual theme) */
 .sidebar-shell .text-slate-400 {
-  color: var(--color-text-tertiary, #94a3b8) !important;
+  color: var(--color-slate-400, #94a3b8) !important;
 }
 
 .sidebar-shell .text-slate-500 {
-  color: var(--color-text-secondary, #64748b) !important;
+  color: var(--color-slate-500, #64748b) !important;
 }
 
 .sidebar-shell .text-slate-600 {
-  color: var(--color-text-secondary, #475569) !important;
+  color: var(--color-slate-500, #475569) !important;
 }
 
 .sidebar-shell .text-slate-700 {
-  color: var(--color-text-primary, #334155) !important;
+  color: var(--color-slate-900, #334155) !important;
 }
 
 .sidebar-shell .border-t {
@@ -389,12 +389,12 @@
 /* Category/label hover neutrals */
 .sidebar-shell .sidebar-category-btn:hover .text-slate-700,
 .sidebar-shell .sidebar-btn:hover .sidebar-label:not(.sidebar-label--active) {
-  color: var(--color-text-primary, #0f172a) !important;
+  color: var(--color-slate-900, #0f172a) !important;
 }
 
 .sidebar-shell .sidebar-btn:hover .sidebar-icon:not(.sidebar-icon--active),
 .sidebar-shell .sidebar-category-btn:hover .text-slate-400 {
-  color: var(--color-text-secondary, #64748b) !important;
+  color: var(--color-slate-500, #64748b) !important;
 }
 
 .sidebar-shell .sidebar-btn:hover .sidebar-icon-container:not(.sidebar-icon-container--active),
@@ -416,11 +416,11 @@
 .sidebar-shell .sidebar-search-input {
   background: color-mix(in srgb, var(--surface-panel, #ffffff) 82%, transparent) !important;
   border-color: var(--border-muted, rgba(203, 213, 225, 0.72)) !important;
-  color: var(--color-text-primary, #0f172a) !important;
+  color: var(--color-slate-900, #0f172a) !important;
 }
 
 .sidebar-shell .sidebar-search-input::placeholder {
-  color: var(--color-text-placeholder, var(--color-text-tertiary, #94a3b8)) !important;
+  color: var(--color-slate-400, var(--color-slate-400, #94a3b8)) !important;
 }
 
 .sidebar-shell .sidebar-search-input:hover {

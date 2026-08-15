@@ -17,7 +17,10 @@
           <div class="wb-text">
             <div class="wb-title-row">
               <h1 class="wb-title">Listing 炼金术工场</h1>
-              <span aria-label="分析功能" class="wb-badge wb-badge-analytics badge badge--analytics">
+              <span
+                aria-label="分析功能"
+                class="wb-badge wb-badge-analytics badge badge--analytics"
+              >
                 <i aria-hidden="true" class="fas fa-flask"></i>Master Prompt
               </span>
             </div>
@@ -81,7 +84,7 @@
                 type="button"
                 @click="toggleAllDimensions()"
                 :class="hasReport ? '' : 'hidden'"
-                class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1"
+                class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1"
                 :title="toggleAllDimensionsTitle"
               >
                 <i class="fas text-sm" :class="toggleAllDimensionsIconClass"></i>
@@ -169,7 +172,7 @@
                 @click="autoPopulateDNA"
                 :disabled="dnaActionDisabled"
                 :class="autoPopulateButtonClass"
-                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition duration-200 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition duration-200 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1"
                 title="从AI分析报告自动提取产品DNA（仅自动填充置信度≥70%的字段）"
               >
                 <i class="fas fa-magic text-[10px]"></i>
@@ -177,7 +180,7 @@
               </button>
               <select
                 @change="setProfileField('targetMarket', $event)"
-                class="text-xs border-2 border-slate-200 rounded-xl p-2 w-48 bg-slate-50 text-slate-700 font-semibold transition duration-200 hover:border-slate-300 cursor-pointer appearance-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1"
+                class="text-xs border-2 border-slate-200 rounded-xl p-2 w-48 bg-slate-50 text-slate-700 font-semibold transition duration-200 hover:border-slate-300 cursor-pointer appearance-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1"
                 id="lab-target-market"
                 aria-label="站点/语言"
                 title="站点/语言"
@@ -246,7 +249,7 @@
                     @click="extractSingleField('keywordsTier1')"
                     :disabled="dnaActionDisabled"
                     :class="extractButtonClass"
-                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1"
                     title="仅重新提取此字段"
                     aria-label="重新提取 Tier 1 核心词"
                   >
@@ -295,7 +298,7 @@
                     @click="extractSingleField('negative')"
                     :disabled="dnaActionDisabled"
                     :class="extractButtonClass"
-                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1"
                     title="仅重新提取此字段"
                     aria-label="重新提取限制词"
                   >
@@ -345,7 +348,7 @@
                     @click="extractSingleField('keywordsTier2')"
                     :disabled="dnaActionDisabled"
                     :class="extractButtonClass"
-                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1"
                     title="仅重新提取此字段"
                     aria-label="重新提取 Tier 2 功能词"
                   >
@@ -396,7 +399,7 @@
                     @click="extractSingleField('audience')"
                     :disabled="dnaActionDisabled"
                     :class="extractButtonClass"
-                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1"
                     title="仅重新提取此字段"
                     aria-label="重新提取目标受众"
                   >
@@ -447,7 +450,7 @@
                     @click="extractSingleField('usps')"
                     :disabled="dnaActionDisabled"
                     :class="extractButtonClass"
-                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1"
                     title="仅重新提取此字段"
                     aria-label="重新提取核心卖点"
                   >
@@ -500,7 +503,7 @@
                     @click="extractSingleField('specs')"
                     :disabled="dnaActionDisabled"
                     :class="extractButtonClass"
-                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1"
                     title="仅重新提取此字段"
                     aria-label="重新提取详细参数"
                   >
@@ -757,7 +760,7 @@
                     :class="listingGenerateButtonClass"
                     :disabled="generateButtonDisabled"
                     @click="generateListingPrompt"
-                    class="relative w-full py-3.5 font-bold rounded-xl transition duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 flex items-center justify-center gap-2.5 group overflow-hidden"
+                    class="relative w-full py-3.5 font-bold rounded-xl transition duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 flex items-center justify-center gap-2.5 group overflow-hidden"
                     id="btn-generate-prompt"
                   >
                     <div
@@ -849,7 +852,7 @@
               <button
                 type="button"
                 @click="copyPrompt"
-                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--color-primary-light,#eff6ff)] text-slate-400 hover:text-[var(--color-primary,#3b82f6)] transition duration-200 cursor-pointer border border-transparent hover:border-[color-mix(in_srgb,var(--color-primary,#3b82f6)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,#3b82f6)] focus-visible:ring-offset-1"
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--color-primary-light,#eff6ff)] text-slate-400 hover:text-[var(--color-primary,#3b82f6)] transition duration-200 cursor-pointer border border-transparent hover:border-[color-mix(in_srgb,var(--color-primary,#3b82f6)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,#3b82f6)] focus-visible:ring-offset-1"
                 title="复制"
                 aria-label="复制 Prompt"
               >

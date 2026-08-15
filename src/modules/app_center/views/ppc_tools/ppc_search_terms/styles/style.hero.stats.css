@@ -76,12 +76,12 @@
 
 .dark .ppc-search-terms-stat-label,
 [data-color-mode-resolved='dark'] .ppc-search-terms-stat-label {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .ppc-search-terms-stat-number,
 [data-color-mode-resolved='dark'] .ppc-search-terms-stat-number {
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .ppc-search-terms-stat-tile-blue .ppc-search-terms-stat-label i,

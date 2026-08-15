@@ -55,7 +55,7 @@
   justify-content: center;
   border-radius: 0.3rem;
   background: transparent;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
   font-size: 0.5rem;
 }
 
@@ -63,7 +63,7 @@
   margin: 0.35rem 0 0;
   font-size: 0.6875rem;
   line-height: 1.4;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .settings-tool-page__hint-mono {
@@ -156,7 +156,7 @@
   margin: 0.15rem 0 0;
   font-size: 0.6875rem;
   font-weight: 400;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
   line-height: 1.4;
 }
 

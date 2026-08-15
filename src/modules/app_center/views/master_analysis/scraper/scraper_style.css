@@ -1270,7 +1270,7 @@
   box-shadow:
     0 0 0 2px var(--color-white, #ffffff),
     0 0 0 4px
-      color-mix(in srgb, var(--color-focus-ring, var(--color-primary, #3b82f6)) 35%, transparent),
+      color-mix(in srgb, var(--color-primary, var(--color-primary, #3b82f6)) 35%, transparent),
     0 12px 24px -20px rgba(var(--ma-accent-rgb, 98, 87, 245), 0.9);
 }
 
@@ -1565,7 +1565,7 @@ textarea:focus-visible {
 [data-color-mode-resolved='dark'] .asin-card [class*='text-slate-'][class*='-700'],
 [data-theme='dark'] .asin-card [class*='text-slate-'][class*='-800'],
 [data-theme='dark'] .asin-card [class*='text-slate-'][class*='-700'] {
-  color: var(--color-text-primary, #f8fafc) !important;
+  color: var(--color-slate-900, #f8fafc) !important;
 }
 
 .dark .asin-card [class*='text-slate-'][class*='-600'],
@@ -1574,7 +1574,7 @@ textarea:focus-visible {
 [data-color-mode-resolved='dark'] .asin-card [class*='text-slate-'][class*='-500'],
 [data-theme='dark'] .asin-card [class*='text-slate-'][class*='-600'],
 [data-theme='dark'] .asin-card [class*='text-slate-'][class*='-500'] {
-  color: var(--color-text-secondary, #cbd5e1) !important;
+  color: var(--color-slate-500, #cbd5e1) !important;
 }
 
 .dark .asin-card .bg-slate-100,
@@ -1585,7 +1585,7 @@ textarea:focus-visible {
 [data-theme='dark'] .asin-card .border-slate-200 {
   background-color: color-mix(in srgb, var(--surface-panel, #0f172a) 85%, #000) !important;
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1)) !important;
-  color: var(--color-text-secondary, #cbd5e1) !important;
+  color: var(--color-slate-500, #cbd5e1) !important;
 }
 
 .dark .asin-card .border-slate-200\/60,
@@ -1617,7 +1617,7 @@ textarea:focus-visible {
 [data-theme='dark'] .history-card {
   background: var(--surface-card, #1e293b) !important;
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.12)) !important;
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark .history-card:hover,
@@ -1653,7 +1653,7 @@ textarea:focus-visible {
 [data-color-mode-resolved='dark'] .history-card [class*='text-slate-'][class*='-700'],
 [data-theme='dark'] .history-card [class*='text-slate-'][class*='-800'],
 [data-theme='dark'] .history-card [class*='text-slate-'][class*='-700'] {
-  color: var(--color-text-primary, #f8fafc) !important;
+  color: var(--color-slate-900, #f8fafc) !important;
 }
 
 .dark .history-card [class*='text-slate-'][class*='-500'],
@@ -1665,13 +1665,13 @@ textarea:focus-visible {
 [data-theme='dark'] .history-card [class*='text-slate-'][class*='-500'],
 [data-theme='dark'] .history-card [class*='text-slate-'][class*='-400'],
 [data-theme='dark'] .history-card [class*='text-slate-'][class*='-300'] {
-  color: var(--color-text-secondary, #cbd5e1) !important;
+  color: var(--color-slate-500, #cbd5e1) !important;
 }
 
 .dark .history-card .delete-btn,
 [data-color-mode-resolved='dark'] .history-card .delete-btn,
 [data-theme='dark'] .history-card .delete-btn {
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .dark .history-card .delete-btn:hover,
@@ -1687,7 +1687,7 @@ textarea:focus-visible {
 [data-theme='dark'] .history-card .load-btn {
   background: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, #000);
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .history-card .load-btn:hover,
@@ -1727,7 +1727,7 @@ textarea:focus-visible {
     color-mix(in srgb, var(--surface-panel, #0f172a) 92%, #000) 0%,
     var(--surface-card, #1e293b) 48%
   );
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark [x-data='scraperPanel'] .manual-config-section,
@@ -1741,7 +1741,7 @@ textarea:focus-visible {
 [data-theme='dark'] [x-data='scraperPanel'] .manual-option-card {
   background: color-mix(in srgb, var(--surface-card, #1e293b) 94%, #000) !important;
   border-color: var(--scraper-border, rgba(255, 255, 255, 0.1)) !important;
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark [x-data='scraperPanel'] .manual-option-card:hover,
@@ -1756,7 +1756,7 @@ textarea:focus-visible {
 [data-theme='dark'] [x-data='scraperPanel'] .manual-site-btn {
   background: var(--scraper-surface, #1e293b) !important;
   border-color: var(--scraper-border, rgba(255, 255, 255, 0.1)) !important;
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 .dark [x-data='scraperPanel'] .manual-site-btn:hover,
@@ -1783,7 +1783,7 @@ textarea:focus-visible {
 [data-theme='dark'] [x-data='scraperPanel'] .manual-site-btn .site-flag {
   background: color-mix(in srgb, var(--surface-panel, #0f172a) 88%, #000) !important;
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.1)) !important;
-  color: var(--color-text-secondary, #cbd5e1) !important;
+  color: var(--color-slate-500, #cbd5e1) !important;
 }
 
 .dark [x-data='scraperPanel'] .manual-asin-textarea,
@@ -1791,13 +1791,13 @@ textarea:focus-visible {
 [data-theme='dark'] [x-data='scraperPanel'] .manual-asin-textarea {
   background: color-mix(in srgb, var(--surface-panel, #0f172a) 90%, #000) !important;
   border-color: var(--scraper-border, rgba(255, 255, 255, 0.1)) !important;
-  color: var(--color-text-primary, #f8fafc) !important;
+  color: var(--color-slate-900, #f8fafc) !important;
 }
 
 .dark [x-data='scraperPanel'] .manual-asin-textarea::placeholder,
 [data-color-mode-resolved='dark'] [x-data='scraperPanel'] .manual-asin-textarea::placeholder,
 [data-theme='dark'] [x-data='scraperPanel'] .manual-asin-textarea::placeholder {
-  color: var(--color-text-placeholder, #64748b) !important;
+  color: var(--color-slate-400, #64748b) !important;
 }
 
 .dark [x-data='scraperPanel'] .manual-config-label,
@@ -1821,7 +1821,7 @@ textarea:focus-visible {
   [x-data='scraperPanel']
   .manual-config-panel
   [class*='text-slate-'][class*='-800'] {
-  color: var(--color-text-primary, #f8fafc) !important;
+  color: var(--color-slate-900, #f8fafc) !important;
 }
 
 .dark [x-data='scraperPanel'] .manual-config-panel [class*='text-slate-'][class*='-400'],
@@ -1851,7 +1851,7 @@ textarea:focus-visible {
   [x-data='scraperPanel']
   .manual-config-panel
   [class*='text-slate-'][class*='-600'] {
-  color: var(--color-text-secondary, #cbd5e1) !important;
+  color: var(--color-slate-500, #cbd5e1) !important;
 }
 
 .dark [x-data='scraperPanel'] .manual-config-panel .bg-slate-50,

@@ -109,7 +109,7 @@
 
 .catalog-search-field:focus-within {
   border-color: transparent;
-  box-shadow: 0 0 0 2px var(--color-focus-ring, var(--color-primary, #3b82f6));
+  box-shadow: 0 0 0 2px var(--color-primary, var(--color-primary, #3b82f6));
 }
 
 .catalog-search-icon {
@@ -201,20 +201,20 @@
   outline: none;
   box-shadow:
     0 0 0 2px var(--surface-card, white),
-    0 0 0 4px var(--color-focus-ring, var(--color-primary, #3b82f6));
+    0 0 0 4px var(--color-primary, var(--color-primary, #3b82f6));
 }
 
 .skill-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-text-primary, var(--color-slate-800));
+  color: var(--color-slate-900, var(--color-slate-800));
   margin-bottom: 0.5rem;
   transition: color var(--duration-fast);
 }
 
 .skill-description {
   font-size: 0.875rem;
-  color: var(--color-text-secondary, var(--color-slate-500));
+  color: var(--color-slate-500, var(--color-slate-500));
   line-height: 1.625;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -351,11 +351,11 @@
 .skill-panel {
   background: var(--surface-card, #ffffff);
   border: 1px solid var(--color-slate-200, #e2e8f0);
-  color: var(--color-text-secondary, #475569);
+  color: var(--color-slate-500, #475569);
 }
 
 .skill-panel-title {
-  color: var(--color-text-primary, #1e293b);
+  color: var(--color-slate-900, #1e293b);
 }
 
 .skill-panel--violet {
@@ -385,11 +385,11 @@
 }
 
 .skill-modal-raw summary {
-  color: var(--color-text-primary, #1e293b);
+  color: var(--color-slate-900, #1e293b);
 }
 
 .skill-modal-raw pre {
-  color: var(--color-text-secondary, #475569);
+  color: var(--color-slate-500, #475569);
 }
 
 .skill-modal-footer {
@@ -409,11 +409,11 @@
 }
 
 .skill-eyebrow {
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-slate-500, #64748b);
 }
 
 .skills-page-footer__note {
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-slate-500, #64748b);
 }
 
 /* ========================================
@@ -501,12 +501,12 @@
 [data-color-mode-resolved='dark'] .skill-panel {
   background: var(--surface-card, #1e293b);
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .skill-panel-title,
 [data-color-mode-resolved='dark'] .skill-panel-title {
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
 }
 
 .dark .skill-panel--violet,
@@ -531,7 +531,7 @@
 [data-color-mode-resolved='dark'] .skill-flow-step {
   background: color-mix(in srgb, var(--color-slate-500, #64748b) 12%, var(--surface-card, #1e293b));
   border-color: var(--color-border-default, rgba(255, 255, 255, 0.12));
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 /* ---- 模态 ---- */
@@ -543,12 +543,12 @@
 
 .dark .skill-modal-raw summary,
 [data-color-mode-resolved='dark'] .skill-modal-raw summary {
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
 }
 
 .dark .skill-modal-raw pre,
 [data-color-mode-resolved='dark'] .skill-modal-raw pre {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .skill-modal-footer,
@@ -574,7 +574,7 @@
 [data-color-mode-resolved='dark'] .skill-eyebrow,
 .dark .skills-page-footer__note,
 [data-color-mode-resolved='dark'] .skills-page-footer__note {
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 /* ========================================
@@ -594,17 +594,17 @@
 
 .dark .catalog-search-icon,
 [data-color-mode-resolved='dark'] .catalog-search-icon {
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 .dark .catalog-search-input,
 [data-color-mode-resolved='dark'] .catalog-search-input {
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
 }
 
 .dark .catalog-search-input::placeholder,
 [data-color-mode-resolved='dark'] .catalog-search-input::placeholder {
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-slate-400, #94a3b8);
 }
 
 /* ---- 业务规则卡 ---- */
@@ -616,12 +616,12 @@
 
 .dark .skill-source-card strong,
 [data-color-mode-resolved='dark'] .skill-source-card strong {
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--color-slate-900, #f1f5f9);
 }
 
 .dark .skill-source-card > p,
 [data-color-mode-resolved='dark'] .skill-source-card > p {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 .dark .skill-source-card__label,

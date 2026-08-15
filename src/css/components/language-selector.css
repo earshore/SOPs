@@ -6,7 +6,7 @@
 .lang-selector {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2xs);
+  gap: var(--spacing-1-5);
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--rounded-lg);
@@ -14,10 +14,10 @@
 }
 
 .lang-btn {
-  padding: var(--spacing-2xs) var(--spacing-sm);
+  padding: var(--spacing-1-5) var(--spacing-3);
   border: none;
   background: transparent;
-  color: var(--color-text-tertiary);
+  color: var(--color-slate-400);
   font-size: var(--text-xs);
   font-weight: var(--font-semibold);
   border-radius: var(--rounded-md);
@@ -34,7 +34,7 @@
 }
 
 .lang-btn:hover {
-  color: var(--color-text-secondary);
+  color: var(--color-slate-500);
   background: var(--color-bg-secondary);
 }
 

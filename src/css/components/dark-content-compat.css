@@ -98,7 +98,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-slate-700 {
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -107,7 +107,7 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .text-slate-500 {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -2931,13 +2931,13 @@
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   :is(.text-gray-900, .text-gray-800, .text-gray-700) {
-  color: var(--color-text-primary, #f8fafc);
+  color: var(--color-slate-900, #f8fafc);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   :is(.text-gray-600, .text-gray-500) {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--color-slate-500, #cbd5e1);
 }
 
 /* gray-family neutral chips (bg-gray-50/100, border-gray-100/200) */

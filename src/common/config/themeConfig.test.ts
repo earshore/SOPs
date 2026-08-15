@@ -123,7 +123,7 @@ describe('ThemeManager', () => {
     expect(rule).toContain('--color-primary-light:var(--color-slate-100)');
     expect(rule).toContain('--color-primary-dark:var(--color-slate-800)');
     expect(rule).toContain('--color-primary-darker:var(--color-slate-900)');
-    expect(rule).toContain('--color-focus-ring:var(--color-slate-700)');
+    expect(rule).toContain('--color-primary:var(--color-slate-700)');
     expect(StorageService.set).toHaveBeenCalledWith('app-theme', 'minimal');
     expect(ThemeManager.getCurrentTheme()).toBe('minimal');
     expect(THEME_PRESETS.minimal?.colorScheme).toBe('slate');
@@ -168,7 +168,7 @@ describe('ThemeManager', () => {
     root.style.setProperty('--color-orange-100', '#ffedd5');
     root.style.setProperty('--color-orange-700', '#c2410c');
     root.style.setProperty('--color-orange-900', '#7c2d12');
-    root.style.setProperty('--color-focus-ring', '#2563eb');
+    root.style.setProperty('--color-primary', '#2563eb');
     // Status / secondary tokens must not appear on the preview shape (D10)
     root.style.setProperty('--color-secondary', '#64748b');
     root.style.setProperty('--color-success', '#16a34a');
@@ -197,7 +197,7 @@ describe('ThemeManager', () => {
     root.style.setProperty('--color-blue-100', '#dbeafe');
     root.style.setProperty('--color-blue-700', '#1d4ed8');
     root.style.setProperty('--color-blue-900', '#1e3a8a');
-    root.style.setProperty('--color-focus-ring', '#3b82f6');
+    root.style.setProperty('--color-primary', '#3b82f6');
 
     const preview = ThemeManager.previewTheme('default');
     expect(preview).toEqual({
@@ -219,7 +219,7 @@ describe('ThemeManager', () => {
     root.style.setProperty('--color-slate-800', '#1e293b');
     root.style.setProperty('--color-slate-900', '#0f172a');
     root.style.setProperty('--color-slate-500', '#64748b');
-    root.style.setProperty('--color-focus-ring', '#2563eb');
+    root.style.setProperty('--color-primary', '#2563eb');
 
     const preview = ThemeManager.previewTheme('minimal');
     expect(preview).not.toBeNull();
@@ -306,7 +306,7 @@ describe('ThemeManager', () => {
     expect(appearanceRuleBefore).toContain('--color-primary-light:var(--color-slate-100)');
     expect(appearanceRuleBefore).toContain('--color-primary-dark:var(--color-slate-800)');
     expect(appearanceRuleBefore).toContain('--color-primary-darker:var(--color-slate-900)');
-    expect(appearanceRuleBefore).toContain('--color-focus-ring:var(--color-slate-700)');
+    expect(appearanceRuleBefore).toContain('--color-primary:var(--color-slate-700)');
     expect(appearanceRuleBefore).not.toMatch(/indigo/i);
 
     mocks.storageSet.mockClear();
@@ -329,7 +329,7 @@ describe('ThemeManager', () => {
     const appearanceRuleAfter = getRuntimeCssRuleText('theme-manager-vars');
     expect(appearanceRuleAfter).toBe(appearanceRuleBefore);
     expect(appearanceRuleAfter).toContain('--color-primary:var(--color-slate-700)');
-    expect(appearanceRuleAfter).toContain('--color-focus-ring:var(--color-slate-700)');
+    expect(appearanceRuleAfter).toContain('--color-primary:var(--color-slate-700)');
     expect(appearanceRuleAfter).not.toMatch(/indigo/i);
 
     expect(StorageService.set).toHaveBeenCalledWith('app-color-mode', 'dark');

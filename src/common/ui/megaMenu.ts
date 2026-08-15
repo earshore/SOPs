@@ -298,7 +298,7 @@ function renderCard(opts: CardOptions): string {
         text-left no-underline
         transition duration-300 ease-out
         hover:-translate-y-0.5
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))]
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))]
         active:translate-y-0">
 
       <!-- Layer 1: Frosted glass + default border + hover bg -->

@@ -108,7 +108,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-slate-500, #6b7280);
   font-size: 0.875rem;
 }
 
@@ -609,7 +609,7 @@
   align-items: center;
   gap: clamp(7px, 0.7vw, 10px);
   transform: translate(-50%, -50%);
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-slate-500, #64748b);
   font-size: 14px;
   line-height: 1;
   pointer-events: none;
