@@ -56,27 +56,27 @@
       class="bg-[var(--wash-blue)] border border-[var(--module-accent-border)] rounded-xl p-3 text-center"
     >
       <div class="text-xl font-bold text-primary-600">100%</div>
-      <div class="text-xs text-slate-600 mt-1">官方回复覆盖率</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">官方回复覆盖率</div>
     </div>
     <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
       <div class="text-xl font-bold text-emerald-600">&lt;48h</div>
-      <div class="text-xs text-slate-600 mt-1">新问题响应时效</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">新问题响应时效</div>
     </div>
     <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 text-center">
       <div class="text-xl font-bold text-purple-600">≥20</div>
-      <div class="text-xs text-slate-600 mt-1">核心ASIN QA数量</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">核心ASIN QA数量</div>
     </div>
     <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
       <div class="text-xl font-bold text-amber-600">1-2个</div>
-      <div class="text-xs text-slate-600 mt-1">自然覆盖必要关键词</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">自然覆盖必要关键词</div>
     </div>
     <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
       <div class="text-xl font-bold text-red-600">0</div>
-      <div class="text-xs text-slate-600 mt-1">未回复负面问题</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">未回复负面问题</div>
     </div>
     <div class="bg-teal-50 border border-teal-200 rounded-xl p-3 text-center">
       <div class="text-xl font-bold text-teal-600">每周二</div>
-      <div class="text-xs text-slate-600 mt-1">固定巡检日</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">固定巡检日</div>
     </div>
   </div>
   <section class="ui-card p-6 mb-6">
@@ -99,12 +99,12 @@
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <label class="block">
-        <span class="text-xs font-semibold text-slate-500">作业负责人</span>
+        <span class="text-xs font-semibold sops-neutral-text-muted">作业负责人</span>
         <input
           id="qa-maintenance-owner"
           type="text"
           value="客服负责人/运营负责人"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring,#3b82f6)] focus:border-[var(--color-focus-ring,#3b82f6)]"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sops-neutral-text focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring,#3b82f6)] focus:border-[var(--color-focus-ring,#3b82f6)]"
         />
       </label>
       <div
@@ -218,9 +218,9 @@
           <div class="sop-timeline-item">
             <div class="sop-timeline-dot completed"></div>
             <div class="content-callout content-callout--info p-3 ml-2 mb-2">
-              <h3 class="font-bold text-slate-800 text-sm mb-1">Step 1: 扫描新问题</h3>
+              <h3 class="font-bold sops-neutral-text-strong text-sm mb-1">Step 1: 扫描新问题</h3>
               <p class="text-xs text-[var(--module-accent-text)] mb-2">⏱ 5 分钟</p>
-              <ul class="text-xs text-slate-600 space-y-1">
+              <ul class="text-xs sops-neutral-text-muted space-y-1">
                 <li>• 逐个打开核心 ASIN 的产品页面</li>
                 <li>• 滚动到 "Customer Questions &amp; Answers"</li>
                 <li>• 筛选没有官方（Manufacturer）回复的问题</li>
@@ -235,9 +235,9 @@
           <div class="sop-timeline-item">
             <div class="sop-timeline-dot"></div>
             <div class="content-callout content-callout--success p-3 ml-2 mb-2">
-              <h3 class="font-bold text-slate-800 text-sm mb-1">Step 2: 分类 + 优先级</h3>
+              <h3 class="font-bold sops-neutral-text-strong text-sm mb-1">Step 2: 分类 + 优先级</h3>
               <p class="text-xs text-emerald-600 mb-2">⏱ 3 分钟</p>
-              <ul class="text-xs text-slate-600 space-y-1">
+              <ul class="text-xs sops-neutral-text-muted space-y-1">
                 <li>• 按类型分类（见右侧分类体系）</li>
                 <li>• 判定是否有投票（votes 多 = 更多人关心）</li>
                 <li>• 优先回复：高票 → 负面倾向 → 产品参数 → 一般</li>
@@ -249,9 +249,11 @@
           <div class="sop-timeline-item">
             <div class="sop-timeline-dot"></div>
             <div class="content-callout content-callout--purple p-3 ml-2 mb-2">
-              <h3 class="font-bold text-slate-800 text-sm mb-1">Step 3: 撰写 + 发布回答</h3>
+              <h3 class="font-bold sops-neutral-text-strong text-sm mb-1">
+                Step 3: 撰写 + 发布回答
+              </h3>
               <p class="text-xs text-purple-600 mb-2">⏱ 10-15 分钟</p>
-              <ul class="text-xs text-slate-600 space-y-1">
+              <ul class="text-xs sops-neutral-text-muted space-y-1">
                 <li>• 用对应站点语言撰写</li>
                 <li>• 以品牌官方身份回答</li>
                 <li>• 仅自然覆盖 1-2 个必要关键词，优先准确回答问题</li>
@@ -264,9 +266,9 @@
           <div class="sop-timeline-item">
             <div class="sop-timeline-dot"></div>
             <div class="content-callout content-callout--warning p-3 ml-2 mb-2">
-              <h3 class="font-bold text-slate-800 text-sm mb-1">Step 4: 处理问题 QA</h3>
+              <h3 class="font-bold sops-neutral-text-strong text-sm mb-1">Step 4: 处理问题 QA</h3>
               <p class="text-xs text-amber-600 mb-2">⏱ 5 分钟</p>
-              <ul class="text-xs text-slate-600 space-y-1">
+              <ul class="text-xs sops-neutral-text-muted space-y-1">
                 <li>• 负面倾向问题 → 专业化解（见模板）</li>
                 <li>• 错误信息 → 用正确数据纠正</li>
                 <li>• 竞对恶意提问 → 举报 + 正面回答</li>
@@ -278,9 +280,11 @@
           <div class="sop-timeline-item">
             <div class="sop-timeline-dot"></div>
             <div class="content-callout content-callout--teal p-3 ml-2 mb-2">
-              <h3 class="font-bold text-slate-800 text-sm mb-1">Step 5: 反哺 Listing 优化</h3>
+              <h3 class="font-bold sops-neutral-text-strong text-sm mb-1">
+                Step 5: 反哺 Listing 优化
+              </h3>
               <p class="text-xs text-teal-600 mb-2">⏱ 3 分钟</p>
-              <ul class="text-xs text-slate-600 space-y-1">
+              <ul class="text-xs sops-neutral-text-muted space-y-1">
                 <li>• 同一问题被问 3+ 次 → 更新 Listing/A+</li>
                 <li>• 高频参数问题 → 加入 Bullet Points</li>
                 <li>• 使用问题 → 更新说明书/产品卡片</li>
@@ -292,9 +296,11 @@
           <div class="sop-timeline-item">
             <div class="sop-timeline-dot pending"></div>
             <div class="content-callout content-callout--rose p-3 ml-2 mb-2">
-              <h3 class="font-bold text-slate-800 text-sm mb-1">Step 6: 竞品 QA 挖掘（月度）</h3>
+              <h3 class="font-bold sops-neutral-text-strong text-sm mb-1">
+                Step 6: 竞品 QA 挖掘（月度）
+              </h3>
               <p class="text-xs text-pink-600 mb-2">⏱ 15 分钟/月</p>
-              <ul class="text-xs text-slate-600 space-y-1">
+              <ul class="text-xs sops-neutral-text-muted space-y-1">
                 <li>• 浏览 TOP 3 竞品的 QA 页面</li>
                 <li>• 提取竞品高频问题 → 预先准备</li>
                 <li>• 发现竞品弱点 → 在你的回答中差异化</li>
@@ -332,7 +338,7 @@
                 >最高频</span
               >
             </div>
-            <p class="text-xs text-slate-500 mb-1">尺寸/重量/材质/兼容性/电压/颜色等</p>
+            <p class="text-xs sops-neutral-text-muted mb-1">尺寸/重量/材质/兼容性/电压/颜色等</p>
             <ul class="text-xs text-[var(--module-accent-text)] space-y-0.5 ml-5">
               <li>• 策略：<strong>精确数据 + 使用场景</strong></li>
               <li>• 关键词植入点：在参数描述中自然嵌入</li>
@@ -346,7 +352,7 @@
               <h4 class="font-bold text-emerald-800 text-sm">B. 使用方法/功能</h4>
               <span class="text-xs bg-emerald-200 text-emerald-700 px-1.5 rounded">高频</span>
             </div>
-            <p class="text-xs text-slate-500 mb-1">"怎么用""能不能做XX""是否支持XX"</p>
+            <p class="text-xs sops-neutral-text-muted mb-1">"怎么用""能不能做XX""是否支持XX"</p>
             <ul class="text-xs text-emerald-700 space-y-0.5 ml-5">
               <li>• 策略：<strong>步骤化回答 + 突出易用性</strong></li>
               <li>• 关键词植入点：功能描述中嵌入长尾词</li>
@@ -360,7 +366,7 @@
               <h4 class="font-bold text-amber-800 text-sm">C. 兼容性/适配</h4>
               <span class="text-xs bg-amber-200 text-amber-700 px-1.5 rounded">中频</span>
             </div>
-            <p class="text-xs text-slate-500 mb-1">"适合XX型号吗""能用在XX上吗"</p>
+            <p class="text-xs sops-neutral-text-muted mb-1">"适合XX型号吗""能用在XX上吗"</p>
             <ul class="text-xs text-amber-700 space-y-0.5 ml-5">
               <li>• 策略：<strong>明确是/否 + 列出兼容清单</strong></li>
               <li>• 如果不兼容，诚实说明→ 避免退货和差评</li>
@@ -374,7 +380,7 @@
               <h4 class="font-bold text-red-800 text-sm">D. 质量/耐用性疑虑</h4>
               <span class="text-xs bg-red-200 text-red-700 px-1.5 rounded">需谨慎</span>
             </div>
-            <p class="text-xs text-slate-500 mb-1">"质量好吗""能用多久""容易坏吗"</p>
+            <p class="text-xs sops-neutral-text-muted mb-1">"质量好吗""能用多久""容易坏吗"</p>
             <ul class="text-xs text-red-700 space-y-0.5 ml-5">
               <li>• 策略：<strong>用事实+认证+售后承诺回应</strong></li>
               <li>• 提及认证（CE/GS/LFGB 等欧洲标准）</li>
@@ -386,9 +392,9 @@
             <div class="flex items-center gap-2 mb-1">
               <i class="fas fa-shipping-fast text-purple-500 text-sm"></i>
               <h4 class="font-bold text-purple-800 text-sm">E. 物流/售后/发票</h4>
-              <span class="text-xs bg-slate-200 text-slate-700 px-1.5 rounded">低价值</span>
+              <span class="text-xs bg-slate-200 sops-neutral-text px-1.5 rounded">低价值</span>
             </div>
-            <p class="text-xs text-slate-500 mb-1">"多久到""有保修吗""能开发票吗"</p>
+            <p class="text-xs sops-neutral-text-muted mb-1">"多久到""有保修吗""能开发票吗"</p>
             <ul class="text-xs text-purple-700 space-y-0.5 ml-5">
               <li>• 策略：<strong>简短专业回答 + 引导联系售后</strong></li>
               <li>• FBA 物流问题引导去亚马逊客服</li>
@@ -396,14 +402,14 @@
             </ul>
           </div>
           <!-- F类 -->
-          <div class="bg-slate-100 rounded-lg p-3 border border-slate-300">
+          <div class="sops-neutral-surface-raised rounded-lg p-3 border border-slate-300">
             <div class="flex items-center gap-2 mb-1">
-              <i class="fas fa-flag text-slate-500 text-sm"></i>
-              <h4 class="font-bold text-slate-700 text-sm">F. 恶意/竞对/不相关</h4>
+              <i class="fas fa-flag sops-neutral-text-muted text-sm"></i>
+              <h4 class="font-bold sops-neutral-text text-sm">F. 恶意/竞对/不相关</h4>
               <span class="text-xs bg-red-200 text-red-700 px-1.5 rounded">需举报</span>
             </div>
-            <p class="text-xs text-slate-500 mb-1">引导去竞品/与产品无关/误导性问题</p>
-            <ul class="text-xs text-slate-600 space-y-0.5 ml-5">
+            <p class="text-xs sops-neutral-text-muted mb-1">引导去竞品/与产品无关/误导性问题</p>
+            <ul class="text-xs sops-neutral-text-muted space-y-0.5 ml-5">
               <li>• 策略：<strong>先正面回答 → 再举报</strong></li>
               <li>• 举报按钮在问题旁边 → "Report"</li>
               <li>• 举报的同时必须回答（防止只有负面信息）</li>
@@ -441,7 +447,9 @@
             >
             <div class="text-xs"><strong>产品参数/兼容性问题</strong> — SEO 价值高 + 减少退货</div>
           </div>
-          <div class="flex items-center gap-3 p-2 bg-slate-50 rounded-lg border border-slate-200">
+          <div
+            class="flex items-center gap-3 p-2 sops-neutral-surface rounded-lg border sops-neutral-divider"
+          >
             <span
               class="px-2 py-0.5 bg-slate-400 text-white rounded text-xs font-bold flex-shrink-0"
               >P3</span
@@ -471,7 +479,7 @@
               >
               <div class="text-xs">
                 <strong>感谢 + 直接回答</strong><br />
-                <span class="text-slate-500"
+                <span class="sops-neutral-text-muted"
                   >"Thank you for your question! Yes/No, [直接回答]."</span
                 >
               </div>
@@ -483,7 +491,7 @@
               >
               <div class="text-xs">
                 <strong>补充细节 + 植入关键词</strong><br />
-                <span class="text-slate-500"
+                <span class="sops-neutral-text-muted"
                   >"Our [product] features [specification + keyword], which [benefit]."</span
                 >
               </div>
@@ -495,7 +503,7 @@
               >
               <div class="text-xs">
                 <strong>增值信息 / 使用场景</strong><br />
-                <span class="text-slate-500"
+                <span class="sops-neutral-text-muted"
                   >"Many of our customers use it for [scenario], and..."</span
                 >
               </div>
@@ -507,7 +515,7 @@
               >
               <div class="text-xs">
                 <strong>结尾 — 品牌签名</strong><br />
-                <span class="text-slate-500"
+                <span class="sops-neutral-text-muted"
                   >"If you have any other questions, please don't hesitate to ask. — [Brand]
                   Team"</span
                 >
@@ -553,7 +561,7 @@
           </div>
           <div class="p-2 bg-accent-100 rounded border border-accent-100">
             <strong class="text-accent-800">关键词来源：</strong>
-            <ul class="mt-1 ml-3 space-y-0.5 text-slate-600">
+            <ul class="mt-1 ml-3 space-y-0.5 sops-neutral-text-muted">
               <li>• 你的 Search Term 报告中的高转化词</li>
               <li>• 竞品 Listing 标题中的关键词</li>
               <li>• Brand Analytics 搜索词排名</li>
@@ -614,19 +622,19 @@
     </p>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- 模板1: 产品尺寸/规格 -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div class="bg-[var(--wash-blue)] px-4 py-3 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="px-2 py-0.5 bg-[var(--module-accent)] text-white rounded text-xs font-bold"
               >A类</span
             >
-            <span class="font-bold text-slate-800 text-sm">#1 产品尺寸/规格</span>
+            <span class="font-bold sops-neutral-text-strong text-sm">#1 产品尺寸/规格</span>
           </div>
         </div>
-        <div class="p-3 border-t border-slate-100">
-          <p class="text-xs text-slate-500 mb-2">Q: "What are the exact dimensions?"</p>
+        <div class="p-3 border-t sops-neutral-divider-soft">
+          <p class="text-xs sops-neutral-text-muted mb-2">Q: "What are the exact dimensions?"</p>
           <div
-            class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+            class="sops-neutral-surface rounded p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
           >
             Thank you for your question! The [KW:Product Name] measures [L × W × H] cm and weighs
             [X] g. The [KW:compact/portable design] makes it ideal for [KW:use scenario, e.g.,
@@ -641,17 +649,19 @@
         </div>
       </div>
       <!-- 模板2: 兼容性 -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div class="bg-amber-50 px-4 py-3 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold">C类</span>
-            <span class="font-bold text-slate-800 text-sm">#2 兼容性/适配</span>
+            <span class="font-bold sops-neutral-text-strong text-sm">#2 兼容性/适配</span>
           </div>
         </div>
-        <div class="p-3 border-t border-slate-100">
-          <p class="text-xs text-slate-500 mb-2">Q: "Does this work with [specific device]?"</p>
+        <div class="p-3 border-t sops-neutral-divider-soft">
+          <p class="text-xs sops-neutral-text-muted mb-2">
+            Q: "Does this work with [specific device]?"
+          </p>
           <div
-            class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+            class="sops-neutral-surface rounded p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
           >
             Great question! Yes, our [KW:Product Name] is fully compatible with [specific device].
             It also works with [KW:list of compatible devices/models]. The [KW:universal design /
@@ -666,17 +676,17 @@
         </div>
       </div>
       <!-- 模板3: 使用方法 -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div class="bg-emerald-50 px-4 py-3 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="px-2 py-0.5 bg-emerald-500 text-white rounded text-xs font-bold">B类</span>
-            <span class="font-bold text-slate-800 text-sm">#3 使用方法/功能</span>
+            <span class="font-bold sops-neutral-text-strong text-sm">#3 使用方法/功能</span>
           </div>
         </div>
-        <div class="p-3 border-t border-slate-100">
-          <p class="text-xs text-slate-500 mb-2">Q: "How do I set this up?"</p>
+        <div class="p-3 border-t sops-neutral-divider-soft">
+          <p class="text-xs sops-neutral-text-muted mb-2">Q: "How do I set this up?"</p>
           <div
-            class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+            class="sops-neutral-surface rounded p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
           >
             Thank you for asking! Setting up your [KW:Product Name] is very straightforward — most
             customers have it ready in under [X] minutes:<br /><br />
@@ -695,19 +705,19 @@
         </div>
       </div>
       <!-- 模板4: 质量/认证 -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div class="bg-red-50 px-4 py-3 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="px-2 py-0.5 bg-red-500 text-white rounded text-xs font-bold">D类</span>
-            <span class="font-bold text-slate-800 text-sm">#4 质量保证/安全认证</span>
+            <span class="font-bold sops-neutral-text-strong text-sm">#4 质量保证/安全认证</span>
           </div>
         </div>
-        <div class="p-3 border-t border-slate-100">
-          <p class="text-xs text-slate-500 mb-2">
+        <div class="p-3 border-t sops-neutral-divider-soft">
+          <p class="text-xs sops-neutral-text-muted mb-2">
             Q: "Is this product safe to use? What certifications does it have?"
           </p>
           <div
-            class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+            class="sops-neutral-surface rounded p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
           >
             Absolutely! Safety is our top priority. Our [KW:Product Name] is [KW:CE certified / GS
             certified / LFGB approved / RoHS compliant] and meets all applicable European safety
@@ -723,17 +733,17 @@
         </div>
       </div>
       <!-- 模板5: 包含内容/配件 -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div class="bg-purple-50 px-4 py-3 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="px-2 py-0.5 bg-purple-500 text-white rounded text-xs font-bold">A类</span>
-            <span class="font-bold text-slate-800 text-sm">#5 包装内容/配件</span>
+            <span class="font-bold sops-neutral-text-strong text-sm">#5 包装内容/配件</span>
           </div>
         </div>
-        <div class="p-3 border-t border-slate-100">
-          <p class="text-xs text-slate-500 mb-2">Q: "What's included in the package?"</p>
+        <div class="p-3 border-t sops-neutral-divider-soft">
+          <p class="text-xs sops-neutral-text-muted mb-2">Q: "What's included in the package?"</p>
           <div
-            class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+            class="sops-neutral-surface rounded p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
           >
             Great question! Your [KW:Product Name] package includes:<br /><br />
             • 1x [Main product]<br />
@@ -751,17 +761,17 @@
         </div>
       </div>
       <!-- 模板6: 物流/保修 -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
-        <div class="bg-slate-50 px-4 py-3 flex items-center justify-between">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
+        <div class="sops-neutral-surface px-4 py-3 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="px-2 py-0.5 bg-slate-400 text-white rounded text-xs font-bold">E类</span>
-            <span class="font-bold text-slate-800 text-sm">#6 配送/保修/售后</span>
+            <span class="font-bold sops-neutral-text-strong text-sm">#6 配送/保修/售后</span>
           </div>
         </div>
-        <div class="p-3 border-t border-slate-100">
-          <p class="text-xs text-slate-500 mb-2">Q: "How long is the warranty?"</p>
+        <div class="p-3 border-t sops-neutral-divider-soft">
+          <p class="text-xs sops-neutral-text-muted mb-2">Q: "How long is the warranty?"</p>
           <div
-            class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+            class="sops-neutral-surface rounded p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
           >
             Thank you for asking! We offer a [X]-month manufacturer's warranty on our [KW:Product
             Name]. This covers any manufacturing defects or functional issues. Additionally, your
@@ -770,7 +780,7 @@
             replacement or full refund, hassle-free. Your satisfaction is our top priority. —
             [Brand] Team
           </div>
-          <p class="mt-2 text-xs text-slate-600">
+          <p class="mt-2 text-xs sops-neutral-text-muted">
             <i class="fas fa-info-circle mr-1"></i
             ><strong>注意：</strong>保修承诺请确保你能实际履行。欧洲消费者法律规定最低 2
             年法定保修（Gewährleistung）。
@@ -792,7 +802,7 @@
         <h4 class="font-bold text-purple-800 text-sm mb-2 flex items-center gap-1">
           <i class="fas fa-search"></i>Step 1: 识别 + 提取
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• 进入 TOP 3-5 竞品的 QA 页面</li>
           <li>• 按 "Most Votes" 排序</li>
           <li>• 记录 TOP 10 高票问题</li>
@@ -804,7 +814,7 @@
         <h4 class="font-bold text-[var(--module-accent-text)] text-sm mb-2 flex items-center gap-1">
           <i class="fas fa-lightbulb"></i>Step 2: 分析 + 应用
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• 竞品高频问题 → 确认你的 Listing 是否已解答</li>
           <li>• 未覆盖 → 立即补充到 Listing / A+ / QA</li>
           <li>• 竞品弱点 → 在你的回答中重点强调你的优势</li>
@@ -815,7 +825,7 @@
         <h4 class="font-bold text-emerald-800 text-sm mb-2 flex items-center gap-1">
           <i class="fas fa-key"></i>Step 3: 关键词收割
         </h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• 买家提问用的自然语言 = 长尾关键词</li>
           <li>• "Is this good for arthritis?" → 关键词 "for arthritis"</li>
           <li>• "Can I use this on a camping trip?" → "camping trip"</li>
@@ -831,7 +841,7 @@
   <div
     class="bg-gradient-to-r from-primary-100 to-accent-100 rounded-xl border border-primary-100 p-6 mb-6"
   >
-    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+    <h2 class="text-lg font-bold sops-neutral-text-strong mb-4 flex items-center gap-2">
       <i class="fas fa-globe-europe text-primary-500"></i>欧洲多站点 QA 回复注意事项
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -931,7 +941,7 @@
           <h4 class="font-bold text-emerald-800 text-sm mb-2 flex items-center gap-1">
             <i class="fas fa-check-circle"></i>✅ 合规操作
           </h4>
-          <div class="space-y-2 text-xs text-slate-700">
+          <div class="space-y-2 text-xs sops-neutral-text">
             <div class="flex items-start gap-2">
               <span class="font-bold text-emerald-600 flex-shrink-0">1.</span>
               <div>
@@ -969,7 +979,7 @@
           <h4 class="font-bold text-amber-800 text-sm mb-2 flex items-center gap-1">
             <i class="fas fa-exclamation-triangle"></i>⚠️ 灰色地带 / 不建议
           </h4>
-          <div class="space-y-2 text-xs text-slate-700">
+          <div class="space-y-2 text-xs sops-neutral-text">
             <div class="flex items-start gap-2">
               <i class="fas fa-exclamation-circle text-amber-500 mt-0.5 flex-shrink-0"></i>
               <div>
@@ -990,7 +1000,7 @@
           <h4 class="font-bold text-red-800 text-sm mb-2 flex items-center gap-1">
             <i class="fas fa-ban"></i>❌ 绝对不做
           </h4>
-          <div class="space-y-2 text-xs text-slate-700">
+          <div class="space-y-2 text-xs sops-neutral-text">
             <div class="flex items-start gap-2">
               <i class="fas fa-times text-red-500 mt-0.5 flex-shrink-0"></i>
               <span>用多个账号批量自问自答/刷 QA 数量</span>
@@ -1022,10 +1032,10 @@
     </h2>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div>
-        <h3 id="qa-tracking-fields-title" class="font-bold text-slate-700 text-sm mb-3">
+        <h3 id="qa-tracking-fields-title" class="font-bold sops-neutral-text text-sm mb-3">
           📊 字段设计
         </h3>
-        <p id="qa-tracking-fields-description" class="text-xs text-slate-500 mb-3">
+        <p id="qa-tracking-fields-description" class="text-xs sops-neutral-text-muted mb-3">
           表格支持横向滚动；按字段查看 QA 追踪表的记录口径和示例。
         </p>
         <div
@@ -1054,74 +1064,92 @@
             </thead>
             <tbody>
               <tr>
-                <th scope="row" class="border border-slate-200 px-2 py-1.5 font-semibold">日期</th>
-                <td class="border border-slate-200 px-2 py-1.5">发现日期</td>
-                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">2025-06-10</td>
+                <th scope="row" class="border sops-neutral-divider px-2 py-1.5 font-semibold">
+                  日期
+                </th>
+                <td class="border sops-neutral-divider px-2 py-1.5">发现日期</td>
+                <td class="border sops-neutral-divider px-2 py-1.5 sops-neutral-text-muted">
+                  2025-06-10
+                </td>
               </tr>
-              <tr class="bg-slate-50">
-                <th scope="row" class="border border-slate-200 px-2 py-1.5 font-semibold">站点</th>
-                <td class="border border-slate-200 px-2 py-1.5">哪个站</td>
-                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">DE</td>
+              <tr class="sops-neutral-surface">
+                <th scope="row" class="border sops-neutral-divider px-2 py-1.5 font-semibold">
+                  站点
+                </th>
+                <td class="border sops-neutral-divider px-2 py-1.5">哪个站</td>
+                <td class="border sops-neutral-divider px-2 py-1.5 sops-neutral-text-muted">DE</td>
               </tr>
               <tr>
-                <th scope="row" class="border border-slate-200 px-2 py-1.5 font-semibold">ASIN</th>
-                <td class="border border-slate-200 px-2 py-1.5">产品</td>
-                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">B0XXXXXXXX</td>
+                <th scope="row" class="border sops-neutral-divider px-2 py-1.5 font-semibold">
+                  ASIN
+                </th>
+                <td class="border sops-neutral-divider px-2 py-1.5">产品</td>
+                <td class="border sops-neutral-divider px-2 py-1.5 sops-neutral-text-muted">
+                  B0XXXXXXXX
+                </td>
               </tr>
-              <tr class="bg-slate-50">
-                <th scope="row" class="border border-slate-200 px-2 py-1.5 font-semibold">
+              <tr class="sops-neutral-surface">
+                <th scope="row" class="border sops-neutral-divider px-2 py-1.5 font-semibold">
                   问题原文
                 </th>
-                <td class="border border-slate-200 px-2 py-1.5">买家提问</td>
-                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">
+                <td class="border sops-neutral-divider px-2 py-1.5">买家提问</td>
+                <td class="border sops-neutral-divider px-2 py-1.5 sops-neutral-text-muted">
                   Ist das wasserdicht?
                 </td>
               </tr>
               <tr>
-                <th scope="row" class="border border-slate-200 px-2 py-1.5 font-semibold">
+                <th scope="row" class="border sops-neutral-divider px-2 py-1.5 font-semibold">
                   问题分类
                 </th>
-                <td class="border border-slate-200 px-2 py-1.5">A-F类</td>
-                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">A-产品参数</td>
+                <td class="border sops-neutral-divider px-2 py-1.5">A-F类</td>
+                <td class="border sops-neutral-divider px-2 py-1.5 sops-neutral-text-muted">
+                  A-产品参数
+                </td>
               </tr>
-              <tr class="bg-slate-50">
-                <th scope="row" class="border border-slate-200 px-2 py-1.5 font-semibold">
+              <tr class="sops-neutral-surface">
+                <th scope="row" class="border sops-neutral-divider px-2 py-1.5 font-semibold">
                   投票数
                 </th>
-                <td class="border border-slate-200 px-2 py-1.5">有多少人关心</td>
-                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">12</td>
+                <td class="border sops-neutral-divider px-2 py-1.5">有多少人关心</td>
+                <td class="border sops-neutral-divider px-2 py-1.5 sops-neutral-text-muted">12</td>
               </tr>
               <tr>
-                <th scope="row" class="border border-slate-200 px-2 py-1.5 font-semibold">
+                <th scope="row" class="border sops-neutral-divider px-2 py-1.5 font-semibold">
                   是否已回复
                 </th>
-                <td class="border border-slate-200 px-2 py-1.5">官方回复状态</td>
-                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">✅ 已回复</td>
+                <td class="border sops-neutral-divider px-2 py-1.5">官方回复状态</td>
+                <td class="border sops-neutral-divider px-2 py-1.5 sops-neutral-text-muted">
+                  ✅ 已回复
+                </td>
               </tr>
-              <tr class="bg-slate-50">
-                <th scope="row" class="border border-slate-200 px-2 py-1.5 font-semibold">
+              <tr class="sops-neutral-surface">
+                <th scope="row" class="border sops-neutral-divider px-2 py-1.5 font-semibold">
                   植入关键词
                 </th>
-                <td class="border border-slate-200 px-2 py-1.5">回答中的SEO词</td>
-                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">waterproof IP65</td>
+                <td class="border sops-neutral-divider px-2 py-1.5">回答中的SEO词</td>
+                <td class="border sops-neutral-divider px-2 py-1.5 sops-neutral-text-muted">
+                  waterproof IP65
+                </td>
               </tr>
               <tr>
-                <th scope="row" class="border border-slate-200 px-2 py-1.5 font-semibold">
+                <th scope="row" class="border sops-neutral-divider px-2 py-1.5 font-semibold">
                   Listing反哺
                 </th>
-                <td class="border border-slate-200 px-2 py-1.5">是否需更新Listing</td>
-                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">→ 加入Bullet #3</td>
+                <td class="border sops-neutral-divider px-2 py-1.5">是否需更新Listing</td>
+                <td class="border sops-neutral-divider px-2 py-1.5 sops-neutral-text-muted">
+                  → 加入Bullet #3
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
       <div>
-        <h3 class="font-bold text-slate-700 text-sm mb-3">📋 月度 QA 分析要点</h3>
+        <h3 class="font-bold sops-neutral-text text-sm mb-3">📋 月度 QA 分析要点</h3>
         <div class="bg-teal-50 rounded-lg p-4 border border-teal-200 space-y-3">
           <div>
             <h4 class="font-bold text-teal-800 text-xs mb-1">一、QA 健康度检查</h4>
-            <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
+            <ul class="text-xs sops-neutral-text-muted space-y-0.5 ml-3">
               <li>• 各核心 ASIN 的 QA 总数量</li>
               <li>• 官方回复覆盖率（目标 100%）</li>
               <li>• 是否有过期/不准确的旧回答需要更新</li>
@@ -1129,7 +1157,7 @@
           </div>
           <div>
             <h4 class="font-bold text-teal-800 text-xs mb-1">二、高频问题 TOP 5</h4>
-            <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
+            <ul class="text-xs sops-neutral-text-muted space-y-0.5 ml-3">
               <li>• 本月被问最多的 5 个问题</li>
               <li>• 对应的 Listing 是否已覆盖这些信息</li>
               <li>• 需要更新的 Listing / A+ / 说明书</li>
@@ -1137,7 +1165,7 @@
           </div>
           <div>
             <h4 class="font-bold text-teal-800 text-xs mb-1">三、SEO 关键词收获</h4>
-            <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
+            <ul class="text-xs sops-neutral-text-muted space-y-0.5 ml-3">
               <li>• 从 QA 中发现的新关键词/长尾词</li>
               <li>• 是否已加入 Search Terms / Backend</li>
               <li>• 竞品 QA 中挖掘到的有价值信息</li>
@@ -1145,7 +1173,7 @@
           </div>
           <div>
             <h4 class="font-bold text-teal-800 text-xs mb-1">四、异常信号监控</h4>
-            <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
+            <ul class="text-xs sops-neutral-text-muted space-y-0.5 ml-3">
               <li>• 是否出现竞对恶意提问</li>
               <li>• 是否有安全相关问题</li>
               <li>• 是否有买家在 QA 中留下负面体验</li>
@@ -1201,37 +1229,45 @@
         </thead>
         <tbody>
           <tr class="bg-red-50">
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2 font-semibold">
               核心利润 ASIN
             </th>
-            <td class="border border-slate-200 px-3 py-2 text-center">&lt;10</td>
-            <td class="border border-slate-200 px-3 py-2 text-center font-bold text-emerald-600">
+            <td class="border sops-neutral-divider px-3 py-2 text-center">&lt;10</td>
+            <td
+              class="border sops-neutral-divider px-3 py-2 text-center font-bold text-emerald-600"
+            >
               ≥20-30
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center">100%</td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">
+            <td class="border sops-neutral-divider px-3 py-2 text-center">100%</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">
               产品卡片引导提问 + 确保每条都有官方回答
             </td>
           </tr>
           <tr>
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold">次核心 ASIN</th>
-            <td class="border border-slate-200 px-3 py-2 text-center">&lt;5</td>
-            <td class="border border-slate-200 px-3 py-2 text-center font-bold text-primary-600">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2 font-semibold">
+              次核心 ASIN
+            </th>
+            <td class="border sops-neutral-divider px-3 py-2 text-center">&lt;5</td>
+            <td
+              class="border sops-neutral-divider px-3 py-2 text-center font-bold text-primary-600"
+            >
               ≥10-15
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center">100%</td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">自然积累 + 及时回复</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-center">100%</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">自然积累 + 及时回复</td>
           </tr>
-          <tr class="bg-slate-50">
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold">
+          <tr class="sops-neutral-surface">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2 font-semibold">
               长尾/新品 ASIN
             </th>
-            <td class="border border-slate-200 px-3 py-2 text-center">0-3</td>
-            <td class="border border-slate-200 px-3 py-2 text-center font-bold text-slate-500">
+            <td class="border sops-neutral-divider px-3 py-2 text-center">0-3</td>
+            <td
+              class="border sops-neutral-divider px-3 py-2 text-center font-bold sops-neutral-text-muted"
+            >
               ≥5
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center">100%</td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">有新问题就回，不强求数量</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-center">100%</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">有新问题就回，不强求数量</td>
           </tr>
         </tbody>
       </table>
@@ -1247,10 +1283,10 @@
   </div>
   <!-- ========== 时间管理 ========== -->
   <div
-    class="bg-gradient-to-r from-slate-50 to-primary-100 rounded-xl border border-slate-200 p-6 mb-6"
+    class="bg-gradient-to-r from-slate-50 to-primary-100 rounded-xl border sops-neutral-divider p-6 mb-6"
   >
-    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-      <i class="fas fa-user-clock text-slate-600"></i>运营 QA 时间投入规划
+    <h2 class="text-lg font-bold sops-neutral-text-strong mb-4 flex items-center gap-2">
+      <i class="fas fa-user-clock sops-neutral-text-muted"></i>运营 QA 时间投入规划
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="ui-card p-4">
@@ -1296,18 +1332,18 @@
       <i class="fas fa-toolbox text-amber-500"></i>工具 &amp; 资源
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-      <div class="bg-slate-50 rounded-lg p-3">
-        <h4 class="font-bold text-slate-700 text-xs mb-2">QA 监控</h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+      <div class="sops-neutral-surface rounded-lg p-3">
+        <h4 class="font-bold sops-neutral-text text-xs mb-2">QA 监控</h4>
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• 手动检查产品页面（最可靠）</li>
           <li>• 卖家精灵 QA 监控提醒</li>
           <li>• Helium10 Listing Alerts</li>
           <li>• 亚马逊会邮件通知新 QA（品牌注册）</li>
         </ul>
       </div>
-      <div class="bg-slate-50 rounded-lg p-3">
-        <h4 class="font-bold text-slate-700 text-xs mb-2">翻译工具</h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+      <div class="sops-neutral-surface rounded-lg p-3">
+        <h4 class="font-bold sops-neutral-text text-xs mb-2">翻译工具</h4>
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• DeepL（首选，欧洲语言最准）</li>
           <li>• ChatGPT/Claude（润色+关键词植入）</li>
           <li>
@@ -1315,18 +1351,18 @@
           </li>
         </ul>
       </div>
-      <div class="bg-slate-50 rounded-lg p-3">
-        <h4 class="font-bold text-slate-700 text-xs mb-2">关键词工具</h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+      <div class="sops-neutral-surface rounded-lg p-3">
+        <h4 class="font-bold sops-neutral-text text-xs mb-2">关键词工具</h4>
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• Brand Analytics 搜索词报告</li>
           <li>• 卖家精灵关键词反查</li>
           <li>• Helium10 Cerebro/Magnet</li>
           <li>• Search Term Report（广告后台）</li>
         </ul>
       </div>
-      <div class="bg-slate-50 rounded-lg p-3">
-        <h4 class="font-bold text-slate-700 text-xs mb-2">管理工具</h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+      <div class="sops-neutral-surface rounded-lg p-3">
+        <h4 class="font-bold sops-neutral-text text-xs mb-2">管理工具</h4>
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• Google Sheet（QA 管理表）</li>
           <li>• 条件格式高亮未回复</li>
           <li>• COUNTIF 统计分类数据</li>
@@ -1341,8 +1377,8 @@
       <div class="flex items-center gap-3">
         <i class="fas fa-video text-primary-500 text-xl"></i>
         <div>
-          <h3 class="font-bold text-slate-800 text-sm">操作视频教程</h3>
-          <p class="text-xs text-slate-600">
+          <h3 class="font-bold sops-neutral-text-strong text-sm">操作视频教程</h3>
+          <p class="text-xs sops-neutral-text-muted">
             公司网盘(待完善)：<span class="text-primary-600 underline" data-internal-only="true"
               >仅限内网访问</span
             >→ 培训资料 → QA维护专题
@@ -1350,12 +1386,12 @@
         </div>
       </div>
     </div>
-    <div class="bg-slate-50 rounded-xl border border-slate-200 p-4">
+    <div class="sops-neutral-surface rounded-xl border sops-neutral-divider p-4">
       <div class="flex items-center gap-3">
-        <i class="fas fa-book text-slate-500 text-xl"></i>
+        <i class="fas fa-book sops-neutral-text-muted text-xl"></i>
         <div>
-          <h3 class="font-bold text-slate-800 text-sm">亚马逊官方参考</h3>
-          <p class="text-xs text-slate-600">
+          <h3 class="font-bold sops-neutral-text-strong text-sm">亚马逊官方参考</h3>
+          <p class="text-xs sops-neutral-text-muted">
             <a
               class="text-primary-600 underline"
               href="https://sellercentral.amazon.com/help/hub/reference/external/G202130610"
@@ -1375,7 +1411,7 @@
     </div>
   </div>
   <!-- 版本记录 -->
-  <div class="text-xs text-slate-400 border-t border-slate-100 pt-3">
+  <div class="text-xs sops-neutral-text-faint border-t sops-neutral-divider-soft pt-3">
     <p>
       <strong>版本历史：</strong>v1.0 (2024-01) 基础巡检流程 → v2.0 (2024-08) 增加分类体系+模板 →
       v3.0 (2025-06) 重构SEO策略+竞品挖掘+主动布局+多站注意事项+管理追踪表

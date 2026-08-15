@@ -43,6 +43,8 @@ semantic lane 为「只降不升」双锁（total + per-file）。token 迁移�
 
 验收实证：ci:quality 20 项全绿（semantic baseline 4087→3600，-487，per-file 双锁刷新后重新锁定；modules 0/0、shell 24/24、lint 0/0）；build EXIT=0（7.7s）；smoke 完整 93 用例（31×3 浏览器）90 通过。3 例失败（firefox NPI pixel diff、webkit NPI 尺寸 1952×1262 vs 基线 976×631）经基线代码复测同样失败，确认为 NPI pixel 断言的 chromium-only 基线既有缺陷（4B 遗留：baseline 只在 chromium dpr=1 下生成），非本次回归；归入后续路线：baseline 按浏览器维度拆分三份，或 captureStableRegion 统一 deviceScaleFactor 后重 seed。
 
+**批 2 已完成（2026-08-15）**：service 组三文件迁移 621 处（email_templates 247、negative_review 193、qa_maintenance 158）；残留 12 处甄别保留（bg-slate-400 ×5 优先级/分类 badge 状态语义——与 P0 red/P1 amber/P2 primary/EU purple 徽章同构色族体系，qa_maintenance E类 badge 同理；bg-slate-200 ×3 inline 状态小标签；border-slate-300 ×4 控件边框契约）；三文件 index.ts 无 slate 用法。semantic baseline 3600→2965（-635）双锁刷新。验收：ci:quality 20 项全绿 · build EXIT=0（7.75s）· smoke 93 用例 90 通过；3 失败与批 1 失败清单逐条一致（firefox/webkit NPI pixel 断言 + webkit L657 时序），确认基线既有缺陷非回归。
+
 ## 5. 风险与回滚
 
 模板类名迁移为机械替换（值等价、class 名等价），零视觉 diff 风险；dark 翻转块为新增（dark 模式视觉变化仅限灰阶上移一档，属既定深色规范）。回滚基线：main `6918f3ef`。主要物理风险为单次批 diff 过大（批 2 六百余处），已按文件族切分控制单批 ≤700 处。

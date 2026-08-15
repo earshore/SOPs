@@ -60,27 +60,27 @@
       class="bg-[var(--wash-blue)] border border-[var(--module-accent-border)] rounded-xl p-3 text-center"
     >
       <div class="text-xl font-bold text-[var(--module-accent-text)]">&lt;24h</div>
-      <div class="text-xs text-slate-600 mt-1">所有消息回复</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">所有消息回复</div>
     </div>
     <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
       <div class="text-xl font-bold text-red-600">&lt;4h</div>
-      <div class="text-xs text-slate-600 mt-1">A-to-Z / 投诉</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">A-to-Z / 投诉</div>
     </div>
     <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
       <div class="text-xl font-bold text-emerald-600">≥96%</div>
-      <div class="text-xs text-slate-600 mt-1">24h 回复率</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">24h 回复率</div>
     </div>
     <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 text-center">
       <div class="text-xl font-bold text-purple-600">≤1.5封</div>
-      <div class="text-xs text-slate-600 mt-1">平均往返次数</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">平均往返次数</div>
     </div>
     <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
       <div class="text-xl font-bold text-amber-600">&lt;1%</div>
-      <div class="text-xs text-slate-600 mt-1">AZ 升级率</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">AZ 升级率</div>
     </div>
     <div class="bg-teal-50 border border-teal-200 rounded-xl p-3 text-center">
       <div class="text-xl font-bold text-teal-600">≥90%</div>
-      <div class="text-xs text-slate-600 mt-1">一次解决率</div>
+      <div class="text-xs sops-neutral-text-muted mt-1">一次解决率</div>
     </div>
   </div>
   <!-- ========== 效率真相 + 铁律 ========== -->
@@ -179,83 +179,85 @@
           消息分级响应矩阵
         </caption>
         <thead>
-          <tr class="bg-slate-100">
-            <th scope="col" class="border border-slate-200 px-3 py-2 text-left">优先级</th>
-            <th scope="col" class="border border-slate-200 px-3 py-2 text-left">场景类型</th>
-            <th scope="col" class="border border-slate-200 px-3 py-2 text-left">响应时效</th>
-            <th scope="col" class="border border-slate-200 px-3 py-2 text-left">处理策略</th>
-            <th scope="col" class="border border-slate-200 px-3 py-2 text-left">使用模板</th>
+          <tr class="sops-neutral-surface-raised">
+            <th scope="col" class="border sops-neutral-divider px-3 py-2 text-left">优先级</th>
+            <th scope="col" class="border sops-neutral-divider px-3 py-2 text-left">场景类型</th>
+            <th scope="col" class="border sops-neutral-divider px-3 py-2 text-left">响应时效</th>
+            <th scope="col" class="border sops-neutral-divider px-3 py-2 text-left">处理策略</th>
+            <th scope="col" class="border sops-neutral-divider px-3 py-2 text-left">使用模板</th>
           </tr>
         </thead>
         <tbody>
           <tr class="bg-red-50">
-            <th scope="row" class="border border-slate-200 px-3 py-2">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2">
               <span class="px-2 py-0.5 bg-red-600 text-white rounded text-xs font-bold"
                 >P0 紧急</span
               >
             </th>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               A-to-Z Claim 通知<br />
               <span class="text-xs text-red-600">安全投诉 / 法律威胁 / Chargeback</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 font-bold text-red-600">≤4h</td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">
+            <td class="border sops-neutral-divider px-3 py-2 font-bold text-red-600">≤4h</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">
               立即停下手头工作处理；AZ需在72h内提交申诉；安全投诉需同步检查产品
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">模板 #10 #11 #12</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">模板 #10 #11 #12</td>
           </tr>
           <tr class="bg-amber-50">
-            <th scope="row" class="border border-slate-200 px-3 py-2">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2">
               <span class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold"
                 >P1 高</span
               >
             </th>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               产品损坏/缺陷到货<br />
               <span class="text-xs text-amber-600">收到错误产品 / 缺件 / 退款争议</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 font-bold text-amber-600">≤12h</td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">
+            <td class="border sops-neutral-divider px-3 py-2 font-bold text-amber-600">≤12h</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">
               快速道歉 + 提供2-3个解决方案；抢在买家开AZ之前解决
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">模板 #2 #3 #5 #6</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">模板 #2 #3 #5 #6</td>
           </tr>
           <tr class="bg-[var(--wash-blue)]">
-            <th scope="row" class="border border-slate-200 px-3 py-2">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2">
               <span
                 class="px-2 py-0.5 bg-[var(--module-accent)] text-white rounded text-xs font-bold"
                 >P2 中</span
               >
             </th>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               物流查询 / 退货流程<br />
               <span class="text-xs text-[var(--module-accent-text)]">使用咨询 / 产品尺寸询问</span>
             </td>
             <td
-              class="border border-slate-200 px-3 py-2 font-bold text-[var(--module-accent-text)]"
+              class="border sops-neutral-divider px-3 py-2 font-bold text-[var(--module-accent-text)]"
             >
               ≤24h
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">
               模板回复；FBA物流问题引导买家联系亚马逊客服
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">模板 #1 #4 #7 #8</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">模板 #1 #4 #7 #8</td>
           </tr>
-          <tr class="bg-slate-50">
-            <th scope="row" class="border border-slate-200 px-3 py-2">
+          <tr class="sops-neutral-surface">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2">
               <span class="px-2 py-0.5 bg-slate-400 text-white rounded text-xs font-bold"
                 >P3 低</span
               >
             </th>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               发票/VAT收据请求<br />
-              <span class="text-xs text-slate-500">GDPR数据请求 / 一般感谢</span>
+              <span class="text-xs sops-neutral-text-muted">GDPR数据请求 / 一般感谢</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 font-bold text-slate-500">≤24h</td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">
+            <td class="border sops-neutral-divider px-3 py-2 font-bold sops-neutral-text-muted">
+              ≤24h
+            </td>
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">
               模板回复；GDPR请求需30天内处理
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-xs">模板 #9 #12</td>
+            <td class="border sops-neutral-divider px-3 py-2 text-xs">模板 #9 #12</td>
           </tr>
         </tbody>
       </table>
@@ -298,7 +300,7 @@
         />
       </label>
       <div
-        class="lg:col-span-2 rounded-lg bg-primary-100 border border-primary-100 p-4 text-sm text-slate-700"
+        class="lg:col-span-2 rounded-lg bg-primary-100 border border-primary-100 p-4 text-sm sops-neutral-text"
       >
         <div class="font-semibold text-primary-800 mb-2">模板会覆盖</div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs">
@@ -322,8 +324,8 @@
           >1</span
         >
         <div>
-          <h4 class="font-bold text-slate-800 text-sm">先道歉后解决</h4>
-          <p class="text-xs text-slate-600 mt-1">
+          <h4 class="font-bold sops-neutral-text-strong text-sm">先道歉后解决</h4>
+          <p class="text-xs sops-neutral-text-muted mt-1">
             无论是否你的错，开头先表达歉意。欧洲人非常重视这一点，尤其德国客户。道歉≠认错，是态度表达。
           </p>
         </div>
@@ -336,8 +338,8 @@
           >2</span
         >
         <div>
-          <h4 class="font-bold text-slate-800 text-sm">给2-3个选择</h4>
-          <p class="text-xs text-slate-600 mt-1">
+          <h4 class="font-bold sops-neutral-text-strong text-sm">给2-3个选择</h4>
+          <p class="text-xs sops-neutral-text-muted mt-1">
             全额退款 / 补发 / 部分退款+保留产品——让客户选。给选择=给尊重，减少来回次数。
           </p>
         </div>
@@ -348,8 +350,8 @@
           >3</span
         >
         <div>
-          <h4 class="font-bold text-slate-800 text-sm">主动超预期</h4>
-          <p class="text-xs text-slate-600 mt-1">
+          <h4 class="font-bold sops-neutral-text-strong text-sm">主动超预期</h4>
+          <p class="text-xs sops-neutral-text-muted mt-1">
             部分退款时主动多给€1-2；补发时选加急物流。小成本换来大概率的问题终结，避免升级。
           </p>
         </div>
@@ -360,8 +362,8 @@
           >4</span
         >
         <div>
-          <h4 class="font-bold text-slate-800 text-sm">一封邮件解决</h4>
-          <p class="text-xs text-slate-600 mt-1">
+          <h4 class="font-bold sops-neutral-text-strong text-sm">一封邮件解决</h4>
+          <p class="text-xs sops-neutral-text-muted mt-1">
             争取一封邮件就把问题关掉。不要问"请问您想怎么解决？"——直接给方案让客户选。来回次数越多，客户越烦。
           </p>
         </div>
@@ -372,8 +374,8 @@
           >5</span
         >
         <div>
-          <h4 class="font-bold text-slate-800 text-sm">用客户的语言</h4>
-          <p class="text-xs text-slate-600 mt-1">
+          <h4 class="font-bold sops-neutral-text-strong text-sm">用客户的语言</h4>
+          <p class="text-xs sops-neutral-text-muted mt-1">
             DE站用德语，FR站用法语——即使不完美也比用英语好。DeepL翻译后自己通读一遍，确保语气不生硬。
           </p>
         </div>
@@ -384,8 +386,8 @@
           >6</span
         >
         <div>
-          <h4 class="font-bold text-slate-800 text-sm">留证据截图</h4>
-          <p class="text-xs text-slate-600 mt-1">
+          <h4 class="font-bold sops-neutral-text-strong text-sm">留证据截图</h4>
+          <p class="text-xs sops-neutral-text-muted mt-1">
             每一笔退款承诺、每一个解决方案，截图保存到该订单文件夹。AZ仲裁或二次纠纷时这就是你的武器。
           </p>
         </div>
@@ -410,21 +412,23 @@
     </div>
     <div class="space-y-4">
       <!-- ===== 模板 #1: 物流查询 ===== -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div
           class="bg-primary-100 px-4 py-3 flex items-center justify-between cursor-pointer"
           data-email-template-toggle
         >
           <div class="flex items-center gap-3">
             <span class="px-2 py-0.5 bg-primary-500 text-white rounded text-xs font-bold">P2</span>
-            <span class="font-bold text-slate-800 text-sm">#1 物流查询 — "我的包裹在哪？"</span>
+            <span class="font-bold sops-neutral-text-strong text-sm"
+              >#1 物流查询 — "我的包裹在哪？"</span
+            >
             <span class="text-xs text-primary-600 bg-primary-100 px-2 py-0.5 rounded"
               >出现频率：★★★★★</span
             >
           </div>
-          <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+          <i class="fas fa-chevron-down sops-neutral-text-faint text-sm"></i>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t sops-neutral-divider-soft">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <!-- FBA版本 -->
             <div>
@@ -432,7 +436,7 @@
                 <i class="fas fa-warehouse"></i>FBA 订单版 — 引导找亚马逊
               </h4>
               <div
-                class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+                class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
               >
                 <p>Subject: Re: Your Order [Order ID]</p>
                 <br />
@@ -478,7 +482,7 @@
                 <i class="fas fa-shipping-fast"></i>FBM 订单版 — 主动查询 + 提供追踪
               </h4>
               <div
-                class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+                class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
               >
                 <p>Subject: Re: Your Order [Order ID]</p>
                 <br />
@@ -518,23 +522,25 @@
         </div>
       </div>
       <!-- ===== 模板 #2: 产品损坏/缺陷 ===== -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div
           class="bg-amber-50 px-4 py-3 flex items-center justify-between cursor-pointer"
           data-email-template-toggle
         >
           <div class="flex items-center gap-3">
             <span class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold">P1</span>
-            <span class="font-bold text-slate-800 text-sm">#2 产品损坏/缺陷 — "收到就是坏的"</span>
+            <span class="font-bold sops-neutral-text-strong text-sm"
+              >#2 产品损坏/缺陷 — "收到就是坏的"</span
+            >
             <span class="text-xs text-amber-600 bg-amber-100 px-2 py-0.5 rounded"
               >出现频率：★★★★☆</span
             >
           </div>
-          <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+          <i class="fas fa-chevron-down sops-neutral-text-faint text-sm"></i>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t sops-neutral-divider-soft">
           <div
-            class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border mb-3"
+            class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border mb-3"
           >
             <p>Subject: Re: Issue with your [Product Name]</p>
             <br />
@@ -593,23 +599,25 @@
         </div>
       </div>
       <!-- ===== 模板 #3: 收到错误产品 ===== -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div
           class="bg-amber-50 px-4 py-3 flex items-center justify-between cursor-pointer"
           data-email-template-toggle
         >
           <div class="flex items-center gap-3">
             <span class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold">P1</span>
-            <span class="font-bold text-slate-800 text-sm">#3 收到错误产品 — "发错货了"</span>
+            <span class="font-bold sops-neutral-text-strong text-sm"
+              >#3 收到错误产品 — "发错货了"</span
+            >
             <span class="text-xs text-amber-600 bg-amber-100 px-2 py-0.5 rounded"
               >出现频率：★★★☆☆</span
             >
           </div>
-          <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+          <i class="fas fa-chevron-down sops-neutral-text-faint text-sm"></i>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t sops-neutral-divider-soft">
           <div
-            class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border mb-3"
+            class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border mb-3"
           >
             <p>Subject: Re: Wrong item received — Order [Order ID]</p>
             <br />
@@ -649,21 +657,23 @@
         </div>
       </div>
       <!-- ===== 模板 #4: 退货/退款请求 ===== -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div
           class="bg-primary-100 px-4 py-3 flex items-center justify-between cursor-pointer"
           data-email-template-toggle
         >
           <div class="flex items-center gap-3">
             <span class="px-2 py-0.5 bg-primary-500 text-white rounded text-xs font-bold">P2</span>
-            <span class="font-bold text-slate-800 text-sm">#4 退货退款请求 — "我想退货"</span>
+            <span class="font-bold sops-neutral-text-strong text-sm"
+              >#4 退货退款请求 — "我想退货"</span
+            >
             <span class="text-xs text-primary-600 bg-primary-100 px-2 py-0.5 rounded"
               >出现频率：★★★★☆</span
             >
           </div>
-          <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+          <i class="fas fa-chevron-down sops-neutral-text-faint text-sm"></i>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t sops-neutral-divider-soft">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <!-- 标准退货 -->
             <div>
@@ -671,7 +681,7 @@
                 方案A：引导走亚马逊标准退货流程
               </h4>
               <div
-                class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+                class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
               >
                 <p>Dear Customer,</p>
                 <br />
@@ -701,7 +711,7 @@
                 方案B：直接退款不退货（低价产品/损坏品）
               </h4>
               <div
-                class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+                class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
               >
                 <p>Dear Customer,</p>
                 <br />
@@ -739,23 +749,25 @@
         </div>
       </div>
       <!-- ===== 模板 #5: 缺少配件/零件 ===== -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div
           class="bg-amber-50 px-4 py-3 flex items-center justify-between cursor-pointer"
           data-email-template-toggle
         >
           <div class="flex items-center gap-3">
             <span class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold">P1</span>
-            <span class="font-bold text-slate-800 text-sm">#5 配件缺失 — "少了零件/说明书"</span>
+            <span class="font-bold sops-neutral-text-strong text-sm"
+              >#5 配件缺失 — "少了零件/说明书"</span
+            >
             <span class="text-xs text-amber-600 bg-amber-100 px-2 py-0.5 rounded"
               >出现频率：★★★☆☆</span
             >
           </div>
-          <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+          <i class="fas fa-chevron-down sops-neutral-text-faint text-sm"></i>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t sops-neutral-divider-soft">
           <div
-            class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border mb-3"
+            class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border mb-3"
           >
             <p>Subject: Re: Missing parts — [Product Name]</p>
             <br />
@@ -790,25 +802,25 @@
         </div>
       </div>
       <!-- ===== 模板 #6: 使用问题/操作咨询 ===== -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div
           class="bg-primary-100 px-4 py-3 flex items-center justify-between cursor-pointer"
           data-email-template-toggle
         >
           <div class="flex items-center gap-3">
             <span class="px-2 py-0.5 bg-primary-500 text-white rounded text-xs font-bold">P2</span>
-            <span class="font-bold text-slate-800 text-sm"
+            <span class="font-bold sops-neutral-text-strong text-sm"
               >#6 使用问题 — "这个怎么用？/ 不会操作"</span
             >
             <span class="text-xs text-primary-600 bg-primary-100 px-2 py-0.5 rounded"
               >出现频率：★★★★☆</span
             >
           </div>
-          <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+          <i class="fas fa-chevron-down sops-neutral-text-faint text-sm"></i>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t sops-neutral-divider-soft">
           <div
-            class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border mb-3"
+            class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border mb-3"
           >
             <p>Subject: Re: How to use [Product Name]</p>
             <br />
@@ -844,23 +856,25 @@
         </div>
       </div>
       <!-- ===== 模板 #7: 不满意但无质量问题 ===== -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div
           class="bg-primary-100 px-4 py-3 flex items-center justify-between cursor-pointer"
           data-email-template-toggle
         >
           <div class="flex items-center gap-3">
             <span class="px-2 py-0.5 bg-primary-500 text-white rounded text-xs font-bold">P2</span>
-            <span class="font-bold text-slate-800 text-sm">#7 期望不符 — "跟我想的不一样"</span>
+            <span class="font-bold sops-neutral-text-strong text-sm"
+              >#7 期望不符 — "跟我想的不一样"</span
+            >
             <span class="text-xs text-primary-600 bg-primary-100 px-2 py-0.5 rounded"
               >出现频率：★★★☆☆</span
             >
           </div>
-          <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+          <i class="fas fa-chevron-down sops-neutral-text-faint text-sm"></i>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t sops-neutral-divider-soft">
           <div
-            class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border mb-3"
+            class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border mb-3"
           >
             <p>Subject: Re: Your [Product Name] order</p>
             <br />
@@ -900,23 +914,25 @@
         </div>
       </div>
       <!-- ===== 模板 #8: 产品质量投诉 ===== -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div
           class="bg-amber-50 px-4 py-3 flex items-center justify-between cursor-pointer"
           data-email-template-toggle
         >
           <div class="flex items-center gap-3">
             <span class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold">P1</span>
-            <span class="font-bold text-slate-800 text-sm">#8 质量投诉 — "用了X天就坏了"</span>
+            <span class="font-bold sops-neutral-text-strong text-sm"
+              >#8 质量投诉 — "用了X天就坏了"</span
+            >
             <span class="text-xs text-amber-600 bg-amber-100 px-2 py-0.5 rounded"
               >出现频率：★★★☆☆</span
             >
           </div>
-          <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+          <i class="fas fa-chevron-down sops-neutral-text-faint text-sm"></i>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t sops-neutral-divider-soft">
           <div
-            class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border mb-3"
+            class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border mb-3"
           >
             <p>Subject: Re: Quality issue with [Product Name]</p>
             <br />
@@ -954,26 +970,28 @@
         </div>
       </div>
       <!-- ===== 模板 #9: 发票/VAT收据 ===== -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div
-          class="bg-slate-50 px-4 py-3 flex items-center justify-between cursor-pointer"
+          class="sops-neutral-surface px-4 py-3 flex items-center justify-between cursor-pointer"
           data-email-template-toggle
         >
           <div class="flex items-center gap-3">
             <span class="px-2 py-0.5 bg-slate-400 text-white rounded text-xs font-bold">P3</span>
-            <span class="font-bold text-slate-800 text-sm">#9 发票请求 — "请提供VAT Invoice"</span>
-            <span class="text-xs text-slate-600 bg-slate-200 px-2 py-0.5 rounded"
+            <span class="font-bold sops-neutral-text-strong text-sm"
+              >#9 发票请求 — "请提供VAT Invoice"</span
+            >
+            <span class="text-xs sops-neutral-text-muted bg-slate-200 px-2 py-0.5 rounded"
               >🇩🇪高频 ★★★★☆</span
             >
           </div>
-          <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+          <i class="fas fa-chevron-down sops-neutral-text-faint text-sm"></i>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t sops-neutral-divider-soft">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
               <h4 class="text-xs font-bold text-primary-700 mb-2">已开通亚马逊VAT自动开票</h4>
               <div
-                class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+                class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
               >
                 <p>Dear Customer,</p>
                 <br />
@@ -1000,7 +1018,7 @@
             <div>
               <h4 class="text-xs font-bold text-amber-700 mb-2">未开通 / 买家找不到发票</h4>
               <div
-                class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+                class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
               >
                 <p>Dear Customer,</p>
                 <br />
@@ -1065,7 +1083,7 @@
                 Step 1: 立即联系买家（抢在仲裁前解决）
               </h4>
               <div
-                class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+                class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
               >
                 <p>Dear Customer,</p>
                 <br />
@@ -1098,7 +1116,7 @@
                 Step 2: 向亚马逊提交申诉（Represent）
               </h4>
               <div
-                class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border"
+                class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border"
               >
                 <p>[在后台 A-to-Z Claims 页面提交]</p>
                 <br />
@@ -1132,27 +1150,27 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div class="bg-emerald-50 rounded-lg p-3 border border-emerald-200">
                 <h5 class="font-bold text-emerald-800 text-xs mb-1">情况A：你确实有责</h5>
-                <p class="text-xs text-slate-600">产品确实有问题/确实没送到/确实发错</p>
+                <p class="text-xs sops-neutral-text-muted">产品确实有问题/确实没送到/确实发错</p>
                 <p class="text-xs text-emerald-700 font-semibold mt-1">
                   → 立即全额退款 + 联系买家撤回claim
                 </p>
-                <p class="text-xs text-slate-500 mt-1">主动退款可减轻 ODR 影响</p>
+                <p class="text-xs sops-neutral-text-muted mt-1">主动退款可减轻 ODR 影响</p>
               </div>
               <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
                 <h5 class="font-bold text-amber-800 text-xs mb-1">情况B：FBA订单问题</h5>
-                <p class="text-xs text-slate-600">物流延迟/包装损坏/FBA操作失误</p>
+                <p class="text-xs sops-neutral-text-muted">物流延迟/包装损坏/FBA操作失误</p>
                 <p class="text-xs text-amber-700 font-semibold mt-1">
                   → 申诉说明是FBA配送 → 亚马逊承担 → ODR不计入
                 </p>
-                <p class="text-xs text-slate-500 mt-1">关键证据：提供FBA发货确认</p>
+                <p class="text-xs sops-neutral-text-muted mt-1">关键证据：提供FBA发货确认</p>
               </div>
               <div class="bg-red-50 rounded-lg p-3 border border-red-200">
                 <h5 class="font-bold text-red-800 text-xs mb-1">情况C：买家恶意/不合理</h5>
-                <p class="text-xs text-slate-600">已收货但谎称未收到/使用后退货</p>
+                <p class="text-xs sops-neutral-text-muted">已收货但谎称未收到/使用后退货</p>
                 <p class="text-xs text-red-700 font-semibold mt-1">
                   → 提交完整证据链申诉 → 可能需2-3次
                 </p>
-                <p class="text-xs text-slate-500 mt-1">签收证明/通讯记录是关键</p>
+                <p class="text-xs sops-neutral-text-muted mt-1">签收证明/通讯记录是关键</p>
               </div>
             </div>
           </div>
@@ -1180,7 +1198,7 @@
             必须在最短时间内处理。
           </div>
           <div
-            class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border mb-3"
+            class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border mb-3"
           >
             <p>Subject: URGENT — Your safety is our top priority</p>
             <br />
@@ -1230,23 +1248,25 @@
         </div>
       </div>
       <!-- ===== 模板 #12: GDPR数据请求 ===== -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="border sops-neutral-divider rounded-xl overflow-hidden">
         <div
           class="bg-purple-50 px-4 py-3 flex items-center justify-between cursor-pointer"
           data-email-template-toggle
         >
           <div class="flex items-center gap-3">
             <span class="px-2 py-0.5 bg-purple-500 text-white rounded text-xs font-bold">EU</span>
-            <span class="font-bold text-slate-800 text-sm">#12 GDPR请求 — "删除我的数据"</span>
+            <span class="font-bold sops-neutral-text-strong text-sm"
+              >#12 GDPR请求 — "删除我的数据"</span
+            >
             <span class="text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded"
               >欧洲特有 ★★☆☆☆</span
             >
           </div>
-          <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+          <i class="fas fa-chevron-down sops-neutral-text-faint text-sm"></i>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t sops-neutral-divider-soft">
           <div
-            class="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 leading-relaxed border mb-3"
+            class="sops-neutral-surface rounded-lg p-3 text-xs font-mono sops-neutral-text leading-relaxed border mb-3"
           >
             <p>Subject: Re: Your data request</p>
             <br />
@@ -1334,128 +1354,155 @@
         </thead>
         <tbody>
           <tr>
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">
+            <th
+              scope="row"
+              class="border sops-neutral-divider px-3 py-2 font-bold sops-neutral-surface"
+            >
               称呼
             </th>
-            <td class="border border-slate-200 px-3 py-2">Dear Customer,</td>
-            <td class="border border-slate-200 px-3 py-2">Sehr geehrte/r Kunde/Kundin,</td>
-            <td class="border border-slate-200 px-3 py-2">Cher/Chère client(e),</td>
-            <td class="border border-slate-200 px-3 py-2">Gentile Cliente,</td>
-            <td class="border border-slate-200 px-3 py-2">Estimado/a cliente,</td>
+            <td class="border sops-neutral-divider px-3 py-2">Dear Customer,</td>
+            <td class="border sops-neutral-divider px-3 py-2">Sehr geehrte/r Kunde/Kundin,</td>
+            <td class="border sops-neutral-divider px-3 py-2">Cher/Chère client(e),</td>
+            <td class="border sops-neutral-divider px-3 py-2">Gentile Cliente,</td>
+            <td class="border sops-neutral-divider px-3 py-2">Estimado/a cliente,</td>
           </tr>
-          <tr class="bg-slate-50">
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">感谢联系</th>
-            <td class="border border-slate-200 px-3 py-2">Thank you for contacting us.</td>
-            <td class="border border-slate-200 px-3 py-2">Vielen Dank für Ihre Nachricht.</td>
-            <td class="border border-slate-200 px-3 py-2">Merci de nous avoir contactés.</td>
-            <td class="border border-slate-200 px-3 py-2">Grazie per averci contattato.</td>
-            <td class="border border-slate-200 px-3 py-2">Gracias por contactarnos.</td>
+          <tr class="sops-neutral-surface">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2 font-bold">感谢联系</th>
+            <td class="border sops-neutral-divider px-3 py-2">Thank you for contacting us.</td>
+            <td class="border sops-neutral-divider px-3 py-2">Vielen Dank für Ihre Nachricht.</td>
+            <td class="border sops-neutral-divider px-3 py-2">Merci de nous avoir contactés.</td>
+            <td class="border sops-neutral-divider px-3 py-2">Grazie per averci contattato.</td>
+            <td class="border sops-neutral-divider px-3 py-2">Gracias por contactarnos.</td>
           </tr>
           <tr>
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">
+            <th
+              scope="row"
+              class="border sops-neutral-divider px-3 py-2 font-bold sops-neutral-surface"
+            >
               表示歉意
             </th>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               We sincerely apologize for the inconvenience.
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Wir entschuldigen uns aufrichtig für die Unannehmlichkeiten.
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Nous nous excusons sincèrement pour ce désagrément.
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Ci scusiamo sinceramente per l'inconveniente.
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Le pedimos sinceras disculpas por las molestias.
             </td>
           </tr>
-          <tr class="bg-slate-50">
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">提供退款</th>
-            <td class="border border-slate-200 px-3 py-2">We have issued a full refund.</td>
-            <td class="border border-slate-200 px-3 py-2">
+          <tr class="sops-neutral-surface">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2 font-bold">提供退款</th>
+            <td class="border sops-neutral-divider px-3 py-2">We have issued a full refund.</td>
+            <td class="border sops-neutral-divider px-3 py-2">
               Wir haben eine vollständige Rückerstattung veranlasst.
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Nous avons procédé à un remboursement intégral.
             </td>
-            <td class="border border-slate-200 px-3 py-2">Abbiamo emesso un rimborso completo.</td>
-            <td class="border border-slate-200 px-3 py-2">Hemos emitido un reembolso completo.</td>
+            <td class="border sops-neutral-divider px-3 py-2">
+              Abbiamo emesso un rimborso completo.
+            </td>
+            <td class="border sops-neutral-divider px-3 py-2">
+              Hemos emitido un reembolso completo.
+            </td>
           </tr>
           <tr>
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">
+            <th
+              scope="row"
+              class="border sops-neutral-divider px-3 py-2 font-bold sops-neutral-surface"
+            >
               补发承诺
             </th>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               We will send a replacement right away.
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Wir senden Ihnen umgehend einen Ersatz.
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Nous vous enverrons un remplacement immédiatement.
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Le invieremo immediatamente un sostituto.
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Le enviaremos un reemplazo de inmediato.
             </td>
           </tr>
-          <tr class="bg-slate-50">
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">无需退货</th>
-            <td class="border border-slate-200 px-3 py-2">No need to return the item.</td>
-            <td class="border border-slate-200 px-3 py-2">
+          <tr class="sops-neutral-surface">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2 font-bold">无需退货</th>
+            <td class="border sops-neutral-divider px-3 py-2">No need to return the item.</td>
+            <td class="border sops-neutral-divider px-3 py-2">
               Sie brauchen den Artikel nicht zurückzusenden.
             </td>
-            <td class="border border-slate-200 px-3 py-2">Pas besoin de retourner l'article.</td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
+              Pas besoin de retourner l'article.
+            </td>
+            <td class="border sops-neutral-divider px-3 py-2">
               Non è necessario restituire l'articolo.
             </td>
-            <td class="border border-slate-200 px-3 py-2">No es necesario devolver el artículo.</td>
+            <td class="border sops-neutral-divider px-3 py-2">
+              No es necesario devolver el artículo.
+            </td>
           </tr>
           <tr>
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">
+            <th
+              scope="row"
+              class="border sops-neutral-divider px-3 py-2 font-bold sops-neutral-surface"
+            >
               退货引导
             </th>
-            <td class="border border-slate-200 px-3 py-2">Please go to "Your Orders" → "Return"</td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
+              Please go to "Your Orders" → "Return"
+            </td>
+            <td class="border sops-neutral-divider px-3 py-2">
               Bitte gehen Sie zu "Meine Bestellungen" → "Artikel zurücksenden"
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Rendez-vous dans "Vos commandes" → "Retourner"
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Vai su "I miei ordini" → "Restituisci"
             </td>
-            <td class="border border-slate-200 px-3 py-2">Vaya a "Mis pedidos" → "Devolver"</td>
+            <td class="border sops-neutral-divider px-3 py-2">Vaya a "Mis pedidos" → "Devolver"</td>
           </tr>
-          <tr class="bg-slate-50">
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">请求照片</th>
-            <td class="border border-slate-200 px-3 py-2">Could you share a photo of the issue?</td>
-            <td class="border border-slate-200 px-3 py-2">
+          <tr class="sops-neutral-surface">
+            <th scope="row" class="border sops-neutral-divider px-3 py-2 font-bold">请求照片</th>
+            <td class="border sops-neutral-divider px-3 py-2">
+              Could you share a photo of the issue?
+            </td>
+            <td class="border sops-neutral-divider px-3 py-2">
               Könnten Sie uns ein Foto des Problems senden?
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Pourriez-vous nous envoyer une photo du problème ?
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               Potrebbe inviarci una foto del problema?
             </td>
-            <td class="border border-slate-200 px-3 py-2">
+            <td class="border sops-neutral-divider px-3 py-2">
               ¿Podría enviarnos una foto del problema?
             </td>
           </tr>
           <tr>
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">
+            <th
+              scope="row"
+              class="border sops-neutral-divider px-3 py-2 font-bold sops-neutral-surface"
+            >
               结尾祝好
             </th>
-            <td class="border border-slate-200 px-3 py-2">Best regards, / Warm regards,</td>
-            <td class="border border-slate-200 px-3 py-2">Mit freundlichen Grüßen,</td>
-            <td class="border border-slate-200 px-3 py-2">Cordialement,</td>
-            <td class="border border-slate-200 px-3 py-2">Cordiali saluti,</td>
-            <td class="border border-slate-200 px-3 py-2">Atentamente, / Saludos cordiales,</td>
+            <td class="border sops-neutral-divider px-3 py-2">Best regards, / Warm regards,</td>
+            <td class="border sops-neutral-divider px-3 py-2">Mit freundlichen Grüßen,</td>
+            <td class="border sops-neutral-divider px-3 py-2">Cordialement,</td>
+            <td class="border sops-neutral-divider px-3 py-2">Cordiali saluti,</td>
+            <td class="border sops-neutral-divider px-3 py-2">Atentamente, / Saludos cordiales,</td>
           </tr>
         </tbody>
       </table>
@@ -1475,7 +1522,7 @@
       <!-- 买家威胁差评 -->
       <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
         <h4 class="font-bold text-amber-800 text-sm mb-2">💬 买家威胁："不退款就给差评"</h4>
-        <div class="text-xs text-slate-700 space-y-1">
+        <div class="text-xs sops-neutral-text space-y-1">
           <p><strong>策略：</strong>不要被威胁左右决策。按正常流程提供合理解决方案。</p>
           <ul class="ml-3 space-y-0.5 mt-1">
             <li>• 如果要求合理（产品确实有问题）→ 正常退款/换货</li>
@@ -1489,7 +1536,7 @@
       <!-- 大量退款欺诈 -->
       <div class="bg-red-50 rounded-lg p-4 border border-red-200">
         <h4 class="font-bold text-red-800 text-sm mb-2">🚩 疑似退款欺诈 / 职业骗子</h4>
-        <div class="text-xs text-slate-700 space-y-1">
+        <div class="text-xs sops-neutral-text space-y-1">
           <p><strong>识别特征：</strong></p>
           <ul class="ml-3 space-y-0.5">
             <li>• 同一买家多次"缺件""损坏"投诉</li>
@@ -1508,7 +1555,7 @@
       <!-- 律师函/法律威胁 -->
       <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
         <h4 class="font-bold text-purple-800 text-sm mb-2">⚖️ 德国买家发律师函/Abmahnung</h4>
-        <div class="text-xs text-slate-700 space-y-1">
+        <div class="text-xs sops-neutral-text space-y-1">
           <p>
             <strong>德国特色：</strong>德国有"Abmahnung"（警告函）文化，买家或竞对可能通过律师发函。
           </p>
@@ -1526,7 +1573,7 @@
         <h4 class="font-bold text-[var(--module-accent-text)] text-sm mb-2">
           📭 发了邮件买家不回复
         </h4>
-        <div class="text-xs text-slate-700 space-y-1">
+        <div class="text-xs sops-neutral-text space-y-1">
           <p><strong>这是常态。</strong>不要焦虑，按流程走：</p>
           <ul class="ml-3 space-y-0.5 mt-1">
             <li>• 首次无回复 → 48h后发第二封（换个角度重述方案）</li>
@@ -1539,7 +1586,7 @@
       <!-- 退货后不退款 -->
       <div class="bg-teal-50 rounded-lg p-4 border border-teal-200">
         <h4 class="font-bold text-teal-800 text-sm mb-2">📦 买家抱怨"退了货没收到退款"</h4>
-        <div class="text-xs text-slate-700 space-y-1">
+        <div class="text-xs sops-neutral-text space-y-1">
           <p>
             <strong>FBA订单：</strong>退款由亚马逊自动处理，引导买家查看退款状态或联系亚马逊客服。
           </p>
@@ -1559,7 +1606,7 @@
         <h4 class="font-bold text-[var(--module-accent-text)] text-sm mb-2">
           🌍 收到完全看不懂的小语种邮件
         </h4>
-        <div class="text-xs text-slate-700 space-y-1">
+        <div class="text-xs sops-neutral-text space-y-1">
           <p><strong>处理流程：</strong></p>
           <ul class="ml-3 space-y-0.5 mt-1">
             <li>1. 复制全文 → 粘贴到 DeepL → 翻译为英语理解内容</li>
@@ -1574,10 +1621,10 @@
   </div>
   <!-- ========== 每日客服工作流 ========== -->
   <div
-    class="bg-gradient-to-r from-slate-50 to-primary-100 rounded-xl border border-slate-200 p-6 mb-6"
+    class="bg-gradient-to-r from-slate-50 to-primary-100 rounded-xl border sops-neutral-divider p-6 mb-6"
   >
-    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-      <i class="fas fa-user-clock text-slate-600"></i>每日客服工作流
+    <h2 class="text-lg font-bold sops-neutral-text-strong mb-4 flex items-center gap-2">
+      <i class="fas fa-user-clock sops-neutral-text-muted"></i>每日客服工作流
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="ui-card p-4">
@@ -1662,10 +1709,10 @@
   <div
     class="bg-gradient-to-r from-primary-100 to-accent-100 rounded-xl border border-primary-100 p-6 mb-6"
   >
-    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+    <h2 class="text-lg font-bold sops-neutral-text-strong mb-4 flex items-center gap-2">
       <i class="fas fa-globe-europe text-primary-500"></i>欧洲各站买家沟通风格差异
     </h2>
-    <p class="text-xs text-slate-500 mb-4">
+    <p class="text-xs sops-neutral-text-muted mb-4">
       了解文化差异 = 用对语气 = 更高的问题一次解决率。这些是真实经验总结。
     </p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1758,7 +1805,7 @@
         <h3 class="font-bold text-emerald-700 text-sm mb-2 flex items-center gap-1">
           <i class="fas fa-check-circle"></i>✅ 允许的内容
         </h3>
-        <div class="space-y-1.5 text-xs text-slate-700">
+        <div class="space-y-1.5 text-xs sops-neutral-text">
           <div class="flex items-start gap-2 p-2 bg-emerald-50 rounded">
             <i class="fas fa-check text-emerald-500 mt-0.5 flex-shrink-0"></i>
             <span>回复买家主动发起的咨询</span>
@@ -1789,7 +1836,7 @@
         <h3 class="font-bold text-red-700 text-sm mb-2 flex items-center gap-1">
           <i class="fas fa-times-circle"></i>❌ 禁止的内容
         </h3>
-        <div class="space-y-1.5 text-xs text-slate-700">
+        <div class="space-y-1.5 text-xs sops-neutral-text">
           <div class="flex items-start gap-2 p-2 bg-red-50 rounded">
             <i class="fas fa-times text-red-500 mt-0.5 flex-shrink-0"></i>
             <span>任何关于评价/Review/Feedback的提及或暗示</span>
@@ -1868,71 +1915,83 @@
         </thead>
         <tbody>
           <tr>
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
+            <th
+              scope="row"
+              class="border sops-neutral-divider px-3 py-2 font-semibold sops-neutral-surface"
+            >
               到货损坏/缺陷
             </th>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-emerald-50">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-emerald-50">
               <span class="font-bold text-emerald-700">全额退款</span><br />
-              <span class="text-slate-500">不退货</span>
+              <span class="sops-neutral-text-muted">不退货</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-[var(--wash-blue)]">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-[var(--wash-blue)]">
               <span class="font-bold text-[var(--module-accent-text)]">退款或换货</span><br />
-              <span class="text-slate-500">不退货</span>
+              <span class="sops-neutral-text-muted">不退货</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-amber-50">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-amber-50">
               <span class="font-bold text-amber-700">要求照片</span><br />
-              <span class="text-slate-500">确认后退款或换货</span>
+              <span class="sops-neutral-text-muted">确认后退款或换货</span>
             </td>
           </tr>
           <tr>
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
+            <th
+              scope="row"
+              class="border sops-neutral-divider px-3 py-2 font-semibold sops-neutral-surface"
+            >
               不喜欢/不合适
             </th>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-emerald-50">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-emerald-50">
               <span class="font-bold text-emerald-700">全额退款</span><br />
-              <span class="text-slate-500">不退货</span>
+              <span class="sops-neutral-text-muted">不退货</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-[var(--wash-blue)]">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-[var(--wash-blue)]">
               <span class="font-bold text-[var(--module-accent-text)]">20-30%部分退款</span><br />
-              <span class="text-slate-500">或引导标准退货</span>
+              <span class="sops-neutral-text-muted">或引导标准退货</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-amber-50">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-amber-50">
               <span class="font-bold text-amber-700">引导标准退货</span><br />
-              <span class="text-slate-500">收到后退款</span>
+              <span class="sops-neutral-text-muted">收到后退款</span>
             </td>
           </tr>
           <tr>
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
+            <th
+              scope="row"
+              class="border sops-neutral-divider px-3 py-2 font-semibold sops-neutral-surface"
+            >
               配件缺失
             </th>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-emerald-50">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-emerald-50">
               <span class="font-bold text-emerald-700">全额退款</span><br />
-              <span class="text-slate-500">不退货</span>
+              <span class="sops-neutral-text-muted">不退货</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-[var(--wash-blue)]">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-[var(--wash-blue)]">
               <span class="font-bold text-[var(--module-accent-text)]">补发配件</span><br />
-              <span class="text-slate-500">或15-25%退款</span>
+              <span class="sops-neutral-text-muted">或15-25%退款</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-[var(--wash-blue)]">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-[var(--wash-blue)]">
               <span class="font-bold text-[var(--module-accent-text)]">补发配件</span><br />
-              <span class="text-slate-500">或换货</span>
+              <span class="sops-neutral-text-muted">或换货</span>
             </td>
           </tr>
           <tr>
-            <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
+            <th
+              scope="row"
+              class="border sops-neutral-divider px-3 py-2 font-semibold sops-neutral-surface"
+            >
               使用一段时间后坏了
             </th>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-emerald-50">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-emerald-50">
               <span class="font-bold text-emerald-700">全额退款</span><br />
-              <span class="text-slate-500">不退货</span>
+              <span class="sops-neutral-text-muted">不退货</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-amber-50">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-amber-50">
               <span class="font-bold text-amber-700">30天内全额退</span><br />
-              <span class="text-slate-500">30天后50%退款</span>
+              <span class="sops-neutral-text-muted">30天后50%退款</span>
             </td>
-            <td class="border border-slate-200 px-3 py-2 text-center bg-amber-50">
+            <td class="border sops-neutral-divider px-3 py-2 text-center bg-amber-50">
               <span class="font-bold text-amber-700">30天内全额退</span><br />
-              <span class="text-slate-500">30天后视情况20-50%</span>
+              <span class="sops-neutral-text-muted">30天后视情况20-50%</span>
             </td>
           </tr>
         </tbody>
@@ -1957,9 +2016,9 @@
       <i class="fas fa-toolbox text-amber-500"></i>工具 &amp; 资源清单
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-      <div class="bg-slate-50 rounded-lg p-3">
-        <h4 class="font-bold text-slate-700 text-xs mb-2">翻译工具</h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+      <div class="sops-neutral-surface rounded-lg p-3">
+        <h4 class="font-bold sops-neutral-text text-xs mb-2">翻译工具</h4>
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• <strong>DeepL</strong>（首选，欧洲语言最准确）</li>
           <li>• ChatGPT/Claude（润色语气+复杂场景）</li>
           <li>• Google Translate（备选/快速理解）</li>
@@ -1969,9 +2028,9 @@
           concise"
         </p>
       </div>
-      <div class="bg-slate-50 rounded-lg p-3">
-        <h4 class="font-bold text-slate-700 text-xs mb-2">效率工具</h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+      <div class="sops-neutral-surface rounded-lg p-3">
+        <h4 class="font-bold sops-neutral-text text-xs mb-2">效率工具</h4>
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• <strong>Text Expander / PhraseExpress</strong>（快捷键展开模板）</li>
           <li>• Amazon Seller App（手机处理紧急消息）</li>
           <li>• Chrome 书签栏保存常用后台入口</li>
@@ -1980,17 +2039,17 @@
           💡 用快捷键工具：输入 "#dam" 自动展开产品损坏模板
         </p>
       </div>
-      <div class="bg-slate-50 rounded-lg p-3">
-        <h4 class="font-bold text-slate-700 text-xs mb-2">模板管理</h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+      <div class="sops-neutral-surface rounded-lg p-3">
+        <h4 class="font-bold sops-neutral-text text-xs mb-2">模板管理</h4>
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• Google Doc（所有模板集中管理）</li>
           <li>• 按场景+语言分 Tab</li>
           <li>• 每月Review使用频率，优化模板</li>
         </ul>
       </div>
-      <div class="bg-slate-50 rounded-lg p-3">
-        <h4 class="font-bold text-slate-700 text-xs mb-2">数据监控</h4>
-        <ul class="text-xs text-slate-600 space-y-1">
+      <div class="sops-neutral-surface rounded-lg p-3">
+        <h4 class="font-bold sops-neutral-text text-xs mb-2">数据监控</h4>
+        <ul class="text-xs sops-neutral-text-muted space-y-1">
           <li>• Seller Central → Account Health</li>
           <li>• Performance → Customer Metrics</li>
           <li>• Buyer Messages → Response Time</li>
@@ -2007,8 +2066,8 @@
       <div class="flex items-center gap-3">
         <i class="fas fa-video text-primary-500 text-xl"></i>
         <div>
-          <h3 class="font-bold text-slate-800 text-sm">操作视频教程</h3>
-          <p class="text-xs text-slate-600">
+          <h3 class="font-bold sops-neutral-text-strong text-sm">操作视频教程</h3>
+          <p class="text-xs sops-neutral-text-muted">
             公司网盘(待完善)：<span class="text-primary-600 underline" data-internal-only="true"
               >仅限内网访问</span
             >→ 培训资料 → 客服邮件专题
@@ -2016,12 +2075,12 @@
         </div>
       </div>
     </div>
-    <div class="bg-slate-50 rounded-xl border border-slate-200 p-4">
+    <div class="sops-neutral-surface rounded-xl border sops-neutral-divider p-4">
       <div class="flex items-center gap-3">
-        <i class="fas fa-book text-slate-500 text-xl"></i>
+        <i class="fas fa-book sops-neutral-text-muted text-xl"></i>
         <div>
-          <h3 class="font-bold text-slate-800 text-sm">亚马逊官方参考</h3>
-          <p class="text-xs text-slate-600">
+          <h3 class="font-bold sops-neutral-text-strong text-sm">亚马逊官方参考</h3>
+          <p class="text-xs sops-neutral-text-muted">
             <a
               class="text-primary-600 underline"
               href="https://sellercentral.amazon.com/help/hub/reference/external/G1701"
@@ -2048,7 +2107,7 @@
     </div>
   </div>
   <!-- 版本记录 -->
-  <div class="text-xs text-slate-400 border-t border-slate-100 pt-3">
+  <div class="text-xs sops-neutral-text-faint border-t sops-neutral-divider-soft pt-3">
     <p>
       <strong>版本历史：</strong>v1.0 (2024-01) 基础英德双语模板 → v2.0 (2024-07) 增加5国语言+AZ模板
       → v3.0 (2025-06) 重构12场景体系+退款矩阵+合规细节+文化差异+GDPR
