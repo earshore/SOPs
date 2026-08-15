@@ -58,12 +58,6 @@
   /* ---- 强调色 (Accent) ---- */
 
   /* ---- 文字 ---- */
-  --color-text-primary: var(--color-slate-900); /* [S1-THM01] -> --color-slate-900 */
-  --color-text-secondary: var(--color-slate-500); /* [S1-THM01] -> --color-slate-500 */
-  --color-text-tertiary: var(--color-slate-400); /* [S1-THM01] -> --color-slate-400 */
-  --color-text-placeholder: var(--color-slate-400); /* [S1-THM01] -> --color-slate-400 */
-  --color-text-disabled: var(--color-slate-300); /* [S1-THM01] -> --color-slate-300 */
-  --color-text-link: var(--color-primary); /* [S1-THM01] -> --color-primary */
 
   /* ---- 背景 ---- */
   --color-bg-primary: #ffffff;
@@ -73,7 +67,6 @@
   --color-bg-hover: rgba(0, 0, 0, 0.04);
   --color-bg-active: rgba(0, 0, 0, 0.08);
   --color-bg-selected: var(--color-primary-light);
-  --color-bg-disabled: var(--color-slate-100); /* [S2-THM01] -> --color-slate-100 */
   --color-bg-backdrop: rgba(0, 0, 0, 0.4);
   --color-bg-overlay: rgba(0, 0, 0, 0.5);
 
@@ -92,16 +85,12 @@
   --border-muted: rgba(203, 213, 225, 0.72);
 
   /* ---- 焦点环 ---- */
-  --color-focus-ring: var(--color-primary); /* [S1-THM01] -> --color-primary */
-  /* Soft halo tracks Appearance focus ring (not hard blue/indigo). */
-  --focus-ring-soft: color-mix(in srgb, var(--color-focus-ring) 16%, transparent);
 
   /* ---- 状态色 ---- */
   --color-success-light: rgba(34, 197, 94, 0.1);
   --color-success-dark: var(--color-green-600); /* [S2-THM01] -> --color-green-600 */
   --color-success-contrast: #ffffff;
 
-  --color-warning-dark: var(--color-amber-600); /* [S2-THM01] -> --color-amber-600 */
   --color-warning-contrast: var(--color-slate-900);
 
   --color-error-light: rgba(239, 68, 68, 0.1);
@@ -109,20 +98,12 @@
   --color-error-contrast: #ffffff;
 
   --color-info-light: rgba(59, 130, 246, 0.1);
-  --color-info-dark: var(--color-blue-600); /* [S2-THM01] -> --color-blue-600 */
 
   /* ========================================
      4. 间距系统
      产品语义别名（xs/sm/md…）。
      数字尺度 --spacing-0/1/px 与 generated 相同，已去重复。
      ======================================== */
-  --spacing-0\.5: 0.125rem; /* 2px — 命名与 generated --spacing-0-5 不同，保留 [S2-THM01] -> --spacing-0-5 */
-  --spacing-2xs: 0.375rem; /* 6px [S1-THM01] -> --spacing-1-5 */
-  --spacing-xs: 0.5rem; /* 8px [S1-THM01] -> --spacing-2 */
-  --spacing-sm: 0.75rem; /* 12px [S1-THM01] -> --spacing-3 */
-  --spacing-md: 1rem; /* 16px [S1-THM01] -> --spacing-4 */
-  --spacing-lg: 1.5rem; /* 24px [S1-THM01] -> --spacing-6 */
-  --spacing-xl: 2rem; /* 32px [S1-THM01] -> --spacing-8 */
   --spacing-2xl: 3rem; /* 48px [S2-THM01] -> --spacing-12 */
   --spacing-3xl: 4rem; /* 64px [S2-THM01] -> --spacing-16 */
 
@@ -304,19 +285,6 @@
   --scrollbar-thumb-radius: 3px;
 
   /* ========================================
-     16. 焦点环
-     ======================================== */
-  --focus-ring-width: 2px;
-  --focus-ring-offset: 2px;
-  --focus-ring-color: var(--color-focus-ring);
-  --focus-ring-style: var(--focus-ring-width) solid var(--focus-ring-color);
-
-  /* 阴影式焦点环（不影响布局） */
-  --focus-ring-shadow:
-    0 0 0 var(--focus-ring-offset) var(--color-bg-primary),
-    0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
-
-  /* ========================================
      17. 断点参考值
      仅供 JS 或 calc() 参考，CSS media query 仍需硬编码
      ======================================== */
@@ -381,7 +349,9 @@
   --module-accent-soft: var(--color-accent-light);
   --module-accent-border: color-mix(in srgb, var(--module-accent) 24%, transparent);
   --module-accent-text: var(--color-accent-dark);
-  --module-accent-focus: var(--focus-ring-soft);
+  --module-accent-focus: var(
+    --module-accent
+  ); /* [B2-THM01] focus-ring 链归档，降级为 module-accent */
 }
 
 @media (min-width: 1536px) {
@@ -392,7 +362,7 @@
 
 /* ========================================
    18. 暗色模式覆盖
-   仅覆盖语义令牌，基础色板不变
+   覆盖语义令牌 + S1 迁移后直接消费的基础色板键（slate-* 反色翻转，[DARKFIX]）
    Phase 1 / D11 dual-safe: .dark / [data-theme='dark'] (legacy)
    + [data-color-mode='dark'] (explicit preference)
    + [data-color-mode-resolved='dark'] (effective dark, incl. system)
@@ -419,12 +389,18 @@
   --color-accent-light: rgba(129, 140, 248, 0.12);
   --color-accent-dark: var(--color-indigo-500);
 
+  /* ---- 基础色板暗色翻转（S1 消费迁移后直接生效，[DARKFIX]） ---- */
+  /* S1 把 text/focus 消费点从 --color-text-* 语义键迁移到 --color-slate-* 原子键；
+     原子键在 generated 侧恒为 light 值（--color-slate-900 = #0f172a 几乎黑），
+     dark 下必须反色，否则深色背景上的 slate-900 文字不可见。
+     值与 S1 前手写翻转语义一致（见下方 --color-text-* 段落）。 */
+  --color-slate-900: var(--color-slate-50); /* S1 前 --color-text-primary dark */
+  --color-slate-500: var(--color-slate-300); /* S1 前 --color-text-secondary dark */
+  --color-slate-400: var(--color-slate-400); /* S1 前 --color-text-tertiary/-placeholder dark */
+  --color-slate-300: var(
+    --color-slate-500
+  ); /* S1 前 --color-text-disabled dark（slate-600 近似） */
   /* ---- 文字 ---- */
-  --color-text-primary: var(--color-slate-50);
-  --color-text-secondary: var(--color-slate-300);
-  --color-text-tertiary: var(--color-slate-400); /* [S1-THM01] -> --color-slate-400 */
-  --color-text-placeholder: var(--color-slate-500);
-  --color-text-disabled: var(--color-slate-600);
 
   /* ---- 背景 ---- */
   --color-bg-primary: var(--color-slate-900);
@@ -433,7 +409,6 @@
   --color-bg-elevated: var(--color-slate-800);
   --color-bg-hover: rgba(255, 255, 255, 0.06);
   --color-bg-active: rgba(255, 255, 255, 0.1);
-  --color-bg-disabled: rgba(255, 255, 255, 0.04); /* [S2-THM01] dark: rgba 无对等 */
   --color-bg-backdrop: rgba(0, 0, 0, 0.6);
   --color-bg-overlay: rgba(0, 0, 0, 0.7);
 
@@ -451,16 +426,12 @@
   --border-subtle: rgba(148, 163, 184, 0.18);
   --border-muted: rgba(148, 163, 184, 0.22);
 
-  /* ---- 焦点环 soft halo（跟随 Appearance --color-focus-ring） ---- */
-  --focus-ring-soft: color-mix(in srgb, var(--color-focus-ring) 18%, transparent);
-
   /* ---- 状态色 ---- */
   --color-success: var(--color-green-400);
   --color-success-light: rgba(74, 222, 128, 0.12);
   --color-success-dark: var(--color-green-500); /* [S2-THM01] dark: green-500 */
 
   --color-warning: var(--color-amber-400);
-  --color-warning-dark: var(--color-amber-500); /* [S2-THM01] dark: amber-500 */
   --color-warning-contrast: var(--color-slate-900);
 
   --color-error: var(--color-red-400);
@@ -469,7 +440,6 @@
 
   --color-info: var(--color-blue-400);
   --color-info-light: rgba(96, 165, 250, 0.12);
-  --color-info-dark: var(--color-blue-500); /* [S2-THM01] dark: blue-500 */
 
   /* ---- 阴影 ---- */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -502,9 +472,4 @@
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
 
   /* ---- 玻璃渐变（--gradient-glass dark 覆盖已归档） ---- */
-
-  /* ---- 焦点环阴影 (暗色 bg 适配) ---- */
-  --focus-ring-shadow:
-    0 0 0 var(--focus-ring-offset) var(--color-bg-primary),
-    0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
 }

@@ -510,9 +510,23 @@ async function closeGlobalSettings(page: Page): Promise<void> {
   if ((await settingsPanel.getAttribute('data-state')) === 'closed') {
     return;
   }
-
-  await page.getByRole('button', { name: '关闭系统设置' }).click();
-  await expect(settingsPanel).toHaveAttribute('data-state', 'closed');
+  const close = page.getByRole('button', { name: '关闭系统设置' });
+  await close.click();
+  try {
+    // TD-E2E-01: webkit panel transitions can lag beyond the default
+    // assertion window, leaving the suite in a mid-animation state and
+    // causing later route-load polls to time out.
+    await expect(settingsPanel).toHaveAttribute('data-state', 'closed', {
+      timeout: 5000,
+    });
+    return;
+  } catch {
+    await close.click();
+    await page.keyboard.press('Escape');
+    await expect(settingsPanel).toHaveAttribute('data-state', 'closed', {
+      timeout: 5000,
+    });
+  }
 }
 
 type SwitchTabTarget =
@@ -1676,7 +1690,10 @@ test.describe('release candidate smoke', () => {
     });
     await closeGlobalSettings(page);
     // Re-enter the NPI route under light mode so the suite ends in a
-    // deterministic state.
+    // deterministic state. TD-E2E-01: #sops_npi_tracker is a legacy route
+    // alias with replace:true, so the router normalizes the URL hash to the
+    // canonical /sops/growth/npi-tracker path — do not assert the alias
+    // itself; assert the rendered panel instead.
     await page.goto('/#sops_npi_tracker', { waitUntil: 'domcontentloaded' });
     await expectNoRouteErrorText(page);
     const trackerPageLight = page.locator('.npi-tracker-page');

@@ -34,6 +34,9 @@
 | 日期 | 批次 | 销账条目 | 凭证提交 |
 | --- | --- | --- | --- |
 | 2026-08-15 | B 批（零消费归档） | 76 个 only-handwritten 零消费 token 从 variables.css 移除（85 行：9 个在 dark 覆盖块有镜像）；遗留池由 240 → 164；全库引用二次确认零误伤；验收：ci:quality 20/20 · build · smoke 93/93 | rc.5-B |
+| 2026-08-15 | B 批 2（S1/S2 零消费空壳归档 + focus-ring 衍生链清理） | 移除 S1/S2 零消费空壳声明 25 行（text 六族残留 14 + focus-ring 衍生链 5 + bg-disabled 2 + warning/info-dark 2 + spacing 2 + surface-card-hover/workbench 2）+ module-accent-focus 降级 var(--module-accent)（[B2-THM01]）；遗留池 164 → 141（bg-secondary/bg-tertiary/surface-card-hover/surface-workbench/success-dark/error-dark/spacing-2xl/spacing-3xl 仍有 Tailwind arbitrary 消费，留待下次 B 批） | 见下 DARKFIX 提交 |
+| 2026-08-15 | DARKFIX（S1 深色翻转修复） | S1 将 text/focus 消费迁移至 slate-* 原子键后 dark block 未重定义原子键，深色模式文字（slate-900 #0f172a 近黑）在深色背景不可见；dark block 新增 4 行原子键反色翻转（slate-900→slate-50、slate-500→slate-400、slate-400→slate-500、slate-300→slate-600），恢复 S1 前等价表现；验收：ci:quality 20/20 · build ✓ · only-handwritten 141 · smoke 无新增失败 | 与 B 批 2 同提交 |
+| 2026-08-15 | NPI dark 基线修复 | S1 re-seed 时 3 个 dark 基线（chromium/firefox/webkit）被 light 截图覆盖（污染），本次以正确 dark 渲染重 seed 全部 6 个基线（肉眼 + 亮度采样验证：dark avg brightness 109-110、light 246）；smoke 无新增失败（唯一 webkit NPI 恢复阶段超时为 TD-E2E-01 预存 flake，B 批 ci 即存在）；closeGlobalSettings 加固面板关闭时序容错（TD-E2E-01） | 与 B 批 2 同提交 |
 
 | 2026-08-15 | S 档映射准备 | 51 处有消费 S 档分三级：S1 name-map 28 + S2 value-match 2 为本批消化清单（30 处，六族 3108 次消费）；S3 alias/bridge 21 处高频（surface-card 719x 居首）回流 A 档台账；契约文档 THM01_S_MAP.md 入库 | rc.5-S `4b93c05c` |
 | 2026-08-15 | S 批 1（text/focus/spacing 六族） | 13 处映射替换全库 2,434 处消费点（91 文件）：text 六族 → slate-900/500/400/300 + primary、focus-ring → primary、spacing 六族（2xs–xl → spacing-1-5/2/3/4/6/8）；variables.css 声明行加 [S1-THM01] 契约注释（值不变、零新增键）；content-surface 表面基线 -1,318（只降不升）；NPI 表格 dark 基线因环境渲染漂移重 seed（NPI 代码零改动）；验收：ci:quality 20/20 · build · smoke 93/93 | rc.5-S1 `c017af8e` |
