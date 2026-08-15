@@ -301,9 +301,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-slate-200:not(.twb-keep):hover { border-color: rgba(255, 255, 255, 0.14); }
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:border-slate-300:not(.twb-keep):hover { border-color: rgba(255, 255, 255, 0.22); }
 
-/* ── 分隔线 ── */
-:is(.dark, [data-color-mode-resolved="dark"]) .divide-slate-100:not(.twb-keep) > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255, 255, 255, 0.07); }
-
 /* ── ring 软环 ── */
 :is(.dark, [data-color-mode-resolved="dark"]) .focus\:ring-amber-100:not(.twb-keep):focus { --tw-ring-color: color-mix(in srgb, var(--color-amber-400) 30%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .focus\:ring-emerald-100:not(.twb-keep):focus { --tw-ring-color: color-mix(in srgb, var(--color-emerald-400) 30%, transparent); }

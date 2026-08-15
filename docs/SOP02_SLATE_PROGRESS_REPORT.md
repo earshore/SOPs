@@ -62,6 +62,10 @@
 
 **批 3 第二小批结构**：backend 3 文件（134 处）+ safety 6 文件（305 处）+ growth/service 甄别残留文件（49 处 + 1 TS）≈ 489 处一次性收官，预计 baseline 2530→2040 左右（甄别保留约 40 处不计入迁移）。
 
+## 6. 专项收官（2026-08-15，批 3 第二小批）
+
+backend 组迁移 115 处（fba_shipping 58 / inventory_replenishment 37 / procurement_qc 20）；safety 组迁移 287 处（eu_gpsr 62 / product_compliance 61 / brand_infringement 50 / account_security 33 / permission_management 27 / performance_notification 24，按实际替换数）。收官后 sops 模块 structural slate 存量清零（2,048 处 100% 迁移，累计 1,917 处 token 化），剩余 89 处全部为甄别台账项，台账构成：border-slate-300 ×44（input/checkbox 控件边框契约，与 settings 控件口径一致）、bg-slate-200 ×9 + bg-slate-400 ×7（inline 状态标签与优先级/分类 badge 语义，与 P0-P3 徽章色族同构）、深色装饰档 ×11（bg-slate-600~900 + /50 alpha，high-contrast 视觉设计）、text-slate-300 ×13（permission 矩阵「无权限」占位符图标与 listing_seo 深色卡内说明文字）。验收实证：ci:quality 20 项全绿（semantic 2128/2128、shell 24/24、modules 0/0、settings-scale 41 files、lint 0/0、bridge gate 修复后通过）；build EXIT=0（7.91s）；smoke 93 用例 90 通过，3 失败与历次清单一致（NPI chromium-only pixel baseline ×2 + webkit L657 时序 ×1），非回归，归后续路线（baseline 浏览器维度拆分）。
+
 ## 5. 门禁与验收基线（截至批 3A）
 
 ci:quality 20 项全绿：theme:hardcode-baseline:gate shell 24/24、modules 0/0、semantic 2530/2530；modules lane 双族（blue+indigo）0/0 锁死；shell lane 24/24（megaMenu glass 豁免登记）；settings-scale 1199/1200 行限额；token:override-audit identical 0 / unallowlisted 0 / stale 0；lint 0/0。build EXIT=0（7.82s）；smoke 93 用例 90 通过（3 基线既有缺陷：NPI chromium-only pixel baseline ×2 + webkit L657 时序 ×1，已登记归后续路线：baseline 按浏览器维度拆分或 captureStableRegion 统一 deviceScaleFactor 后重 seed）。

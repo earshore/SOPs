@@ -43,7 +43,11 @@ semantic lane 为「只降不升」双锁（total + per-file）。token 迁移�
 
 验收实证：ci:quality 20 项全绿（semantic baseline 4087→3600，-487，per-file 双锁刷新后重新锁定；modules 0/0、shell 24/24、lint 0/0）；build EXIT=0（7.7s）；smoke 完整 93 用例（31×3 浏览器）90 通过。3 例失败（firefox NPI pixel diff、webkit NPI 尺寸 1952×1262 vs 基线 976×631）经基线代码复测同样失败，确认为 NPI pixel 断言的 chromium-only 基线既有缺陷（4B 遗留：baseline 只在 chromium dpr=1 下生成），非本次回归；归入后续路线：baseline 按浏览器维度拆分三份，或 captureStableRegion 统一 deviceScaleFactor 后重 seed。
 
+**批 3 第二小批收官（2026-08-15）**：backend 3 + safety 6 文件迁移 410 处，baseline 2530→2128（-402），structural 迁移 100% 达成；bridge 漂移修复 1 处（utility-bridge.generated.css 416→415，与 sops-neutral 候选类纳入一致）；剩余 89 处甄别台账（控件边框 ×44 / 状态标签 ×16 / 深色装饰档 ×11 / 占位符 ×13）。专项收官：累计迁移 1,917 处。
+
 **批 3 第一小批已完成（2026-08-15）**：growth 组 4 文件 + npi_tracker/index.ts 迁移 436 处（npi_tracker template 174 清零 + index.ts 4、promotion_submission 109、listing_seo 82、competitor_monitoring 67）；semantic baseline 2965→2530（-435）。甄别保留 17 处：border-slate-300 ×10（控件边框契约）、bg-slate-200 ×6（inline 状态标签）、深色装饰档 slate-600~900 + /50 alpha ×10 + text-slate-300 ×6（high-contrast 视觉设计，不在浅色 structural 契约范围）。smoke 93 用例 90 通过，3 失败与批 1/2 清单一致非回归。剩余 489 处（backend 134 + safety 305 + 甄别残留文件 50），批 3 第二小批一次性收官。
+
+**批 3 第二小批收官（2026-08-15）**：backend 3 + safety 6 文件迁移 410 处，baseline 2530→2128（-402），structural 迁移 100% 达成；bridge 漂移修复 1 处（utility-bridge.generated.css 416→415，与 sops-neutral 候选类纳入一致）；剩余 89 处甄别台账（控件边框 ×44 / 状态标签 ×16 / 深色装饰档 ×11 / 占位符 ×13）。专项收官：累计迁移 1,917 处。
 
 **批 3 第一小批已完成（2026-08-15）**：growth 组 4 文件 + npi_tracker/index.ts 迁移 436 处（npi_tracker template 174 清零 + index.ts 4、promotion_submission 109、listing_seo 82、competitor_monitoring 67）；semantic baseline 2965→2530（-435）。甄别保留 17 处：border-slate-300 ×10（控件边框契约）、bg-slate-200 ×6（inline 状态标签）、深色装饰档 slate-600~900 + /50 alpha ×10 + text-slate-300 ×6（high-contrast 视觉设计，不在浅色 structural 契约范围）。smoke 93 用例 90 通过，3 失败与批 1/2 清单一致非回归。剩余 489 处（backend 134 + safety 305 + 甄别残留文件 50），批 3 第二小批一次性收官。
 
