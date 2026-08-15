@@ -28,4 +28,4 @@
 
 ## 执行纪律
 
-每次收紧后必须满足：`npm run ci:quality` 全绿、`npm run build` 成功、`npm run test:e2e:smoke` 通过；看板描述与代码现状冲突时，以代码实测为准，先修板再谈消债；大迁移类（TD-THM-02）按 RC 节奏分批消化，禁止一次性大 diff。
+每次收紧后必须满足：`npm run ci:quality` 全绿、`npm run build` 成功、`npm run test:e2e:smoke` 通过；看板描述与代码现状冲突时，以代码实测为准，先修板再谈消债；大迁移类（TD-THM-02）按 RC 节奏分批消化，禁止一次性大 diff。；**2026-08-15（rc.3 发布后）**后续规划见 `NEXT_PHASES_PLAN.md`：次序 10 TD-THM-02 降级 P3 + glass 豁免复审（0.5 天）；次序 11 TD-CMP-02 体系 A settings-control 112 处/14 文件收敛（4-6 天，按 TD-THM-02 成熟模式分批）；次序 12 TD-THM-01 覆盖冲突 20 处收敛（2-3 天）；次序 13 slate 结构性灰调统一化（独立立项 TD-SOP-NPI-02 候选，3-4 天）。
