@@ -29,6 +29,7 @@ interface CardState {
   borderLeftWidth: string;
   boxShadow: string;
   radius: string;
+  textColor: string;
   transform: string;
 }
 
@@ -91,16 +92,33 @@ function normalizeColor(value: string): string {
 }
 
 function extractRgb(value: string): [number, number, number, number] | null {
-  const match = value.match(/rgba?\(([^)]+)\)/);
-  if (!match) return null;
+  const legacy = value.match(/rgba?\(([^)]+)\)/);
 
-  const parts = match[1]
-    .split(',')
-    .map(part => Number(part.trim()))
+  if (legacy) {
+    const parts = legacy[1]
+      .split(',')
+      .map(part => Number(part.trim()))
+      .filter(part => Number.isFinite(part));
+
+    if (parts.length < 3) return null;
+    return [parts[0], parts[1], parts[2], parts[3] ?? 1];
+  }
+
+  // Chromium 对 color-mix 等现代语法的计算值序列化为 color(srgb r g b[/ a])，分量为 0-1 浮点。
+  const modern = value.match(/color\(srgb\s+([^)]+)\)/);
+  if (!modern) return null;
+
+  const parts = modern[1]
+    .replace('/', ' ')
+    .trim()
+    .split(/\s+/)
+    .map(part => Number(part))
     .filter(part => Number.isFinite(part));
 
   if (parts.length < 3) return null;
-  return [parts[0], parts[1], parts[2], parts[3] ?? 1];
+  const scale = parts.every(part => part <= 1) ? 255 : 1;
+
+  return [parts[0] * scale, parts[1] * scale, parts[2] * scale, parts[3] ?? 1];
 }
 
 function colorDistance(a: string, b: string): number {
@@ -133,6 +151,70 @@ function hasTransparentInsetRail(boxShadow: string): boolean {
   return Boolean(rail?.includes('rgba(0, 0, 0, 0)'));
 }
 
+type AuditMode = 'light' | 'dark';
+
+/** 深色背景必须显著低于浅色背景的亮度差（实际差距 ≥ 0.5，0.3 留足容差）。 */
+const DARK_LUMINANCE_DROP = 0.3;
+
+/** 亮度 0-1：0.2126*R + 0.7152*G + 0.0722*B（不要求 sRGB 线性化）。无法解析或全透明返回 null。 */
+function luminance(value: string): number | null {
+  const rgb = extractRgb(value);
+  if (!rgb || rgb[3] === 0) return null;
+  const [red, green, blue] = rgb;
+  return 0.2126 * (red / 255) + 0.7152 * (green / 255) + 0.0722 * (blue / 255);
+}
+
+/** 注入与 ThemeManager 一致的深色标记（.dark + data-color-mode-resolved + colorScheme）。 */
+async function enableDarkMode(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document.documentElement.classList.add('dark');
+    document.documentElement.setAttribute('data-color-mode-resolved', 'dark');
+    document.documentElement.style.colorScheme = 'dark';
+  });
+  await page.waitForTimeout(300);
+}
+
+function prefixModeFailures(failures: string[], mode: AuditMode): string[] {
+  return mode === 'dark' ? failures.map(failure => `[dark] ${failure}`) : failures;
+}
+
+/** 深色翻转确实发生：背景变化且显著变暗、文字变亮。不断言具体色值。 */
+function auditDarkFlip(label: string, light: CardState, dark: CardState): string[] {
+  const failures: string[] = [];
+
+  if (normalizeColor(dark.background) === normalizeColor(light.background)) {
+    failures.push(`${label}: expected dark background to differ from light background`);
+  }
+
+  const lightLuminance = luminance(light.background);
+  const darkLuminance = luminance(dark.background);
+
+  if (
+    lightLuminance !== null &&
+    darkLuminance !== null &&
+    darkLuminance >= lightLuminance - DARK_LUMINANCE_DROP
+  ) {
+    failures.push(
+      `${label}: expected dark background luminance (${darkLuminance.toFixed(3)}) to be significantly below light (${lightLuminance.toFixed(3)})`
+    );
+  }
+
+  const lightTextLuminance = luminance(light.textColor);
+  const darkTextLuminance = luminance(dark.textColor);
+
+  if (
+    lightTextLuminance !== null &&
+    darkTextLuminance !== null &&
+    darkTextLuminance <= lightTextLuminance
+  ) {
+    failures.push(
+      `${label}: expected dark text (${darkTextLuminance.toFixed(3)}) to be lighter than light text (${lightTextLuminance.toFixed(3)})`
+    );
+  }
+
+  return failures;
+}
+
 async function readCard(locator: Locator): Promise<CardSample | null> {
   return locator.evaluate(card => {
     const rect = card.getBoundingClientRect();
@@ -140,6 +222,9 @@ async function readCard(locator: Locator): Promise<CardSample | null> {
     const before = getComputedStyle(card, '::before');
     const accentElement = card.querySelector<HTMLElement>('.app-flow-icon, .app-card-icon');
     const accentStyles = getComputedStyle(accentElement ?? card);
+    // 标题文字色：workflow 卡根色为 accent 且在深色下保持色相，正文标题（h3/strong）才会翻转。
+    const textElement = card.querySelector<HTMLElement>('h1, h2, h3, h4, h5, h6, strong');
+    const textStyles = getComputedStyle(textElement ?? card);
 
     if (
       rect.width <= 40 ||
@@ -166,6 +251,7 @@ async function readCard(locator: Locator): Promise<CardSample | null> {
         borderLeftWidth: styles.borderLeftWidth,
         boxShadow: styles.boxShadow,
         radius: styles.borderTopLeftRadius,
+        textColor: textStyles.color,
         transform: styles.transform,
       },
       text: (card.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 80),
@@ -202,10 +288,18 @@ async function readHoverState(
   return latest;
 }
 
-async function auditTarget(page: Page, target: Target): Promise<string[]> {
+async function auditTarget(
+  page: Page,
+  target: Target,
+  mode: AuditMode,
+  lightSamples: Map<string, CardSample[]>
+): Promise<string[]> {
   const failures: string[] = [];
 
   await page.goto(`${hashBase}${target.path}`, { waitUntil: 'commit', timeout: 30000 });
+  if (mode === 'dark') {
+    await enableDarkMode(page);
+  }
   if (target.selector.includes('app-flow-step')) {
     await page
       .locator('.app-overview-collapsible')
@@ -239,7 +333,10 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
   const count = await cards.count();
 
   if (count === 0) {
-    return [`${target.name}: no visible card found with selector "${target.selector}"`];
+    return prefixModeFailures(
+      [`${target.name}: no visible card found with selector "${target.selector}"`],
+      mode
+    );
   }
 
   let checkedCount = 0;
@@ -263,6 +360,12 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
       continue;
     }
 
+    if (mode === 'light') {
+      const samples = lightSamples.get(target.name) ?? [];
+      samples[index] = base;
+      lightSamples.set(target.name, samples);
+    }
+
     const hover = await readHoverState(page, card, base);
 
     if (!hover) {
@@ -272,6 +375,13 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
 
     const cardLabel = `${target.name} #${index + 1} "${base.text}"`;
     const railColor = extractInsetRailColor(hover.state.boxShadow);
+
+    if (mode === 'dark') {
+      const lightBase = lightSamples.get(target.name)?.[index];
+      if (lightBase) {
+        failures.push(...auditDarkFlip(cardLabel, lightBase.state, base.state));
+      }
+    }
 
     if (base.state.radius !== '16px') {
       failures.push(`${cardLabel}: expected 16px default radius, got ${base.state.radius}`);
@@ -289,7 +399,13 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
       );
     }
 
-    if (!hasTransparentInsetRail(base.state.boxShadow)) {
+    // 深色下 .dark .sop-card 会以单条 shadow 覆盖透明 rail 层（CSS 现状），
+    // 默认态契约等价为“无可见 rail”；浅色保持透明 rail 层必须存在的严格断言。
+    if (mode === 'light') {
+      if (!hasTransparentInsetRail(base.state.boxShadow)) {
+        failures.push(`${cardLabel}: expected hidden default inset rail`);
+      }
+    } else if (extractInsetRailColor(base.state.boxShadow)) {
       failures.push(`${cardLabel}: expected hidden default inset rail`);
     }
 
@@ -337,7 +453,7 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
     );
   }
 
-  return failures;
+  return prefixModeFailures(failures, mode);
 }
 
 function auditOverviewSources(): string[] {
@@ -421,9 +537,14 @@ async function main(): Promise<void> {
       ...auditOverviewSources(),
       ...auditKeywordStatusSource(),
     ];
+    const lightSamples = new Map<string, CardSample[]>();
 
     for (const target of targets) {
-      failures.push(...(await auditTarget(page, target)));
+      failures.push(...(await auditTarget(page, target, 'light', lightSamples)));
+    }
+
+    for (const target of targets) {
+      failures.push(...(await auditTarget(page, target, 'dark', lightSamples)));
     }
 
     if (failures.length > 0) {
@@ -435,7 +556,9 @@ async function main(): Promise<void> {
       return;
     }
 
-    console.log(`Card UI audit passed for ${targets.length} PC overview card targets.`);
+    console.log(
+      `Card UI audit passed for ${targets.length} PC overview card targets (light + dark).`
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('Card UI audit could not run.');

@@ -29,6 +29,7 @@ interface CalloutState {
   background: string;
   borderColor: string;
   boxShadow: string;
+  color: string;
   radius: string;
   transform: string;
 }
@@ -183,6 +184,100 @@ function extractInsetRailColor(boxShadow: string): string | null {
   return rail.match(/rgba?\([^)]+\)/)?.[0] ?? null;
 }
 
+type AuditMode = 'light' | 'dark';
+
+/** 深色背景必须显著低于浅色背景的亮度差（实际差距 ≥ 0.5，0.3 留足容差）。 */
+const DARK_LUMINANCE_DROP = 0.3;
+
+function extractRgb(value: string): [number, number, number, number] | null {
+  const legacy = value.match(/rgba?\(([^)]+)\)/);
+
+  if (legacy) {
+    const parts = legacy[1]
+      .split(',')
+      .map(part => Number(part.trim()))
+      .filter(part => Number.isFinite(part));
+
+    if (parts.length < 3) return null;
+    return [parts[0], parts[1], parts[2], parts[3] ?? 1];
+  }
+
+  // Chromium 对 color-mix 等现代语法的计算值序列化为 color(srgb r g b[/ a])，分量为 0-1 浮点。
+  const modern = value.match(/color\(srgb\s+([^)]+)\)/);
+  if (!modern) return null;
+
+  const parts = modern[1]
+    .replace('/', ' ')
+    .trim()
+    .split(/\s+/)
+    .map(part => Number(part))
+    .filter(part => Number.isFinite(part));
+
+  if (parts.length < 3) return null;
+  const scale = parts.every(part => part <= 1) ? 255 : 1;
+
+  return [parts[0] * scale, parts[1] * scale, parts[2] * scale, parts[3] ?? 1];
+}
+
+/** 亮度 0-1：0.2126*R + 0.7152*G + 0.0722*B（不要求 sRGB 线性化）。无法解析或全透明返回 null。 */
+function luminance(value: string): number | null {
+  const rgb = extractRgb(value);
+  if (!rgb || rgb[3] === 0) return null;
+  const [red, green, blue] = rgb;
+  return 0.2126 * (red / 255) + 0.7152 * (green / 255) + 0.0722 * (blue / 255);
+}
+
+/** 注入与 ThemeManager 一致的深色标记（.dark + data-color-mode-resolved + colorScheme）。 */
+async function enableDarkMode(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document.documentElement.classList.add('dark');
+    document.documentElement.setAttribute('data-color-mode-resolved', 'dark');
+    document.documentElement.style.colorScheme = 'dark';
+  });
+  await page.waitForTimeout(300);
+}
+
+function prefixModeFailures(failures: string[], mode: AuditMode): string[] {
+  return mode === 'dark' ? failures.map(failure => `[dark] ${failure}`) : failures;
+}
+
+/** 深色翻转确实发生：背景变化且显著变暗、文字变亮。不断言具体色值。 */
+function auditDarkFlip(label: string, light: CalloutState, dark: CalloutState): string[] {
+  const failures: string[] = [];
+
+  if (dark.background === light.background) {
+    failures.push(`${label}: expected dark background to differ from light background`);
+  }
+
+  const lightLuminance = luminance(light.background);
+  const darkLuminance = luminance(dark.background);
+
+  if (
+    lightLuminance !== null &&
+    darkLuminance !== null &&
+    darkLuminance >= lightLuminance - DARK_LUMINANCE_DROP
+  ) {
+    failures.push(
+      `${label}: expected dark background luminance (${darkLuminance.toFixed(3)}) to be significantly below light (${lightLuminance.toFixed(3)})`
+    );
+  }
+
+  const lightTextLuminance = luminance(light.color);
+  const darkTextLuminance = luminance(dark.color);
+
+  if (
+    lightTextLuminance !== null &&
+    darkTextLuminance !== null &&
+    darkTextLuminance <= lightTextLuminance
+  ) {
+    failures.push(
+      `${label}: expected dark text (${darkTextLuminance.toFixed(3)}) to be lighter than light text (${lightTextLuminance.toFixed(3)})`
+    );
+  }
+
+  return failures;
+}
+
 async function waitForVisibleTarget(page: Page, selector: string): Promise<void> {
   await page.waitForFunction(
     targetSelector => {
@@ -221,16 +316,25 @@ async function readCallout(locator: Locator): Promise<CalloutState | null> {
       background: styles.backgroundColor,
       borderColor: styles.borderTopColor,
       boxShadow: styles.boxShadow,
+      color: styles.color,
       radius: styles.borderTopLeftRadius,
       transform: styles.transform,
     };
   });
 }
 
-async function auditTarget(page: Page, target: Target): Promise<string[]> {
+async function auditTarget(
+  page: Page,
+  target: Target,
+  mode: AuditMode,
+  lightSamples: Map<string, CalloutState[]>
+): Promise<string[]> {
   const failures: string[] = [];
 
   await page.goto(`${hashBase}${target.path}`, { waitUntil: 'commit', timeout: 30000 });
+  if (mode === 'dark') {
+    await enableDarkMode(page);
+  }
   await waitForVisibleTarget(page, target.selector);
 
   const callouts = page.locator(target.selector);
@@ -255,6 +359,17 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
     if (!base) {
       failures.push(`${target.name} #${index + 1}: visible callout could not be sampled`);
       continue;
+    }
+
+    if (mode === 'light') {
+      const samples = lightSamples.get(target.name) ?? [];
+      samples[index] = base;
+      lightSamples.set(target.name, samples);
+    } else {
+      const lightBase = lightSamples.get(target.name)?.[index];
+      if (lightBase) {
+        failures.push(...auditDarkFlip(`${target.name} #${index + 1}`, lightBase, base));
+      }
     }
 
     await callout.hover({ force: true });
@@ -285,7 +400,7 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
     }
   }
 
-  return failures;
+  return prefixModeFailures(failures, mode);
 }
 
 async function readMarker(locator: Locator): Promise<MarkerState | null> {
@@ -311,10 +426,17 @@ async function readMarker(locator: Locator): Promise<MarkerState | null> {
   });
 }
 
-async function auditMarkerTarget(page: Page, target: MarkerTarget): Promise<string[]> {
+async function auditMarkerTarget(
+  page: Page,
+  target: MarkerTarget,
+  mode: AuditMode
+): Promise<string[]> {
   const failures: string[] = [];
 
   await page.goto(`${hashBase}${target.path}`, { waitUntil: 'commit', timeout: 30000 });
+  if (mode === 'dark') {
+    await enableDarkMode(page);
+  }
   await waitForVisibleTarget(page, target.selector);
 
   const markers = page.locator(target.selector);
@@ -361,7 +483,7 @@ async function auditMarkerTarget(page: Page, target: MarkerTarget): Promise<stri
     }
   }
 
-  return failures;
+  return prefixModeFailures(failures, mode);
 }
 
 async function main(): Promise<void> {
@@ -398,15 +520,29 @@ async function main(): Promise<void> {
     const viewport = { width: 1440, height: 1000 };
     const page = await browser.newPage({ viewport });
     const failures: string[] = [];
+    const lightSamples = new Map<string, CalloutState[]>();
 
     for (const target of targets) {
-      failures.push(...(await auditTarget(page, target)));
+      failures.push(...(await auditTarget(page, target, 'light', lightSamples)));
     }
 
     for (const target of markerTargets) {
       const markerPage = await browser.newPage({ viewport });
       try {
-        failures.push(...(await auditMarkerTarget(markerPage, target)));
+        failures.push(...(await auditMarkerTarget(markerPage, target, 'light')));
+      } finally {
+        await markerPage.close();
+      }
+    }
+
+    for (const target of targets) {
+      failures.push(...(await auditTarget(page, target, 'dark', lightSamples)));
+    }
+
+    for (const target of markerTargets) {
+      const markerPage = await browser.newPage({ viewport });
+      try {
+        failures.push(...(await auditMarkerTarget(markerPage, target, 'dark')));
       } finally {
         await markerPage.close();
       }
@@ -422,7 +558,7 @@ async function main(): Promise<void> {
     }
 
     console.log(
-      `Callout UI audit passed for ${targets.length} migrated PC content target and ${markerTargets.length} semantic marker target.`
+      `Callout UI audit passed for ${targets.length} migrated PC content target and ${markerTargets.length} semantic marker target (light + dark).`
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
