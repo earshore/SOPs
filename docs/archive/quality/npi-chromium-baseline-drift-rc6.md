@@ -20,8 +20,14 @@ Quality Gate run 31949435265（commit `79a8feb9`）中 `smoke e2e` 失败 1 例�
 ## 处置
 
 按 TD-E2E-01 既有机制 `UPDATE_SNAPSHOTS=1` 在 CI runner 上重 seed `npi-table-status-colors-light.png`
-基线，写回 `docs/color-region-baselines/`，并登记本事件。重 seed 的 commit 需保持 Quality Gate 全绿
-（smoke 93/93），方可满足 release.yml 对 tag commit 的成功门禁要求。
+基线，写回 `docs/color-region-baselines/`，并登记本事件。
+
+## 结果（2026-08-16）
+
+Quality Gate run 31951014339（commit `7837c53a`）以 `UPDATE_SNAPSHOTS=1` 重 seed：
+`smoke e2e` 93/93 通过、全门禁 10/10 成功；CI-minted 基线（artifact `color-region-baselines`
+ID `9264835581`）已写回 docs 三引擎 12 份基线（light/dark × chromium/firefox/webkit × linux/win32），
+light 基线 976×631 几何一致，内容为 runner 实际渲染。后续已移除一次性 env 开关。
 
 ## 相关文档
 

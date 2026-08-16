@@ -12,10 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed（变更）
 
+- **CI 质量门禁补全**：Quality Gate `build` job 新增 `npx playwright install chromium`（此前缺失致 build 失败，发版卡点）（`79a8feb9`）。
 - **CI 供应链加固（SHA pin）**：`code-review.yml` 5 处 action 浮动 tag 固定 SHA（checkout V4.3.1 / setup-node V4.4.0 / CodeQL-init V3 / upload-artifact V4 / codeql-analyze V3），消除供应链投毒面。
 - **发布流水线生产探针**：`release.yml` 新增 `production-probe` job（`workflow_dispatch` 手动触发；`RELEASE_PROBE_SECRET` 空值时自动跳过），发布完成后可一键验证生产环境可用性。
 - **测试契约同步（THM01 归档后）**：`pc-design-token-css` 6 例 / `pc-motion-css` 2 例 / `themeConfig` 2 例断言与 B2/B5 归档契约对齐（focus-ring 链 → Appearance 聚焦色、容器/动效令牌 → 内联字面 + generated 契约）；`aiAnalysisPanelCurrent` 3 例随 THM01 主题迁移更新（`bg-[#eff6ff]` 等）。
 - 构建脚本清理：`vite.config.js` 移除未使用导入（`createReadStream` / `copyFile`）。
+- **文档归档清理**：26 份已闭环专项文档移入 `docs/archive/{cmp02,theme,debt,quality}/`（docs 顶层清理至 33 份），活跃文档引用同步（`7837c53a`）。
+
+### Fixed（基线重 seed）
+
+- **smoke e2e 像素基线漂移治理**：`npi-table-status-colors-light` 在 runner 上实测 3.35% 光栅化漂移（垂直互相关 dy=0 最优对齐，无整页位移；内容/语义断言全过，非回归），按 TD-E2E-01 机制以 `UPDATE_SNAPSHOTS=1` 在 CI runner 重 seed 全三引擎 12 份基线（chromium/firefox/webkit × light/dark × linux/win32），smoke 93/93 全绿（`7837c53a`）；事件记录见 `docs/archive/quality/npi-chromium-baseline-drift-rc6.md`。
 
 ### Fixed（修复）
 

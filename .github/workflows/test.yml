@@ -212,18 +212,6 @@ jobs:
 
       - name: Run release smoke E2E against dist
         run: npm run test:e2e:smoke:release
-        env:
-          UPDATE_SNAPSHOTS: 1 # rc.6 chromium light baseline drift re-seed (TD-E2E-01 mechanism); remove after seeding
-
-      - name: Upload re-seeded color-region baselines
-        # rc.6 one-off: CI-minted baselines must be committed back to docs/color-region-baselines/
-        continue-on-error: true # report collection only, never blocks
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
-        with:
-          name: color-region-baselines
-          path: docs/color-region-baselines/
-          retention-days: 7
 
       - name: Upload E2E report
         continue-on-error: true # artifact quota outage: report collection only, never blocks
