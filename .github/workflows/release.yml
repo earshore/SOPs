@@ -328,7 +328,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: release
     # 手动触发时对真实 Pages URL 做只读 HTTP 契约探测;tag 推送自动发布时 Pages 部署时序不可控,不运行
-    if: github.event_name == 'workflow_dispatch' && (secrets.PAGES_PREVIEW_URL != '' || secrets.PAGES_URL != '')
+    # secrets 上下文不适用于 job 级 if（会导致 workflow 编译失败），故 URL 判断下沉到 step 级 env
+    if: github.event_name == 'workflow_dispatch'
+    env:
+      PAGES_PREVIEW_URL: ${{ secrets.PAGES_PREVIEW_URL }}
+      PAGES_URL: ${{ secrets.PAGES_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
@@ -347,8 +351,6 @@ jobs:
         run: npm ci
 
       - name: Run production HTTP gate
-        # 未配置 URL secret 时由 job 级 if 跳过;脚本内无 URL 以退出码 2 失败,不会误通过
+        # 未配置 URL secret 时跳过（脚本内无 URL 会以退出码 2 失败，不会误通过）
+        if: env.PAGES_PREVIEW_URL != '' || env.PAGES_URL != ''
         run: npx tsx scripts/release/production-gate.ts
-        env:
-          PAGES_PREVIEW_URL: ${{ secrets.PAGES_PREVIEW_URL }}
-          PAGES_URL: ${{ secrets.PAGES_URL }}

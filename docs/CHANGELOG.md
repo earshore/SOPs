@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed（修复）
 
+- **release.yml 编译修复**：`production-probe` job 级 `if` 引用 `secrets` 上下文导致 workflow 编译失败（rc.6 收口期间任何 push/tag 触发均即时失败，发版阻塞），改为 job env + step 级 `if` 判断（`secrets` 不适用于 job 级 `if`）。
 - **welcome-banner 头部对齐修复**：`.wb-header` 存在下载图标时对齐由 `center` 改为 `flex-start`，修正图标行纵向定位（`b4c6adfb`）。
 - **测试修复：AI 分析链路 mock 补齐**：`aiAnalysisService.test.ts` 补 `MASTER_ANALYSIS_SYSTEM_PROMPT` 导出（`e5a4e4f2` 提取系统提示词常量后 mock 缺失，导致 `runAIAnalysis` 4 例 + panel 2 例 callLLM 0 调用）。
 - **可访问性断言同步**：scraper / ui-p1-10 NPI 模板断言随 THM01 迁移更新（focus-visible 类、`divide-y sops-neutral-divider-soft` 切片边界）。
