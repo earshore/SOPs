@@ -73,6 +73,44 @@
 - **验收**：`ci:quality` 20/20（三审计 light+dark 全绿）· `ci:security` 通过 · smoke **93/93**（31 chromium + 62 firefox/webkit）。
 
 
+## 4.2 批 4/5 可行性评估结论（2026-08-16 调研）
+
+调研证据（generated 家族已有 EASING/DURATION/BOX_SHADOW；生成器按家族硬编码但家族内加键纯数据驱动；Tailwind 主题**内联** generated 字面量而非 `var(--shadow-*)`；variables.css 覆盖顺序有单测锁定）推翻了批 4 的「等价迁移」假设，修订如下：
+
+**批 5（动效契约）——判定：可执行，安全等价迁移 ✅**
+
+| 组 | 键 | 证据 |
+| --- | --- | --- |
+| duration 命名键 8 个 | fastest/fast(242x)/normal(188x)/slow(54x)/slower/slowest/1s/2s | 无 dark 镜像；Tailwind 类只用数字键（duration-200 等）与命名键互不相干；加入 DURATION 即生成，critical.css 的 300ms 别名与迁入值一致 |
+| ease 4 个 + ease-smooth（447x，冲突） | spring/elastic/back-in/back-out | 无 dark 镜像；`ease-smooth` 类 src 零使用（447 处全为 var 消费）；tailwind.config.js 硬编码的 ease-spring 类与迁入值同值不冲突 |
+| animations-enabled / animation-speed-multiplier | 2 键 | 运行时被 animation-manager.ts 内联覆写，样式表定义仅 JS 执行前默认值 |
+
+预计 only-handwritten 66 → 约 51（含 4 个 micro 键零消费归档：src 零实际消费，值已在 animation-config.ts 常量中，buttons.css 注释登记 micro 未落地）。
+
+**批 4（shadow 契约）——判定：有条件执行，行为变更需升级验收 ⚠️**
+
+- 变量消费者（var(--shadow-*) 约 123 处）等价；但 **Tailwind 主题内联字面量**：浅色 `shadow-sm/md/lg/xl/2xl/inner` 类（约 150 处）今天有效值 = Tailwind 默认值，深色经 bridge 走 var(--shadow-*) 产品值——**浅深本来就不一致**；generated 对齐产品值后浅色类消费者**有意变值**（修复浅深不一致，但属行为变更，非等价迁移）。
+- dark 镜像承载：generated 无 dark 层 → 迁移拆分为「light 值进 generated + 手写层只保留 dark 块镜像」，与批 3 决策联动。
+- 验收升级：全量 smoke + shadow-sm 等高消费类的浅/深双模式视觉抽查（compat 三引擎），NPI 基线不涉 shadow 区域。
+
+**执行建议**：批 5 先做（纯等价、低风险）；批 4 待批 3 决策后按修订方案执行。
+
+## 4.3 批 3 决策点评审（dark 翻转契约）
+
+**问题定义**：generated 层无 dark 块机制，凡 dark 下需换值的语义（border/alpha 族 ~13 键、shadow 10 条 dark 镜像、color-mix 比例差）只能留在手写层——这是 only-handwritten 66 键中大部分键的销账卡点。
+
+| 维度 | 方案 A：generated 引入 dark 轴 | 方案 B：手写 dark 块正式登记（推荐） |
+| --- | --- | --- |
+| 做法 | design-tokens.ts 增加 dark 轴，三个生成器（CSS/Tailwind/类型）+ audit 分类器扩展，输出 generated dark 块 | variables.css dark 块加契约注释（S2 模式），暗块规则正式化（禁引反色键、raw 值、登记台账），销账条件改挂 workbench migration |
+| 工作量 | 3–5 天（生成器+迁移校验） | 0.5 天 |
+| 风险 | 高：DARKFIX/变白回退类链式反色事故风险集中在深色翻转；RC 冻结期大范围深色重排 | 零视觉风险（值不动） |
+| 收益 | 单一事实源，border/alpha/shadow dark 原子化 | 债务受控不增长，门禁已锁增量 |
+| 时机 | workbench migration 本来就要重构 generated 体系（模块色 SSOT、workbench 半径），dark 轴顺带落地可避免二次改生成器 | 立即可做 |
+
+**推荐：方案 B 短期 + 方案 A 并入 workbench migration**。理由：① RC 冻结期深色翻转变更是全库风险最高的动作（B4/B5 两次事故均为 dark 链式反色）；② workbench migration 必然重构 generated 层，dark 轴与其同机落地只改一次生成器；③ 方案 B 实质工作极小且门禁（token:override gate + DARKFIX-CHAIN 契约 + smoke 93/93）已锁死增量。
+
+**决策请求**：产品/工程负责人确认方案 B（默认推荐），或选择方案 A 提前执行。
+
 ## 5. 收口判据（Close-out Criteria）
 
 ### 5.1 TD-THM-01 降级（P2 → P3）
