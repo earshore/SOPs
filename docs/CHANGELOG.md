@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 锚点 commit
 
-- `<commit-sha>`（rc.6 bump + 门禁修复 + 文档同步）。
+- `75192a67`（rc.6 bump + 门禁修复 + 文档同步）。
 
 ## [3.1.1-rc.5] - 2026-08-15
 
