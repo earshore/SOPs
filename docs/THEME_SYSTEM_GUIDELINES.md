@@ -400,18 +400,18 @@ npm run generate:tokens
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | D1  | `variables.css` 重定义基础色阶 / 字号，覆盖 generated                                                                                                                     |
 | D2  | 圆角语义名与像素不一致；工作台行为写死 ≤8px。决策：`--workbench-radius` SSOT，见 [workbench-radius-decision](./superpowers/plans/2026-07-26-workbench-radius-decision.md) |
-| D3  | `[data-theme='dark']` 与 appearance id **互斥共用** `data-theme`；`applyTheme` 会覆盖 dark；后续应拆 `data-appearance` / `data-color-mode`                                |
+| D3  | **代码侧已拆（Done）**：`data-appearance` / `data-color-mode`(-resolved) 三属性落地，`applyTheme` 不碰 color mode（单测覆盖），legacy `data-theme='dark'` 已一次性迁移入 `app-color-mode`。剩余：CSS 第三兼容选择器 `[data-theme='dark']`（约 1,075 处/34 文件）待兼容窗口关闭后清理（见 `DARK_MODE_DEBT_CLOSURE_SPEC.md` 批 7） |
 | D4  | colorSchemes 营销向 hover 与工作台底线冲突                                                                                                                                |
-| D5  | `--focus-ring-soft` 等可能残留蓝系硬编码                                                                                                                                  |
+| D5  | `--focus-ring-soft` 消费点仍带蓝 fallback（`rgba(37,99,235,0.16)`，promo_tools / ppc_tools / homeDisplay / header 等）已登记保留；随 D13 组件层统一接线时消除                                                                                                                                   |
 | D6  | 大量 UI 硬编码 `blue-*`，Appearance 可见影响有限                                                                                                                          |
 | D7  | `ColorContext.setModuleColor` 全局写入与 DOM `wb-theme-*` 双通道；`setModuleColor` 已 `@deprecated`，权威通道为 `inferColorFromModule` / menu；Appearance 绝不得调用      |
 | D8  | `wb-theme-*` 混用角色名与色名；Role→Palette **代码 scaffold** 已落 `src/common/config/ownershipRoles.ts`（表 + pure helpers）；全站 DOM 绑定/命名收敛仍 Phase 4 |
 | D9  | 局部 token 前缀生命周期：**文档已落** [local-token-prefix-lifecycle](./superpowers/plans/2026-07-26-local-token-prefix-lifecycle.md)；代码侧冗余/归档执行仍 optional |
 | D10 | **Done**：`AppearanceThemeColors` 仅 primary 族 + focus；已删除 deprecated 别名 `ThemeColors`；`getColorVars` / `previewTheme` / `applyTheme` **从不**写 secondary/accent/status；生产 **0** 调用方读取状态色字段（见 landing §5.4） |
-| D11 | 暗色覆盖依赖 `data-theme='dark'`，与 D3 同源                                                                                                                              |
+| D11 | 运行时已走 `.dark` / `data-color-mode-resolved`（D3 代码侧已拆）；剩余同 D3——兼容选择器 `[data-theme='dark']` 清理                                                                                                                                                                        |
 | D12 | 缺 Appearance preset 壳层视觉回归矩阵                                                                                                                                     |
-| D13 | `--focus-ring-*` 组已写入手写 `variables.css`（L397-407）但 generated 层未生成、组件层未统一接线（forms 走 `--field-focus-ring`）；裁决与 token 登记见 ACCESSIBILITY §2.2                                                                                                                                                                      |
-| D14 | badge 深色两派（共享层 `-500 底 18%` vs 既有 `-400 底 16%` 局部）已裁决为 `-500 底 18%`（COMPONENT §5.1）；-400 派（`amz_hub_style.css` `.wb-badge`、`cards.css` overview-accent）待收敛                                                                                                                                                          |
+| D13 | 手写 `--focus-ring-*` 组已随 B2 归档（`--module-accent-focus` 降级 `var(--module-accent)`）；剩余：generated 层无 focus-ring 族 token、组件层未统一接线（forms 走 `--field-focus-*` 三口径契约，header/homeDisplay 走 `--focus-ring-soft`）                                                                                                                                                                      |
+| D14 | badge 深色两派已裁决为 `-500 底 18%`（COMPONENT §5.1）；共享层已收敛（badges.css `.badge` 统一契约 + 8 归属变体 + 3 SOP 状态变体）。**Done（2026-08-16 消债批 2）**：-400 派 2 处已收敛为 `-500/18%`（`cards.css` overview-accent 14 条 dark 规则 + `amz_hub_style.css` 重复块清理、border-color 移植到后置规则），深色 badge 全库单一标准                                                                                                                                                          |
 
 ---
 
