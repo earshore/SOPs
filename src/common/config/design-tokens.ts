@@ -556,6 +556,10 @@ export const EASING = {
   out: 'cubic-bezier(0, 0, 0.2, 1)',
   'in-out': 'cubic-bezier(0.4, 0, 0.2, 1)',
   bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+  spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+  elastic: 'cubic-bezier(0.68, -0.6, 0.32, 1.6)',
+  'back-in': 'cubic-bezier(0.6, -0.28, 0.735, 0.045)',
+  'back-out': 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
   smooth: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
 } as const;
 
@@ -571,6 +575,14 @@ export const DURATION = {
   500: '500ms',
   700: '700ms',
   1000: '1000ms',
+  fastest: '100ms',
+  fast: '200ms',
+  normal: '300ms',
+  slow: '400ms',
+  slower: '500ms',
+  slowest: '700ms',
+  '1s': '1000ms',
+  '2s': '2000ms',
 } as const;
 
 // ═══════════════════════════════════════════════════════════

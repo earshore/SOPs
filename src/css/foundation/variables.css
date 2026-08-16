@@ -168,31 +168,9 @@
   /* ========================================
      11. 缓动函数
      linear/in/out/in-out/bounce 与 generated 相同已去重复；
-     保留产品缓动（smooth 有意不同、spring/elastic/back/*）。
+     保留产品缓动（smooth 有意不同，其余已迁入 generated）。
      ======================================== */
   --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
-  --ease-back-in: cubic-bezier(0.6, -0.28, 0.735, 0.045);
-  --ease-back-out: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-
-  /* ---- 微交互缓动函数 ---- */
-
-  /* ========================================
-     12. 动画时长
-     ======================================== */
-  --duration-fastest: 100ms;
-  --duration-fast: 200ms;
-  --duration-normal: 300ms;
-  --duration-slow: 400ms;
-  --duration-slower: 500ms;
-  --duration-slowest: 700ms;
-  --duration-1s: 1000ms;
-  --duration-2s: 2000ms;
-
-  /* ---- 微交互动画时长 ---- */
-
-  /* ---- PC 交互过渡属性 ---- */
 
   /* ========================================
      13. 模糊 & 滤镜
@@ -226,24 +204,6 @@
      17. 断点参考值
      仅供 JS 或 calc() 参考，CSS media query 仍需硬编码
      ======================================== */
-
-  /* ========================================
-     18. 微交互动画变换值
-     ======================================== */
-
-  /* ---- 缩放变换 ---- */
-  --micro-scale-press: 0.98;
-  --micro-scale-hover: 1.02;
-
-  /* ---- 位移变换 ---- */
-  --micro-translate-hover: -4px;
-  --micro-translate-press: 0px;
-
-  /* ========================================
-     19. 动画控制标志
-     ======================================== */
-  --animations-enabled: 1;
-  --animation-speed-multiplier: 1;
 
   /* ========================================
      20. PC 工作台语义别名
