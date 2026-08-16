@@ -27,9 +27,72 @@ const CORE_ROUTES = [
   { label: 'AMZ Hub', path: '/#/amz-hub', ready: '.amz-hub-overview' },
   { label: 'More', path: '/#/more', ready: '.more-overview' },
   { label: 'Skills', path: '/#/more/explore/skills', ready: '.skills-page' },
+  // SOPs 子页面
+  { label: 'S-NPI', path: '/#/sops/growth/npi-tracker', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-ListingSEO', path: '/#/sops/growth/listing-seo', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-PPC', path: '/#/sops/growth/ppc-advertising', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-Restricted', path: '/#/sops/growth/restricted-words', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-Promo', path: '/#/sops/growth/promotion-submission', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-Competitor', path: '/#/sops/growth/competitor-monitoring', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-FBA', path: '/#/sops/backend/fba-shipping', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-Procurement', path: '/#/sops/backend/procurement-qc', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-Inventory', path: '/#/sops/backend/inventory-replenishment', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-AccountSec', path: '/#/sops/safety/account-security', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-Permission', path: '/#/sops/safety/permission-management', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-Brand', path: '/#/sops/safety/brand-infringement', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-PerfNotif', path: '/#/sops/safety/performance-notification', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-Compliance', path: '/#/sops/safety/product-compliance', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-GPSR', path: '/#/sops/safety/eu-gpsr-compliance', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-Email', path: '/#/sops/service/email-templates', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-NegReview', path: '/#/sops/service/negative-review', ready: '#panel-sops:not(.hidden)' },
+  { label: 'S-QA', path: '/#/sops/service/qa-maintenance', ready: '#panel-sops:not(.hidden)' },
+  // AMZ Hub 子页面
+  { label: 'H-EU', path: '/#/amz-hub/knowledge/eu-insights', ready: '#panel-amz_hub:not(.hidden)' },
+  { label: 'H-SEO', path: '/#/amz-hub/knowledge/seo-strategy', ready: '#panel-amz_hub:not(.hidden)' },
+  { label: 'H-Eco', path: '/#/amz-hub/knowledge/ecosystem', ready: '#panel-amz_hub:not(.hidden)' },
+  { label: 'H-QL', path: '/#/amz-hub/practice/quality-listing', ready: '#panel-amz_hub:not(.hidden)' },
+  { label: 'H-Calendar', path: '/#/amz-hub/practice/marketing-calendar', ready: '#panel-amz_hub:not(.hidden)' },
+  { label: 'H-PromoAct', path: '/#/amz-hub/practice/promo-activities', ready: '#panel-amz_hub:not(.hidden)' },
+  { label: 'H-PromoTools', path: '/#/amz-hub/practice/promo-tools', ready: '#panel-amz_hub:not(.hidden)' },
+  { label: 'H-New30D', path: '/#/amz-hub/advanced/new-product-30days', ready: '#panel-amz_hub:not(.hidden)' },
+  { label: 'H-Conversion', path: '/#/amz-hub/advanced/conversion-optimization', ready: '#panel-amz_hub:not(.hidden)' },
+  { label: 'H-Mature', path: '/#/amz-hub/advanced/mature-phase', ready: '#panel-amz_hub:not(.hidden)' },
 ] as const;
 
 const onlyRoute = process.argv.find(a => a.startsWith('--route='))?.slice(8);
+
+// 注入 4 种类型的 toast（模拟 showToast 产物，无动画便于稳定审计）
+const TOAST_SOURCE = `
+(() => {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const types = [
+    ['success', 'fa-circle-check'],
+    ['error', 'fa-circle-xmark'],
+    ['info', 'fa-circle-info'],
+    ['warning', 'fa-triangle-exclamation'],
+  ];
+  for (const [type, icon] of types) {
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    const iconEl = document.createElement('i');
+    iconEl.className = 'fa-solid ' + icon;
+    toast.appendChild(iconEl);
+    const content = document.createElement('div');
+    content.className = 'toast-content';
+    const titleEl = document.createElement('strong');
+    titleEl.textContent = type + ' 通知示例标题';
+    content.appendChild(titleEl);
+    const descEl = document.createElement('div');
+    descEl.className = 'toast-desc';
+    descEl.textContent = '这是一条 ' + type + ' 类型的描述文字，用于对比度审计。';
+    content.appendChild(descEl);
+    toast.appendChild(content);
+    container.appendChild(toast);
+  }
+})()
+`;
 
 // 页面内审计逻辑，纯 JS 字符串（避免 tsx 转译注入 __name helper / TS 语法）
 const AUDIT_SOURCE = `
@@ -61,7 +124,7 @@ const AUDIT_SOURCE = `
   // 解析背景图（linear/radial-gradient）的端点颜色，取平均作为近似底色
   const gradientAvg = (img) => {
     const stops = [];
-    const re = /rgba?\([^)]*\)|#[0-9a-fA-F]{3,8}/g;
+    const re = /rgba?\\([^)]*\\)|#[0-9a-fA-F]{3,8}/g;
     let m;
     while ((m = re.exec(img)) !== null) {
       const c = parseColor(m[0]);
@@ -212,6 +275,9 @@ async function main() {
 
   for (const mode of ['dark', 'light'] as const) {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('DOM.enable');
+    await cdp.send('CSS.enable');
     await page.addInitScript(modeValue => {
       window.localStorage.setItem('app-color-mode', JSON.stringify(modeValue));
     }, mode);
@@ -221,8 +287,47 @@ async function main() {
       try {
         await page.goto(`${BASE}${route.path}`, { waitUntil: 'domcontentloaded' });
         await page.waitForSelector(route.ready, { timeout: 20000 });
-        await page.waitForTimeout(800);
+        await page.waitForTimeout(900);
+        await page.evaluate(TOAST_SOURCE);
+        await page.waitForTimeout(500);
         const result = await page.evaluate(AUDIT_SOURCE);
+        // 用 CDP 获取每个缺陷元素的 color 规则来源
+        const doc = await cdp.send('DOM.getDocument');
+        for (const d of result.defects) {
+          try {
+            const q = await cdp.send('DOM.querySelector', {
+              nodeId: doc.root.nodeId,
+              selector: `${d.tag}${d.sel.includes('.') || d.sel.includes('#') ? d.sel.slice(d.sel.indexOf('.') >= 0 ? d.sel.indexOf('.') : d.sel.indexOf('#')) : ''}`,
+            });
+            if (!q.nodeId) continue;
+            const matched = await cdp.send('CSS.getMatchedStylesForNode', { nodeId: q.nodeId });
+            const sources: string[] = [];
+            for (const entry of matched.matchedCSSRules ?? []) {
+              const style = entry.rule?.style;
+              const colorProp = style?.cssProperties?.find(p => p.name === 'color');
+              if (!colorProp) continue;
+              const sheetId = entry.rule.styleSheetId ?? style.styleSheetId;
+              if (!sheetId) continue;
+              try {
+                const header = await cdp.send('CSS.getStyleSheetHeader', {
+                  styleSheetId: sheetId,
+                });
+                const line = style.range ? style.range.startLine + 1 : '?';
+                // 只保留文件规则（跳过注入/内联）
+                if (header.sourceURL && !header.sourceURL.includes('data:')) {
+                  const selText =
+                    entry.rule.selectorList?.text ?? entry.rule.selectorText ?? '?';
+                  sources.push(`${header.sourceURL}:${line} :: ${selText}`);
+                }
+              } catch {
+                /* 忽略 */
+              }
+            }
+            if (sources.length) d.cssRules = [...new Set(sources)];
+          } catch {
+            /* CDP 个别节点失败忽略 */
+          }
+        }
         report[`${mode}:${route.label}`] = result;
         total += result.defects.length;
         console.log(`[${route.label}] checked=${result.checked} defects=${result.defects.length}`);

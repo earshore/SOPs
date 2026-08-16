@@ -107,8 +107,8 @@
 #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:hover,
 #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:focus-visible,
 #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary:active {
-  border-color: var(--color-primary) !important;
-  background-color: var(--color-primary) !important;
+  border-color: color-mix(in srgb, var(--color-primary) 75%, #0f172a) !important;
+  background-color: color-mix(in srgb, var(--color-primary) 75%, #0f172a) !important;
   background-image: none !important;
   color: #ffffff !important;
   box-shadow: none !important;
@@ -129,8 +129,8 @@
 [data-theme='dark'] .keyword-hunter-title-icon-btn--primary,
 [data-theme='dark'] #keyword-hunter-btn-start-analysis.keyword-hunter-title-icon-btn--primary {
   /* Same token as light — do not freeze indigo/blue fallback fill */
-  border-color: var(--color-primary) !important;
-  background-color: var(--color-primary) !important;
+  border-color: color-mix(in srgb, var(--color-primary) 75%, #0f172a) !important;
+  background-color: color-mix(in srgb, var(--color-primary) 75%, #0f172a) !important;
   background-image: none !important;
   color: #f8fafc !important;
   box-shadow: none !important;
@@ -886,6 +886,12 @@
   background: var(--color-primary-light, #eff6ff);
   color: var(--color-primary-dark, #1d4ed8);
   border: 1px solid color-mix(in srgb, var(--color-primary, #3b82f6) 16%, transparent);
+}
+
+/* [CONTRAST] dark 下 primary-dark(#1d4ed8) 在深底仅 2.8:1，字色亮化 */
+.dark .keyword-hunter-keyword-count-badge,
+[data-color-mode-resolved='dark'] .keyword-hunter-keyword-count-badge {
+  color: color-mix(in srgb, var(--color-primary) 36%, #ffffff);
 }
 
 .keyword-hunter-keyword-count-badge__muted {

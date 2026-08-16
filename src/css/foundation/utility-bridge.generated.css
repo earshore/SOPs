@@ -395,7 +395,7 @@
 /* ── 渐变端点 · to (映射 + 回写) ── */
 :is(.dark, [data-color-mode-resolved="dark"]) .hover\:to-rose-500:not(.twb-keep):hover { --tw-gradient-to: var(--color-rose-500) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-amber-100:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-amber-400) 18%, transparent) var(--tw-gradient-to-position); }
-:is(.dark, [data-color-mode-resolved="dark"]) .to-amber-500:not(.twb-keep) { --tw-gradient-to: var(--color-amber-500) var(--tw-gradient-to-position); }
+:is(.dark, [data-color-mode-resolved="dark"]) .to-amber-700:not(.twb-keep) { --tw-gradient-to: var(--color-amber-700) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-blue-600:not(.twb-keep) { --tw-gradient-to: var(--color-blue-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-cyan-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-cyan-400) 12%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-cyan-600:not(.twb-keep) { --tw-gradient-to: var(--color-cyan-600) var(--tw-gradient-to-position); }
@@ -408,8 +408,8 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .to-gray-600:not(.twb-keep) { --tw-gradient-to: var(--color-gray-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-green-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-green-400) 12%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-green-50\/50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-green-400) 6%, transparent) var(--tw-gradient-to-position); }
-:is(.dark, [data-color-mode-resolved="dark"]) .to-green-500:not(.twb-keep) { --tw-gradient-to: var(--color-green-500) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-green-600:not(.twb-keep) { --tw-gradient-to: var(--color-green-600) var(--tw-gradient-to-position); }
+:is(.dark, [data-color-mode-resolved="dark"]) .to-green-700:not(.twb-keep) { --tw-gradient-to: var(--color-green-700) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-indigo-600:not(.twb-keep) { --tw-gradient-to: var(--color-indigo-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-orange-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-orange-400) 12%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-orange-500:not(.twb-keep) { --tw-gradient-to: var(--color-orange-500) var(--tw-gradient-to-position); }
@@ -420,8 +420,8 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .to-pink-900:not(.twb-keep) { --tw-gradient-to: var(--color-pink-900) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-purple-100:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-purple-400) 18%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-purple-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-purple-400) 12%, transparent) var(--tw-gradient-to-position); }
-:is(.dark, [data-color-mode-resolved="dark"]) .to-purple-500:not(.twb-keep) { --tw-gradient-to: var(--color-purple-500) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-purple-600:not(.twb-keep) { --tw-gradient-to: var(--color-purple-600) var(--tw-gradient-to-position); }
+:is(.dark, [data-color-mode-resolved="dark"]) .to-purple-700:not(.twb-keep) { --tw-gradient-to: var(--color-purple-700) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-red-50\/50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-red-400) 6%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-red-600:not(.twb-keep) { --tw-gradient-to: var(--color-red-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-rose-100:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-rose-400) 18%, transparent) var(--tw-gradient-to-position); }
@@ -438,6 +438,7 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .to-teal-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-teal-400) 12%, transparent) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-teal-600:not(.twb-keep) { --tw-gradient-to: var(--color-teal-600) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-violet-600:not(.twb-keep) { --tw-gradient-to: var(--color-violet-600) var(--tw-gradient-to-position); }
+:is(.dark, [data-color-mode-resolved="dark"]) .to-violet-700:not(.twb-keep) { --tw-gradient-to: var(--color-violet-700) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-white:not(.twb-keep) { --tw-gradient-to: var(--surface-card) var(--tw-gradient-to-position); }
 :is(.dark, [data-color-mode-resolved="dark"]) .to-yellow-50:not(.twb-keep) { --tw-gradient-to: color-mix(in srgb, var(--color-yellow-400) 12%, transparent) var(--tw-gradient-to-position); }
 

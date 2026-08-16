@@ -293,7 +293,7 @@
     120deg,
     var(--color-primary-dark, #1d4ed8),
     var(--color-primary, #2563eb) 66%,
-    var(--color-cyan-500, #06b6d4)
+    var(--color-cyan-700, #0e7490)
   );
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.24),
@@ -1048,6 +1048,12 @@
 .dark .workbench-tool:hover .workbench-tool__arrow,
 [data-color-mode-resolved='dark'] .workbench-tool:hover .workbench-tool__arrow {
   color: var(--color-blue-400, #60a5fa);
+}
+
+/* [CONTRAST] 深色下加深 primary-action 渐变，保证白字 ≥ 4.5:1 */
+.dark .workbench-launchpad__primary-action,
+[data-color-mode-resolved='dark'] .workbench-launchpad__primary-action {
+  background: linear-gradient(120deg, #1e3a8a, #1e40af 66%, #155e75);
 }
 @media (prefers-reduced-motion: reduce) {
   .workbench-launchpad__primary-action,

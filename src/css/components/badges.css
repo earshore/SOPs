@@ -1039,9 +1039,9 @@
   --wb-badge-border: color-mix(in srgb, var(--color-cyan-400, #22d3ee) 32%, transparent);
 }
 
-.dark .wb-badge-hub,
-[data-color-mode-resolved='dark'] .wb-badge-hub,
-[data-theme='dark'] .wb-badge-hub {
+.dark .wb-badge-hub.wb-badge,
+[data-color-mode-resolved='dark'] .wb-badge-hub.wb-badge,
+[data-theme='dark'] .wb-badge-hub.wb-badge {
   --wb-badge-bg: color-mix(in srgb, var(--color-slate-500, #64748b) 16%, transparent);
   --wb-badge-color: var(--color-slate-300, #cbd5e1);
   --wb-badge-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 32%, transparent);

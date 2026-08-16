@@ -268,6 +268,9 @@
   --color-accent: var(--color-indigo-400);
   --color-accent-light: rgba(129, 140, 248, 0.12);
   --color-accent-dark: var(--color-indigo-500);
+  --module-accent-text: var(
+    --color-accent
+  ); /* [CONTRAST] indigo-500 在深底仅 3.3:1，dark 下用 accent(indigo-400) */
 
   /* ---- 基础色板暗色翻转（S1 消费迁移后直接生效，[DARKFIX]） ---- */
   /* S1 把 text/focus 消费点从 --color-text-* 语义键迁移到 --color-slate-* 原子键；
@@ -275,11 +278,9 @@
      dark 下必须反色，否则深色背景上的 slate-900 文字不可见。
      值与 S1 前手写翻转语义一致（见下方 --color-text-* 段落）。 */
   --color-slate-900: var(--color-slate-50); /* S1 前 --color-text-primary dark */
-  --color-slate-500: var(--color-slate-300); /* S1 前 --color-text-secondary dark */
-  --color-slate-400: var(--color-slate-400); /* S1 前 --color-text-tertiary/-placeholder dark */
-  --color-slate-300: var(
-    --color-slate-500
-  ); /* S1 前 --color-text-disabled dark（slate-600 近似） */
+  --color-slate-500: #cbd5e1; /* [DARKFIX-CHAIN] S1 前 --color-text-secondary dark（slate-300）；raw 值避免与 slate-300 互引循环（循环=invalid=回退 light fallback） */
+  --color-slate-400: #94a3b8; /* [DARKFIX-CHAIN] S1 前 --color-text-tertiary/-placeholder dark（不变）；消除自引用 invalid */
+  --color-slate-300: #cbd5e1; /* [DARKFIX-CHAIN] dark 亮文字（model-status / text-slate-600 bridge 映射消费此键）；raw 值避免与 slate-500 互引循环 */
   /* ---- 文字 ---- */
 
   /* ---- 背景 ---- */

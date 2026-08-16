@@ -166,6 +166,8 @@
 .dark .ppc-search-terms-empty-state,
 [data-color-mode-resolved='dark'] .ppc-search-terms-empty-state {
   border-color: rgba(148, 163, 184, 0.3);
+  /* [CONTRAST] slate-700 底上 slate-400 文字仅 4.0:1，改为 surface-card 底 */
+  background: var(--surface-card, #1e293b);
 }
 
 .dark .ppc-search-terms-table-wrapper,

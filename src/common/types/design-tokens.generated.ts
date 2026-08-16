@@ -2,7 +2,7 @@
  * 设计令牌类型定义 - 自动生成文件
  * ⚠️ 请勿手动编辑此文件！
  * 修改 src/common/config/design-tokens.ts 后运行 npm run generate:tokens
- * 生成时间: 2026-08-15T01:20:08.776Z
+ * 生成时间: 2026-08-16T17:41:25.059Z
  */
 
 // ═══════════════════════════════════════════════════════════
@@ -94,12 +94,12 @@ export type ZIndexName = '0' | '10' | '20' | '30' | '40' | '50' | 'auto' | 'drop
 /**
  * 缓动函数名称
  */
-export type EasingName = 'linear' | 'in' | 'out' | 'in-out' | 'bounce' | 'smooth';
+export type EasingName = 'linear' | 'in' | 'out' | 'in-out' | 'bounce' | 'spring' | 'elastic' | 'back-in' | 'back-out' | 'smooth';
 
 /**
  * 动画时长名称
  */
-export type DurationName = '75' | '100' | '150' | '200' | '300' | '500' | '700' | '1000';
+export type DurationName = '75' | '100' | '150' | '200' | '300' | '500' | '700' | '1000' | 'fastest' | 'fast' | 'normal' | 'slow' | 'slower' | 'slowest' | '1s' | '2s';
 
 // ═══════════════════════════════════════════════════════════
 // 断点系统类型

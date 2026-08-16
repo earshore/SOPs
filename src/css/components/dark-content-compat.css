@@ -109,6 +109,13 @@
   color: var(--color-slate-500, #cbd5e1);
 }
 
+/* [CONTRAST] primary-600/700/800（var(--color-primary-dark/-darker)）深底不足 3:1，提亮 */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.text-primary-600, .text-primary-700, .text-primary-800) {
+  color: color-mix(in srgb, var(--color-primary) 56%, #ffffff);
+}
+
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .border-slate-100,
