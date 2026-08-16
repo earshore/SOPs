@@ -484,7 +484,9 @@ body {
 .dark .header,
 [data-color-mode='dark'] .header,
 [data-color-mode-resolved='dark'] .header {
-  background: color-mix(in srgb, var(--color-slate-900, #0f172a) 88%, transparent);
+  /* [DARKFIX-CHAIN] 直写 raw 暗值：dark 块 --color-slate-900 已被反色为 --color-slate-50（近白），
+     链式解析会把首帧 header 翻成白色（FOUC）。与 variables.css dark 契约一致。 */
+  background: color-mix(in srgb, #0f172a 88%, transparent);
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
@@ -508,23 +510,24 @@ body {
 [data-color-mode-resolved='dark'] .model-status {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.1);
-  color: var(--color-slate-300, #cbd5e1);
+  /* [DARKFIX-CHAIN] 直写 raw 亮值：dark 块 --color-slate-300 已被反色为 --color-slate-500（暗），
+     链式解析会把 status 文字翻成不可见的暗色。 */
+  color: #cbd5e1;
 }
 
 .dark .model-status :is(.text-slate-500, .text-slate-600),
 [data-color-mode='dark'] .model-status :is(.text-slate-500, .text-slate-600),
 [data-color-mode-resolved='dark'] .model-status :is(.text-slate-500, .text-slate-600) {
-  color: var(--color-slate-300, #cbd5e1);
+  /* [DARKFIX-CHAIN] 直写 raw 亮值（dark 块 --color-slate-300 已反色为 slate-500，不可再引）。 */
+  color: #cbd5e1;
 }
 
 .dark .mega-menu-inner,
 [data-color-mode='dark'] .mega-menu-inner,
 [data-color-mode-resolved='dark'] .mega-menu-inner {
-  background: color-mix(
-    in srgb,
-    var(--color-slate-900, #0f172a) 96%,
-    var(--color-slate-800, #1e293b)
-  );
+  /* [DARKFIX-CHAIN] 直写 raw 暗值：dark 块 --color-slate-900→slate-50、--color-slate-800→slate-200
+     均已被反色翻转，链式解析会把 mega menu 翻成白色。 */
+  background: color-mix(in srgb, #0f172a 96%, #1e293b);
   border-color: rgba(255, 255, 255, 0.08);
 }
 

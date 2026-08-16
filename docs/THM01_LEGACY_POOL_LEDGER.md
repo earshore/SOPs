@@ -51,6 +51,7 @@
 | 2026-08-16 | 消债批 2（D14 badge -400 派残留收敛） | cards.css overview-accent 14 条 dark 规则收敛为规范配方 color-mix(in srgb, var(--color-{hue}-500, hex) 18%, var(--surface-card))（含 slate 14%→18%）；amz_hub_style.css 删除两前缀重复块（L403-408，已被 -500 规则覆盖）并移植 border-color 至三前缀后置块（16%→18%）；浅色规则零改动。验收：button-ui:gate + badge 审计 + smoke（NPI dark 基线零漂移） | 消债批 2 系列提交 |
 | 2026-08-16 | TD-E2E-01b（附带修复：smoke NPI 基线 per-OS） | release-smoke.spec.ts：① URL.pathname 在 Windows 丢盘符（ENOENT `D:\D:\…`）改用 fileURLToPath；② 像素基线改为 per-OS 维度——Linux 保持裸名（CI 不受影响），非 Linux 追加 -{platform} 后缀，seed 本机 win32 基线 6 张（尺寸一致、平均 RGB 一致、mismatch 3.2% 为渲染级漂移）。验收：ci:quality 20/20 · smoke 93/93 | `3d95121b` |
 | 2026-08-16 | 消债方案立项（收口准备） | docs/DARK_MODE_DEBT_CLOSURE_SPEC.md 入库——TD-THM-01 四契约专项 8 批执行计划 + 收口判据（批 1/2 已完成；批 3 dark 翻转契约决策点 pending：方案 B 手写登记推荐 / 方案 A generated dark 轴；批 5 动效契约判定可执行 66→~51；批 4 shadow 契约有条件执行⚠️；批 6 workbench migration 独立立项）；TD-THM-01 降级判据 = 批 1–5 + allowlist 20 + dark keys 只降不升 + 30 天复检窗；关闭判据 = 批 6 完成 | `867ac6e7` + `1adb4e21` |
+| 2026-08-16 | DARKFIX-CHAIN 扩展 | critical.css dark 块 4 处反色链引用修复 | header 白闪 FOUC 根因：dark 块 `--color-slate-900→slate-50` 反色后，`.header`/`.mega-menu-inner` dark 规则链式解析把首帧翻成近白（srgb .972/0.88），`.model-status` 文字被翻成暗色不可见。4 处全部直写 raw 值并 [DARKFIX-CHAIN] 标注，首帧至稳态 header bg 恒深（#0f172a/88%，v15 探针 0ms–2s 全程无浅态跳变）。遗留池 66 不变（纯 critical path 修复，无声明增删）。 | ci:quality 20/20 · build ✓ · smoke 93/93 · NPI dark 基线不变 | [DARKFIX-CHAIN] critical.css · 4 处 raw 值替换 · 0 声明增删 |
 
 ## S3 高频 bridge 水台销账（rc.5，2026-08-16）
 
@@ -87,3 +88,10 @@ S2（契约登记口径）已判定 bg/surface/status-dark 族 dark 翻转值 �
 ### 留档位置
 
 66 键中 surface/border/white/black/shadow 17 键归 A 档 surface-shadow 组；module-accent 5 键 + workbench 半径 4 键归 workbench migration 组；duration/ease/micro 15 键归动效组；button-primary 4 键归控件契约组；其余归各自契约组。销账触发条件不变：对应契约专项立项（workbench migration / shadow 契约 / dark 翻转契约 / 动效专项）。
+
+## 留档观察项（dark 反色链，随后续专项统一处理）
+
+| 位置                                                                                  | 现状                                                                                    | 计划                            |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------- |
+| badges.css `[data-theme="dark"]` draft/inactive/hub 灰章 mix `var(--color-slate-500)` | 反色后为浅灰章（slate-300 18%），语义上 draft/inactive 本就"次要"，非白闪类缺陷，暂不动 | 随 workbench migration 专项复审 |
+| welcome-banner.css `[data-theme="dark"]` 装饰 orb mix `var(--color-slate-500)`        | 同上，装饰语义                                                                          | 随 welcome-banner 主题专项      |
