@@ -519,7 +519,7 @@
 
 /* wb-header 与下载图标并列时两端分布 */
 .wb-header:has(.wb-plugin-download) {
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 
