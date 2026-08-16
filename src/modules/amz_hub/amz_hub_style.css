@@ -400,13 +400,6 @@
   color: var(--color-slate-500) !important;
 }
 
-.dark .amz-hub-overview .amz-hub-hero .wb-badge,
-[data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-badge {
-  border-color: rgba(248, 113, 113, 0.32);
-  background: color-mix(in srgb, var(--color-orange-400) 16%, var(--surface-card)) !important;
-  color: var(--color-orange-300) !important;
-}
-
 .dark .amz-hub-overview .amz-hub-hero .wb-tag,
 [data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-tag {
   border-color: rgba(148, 163, 184, 0.24) !important;
@@ -450,9 +443,10 @@
 .dark .amz-hub-overview .amz-hub-hero .wb-badge,
 [data-color-mode-resolved='dark'] .amz-hub-overview .amz-hub-hero .wb-badge,
 [data-theme='dark'] .amz-hub-overview .amz-hub-hero .wb-badge {
+  border-color: rgba(248, 113, 113, 0.32);
   background: color-mix(
     in srgb,
-    var(--color-orange-500, #f97316) 16%,
+    var(--color-orange-500, #f97316) 18%,
     var(--surface-card, #1e293b)
   ) !important;
   color: var(--color-orange-300, #fdba74) !important;

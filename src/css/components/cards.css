@@ -495,72 +495,128 @@
 .dark .overview-accent-blue,
 [data-color-mode-resolved='dark'] .overview-accent-blue,
 [data-theme='dark'] .overview-accent-blue {
-  --card-left-accent-bg: color-mix(in srgb, #60a5fa 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-blue-500, #3b82f6) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-green,
 [data-color-mode-resolved='dark'] .overview-accent-green,
 [data-theme='dark'] .overview-accent-green {
-  --card-left-accent-bg: color-mix(in srgb, #4ade80 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-green-500, #22c55e) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-emerald,
 [data-color-mode-resolved='dark'] .overview-accent-emerald,
 [data-theme='dark'] .overview-accent-emerald {
-  --card-left-accent-bg: color-mix(in srgb, #34d399 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-red,
 [data-color-mode-resolved='dark'] .overview-accent-red,
 [data-theme='dark'] .overview-accent-red {
-  --card-left-accent-bg: color-mix(in srgb, #f87171 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-red-500, #ef4444) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-purple,
 [data-color-mode-resolved='dark'] .overview-accent-purple,
 [data-theme='dark'] .overview-accent-purple {
-  --card-left-accent-bg: color-mix(in srgb, #c084fc 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-purple-500, #a855f7) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-violet,
 [data-color-mode-resolved='dark'] .overview-accent-violet,
 [data-theme='dark'] .overview-accent-violet {
-  --card-left-accent-bg: color-mix(in srgb, #a78bfa 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-violet-500, #8b5cf6) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-fuchsia,
 [data-color-mode-resolved='dark'] .overview-accent-fuchsia,
 [data-theme='dark'] .overview-accent-fuchsia {
-  --card-left-accent-bg: color-mix(in srgb, #e879f9 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-fuchsia-500, #d946ef) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-amber,
 [data-color-mode-resolved='dark'] .overview-accent-amber,
 [data-theme='dark'] .overview-accent-amber {
-  --card-left-accent-bg: color-mix(in srgb, #fbbf24 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-amber-500, #f59e0b) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-cyan,
 [data-color-mode-resolved='dark'] .overview-accent-cyan,
 [data-theme='dark'] .overview-accent-cyan {
-  --card-left-accent-bg: color-mix(in srgb, #22d3ee 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-cyan-500, #06b6d4) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-rose,
 [data-color-mode-resolved='dark'] .overview-accent-rose,
 [data-theme='dark'] .overview-accent-rose {
-  --card-left-accent-bg: color-mix(in srgb, #fb7185 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-rose-500, #f43f5e) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-teal,
 [data-color-mode-resolved='dark'] .overview-accent-teal,
 [data-theme='dark'] .overview-accent-teal {
-  --card-left-accent-bg: color-mix(in srgb, #2dd4bf 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-teal-500, #14b8a6) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-indigo,
 [data-color-mode-resolved='dark'] .overview-accent-indigo,
 [data-theme='dark'] .overview-accent-indigo {
-  --card-left-accent-bg: color-mix(in srgb, #818cf8 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-indigo-500, #6366f1) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-orange,
 [data-color-mode-resolved='dark'] .overview-accent-orange,
 [data-theme='dark'] .overview-accent-orange {
-  --card-left-accent-bg: color-mix(in srgb, #fb923c 16%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-orange-500, #f97316) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 .dark .overview-accent-slate,
 [data-color-mode-resolved='dark'] .overview-accent-slate,
 [data-theme='dark'] .overview-accent-slate {
-  --card-left-accent-bg: color-mix(in srgb, #94a3b8 14%, var(--surface-card, #1e293b));
+  --card-left-accent-bg: color-mix(
+    in srgb,
+    var(--color-slate-500, #64748b) 18%,
+    var(--surface-card, #1e293b)
+  );
 }
 
 .dark .amz_card-hover,
