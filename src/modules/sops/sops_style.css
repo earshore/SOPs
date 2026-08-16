@@ -42,6 +42,28 @@
   --wb-tag-dot-4: #8b5cf6;
 }
 
+/* [CONTRAST] dark：qwen-violet-strong(#4f46e5) 在深底仅 2.3:1，soft(#f5f3ff) 需翻深 */
+.dark .sops-overview,
+[data-color-mode-resolved='dark'] .sops-overview,
+[data-theme='dark'] .sops-overview {
+  --sops-qwen-violet-strong: var(--color-indigo-300, #a5b4fc);
+  --sops-qwen-soft: color-mix(
+    in srgb,
+    var(--sops-qwen-violet, #6257f5) 14%,
+    var(--surface-card, #1e293b)
+  );
+  --sops-qwen-surface: color-mix(
+    in srgb,
+    var(--sops-qwen-violet, #6257f5) 8%,
+    var(--surface-panel, #0f172a)
+  );
+  --module-accent-text: var(--sops-qwen-violet-strong);
+  --module-accent-soft: var(--sops-qwen-soft);
+  --button-filter-accent: var(--sops-qwen-violet-strong);
+  --button-filter-hover-bg: var(--sops-qwen-soft);
+  --button-filter-hover-color: var(--sops-qwen-violet-strong);
+}
+
 .sops-overview .wb-container--simple {
   border: 1px solid var(--sops-qwen-border) !important;
   background:
@@ -1065,7 +1087,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   height: 40px;
   margin: 0 auto var(--spacing-3, 0.75rem);
   border-radius: 50%;
-  background: var(--module-accent, var(--color-primary, #3b82f6));
+  background: color-mix(in srgb, var(--module-accent, var(--color-primary, #3b82f6)) 78%, #0f172a);
   color: white;
   font-size: var(--text-md, 1rem);
   font-weight: var(--font-bold, 700);
@@ -1078,7 +1100,11 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:hover .sop-step-number {
-  background: var(--module-accent-text, var(--module-accent, var(--color-primary, #3b82f6)));
+  background: color-mix(
+    in srgb,
+    var(--module-accent-text, var(--module-accent, var(--color-primary, #3b82f6))) 78%,
+    #0f172a
+  );
 }
 
 /* 步骤内容 */
@@ -1145,23 +1171,23 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 
 /* 步骤编号颜色变体 */
 .sop-process-step:nth-child(4n + 1) .sop-step-number {
-  background: var(--color-blue-500);
+  background: color-mix(in srgb, var(--color-blue-500) 78%, #0f172a);
 }
 
 .sop-process-step:nth-child(4n + 3) .sop-step-number {
-  background: var(--color-emerald-500);
+  background: color-mix(in srgb, var(--color-emerald-500) 78%, #0f172a);
 }
 
 .sop-process-step:nth-child(4n + 5) .sop-step-number {
-  background: var(--color-amber-500);
+  background: color-mix(in srgb, var(--color-amber-500) 74%, #0f172a);
 }
 
 .sop-process-step:nth-child(4n + 7) .sop-step-number {
-  background: var(--color-purple-500);
+  background: color-mix(in srgb, var(--color-purple-500) 78%, #0f172a);
 }
 
 .sop-process-step:nth-child(4n + 9) .sop-step-number {
-  background: var(--color-rose-500);
+  background: color-mix(in srgb, var(--color-rose-500) 78%, #0f172a);
 }
 
 /* ==================== 响应式适配 ==================== */
@@ -1429,7 +1455,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 
   #sops_content_area .module-container > * + *:where([class*='bg-gradient-to-'].text-white),
   #sops_content_area .module-container > * + * :where([class*='bg-gradient-to-'].text-white) {
-    background-color: var(--color-slate-900, #0f172a) !important;
+    background-color: #0f172a !important;
   }
 
   #sops_content_area
@@ -1490,6 +1516,97 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     + *
     :where([class*='from-purple-'].text-white, [class*='from-pink-'].text-white) {
     background-color: var(--color-purple-600, #9333ea) !important;
+  }
+
+  /* [CONTRAST] dark 下将渐变归一浅底翻深（上列 from-xxx-50 规则仅 light 值） */
+  .dark #sops_content_area .module-container > * + *:where([class*='from-emerald-50']),
+  .dark #sops_content_area .module-container > * + * :where([class*='from-emerald-50']) {
+    background-color: color-mix(
+      in srgb,
+      var(--color-emerald-500, #10b981) 14%,
+      var(--surface-card, #1e293b)
+    ) !important;
+  }
+  .dark
+    #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-amber-50'], [class*='from-orange-50'], [class*='from-yellow-50']),
+  .dark
+    #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-amber-50'], [class*='from-orange-50'], [class*='from-yellow-50']) {
+    background-color: color-mix(
+      in srgb,
+      var(--color-amber-500, #f59e0b) 14%,
+      var(--surface-card, #1e293b)
+    ) !important;
+  }
+  .dark
+    #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-red-50'], [class*='from-rose-50']),
+  .dark
+    #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-red-50'], [class*='from-rose-50']) {
+    background-color: color-mix(
+      in srgb,
+      var(--color-red-500, #ef4444) 14%,
+      var(--surface-card, #1e293b)
+    ) !important;
+  }
+  .dark
+    #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-purple-50'], [class*='from-pink-50']),
+  .dark
+    #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-purple-50'], [class*='from-pink-50']) {
+    background-color: color-mix(
+      in srgb,
+      var(--color-purple-500, #a855f7) 14%,
+      var(--surface-card, #1e293b)
+    ) !important;
+  }
+  .dark
+    #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-teal-50'], [class*='from-cyan-50']),
+  .dark
+    #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-teal-50'], [class*='from-cyan-50']) {
+    background-color: color-mix(
+      in srgb,
+      var(--color-teal-500, #14b8a6) 14%,
+      var(--surface-card, #1e293b)
+    ) !important;
+  }
+  .dark
+    #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-slate-50'], [class*='from-gray-']),
+  .dark
+    #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-slate-50'], [class*='from-gray-']) {
+    background-color: var(--bg-secondary, #1e293b) !important;
   }
 
   #sops_content_area
@@ -1724,7 +1841,8 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   [class*='from-teal-'].text-white,
 [data-theme='dark'] #sops_content_area .module-container [class*='from-emerald-'].text-white,
 [data-theme='dark'] #sops_content_area .module-container [class*='from-teal-'].text-white {
-  background-color: var(--color-emerald-700, #047857) !important;
+  /* [CONTRAST] emerald-200 浅字在 700 底仅 4.28:1，压至 800 */
+  background-color: var(--color-emerald-800, #065f46) !important;
 }
 
 .dark #sops_content_area .module-container [class*='from-amber-'].text-white,

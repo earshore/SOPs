@@ -49,6 +49,15 @@
   will-change: transform, opacity;
 }
 
+/* [CONTRAST] dark 下 toast 背景翻深、文字提亮（原实现白底 + 深色模式文字=白字白底 1.05:1） */
+.dark .toast,
+[data-color-mode-resolved='dark'] .toast,
+[data-theme='dark'] .toast {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--color-border-default, rgba(255, 255, 255, 0.1));
+  color: var(--color-slate-100, #f1f5f9);
+}
+
 /* Toast 图标 */
 .toast > i {
   font-size: 16px;
@@ -69,8 +78,15 @@
 
 .toast-content .toast-desc {
   font-size: 11px;
-  color: var(--color-slate-400);
+  color: var(--color-slate-500);
   line-height: 1.4;
+}
+
+/* [CONTRAST] dark 下 toast 描述文字提亮 */
+.dark .toast-content .toast-desc,
+[data-color-mode-resolved='dark'] .toast-content .toast-desc,
+[data-theme='dark'] .toast-content .toast-desc {
+  color: var(--color-slate-300, #cbd5e1);
 }
 
 /* Optional CTA (e.g. open settings) */

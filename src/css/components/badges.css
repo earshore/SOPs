@@ -988,55 +988,61 @@
   --wb-theme-tag-icon-color: color-mix(in srgb, var(--wb-theme-accent) 62%, #ffffff);
 }
 
-.dark .wb-badge-ai,
-[data-color-mode-resolved='dark'] .wb-badge-ai,
-[data-theme='dark'] .wb-badge-ai {
+.dark .wb-badge-ai.wb-badge,
+[data-color-mode-resolved='dark'] .wb-badge-ai.wb-badge,
+[data-theme='dark'] .wb-badge-ai.wb-badge {
   --wb-badge-bg: color-mix(in srgb, var(--color-blue-500, #3b82f6) 16%, transparent);
   --wb-badge-color: var(--color-blue-300, #93c5fd);
   --wb-badge-border: color-mix(in srgb, var(--color-blue-400, #60a5fa) 32%, transparent);
+  color: var(--color-blue-300, #93c5fd) !important;
 }
 
-.dark .wb-badge-growth,
-[data-color-mode-resolved='dark'] .wb-badge-growth,
-[data-theme='dark'] .wb-badge-growth {
+.dark .wb-badge-growth.wb-badge,
+[data-color-mode-resolved='dark'] .wb-badge-growth.wb-badge,
+[data-theme='dark'] .wb-badge-growth.wb-badge {
   --wb-badge-bg: color-mix(in srgb, var(--color-emerald-500, #10b981) 16%, transparent);
   --wb-badge-color: var(--color-emerald-300, #6ee7b7);
   --wb-badge-border: color-mix(in srgb, var(--color-emerald-400, #34d399) 32%, transparent);
+  color: var(--color-emerald-300, #6ee7b7) !important;
 }
 
-.dark .wb-badge-safety,
-[data-color-mode-resolved='dark'] .wb-badge-safety,
-[data-theme='dark'] .wb-badge-safety {
+.dark .wb-badge-safety.wb-badge,
+[data-color-mode-resolved='dark'] .wb-badge-safety.wb-badge,
+[data-theme='dark'] .wb-badge-safety.wb-badge {
   --wb-badge-bg: color-mix(in srgb, var(--color-red-500, #ef4444) 16%, transparent);
   --wb-badge-color: var(--color-red-300, #fca5a5);
   --wb-badge-border: color-mix(in srgb, var(--color-red-400, #f87171) 32%, transparent);
+  color: var(--color-red-300, #fca5a5) !important;
 }
 
-.dark .wb-badge-service,
-[data-color-mode-resolved='dark'] .wb-badge-service,
-[data-theme='dark'] .wb-badge-service {
+.dark .wb-badge-service.wb-badge,
+[data-color-mode-resolved='dark'] .wb-badge-service.wb-badge,
+[data-theme='dark'] .wb-badge-service.wb-badge {
   --wb-badge-bg: color-mix(in srgb, var(--color-teal-500, #14b8a6) 16%, transparent);
   --wb-badge-color: var(--color-teal-300, #5eead4);
   --wb-badge-border: color-mix(in srgb, var(--color-teal-400, #2dd4bf) 32%, transparent);
+  color: var(--color-teal-300, #5eead4) !important;
 }
 
-.dark .wb-badge-supply,
-.dark .wb-badge-pro,
-[data-color-mode-resolved='dark'] .wb-badge-supply,
-[data-color-mode-resolved='dark'] .wb-badge-pro,
-[data-theme='dark'] .wb-badge-supply,
-[data-theme='dark'] .wb-badge-pro {
+.dark .wb-badge-supply.wb-badge,
+.dark .wb-badge-pro.wb-badge,
+[data-color-mode-resolved='dark'] .wb-badge-supply.wb-badge,
+[data-color-mode-resolved='dark'] .wb-badge-pro.wb-badge,
+[data-theme='dark'] .wb-badge-supply.wb-badge,
+[data-theme='dark'] .wb-badge-pro.wb-badge {
   --wb-badge-bg: color-mix(in srgb, var(--color-amber-500, #f59e0b) 16%, transparent);
   --wb-badge-color: var(--color-amber-300, #fcd34d);
   --wb-badge-border: color-mix(in srgb, var(--color-amber-400, #fbbf24) 32%, transparent);
+  color: var(--color-amber-300, #fcd34d) !important;
 }
 
-.dark .wb-badge-analytics,
-[data-color-mode-resolved='dark'] .wb-badge-analytics,
-[data-theme='dark'] .wb-badge-analytics {
+.dark .wb-badge-analytics.wb-badge,
+[data-color-mode-resolved='dark'] .wb-badge-analytics.wb-badge,
+[data-theme='dark'] .wb-badge-analytics.wb-badge {
   --wb-badge-bg: color-mix(in srgb, var(--color-cyan-500, #06b6d4) 16%, transparent);
   --wb-badge-color: var(--color-cyan-300, #67e8f9);
   --wb-badge-border: color-mix(in srgb, var(--color-cyan-400, #22d3ee) 32%, transparent);
+  color: var(--color-cyan-300, #67e8f9) !important;
 }
 
 .dark .wb-badge-hub.wb-badge,
@@ -1045,6 +1051,7 @@
   --wb-badge-bg: color-mix(in srgb, var(--color-slate-500, #64748b) 16%, transparent);
   --wb-badge-color: var(--color-slate-300, #cbd5e1);
   --wb-badge-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 32%, transparent);
+  color: var(--color-slate-300, #cbd5e1) !important;
 }
 
 /* TD-CMP-04 badge 统一契约：深色翻转 */

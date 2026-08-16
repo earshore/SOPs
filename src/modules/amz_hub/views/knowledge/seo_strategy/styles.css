@@ -36,9 +36,24 @@
     background: var(--surface-card-hover, var(--color-slate-50)) !important;
   }
 
+  /* [CONTRAST] dark：surface-card-hover(slate-700) 上 slate-400 仅 4.0:1，归一底翻至 surface-card */
+  .dark
+    .seo-page
+    > :nth-child(n + 2)
+    :is([class^='p-'], [class*=' p-']):where(
+      .bg-slate-50,
+      .bg-emerald-50,
+      .bg-purple-50,
+      .bg-orange-50,
+      .bg-amber-50,
+      .bg-teal-50
+    ) {
+    background: var(--surface-card, #1e293b) !important;
+  }
+
   .seo-page > :nth-child(n + 2) :where(.bg-slate-900, .bg-slate-800) {
     border-radius: var(--rounded-card, var(--rounded-md)) !important;
-    background: var(--color-slate-900) !important;
+    background: #0f172a !important;
     box-shadow: none !important;
   }
 }

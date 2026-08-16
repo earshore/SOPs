@@ -16,12 +16,18 @@
   }
 
   .ql-page > :nth-child(n + 2).text-white :where(strong, [class*='text-amber']) {
-    color: var(--color-warning-dark, #b45309) !important;
+    /* [CONTRAST] warning-dark(#b45309) 在墨卡上仅 2.9:1，统一用 warning 琥珀 */
+    color: var(--color-warning, #f59e0b) !important;
   }
 
   .ql-page > :nth-child(n + 2).text-white :where(.bg-white, [class*='bg-white']) {
     background: var(--surface-card-hover, var(--color-slate-50)) !important;
     color: var(--color-slate-500, var(--color-slate-600)) !important;
+  }
+
+  /* [CONTRAST] dark：墨卡内白卡 → surface-card，保持 slate-400 文字可读（5.7:1） */
+  .dark .ql-page > :nth-child(n + 2).text-white :where(.bg-white, [class*='bg-white']) {
+    background: var(--surface-card, #1e293b) !important;
   }
 
   .ql-page > :nth-child(n + 2) :where(.rounded-xl, .rounded-lg) {
@@ -67,6 +73,24 @@
     background: var(--surface-card-hover, var(--color-slate-50)) !important;
   }
 
+  /* [CONTRAST] dark：surface-card-hover(slate-700) 上 slate-400 仅 4.0:1，归一底翻至 surface-card */
+  .dark
+    .ql-page
+    > :nth-child(n + 2)
+    :is([class^='p-'], [class*=' p-']):where(
+      .bg-slate-50,
+      .bg-primary-100,
+      .bg-accent-100,
+      .bg-emerald-50,
+      .bg-purple-50,
+      .bg-orange-50,
+      .bg-amber-50,
+      .bg-teal-50,
+      [class*='from-'][class*='to-']
+    ) {
+    background: var(--surface-card, #1e293b) !important;
+  }
+
   .ql-page > :nth-child(n + 2) [class*='hover:']:hover {
     transform: none !important;
     box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36)) !important;
@@ -90,7 +114,7 @@
   .ql-page > :nth-child(n + 2) .bg-slate-900,
   .ql-page > :nth-child(n + 2) [class*='from-slate-8'][class*='to-slate-'],
   .ql-page > :nth-child(n + 2) [class*='from-slate-9'][class*='to-slate-'] {
-    background: var(--color-slate-900, #0f172a) !important;
+    background: #0f172a !important;
     color: #ffffff !important;
   }
 

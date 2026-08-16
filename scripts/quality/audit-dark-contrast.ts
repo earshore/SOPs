@@ -66,6 +66,7 @@ const TOAST_SOURCE = `
 (() => {
   const container = document.getElementById('toast-container');
   if (!container) return;
+  container.innerHTML = '';
   const types = [
     ['success', 'fa-circle-check'],
     ['error', 'fa-circle-xmark'],
@@ -98,11 +99,24 @@ const TOAST_SOURCE = `
 const AUDIT_SOURCE = `
 (() => {
   const parseColor = (v) => {
-    const m = v.match(/rgba?\\(([^)]+)\\)/);
-    if (!m) return null;
-    const p = m[1].split(/[\\s,/]+/).filter(Boolean).map(Number);
-    if (p.length < 3 || p.some(Number.isNaN)) return null;
-    return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+    if (!v || v === 'transparent') return null;
+    let p = null;
+    let m = v.match(/rgba?\\\(([^)]+)\\\)/);
+    if (m) {
+      p = m[1].split(/[\\s,/]+/).filter(Boolean).map(Number);
+    } else {
+      // Chromium 对 color-mix 的 computed 值为 color(srgb r g b / a) 或百分数
+      m = v.match(/color\\\(srgb\\s+([^)]+)\\\)/);
+      if (m) {
+        p = m[1].split(/[\s/]+/).filter(Boolean).map(x =>
+          x.endsWith('%') ? parseFloat(x) / 100 : parseFloat(x)
+        );
+      }
+    }
+    if (!p || p.length < 3 || p.some(Number.isNaN)) return null;
+    const isUnit = v.startsWith('color(');
+    const to255 = (x) => (isUnit ? x * 255 : x);
+    return { r: to255(p[0]), g: to255(p[1]), b: to255(p[2]), a: p.length > 3 ? p[3] : 1 };
   };
   const luminance = (c) => {
     const lin = (x) => {
@@ -189,8 +203,15 @@ const AUDIT_SOURCE = `
 
   const defects = [];
   const stats = { checked: 0, skippedTransparent: 0 };
+  // 只审计当前可见面板（SPA 中其它面板以 .hidden 留在 DOM）
+  const hiddenPanels = Array.from(
+    document.querySelectorAll(
+      '#panel-home.hidden, #panel-sops.hidden, #panel-app_center.hidden, #panel-amz_hub.hidden, #panel-more.hidden'
+    )
+  );
   const all = document.querySelectorAll('body *');
   for (const el of Array.from(all)) {
+    if (hiddenPanels.some(p => p.contains(el))) continue;
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden') continue;
     const opacity = parseFloat(cs.opacity);

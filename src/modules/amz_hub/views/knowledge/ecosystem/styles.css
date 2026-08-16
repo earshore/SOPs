@@ -44,6 +44,25 @@
     background: var(--surface-card-hover, var(--color-slate-50)) !important;
   }
 
+  /* [CONTRAST] dark：surface-card-hover(slate-700) 上 slate-400 仅 4.0:1，归一底翻至 surface-card */
+  .dark
+    .eco-page
+    > :nth-child(n + 2)
+    :is([class^='p-'], [class*=' p-']):where(
+      .bg-slate-50,
+      .bg-primary-100,
+      .bg-accent-100,
+      .bg-gray-100,
+      .bg-gray-200,
+      .bg-emerald-50,
+      .bg-purple-50,
+      .bg-orange-50,
+      .bg-amber-50,
+      .bg-teal-50
+    ) {
+    background: var(--surface-card, #1e293b) !important;
+  }
+
   .eco-page > :nth-child(n + 2) :where(.amz_card-hover:hover, .group:hover) {
     transform: none !important;
   }

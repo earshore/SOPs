@@ -292,7 +292,8 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: #ffffff;
-  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  /* [CONTRAST] 加深渐变保证白字 ≥4.5:1 */
+  background: linear-gradient(135deg, #1d4ed8 0%, #4338ca 100%);
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.2);
   transition:
     box-shadow 0.22s ease,
@@ -300,12 +301,12 @@
 }
 
 .amzpt_nav_step:nth-child(4n + 2) .amzpt_nav_step_no {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.2);
 }
 
 .amzpt_nav_step:nth-child(4n + 3) .amzpt_nav_step_no {
-  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #b45309 0%, #9a3412 100%);
   box-shadow: 0 6px 16px rgba(245, 158, 11, 0.2);
 }
 
@@ -866,11 +867,12 @@
   }
 
   .amzpt_callout--formula {
-    background: var(--color-slate-900);
+    background: #0f172a;
   }
 
   .amzpt_table thead {
-    background: var(--color-primary, var(--color-blue-500));
+    /* [CONTRAST] primary 500 档白字仅 3.7:1，混深保证 ≥4.5:1 */
+    background: color-mix(in srgb, var(--color-primary, var(--color-blue-500)) 78%, #0f172a);
   }
 }
 

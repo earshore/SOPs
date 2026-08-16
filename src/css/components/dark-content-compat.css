@@ -33,6 +33,17 @@
   background-color: var(--bg-secondary, #1e293b);
 }
 
+/* [CONTRAST] 任意值浅底 bg-[#eff6ff]（blue-50）——sops 模板/渲染器 ×125 处 */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .bg-\[\#eff6ff\] {
+  background-color: color-mix(
+    in srgb,
+    var(--color-blue-500, #3b82f6) 14%,
+    var(--surface-card, #1e293b)
+  );
+}
+
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
   .bg-slate-100,
@@ -114,6 +125,13 @@
   :is(.module-container, .settings-panel-root)
   :is(.text-primary-600, .text-primary-700, .text-primary-800) {
   color: color-mix(in srgb, var(--color-primary) 56%, #ffffff);
+}
+
+/* [CONTRAST] primary-500 深底/primary 22% tint 仅 2.9-4.0:1，提亮 */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  .text-primary-500 {
+  color: color-mix(in srgb, var(--color-primary) 62%, #ffffff);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -2969,49 +2987,74 @@
    4.5:1 (500-level chips measured 2.1-4.3:1 with white ink) */
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
-  :is(.bg-amber-500, .bg-amber-600).text-white {
+  :is(.bg-amber-500, .bg-amber-600).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-amber-500, .bg-amber-600):has(.text-white) {
   background-color: var(--color-amber-700, #b45309);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
-  :is(.bg-orange-500, .bg-orange-600).text-white {
+  :is(.bg-orange-500, .bg-orange-600).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-orange-500, .bg-orange-600):has(.text-white) {
   background-color: var(--color-orange-700, #c2410c);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
-  :is(.bg-emerald-500, .bg-emerald-600).text-white {
-  background-color: var(--color-emerald-700, #047857);
+  :is(.bg-emerald-500, .bg-emerald-600).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-emerald-500, .bg-emerald-600):has(.text-white) {
+  /* [CONTRAST] emerald-200 浅字在 700 底仅 4.28:1，压至 800 */
+  background-color: var(--color-emerald-800, #065f46);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
-  :is(.bg-teal-500, .bg-teal-600).text-white {
+  :is(.bg-teal-500, .bg-teal-600).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-teal-500, .bg-teal-600):has(.text-white) {
   background-color: var(--color-teal-700, #0f766e);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
-  :is(.bg-green-500, .bg-green-600).text-white {
+  :is(.bg-green-500, .bg-green-600).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-green-500, .bg-green-600):has(.text-white) {
   background-color: var(--color-green-700, #15803d);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
-  :is(.bg-blue-500, .bg-sky-500).text-white {
+  :is(.bg-blue-500, .bg-sky-500).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-blue-500, .bg-sky-500):has(.text-white) {
   background-color: var(--color-blue-700, #1d4ed8);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
-  :is(.bg-purple-500, .bg-violet-500).text-white {
+  :is(.bg-purple-500, .bg-violet-500).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-purple-500, .bg-violet-500):has(.text-white) {
   background-color: var(--color-purple-700, #7e22ce);
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
   :is(.module-container, .settings-panel-root)
-  :is(.bg-rose-500, .bg-red-400).text-white {
+  :is(.bg-rose-500, .bg-red-500, .bg-red-400).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-rose-500, .bg-red-500, .bg-red-400):has(.text-white) {
   background-color: var(--color-rose-700, #be123c);
 }
 
@@ -3019,6 +3062,72 @@
   :is(.module-container, .settings-panel-root)
   .bg-slate-400.text-white {
   background-color: var(--color-slate-600, #475569);
+}
+
+/* [CONTRAST] module-accent 任意值彩底（dark 下 accent=indigo-400 偏亮，白字 <3:1） */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-[var(--module-accent)]'].text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  [class*='bg-[var(--module-accent)]']:has(.text-white) {
+  background-color: color-mix(in srgb, var(--module-accent) 55%, #0f172a);
+}
+
+/* [CONTRAST] primary/accent 彩底白字（dark 下 --color-accent=indigo-400 偏亮） */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-primary-500, .bg-primary-600).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-primary-500, .bg-primary-600):has(.text-white) {
+  background-color: color-mix(in srgb, var(--color-primary) 78%, #0f172a);
+}
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-accent-500, .bg-accent-600).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-accent-500, .bg-accent-600):has(.text-white) {
+  background-color: color-mix(in srgb, var(--color-accent) 55%, #0f172a);
+}
+
+/* [CONTRAST] bg-slate-600 中深底（dark 下保持 #334155，slate-400 文字仅 4.0:1） */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-slate-600, .hover\:bg-slate-600:hover) {
+  background-color: color-mix(
+    in srgb,
+    var(--color-slate-500, #64748b) 22%,
+    var(--surface-card, #1e293b)
+  );
+}
+
+/* [CONTRAST] bg-yellow-500 / bg-pink-500 白字（bridge 未覆盖家族） */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-yellow-500, .bg-yellow-600).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-yellow-500, .bg-yellow-600):has(.text-white) {
+  background-color: var(--color-yellow-700, #a16207);
+}
+/* 亮黄底 + 深字（text-slate-900 在 dark 下翻白，1.75:1）→ 同规则加深 */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-yellow-500, .bg-yellow-600).text-slate-900,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-yellow-500, .bg-yellow-600):has(.text-slate-900) {
+  background-color: var(--color-yellow-800, #854d0e);
+}
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-pink-500, .bg-pink-600).text-white,
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.bg-pink-500, .bg-pink-600):has(.text-white) {
+  background-color: var(--color-pink-700, #be185d);
 }
 
 /* Amber CTA buttons (bg-amber-600 hover:bg-amber-700 text-white): deepen */

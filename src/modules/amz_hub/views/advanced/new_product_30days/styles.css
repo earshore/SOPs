@@ -65,6 +65,24 @@
     background: var(--surface-card-hover, var(--color-slate-50)) !important;
   }
 
+  /* [CONTRAST] dark：surface-card-hover(slate-700) 上 slate-400 仅 4.0:1，归一底翻至 surface-card */
+  .dark
+    .np30-page
+    > :nth-child(n + 2)
+    :is([class^='p-'], [class*=' p-']):where(
+      .bg-slate-50,
+      .bg-primary-100,
+      .bg-accent-100,
+      .bg-emerald-50,
+      .bg-rose-50,
+      .bg-orange-50,
+      .bg-amber-50,
+      .bg-teal-50,
+      [class*='from-'][class*='to-']
+    ) {
+    background: var(--surface-card, #1e293b) !important;
+  }
+
   .np30-page > :nth-child(n + 2) [class*='hover:']:hover {
     transform: none !important;
     box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36)) !important;

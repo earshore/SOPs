@@ -384,7 +384,7 @@ pre code {
 
 .ai-analysis-wrapper .bg-slate-950::-webkit-scrollbar-track,
 .ai-analysis-wrapper .bg-slate-900::-webkit-scrollbar-track {
-  background: var(--color-slate-900);
+  background: #0f172a;
   border-radius: var(--rounded-sm);
 }
 

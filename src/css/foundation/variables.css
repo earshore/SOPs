@@ -269,8 +269,9 @@
   --color-accent-light: rgba(129, 140, 248, 0.12);
   --color-accent-dark: var(--color-indigo-500);
   --module-accent-text: var(
-    --color-accent
-  ); /* [CONTRAST] indigo-500 在深底仅 3.3:1，dark 下用 accent(indigo-400) */
+    --color-indigo-300,
+    #a5b4fc
+  ); /* [CONTRAST] accent(indigo-400) 在 color-mix 深底上仅 3.5-4.1:1，dark 下提至 indigo-300 */
 
   /* ---- 基础色板暗色翻转（S1 消费迁移后直接生效，[DARKFIX]） ---- */
   /* S1 把 text/focus 消费点从 --color-text-* 语义键迁移到 --color-slate-* 原子键；

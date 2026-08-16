@@ -2092,3 +2092,30 @@
 .dark .amzf_history_row:focus-within {
   background: color-mix(in srgb, var(--color-indigo-400, #818cf8) 14%, transparent);
 }
+
+/* [CONTRAST] 写死浅底 dark 翻转（#f8fafc / #eff6ff / #fef2f2 / #ecfdf5） */
+.dark .amzf_month_header,
+.dark .amzf_event_card:hover,
+.dark .amzf_event_emoji,
+[data-color-mode-resolved='dark'] .amzf_month_header,
+[data-color-mode-resolved='dark'] .amzf_event_card:hover,
+[data-color-mode-resolved='dark'] .amzf_event_emoji {
+  background: var(--bg-secondary, #1e293b);
+}
+.dark .amzf_search_status,
+[data-color-mode-resolved='dark'] .amzf_search_status {
+  background: color-mix(in srgb, var(--color-blue-500, #3b82f6) 14%, var(--surface-card, #1e293b));
+  color: var(--color-blue-300, #93c5fd);
+}
+.dark .amzf_event_type_holiday,
+[data-color-mode-resolved='dark'] .amzf_event_type_holiday {
+  background: color-mix(in srgb, var(--color-red-500, #ef4444) 14%, var(--surface-card, #1e293b));
+}
+.dark .amzf_event_type_shopping,
+[data-color-mode-resolved='dark'] .amzf_event_type_shopping {
+  background: color-mix(
+    in srgb,
+    var(--color-emerald-500, #10b981) 14%,
+    var(--surface-card, #1e293b)
+  );
+}
