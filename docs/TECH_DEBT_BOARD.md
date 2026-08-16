@@ -1,7 +1,7 @@
 # 技术债务看板（Living Tech Debt Board）
 
 **Status:** active · **活** SSOT（open 项）  
-**Updated:** 2026-08-15（卡面实测核验 + 收敛首轮，见收紧路线）  
+**Updated:** 2026-08-16（rc.6 基线漂移闭环 + 发布收口）  
 **Owner:** 工程负责人
 
 > **用法：** 只维护 **Open** 债务。已关闭项写 CHANGELOG 或移入历史段落，**禁止**用长篇「已完成荣誉榜」冒充当前债。  
@@ -53,6 +53,7 @@
 
 | ID                   | 关闭日期   | 说明                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | -------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TD-E2E-01            | 2026-08-16 | smoke 像素基线治理闭环（含 rc.6 复现）：08-15 专项完成 per-engine 基线（`2c640226`）后，rc.6 runner 上 NPI light chromium 再现 3.35% 光栅化漂移（非回归，dy=0 对齐），按机制以 `UPDATE_SNAPSHOTS=1` 在 CI 重 seed 全三引擎 12 份基线，CI-minted 产物回写 `docs/color-region-baselines/`，test.yml 一次性开关移除（`bd3f6562`）；smoke 93/93 · Quality Gate 10/10；事件记录 `docs/archive/quality/npi-chromium-baseline-drift-rc6.md` |
 | TD-CMP-03            | 2026-08-14 | 弹层债闭环（TD-CMP-03 消除）：confirm Tab 陷阱已修；双弹窗（import-conflict/delete-confirm）已移除（`sharedModals.html` 仅余 5 行兼容壳）；弹层按钮已统一 `app-confirm-modal` 契约（`confirmModal.css` 109 行，T2 dual-theme 表面、theme/danger 变体均有 token 变量 + dark fallback hex，无 white 按钮缺口）；`modals.css` 四变体旧描述已核实：变体系已重构为 `app-confirm-modal--{theme,danger}`（danger 确认有引用，含 `confirmModal.test.ts` 覆盖）。commit `cf677bd4` 后实测 |
 | TD-SET-01            | 2026-08-03 | systemSettings 拆分收口：TS 壳 651 行（≤900）+ 6 `sections/*`（各 ≤456 行）+ `SettingsDomain` 门面（load/savePartition/diff/validate/snapshot）+ `loader.ts` 组装 + `settings-scale` audit 入 `ci:quality`；8 空 stub 清零、UI 直写存储归零。本地 Gate（基 `3bf0d476`）：unit 153 passed / e2e settings 17 + smoke 29 / coverage 80.09·68.08·83.81·82.05（四阈值 ≥ 基线）/ circular 0 / ci:quality 全绿 / build 绿。commit `0093e3c9`                                            |
 | TD-SET-05            | 2026-07-26 | 工具策略侧栏二级 Keyword Hunter + deep-link `keyword-hunter` + e2e                                                                                                                                                                                                                                                                                                                                                                                                               |

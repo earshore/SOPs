@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 锚点 commit
 
-- `75192a67`（rc.6 bump + 门禁修复 + 文档同步）。
+- `75192a67` rc.6 主体 · `1955e288` CHANGELOG 锚点 · `79a8feb9` CI chromium 安装 · `05d49587` 基线 seed · `64ebc815` worknotes 移除 · `7837c53a` 文档归档 · `bd3f6562` 基线回写 + 一次性开关移除。
 
 ## [3.1.1-rc.5] - 2026-08-15
 

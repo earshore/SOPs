@@ -13,16 +13,18 @@
 - 处置：UPDATE_SNAPSHOTS=1 CI 重 seed + 事件记录 docs/archive/quality/npi-chromium-baseline-drift-rc6.md。
 - 机制说明见 tests/e2e/release-smoke.spec.ts assertPixelDiff（TD-E2E-01 per-engine/per-OS 基线）。
 
+## 进度（2026-08-16 更新）
+- ✅ 7837c53a / bd3f6562 两个 Quality Gate 全绿（run 31951014339 / 31952433336，10/10；smoke 93/93）。
+- ✅ CI-minted 基线已回写 docs/color-region-baselines/（`bd3f6562`），test.yml 一次性 UPDATE_SNAPSHOTS env 与上传 step 已移除。
+- ✅ 事件记录 docs/archive/quality/npi-chromium-baseline-drift-rc6.md 已更新；TECH_DEBT_BOARD 漂移闭环登记（本次提交）。
+- ✅ worknotes/open_debts.txt 分析产物移除（本次提交）。
+
 ## 剩余步骤
-1. 等 7837c53a 的 Quality Gate 完成（全 job）；该 run 中 smoke job 会重 seed 基线并上传 artifact `color-region-baselines`。
-2. 下载 artifact，取 npi-table-status-colors-light.png，commit 回 docs/color-region-baselines/。
-3. 移除 test.yml 的一次性 UPDATE_SNAPSHOTS env 与基线上传 step，更新 docs/archive/quality/ 事件记录、TECH_DEBT_BOARD（smoke 基线漂移条目）。
-4. 重新跑 Quality Gate 全绿（93/93）。
-5. 打 annotated tag v3.1.1-rc.6（附发版说明），推送触发 release.yml：
-   - release.yml 要求：tag 在 main 上、有一个成功的 test.yml run、`scripts/release/prepare-release.ts validate` 通过（版本对齐、CHANGELOG 章节、无 uncommitted changes）。
-   - 用 `gh release create v3.1.1-rc.6 --prerelease`（release.yml 是 push tag 触发构建产物+发布，若 workflow 未跑可用 gh release 直接创建 prerelease）。
-   - GitHub Latest 保持 v3.1.0（prerelease 不抢 Latest）。
-6. 交付报告：收口规划 + 执行记录。
+1. 等本次 doc 清理 commit 的 Quality Gate 全绿（10/10）。
+2. 打 annotated tag v3.1.1-rc.6（附发版说明），推送触发 release.yml（要求：tag 在 main、有成功 test.yml run、validate 通过）。
+3. 验证 GitHub Pre-release 创建成功、GitHub Latest 仍 v3.1.0。
+4. 发版后文档收尾：docs/RC6_CLOSURE_PLAN.md 归档 docs/archive/quality/、rc6_progress_state.md 移除、CHANGELOG 补「发布完成」记录。
+5. 交付报告：收口规划 + 执行记录。
 
 ## 其他事实
 - package.json version = 3.1.1-rc.6；CHANGELOG [3.1.1-rc.6] 章节已就绪（锚点 75192a67）。
