@@ -299,7 +299,7 @@ it('computes selection, target, prompt, and visual class branches', () => {
   );
   expect(panel.getListingTargetCardClass('selling-points')).toContain('var(--color-primary)');
   expect(panel.getListingTargetCardClass('selling-points')).toContain('var(--surface-card)');
-  expect(panel.getReviewTargetCardClass('review-insights')).toContain('var(--surface-card-hover)');
+  expect(panel.getReviewTargetCardClass('review-insights')).toContain('hover:bg-surface-card-hover');
   expect(panel.getListingTargetIconClass('missing')).toContain('fa-circle');
   expect(panel.getTargetCheckClass('selling-points')).toContain('bg-[var(--color-primary)]');
   expect(panel.getTargetColor('blue')).toBe('target-blue');
@@ -371,16 +371,19 @@ it('computes hero, progress, report, JSON, and confidence branches', () => {
   expect(panel.getReportJsonText()).toContain('"hello"');
   expect(panel.getReportJsonCharText()).not.toBe('');
   expect(panel.getResultColorEnd('review-insights')).toBe('orange');
-  expect(panel.getListingResultHeaderClass('selling-points')).toContain('bg-blue-50');
+  expect(panel.getListingResultHeaderClass('selling-points')).toContain('bg-[#eff6ff]');
   expect(panel.getReviewResultHeaderClass('review-insights')).toContain('bg-amber-50');
-  expect(panel.getResultIconWrapClass('missing')).toContain('bg-blue-100');
+  expect(panel.getResultIconWrapClass('missing')).toContain('bg-[#eff6ff]');
   expect(panel.getResultIconDisplayClass('selling-points')).toContain('icon-selling-points');
   expect(panel.getResultCategoryClass('review-insights')).toContain('text-amber-700');
   expect(panel.getHighlightClass('danger')).toHaveProperty(
     'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border-red-200',
     true
   );
-  expect(panel.getHighlightIconClass('info')).toHaveProperty('fa-circle-info text-blue-500', true);
+  expect(panel.getHighlightIconClass('info')).toHaveProperty(
+    'fa-circle-info text-[var(--module-accent-soft)]',
+    true
+  );
 
   panel.isAnalyzing = true;
   expect(panel.analysisHeroIsStrong).toBe(true);
@@ -489,9 +492,9 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   expect(panel.getAsinTextClass('B001')).toBe(
     'text-[var(--color-primary-dark,var(--color-primary))]'
   );
-  expect(panel.getAsinTextClass('B002')).toBe('text-[color:var(--color-text-tertiary)]');
+  expect(panel.getAsinTextClass('B002')).toBe('text-[color:var(--color-slate-400)]');
   expect(panel.getListingTargetCardClass('selling-points')).toContain(
-    'hover:bg-[var(--surface-card-hover)]'
+    'hover:bg-surface-card-hover'
   );
   expect(panel.getReviewTargetCardClass('review-insights')).toContain('var(--color-amber-400');
   expect(panel.getListingTargetIconWrapClass('selling-points')).toContain('var(--surface-card-hover)');
@@ -513,8 +516,8 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   expect(panel.runAnalysisButtonClass).toContain('cursor-not-allowed');
   expect(panel.analysisHeroAmbientClass).toBe('opacity-0');
   expect(panel.analysisHeroPatternClass).toBe('opacity-0');
-  expect(panel.analysisHeroTextClass).toBe('text-[color:var(--color-text-primary)]');
-  expect(panel.analysisHeroSubtextClass).toBe('text-[color:var(--color-text-secondary)]');
+  expect(panel.analysisHeroTextClass).toBe('text-[color:var(--color-slate-900)]');
+  expect(panel.analysisHeroSubtextClass).toBe('text-[color:var(--color-slate-500)]');
   expect(panel.analysisHeroMetricPillClass).toContain('bg-slate-100');
   expect(panel.analysisPerfButtonClass).toContain('bg-slate-50');
   expect(panel.analysisHeroIconWrapClass).toContain('bg-slate-100');
@@ -535,7 +538,7 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   );
   panel.isAnalyzing = true;
   expect(panel.reportStatusText).toContain('实时更新');
-  expect(panel.reportStatusBadgeClass).toContain('bg-blue-50');
+  expect(panel.reportStatusBadgeClass).toContain('bg-[#eff6ff]');
   expect(panel.reportStatusIconClass).toContain('animate-pulse');
   expect(panel.reportStatusBadgeText).toBe('实时生成');
   panel.perfSettings.settings.enableCache = false;
@@ -566,12 +569,14 @@ it('computes idle, disabled, fallback, and confidence edge branches', () => {
   expect(panel.getConfidenceTextBorderClass(49)).toContain('confidence-low-border');
 
   panelMocks.helperGetResultColor.mockReturnValueOnce('violet');
-  expect(panel.getListingResultHeaderClass('unknown')).toBe('bg-blue-50 border-b border-blue-100');
+  expect(panel.getListingResultHeaderClass('unknown')).toBe(
+    'bg-[#eff6ff] border-b border-[var(--module-accent-border)]'
+  );
   panelMocks.helperGetResultColor.mockReturnValueOnce('violet');
   expect(panel.getReviewResultHeaderClass('unknown')).toBe('bg-amber-50 border-b border-amber-100');
   panelMocks.helperGetResultColor.mockReturnValueOnce('violet');
   expect(panel.getResultCategoryClass('unknown')).toBe(
-    'bg-blue-50 text-blue-700 border border-blue-100'
+    'bg-[#eff6ff] text-[var(--module-accent-text)] border border-[var(--module-accent-border)]'
   );
   panelMocks.helperGetResultColor.mockReturnValueOnce('violet');
   expect(panel.getResultColorEnd('unknown')).toBe('indigo');

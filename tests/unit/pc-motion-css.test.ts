@@ -82,11 +82,13 @@ describe('PC motion CSS contract', () => {
     const css = readFileSync(transitionsCssPath, 'utf8');
     const variablesCss = readFileSync(variablesCssPath, 'utf8');
 
-    expect(variablesCss).toContain('--transition-interactive-properties:');
-    expect(variablesCss).toContain(
+    // B5-THM01: --transition-interactive-properties 令牌已归档（动效簇），
+    // 共享过渡工具类内联同一受约束属性清单。
+    expect(variablesCss).not.toContain('--transition-interactive-properties:');
+    expect(css).toContain(
       'color, background-color, border-color, fill, stroke, opacity, box-shadow, transform'
     );
-    expect(css).toContain('transition-property: var(--transition-interactive-properties)');
+    expect(css).toContain('transition-property:');
     expect(css).not.toMatch(/transition\s*:\s*all\b/);
   });
 
@@ -98,14 +100,14 @@ describe('PC motion CSS contract', () => {
     explicitMotionComponentPaths.forEach(cssPath => {
       expect(readFileSync(cssPath, 'utf8')).not.toMatch(/transition\s*:\s*all\b/);
     });
-    expect(badgesCss).toContain('background-color var(--duration-fast) var(--ease-smooth)');
-    expect(badgesCss).toContain('opacity var(--duration-fast) var(--ease-smooth)');
-    expect(badgesCss).toContain('transform var(--duration-fast) var(--ease-smooth)');
+    // B5-THM01/D14: .badge 过渡已收敛为离散属性字面值（200ms ease），不含 opacity/transform。
+    expect(badgesCss).toContain('background-color 200ms ease');
+    expect(badgesCss).toContain('border-color 200ms ease');
+    expect(badgesCss).toContain('color 200ms ease');
     expect(cardsCss).toContain('transform var(--duration-slow) var(--ease-spring)');
     expect(cardsCss).toContain('box-shadow var(--duration-slow) var(--ease-spring)');
-    expect(buttonsCss).toContain(
-      'transform var(--micro-duration-smooth, 250ms) var(--micro-ease-button, ease)'
-    );
+    // B5-THM01: --micro-* 令牌未落地，按钮微交互过渡为字面 250ms ease。
+    expect(buttonsCss).toContain('transform 250ms ease');
   });
 
   it('keeps converged PC module styles from animating every CSS property', () => {

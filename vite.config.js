@@ -4,8 +4,7 @@ import { dirname, resolve } from 'path';
 import { createRequire } from 'module';
 import { promisify } from 'util';
 import { gzip, brotliCompress, constants as zlibConstants } from 'zlib';
-import { createReadStream } from 'fs';
-import { copyFile, mkdir, readdir, readFile, stat, writeFile } from 'fs/promises';
+import { mkdir, readdir, readFile, stat, writeFile } from 'fs/promises';
 import { patchDeepChatBundleSource } from './config/patch-deep-chat-bundle.mjs';
 
 // ES 模块兼容的 __dirname 定义

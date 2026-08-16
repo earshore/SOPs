@@ -41,7 +41,7 @@ describe('Scraper template accessibility semantics', () => {
     expect(template).not.toContain("handleImportFiles($event, 'overwrite')");
     // Focus ring is Appearance-tokenized (theme Phase 1–2), not hard blue.
     expect(template).toContain(
-      'focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring,var(--color-primary))]'
+      'focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))]'
     );
     expect(emptyStateButton).not.toContain('role="button"');
     expect(emptyStateButton).not.toContain('tabindex="0"');

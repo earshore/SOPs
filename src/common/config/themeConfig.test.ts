@@ -179,8 +179,9 @@ describe('ThemeManager', () => {
       primaryLight: '#ffedd5',
       primaryDark: '#c2410c',
       primaryDarker: '#7c2d12',
-      // sunset has no custom focus → current document focus-ring
-      focusRing: '#2563eb',
+      // sunset has no custom focus → B2-THM01: --color-focus-ring 已无静态 CSS 值，
+      // 未应用 Appearance 时预览读文档现值为空
+      focusRing: '',
     } satisfies AppearanceThemeColors);
     expect(preview).not.toHaveProperty('secondary');
     expect(preview).not.toHaveProperty('success');
@@ -205,7 +206,8 @@ describe('ThemeManager', () => {
       primaryLight: '#dbeafe',
       primaryDark: '#1d4ed8',
       primaryDarker: '#1e3a8a',
-      focusRing: '#3b82f6',
+      // no focus override → B2-THM01: 文档 --color-focus-ring 无静态值（空）
+      focusRing: '',
     } satisfies AppearanceThemeColors);
     expect(Object.keys(preview as AppearanceThemeColors).sort()).toEqual(
       ['focusRing', 'primary', 'primaryDark', 'primaryDarker', 'primaryLight'].sort()

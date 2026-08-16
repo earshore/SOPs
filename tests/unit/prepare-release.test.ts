@@ -218,7 +218,11 @@ describe('v3.1.0 release metadata', () => {
     );
     expect(readme).toMatch(/\|\s*上一 GA\s*\|\s*`v3\.0\.12`\s*\|/);
     expect(readme).toContain(`\`0.1.0\`…\`${CURRENT_VERSION}\``);
-    expect(readme).toContain(`当前稳定版为 \`v${CURRENT_VERSION}\``);
+    expect(readme).toContain(
+      IS_PRE_RELEASE
+        ? `当前候选为 \`v${CURRENT_VERSION}\``
+        : `当前稳定版为 \`v${CURRENT_VERSION}\``
+    );
   });
 
   it('declares the current GA and candidate line in release policy', () => {
@@ -227,7 +231,7 @@ describe('v3.1.0 release metadata', () => {
     expect(policy).toMatch(/`v3\.1\.0`.*2026-08-12.*当前 GA/);
     expect(policy).toMatch(/`v3\.0\.12`.*2026-08-08.*上一 GA/);
     if (IS_PRE_RELEASE) {
-      expect(policy).toContain(`当前候选线为 \`v${CURRENT_VERSION}-rc.*\``);
+      expect(policy).toContain(`当前候选线为 \`v${CURRENT_VERSION}\``);
     } else {
       expect(policy).toContain('当前候选线关闭');
     }

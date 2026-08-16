@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1-rc.6] - 2026-08-16
+
+> 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.5` 基线上完成上线前阻塞清理：22 项测试失败清零（THM01 归档契约同步 + AI 分析测试 mock 补齐 + 模板断言更新）、CI 供应链加固（action SHA pin）、发布流水线生产探针与发布元数据同步（README / RELEASE_POLICY / 候选线）；`v3.1.1-rc.5` 发布时 CI 质量门禁为红的历史缺口在本候选关停——RC 必须带绿门禁发版。上一 GA 为 `v3.0.12`，当前 GA 为 `v3.1.0`，GitHub Latest 仍为 `v3.1.0`；回滚基线 `v3.1.0`。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Changed（变更）
+
+- **CI 供应链加固（SHA pin）**：`code-review.yml` 5 处 action 浮动 tag 固定 SHA（checkout V4.3.1 / setup-node V4.4.0 / CodeQL-init V3 / upload-artifact V4 / codeql-analyze V3），消除供应链投毒面。
+- **发布流水线生产探针**：`release.yml` 新增 `production-probe` job（`workflow_dispatch` 手动触发；`RELEASE_PROBE_SECRET` 空值时自动跳过），发布完成后可一键验证生产环境可用性。
+- **测试契约同步（THM01 归档后）**：`pc-design-token-css` 6 例 / `pc-motion-css` 2 例 / `themeConfig` 2 例断言与 B2/B5 归档契约对齐（focus-ring 链 → Appearance 聚焦色、容器/动效令牌 → 内联字面 + generated 契约）；`aiAnalysisPanelCurrent` 3 例随 THM01 主题迁移更新（`bg-[#eff6ff]` 等）。
+- 构建脚本清理：`vite.config.js` 移除未使用导入（`createReadStream` / `copyFile`）。
+
+### Fixed（修复）
+
+- **测试修复：AI 分析链路 mock 补齐**：`aiAnalysisService.test.ts` 补 `MASTER_ANALYSIS_SYSTEM_PROMPT` 导出（`e5a4e4f2` 提取系统提示词常量后 mock 缺失，导致 `runAIAnalysis` 4 例 + panel 2 例 callLLM 0 调用）。
+- **可访问性断言同步**：scraper / ui-p1-10 NPI 模板断言随 THM01 迁移更新（focus-visible 类、`divide-y sops-neutral-divider-soft` 切片边界）。
+- **发布元数据同步**：README / RELEASE_POLICY 当前候选线更新至 `v3.1.1-rc.6`；`prepare-release` 元数据断言修正（候选线格式对齐政策文档惯例）。
+
+### 门禁验收
+
+- type-check 0 error · lint 0/0 warning · vitest 全量通过 · build 零错误 · 覆盖率达标（lines ≥ 82 · statements ≥ 80 · functions ≥ 82 · branches ≥ 65）。
+
+### 锚点 commit
+
+- `<commit-sha>`（rc.6 bump + 门禁修复 + 文档同步）。
+
 ## [3.1.1-rc.5] - 2026-08-15
 
 > 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.4` 基线上纳入 TD-THM-01 遗留池 S 档第一批消化（B 批零消费归档 76 处 + S 档 30 处映射契约）与 S 批 1 迁移落地（text/focus/spacing 六族 13 处映射、2,434 处消费点），S 批 2 完成 bg/surface/status-dark/spacing 契约登记；`v3.1.1` GA 曾短暂发布后因债务消除未完成回退为 `v3.1.1-rc.5`，`v3.1.1` 系列 RC 序列重建（rc.1–rc.4 按真实锚点补发，anchor commit 见各章）；`package.json` version 与 RC 命名对齐（3.1.1-rc.3 → 3.1.1-rc.5，rc.4 锚点历史遗漏已审计登记）。

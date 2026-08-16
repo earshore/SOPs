@@ -61,7 +61,10 @@ it('keeps the NPI lifecycle table named, described, and grouped', () => {
   expectSrOnlyCaption(html, '新品生命周期跟踪明细表');
 
   const tableStart = html.indexOf('id="npi-lifecycle-table"');
-  const tableBodyStart = html.indexOf('<tbody class="divide-y divide-slate-100"', tableStart);
+  const tableBodyStart = html.indexOf(
+    '<tbody class="divide-y sops-neutral-divider-soft"',
+    tableStart
+  );
   const tableHeadHtml = html.slice(tableStart, tableBodyStart);
   const colgroupHeaders = tableHeadHtml.match(/<th\b[^>]*\bscope="colgroup"/g) ?? [];
   const columnHeaders =
