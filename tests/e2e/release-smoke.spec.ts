@@ -2,6 +2,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
+import { fileURLToPath } from 'node:url';
 
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
@@ -418,15 +419,26 @@ async function assertPixelDiff(
 ): Promise<void> {
   const fs = await import('node:fs');
   const path = await import('node:path');
-  // TD-E2E-01: append the engine suffix when a browser name is provided
-  // (chromium keeps the bare name to reuse the original baseline).
+  // TD-E2E-01: per-engine baselines — render engines differ at the pixel
+  // level even with CSS-pixel clip normalization (3.2% firefox diff vs the
+  // chromium baseline). Each engine keeps its own seeded baseline; chromium
+  // uses the bare name so the existing baseline stays valid.
+  // TD-E2E-01b: per-OS dimension — non-Linux dev machines (e.g. Windows)
+  // drift at the same order of magnitude (3.2%) vs the Linux-seeded
+  // baselines (font metrics / headless rendering). Linux keeps the bare
+  // name (CI is Linux); other platforms append their platform id so local
+  // runs self-seed without touching the CI baselines.
+  const osSuffix = process.platform === 'linux' ? '' : `-${process.platform}`;
   const baseName =
     options.browser && options.browser !== 'chromium'
-      ? `${baselineName}-${options.browser}`
-      : baselineName;
+      ? `${baselineName}-${options.browser}${osSuffix}`
+      : `${baselineName}${osSuffix}`;
   // ESM context: `__dirname` is unavailable; derive it from import.meta.url.
+  // fileURLToPath restores the Windows drive prefix that URL.pathname loses.
   const dirname =
-    typeof __dirname !== 'undefined' ? __dirname : path.dirname(new URL(import.meta.url).pathname);
+    typeof __dirname !== 'undefined'
+      ? __dirname
+      : path.dirname(fileURLToPath(import.meta.url));
   // Baselines live under docs/color-region-baselines/ because the repo
   // `.gitignore` excludes every `tests/**/*.png` (visual snapshots are
   // CI-local by project convention). The docs/ tree is versioned, so the
