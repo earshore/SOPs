@@ -31,7 +31,9 @@
 
 ## 销账记录
 
-| 日期 | 批次 日期 | 批次 | 销账条目 | 凭证提交 |
+| 日期 | 批次 日期 | 批次 | 销账条目 | 凭证提交 | 日期 | 批次 日期 | 批次 | 销账条目 | 凭证提交 |
+
+| 2026-08-16 | C1 批（零消费归档 + 低消费内联：遗留池 48→46） | 零消费归档 2 键（--color-black 0 处、--gradient-ocean 0 处，保留 .icon-container--gradient-ocean 类名样式块）；低消费内联 8 键 15 处（scrollbar-thumb-hover/track/width/width-thin/thumb-radius 8 处内联 rgba/transparent/px 字面——dark 翻转由 reset.css 专属 dark 块字面规则覆盖，安全；rounded-panel 3 处内联 8px；gradient-sunset 内联字面；color-border-focus 内联 var(--color-primary) fallback）；删 dark 镜像 1 行（--scrollbar-thumb-hover dark 块 rgba(255,255,255,0.25)）；留档甄别：--rounded-panel（workbench 别名中转，panel-radius 37x 经其链式消费）、--scrollbar-thumb（11x 消费，dark 翻转在 reset.css/dark-content-compat 桥接）、--panel-radius（别名）；验收：ci:quality 20/20（only-handwritten 48→46）· build ✓ · smoke 93/93 | 待提交 |
 
 | 2026-08-16 | 批 5（动效契约专项：遗留池 66→48）                                        | EASING +4（spring/elastic/back-in/back-out）+ DURATION +8（fastest/fast/normal/slow/slower/slowest/1s/2s） 迁入 design-tokens.ts 并生成 variables.generated.css（12 键逐值核对与手写一致，消费点零改动）；variables.css 收口删 32 行（18 键声明 + 孤立注释 + 空章节头 12/18/19 与 PC 交互过渡注释）；留档：--ease-smooth（产品缓动有意差异 0.22,1,0.36,1 vs generated 0.25,0.1,0.25,1，A 档留档）；验收：ci:quality 20/20（only-handwritten 48 / only-generated 381 / allowlist 20 / unallowlisted 0）· build ✓ · smoke 93/93（chromium 31 + ff/wk 62） | 待提交            |
 | ---------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |

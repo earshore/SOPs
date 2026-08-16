@@ -1486,7 +1486,7 @@
   }
 
   .amzf_search_box:focus-within {
-    border-color: var(--color-border-focus, var(--color-primary));
+    border-color: var(--color-primary);
   }
 
   .amzf_search_box:focus-within .amzf_search_icon {

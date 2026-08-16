@@ -158,7 +158,7 @@
 /* 锁定但保留滚动条占位（防止布局抖动） */
 .scroll-locked-stable {
   overflow: hidden !important;
-  padding-right: var(--scrollbar-width, 15px);
+  padding-right: 15px;
 }
 
 /* ========================================

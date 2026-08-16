@@ -191,7 +191,7 @@
 
 /* 渐变 - Sunset */
 .icon-container--gradient-sunset {
-  background: var(--gradient-sunset, linear-gradient(135deg, #f97316, #ec4899, #8b5cf6));
+  background: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
   color: white;
   box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
 }

@@ -958,7 +958,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 /* ==================== SOP 详情视图 ==================== */
 .sop-detail-header {
   background: var(--surface-workbench, var(--color-slate-50));
-  border-radius: var(--rounded-panel, 8px);
+  border-radius: 8px;
   padding: 2rem;
   margin-bottom: 2rem;
 }

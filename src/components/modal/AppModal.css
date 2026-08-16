@@ -23,7 +23,7 @@
   /* floating white glass → surface frost */
   --modal-floating-bg: color-mix(in srgb, var(--surface-panel, #ffffff) 92%, transparent);
   --modal-scrollbar-thumb: var(--scrollbar-thumb, var(--color-slate-300, #cbd5e1));
-  --modal-scrollbar-thumb-hover: var(--scrollbar-thumb-hover, var(--color-slate-400, #94a3b8));
+  --modal-scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
   --modal-focus-ring-offset: var(--modal-bg);
   --modal-focus-ring: var(--modal-accent);
   --modal-backdrop-bg: rgba(15, 23, 42, 0.5);

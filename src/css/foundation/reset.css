@@ -769,26 +769,26 @@ select:-webkit-autofill:focus {
 /* 全局滚动条宽度 */
 :root {
   scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb, rgba(0, 0, 0, 0.15)) var(--scrollbar-track, transparent);
+  scrollbar-color: var(--scrollbar-thumb, rgba(0, 0, 0, 0.15)) transparent;
 }
 
 /* Webkit 滚动条 */
 ::-webkit-scrollbar {
-  width: var(--scrollbar-width-thin, 6px);
-  height: var(--scrollbar-width-thin, 6px);
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--scrollbar-track, transparent);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb, rgba(0, 0, 0, 0.15));
-  border-radius: var(--scrollbar-thumb-radius, 3px);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover, rgba(0, 0, 0, 0.25));
+  background: rgba(0, 0, 0, 0.25);
 }
 
 /* 滚动条角落 */
@@ -991,8 +991,7 @@ a {
 .dark,
 [data-color-mode-resolved='dark'],
 [data-theme='dark'] {
-  scrollbar-color: var(--scrollbar-thumb, rgba(255, 255, 255, 0.15))
-    var(--scrollbar-track, transparent);
+  scrollbar-color: var(--scrollbar-thumb, rgba(255, 255, 255, 0.15)) transparent;
 }
 
 .dark ::-webkit-scrollbar-thumb,

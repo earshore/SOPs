@@ -179,7 +179,7 @@
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover, var(--color-slate-400));
+  background: rgba(0, 0, 0, 0.25);
 }
 
 /* ========================================

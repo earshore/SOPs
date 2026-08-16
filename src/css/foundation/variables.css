@@ -42,7 +42,6 @@
      基础 11 级色阶以 variables.generated.css 为准（已去掉相同重复）。
      ======================================== */
   --color-white: #ffffff;
-  --color-black: #000000;
 
   /* ========================================
      3. 色彩系统 — 语义令牌
@@ -186,7 +185,6 @@
 
   /* 装饰性渐变（--gradient-rainbow 已归档；primary/success/sunset/ocean 保留为显式契约） */
   --gradient-sunset: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
-  --gradient-ocean: linear-gradient(135deg, #06b6d4, #3b82f6, #8b5cf6);
 
   /* 玻璃效果背景 / 文字渐变：对应 --gradient-glass / --gradient-text 已归档 */
 
@@ -333,7 +331,6 @@
 
   /* ---- 滚动条 ---- */
   --scrollbar-thumb: rgba(255, 255, 255, 0.15);
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
 
   /* ---- 玻璃渐变（--gradient-glass dark 覆盖已归档） ---- */
 }
