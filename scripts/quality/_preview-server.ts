@@ -64,10 +64,11 @@ export async function launchPreviewServer(): Promise<PreviewServer> {
   const port = DEFAULT_PREVIEW_PORT;
   if (!(await portInUse(port))) {
     execSync('npm run build:app', { stdio: 'inherit' });
+    // Windows 下 npm 为 npm.cmd，需经 shell 解析（Node 24 直接 spawn .cmd 会抛 EINVAL）。
     const child: ChildProcess = spawn(
-      'npm',
-      ['run', 'preview', '--', '--host', '127.0.0.1', '--port', String(port), '--strictPort'],
+      `npm run preview -- --host 127.0.0.1 --port ${port} --strictPort`,
       {
+        shell: true,
         stdio: ['ignore', 'ignore', 'inherit'],
       }
     );
