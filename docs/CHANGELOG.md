@@ -35,9 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - type-check 0 error · lint 0/0 warning · vitest 全量通过 · build 零错误 · 覆盖率达标（lines ≥ 82 · statements ≥ 80 · functions ≥ 82 · branches ≥ 65）。
 
+- **发布完成（2026-08-16）**：`v3.1.1-rc.6` 以 annotated tag（commit `0b138ccc`）发布为 GitHub Pre-release，3 产物归档 SHA256（`sops-dist-3.1.1-rc.6.zip` / `build-info.json` / `SHA256SUMS.txt`）；GitHub Latest 保持 `v3.1.0`（GA），回滚基线 `v3.1.0`。
+
 ### 锚点 commit
 
-- `75192a67` rc.6 主体 · `1955e288` CHANGELOG 锚点 · `79a8feb9` CI chromium 安装 · `05d49587` 基线 seed · `64ebc815` worknotes 移除 · `7837c53a` 文档归档 · `bd3f6562` 基线回写 + 一次性开关移除。
+- `75192a67` rc.6 主体 · `1955e288` CHANGELOG 锚点 · `79a8feb9` CI chromium 安装 · `05d49587` 基线 seed · `64ebc815` worknotes 移除 · `7837c53a` 文档归档 · `bd3f6562` 基线回写 + 一次性开关移除 · `0b138ccc` release.yml 编译修复（发版 commit）。
 
 ## [3.1.1-rc.5] - 2026-08-15
 
