@@ -2584,11 +2584,122 @@
   --app-recent-accent-strong: color-mix(in srgb, var(--app-recent-accent) 45%, #ffffff);
 }
 
-/* [CONTRAST] flow 卡图标：minimax-red #c83a52 在暗 canvas 上仅 2.91:1 → 同 hue 提亮 */
-.dark .app-overview-container .app-flow-icon,
-[data-color-mode-resolved='dark'] .app-overview-container .app-flow-icon,
-[data-theme='dark'] .app-overview-container .app-flow-icon {
-  color: color-mix(in srgb, var(--app-overview-accent) 48%, #ffffff) !important;
+/* [CONTRAST] flow 卡图标 + hover rail/边框：dark 下 minimax 深色系（red #c83a52 等）在暗 canvas 对比不足
+   → 按各卡自身 hue 提亮（同 hue 契约），hover rail/边框同步同 hue，可读性与 card-ui 契约双保 */
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(1),
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(4),
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(5),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(1),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(4),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(5),
+[data-theme='dark'] .app-overview-container .app-flow-step.app-child-link:nth-child(1),
+[data-theme='dark'] .app-overview-container .app-flow-step.app-child-link:nth-child(4),
+[data-theme='dark'] .app-overview-container .app-flow-step.app-child-link:nth-child(5) {
+  --overview-card-accent: color-mix(in srgb, var(--app-overview-minimax-red) 48%, #ffffff);
+}
+
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(1) .app-flow-icon,
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(4) .app-flow-icon,
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(5) .app-flow-icon,
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(1)
+  .app-flow-icon,
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(4)
+  .app-flow-icon,
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(5)
+  .app-flow-icon,
+[data-theme='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(1)
+  .app-flow-icon,
+[data-theme='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(4)
+  .app-flow-icon,
+[data-theme='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(5)
+  .app-flow-icon {
+  color: color-mix(in srgb, var(--app-overview-minimax-red) 48%, #ffffff) !important;
+}
+
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(2),
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(6),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(2),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(6),
+[data-theme='dark'] .app-overview-container .app-flow-step.app-child-link:nth-child(2),
+[data-theme='dark'] .app-overview-container .app-flow-step.app-child-link:nth-child(6) {
+  --overview-card-accent: color-mix(in srgb, var(--app-overview-minimax-fire) 48%, #ffffff);
+}
+
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(2) .app-flow-icon,
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(6) .app-flow-icon,
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(2)
+  .app-flow-icon,
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(6)
+  .app-flow-icon,
+[data-theme='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(2)
+  .app-flow-icon,
+[data-theme='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(6)
+  .app-flow-icon {
+  color: color-mix(in srgb, var(--app-overview-minimax-fire) 48%, #ffffff) !important;
+}
+
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(3),
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(7),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(3),
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(7),
+[data-theme='dark'] .app-overview-container .app-flow-step.app-child-link:nth-child(3),
+[data-theme='dark'] .app-overview-container .app-flow-step.app-child-link:nth-child(7) {
+  --overview-card-accent: color-mix(in srgb, var(--app-overview-minimax-charcoal) 48%, #ffffff);
+}
+
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(3) .app-flow-icon,
+.dark .app-overview-container .app-flow-step.app-child-link:nth-child(7) .app-flow-icon,
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(3)
+  .app-flow-icon,
+[data-color-mode-resolved='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(7)
+  .app-flow-icon,
+[data-theme='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(3)
+  .app-flow-icon,
+[data-theme='dark']
+  .app-overview-container
+  .app-flow-step.app-child-link:nth-child(7)
+  .app-flow-icon {
+  color: color-mix(in srgb, var(--app-overview-minimax-charcoal) 48%, #ffffff) !important;
 }
 
 /* Dark: recent 行 per-app 徽章 token 在浅色下硬编码 -50/-100 档（如 #f5f3ff），不随主题翻转

@@ -133,17 +133,17 @@ function colorDistance(a: string, b: string): number {
 }
 
 function extractInsetRailColor(boxShadow: string): string | null {
-  const shadows = boxShadow.split(/,\s(?=(?:rgb|rgba)\()/);
+  const shadows = boxShadow.split(/,\s(?=(?:rgb|rgba|color)\()/);
   const rail = shadows.find(
     shadow => shadow.includes('inset') && shadow.includes(hoverRailShadowSignature)
   );
 
   if (!rail || rail.includes('rgba(0, 0, 0, 0)')) return null;
-  return rail.match(/rgba?\([^)]+\)/)?.[0] ?? null;
+  return rail.match(/rgba?\([^)]+\)|color\(srgb\s+[^)]+\)/)?.[0] ?? null;
 }
 
 function hasTransparentInsetRail(boxShadow: string): boolean {
-  const shadows = boxShadow.split(/,\s(?=(?:rgb|rgba)\()/);
+  const shadows = boxShadow.split(/,\s(?=(?:rgb|rgba|color)\()/);
   const rail = shadows.find(
     shadow => shadow.includes('inset') && shadow.includes(hoverRailShadowSignature)
   );
