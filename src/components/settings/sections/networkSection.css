@@ -163,10 +163,11 @@
 .dark .settings-proxy-form__btn--save,
 [data-color-mode-resolved='dark'] .settings-proxy-form__btn--save,
 [data-theme='dark'] .settings-proxy-form__btn--save {
+  /* [CONTRAST] 76%+纯色渐变仍 3.7:1 → 全段压深（primary 保持 blue-500 亮值） */
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--settings-accent) 76%, #000),
-    var(--settings-accent)
+    color-mix(in srgb, var(--settings-accent) 38%, #0f172a),
+    color-mix(in srgb, var(--settings-accent) 52%, #0f172a)
   );
 }
 
@@ -269,9 +270,10 @@
 .dark .settings-strategy-footer__btn--primary,
 [data-color-mode-resolved='dark'] .settings-strategy-footer__btn--primary,
 [data-theme='dark'] .settings-strategy-footer__btn--primary {
+  /* [CONTRAST] 76%+纯色渐变仍 3.7:1 → 全段压深（primary 保持 blue-500 亮值） */
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--settings-accent) 76%, #000),
-    var(--settings-accent)
+    color-mix(in srgb, var(--settings-accent) 38%, #0f172a),
+    color-mix(in srgb, var(--settings-accent) 52%, #0f172a)
   );
 }

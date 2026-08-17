@@ -138,7 +138,7 @@ const AUDIT_SOURCE = `
   // 解析背景图（linear/radial-gradient）的端点颜色，取平均作为近似底色
   const gradientAvg = (img) => {
     const stops = [];
-    const re = /rgba?\\([^)]*\\)|#[0-9a-fA-F]{3,8}/g;
+    const re = /rgba?\\([^)]*\\)|#[0-9a-fA-F]{3,8}|color(srgb [^)]*)/g;
     let m;
     while ((m = re.exec(img)) !== null) {
       const c = parseColor(m[0]);

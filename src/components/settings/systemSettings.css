@@ -538,6 +538,16 @@
   color: var(--color-warning-dark, #92400e);
 }
 
+.dark .settings-badge--ai-cost,
+[data-color-mode-resolved='dark'] .settings-badge--ai-cost,
+[data-theme='dark'] .settings-badge--ai-cost,
+.dark .settings-badge--alpha,
+[data-color-mode-resolved='dark'] .settings-badge--alpha,
+[data-theme='dark'] .settings-badge--alpha {
+  /* [CONTRAST] warning-dark 在暗底 mix 上仅 1.9:1 → 翻亮 */
+  color: var(--color-amber-300, #fcd34d);
+}
+
 .settings-badge--scrape {
   background: color-mix(in srgb, #06b6d4 14%, var(--settings-surface));
   color: color-mix(in srgb, #06b6d4 70%, var(--settings-text));
@@ -548,9 +558,23 @@
   color: var(--color-red-600, #b91c1c);
 }
 
+.dark .settings-badge--destructive,
+[data-color-mode-resolved='dark'] .settings-badge--destructive,
+[data-theme='dark'] .settings-badge--destructive {
+  /* [CONTRAST] red-600 在暗底 mix 上仅 3.16:1 → 翻亮 */
+  color: var(--color-red-400, #f87171);
+}
+
 .settings-badge--dev {
   background: color-mix(in srgb, var(--color-success, #10b981) 12%, var(--settings-surface));
   color: var(--color-green-600, #065f46);
+}
+
+.dark .settings-badge--dev,
+[data-color-mode-resolved='dark'] .settings-badge--dev,
+[data-theme='dark'] .settings-badge--dev {
+  /* [CONTRAST] green-600 在暗底 mix 上 4.28:1 → 翻亮 */
+  color: var(--color-green-400, #4ade80);
 }
 
 .settings-badge--instant {
@@ -1189,6 +1213,13 @@ select.settings-control {
   font-size: 0.625rem;
   font-weight: 600;
   line-height: 1.2;
+}
+
+/* [CONTRAST] warning-dark 在暗底仅 3.1:1 → 翻亮 */
+.dark .settings-note__badge,
+[data-color-mode-resolved='dark'] .settings-note__badge,
+[data-theme='dark'] .settings-note__badge {
+  color: var(--color-amber-300, #fcd34d);
 }
 
 .settings-tool-page-stack {

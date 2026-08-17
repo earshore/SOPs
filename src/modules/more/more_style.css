@@ -348,6 +348,12 @@
   background: var(--color-accent);
 }
 
+.dark .zn-avatar--assistant,
+[data-color-mode-resolved='dark'] .zn-avatar--assistant {
+  /* [CONTRAST] accent 已翻亮至 hue-400，白字头像仅 1.9-3.0:1 → 压深 mix */
+  background: color-mix(in srgb, var(--color-accent) 38%, #0f172a);
+}
+
 .zn-avatar--user {
   background: #f97316;
 }
@@ -355,6 +361,14 @@
 .ziniao-case-shell[data-case-theme='ad-acos-diagnosis'] .zn-avatar--assistant {
   /* amber accent: white fails 2.15:1 — use deep amber ink */
   color: var(--color-amber-950, #451a03);
+}
+
+.dark .ziniao-case-shell[data-case-theme='ad-acos-diagnosis'] .zn-avatar--assistant,
+[data-color-mode-resolved='dark']
+  .ziniao-case-shell[data-case-theme='ad-acos-diagnosis']
+  .zn-avatar--assistant {
+  /* [CONTRAST] dark 下头像底已压深（accent 38%+dark），深琥珀字 2.1:1 → 白字 */
+  color: #fff;
 }
 
 .zn-chat-stage + .zn-chat-stage {
@@ -752,6 +766,31 @@
   color: var(--color-slate-900);
 }
 
+/* [CONTRAST] 局部主题 var(--color-accent) 为各场景灯色（indigo-600/amber-500/teal-700…），
+   在暗底上仅 2.0-3.8:1；dark 下翻亮至对应 hue-400（数字圈/标签/链接同源变量）。 */
+.dark .ziniao-case-shell,
+[data-color-mode-resolved='dark'] .ziniao-case-shell {
+  --color-accent: var(--color-cyan-400, #22d3ee);
+}
+.dark .ziniao-case-shell[data-case-theme='bad-review-response'],
+[data-color-mode-resolved='dark'] .ziniao-case-shell[data-case-theme='bad-review-response'],
+.dark .ziniao-case-shell[data-case-theme='amazon-daily-report'],
+[data-color-mode-resolved='dark'] .ziniao-case-shell[data-case-theme='amazon-daily-report'] {
+  --color-accent: var(--color-indigo-400, #818cf8);
+}
+.dark .ziniao-case-shell[data-case-theme='ad-acos-diagnosis'],
+[data-color-mode-resolved='dark'] .ziniao-case-shell[data-case-theme='ad-acos-diagnosis'] {
+  --color-accent: var(--color-amber-400, #fbbf24);
+}
+.dark .ziniao-case-shell[data-case-theme='review-monitor'],
+[data-color-mode-resolved='dark'] .ziniao-case-shell[data-case-theme='review-monitor'] {
+  --color-accent: var(--color-teal-400, #2dd4bf);
+}
+.dark .ziniao-notice-shell,
+[data-color-mode-resolved='dark'] .ziniao-notice-shell {
+  --color-accent: var(--color-red-400, #f87171);
+}
+
 .dark .zn-card,
 [data-color-mode-resolved='dark'] .zn-card,
 .dark .zn-chat-card,
@@ -825,7 +864,19 @@
 
 .dark .zn-phase-grid h3 span,
 [data-color-mode-resolved='dark'] .zn-phase-grid h3 span {
-  background: color-mix(in srgb, var(--color-accent) 18%, var(--surface-card));
+  /* [CONTRAST] hue-400 文字在 18% mix 底上仍 4.1:1，提亮至 hue-200 档 */
+  color: color-mix(in srgb, var(--color-accent) 45%, #ffffff);
+  background: color-mix(in srgb, var(--color-accent) 22%, var(--surface-card));
+}
+
+/* [CONTRAST] stage banner 渐变用亮档 accent/secondary，白字仅 3.8:1 → 加深 stops */
+.dark .zn-stage-banner,
+[data-color-mode-resolved='dark'] .zn-stage-banner {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-accent) 52%, #0f172a),
+    color-mix(in srgb, var(--color-secondary) 58%, #0f172a)
+  );
 }
 
 .dark .zn-bubble,
@@ -837,9 +888,16 @@
 
 .dark .zn-msg--user .zn-bubble,
 [data-color-mode-resolved='dark'] .zn-msg--user .zn-bubble {
-  background: #2563eb;
-  border-color: #2563eb;
+  /* [CONTRAST] blue-600 上 12px meta 白字仅 3.48:1 → blue-700 同色相加深 */
+  background: #1d4ed8;
+  border-color: #1d4ed8;
   color: #fff;
+}
+
+.dark .zn-avatar--user,
+[data-color-mode-resolved='dark'] .zn-avatar--user {
+  /* [CONTRAST] orange-500 上白首字母仅 2.8:1 → orange-700 */
+  background: #c2410c;
 }
 
 .dark .zn-tool,
