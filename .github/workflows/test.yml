@@ -212,6 +212,9 @@ jobs:
 
       - name: Run release smoke E2E against dist
         run: npm run test:e2e:smoke:release
+        env:
+          UPDATE_SNAPSHOTS: 1 # GA 一次性（第二次）：跨机渲染差异导致 NPI light 基线与 runner 不一致（0.03347），
+          # 必须在 runner 上 CI-minted 重 seed（TD-E2E-01b）；seed 后连同 artifact 回写并移除
 
       - name: Upload re-seeded color-region baselines
         # GA 一次性：CI-minted baselines 必须提交回 docs/color-region-baselines/
