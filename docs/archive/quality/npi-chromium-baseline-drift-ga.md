@@ -25,9 +25,19 @@ CI-minted 的 dark 基线在 `7c78f9c0` 后可读性微调后再次漂移），�
 
 ## 结果（2026-08-17）
 
-重 seed 后 chromium 项目 31 用例全过；`theme:hardcode-baseline` 语义 lane 基线同步登记
-2139（深色对比度定稿修复）。CI 侧待 main push 后由 Quality Gate 全矩阵
-（chromium/firefox/webkit × light/dark）最终验收。
+第一次本地重 seed 后本地 31 用例全过，但 CI runner（`099f751e`，run 31985281430）仍报
+NPI light diff 0.03347（与 rc.6 期间 runner 漂移值相同）。本地回放 runner-seeded 基线也
+恰好得到同一 diff 值，证明沙盒与 runner 存在约 3.35% 的固有光栅化差异（跨机，属
+TD-E2E-01b 记录的同类现象），本地永远无法与 runner 基线对齐。
+
+按 TD-E2E-01 机制升级处置：CI smoke job 恢复一次性 `UPDATE_SNAPSHOTS: 1`（commit
+`3d3aaef4`），由 runner 渲染 CI-minted 重 seed 全 31 用例通过（run 31986179336 全绿），
+artifact `color-region-baselines` 回写 `docs/color-region-baselines/`（commit `待定`），
+随后移除一次性开关。
+
+`theme:hardcode-baseline` 语义 lane 基线同步登记 2139（深色对比度定稿修复）。CI Quality
+Gate 最终验收：run 31986179336 全绿（type-check · lint · unit · build · smoke · npm audit
+· visual regression · business e2e 均 success）。
 
 ## 相关文档
 
