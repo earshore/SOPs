@@ -321,14 +321,15 @@
 [data-color-mode-resolved='dark'] .category-filter-btn[aria-pressed='true'],
 [data-theme='dark'] .category-filter-btn.active,
 [data-theme='dark'] .category-filter-btn[aria-pressed='true'] {
+  /* [CONTRAST] 76% 混合后白字 4.02:1 → 62% 压至 ~4.8:1 */
   background: color-mix(
     in srgb,
-    var(--button-filter-active-bg, var(--button-filter-accent, var(--color-primary))) 76%,
+    var(--button-filter-active-bg, var(--button-filter-accent, var(--color-primary))) 62%,
     #000
   ) !important;
   border-color: color-mix(
     in srgb,
-    var(--button-filter-active-border, var(--button-filter-accent, var(--color-primary))) 76%,
+    var(--button-filter-active-border, var(--button-filter-accent, var(--color-primary))) 62%,
     #000
   ) !important;
 }

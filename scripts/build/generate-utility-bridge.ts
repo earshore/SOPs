@@ -123,7 +123,8 @@ const HUE_BG_TINT_HOVER: Record<string, number> = { '50': 16, '100': 22, '200': 
 /** hue 文字平移: 深读色 → 亮读色 (Radix/Material 深色惯例) */
 const HUE_TEXT: Record<string, number> = {
   '500': 400,
-  '600': 400,
+  // 600 → 300: 与 dark-content-compat 意图一致；400 档在暗色卡面上仅 4.1-4.4:1
+  '600': 300,
   '700': 300,
   '800': 300,
   '900': 200,

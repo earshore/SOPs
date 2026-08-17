@@ -3137,11 +3137,11 @@
   background-color: var(--color-amber-800, #92400e);
 }
 
-/* Saturated -500 ink on dark cards (red-500 on slate-800 = 3.9) → -400 */
+/* Saturated -500 ink on dark cards (red-500 on slate-800 = 3.9) → -300 */
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
-  :is(.module-container, .settings-panel-root)
+  :is(.module-container, .settings-panel-root, .ql-page)
   .text-red-500 {
-  color: var(--color-red-400, #f87171);
+  color: var(--color-red-300, #fca5a5) !important;
 }
 
 :where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
@@ -3182,4 +3182,1188 @@
   :is(.module-container, .settings-panel-root)
   .bg-sky-600.text-white {
   background-color: var(--color-sky-700, #0369a1);
+}
+
+/* [CONTRAST] accent(500/800 → var(--color-accent)) 在暗色 indigo 卡面仅 4.2:1 → 提至 indigo-300 */
+:where(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.module-container, .settings-panel-root)
+  :is(.text-accent-500, .text-accent-600, .text-accent-700, .text-accent-800) {
+  color: var(--module-accent-text, #a5b4fc);
+}
+
+/* ============================================================
+   [LIGHT-COMPAT] 浅色模式可读性对等修复
+   审计（audit-dark-contrast.ts light 通道）在浅色画布测得：
+   - 中性 slate-400/500 文字与图标对比不足（侧栏、折叠箭头、计数）
+   - hue 500 图标/小字在浅底 2.2-2.6:1，600 小字 3.1-4.4:1
+   - 白字 500/600 彩底徽章/按钮 2.1-4.3:1
+   全部限定浅色根（html 无 dark 标记），深色走既有翻转规则不受影响。
+   ============================================================ */
+
+/* ---- 中性文字/图标：400 → 500，500 → 600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .text-slate-400 {
+  color: var(--color-slate-500, #64748b);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .text-slate-500 {
+  color: var(--color-slate-600, #475569);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[color\:var\(--color-slate-400\,_\#94a3b8\)\],
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[color\:var\(--color-slate-400\,#94a3b8\)\],
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[color\:var\(--color-slate-400\)\] {
+  color: var(--color-slate-500, #64748b);
+}
+/* 兼容任意值类的各种转义形态（属性子串匹配最稳） */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  [class*='text-[color:var(--color-slate-400'] {
+  color: var(--color-slate-500, #64748b) !important;
+}
+
+/* ---- hue 500 图标/文字 → 600（浅底 2.2-2.6:1 → 3.2:1+） ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-amber-500) {
+  color: var(--color-amber-600, #d97706);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-orange-500) {
+  color: var(--color-orange-600, #ea580c);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-yellow-500) {
+  /* tint 底（yellow-50）600 仅 2.4:1 → 700 */
+  color: var(--color-yellow-700, #a16207);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-emerald-500) {
+  color: var(--color-emerald-600, #059669);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-green-500) {
+  color: var(--color-green-600, #16a34a);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-teal-500) {
+  color: var(--color-teal-600, #0d9488);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-lime-500) {
+  color: var(--color-lime-600, #65a30d);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-red-500) {
+  color: var(--color-red-600, #dc2626);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-rose-500) {
+  color: var(--color-rose-600, #e11d48);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-pink-500) {
+  color: var(--color-pink-600, #db2777);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-fuchsia-500) {
+  color: var(--color-fuchsia-600, #c026d3);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-purple-500) {
+  color: var(--color-purple-600, #9333ea);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-violet-500) {
+  color: var(--color-violet-600, #7c3aed);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-indigo-500) {
+  color: var(--color-indigo-600, #4f46e5);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-blue-500) {
+  color: var(--color-blue-600, #2563eb);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-sky-500) {
+  color: var(--color-sky-600, #0284c7);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-cyan-500) {
+  color: var(--color-cyan-600, #0891b2);
+}
+
+/* ---- hue 600 小字 → 700（浅底 3.1-4.4:1 → 4.8:1+） ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-amber-600) {
+  color: var(--color-amber-700, #b45309);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-orange-600) {
+  color: var(--color-orange-700, #c2410c);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-yellow-600) {
+  color: var(--color-yellow-700, #a16207);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-emerald-600) {
+  color: var(--color-emerald-700, #047857);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-green-600) {
+  color: var(--color-green-700, #15803d);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-teal-600) {
+  color: var(--color-teal-700, #0f766e);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-lime-600) {
+  color: var(--color-lime-700, #4d7c0f);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-red-600) {
+  color: var(--color-red-700, #b91c1c);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-rose-600) {
+  color: var(--color-rose-700, #be123c);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-pink-600) {
+  color: var(--color-pink-700, #be185d);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-fuchsia-600) {
+  color: var(--color-fuchsia-700, #a21caf);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-purple-600) {
+  color: var(--color-purple-700, #7e22ce);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-violet-600) {
+  color: var(--color-violet-700, #6d28d9);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-indigo-600) {
+  color: var(--color-indigo-700, #4338ca);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-blue-600) {
+  color: var(--color-blue-700, #1d4ed8);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-sky-600) {
+  color: var(--color-sky-700, #0369a1);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-cyan-600) {
+  color: var(--color-cyan-700, #0e7490);
+}
+
+/* ---- 白字 500/600 彩底徽章/按钮 → 700 档（浅色 2.1-4.3:1 → 4.8:1+；
+   深色既有 Saturated 段规则特异性更高，同向不冲突） ---- */
+:is(.bg-amber-500, .bg-amber-600).text-white,
+:is(.bg-amber-500, .bg-amber-600):has(.text-white) {
+  background-color: var(--color-amber-700, #b45309);
+}
+:is(.bg-orange-500, .bg-orange-600).text-white,
+:is(.bg-orange-500, .bg-orange-600):has(.text-white) {
+  background-color: var(--color-orange-700, #c2410c);
+}
+:is(.bg-emerald-500, .bg-emerald-600).text-white,
+:is(.bg-emerald-500, .bg-emerald-600):has(.text-white) {
+  background-color: var(--color-emerald-700, #047857);
+}
+:is(.bg-green-500, .bg-green-600).text-white,
+:is(.bg-green-500, .bg-green-600):has(.text-white) {
+  background-color: var(--color-green-700, #15803d);
+}
+:is(.bg-teal-500, .bg-teal-600).text-white,
+:is(.bg-teal-500, .bg-teal-600):has(.text-white) {
+  background-color: var(--color-teal-700, #0f766e);
+}
+:is(.bg-purple-500, .bg-purple-600).text-white,
+:is(.bg-purple-500, .bg-purple-600):has(.text-white) {
+  background-color: var(--color-purple-700, #7e22ce);
+}
+:is(.bg-violet-500, .bg-violet-600).text-white,
+:is(.bg-violet-500, .bg-violet-600):has(.text-white) {
+  background-color: var(--color-violet-700, #6d28d9);
+}
+:is(.bg-red-500, .bg-red-600).text-white,
+:is(.bg-red-500, .bg-red-600):has(.text-white) {
+  background-color: var(--color-red-700, #b91c1c);
+}
+:is(.bg-rose-500, .bg-rose-600).text-white,
+:is(.bg-rose-500, .bg-rose-600):has(.text-white) {
+  background-color: var(--color-rose-700, #be123c);
+}
+:is(.bg-pink-500, .bg-pink-600).text-white,
+:is(.bg-pink-500, .bg-pink-600):has(.text-white) {
+  background-color: var(--color-pink-700, #be185d);
+}
+:is(.bg-blue-500, .bg-blue-600).text-white,
+:is(.bg-blue-500, .bg-blue-600):has(.text-white) {
+  background-color: var(--color-blue-700, #1d4ed8);
+}
+:is(.bg-sky-500, .bg-sky-600).text-white,
+:is(.bg-sky-500, .bg-sky-600):has(.text-white) {
+  background-color: var(--color-sky-700, #0369a1);
+}
+:is(.bg-cyan-500, .bg-cyan-600).text-white,
+:is(.bg-cyan-500, .bg-cyan-600):has(.text-white) {
+  background-color: var(--color-cyan-700, #0e7490);
+}
+:is(.bg-indigo-500, .bg-indigo-600).text-white,
+:is(.bg-indigo-500, .bg-indigo-600):has(.text-white) {
+  background-color: var(--color-indigo-700, #4338ca);
+}
+:is(.bg-fuchsia-500, .bg-fuchsia-600).text-white,
+:is(.bg-fuchsia-500, .bg-fuchsia-600):has(.text-white) {
+  background-color: var(--color-fuchsia-700, #a21caf);
+}
+:is(.bg-lime-500, .bg-lime-600).text-white,
+:is(.bg-lime-500, .bg-lime-600):has(.text-white) {
+  background-color: var(--color-lime-700, #4d7c0f);
+}
+:is(.bg-yellow-500, .bg-yellow-600).text-white,
+:is(.bg-yellow-500, .bg-yellow-600):has(.text-white) {
+  background-color: var(--color-yellow-700, #a16207);
+}
+:is(.bg-slate-400, .bg-slate-500).text-white,
+:is(.bg-slate-400, .bg-slate-500):has(.text-white) {
+  background-color: var(--color-slate-600, #475569);
+}
+:is(.bg-primary-500, .bg-primary-600).text-white,
+:is(.bg-primary-500, .bg-primary-600):has(.text-white) {
+  background-color: var(--color-primary-darker, #1d4ed8);
+}
+:is(.bg-accent-500, .bg-accent-600).text-white,
+:is(.bg-accent-500, .bg-accent-600):has(.text-white) {
+  background-color: var(--color-accent-dark, #4f46e5);
+}
+
+/* module-accent 白字 chips：indigo-500 白字 4.1:1 → 混深 12% */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .bg-\[var\(--module-accent\)\].text-white,
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .bg-\[var\(--module-accent\)\]:has(.text-white) {
+  background-color: color-mix(in srgb, var(--module-accent, #6366f1) 88%, #000);
+}
+
+/* toast 图标：浅色画布绿/琥珀/红 500 档图标 2.1-3.3:1 → 600 档 */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .toast-success i {
+  color: var(--color-green-600, #16a34a);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .toast-warning i {
+  color: var(--color-amber-600, #d97706);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .toast-error i {
+  color: var(--color-red-600, #dc2626);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .toast-info i {
+  color: var(--color-blue-600, #2563eb);
+}
+
+/* SOP 状态徽章：green-600 字在 green-100 底 3.1:1 → green-700 */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sop-status-badge.sop-status-active {
+  color: var(--color-green-700, #15803d);
+}
+
+/* 侧栏模块图标：白字渐变底 2.9:1 → 渐变混深 */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  .sidebar-module-icon {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--sidebar-primary) 58%, #0f172a),
+    color-mix(in srgb, var(--sidebar-accent) 62%, #0f172a)
+  ) !important;
+  box-shadow: 0 10px 20px -14px var(--sidebar-shadow) !important;
+}
+
+/* ---- 共享筛选按钮 active：primary(blue-500) 白字 3.68:1 → primary-darker ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.category-filter-btn.active, .category-filter-btn[aria-pressed='true']) {
+  background: var(--color-primary-darker, #1d4ed8) !important;
+  border-color: var(--color-primary-darker, #1d4ed8) !important;
+}
+
+/* ---- .btn-icon（技能卡行内图标）slate-400 白底 2.56:1 → slate-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .btn-icon {
+  color: var(--color-slate-500, #64748b);
+}
+
+/* ---- .amzpt_tag（工具对比表标签）slate-500 浅灰底 4.34:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .amzpt_tag {
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- NPI 状态文字：purple-500 白底 3.5:1 / green-600 白底 3.4-3.8:1 → 深一档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.npi-status-todo, .npi-status-pending) {
+  color: var(--color-purple-600, #9333ea);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.npi-status-done, .npi-status-ok, .npi-status-pass) {
+  color: var(--color-green-700, #15803d);
+}
+
+/* ---- 侧栏分类迷你图标（text-[10px] 彩字浅底 2.2-2.9:1）→ 700 档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-amber-500) {
+  color: var(--color-amber-700, #b45309);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-orange-500) {
+  color: var(--color-orange-700, #c2410c);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-emerald-500) {
+  color: var(--color-emerald-700, #047857);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-teal-500) {
+  color: var(--color-teal-700, #0f766e);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-green-500) {
+  color: var(--color-green-700, #15803d);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-red-500) {
+  color: var(--color-red-700, #b91c1c);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-cyan-500) {
+  color: var(--color-cyan-700, #0e7490);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-sky-500) {
+  color: var(--color-sky-700, #0369a1);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-purple-500) {
+  color: var(--color-purple-700, #7e22ce);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-blue-500) {
+  color: var(--color-blue-700, #1d4ed8);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-violet-500) {
+  color: var(--color-violet-700, #6d28d9);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-pink-500) {
+  color: var(--color-pink-700, #be185d);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-rose-500) {
+  color: var(--color-rose-700, #be123c);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-yellow-500) {
+  color: var(--color-yellow-700, #a16207);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-indigo-500) {
+  color: var(--color-indigo-700, #4338ca);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-fuchsia-500) {
+  color: var(--color-fuchsia-700, #a21caf);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  :where(.text-lime-500) {
+  color: var(--color-lime-700, #4d7c0f);
+}
+
+/* ---- 任意值 slate-400（text-[color:var(--color-slate-400)] 及带 fallback 变体，见上方规则组） ---- */
+
+/* ---- PPC 核心思维框架渐变卡：emerald-500→teal-600 白字 3.77:1 → 深一档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.from-emerald-500, .from-emerald-600).to-teal-600.text-white,
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.from-emerald-500, .from-emerald-600).to-teal-600:has(.text-white) {
+  background-color: var(--color-emerald-700, #047857) !important;
+  background-image: linear-gradient(
+    to right,
+    var(--color-emerald-600, #059669),
+    var(--color-teal-700, #0f766e)
+  ) !important;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.from-emerald-500, .from-emerald-600).to-teal-600
+  .text-emerald-200 {
+  color: var(--color-emerald-100, #d1fae5);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.from-emerald-500, .from-emerald-600).to-teal-600
+  .text-amber-300 {
+  color: var(--color-amber-200, #fde68a);
+}
+
+/* ---- H-QL dark-tile 芯片：浅色画布白字白底 1:1 → 深字浅底 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ql-page
+  .ql-dark-tile:not(:where(.bg-slate-800, .bg-slate-900, [class*='from-slate-8']) .ql-dark-tile) {
+  background: rgba(15, 23, 42, 0.06) !important;
+  color: var(--color-slate-800, #1e293b) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+/* ---- H-QL 深色渐变卡（from-slate-8→9）：light 下被模块卡片化规则强制白底，白字 1:1 → 保持深底 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ql-page
+  :where([class*='from-slate-8'], [class*='from-slate-9']):where([class*='bg-gradient-to-']) {
+  background: #0f172a !important;
+  color: #ffffff !important;
+}
+/* ---- H-QL 深色卡内文字：模块 .text-white :where(h1..) 会把文字翻成 slate-900，这里回写白色 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ql-page
+  :where([class*='from-slate-8'], [class*='from-slate-9']):where([class*='bg-gradient-to-'])
+  :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong, em) {
+  color: #ffffff !important;
+}
+
+/* ---- H-QL 红底白字徽章 red-400 白字 2.77:1 → red-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ql-page
+  .bg-red-400.text-white {
+  background-color: var(--color-red-600, #dc2626) !important;
+}
+
+/* ---- H-QL 提示图标 orange-400 白底 2.26:1 → orange-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ql-page
+  .text-orange-400 {
+  color: var(--color-orange-500, #f97316);
+}
+
+/* ---- action-btn-primary（技能卡主按钮）blue-500 白字 3.68:1 → blue-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.action-btn-primary, .action-btn--primary) {
+  background-color: var(--color-primary-dark, #2563eb) !important;
+  border-color: var(--color-primary-dark, #2563eb) !important;
+}
+
+/* ---- .amzpa_list（组合卡列表）slate-500 浅底 4.34:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.amzpa_list, .amzpa_list-danger, .amzpa_list-warning, .amzpa_list-success) {
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- AI 分析主按钮文字 slate-500 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.ai-analysis-primary-split__main) {
+  color: var(--color-slate-600, #475569) !important;
+}
+
+/* ---- app-flow-index 序号 slate-400 白底 2.34:1 → slate-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .app-flow-index {
+  color: var(--color-slate-500, #64748b);
+}
+
+/* ---- H-QL 清单 ✓/✗/• 500 档 tint 底 2.9-4.3:1 → 700 档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-emerald-500) {
+  color: var(--color-emerald-700, #047857);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-red-500) {
+  color: var(--color-red-700, #b91c1c);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-amber-500) {
+  color: var(--color-amber-700, #b45309);
+}
+
+/* ---- rose-400（白底 3.0:1）→ rose-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-rose-400) {
+  color: var(--color-rose-600, #e11d48);
+}
+
+/* ---- sop 流程箭头 slate-400 白底 2.56:1 → slate-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sop-process-arrow {
+  color: var(--color-slate-500, #64748b);
+}
+
+/* ---- amzpa_timeline_tag（时间轴标签）orange-500 浅底 3.4:1 → orange-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amzpa_timeline_tag {
+  color: var(--color-orange-700, #c2410c);
+}
+
+/* ---- text-primary-500 / text-accent-500/600 语义文字（H-QL 等） ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-primary-500) {
+  color: var(--color-primary-dark, #2563eb);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :where(.text-accent-500, .text-accent-600, .text-accent-700, .text-accent-800) {
+  color: var(--color-accent-dark, #4f46e5);
+}
+
+/* ---- 红底深字小标签（高优先等）red-700 on red-200 4.2:1 → red-800 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .bg-red-200.text-red-700 {
+  color: var(--color-red-800, #991b1b);
+}
+
+/* ---- dark 彩色徽章（200 底已被映射为深底，700/800 字被映射为 300 档，4.4x:1）→ 再提亮一档 ---- */
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(
+    .bg-red-100.text-red-700,
+    .bg-red-100.text-red-800,
+    .bg-red-200.text-red-700,
+    .bg-red-200.text-red-800
+  ) {
+  color: #fecaca;
+}
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(
+    .bg-amber-100.text-amber-700,
+    .bg-amber-100.text-amber-800,
+    .bg-amber-200.text-amber-700,
+    .bg-amber-200.text-amber-800
+  ) {
+  color: #fde68a;
+}
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(
+    .bg-emerald-100.text-emerald-700,
+    .bg-emerald-100.text-emerald-800,
+    .bg-emerald-200.text-emerald-700,
+    .bg-emerald-200.text-emerald-800
+  ) {
+  color: #a7f3d0;
+}
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(
+    .bg-purple-100.text-purple-700,
+    .bg-purple-100.text-purple-800,
+    .bg-purple-200.text-purple-700,
+    .bg-purple-200.text-purple-800
+  ) {
+  color: #e9d5ff;
+}
+
+/* ---- NPI 失败态 red-600 浅底 3.5:1 → red-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.npi-status-fail, .npi-status-fail-soft) {
+  color: var(--color-red-700, #b91c1c);
+}
+
+/* ---- .amzpa_dual_points（双卡对照）slate-500 浅灰底 4.4:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amzpa_dual_points
+  span {
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- Keyword Hunter 空态提示 slate-400 白底 2.34:1 → slate-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .keyword-hunter-input-snapshot-empty
+  span {
+  color: var(--color-slate-500, #64748b);
+}
+
+/* ---- App Center 最近目录筛选 slate-400 白底 → slate-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .app-overview-recent-filter-directory
+  > span {
+  color: var(--color-slate-500, #64748b);
+}
+
+/* ---- App Center 列数切换 active：rose-800 字配 primary-darker 底 → 白字 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .app-overview-recent-columns-toggle
+  :is(.category-filter-btn.active, .category-filter-btn[aria-pressed='true']) {
+  color: #ffffff !important;
+}
+
+/* ---- App Center 列数切换 active 图标：rose-800 配 primary-darker 底 → 白 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .app-overview-recent-columns-toggle
+  :is(.category-filter-btn.active, .category-filter-btn[aria-pressed='true'])
+  i {
+  color: #ffffff !important;
+}
+
+/* ---- App Center 视图切换 active：同被强制 primary-darker 底，红字 1.06:1 → 白字 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .app-overview-view-toggle
+  :is(.category-filter-btn.active, .category-filter-btn[aria-pressed='true']),
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .app-overview-view-toggle
+  :is(.category-filter-btn.active, .category-filter-btn[aria-pressed='true'])
+  i,
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .app-overview-view-toggle
+  :is(.category-filter-btn.active, .category-filter-btn[aria-pressed='true'])
+  span {
+  color: #ffffff !important;
+}
+
+/* ---- App Center 卡片链接 accent 文字（3.4-4.4:1）→ 混深 22% ink ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .app-overview-card
+  :is(.app-card-primary-link, .app-child-link),
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .app-overview-card
+  :is(.app-card-primary-link, .app-child-link):hover {
+  color: color-mix(in srgb, var(--color-accent, #3b82f6) 76%, #0f172a);
+}
+
+/* ---- H-Calendar 品牌色任意值（浅灰底 1.5-3.4:1）→ 深一档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[\#00A8E1\] {
+  color: #0073a8;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[\#FFC107\] {
+  color: #b8860b;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[\#FF9800\] {
+  color: #e65100;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[\#FFD700\] {
+  color: #b8860b;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[\#00BFFF\] {
+  color: #0284c7;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[\#4CAF50\] {
+  color: #2e7d32;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[\#FF69B4\] {
+  color: #d81b60;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[\#9E9E9E\] {
+  color: #616161;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-\[\#F59E0B\] {
+  color: #b45309;
+}
+
+/* ---- App Center / Skills 搜索图标 slate-400 白底 → slate-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.app-overview-recent-toolbar, .skills-page)
+  i.fa-search {
+  color: var(--color-slate-500, #64748b);
+}
+
+/* ---- SOPs 模块白字渐变卡（sops_style 浅色映射 600 档，白字 3.2-3.8:1 不达标）→ 深一档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  #sops_content_area
+  .module-container
+  [class*='from-emerald-'].text-white,
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  #sops_content_area
+  .module-container
+  [class*='from-teal-'].text-white {
+  background-color: var(--color-emerald-700, #047857) !important;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  #sops_content_area
+  .module-container
+  [class*='from-amber-'].text-white,
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  #sops_content_area
+  .module-container
+  [class*='from-orange-'].text-white {
+  background-color: var(--color-amber-700, #b45309) !important;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  #sops_content_area
+  .module-container
+  [class*='from-red-'].text-white,
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  #sops_content_area
+  .module-container
+  [class*='from-rose-'].text-white {
+  background-color: var(--color-red-700, #b91c1c) !important;
+}
+
+/* ---- SOPs 深色卡（from-slate-8→9）内 module-accent-text：indigo-600 深底 2.15:1 → 提亮 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  #sops_content_area
+  .module-container
+  [class*='from-slate-8']
+  :where([class*='module-accent-text']) {
+  color: var(--color-indigo-200, #c7d2fe) !important;
+}
+
+/* ============================================================
+   [LIGHT-COMPAT-2] 第二轮浅色可读性——审计工具修复后暴露的剩余缺陷
+   ============================================================ */
+
+/* ---- 筛选胶囊计数徽章 em（App Center/PPC 等）slate-500 浅底 4.21:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .category-filter-btn
+  em {
+  color: var(--color-slate-600, #475569);
+}
+/* active（深蓝底）徽章回到白字 */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .category-filter-btn.active
+  em,
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .category-filter-btn[aria-pressed='true']
+  em {
+  color: #ffffff;
+}
+
+/* ---- Home 启动台徽章图标 cyan-500 浅底 2.21:1 → cyan-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .workbench-launchpad__badge
+  .fas {
+  color: var(--color-cyan-700, #0e7490);
+}
+
+/* ---- 页面说明 wb-description slate-500 浅底 4.36-4.5:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .wb-description {
+  color: var(--color-slate-600, #475569) !important;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amz-hub-overview
+  .amz-hub-hero
+  .wb-description {
+  color: var(--color-slate-600, #475569) !important;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .app-overview-hero
+  .wb-description {
+  color: var(--color-slate-600, #475569) !important;
+}
+
+/* ---- Deep Chat 面板标题 slate-500 浅底 4.47-4.49:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.deep-chat-panel-title, .deep-chat-panel-title--prompt) {
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- S-Permission 矩阵减号图标 slate-300 白底 1.48:1 → slate-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .fa-minus.text-slate-300 {
+  color: var(--color-slate-500, #64748b);
+}
+
+/* ---- S-Email 图例色块 amber-300/purple-300 白底 1.4-1.8:1 → 深一档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-amber-300.fa-square {
+  color: var(--color-amber-600, #d97706);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-purple-300.fa-square {
+  color: var(--color-purple-500, #a855f7);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-red-400.fa-chevron-down {
+  color: var(--color-red-500, #ef4444);
+}
+
+/* ---- S-NegReview/S-QA 频次徽章 emerald-200 底 emerald-700 字 4.28:1 → 800 字 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .bg-emerald-200.text-emerald-700 {
+  color: var(--color-emerald-800, #065f46);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .bg-amber-200.text-amber-700 {
+  color: var(--color-amber-800, #92400e);
+}
+
+/* ---- S-NegReview 附件图标 emerald-400 白底 1.92:1 → emerald-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-emerald-400.fa-file-alt {
+  color: var(--color-emerald-600, #059669);
+}
+
+/* ---- S-AccountSec 示例 code rose-600 浅蓝底 4.19:1 → rose-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  code.sops-neutral-surface-raised.text-rose-600,
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sops-neutral-surface-raised
+  :where(code.text-rose-600) {
+  color: var(--color-rose-700, #be123c);
+}
+
+/* ---- S-ListingSEO 提示字 amber-600 浅紫底 4.45:1 → amber-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  div.text-amber-600.mt-1 {
+  color: var(--color-amber-700, #b45309);
+}
+
+/* ---- workbench 图标渐变（动态拼接类，safelist 已补齐 to-*）白字 2.9-4.4:1 → 加深一档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.from-orange-500.to-amber-600, .from-orange-600.to-amber-600) {
+  --tw-gradient-from: var(--color-orange-700, #c2410c) var(--tw-gradient-from-position);
+  --tw-gradient-to: var(--color-amber-800, #92400e) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.from-blue-500.to-indigo-600) {
+  --tw-gradient-from: var(--color-blue-600, #2563eb) var(--tw-gradient-from-position);
+  --tw-gradient-to: var(--color-indigo-700, #4338ca) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(.from-indigo-500.to-violet-600) {
+  --tw-gradient-from: var(--color-indigo-600, #4f46e5) var(--tw-gradient-from-position);
+  --tw-gradient-to: var(--color-violet-700, #6d28d9) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+/* ---- Scraper 空态图标 slate-300/slate-200 白底 1.2-1.5:1 → slate-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(
+    .text-slate-300.fa-file-import,
+    .text-slate-200.fa-folder-open,
+    .text-slate-300.fa-rotate-left,
+    .text-slate-300.fa-table,
+    .text-slate-300.fa-folder-open
+  ) {
+  color: var(--color-slate-500, #64748b);
+}
+
+/* ---- Scraper 统计徽章 rose-500 浅底 4.28:1 → rose-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-rose-500.font-bold.text-\[10px\] {
+  color: var(--color-rose-700, #be123c);
+}
+
+/* ---- Scraper 数据预览 tab 文字 blue-500 白底 3.68:1 → blue-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .tab-btn.text-blue-500 {
+  color: var(--color-blue-600, #2563eb);
+}
+
+/* ---- PPC Terms 拖拽区说明 slate-500 浅绿底 4.5:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ppc-search-terms-dropzone-meta {
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- KH 快照计数 slate-400 白底 2.56:1 → slate-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .keyword-hunter-input-snapshot-count {
+  color: var(--color-slate-500, #64748b);
+}
+
+/* ---- Promptlab checkbox 附注小字 text-slate-400（已 500）浅橙底 4.48:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  [x-data='promptlabPanel']
+  span.text-\[10px\].text-slate-400 {
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- KH 标题/空态图标 slate-300 浅底 1.4:1 → slate-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  :is(
+    .keyword-hunter-title-icon-btn .fa-rotate-left,
+    .keyword-hunter-input-snapshot-empty .fa-folder-open
+  ) {
+  color: var(--color-slate-500, #64748b) !important;
+}
+
+/* ---- PPC Terms 拖拽区说明 slate-500 浅绿底 4.5:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ppc-search-terms-dropzone-meta {
+  color: var(--color-slate-600, #475569) !important;
+}
+
+/* ---- KH 徽章 muted（primary 55% 透明浅底 3.2:1）→ 60% 墨 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .keyword-hunter-keyword-count-badge__muted {
+  color: color-mix(in srgb, var(--color-primary, #3b82f6) 72%, #0f172a) !important;
+}
+
+/* ---- Skills 徽章图标 amber-600 浅底 2.91:1 → amber-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .fa-graduation-cap.text-amber-600 {
+  color: var(--color-amber-700, #b45309);
+}
+
+/* ---- AMZ Hub 概览卡片图标 500 档浅底 2.0-2.8:1 → 600 档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amz-hub-overview
+  :is(.text-sky-500, .text-emerald-500, .text-teal-500, .text-amber-500, .text-orange-500) {
+  color: var(--color-emerald-600, #059669);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amz-hub-overview
+  .text-sky-500 {
+  color: var(--color-sky-600, #0284c7);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amz-hub-overview
+  .text-teal-500 {
+  color: var(--color-teal-600, #0d9488);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amz-hub-overview
+  .text-amber-500 {
+  color: var(--color-amber-600, #d97706);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amz-hub-overview
+  .text-orange-500 {
+  color: var(--color-orange-600, #ea580c);
+}
+
+/* ---- H-Eco 图例芯片 teal-700/orange-700 浅彩底 3.8-4.3:1 → 800 档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-teal-700.font-semibold.inline-block {
+  color: var(--color-teal-800, #115e59);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-orange-700.font-semibold.inline-block {
+  color: var(--color-orange-800, #9a3412);
+}
+
+/* ---- H-Eco 从理论到实操 gray-400 浅底 2.43:1 → gray-500 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .text-gray-400.mx-4 {
+  color: var(--color-gray-500, #6b7280);
+}
+
+/* ---- H-EU 站点画像 gray-500 浅底 4.39:1 → gray-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  span.text-xs.text-gray-500.bg-gray-100 {
+  color: var(--color-gray-600, #4b5563);
+}
+
+/* ---- H-PromoAct 组合卡描述 slate-500 浅底 4.32:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .amzpa_combo_desc {
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- H-PromoAct 列表项 emerald-500 浅底 2.35:1 → emerald-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amzpa_list
+  :is(.fa-check-circle, .fa-list-check) {
+  color: var(--color-emerald-600, #059669);
+}
+
+/* ---- H-PromoTools 对比表标签 slate-500 浅底 4.34:1 → slate-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .amzpt_table span,
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amzpt_table
+  :where(span) {
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- H-QL 数字徽章 red-400 白字 2.77:1 → red-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ql-page
+  .bg-red-400.text-white,
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ql-page
+  .bg-red-400
+  :where(.text-white) {
+  background-color: var(--color-red-600, #dc2626) !important;
+}
+
+/* ---- H-QL 提示图标 orange-400 白底 2.26:1 → orange-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ql-page
+  .fa-info-circle.text-orange-400 {
+  color: var(--color-orange-600, #ea580c);
+}
+
+/* ---- S-FBA/Procurement/Inventory 侧栏分类图标 amber-600 浅底 2.96:1 → amber-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  .sidebar-icon-container
+  :where(.sidebar-icon.text-amber-600),
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  .sidebar-icon.text-amber-600 {
+  color: var(--color-amber-700, #b45309) !important;
+}
+
+/* ---- AMZ Hub 概览卡片图标（--color-accent 500 档浅底 2.0-2.8:1）→ 混深 22% ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amz-hub-overview
+  .sop-icon-container {
+  color: color-mix(in srgb, var(--color-accent, #3b82f6) 74%, #0f172a) !important;
+}
+
+/* ---- Skills 徽章 tile amber-600 浅底 2.91:1 → amber-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .skill-icon-tile--amber {
+  color: var(--color-amber-700, #b45309);
+}
+
+/* ---- S-ListingSEO 提示字 amber-600 浅紫底 4.45:1 → amber-700（两处重复）---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .listing-seo-page
+  div.text-amber-600.mt-1 {
+  color: var(--color-amber-700, #b45309);
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .listing-seo-page
+  div.text-amber-600.mt-1 {
+  color: var(--color-amber-800, #92400e) !important;
+}
+
+/* ---- S-AccountSec code rose-600 浅蓝底 4.19:1 → rose-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  code.sops-neutral-surface-raised {
+  color: var(--color-rose-700, #be123c);
+}
+
+/* ---- H-Eco 图例芯片 teal-700/orange-700 浅彩底 3.8-4.3:1 → 800 档（通用）---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  span.text-teal-700.font-semibold {
+  color: var(--color-teal-800, #115e59) !important;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  span.text-orange-700.font-semibold {
+  color: var(--color-orange-800, #9a3412) !important;
+}
+/* text-teal-600/orange-600 已被 hue 600→700 提升，仍差 → 800 */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  span.text-teal-600.font-semibold {
+  color: var(--color-teal-800, #115e59) !important;
+}
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  span.text-orange-600.font-semibold {
+  color: var(--color-orange-800, #9a3412) !important;
+}
+
+/* ---- H-PromoAct 组合卡 emerald-500 图标浅底 2.35:1 → emerald-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amzpa_panel_title
+  :is(.fa-check-circle, .fa-list-check) {
+  color: var(--color-emerald-600, #059669) !important;
+}
+
+/* ---- Scraper 激活 tab 文字 blue-500 白底 3.68:1 → blue-600 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .tab-btn.active {
+  color: var(--color-blue-600, #2563eb) !important;
+}
+
+/* ---- Deep Chat 空态提示 p slate-600 浅底 4.49:1 → slate-700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .deep-chat-view p {
+  color: var(--color-slate-700, #334155);
+}
+
+/* ---- H-PromoTools 对比表 span slate-500 浅底 4.34:1 → slate-600（父表内，排除白字 badge） ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amzpt_table
+  :where(span),
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .amzpt_dual_card
+  :where(span):not(.amzpt_dual_badge):not(.amzpt_dual_badge--soft) {
+  color: var(--color-slate-600, #475569);
+}
+
+/* ---- Deep Chat prompt 空态说明 --deep-chat-ink-muted 浅底 4.49:1 → 深一档 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .deep-chat-prompt-empty
+  p {
+  color: var(--color-slate-600, #475569) !important;
+}
+
+/* ---- welcome banner 角标徽章（wb-icon-badge）渐变白字 2.9:1 → 混深 25% ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark']) .wb-icon-badge {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--wb-icon-badge-gradient-1, #fbbf24) 74%, #0f172a),
+    color-mix(in srgb, var(--wb-icon-badge-gradient-2, #f59e0b) 76%, #0f172a)
+  ) !important;
+}
+
+/* ---- PPC Terms hero 角标徽章 teal-400→600 白字 2.59:1 → teal-500→700 ---- */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .ppc-search-terms-hero-icon-badge {
+  background: linear-gradient(
+    135deg,
+    var(--color-teal-500, #14b8a6),
+    var(--color-teal-700, #0f766e)
+  );
+}
+
+/* ============================================================
+   [DARK-COMPAT-2] 第二轮深色可读性——审计工具合成方向修复后暴露的剩余缺陷
+   ============================================================ */
+
+/* ---- workbench 渐变图标（dark 下仍来自 Tailwind 原生 500/600 档）白字 3.0-4.4:1 → 混深 ---- */
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(
+    .from-blue-500.to-indigo-600,
+    .from-indigo-500.to-violet-600,
+    .from-purple-500.to-violet-600
+  ) {
+  --tw-gradient-from: color-mix(in srgb, var(--color-indigo-500, #6366f1) 62%, #0f172a)
+    var(--tw-gradient-from-position);
+  --tw-gradient-to: var(--color-violet-700, #6d28d9) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  :is(.from-orange-500.to-amber-600, .from-orange-600.to-amber-600) {
+  --tw-gradient-from: var(--color-orange-700, #c2410c) var(--tw-gradient-from-position);
+  --tw-gradient-to: var(--color-amber-800, #92400e) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+/* ---- Promptlab 深卡片说明文字 slate-500 深底 3.91:1 → slate-400 ---- */
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  [x-data='promptlabPanel']
+  :where(.promptlab-card-desc, .promptlab-hero-desc) {
+  color: var(--color-slate-400, #94a3b8);
+}
+
+/* ---- Promptlab 主按钮文字 slate-400 深底 3.91:1 → slate-300 ---- */
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  [x-data='promptlabPanel']
+  :where(#btn-generate-prompt, #btn-generate-listing, #btn-generate-visual)
+  span.relative.z-10,
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark'])
+  [x-data='promptlabPanel']
+  button[class*='rounded-xl'][class*='font-bold']
+  span.relative.z-10 {
+  color: var(--color-slate-300, #cbd5e1);
+}
+
+/* ---- Scraper 下载按钮 indigo-600 92% 叠深底 2.05:1 → 加深 ---- */
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark']) .wb-plugin-download {
+  background: var(--color-indigo-700, #4338ca) !important;
+}
+
+/* ---- dark 玫瑰花底计数徽章 rose-400 4.0:1 → rose-300 ---- */
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark']) .text-rose-500.bg-rose-50 {
+  color: var(--color-rose-300, #fda4af) !important;
 }

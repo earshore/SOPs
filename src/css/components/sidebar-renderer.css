@@ -357,13 +357,22 @@
   border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));
 }
 
-/* Muted chrome (overrides light-only Tailwind slate utilities in dual theme) */
+/* Muted chrome (overrides light-only Tailwind slate utilities in dual theme)
+   [CONTRAST] 浅色 400/500 在浅灰底仅 2.3/4.3:1 → 基规则加深一档；深色回写保持原观感 */
 .sidebar-shell .text-slate-400 {
-  color: var(--color-slate-400, #94a3b8) !important;
+  color: var(--color-slate-500, #64748b) !important;
 }
 
 .sidebar-shell .text-slate-500 {
-  color: var(--color-slate-500, #64748b) !important;
+  color: var(--color-slate-600, #475569) !important;
+}
+
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark']) .sidebar-shell .text-slate-400 {
+  color: var(--color-slate-400, #94a3b8) !important;
+}
+
+:is(.dark, [data-color-mode-resolved='dark'], [data-theme='dark']) .sidebar-shell .text-slate-500 {
+  color: var(--color-slate-500, #cbd5e1) !important;
 }
 
 .sidebar-shell .text-slate-600 {
@@ -477,6 +486,13 @@
 
 .sidebar-shell .sidebar-icon--active {
   color: var(--sidebar-active, var(--sidebar-primary)) !important;
+}
+
+/* [CONTRAST] light：active 图标 = 主题 -600 档，浅灰蓝底上 2.84-2.96:1 → 加深一档 */
+:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
+  .sidebar-shell
+  .sidebar-icon--active {
+  color: color-mix(in srgb, var(--sidebar-active, #2563eb) 80%, #0f172a) !important;
 }
 
 /* [CONTRAST] active 图标用主题深档（indigo-600 等），dark 画布上仅 2.84:1 → 同 hue 提亮 */

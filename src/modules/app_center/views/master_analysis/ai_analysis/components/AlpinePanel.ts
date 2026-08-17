@@ -1268,7 +1268,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
         type === 'success',
       'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border-amber-200':
         type === 'warning',
-      'bg-gradient-to-r from-[#eff6ff] to-[var(--wash-indigo)] text-[var(--module-accent-text)] border-[var(--module-accent-border)]':
+      'bg-gradient-to-r from-purple to-[var(--wash-indigo)] text-[var(--module-accent-text)] border-[var(--module-accent-border)]':
         type === 'info',
     };
   },

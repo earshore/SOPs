@@ -100,8 +100,10 @@
 [data-color-mode-resolved='dark'] .deep-chat-skill-library-modal,
 [data-color-mode-resolved='dark'] .deep-chat-prompt-preview-popover {
   --deep-chat-accent-rgb: 208, 137, 104;
-  --deep-chat-accent: #b06a45;
-  --deep-chat-accent-hover: #d08968;
+  /* [CONTRAST] #b06a45 暗底图标仅 2.97:1 → 提亮一档 */
+  --deep-chat-accent: #c07a52;
+  /* [CONTRAST] #d08968 暗底文字仅 4.44:1 → 提亮一档 */
+  --deep-chat-accent-hover: #e0a585;
   --deep-chat-accent-active: #9c5c3a;
   --deep-chat-accent-light: #ddab8b;
   --deep-chat-accent-muted: color-mix(in srgb, var(--deep-chat-accent) 32%, var(--surface-card));

@@ -1129,7 +1129,8 @@
 
 .dark .amzpa_combo_card--slate .amzpa_combo_desc,
 [data-color-mode-resolved='dark'] .amzpa_combo_card--slate .amzpa_combo_desc {
-  color: var(--color-slate-400, #94a3b8);
+  /* [CONTRAST] slate-400 在混色卡面上仅 4.47:1 → 提至 slate-300 */
+  color: var(--color-slate-300, #cbd5e1);
 }
 
 .dark .amzpa_combo_card--emerald,

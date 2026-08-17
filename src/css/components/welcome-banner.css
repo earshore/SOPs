@@ -1501,8 +1501,8 @@
   --wb-orb-2-color: color-mix(in srgb, var(--color-emerald-300, #6ee7b7) 12%, transparent);
   --wb-orb-3-color: color-mix(in srgb, var(--color-emerald-500, #10b981) 8%, transparent);
   --wb-particle-color: color-mix(in srgb, var(--color-emerald-500, #10b981) 60%, transparent);
-  --wb-icon-gradient-1: var(--color-green-500, #22c55e);
-  --wb-icon-gradient-2: var(--color-teal-600, #0d9488);
+  --wb-icon-gradient-1: var(--color-green-600, #16a34a);
+  --wb-icon-gradient-2: var(--color-teal-700, #0f766e);
   --wb-icon-shadow: 0 8px 18px -14px rgba(16, 185, 129, 0.52);
   --wb-icon-shadow-hover: 0 10px 22px -16px rgba(13, 148, 136, 0.58);
   --wb-icon-badge-gradient-1: var(--color-emerald-400, #34d399);
@@ -1541,8 +1541,8 @@
   --wb-orb-2-color: color-mix(in srgb, var(--color-amber-300, #fcd34d) 12%, transparent);
   --wb-orb-3-color: color-mix(in srgb, var(--color-amber-500, #f59e0b) 8%, transparent);
   --wb-particle-color: color-mix(in srgb, var(--color-amber-500, #f59e0b) 60%, transparent);
-  --wb-icon-gradient-1: var(--color-amber-500, #f59e0b);
-  --wb-icon-gradient-2: var(--color-orange-600, #ea580c);
+  --wb-icon-gradient-1: var(--color-amber-600, #d97706);
+  --wb-icon-gradient-2: var(--color-orange-700, #c2410c);
   --wb-icon-shadow: 0 8px 18px -14px rgba(245, 158, 11, 0.54);
   --wb-icon-shadow-hover: 0 10px 22px -16px rgba(234, 88, 12, 0.58);
   --wb-icon-badge-gradient-1: var(--color-amber-400, #fbbf24);

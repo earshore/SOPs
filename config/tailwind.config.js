@@ -86,6 +86,14 @@ export default {
     },
   },
   plugins: [],
-  safelist: []
+  safelist: [
+    // getWorkbenchIconContainerClasses 等运行时拼接的渐变端点类
+    // （from-${color}-500 to-${to}-600）不在静态扫描范围，light 下不生成
+    // → 渐变终点回退「同色 0% 透明」，白字图标不可读。显式列入。
+    {
+      pattern:
+        /^to-(rose|pink|fuchsia|purple|violet|indigo|blue|sky|cyan|teal|emerald|green|lime|amber|orange|red|gray)-600$/,
+    },
+  ],
 };
 

@@ -108,7 +108,7 @@ const AUDIT_SOURCE = `
       // Chromium 对 color-mix 的 computed 值为 color(srgb r g b / a) 或百分数
       m = v.match(/color\\\(srgb\\s+([^)]+)\\\)/);
       if (m) {
-        p = m[1].split(/[\s/]+/).filter(Boolean).map(x =>
+        p = m[1].split(/[\\s/]+/).filter(Boolean).map(x =>
           x.endsWith('%') ? parseFloat(x) / 100 : parseFloat(x)
         );
       }
@@ -136,9 +136,16 @@ const AUDIT_SOURCE = `
     'rgba(' + Math.round(c.r) + ',' + Math.round(c.g) + ',' + Math.round(c.b) + ',' + c.a.toFixed(2) + ')';
 
   // 解析背景图（linear/radial-gradient）的端点颜色，取平均作为近似底色
-  const gradientAvg = (img) => {
+  // var() 渐变（如 --sidebar-primary）先借元素计算样式解析为实际颜色
+  const gradientAvg = (img, el) => {
+    if (img.includes('var(')) {
+      img = img.replace(/var\(--([a-z0-9-]+)(?:\s*,\s*([^)]*))?\)/g, (_, name, fallback) => {
+        const resolved = el ? getComputedStyle(el).getPropertyValue('--' + name).trim() : '';
+        return resolved && !resolved.startsWith('var(') ? resolved : (fallback || '').trim();
+      });
+    }
     const stops = [];
-    const re = /rgba?\\([^)]*\\)|#[0-9a-fA-F]{3,8}|color(srgb [^)]*)/g;
+    const re = /rgba?\\([^)]*\\)|#[0-9a-fA-F]{3,8}|color\\(srgb [^)]*\\)/g;
     let m;
     while ((m = re.exec(img)) !== null) {
       const c = parseColor(m[0]);
@@ -169,24 +176,28 @@ const AUDIT_SOURCE = `
       let bg = parseColor(cs.backgroundColor);
       if (bgImg && bgImg !== 'none') {
         gradient = true;
-        const g = gradientAvg(bgImg);
+        const g = gradientAvg(bgImg, node);
         if (g && g.a > 0) {
           // 渐变层在其 background-color 之上，优先用渐变近似色
           bg = g;
         }
       }
       if (bg) {
+        // 遍历从内层 el 向上，父层在视觉下层：acc(已处理内层) 在上，bg(父层) 在下
         acc = {
-          r: bg.r * bg.a + acc.r * (1 - bg.a),
-          g: bg.g * bg.a + acc.g * (1 - bg.a),
-          b: bg.b * bg.a + acc.b * (1 - bg.a),
-          a: bg.a + acc.a * (1 - bg.a),
+          r: acc.r + bg.r * bg.a * (1 - acc.a),
+          g: acc.g + bg.g * bg.a * (1 - acc.a),
+          b: acc.b + bg.b * bg.a * (1 - acc.a),
+          a: acc.a + bg.a * (1 - acc.a),
         };
         if (acc.a > 0.99) break;
       }
       node = node.parentElement;
     }
     if (acc.a < 0.99) {
+      // 链上出现过渐变但解析失败（var() 未就绪等）：真实底色存在但不可知，
+      // 不应退化为画布色猜测（会误报白字白底），改为跳过该元素
+      if (gradient) return { bg: null, gradient };
       const doc = parseColor(getComputedStyle(document.documentElement).backgroundColor);
       const body = parseColor(getComputedStyle(document.body).backgroundColor);
       const canvas = doc && doc.a > 0 ? doc : body && body.a > 0 ? body : null;
@@ -211,6 +222,11 @@ const AUDIT_SOURCE = `
   );
   const all = document.querySelectorAll('body *');
   for (const el of Array.from(all)) {
+    if (typeof el.className === 'string' && el.className.includes('sop-step-number')) {
+      const __bg = getComputedStyle(el).backgroundColor;
+      window.__stepCapture = window.__stepCapture || [];
+      window.__stepCapture.push({ text: (el.textContent||'').trim(), bg: __bg, t: Math.round(performance.now()) });
+    }
     if (hiddenPanels.some(p => p.contains(el))) continue;
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden') continue;
@@ -272,7 +288,7 @@ const AUDIT_SOURCE = `
       });
     }
   }
-  return { defects, checked: stats.checked, skipped: stats.skippedTransparent };
+  return { defects, checked: stats.checked, skipped: stats.skippedTransparent, stepCapture: window.__stepCapture || [] };
 })()
 `;
 
@@ -304,23 +320,62 @@ async function main() {
   let total = 0;
 
   for (const mode of ['dark', 'light'] as const) {
-    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    const cdp = await page.context().newCDPSession(page);
-    await cdp.send('DOM.enable');
-    await cdp.send('CSS.enable');
-    await page.addInitScript(modeValue => {
-      window.localStorage.setItem('app-color-mode', JSON.stringify(modeValue));
-    }, mode);
     console.log(`\n========== MODE: ${mode} ==========`);
     for (const route of CORE_ROUTES) {
       if (onlyRoute && !route.path.includes(onlyRoute)) continue;
+      // 每个路由用全新页面：SPA 连续路由切换会残留前序路由的主题变量
+      // （如 --color-blue-500 被覆写/移除 → color-mix 失效 → 背景变透明 → 审计误报）
+      const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send('DOM.enable');
+      await cdp.send('CSS.enable');
+      await page.addInitScript(modeValue => {
+        window.localStorage.setItem('app-color-mode', JSON.stringify(modeValue));
+      }, mode);
       try {
         await page.goto(`${BASE}${route.path}`, { waitUntil: 'domcontentloaded' });
         await page.waitForSelector(route.ready, { timeout: 20000 });
-        await page.waitForTimeout(900);
+        // 固定等待：模块 CSS/JS 为懒加载 chunk，DOM 可能静态无变化，
+        // 仅靠元素计数轮询会提前退出 → 审计跑在样式就绪前产生误报
+        await page.waitForTimeout(4000);
+        // 再等 Alpine/动态渲染稳定（元素计数连续两次一致）
+        const panelSel = [
+          '#panel-sops:not(.hidden)',
+          '#panel-amz_hub:not(.hidden)',
+          '#panel-app_center:not(.hidden)',
+          '#panel-more:not(.hidden)',
+          '#panel-home:not(.hidden)',
+        ].join(', ');
+        for (let i = 0; i < 16; i++) {
+          const before = await page.evaluate((sel) => {
+            const root = document.querySelector(sel) ?? document.body;
+            return root.querySelectorAll('*').length + document.styleSheets.length * 1000000;
+          }, panelSel);
+          await page.waitForTimeout(350);
+          const after = await page.evaluate((sel) => {
+            const root = document.querySelector(sel) ?? document.body;
+            return root.querySelectorAll('*').length + document.styleSheets.length * 1000000;
+          }, panelSel);
+          if (before === after) break;
+        }
+        // 展开所有 <details> 折叠区：关闭状态下内容 display:none，不展开永远审计不到
+        await page.evaluate(() => {
+          document.querySelectorAll('details').forEach((d) => {
+            (d as HTMLDetailsElement).open = true;
+          });
+        });
+        await page.waitForTimeout(600);
         await page.evaluate(TOAST_SOURCE);
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(600);
+        // 双跑复验：间隔 800ms 跑两遍，只保留两次一致的缺陷——
+        // 过滤过渡/动画中间态（背景 alpha 0）导致的瞬态误报
+        const first = await page.evaluate(AUDIT_SOURCE);
+        await page.waitForTimeout(800);
         const result = await page.evaluate(AUDIT_SOURCE);
+        const stable = new Set(result.defects.map((d) => `${d.sel}|${d.text}|${d.color}|${d.bg}`));
+        result.defects = result.defects.filter(
+          (d) => stable.has(`${d.sel}|${d.text}|${d.color}|${d.bg}`)
+        );
         // 用 CDP 获取每个缺陷元素的 color 规则来源
         const doc = await cdp.send('DOM.getDocument');
         for (const d of result.defects) {
@@ -369,9 +424,10 @@ async function main() {
       } catch (e) {
         report[`${mode}:${route.label}`] = { error: String(e).slice(0, 200) };
         console.log(`[${route.label}] ERROR ${String(e).slice(0, 200)}`);
+      } finally {
+        await page.close();
       }
     }
-    await page.close();
   }
 
   writeFileSync('audit-dark-contrast-report.json', JSON.stringify(report, null, 2));

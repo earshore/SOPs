@@ -1185,11 +1185,13 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:nth-child(4n + 3) .sop-step-number {
-  background: color-mix(in srgb, var(--color-emerald-500) 78%, #0f172a);
+  /* [CONTRAST] emerald-500 混深后白字仅 3.8:1 → 用 emerald-600 */
+  background: color-mix(in srgb, var(--color-emerald-600) 78%, #0f172a);
 }
 
 .sop-process-step:nth-child(4n + 5) .sop-step-number {
-  background: color-mix(in srgb, var(--color-amber-500) 74%, #0f172a);
+  /* [CONTRAST] amber-500 混深后白字仅 3.6:1 → 用 amber-600 */
+  background: color-mix(in srgb, var(--color-amber-600) 74%, #0f172a);
 }
 
 .sop-process-step:nth-child(4n + 7) .sop-step-number {
@@ -1715,7 +1717,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   --npi-status-pending-soft: color-mix(in srgb, #d97706 14%, var(--surface-panel, #0f172a));
   --npi-status-done: #34d399;
   --npi-status-done-soft: color-mix(in srgb, #059669 14%, var(--surface-panel, #0f172a));
-  --npi-status-fail: #f87171;
+  --npi-status-fail: #fca5a5;
   --npi-status-fail-soft: color-mix(in srgb, #dc2626 14%, var(--surface-panel, #0f172a));
   --npi-status-neutral: #94a3b8;
   --npi-status-neutral-soft: color-mix(in srgb, #475569 14%, var(--surface-panel, #0f172a));

@@ -894,6 +894,12 @@
   color: color-mix(in srgb, var(--color-primary) 36%, #ffffff);
 }
 
+/* [CONTRAST] dark 下 muted 徽章 primary 55% 透明叠深底仅 3.98:1 → 改为亮底混白 */
+.dark .keyword-hunter-keyword-count-badge__muted,
+[data-color-mode-resolved='dark'] .keyword-hunter-keyword-count-badge__muted {
+  color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, #ffffff);
+}
+
 .keyword-hunter-keyword-count-badge__muted {
   color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, transparent);
 }

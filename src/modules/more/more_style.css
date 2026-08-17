@@ -33,7 +33,12 @@
 }
 
 .more-overview .wb-container--simple .wb-icon {
-  background: linear-gradient(135deg, var(--color-green-500), var(--color-teal-600)) !important;
+  /* [CONTRAST] light：green-500 渐变白图标仅 2.91:1 → 同 hue 压深 */
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-green-500) 34%, #0f172a),
+    color-mix(in srgb, var(--color-teal-600) 44%, #0f172a)
+  ) !important;
   box-shadow: 0 12px 24px -18px rgba(34, 197, 94, 0.56) !important;
 }
 
