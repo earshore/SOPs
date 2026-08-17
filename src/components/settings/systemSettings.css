@@ -29,9 +29,7 @@
   --settings-btn-secondary-transition: 160ms ease;
 }
 
-/* Dark theme: accent soft/strong re-derived from the Accent hue itself —
- * primary-light/dark tokens are light-mode ladders (minimal → slate-100)
- * and would render near-white chips / too-dark text on dark surfaces. */
+/* Dark theme: accent soft/strong re-derived from the Accent hue itself — primary-light/dark tokens are light-mode ladders (minimal → slate-100) and would render near-white chips / too-dark text on dark surfaces. */
 .dark .settings-panel-root,
 [data-color-mode-resolved='dark'] .settings-panel-root,
 [data-theme='dark'] .settings-panel-root {
@@ -95,9 +93,7 @@
 }
 
 /* ===== 抽屉动画：backdrop 淡入/淡出 ===== */
-/* 动画绑定到一次性 class（由 TS 在 open/close 时加、animationend 后移除），
- * 不用 :data-state 属性选择器：Alpine 重应用绑定属性会短暂断开选择器匹配，
- * 导致主题切换等 reactivity 场景下抽屉动画误重播。 */
+/* 动画绑定一次性 class（TS open/close 时加、animationend 后移除）；不用 :data-state 属性选择器：Alpine 重应用绑定属性会短暂断开匹配，导致主题切换等场景动画误重播。 */
 .settings-panel-root .settings-panel-backdrop--anim-in {
   animation: settingsBackdropIn 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -274,10 +270,7 @@
   );
 }
 
-/*
- * Section frames are hierarchy shells, not brand chips (Operational Quiet).
- * Variant classes kept for HTML stability; all map to the same neutral surface.
- */
+/* Section frames are hierarchy shells, not brand chips (Operational Quiet). Variant classes kept for HTML stability; all map to the same neutral surface. */
 .settings-section-frame--llm,
 .settings-section-frame--strategy,
 .settings-section-frame--network,
@@ -300,7 +293,8 @@
   margin-bottom: 0.35rem;
 }
 
-.settings-section-head__main {
+.settings-section-head__main,
+.settings-note__body {
   min-width: 0;
   flex: 1 1 auto;
 }
@@ -384,7 +378,8 @@
   outline: none;
 }
 
-.settings-section-tip.is-warn .settings-section-tip__btn {
+.settings-section-tip.is-warn .settings-section-tip__btn,
+.settings-status-bar--warning .settings-status-bar__icon {
   color: var(--color-warning-dark, #d97706);
 }
 
@@ -641,12 +636,9 @@
   font-size: 0.75rem;
 }
 
-.settings-status-bar--info .settings-status-bar__icon {
+.settings-status-bar--info .settings-status-bar__icon,
+.settings-text-accent {
   color: var(--settings-accent);
-}
-
-.settings-status-bar--warning .settings-status-bar__icon {
-  color: var(--color-warning-dark, #d97706);
 }
 
 .settings-status-bar__body {
@@ -746,7 +738,9 @@
     0 0 0 1px color-mix(in srgb, var(--settings-accent) 28%, transparent);
 }
 
-.settings-segmented__btn:focus-visible {
+.settings-segmented__btn:focus-visible,
+.settings-search-results__item:focus-visible,
+.settings-btn-secondary:focus-visible {
   outline: none;
   box-shadow: var(--settings-focus-ring);
 }
@@ -827,11 +821,6 @@
 .settings-search-results__item:hover,
 .settings-search-results__item.is-active {
   background: color-mix(in srgb, var(--color-primary, #6366f1) 8%, transparent);
-}
-
-.settings-search-results__item:focus-visible {
-  outline: none;
-  box-shadow: var(--settings-focus-ring);
 }
 
 .settings-search-results__title {
@@ -953,11 +942,6 @@ select.settings-control {
   opacity: 0.5;
 }
 
-.settings-btn-secondary:focus-visible {
-  outline: none;
-  box-shadow: var(--settings-focus-ring);
-}
-
 .settings-capability-badges {
   display: flex;
   flex-wrap: wrap;
@@ -1009,10 +993,6 @@ select.settings-control {
   outline-offset: 2px;
 }
 
-.settings-text-accent {
-  color: var(--settings-accent);
-}
-
 .settings-icon-chip--accent {
   background: var(--settings-accent-soft);
   color: var(--settings-accent);
@@ -1050,10 +1030,7 @@ select.settings-control {
   overflow: hidden;
 }
 
-/*
- /* Nested pref-list (L4 inside L3 shell): drop second chrome box.
- * Dividers alone separate rows; outer tool-app / step / card already frames the group.
- */
+/* Nested pref-list (L4 inside L3 shell): drop second chrome box. Dividers alone separate rows; outer tool-app / step / card already frames the group. */
 .settings-tool-page .settings-pref-list,
 .settings-pref-fold__body .settings-pref-list,
 .settings-pref-fold__body .settings-tool-page .settings-pref-list {
@@ -1074,10 +1051,7 @@ select.settings-control {
   padding-right: 0;
 }
 
-/*
- * L4 tool page region — same product surface for KH / Deep Chat / Master Analysis modules.
- * Neutral (Operational Quiet); replaces ad-hoc border-slate/bg-slate utility stacks.
- */
+/* L4 tool page region — same product surface for KH / Deep Chat / Master Analysis modules. Neutral (Operational Quiet); replaces ad-hoc border-slate/bg-slate utility stacks. */
 .settings-tool-page {
   border: 1px solid color-mix(in srgb, var(--settings-border) 92%, transparent);
   border-radius: 0.5rem;
@@ -1085,12 +1059,8 @@ select.settings-control {
   padding: 0.75rem;
 }
 
-/*
- * Tool / data page body contract:
- * each settings-tool-page / settings-tool-l3__body keeps ONE settings-pref-list
- * (or framed composite content). Always keep the tool-page chrome — do not strip
- * borders when the only child is a pref-list.
- */
+/* Tool / data page body contract: each settings-tool-page / settings-tool-l3__body keeps
+ * ONE settings-pref-list (or framed composite content). Keep the tool-page chrome — do not strip borders when the only child is a pref-list. */
 .settings-scrape-runtime > .settings-pref-list {
   margin-top: 0.5rem;
 }
@@ -1160,11 +1130,6 @@ select.settings-control {
 .settings-note--warn .settings-note__icon {
   background: color-mix(in srgb, var(--color-warning, #f59e0b) 16%, var(--settings-surface));
   color: var(--color-warning-dark, #b45309);
-}
-
-.settings-note__body {
-  min-width: 0;
-  flex: 1 1 auto;
 }
 
 .settings-note__title {
