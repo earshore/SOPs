@@ -108,6 +108,16 @@
   box-shadow: var(--wb-icon-shadow) !important;
 }
 
+/* [CONTRAST] dark：qwen 渐变同 hue 压深（白图标 3:1） */
+.dark .sops-overview .wb-container--simple .wb-icon {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--sops-qwen-violet-strong) 42%, #0f172a),
+    color-mix(in srgb, var(--sops-qwen-violet) 46%, #0f172a) 56%,
+    color-mix(in srgb, var(--sops-qwen-cyan) 52%, #0f172a)
+  ) !important;
+}
+
 .sops-overview .wb-container--simple:hover .wb-icon {
   box-shadow: var(--wb-icon-shadow-hover) !important;
 }

@@ -2584,6 +2584,13 @@
   --app-recent-accent-strong: color-mix(in srgb, var(--app-recent-accent) 45%, #ffffff);
 }
 
+/* [CONTRAST] flow 卡图标：minimax-red #c83a52 在暗 canvas 上仅 2.91:1 → 同 hue 提亮 */
+.dark .app-overview-container .app-flow-icon,
+[data-color-mode-resolved='dark'] .app-overview-container .app-flow-icon,
+[data-theme='dark'] .app-overview-container .app-flow-icon {
+  color: color-mix(in srgb, var(--app-overview-accent) 48%, #ffffff) !important;
+}
+
 /* Dark: recent 行 per-app 徽章 token 在浅色下硬编码 -50/-100 档（如 #f5f3ff），不随主题翻转
    → 按共享 badge 深色惯例（同色相低明度 chip：accent 18% + surface-card；亮字 45% + white）
    显式翻转；compliance_check（neutral）由上方容器级覆盖接管，无需 per-app 块。 */

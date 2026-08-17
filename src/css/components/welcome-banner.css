@@ -958,9 +958,42 @@
   align-items: center;
   justify-content: center;
   box-shadow: var(--wb-icon-shadow, 0 8px 18px -14px rgba(37, 99, 235, 0.72));
-  transition:
-    box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    filter 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* [CONTRAST] dark：500 档渐变的 wb-icon 白图标仅 2.6-2.9:1 → 同 hue 压深 */
+.dark .wb-container--simple .wb-icon,
+[data-color-mode-resolved='dark'] .wb-container--simple .wb-icon,
+[data-theme='dark'] .wb-container--simple .wb-icon {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--wb-icon-gradient-1, #2563eb) 40%, #0f172a),
+    color-mix(in srgb, var(--wb-icon-gradient-2, #0891b2) 46%, #0f172a)
+  );
+}
+
+/* [CONTRAST] dark：卡片结构 wb-icon-main 同 wb-icon 压深（白图标 3:1） */
+.dark .wb-icon-main,
+[data-color-mode-resolved='dark'] .wb-icon-main,
+[data-theme='dark'] .wb-icon-main {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--wb-icon-gradient-1, #2563eb) 40%, #0f172a),
+    color-mix(in srgb, var(--wb-icon-gradient-2, #0891b2) 46%, #0f172a)
+  );
+}
+
+/* [CONTRAST] dark：角标徽章（bolt/check 白图标 on amber/green 渐变 2.6-2.9:1）→ 同 hue 压深 */
+.dark .wb-icon-badge,
+[data-color-mode-resolved='dark'] .wb-icon-badge,
+[data-theme='dark'] .wb-icon-badge,
+.dark .wb-container--simple .wb-icon::after,
+[data-color-mode-resolved='dark'] .wb-container--simple .wb-icon::after,
+[data-theme='dark'] .wb-container--simple .wb-icon::after {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--wb-icon-badge-gradient-1, #fbbf24) 42%, #0f172a),
+    color-mix(in srgb, var(--wb-icon-badge-gradient-2, #f59e0b) 48%, #0f172a)
+  );
 }
 
 .wb-container--simple .wb-icon i {

@@ -134,6 +134,16 @@
   border-color: var(--surface-card, #1e293b);
 }
 
+/* [CONTRAST] badge 白图标 on teal-400/600 渐变 2.59:1 → 同 hue 压深 */
+.dark .ppc-search-terms-hero-icon-badge,
+[data-color-mode-resolved='dark'] .ppc-search-terms-hero-icon-badge {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-teal-400, #2dd4bf) 36%, #0f172a),
+    color-mix(in srgb, var(--color-teal-600, #0d9488) 48%, #0f172a)
+  );
+}
+
 .dark .ppc-search-terms-hero-eyebrow,
 [data-color-mode-resolved='dark'] .ppc-search-terms-hero-eyebrow {
   background: color-mix(in srgb, var(--surface-card, #1e293b) 68%, transparent);

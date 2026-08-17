@@ -221,11 +221,19 @@ const AUDIT_SOURCE = `
     const hasText = Array.from(el.childNodes).some(
       n => n.nodeType === Node.TEXT_NODE && (n.textContent || '').trim().length > 0
     );
-    if (!hasText) continue;
+    // 图形图标（font-icon）无文本节点：按非文本 3:1 阈值审计
+    const isIcon =
+      !hasText &&
+      el.tagName.toLowerCase() === 'i' &&
+      typeof el.className === 'string' &&
+      /fa-|icon/i.test(el.className);
+    if (!hasText && !isIcon) continue;
     const fg = parseColor(cs.color);
     if (!fg) continue;
     // 误报排除：渐变文字（background-clip: text）、视觉隐藏（sr-only/clip）、描边字
     if (cs.webkitBackgroundClip === 'text' || cs.backgroundClip === 'text') continue;
+    // [CONTRAST] 低 alpha 文字（12% accent-soft 等）不可读但对不透明色对比虚高 → 跳过（按不可见处理）
+    if (fg.a < 0.35) continue;
     if (fg.a === 0) continue;
     if (el.classList.contains('sr-only') || el.closest('.sr-only')) continue;
     if (cs.position === 'absolute' && cs.clipPath !== 'none') continue;
@@ -238,7 +246,7 @@ const AUDIT_SOURCE = `
     const weight = parseInt(cs.fontWeight, 10) || 400;
     const isLarge = fontSize >= 24 || (fontSize >= 18.66 && weight >= 700);
     const r = ratio(fg, bg);
-    const threshold = isLarge ? 3 : 4.5;
+    const threshold = isIcon ? 3 : isLarge ? 3 : 4.5;
     stats.checked += 1;
     if (r < threshold) {
       const id = el.id ? '#' + el.id : '';
@@ -247,6 +255,7 @@ const AUDIT_SOURCE = `
           ? '.' + el.className.trim().split(/\\s+/).slice(0, 3).join('.')
           : '';
       defects.push({
+        icon: isIcon || undefined,
         tag: el.tagName.toLowerCase(),
         cls: typeof el.className === 'string' ? el.className.slice(0, 160) : '',
         text: (el.textContent || '').trim().slice(0, 48),

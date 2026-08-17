@@ -759,6 +759,11 @@
   color: var(--color-blue-600, #2563eb);
 }
 
+.dark .amzf_stat_icon.amzf_blue i,
+[data-color-mode-resolved='dark'] .amzf_stat_icon.amzf_blue i {
+  color: var(--color-blue-300, #93c5fd);
+}
+
 .amzf_stat_icon.amzf_green {
   background: color-mix(
     in srgb,
@@ -771,6 +776,11 @@
   color: var(--color-emerald-600, #059669);
 }
 
+.dark .amzf_stat_icon.amzf_green i,
+[data-color-mode-resolved='dark'] .amzf_stat_icon.amzf_green i {
+  color: var(--color-emerald-300, #6ee7b7);
+}
+
 .amzf_stat_icon.amzf_orange {
   background: color-mix(
     in srgb,
@@ -781,6 +791,11 @@
 
 .amzf_stat_icon.amzf_orange i {
   color: var(--color-orange-600, #ea580c);
+}
+
+.dark .amzf_stat_icon.amzf_orange i,
+[data-color-mode-resolved='dark'] .amzf_stat_icon.amzf_orange i {
+  color: var(--color-orange-300, #fdba74);
 }
 
 /* 3. 数字：主文字色，加粗，数字等宽 */
@@ -2118,4 +2133,57 @@
     var(--color-emerald-500, #10b981) 14%,
     var(--surface-card, #1e293b)
   );
+}
+
+/* [CONTRAST] 事件图标的国旗/主题 Material 深色（#000000/#0055A4/…）在 dark 画布上
+   1.4-2.9:1 → 逐键映射亮档（仅作用于日历事件 emoji 内图标） */
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#000000\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#000000\],
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#212121\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#212121\] {
+  color: var(--color-slate-400, #94a3b8);
+}
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#0055A4\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#0055A4\],
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#3F51B5\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#3F51B5\] {
+  color: var(--color-blue-400, #60a5fa);
+}
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#006AA7\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#006AA7\] {
+  color: var(--color-sky-400, #38bdf8);
+}
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#9C27B0\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#9C27B0\] {
+  color: var(--color-fuchsia-400, #e879f9);
+}
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#673AB7\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#673AB7\] {
+  color: var(--color-violet-400, #a78bfa);
+}
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#2E7D32\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#2E7D32\] {
+  color: var(--color-green-400, #4ade80);
+}
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#795548\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#795548\] {
+  color: var(--color-stone-400, #a8a29e);
+}
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#D32F2F\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#D32F2F\] {
+  color: var(--color-red-400, #f87171);
+}
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#FF9800\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#FF9800\],
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#FFD700\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#FFD700\] {
+  color: var(--color-amber-400, #fbbf24);
+}
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#4CAF50\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#4CAF50\] {
+  color: var(--color-green-400, #4ade80);
+}
+.dark :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#00BFFF\],
+[data-color-mode-resolved='dark'] :is(.amzf_event_emoji, .amzf_country_event) i.text-\[\#00BFFF\] {
+  color: var(--color-sky-400, #38bdf8);
 }

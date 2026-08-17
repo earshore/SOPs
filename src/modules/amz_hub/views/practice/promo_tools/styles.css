@@ -917,6 +917,12 @@
   background: color-mix(in srgb, var(--color-blue-400) 16%, transparent);
 }
 
+/* [CONTRAST] sub_icon 图标在深底上 blue-600 2.83:1 → 提亮 */
+.dark .amzpt_sub_icon,
+[data-color-mode-resolved='dark'] .amzpt_sub_icon {
+  color: var(--color-blue-300, #93c5fd);
+}
+
 .dark .amzpt_dual_badge--soft,
 [data-color-mode-resolved='dark'] .amzpt_dual_badge--soft {
   background: color-mix(in srgb, var(--color-emerald-400) 16%, transparent);

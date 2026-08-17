@@ -447,6 +447,17 @@
   box-shadow: 0 10px 20px -14px var(--sidebar-shadow) !important;
 }
 
+/* [CONTRAST] 模块图标 green-500/emerald-600 渐变白图标 2.91:1 → 同 hue 压深 */
+.dark .sidebar-shell .sidebar-module-icon,
+[data-color-mode-resolved='dark'] .sidebar-shell .sidebar-module-icon,
+[data-theme='dark'] .sidebar-shell .sidebar-module-icon {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--sidebar-primary) 40%, #0f172a),
+    color-mix(in srgb, var(--sidebar-accent) 46%, #0f172a)
+  ) !important;
+}
+
 .sidebar-shell .sidebar-btn--active {
   background: linear-gradient(
     90deg,
@@ -466,6 +477,13 @@
 
 .sidebar-shell .sidebar-icon--active {
   color: var(--sidebar-active, var(--sidebar-primary)) !important;
+}
+
+/* [CONTRAST] active 图标用主题深档（indigo-600 等），dark 画布上仅 2.84:1 → 同 hue 提亮 */
+.dark .sidebar-shell .sidebar-icon--active,
+[data-color-mode-resolved='dark'] .sidebar-shell .sidebar-icon--active,
+[data-theme='dark'] .sidebar-shell .sidebar-icon--active {
+  color: color-mix(in srgb, var(--sidebar-primary) 42%, #ffffff) !important;
 }
 
 .sidebar-shell .sidebar-search:focus-within .sidebar-search-icon {

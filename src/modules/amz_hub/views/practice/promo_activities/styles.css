@@ -439,6 +439,12 @@
   color: var(--color-blue-600);
 }
 
+/* [CONTRAST] section 标题图标 blue-600 在深底 2.83:1 → 提亮 */
+.dark .amzpa_section_header i,
+[data-color-mode-resolved='dark'] .amzpa_section_header i {
+  color: var(--color-blue-300, #93c5fd);
+}
+
 .amzpa_grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -866,6 +872,12 @@
 .dark .amzpa_sub_icon,
 [data-color-mode-resolved='dark'] .amzpa_sub_icon {
   background: color-mix(in srgb, var(--color-blue-400) 16%, transparent);
+}
+
+/* [CONTRAST] sub_icon 图标在深底上 blue-600 2.83:1 → 提亮 */
+.dark .amzpa_sub_icon,
+[data-color-mode-resolved='dark'] .amzpa_sub_icon {
+  color: var(--color-blue-300, #93c5fd);
 }
 
 .dark .amzpa_dual_badge--soft,
@@ -1309,6 +1321,12 @@
 [data-color-mode-resolved='dark'] .amzpa_stats_box {
   background: var(--surface-card-hover, #1e293b);
   border-color: var(--border-subtle);
+}
+
+/* [CONTRAST] stats 图标 blue-600 在深底仅 2.0:1 → 提亮 */
+.dark .amzpa_stats_box i,
+[data-color-mode-resolved='dark'] .amzpa_stats_box i {
+  color: var(--color-blue-300, #93c5fd);
 }
 
 .dark .amzpa_stats_text,
