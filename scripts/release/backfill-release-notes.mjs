@@ -112,20 +112,31 @@ function buildBody(version, section, extra = '') {
   const shortSha = sha.slice(0, 12);
   const pre = isPre(version);
   const productionVerification = version.startsWith('3.0.7-rc.');
+  const latestGa = '3.1.1';
   const preNote = pre
     ? productionVerification
       ? '\n> ⚠ 历史预发布候选，发布时获准覆盖生产域验证；现已收口于 GA `v3.0.7`，GitHub Latest 应指向 `v3.0.10`。\n'
-      : '\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA（当前为 `v3.0.10`）。\n'
+      : `\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA（当前为 \`v${latestGa}\`）。\n`
     : '';
 
   const rollback =
-    version === '3.0.11-rc.7' ||
-    version === '3.0.11-rc.6' ||
-    version === '3.0.11-rc.5' ||
-    version === '3.0.11-rc.4' ||
-    version === '3.0.11-rc.3' ||
-    version === '3.0.11-rc.2' ||
-    version === '3.0.11-rc.1'
+    version === '3.1.1' ||
+    version === '3.1.1-rc.6' ||
+    version === '3.1.1-rc.5' ||
+    version === '3.1.1-rc.4' ||
+    version === '3.1.1-rc.3' ||
+    version === '3.1.1-rc.2' ||
+    version === '3.1.1-rc.1'
+      ? '上一 GA：`v3.1.0`；生产回滚：`v3.1.0` 对应的上一条 Pages 部署'
+      : version === '3.1.0'
+        ? '上一 GA：`v3.0.12`；生产回滚：`v3.0.12` 对应的上一条 Pages 部署'
+      : version === '3.0.11-rc.7' ||
+        version === '3.0.11-rc.6' ||
+        version === '3.0.11-rc.5' ||
+        version === '3.0.11-rc.4' ||
+        version === '3.0.11-rc.3' ||
+        version === '3.0.11-rc.2' ||
+        version === '3.0.11-rc.1'
       ? '上一 GA：`v3.0.10`；生产回滚：`v3.0.10` 对应的上一条 Pages 部署'
       : version === '3.0.10'
       ? '上一 GA：`v3.0.9`；生产回滚：`v3.0.9` 对应的上一条 Pages 部署'
@@ -143,7 +154,9 @@ function buildBody(version, section, extra = '') {
           ? '上一 GA：`v3.0.4`'
           : version === '3.0.4'
             ? '上一 GA：`v3.0.2`；后继 GA：`v3.0.5`'
-            : pre
+              : pre && (version.startsWith('3.1.1-') || version.startsWith('3.1.0-'))
+                ? `后继收口 GA：\`v${latestGa}\`；同线完整叙述见 CHANGELOG 各 RC 章节与 README「最新发布」`
+              : pre
               ? '后继收口 GA：`v3.0.5`；同线完整叙述见 CHANGELOG 各 RC 章节与 README「最新发布」'
               : '见 GitHub Releases 中更早正式版';
 
@@ -213,7 +226,7 @@ function applyNotes(version, bodyPath, dryRun) {
       stdio: 'inherit',
     });
   } else {
-    // Do not steal Latest from current GA (3.0.10)
+    // Do not steal Latest from current GA
     sh(`gh release edit ${tag} --notes-file "${bodyPath}" --title "${tag}"`, {
       stdio: 'inherit',
     });

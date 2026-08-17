@@ -205,7 +205,7 @@ describe('v3.1.0 release metadata', () => {
   it('publishes the current GA, package version, and previous GA in README', () => {
     const readme = readRepoFile('README.md');
 
-    expect(readme).toMatch(/\|\s*\*\*GitHub Latest（稳定 GA）\*\*\s*\|\s*`v3\.1\.0`\s*\|/);
+    expect(readme).toMatch(/\|\s*\*\*GitHub Latest（稳定 GA）\*\*\s*\|\s*`v3\.1\.1`\s*\|/);
     if (IS_PRE_RELEASE) {
       expect(readme).toMatch(
         new RegExp(`\\|\\s*\\*\\*当前 Pre-release 候选\\*\\*\\s*\\|\\s*\`v${CURRENT_VERSION_RE}\`\\s*\\|`)
@@ -216,7 +216,7 @@ describe('v3.1.0 release metadata', () => {
     expect(readme).toMatch(
       new RegExp(`\\|\\s*package\\.json\\s*\\|\\s*\`${CURRENT_VERSION_RE}\`\\s*\\|`)
     );
-    expect(readme).toMatch(/\|\s*上一 GA\s*\|\s*`v3\.0\.12`\s*\|/);
+    expect(readme).toMatch(/\|\s*上一 GA\s*\|\s*`v3\.1\.0`\s*\|/);
     expect(readme).toContain(`\`0.1.0\`…\`${CURRENT_VERSION}\``);
     expect(readme).toContain(
       IS_PRE_RELEASE
@@ -228,8 +228,8 @@ describe('v3.1.0 release metadata', () => {
   it('declares the current GA and candidate line in release policy', () => {
     const policy = readRepoFile('docs/RELEASE_POLICY.md');
 
-    expect(policy).toMatch(/`v3\.1\.0`.*2026-08-12.*当前 GA/);
-    expect(policy).toMatch(/`v3\.0\.12`.*2026-08-08.*上一 GA/);
+    expect(policy).toMatch(/`v3\.1\.1`.*2026-08-17.*当前 GA/);
+    expect(policy).toMatch(/`v3\.1\.0`.*2026-08-12.*上一 GA/);
     if (IS_PRE_RELEASE) {
       expect(policy).toContain(`当前候选线为 \`v${CURRENT_VERSION}\``);
     } else {

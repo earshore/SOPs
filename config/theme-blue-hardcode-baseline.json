@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-08-15T06:52:44.888Z",
+  "updatedAt": "2026-08-17T01:05:38.154Z",
   "shell": {
     "total": 24,
     "filesScanned": 71,
@@ -46,11 +46,11 @@
     }
   },
   "semantic": {
-    "total": 2128,
+    "total": 2139,
     "filesScanned": 52,
     "filesWithHits": 22,
     "files": {
-      "src/modules/sops/views/growth/restricted_words/template.html": 266,
+      "src/modules/sops/views/growth/restricted_words/template.html": 267,
       "src/modules/sops/views/growth/ppc_advertising/template.html": 226,
       "src/modules/sops/views/service/email_templates/template.html": 219,
       "src/modules/sops/views/service/qa_maintenance/template.html": 151,
@@ -68,8 +68,8 @@
       "src/modules/sops/views/safety/account_security/template.html": 60,
       "src/modules/sops/views/backend/inventory_replenishment/template.html": 55,
       "src/modules/sops/views/safety/performance_notification/template.html": 50,
+      "src/modules/sops/sops_style.css": 20,
       "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts": 11,
-      "src/modules/sops/sops_style.css": 10,
       "src/modules/sops/views/growth/promotion_submission/index.ts": 6,
       "src/modules/sops/views/growth/npi_tracker/index.ts": 1
     }

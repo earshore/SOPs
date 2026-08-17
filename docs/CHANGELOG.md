@@ -9,10 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 正式 GA。发布后 GitHub Latest 指向 `v3.1.1`；上一 GA 与生产回滚基线均为 `v3.1.0`。
 > 生产目标为 `https://sops.hongecb.store`。
+> 回滚链：当前 GA 与生产回滚基线为 `v3.1.0`，更早一代 GA 为 `v3.0.12`。
 > 本版定稿 `v3.1.1-rc.1`…`rc.6` 的全部候选增量：首页运营工作台 Launchpad、路由加载
 > 视觉系统、AI 分析提示词集中化、TD-THM-01 遗留池 B 批/S 批消债、TD-CMP-04 badge 契约、
 > DEBT 收紧与 rc.6 门禁/供应链修复，并纳入 GA 定稿修复：深色模式文字可读性专项
-> （dark 全路由 WCAG 对比度清零，含 toast / 流程中心 / Amazon 智库）。
+> （dark 全路由 WCAG 对比度清零，含 toast / 流程中心 / Amazon 智库）；语义色 baseline 因深色修复增量
+> 按只降不升登记机制 2128 → 2139，NPI 表格 light 基线 GA 定稿期按 TD-E2E-01 重 seed
+> （事件记录 `docs/archive/quality/npi-chromium-baseline-drift-ga.md`）。
 
 ### Added（新增）
 
@@ -44,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 门禁验收
 
-- type-check 0 error · lint 0/0 warning · vitest 全量通过 · ci:quality 20/20（semantic 2128/2128）· build 零错误 · smoke 93/93（chromium/firefox/webkit × light/dark）· 覆盖率达标（lines ≥ 82 · statements ≥ 80 · functions ≥ 82 · branches ≥ 65）· CSP 生产探针在列。
+- type-check 0 error · lint 0/0 warning · vitest 全量通过 · ci:quality 20/20（semantic 基线 2128 → 2139，深色对比度定稿修复按登记机制更新，只降不升规则维持）· build 零错误 · smoke 93/93（chromium/firefox/webkit × light/dark；NPI light 基线 GA 定稿期重 seed，事件记录 `npi-chromium-baseline-drift-ga.md`）· 覆盖率达标（lines ≥ 82 · statements ≥ 80 · functions ≥ 82 · branches ≥ 65）· CSP 生产探针在列。
 
 ### 锚点 commit
 

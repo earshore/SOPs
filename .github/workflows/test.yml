@@ -212,8 +212,6 @@ jobs:
 
       - name: Run release smoke E2E against dist
         run: npm run test:e2e:smoke:release
-        env:
-          UPDATE_SNAPSHOTS: 1 # GA 一次性：NPI dark 基线随 6fe5452c 深色加深重 seed（TD-E2E-01 mechanism）；seed 后移除
 
       - name: Upload re-seeded color-region baselines
         # GA 一次性：CI-minted baselines 必须提交回 docs/color-region-baselines/
