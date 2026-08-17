@@ -28,15 +28,23 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本          | 说明                                                                          |
 | ---------------------------- | ------------- | ----------------------------------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.1.1`      | 生产推荐版本；保持 Latest                                                     |
-| **当前 Pre-release 候选**    | —             | `v3.1.1` 候选线已 GA 收口；下一个候选进入 `v3.1.2-rc.*` / `v3.2.0-rc.*`       |
-| package.json                 | `3.1.1`       | 与 GA tag / Release 一致                                                      |
+| **当前 Pre-release 候选**    | `v3.1.2-rc.1` | 深色/浅色可读性债务收官候选（Pre-release，未抢占 Latest）                     |
+| package.json                 | `3.1.2-rc.1`  | 与候选 tag / Release 一致                                                    |
 | **回滚基线（GA）**           | `v3.1.0`      | 生产回退至上一代稳定版本                                                     |
 | 上一 GA                      | `v3.1.0`      | `v3.1.1` 之前一代稳定 GA；历史基线见 CHANGELOG                                |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.1.1` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.1.2-rc.1` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.1`（GA），`v3.1.1` 候选线已收口。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.1`（GA），当前候选线为 `v3.1.2-rc.1`（Pre-release，Latest 仍为 `v3.1.1`）。
+
+`v3.1.2-rc.1`（2026-08-18，Pre-release）聚焦**深色/浅色模式可读性债务收官**：
+
+- **深色可读性深度审计**：More 子页与系统设置深层页面（网络设置 / 系统设置 / 卡片 / 探索页 / Prompt 页）逐元素对比度修复。
+- **图标可读性专项**：sidebar / welcome-banner / AMZ Hub 营销日历·促销活动·促销工具·质量 Listing / App Center / PPC 搜索词 hero / SOPS 流程中心 10 页面图标与文本审计归零。
+- **审计工具 local-contrast 合成修正 + 全量复检**：按背景叠层合成计算实际对比，40 路由 × dark/light 双模式全部 0 缺陷（含 toast 通知、Video Resource 备注等区域）。
+- **settings-scale 门禁修复**：`systemSettings.css` 1230 → 1195 行（注释收敛 + 重复块合并，无样式变更）。
+- GitHub Latest **仍指向** `v3.1.1`；回滚基线为 `v3.1.1`；生产目标 `https://sops.hongecb.store`。
 
 `v3.1.1`（2026-08-17，稳定 GA）定稿 `v3.1.1-rc.1`…`rc.6` 全部候选增量并纳入 GA 定稿修复：
 

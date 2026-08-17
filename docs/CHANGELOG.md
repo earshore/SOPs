@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2-rc.1] - 2026-08-18
+
+> 功能冻结后的发布候选（Pre-release）。`v3.1.1` GA 之后的下一候选线：本候选专注**深色/浅色模式可读性债务收官**——在 v3.1.1 GA 定稿（dark 全 40 路由对比度审计 0 缺陷）基础上，补做 More 子页与系统设置的深度审计、图标/文本可读性专项、审计工具 local-contrast 合成修正后的全量复检（40 路由 × dark/light 双模式均 0 缺陷），并修复 settings-scale 门禁超限。上一 GA 与生产回滚基线均为 `v3.1.1`，GitHub Latest 仍为 `v3.1.1`。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Added（新增）
+
+- **深色可读性深度审计模式（`audit-dark-depth.ts`）**：对 More 子页与系统设置等深层页面做逐元素对比度深度审计，审计范围从路由级扩展到子页/组件级（`4e299c52`）。
+
+### Changed（变更）
+
+- **审计工具 local-contrast 合成修正（`c69b4cb2`）**：`audit-dark-contrast.ts` 按背景叠层合成计算实际对比，消除浅色底/深层背景误判；utility-bridge 随 tailwind 配置联动重新生成（417 条规则）。
+
+### Fixed（修复）
+
+- **More 子页与系统设置深色修复（`4e299c52`）**：网络设置 / 系统设置 / 卡片 / More 探索页 / Prompt 页等深层页面背景过亮、文字辨识度不足的缺陷全部消除。
+- **图标可读性专项（`57c9a082`）**：sidebar / welcome-banner / AMZ Hub 营销日历·促销活动·促销工具·质量 Listing / App Center / PPC 搜索词 hero / SOPS 流程中心 10 页面（采购质检、Listing SEO、PPC 广告、受限词、品牌侵权、产品合规、邮件模板、差评、QA 维护等）的 dark 图标与文本审计归零。
+- **深色/浅色可读性审计归零（`c69b4cb2`）**：审计工具合成修正后全量复检，40 路由 × dark/light 双模式全部 0 缺陷（含 SOPS 流程中心、Amazon 智库、toast 通知、Video Resource 备注等用户反馈区）。
+- **settings-scale 门禁修复（`ec8f845e`）**：`systemSettings.css` 行数 1230 → 1195（多行注释收敛为单行、重复声明块合并，无任何样式变更），恢复 `npm run settings-scale` 通过。
+
+### 门禁验收
+
+- type-check 0 error · lint 0/0 warning · vitest 全量通过 · `audit-dark-contrast` 40 路由 × dark/light 全部 0 缺陷 · `settings-scale` 通过（1195 ≤ 1200）· `format:check` 通过 · build 零错误。
+
+### 锚点 commit
+
+- `4e299c52` More 子页与系统设置深度审计 · `57c9a082` 图标可读性专项 · `c69b4cb2` 审计工具合成修正 + 全量缺陷消除 · `ec8f845e` settings-scale 门禁修复
+
 ## [3.1.1] - 2026-08-17
 
 > 正式 GA。发布后 GitHub Latest 指向 `v3.1.1`；上一 GA 与生产回滚基线均为 `v3.1.0`。
