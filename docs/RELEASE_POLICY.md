@@ -1,7 +1,7 @@
 # SOPs 发布策略
 
 **Status:** active · SSOT  
-**Updated:** 2026-07-27
+**Updated:** 2026-08-17
 
 本文档定义 GitHub Releases、版本号、变更说明与发版门禁的企业级约定。  
 与 [变更日志](./CHANGELOG.md)、[部署指南](./DEPLOYMENT.md)、[CI 质量门禁](./CI-QUALITY-GATES.md)、[OPS_RUNBOOK.md](./OPS_RUNBOOK.md)、[ACCESSIBILITY.md](./ACCESSIBILITY.md) 配套使用。
@@ -44,7 +44,7 @@
 - `v3.0.8`（2026-07-19）为历史 GA：修复 App Center 启动降级、模块异步 mount 竞态与 Deep Chat CSP 兼容问题。
 - `v3.0.9`（2026-07-19）为历史 GA：落地 release-debt hardening（静态托管合同、质量/浏览器门禁、本地 `release:gate`）并收口构建质量门。
 - `v3.0.10`（2026-07-20）为历史 GA：收口 `v3.0.9` 后热修（数据备份 UX、Vercel 构建、UI 打磨、confirm 弹窗去重）并恢复 package / tag / Release / 生产三者一致。
-- `v3.1.0`（2026-08-12）为当前 GA：定稿 `v3.1.0-rc.1`…`rc.3`（AI 分析取消/运行感知、总览优化、Deep Chat 会话设置加固与请求链路可靠性）并纳入 GA 定稿修复（模型选择作用域隔离、AI 分析离开页面重复 toast）；Latest 指向 `v3.1.0`，回滚基线 `v3.0.12`。
+- `v3.1.0`（2026-08-12）为上一 GA：定稿 `v3.1.0-rc.1`…`rc.3`（AI 分析取消/运行感知、总览优化、Deep Chat 会话设置加固与请求链路可靠性）并纳入 GA 定稿修复（模型选择作用域隔离、AI 分析离开页面重复 toast）；当时 Latest 指向 `v3.1.0`，回滚基线 `v3.0.12`。
 - `v3.0.12`（2026-08-08）为上一 GA：定稿 `v3.0.12-rc.1`…`rc.10`（AI 分析推理联动与动态耗时估算、Deep Chat 正文净化/流式去重、数据采集合并/导入新的、ModelSelect 组件统一、门禁加固）；当时 Latest 指向 `v3.0.12`，回滚基线 `v3.0.11`。
 - `v3.0.11`（2026-07-27）为上一 GA：定稿 `v3.0.11-rc.1`…`rc.13`（系统设置 pref-list / ≤L3、企业主题 v2、Deep Chat 动态推理与 vision、四路径 LLM 对齐）；当时 Latest 指向 `v3.0.11`，回滚基线 `v3.0.10`。
 - `v3.0.12-rc.2`（2026-07-28）为生产验证候选：应用总览最近作业链路真实摘要、卡片视觉与 Appearance 色调对齐；**Pre-release**，Latest 仍为 `v3.0.11`。
@@ -64,6 +64,7 @@
 - `v3.0.11-rc.12`（2026-07-27）为生产验证候选：四路径 LLM API 官方对齐（传输层/协议层）、jsonMode 原生路径与 OpenAI effort clamp 残留风险修复、暗色 WCAG 对比度清零；**Pre-release**（已并入 `v3.0.11` GA）。
 - GA 后不得再发 `v3.0.12-rc.*`；当前候选线关闭，下一候选进入 `v3.0.13-rc.*` 或 `v3.1.0-rc.*`（以实际版本线为准）。
 - `v3.1.0` 已于 2026-08-12 GA 收口；当前候选线为 `v3.1.1-rc.6`（2026-08-16，随 rc.6 更新），必须保持 **Pre-release**，GitHub Latest 仍为 `v3.1.0`；RC 回滚基线为 `v3.1.0`。
+- `v3.1.1`（2026-08-17）为当前 GA：收口 `v3.1.1-rc.1`…`rc.6`（Launchpad / 加载视觉 / AI 提示词集中化 / TD-THM-01 遗留池 B 批与 S 批消债 / TD-CMP-04 badge 契约 / rc.6 门禁与供应链修复），并纳入 GA 定稿修复：深色模式文字可读性专项（dark 全 40 路由对比度审计 0 缺陷）；GitHub Latest 指向 `v3.1.1`，回滚基线 `v3.1.0`。候选线已关闭：GA 后不得再发 `v3.1.1-rc.*`，下一候选进入 `v3.1.2-rc.*` 或 `v3.2.0-rc.*`。
 - `v3.1.1-rc.1` 为首页亚马逊运营工作台 Launchpad 的功能冻结候选：统一最近作业、SOPs 与三条核心工具直达路径，保留浮动工作台和 PPC 快捷入口；须通过 Build、发布冒烟、首页直达路由与人工 OPS/A11y 抽检后方可升级 GA。
 - `v3.1.0-rc.3`（2026-08-10）为生产验证候选：Deep Chat 跨会话串线/删除复活/预算预检/KH 推送误拦/双提交/输入持久化；**Pre-release**（已并入 `v3.1.0` GA）。
 - `v3.1.0-rc.2`（2026-08-10）为生产验证候选：Deep Chat 会话设置加固全量；**Pre-release**，Latest 仍为 `v3.0.12`。

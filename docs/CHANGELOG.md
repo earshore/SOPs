@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2026-08-17
+
+> 正式 GA。发布后 GitHub Latest 指向 `v3.1.1`；上一 GA 与生产回滚基线均为 `v3.1.0`。
+> 生产目标为 `https://sops.hongecb.store`。
+> 本版定稿 `v3.1.1-rc.1`…`rc.6` 的全部候选增量：首页运营工作台 Launchpad、路由加载
+> 视觉系统、AI 分析提示词集中化、TD-THM-01 遗留池 B 批/S 批消债、TD-CMP-04 badge 契约、
+> DEBT 收紧与 rc.6 门禁/供应链修复，并纳入 GA 定稿修复：深色模式文字可读性专项
+> （dark 全路由 WCAG 对比度清零，含 toast / 流程中心 / Amazon 智库）。
+
+### Added（新增）
+
+- **首页运营工作台 Launchpad**：新增“亚马逊运营工作台”主入口，将最近作业、SOPs 流程中心及 Master Analysis、Playground、Keyword Hunter 三条日常任务直达路径集中呈现，保留浮动工作台与 PPC 快捷入口（rc.1）。
+- **路由加载视觉系统**：路由切换居中极简 loading dots，替代页面转场动画，长任务导航时主内容区直接让位无骨架屏抖动（rc.2）。
+- **语义色哨兵门禁（semantic lane）**：`theme:hardcode-baseline` 扩容 slate/red/emerald/purple/amber 五族，sops 模块 52 文件 baseline 4282 处，total + per-file 双锁只降不升（rc.3）。
+- **NPI 表格全状态截图断言**：release-smoke 新增 light/dark 双 baseline 像素级断言（pixelmatch ≤ 0.001），基线入库 `docs/color-region-baselines/`（rc.3）。
+- **TD-THM-01 遗留池治理体系**：`THM01_LEGACY_POOL_RC5_PLAN.md` / `THM01_LEGACY_POOL_LEDGER.md` / `THM01_S_MAP.md`（B/S/A 档分档、台账 + 销账记录、S 档三级映射契约）（rc.5）。
+
+### Changed（变更）
+
+- **TD-THM-01 遗留池 B 批归档（rc.5-B）**：76 处零消费 only-handwritten token 从 `variables.css` 移除，遗留池 240 → 164；验收 ci:quality · build · smoke 93/93。
+- **TD-THM-01 S 批 1 迁移（rc.5-S1）**：text 六族/focus-ring/spacing 六族 13 处映射替换全库 2,434 处消费点（91 文件），content-surface 表面基线 -1,318（只降不升）。
+- **TD-THM-01 S 批 2 契约登记（rc.5-S2）**：bg 3 + surface 2 + status-dark 3 + spacing 5 共 13 处映射加 [S2-THM01] 契约注释（消费点不替换，保留 dark 翻转契约）。
+- **TD-CMP-04 badge 统一契约（rc.4）**：`.badge` 主类 + 8 模块归属变体 + 3 SOP 状态变体 + 深色翻转，40 个 template 双类叠加。
+- **AI 分析提示词集中化（rc.2）**：`MASTER_ANALYSIS_SYSTEM_PROMPT` 常量提取，链路声明与 mock 对齐。
+- **CI 供应链加固与发布流水线**（rc.6）：`code-review.yml` 5 处 action 浮动 tag 固定 SHA；Quality Gate build job 补 `playwright install chromium`；`release.yml` 新增 `production-probe` job（手动触发、密钥空值自动跳过）并修复 job 级 `if` 引用 secrets 的编译失败。
+- **文档归档清理（rc.6）**：26 份已闭环专项文档移入 `docs/archive/`，docs 顶层清理至 33 份，活跃文档引用同步；临时 worknotes 产物移出仓库。
+- **构建脚本清理（rc.6）**：`vite.config.js` 移除未使用导入。
+
+### Fixed（修复）
+
+- **深色模式文字可读性专项（GA 定稿）**：`DARKFIX-CHAIN` slate 链循环引用消除（raw 值）、徽章/launchpad/表单/PPC 表底加深、`--module-accent-text` dark 提亮至 indigo-300、hue-50 归一底（slate-700）dark 翻至 surface-card（AMZ Hub 7 页）、`.sops-overview` 局部 accent 变量 dark 覆盖、emerald 墨卡压至 800、`text-primary-500` 提亮、toast 白底白字、badge 变量链提权——dark 全 40 路由审计 0 缺陷（`6fe5452c` / `7c78f9c0`）。
+- **welcome-banner 头部对齐**：`.wb-header` 存在下载图标时对齐改为 `flex-start`（rc.6）。
+- **测试契约同步（rc.6）**：pc-design-token-css 等 10 例断言随 THM01 归档契约对齐；AI 分析链路 mock 补齐（`MASTER_ANALYSIS_SYSTEM_PROMPT` 导出缺失致 6 例 0 调用）；scraper / ui-p1-10 NPI 模板断言随迁移更新。
+- **smoke e2e 像素基线漂移治理（rc.6）**：NPI 表格 light 基线按 TD-E2E-01 机制在 CI runner 重 seed 全三引擎 12 份基线，smoke 93/93 全绿，事件记录归档。
+- **路由加载回归（rc.6）**：release-smoke 对首页五条直达路径实际点击验证路由落点与控制台错误。
+- **release:audit 鲁棒性（rc.5）**：gh API ANSI 清洗与 streaming JSON 兼容解析。
+
+### 门禁验收
+
+- type-check 0 error · lint 0/0 warning · vitest 全量通过 · ci:quality 20/20（semantic 2128/2128）· build 零错误 · smoke 93/93（chromium/firefox/webkit × light/dark）· 覆盖率达标（lines ≥ 82 · statements ≥ 80 · functions ≥ 82 · branches ≥ 65）· CSP 生产探针在列。
+
+### 锚点 commit
+
+- `6dc3e0a3` rc.1 · `d6237dd3` rc.2 · `03833972` rc.3 · `1a71c3a1` rc.4 · `c017af8e` rc.5 主体 · `0b138ccc` rc.6 发版 · `6fe5452c` GA 定稿：深色对比度专项 · `7c78f9c0` GA 定稿：深色可读性收尾
+
 ## [3.1.1-rc.6] - 2026-08-16
 
 > 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.1-rc.5` 基线上完成上线前阻塞清理：22 项测试失败清零（THM01 归档契约同步 + AI 分析测试 mock 补齐 + 模板断言更新）、CI 供应链加固（action SHA pin）、发布流水线生产探针与发布元数据同步（README / RELEASE_POLICY / 候选线）；`v3.1.1-rc.5` 发布时 CI 质量门禁为红的历史缺口在本候选关停——RC 必须带绿门禁发版。上一 GA 为 `v3.0.12`，当前 GA 为 `v3.1.0`，GitHub Latest 仍为 `v3.1.0`；回滚基线 `v3.1.0`。
