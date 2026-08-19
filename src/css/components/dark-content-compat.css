@@ -3208,10 +3208,6 @@
   color: var(--color-slate-600, #475569);
 }
 :root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
-  .text-\[color\:var\(--color-slate-400\,_\#94a3b8\)\],
-:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
-  .text-\[color\:var\(--color-slate-400\,#94a3b8\)\],
-:root:not(.dark):not([data-color-mode-resolved='dark']):not([data-theme='dark'])
   .text-\[color\:var\(--color-slate-400\)\] {
   color: var(--color-slate-500, #64748b);
 }
