@@ -3,16 +3,9 @@
 // 工具调用循环（tool loop）全链路（含上下文初始化与重试）
 // 由 llmService.ts 拆分而来（Level 2 重构）
 // ================================================================
-import {
-  ApiError,
-  ValidationError,
+import { ApiError, ValidationError } from '@/common/errors';
 
-} from '@/common/errors';
-
-import {
-  resolveLLMOptions,
-
-} from './callContext';
+import { resolveLLMOptions } from './callContext';
 import {
   executeLLMAttemptPayload,
   getLLMResponseContent,
@@ -21,18 +14,13 @@ import {
   resolveLLMAttemptFailure,
   createUnknownLLMFailure,
   isResponsesPathFallbackEligible,
-
 } from './responseParsing';
-import {
-  isResponsesLikePayload,
-
-} from './streamParsing';
+import { isResponsesLikePayload } from './streamParsing';
 import {
   assertSafeLLMEndpoint,
   createLLMTransport,
   normalizeMessagesForTransport,
   resolveProviderEndpoint,
-
 } from '../llmTransport';
 import {
   DEFAULT_MAX_TOOL_ROUNDS,
@@ -53,28 +41,13 @@ import {
   type ChatFunctionToolCall,
   type CollectedToolOutput,
   type ResponsesToolExecutor,
-
 } from '../modelCapability';
 
-import type {
-
-  LLMAttemptState,
-  LLMCallContext,
-  LLMResponsePayload,
-
-} from './callContext';
-import type {
-
-ChatMessage,
-LLMCallArgs,
-LLMCallRequest,
-ResolvedLLMOptions,
-} from '../llmTypes';
-
+import type { LLMAttemptState, LLMCallContext, LLMResponsePayload } from './callContext';
+import type { ChatMessage, LLMCallArgs, LLMCallRequest, ResolvedLLMOptions } from '../llmTypes';
 
 export { chatContentToPlainText } from '../llmTransport';
 export { fetchModelsFromApi } from '../llmModelList';
-
 
 export function normalizeLLMCallArgs(args: LLMCallArgs): LLMCallRequest {
   if (args.length === 1) {

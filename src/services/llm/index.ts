@@ -4,10 +4,7 @@
 // 由 llmService.ts 拆分而来（Level 2 重构）
 // ================================================================
 // 导入类型守卫
-import {
-
-  resolveLLMOptions,
-} from './callContext';
+import { resolveLLMOptions } from './callContext';
 import {
   callLLMChatStreamFirstThenToolLoop,
   callLLMChatToolLoop,
@@ -19,23 +16,12 @@ import {
   shouldUseResponsesToolLoop,
   callLLMWithRetry,
 } from './toolLoop';
-import {
-  assertSafeLLMEndpoint,
-  resolveProviderEndpoint,
-} from '../llmTransport';
+import { assertSafeLLMEndpoint, resolveProviderEndpoint } from '../llmTransport';
 
-import type {
-ChatMessage,
-LLMCallArgs,
-LLMCallRequest,
-LLMConfig,
-LLMOptions,
-} from '../llmTypes';
-
+import type { ChatMessage, LLMCallArgs, LLMCallRequest, LLMConfig, LLMOptions } from '../llmTypes';
 
 export { chatContentToPlainText } from '../llmTransport';
 export { fetchModelsFromApi } from '../llmModelList';
-
 
 /**
  * 通用大语言模型调用接口 (带自动重试)
@@ -108,4 +94,3 @@ export * from './streamParsing';
 export * from './callContext';
 export * from './responseParsing';
 export * from './toolLoop';
-

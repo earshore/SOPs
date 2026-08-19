@@ -3,10 +3,7 @@
 // 流处理与解析：侧信道收集、工具调用提取、结果构建
 // 由 llmService.ts 拆分而来（Level 2 重构）
 // ================================================================
-import {
-
-  ApiError,
-} from '@/common/errors';
+import { ApiError } from '@/common/errors';
 
 // 导入统一的 API 响应类型
 // 导入类型守卫
@@ -19,11 +16,8 @@ import {
   parseBufferedJsonCompletion,
   parseStreamPayload,
 } from '../llmStreamDelta';
+import { chatContentToPlainText } from '../llmTransport';
 import {
-  chatContentToPlainText,
-} from '../llmTransport';
-import {
-
   extractAnthropicMessagesText,
   extractAnthropicToolUses,
   extractAnthropicUsage,
@@ -52,19 +46,17 @@ import {
 } from '../modelCapability';
 
 import type {
-ChatContentPart,
-LLMOptions,
-OpenAIStreamLineContext,
-OpenAIStreamOptions,
-OpenAIStreamReadResult,
-OpenAIStreamState,
+  ChatContentPart,
+  LLMOptions,
+  OpenAIStreamLineContext,
+  OpenAIStreamOptions,
+  OpenAIStreamReadResult,
+  OpenAIStreamState,
 } from '../llmTypes';
 import type { LLMChatCompletionResponse } from '@/types/api';
 
-
 export { chatContentToPlainText } from '../llmTransport';
 export { fetchModelsFromApi } from '../llmModelList';
-
 
 export function getAbortError(signal: AbortSignal): Error {
   if (signal.reason instanceof Error && signal.reason.name === 'AbortError') {
@@ -310,7 +302,9 @@ export function geminiFunctionCallsToChatToolCalls(
   }));
 }
 
-export function anthropicToolUsesToChatToolCalls(toolUses: AnthropicToolUse[]): ChatFunctionToolCall[] {
+export function anthropicToolUsesToChatToolCalls(
+  toolUses: AnthropicToolUse[]
+): ChatFunctionToolCall[] {
   return toolUses.map(use => ({
     id: use.id,
     type: 'function' as const,

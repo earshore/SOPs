@@ -28,10 +28,7 @@
  *
  * @template TState - 该视图所需的状态快照类型（不可变数据）。
  */
-export interface ViewRenderer<
-  TState,
-  THandlers = unknown
-> {
+export interface ViewRenderer<TState, THandlers = unknown> {
   /**
    * 将状态渲染到目标容器。
    *
@@ -81,11 +78,10 @@ export class RenderContext {
  *
  * 适用于"一个容器内多个独立区域分别渲染"的场景（如统计面板）。
  */
-export class CompositeViewRenderer<
+export class CompositeViewRenderer<TState, THandlers = unknown> implements ViewRenderer<
   TState,
-  THandlers = unknown
-> implements ViewRenderer<TState, THandlers>
-{
+  THandlers
+> {
   constructor(
     private readonly parts: Array<{
       /** 容器内定位方式：按 id 查找子容器。 */

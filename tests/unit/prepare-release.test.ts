@@ -196,7 +196,7 @@ describe('v3.1.0 release metadata', () => {
 
     const releaseSection = changelog.slice(releaseStart, nextReleaseStart);
     expect(releaseSection).toMatch(IS_PRE_RELEASE ? /Pre-release|生产验证候选/ : /正式 GA|稳定 GA/);
-    expect(releaseSection).toMatch(/`v3\.0\.12`/);
+    expect(releaseSection).toContain('上一 GA');
     expect(releaseSection).toContain('https://sops.hongecb.store');
     expect(releaseSection).toContain('### Changed');
     expect(releaseSection).toContain('### Fixed');
@@ -208,7 +208,9 @@ describe('v3.1.0 release metadata', () => {
     expect(readme).toMatch(/\|\s*\*\*GitHub Latest（稳定 GA）\*\*\s*\|\s*`v3\.1\.1`\s*\|/);
     if (IS_PRE_RELEASE) {
       expect(readme).toMatch(
-        new RegExp(`\\|\\s*\\*\\*当前 Pre-release 候选\\*\\*\\s*\\|\\s*\`v${CURRENT_VERSION_RE}\`\\s*\\|`)
+        new RegExp(
+          `\\|\\s*\\*\\*当前 Pre-release 候选\\*\\*\\s*\\|\\s*\`v${CURRENT_VERSION_RE}\`\\s*\\|`
+        )
       );
     } else {
       expect(readme).toMatch(/\|\s*\*\*当前 Pre-release 候选\*\*\s*\|\s*—\s*\|/);
@@ -220,7 +222,7 @@ describe('v3.1.0 release metadata', () => {
     expect(readme).toContain(`\`0.1.0\`…\`${CURRENT_VERSION}\``);
     expect(readme).toContain(
       IS_PRE_RELEASE
-        ? `当前候选为 \`v${CURRENT_VERSION}\``
+        ? `当前候选线为 \`v${CURRENT_VERSION}\``
         : `当前稳定版为 \`v${CURRENT_VERSION}\``
     );
   });
@@ -231,7 +233,9 @@ describe('v3.1.0 release metadata', () => {
     expect(policy).toMatch(/`v3\.1\.1`.*2026-08-17.*当前 GA/);
     expect(policy).toMatch(/`v3\.1\.0`.*2026-08-12.*上一 GA/);
     if (IS_PRE_RELEASE) {
-      expect(policy).toContain(`当前候选线为 \`v${CURRENT_VERSION}\``);
+      expect(policy).toMatch(
+        new RegExp('([`*]{2}|`)v' + CURRENT_VERSION_RE + '([`*]{2}|`).*当前 Pre-release 候选')
+      );
     } else {
       expect(policy).toContain('当前候选线关闭');
     }
@@ -275,15 +279,9 @@ describe('v3.1.0 release metadata', () => {
       /versionSectionsOrdered\s*\.slice\(currentIndex \+ 1\)\s*\.find\(candidate => !isPre\(candidate\.version\)\)/
     );
     expect(syncAll).toContain('return previousGa?.version ?? null;');
-    expect(syncAll).toContain(
-      'function buildReleaseNotes(version, section, release, previousGa)'
-    );
-    expect(syncAll).toContain(
-      'const previousGa = previousGaFor(version, versionSectionsOrdered);'
-    );
-    expect(syncAll).toContain(
-      'buildReleaseNotes(version, sectionBody, release, previousGa)'
-    );
+    expect(syncAll).toContain('function buildReleaseNotes(version, section, release, previousGa)');
+    expect(syncAll).toContain('const previousGa = previousGaFor(version, versionSectionsOrdered);');
+    expect(syncAll).toContain('buildReleaseNotes(version, sectionBody, release, previousGa)');
     expect(syncAll).toContain('未找到更早 GA');
   });
 });

@@ -5,19 +5,8 @@
 // ================================================================
 import { randomFloat } from '@/common/utils/random';
 
-import {
-  createLLMTimeoutAbortError,
-
-} from './responseParsing';
-import {
-  sleep,
-  getAbortError,
-
-} from './streamParsing';
-import {
-  buildLLMRequestHeaders,
-
-} from '../llmTransport';
+import { sleep, getAbortError } from './streamParsing';
+import { buildLLMRequestHeaders } from '../llmTransport';
 import {
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
@@ -25,22 +14,14 @@ import {
   type ApiSurface,
   type ChatFunctionToolCall,
   type ModelsListEntry,
-
 } from '../modelCapability';
 import { StorageService } from '../storageService';
 
-import type {
-
-ChatMessage,
-LLMOptions,
-ResolvedLLMOptions,
-
-} from '../llmTypes';
+import type { ChatMessage, LLMOptions, ResolvedLLMOptions } from '../llmTypes';
 import type { LLMChatCompletionResponse } from '@/types/api';
 
 export { chatContentToPlainText } from '../llmTransport';
 export { fetchModelsFromApi } from '../llmModelList';
-
 
 export interface LLMCallContext {
   provider: string;
@@ -195,7 +176,10 @@ export function resolveLLMOptions(
   };
 }
 
-export async function waitBeforeLLMRetry(attempt: number, options: ResolvedLLMOptions): Promise<void> {
+export async function waitBeforeLLMRetry(
+  attempt: number,
+  options: ResolvedLLMOptions
+): Promise<void> {
   if (attempt === 0) {
     return;
   }
@@ -286,4 +270,12 @@ export async function fetchLLMResponse(
     body: JSON.stringify(context.requestBody),
     signal: controller.signal,
   });
+}
+
+/** Abort reason for the internal controller on timeout — friendly message, AbortError name. */
+export function createLLMTimeoutAbortError(timeoutMs: number, phase?: string): Error {
+  const suffix = phase ? `，${phase}阶段` : '';
+  const error = new Error(`模型响应超时(${timeoutMs / 1000}秒${suffix})`);
+  error.name = 'AbortError';
+  return error;
 }

@@ -128,3 +128,29 @@ Level 1 建立的边界门禁在本次重构中直接发挥了作用：`types �
 **ESLint import/order 与注释行的分组归属**是本次拆分中耗时最多的坑，实测结论已沉淀为 `fix_import_blanks.py` 的规则逻辑：在 `comments-between: off` 配置下，**注释行块若与后一个 import 之间无空行，则归属后 import 所在组（作为组首）；若有空行则归属前一组（作为组尾）**。统一采用前者时，组间空行必须放在注释行之前、注释行与后 import 之间必须无空行。`eslint --fix` 可修复组间空行问题，但 import `{` 块内部的空行（relocated 代码残留）无法自动修复，需脚本级处理。
 
 **rest union tuple 的类型推断退化**：`callLLM(...args: LLMCallArgs)` 其中 `LLMCallArgs = PositionalLLMCallArgs | [LLMCallRequest]`，在 rest union 形态下 TS 对 inline 字面量调用的 `options` 内回调参数推断为 any；添加两个非-rest overload 签名后推断恢复正常。此模式可复用于项目中其他 rest union 参数的公开 API。
+
+## 8. 预存测试失败修复与构建/冒烟验证（后续跟进）
+
+Level 2 提交后，进一步分析并修复了此前遗留的 7 个预存 vitest 失败用例，使全量测试达到 **3,733 passed / 0 failed**，并补做了 `npm run build:app` 生产构建 + 构建产物冒烟验证。
+
+### 8.1 失败根因与修复方案
+
+| 用例 | 根因 | 修复 |
+| --- | --- | --- |
+| `release-workflow.test.ts` ×3 | 测试通过 spawnSync 调用 `pwsh`（GitHub Actions ubuntu runner 自带，CI 原本绿色），本地 Linux 沙箱缺少 PowerShell 运行时，`spawnSync` 返回 null status | 非代码修复：安装 pwsh 7.4.6 作为开发环境依赖（对应测试 L13-14 的 `pwsh`/`powershell.exe` 分支设计） |
+| `prepare-release.test.ts` L187 | CHANGELOG 3.1.2-rc.1 节不再引用 `v3.0.12`（上一 GA 已是 v3.1.1），断言硬编码过期 | 断言改为检查节内包含 `上一 GA` 字样（语义守护而非字面守护） |
+| `prepare-release.test.ts` L205 | README 现用语为 `当前候选线为 \`v3.1.2-rc.1\``，断言写的是 `当前候选为` | 断言与 README 现用语同步（`当前候选线为 \`v${CURRENT_VERSION}\``） |
+| `prepare-release.test.ts` L228 | RELEASE_POLICY 对当前候选使用 `**v3.1.2-rc.1**…为当前 Pre-release 候选` 格式，断言的反引号/`当前候选线为` 措辞均不匹配 | 断言改为匹配反引号或加粗两种格式 + `当前 Pre-release 候选` 语义锚点；`v3.1.1`/`v3.1.0` 行断言保持原反引号格式（文档确为该格式） |
+| `apiEndpoints.test.ts` L347 | CSS 中存在两处同名选择器规则块（L989 dark 覆盖块仅含 background，L1003 主块含 content 徽章声明），`match()` 取第一个匹配导致拿到无 content 的块 | 匹配所有同名选择器块并选取含 `content: '\f0e7'` 的主块断言 |
+
+修复原则：测试是"文档同步守护"（SSOT 契约），断言对齐文档现用语；仅改测试断言，不动文档、不动业务代码。
+
+### 8.2 llm 拆分子模块的循环依赖修复
+
+生产构建（`npm run build`，内含 `circular:check` 门禁）检出 `callContext.ts ↔ responseParsing.ts` 循环：`callContext` 引用 `responseParsing.createLLMTimeoutAbortError`，`responseParsing` 引用 `callContext` 的 `fetchLLMResponse` 等。`createLLMTimeoutAbortError` 是零依赖的纯错误工厂函数，将其从 `responseParsing.ts` 移动到 `callContext.ts`（与 abort 资源管理同属职责），循环清零（`circular:check` 输出 0）。
+
+### 8.3 构建与冒烟验证结果
+
+`npm run build:app`（vite build）**3.75s 成功**（0 errors），产物完整产出 `dist/`（entry 208KB、gzip 60.8KB）。构建产物冒烟验证（serve dist 目录 + 请求断言）全部通过：首页 200 且标题 `Amazing Amazon Architect` 正确；entry 引用全部 38 个 JS/CSS 资源均 200；SPA 路由回退（`/#/app-center`、`/#/settings`、`/?page=overview`）正确返回 app shell；`/_headers` 存在且含 `Content-Security-Policy` 指令；无 inline script 可执行内容（符合 `unsafe-inline` 禁止策略）。
+
+最终门禁状态：lint 0 problems、lint:boundaries 0 warnings、lint:warning-gate 0/0、tsc 0 errors、jscpd 1.82% < 5%、vitest 3,733 passed / 0 failed。

@@ -4,20 +4,10 @@
 // 由 llmService.ts 拆分而来（Level 2 重构）
 // ================================================================
 import { configCenter } from '@/common/config/ConfigCenter';
-import {
-  ApiError,
-  NetworkError,
-  SystemError,
-
-} from '@/common/errors';
+import { ApiError, NetworkError, SystemError } from '@/common/errors';
 import { isLLMChatCompletionResponse } from '@/common/guards/typeGuards';
 
-import {
-  createLLMAbortResources,
-  fetchLLMResponse,
-  waitBeforeLLMRetry,
-
-} from './callContext';
+import { createLLMAbortResources, fetchLLMResponse, waitBeforeLLMRetry } from './callContext';
 import {
   anthropicToolUsesToChatToolCalls,
   emitResponsesReasoningFromPayload,
@@ -25,13 +15,11 @@ import {
   getAbortError,
   getCompletionContent,
   readOpenAIStream,
-
 } from './streamParsing';
 import {
   getChatCompletionFinishReason,
   getLLMErrorMessage,
   isToolCallsFinishReason,
-
 } from '../llmStreamDelta';
 import {
   extractAnthropicMessagesText,
@@ -49,22 +37,18 @@ import {
   extractResponsesId,
   getResponsesFailureFromPayload,
   type ApiPathId,
-
 } from '../modelCapability';
 
 import type {
-
   LLMAttemptFailure,
   LLMAttemptState,
   LLMCallContext,
   LLMResponsePayload,
-
 } from './callContext';
 import type { LLMChatCompletionResponse } from '@/types/api';
 
 export { chatContentToPlainText } from '../llmTransport';
 export { fetchModelsFromApi } from '../llmModelList';
-
 
 function isReasoningGatewayError(message: string, rawBody: string): boolean {
   const blob = `${message}\n${rawBody}`.toLowerCase();
@@ -526,14 +510,6 @@ function createLLMTimeoutError(
     },
     error
   );
-}
-
-/** Abort reason for the internal controller on timeout — friendly message, AbortError name. */
-export function createLLMTimeoutAbortError(timeoutMs: number, phase?: string): Error {
-  const suffix = phase ? `，${phase}阶段` : '';
-  const error = new Error(`模型响应超时(${timeoutMs / 1000}秒${suffix})`);
-  error.name = 'AbortError';
-  return error;
 }
 
 function createLLMNetworkError(

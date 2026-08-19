@@ -346,14 +346,21 @@ describe('apiEndpoints inline style policy', () => {
 describe('Font Awesome CSS policy', () => {
   it('keeps the welcome banner badge on the Font Awesome 7 classic solid glyph', () => {
     const css = readProjectFile('src/css/components/welcome-banner.css');
-    const rule = css.match(/\.wb-container--simple\s+\.wb-icon::after\s*\{([^}]*)\}/)?.[1] ?? '';
+    // CSS 中存在两处匹配该选择器的规则块：L989-996 的 dark 覆盖块（仅有
+    // background 渐变，无 content）与 L1003-1022 的主规则块（含 content 等全部
+    // 徽章声明）。原正则取第一个匹配块会导致断言失效，改为从所有匹配块中
+    // 挑选包含 content 声明的主规则块。
+    const ruleBlocks = css.match(/\.wb-container--simple\s+\.wb-icon::after\s*\{[^}]*\}/g) ?? [];
+    const rule =
+      ruleBlocks.find(block => /content:\s*['"]\\f0e7['"]\s*;/.test(block)) ?? ruleBlocks[0] ?? '';
+    const declarations = rule.slice(rule.indexOf('{') + 1, rule.lastIndexOf('}'));
 
-    expect(rule).not.toBe('');
-    expect(rule).toMatch(/content:\s*['"]\\f0e7['"]\s*;/);
-    expect(rule).toMatch(/font-weight:\s*900\s*;/);
-    expect(rule).toMatch(
+    expect(declarations).not.toBe('');
+    expect(declarations).toMatch(/content:\s*['"]\\f0e7['"]\s*;/);
+    expect(declarations).toMatch(/font-weight:\s*900\s*;/);
+    expect(declarations).toMatch(
       /font-family:\s*var\(--fa-family-classic(?:,\s*['"]Font Awesome 7 Free['"])?\)\s*;/
     );
-    expect(rule).not.toContain('Font Awesome 6 Free');
+    expect(declarations).not.toContain('Font Awesome 6 Free');
   });
 });
