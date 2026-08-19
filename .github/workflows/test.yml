@@ -237,6 +237,12 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run release smoke E2E against dist
+        env:
+          # CI-minted baseline re-seed: `assertPixelDiff` writes the captured
+          # region to docs/color-region-baselines/ when set, then returns
+          # (no pixel assert). The re-seeded baseline is uploaded below and
+          # must be reviewed + committed back via PR (GA one-off until stable).
+          UPDATE_SNAPSHOTS: '1'
         run: npm run test:e2e:smoke:release
 
       - name: Upload re-seeded color-region baselines
