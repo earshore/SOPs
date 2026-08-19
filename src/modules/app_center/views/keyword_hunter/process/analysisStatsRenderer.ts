@@ -44,9 +44,7 @@ export interface AnalysisStatsSnapshot {
 }
 
 /** 从 store 状态派生出渲染快照（纯函数，易于测试） */
-export function buildAnalysisStatsSnapshot(
-  tracker: KeywordTrackerState
-): AnalysisStatsSnapshot {
+export function buildAnalysisStatsSnapshot(tracker: KeywordTrackerState): AnalysisStatsSnapshot {
   const total = tracker.keywords ? tracker.keywords.length : 0;
   const matched = tracker.matchedKeywords ? tracker.matchedKeywords.length : 0;
   const unmatched = tracker.unmatchedKeywords ? tracker.unmatchedKeywords.length : 0;
@@ -84,9 +82,10 @@ const COVERAGE_IDS = {
 /** 词频列表区域的目标元素 id */
 const WORD_FREQUENCY_ID = 'keyword-hunter-word-frequency-list';
 
-export class AnalysisStatsViewRenderer
-  implements ViewRenderer<AnalysisStatsSnapshot, AnalysisStatsViewHandlers>
-{
+export class AnalysisStatsViewRenderer implements ViewRenderer<
+  AnalysisStatsSnapshot,
+  AnalysisStatsViewHandlers
+> {
   render(
     container: HTMLElement,
     state: AnalysisStatsSnapshot,
@@ -97,10 +96,7 @@ export class AnalysisStatsViewRenderer
   }
 }
 
-function renderCoverageStats(
-  container: HTMLElement,
-  state: AnalysisStatsSnapshot
-): void {
+function renderCoverageStats(container: HTMLElement, state: AnalysisStatsSnapshot): void {
   setTextById(container, COVERAGE_IDS.rate, `${state.coverageRate}%`);
   const bar = container.querySelector<HTMLElement>(`#${escId(COVERAGE_IDS.bar)}`);
   if (bar) {
@@ -119,7 +115,7 @@ function renderCoverageStats(
 
 function escId(id: string): string {
   // 简易 id 清洗：保留 ASCII 字字母数字/连字符/下划线，其余转义
-  return id.replace(/[^a-zA-Z0-9_-]/g, (c) => `\\${c}`);
+  return id.replace(/[^a-zA-Z0-9_-]/g, c => `\\${c}`);
 }
 
 function setTextById(container: HTMLElement, id: string, text: string): void {
@@ -134,9 +130,7 @@ function renderWordFrequencyStats(
   state: AnalysisStatsSnapshot,
   onLocateRoot?: (root: string) => void
 ): void {
-  const freqList = container.querySelector<HTMLElement>(
-    `#${escId(WORD_FREQUENCY_ID)}`
-  );
+  const freqList = container.querySelector<HTMLElement>(`#${escId(WORD_FREQUENCY_ID)}`);
   if (!freqList) return;
   const matchedKeywordRoots = collectMatchedKeywordRoots(state.matchedKeywords);
   const unmatchedKeywordRoots = collectUnmatchedKeywordRoots(
@@ -153,9 +147,7 @@ function renderWordFrequencyStats(
 }
 
 function collectMatchedKeywordRoots(
-  matchedKeywords: ReadonlyArray<
-    KeywordTrackerState['matchedKeywords'][number] | string
-  >
+  matchedKeywords: ReadonlyArray<KeywordTrackerState['matchedKeywords'][number] | string>
 ): Set<string> {
   const roots = new Set<string>();
   matchedKeywords.forEach(item => {
@@ -182,11 +174,7 @@ function getMatchedKeywordText(
   return typeof item === 'object' ? item.keyword : item;
 }
 
-function addKeywordRoots(
-  roots: Set<string>,
-  keyword: string,
-  excludedRoots?: Set<string>
-): void {
+function addKeywordRoots(roots: Set<string>, keyword: string, excludedRoots?: Set<string>): void {
   if (!keyword) return;
   const words = keyword.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
   words.forEach((word: string) => {
@@ -213,11 +201,7 @@ function renderWordCloud(
   freqList.appendChild(wordCloudDiv);
 }
 
-function createWordFrequencySpan(
-  word: string,
-  count: number,
-  isMatched: boolean
-): HTMLElement {
+function createWordFrequencySpan(word: string, count: number, isMatched: boolean): HTMLElement {
   const span = document.createElement('span');
   const countSpan = document.createElement('span');
   countSpan.textContent = `(${count})`;
@@ -250,9 +234,7 @@ function renderUnmatchedRootSection(
   const unmatchedSection = document.createElement('div');
   unmatchedSection.className = 'mt-4 pt-4 border-t border-slate-200';
   unmatchedSection.appendChild(createUnmatchedRootsHeader(unmatchedRootsArray.length));
-  unmatchedSection.appendChild(
-    createUnmatchedRootsContainer(unmatchedRootsArray, onLocateRoot)
-  );
+  unmatchedSection.appendChild(createUnmatchedRootsContainer(unmatchedRootsArray, onLocateRoot));
   freqList.appendChild(unmatchedSection);
 }
 
@@ -282,10 +264,7 @@ function createUnmatchedRootsContainer(
   return rootsContainer;
 }
 
-function createUnmatchedRootTag(
-  root: string,
-  onLocateRoot?: (root: string) => void
-): HTMLElement {
+function createUnmatchedRootTag(root: string, onLocateRoot?: (root: string) => void): HTMLElement {
   const span = document.createElement('span');
   span.className =
     'px-2 py-1 bg-red-100 text-red-700 text-xs rounded-md inline-flex items-center gap-1 cursor-pointer hover:bg-red-200 transition-colors';

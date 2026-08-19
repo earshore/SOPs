@@ -22,10 +22,7 @@ import { getRuntimeKeywordHunterSeoOptions } from '@/services/runtimeStrategySer
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { appStore } from '@/stores/useAppStore';
 
-import {
-  AnalysisStatsViewRenderer,
-  buildAnalysisStatsSnapshot,
-} from './analysisStatsRenderer';
+import { AnalysisStatsViewRenderer, buildAnalysisStatsSnapshot } from './analysisStatsRenderer';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import '../styles.css';
@@ -1585,4 +1582,3 @@ export const mount = (container: HTMLElement): Promise<void> =>
 export const unmount = (): void => {
   keywordHunterProcessModule.unmount();
 };
-
