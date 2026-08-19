@@ -21,8 +21,6 @@ import type {
   DeepChatThread,
 } from '../types';
 
-
-
 type DraftUpdater = (threadId: string, draftText: string) => void;
 type RequestHandler = (
   container: HTMLElement,

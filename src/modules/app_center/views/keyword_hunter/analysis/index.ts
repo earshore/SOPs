@@ -29,7 +29,6 @@ import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { confirmWithModal } from '../utils/confirmModal';
 
-
 import '../styles.css';
 
 // ==========================================

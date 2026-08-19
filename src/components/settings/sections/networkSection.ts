@@ -19,7 +19,6 @@ import { ProxyConfig } from '@/types/modules-business';
 import { saveSettingsDomainPartition } from '../domain/settingsDomain';
 import { ProxyState, SettingsPanelPart } from '../panelTypes';
 
-
 /** Lightweight public URL used only to exercise the configured proxy path. */
 const PROXY_PROBE_TARGET_URL = 'https://www.example.com/';
 function applyProxyProbeFailure(

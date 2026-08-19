@@ -20,7 +20,6 @@ import { StorageService } from '@/services/storageService';
 import { HistoryService } from './historyService';
 import { parseProductPage, parseReviews } from './parserService';
 
-
 import type {
   ProxyConfig,
   FetchOptions,

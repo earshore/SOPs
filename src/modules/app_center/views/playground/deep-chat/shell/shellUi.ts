@@ -1,13 +1,3 @@
-
-
-
-
-
-
-
-
-
-
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import eventBus from '@/common/EventBus';
 import { navigateToRouteId } from '@/common/router/initRouter';

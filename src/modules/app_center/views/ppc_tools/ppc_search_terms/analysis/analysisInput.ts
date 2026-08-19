@@ -6,7 +6,6 @@ import { setPpcSearchTermsStatus } from '../ui/reportControls';
 
 import type { AnalysisFlowCallbacks } from './analysisFlowTypes';
 
-
 export function getAnalyzableReportText(
   container: HTMLElement,
   text: string,

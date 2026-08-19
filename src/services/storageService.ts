@@ -20,7 +20,6 @@ import type { HistoryItem, ProxyConfig } from '@/types/modules-business';
 import type { IStorageService } from '@/types/services';
 import type { LLMProviderConfig } from '@/types/state';
 
-
 /**
  * 存储键名常量
  */

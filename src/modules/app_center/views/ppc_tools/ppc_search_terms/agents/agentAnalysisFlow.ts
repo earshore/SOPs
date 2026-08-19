@@ -16,7 +16,6 @@ import type { AnalysisSettings } from '../settings/settings';
 import type { Thresholds } from '../types';
 import type { PpcSearchTermsLlmAnalysisProgress } from './agentTypes';
 
-
 interface AgentAnalysisContext {
   container: HTMLElement;
   localResult: AnalysisResult;

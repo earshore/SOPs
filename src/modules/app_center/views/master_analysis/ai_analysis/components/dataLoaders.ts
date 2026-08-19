@@ -12,7 +12,6 @@ import { AlpineContext, HistoricalReportDetail } from '../types';
 
 import type { AnalysisReport, ScrapedData } from '@/types/modules-business';
 
-
 function isHistoricalAnalysisReport(report: unknown): report is AnalysisReport | string {
   return typeof report === 'string' || (typeof report === 'object' && report !== null);
 }

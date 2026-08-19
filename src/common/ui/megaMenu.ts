@@ -13,7 +13,6 @@ import { escapeHtml, setSafeHtml } from '../utils/security';
 
 import type { ColorSchemeName } from '../constants/colorSchemes';
 
-
 type MenuModule = (typeof MENU_CONFIG.modules)[keyof typeof MENU_CONFIG.modules];
 
 // ═══════════════════════════════════════════════════════════

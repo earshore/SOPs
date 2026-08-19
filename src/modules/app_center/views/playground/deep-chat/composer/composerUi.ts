@@ -6,8 +6,6 @@ import {
   stripSkillMarkersFromDraft,
 } from '@/modules/app_center/skillDeepChatHandoff';
 
-
-
 import { refreshMessageToolbarStatuses } from './messageToolbar';
 import {
   SKILL_CHIP_CLASS,

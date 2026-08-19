@@ -15,7 +15,6 @@ import {
 } from '@/services/modelCapability';
 import { StorageService } from '@/services/storageService';
 
-
 import { saveSettingsDomainPartition } from '../domain/settingsDomain';
 import {
   LLM_TEST_CONNECTION_MAX_TOKENS,

@@ -1,7 +1,6 @@
 import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
 import { setSafeHtml } from '@/common/utils/security';
 
-
 import { formatPromptDraftPreviewMeta, getPromptDrafts } from '../composer/promptDrafts';
 import { escapeHTML } from '../infra/utils';
 

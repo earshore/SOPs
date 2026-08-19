@@ -15,10 +15,6 @@ import { ErrorService } from '@/services/errorService';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { appStore } from '@/stores/useAppStore';
 
-
-
-
-
 import { DataPreview, DataPreviewState } from './DataPreview';
 import { HistoryPanel } from './HistoryPanel';
 import { emitHistoryUpdated } from '../../services/historyEvents';
@@ -51,7 +47,6 @@ import type {
 import type { ScrapedData, ScrapedProduct, HistoryItem } from '@/types/modules-business';
 import type { ScraperSite } from '@/types/modules-business';
 import type { ScraperState } from '@/types/state';
-
 
 type ScraperPanelState = {
   inputAsins: string;

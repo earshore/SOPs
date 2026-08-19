@@ -25,7 +25,6 @@ import type {
 } from '../../ai_analysis/config/analysisReportData';
 import type { ExtendedDNA } from '../../types/extendedDNA';
 
-
 const nativeLoggerConsole = globalThis.console;
 
 type FullAnalysisReportInput = Partial<FullAnalysisReport> & {

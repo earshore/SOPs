@@ -4,7 +4,6 @@
 // 定义基础服务和核心服务的注册配置
 // ================================================================
 
-
 import { ConfigCenter } from '@/common/config/ConfigCenter';
 import { globalErrorHandler } from '@/common/errors/GlobalErrorHandler';
 import eventBus from '@/common/EventBus';

@@ -16,7 +16,6 @@ import type {
   SurfaceCapability,
 } from './types';
 
-
 /** Match model id against pattern with `*` wildcards (glob-style, case-insensitive). */
 export function matchModelPattern(pattern: string, modelId: string): boolean {
   if (!pattern) return false;

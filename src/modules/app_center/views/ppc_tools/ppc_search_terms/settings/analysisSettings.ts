@@ -9,7 +9,6 @@ import { getAnalysisSettingInputs, getInput, getTextarea, setChecked } from './s
 
 import type { PpcSearchTermsAnalysisContext } from '../services/llmAnalysisService';
 
-
 export interface AnalysisSettings {
   useAgent: boolean;
   allowLocalFallback: boolean;

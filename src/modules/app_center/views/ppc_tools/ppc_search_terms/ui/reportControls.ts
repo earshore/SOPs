@@ -6,8 +6,6 @@ import type { ColumnMapping } from '../columns/columns';
 import type { ReportType } from '../types';
 import type { FilterType } from '../utils/filters';
 
-
-
 export function updateReportControls(
   container: HTMLElement,
   reportType: ReportType,

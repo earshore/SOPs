@@ -11,7 +11,6 @@ import { scrapeAsin } from '../../services/scraperService';
 import type { Task, ScrapedData, TaskStatusCallback } from '../types';
 import type { ScrapedProduct, ScraperSite } from '@/types/modules-business';
 
-
 /**
  * 更新任务状态
  */

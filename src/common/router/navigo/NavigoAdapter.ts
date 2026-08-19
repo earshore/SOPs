@@ -29,7 +29,6 @@ import type {
   PreloadOptions,
 } from './types';
 
-
 type NavigationTarget = {
   normalizedPath: string;
   to: Route;

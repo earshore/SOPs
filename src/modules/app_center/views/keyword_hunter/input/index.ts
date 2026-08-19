@@ -21,7 +21,6 @@ import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { confirmWithModal } from '../utils/confirmModal';
 
-
 import type { KeywordHunterSnapshot } from '@/types/modules-business';
 import type { KeywordTrackerState } from '@/types/state';
 

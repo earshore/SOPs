@@ -20,7 +20,6 @@ import { TRANSLATE_PROMPT_TEMPLATE } from '../constants/prompts';
 
 import type { ProductData, DataOptions, LLMConfig, AnalysisReport } from '@/types/modules-business';
 
-
 const nativeLoggerConsole = globalThis.console;
 
 // ========================

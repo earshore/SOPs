@@ -28,8 +28,6 @@ import { AlpineContext, FullReportData } from '../types';
 
 import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analysisReportData';
 
-
-
 type AlpineWatchContext = {
   $watch: (property: string, callback: (newValue: unknown) => void) => void;
 };

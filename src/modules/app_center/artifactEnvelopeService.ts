@@ -17,8 +17,6 @@ import type {
   KeywordHunterSnapshot,
 } from '@/types/modules-business';
 
-
-
 export const APP_CENTER_WORK_ITEMS_STORAGE_KEY = 'app_center_work_items_v1';
 export const APP_CENTER_ARTIFACTS_STORAGE_KEY = 'app_center_artifact_envelopes_v1';
 export const APP_CENTER_ARTIFACTS_CHANGED = 'app-center:artifacts-changed';

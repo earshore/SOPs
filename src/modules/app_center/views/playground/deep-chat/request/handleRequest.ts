@@ -56,7 +56,12 @@ import {
   saveThreadMessages,
   threadExists,
 } from '../session/threadStore';
-import { findConfigModelsEntry, registerRequestUiHooks, redactSensitiveError, uiHooks } from '../session/uiHooks';
+import {
+  findConfigModelsEntry,
+  registerRequestUiHooks,
+  redactSensitiveError,
+  uiHooks,
+} from '../session/uiHooks';
 
 import type {
   DeepChatElement,

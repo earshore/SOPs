@@ -3,7 +3,6 @@ import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { consumeListingPromptForDeepChat } from '@/modules/app_center/listingWorkflowHandoff';
 
-
 // Side-effect imports: register uiHooks before mount wires domains together.
 import './session/pendingRuntime';
 import './chrome/generationChrome';

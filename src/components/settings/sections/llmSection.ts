@@ -58,8 +58,6 @@ import {
   SettingsPanelPart,
 } from '../panelTypes';
 
-
-
 export const llmSectionBehavior: SettingsPanelPart = {
   get currentProviderConfig(): ProviderConfig | Record<string, never> {
     return getLlmProviderConfig(this.llm.provider) || {};

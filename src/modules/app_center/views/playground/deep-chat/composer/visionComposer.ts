@@ -21,7 +21,6 @@ import {
 
 import type { DeepChatElement } from '../types';
 
-
 export const VISION_COMPOSER_ROOT_ID = 'deep-chat-vision-composer-root';
 export const VISION_STRIP_ID = 'deep-chat-vision-strip';
 export const VISION_UPLOAD_BTN_ID = 'deep-chat-vision-upload';

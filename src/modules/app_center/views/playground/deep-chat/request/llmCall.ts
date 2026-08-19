@@ -57,7 +57,6 @@ import type { DeepChatThread } from '../types';
 import type { DeepChatElement, DeepChatSignals, DeepChatLLMCallContext } from '../types';
 import type { LLMProviderConfig } from '@/types/state';
 
-
 type DeepChatStreamState = { streamedText: string };
 
 /**

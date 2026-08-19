@@ -25,8 +25,20 @@ import { serviceRegistry } from '@/common/di/ServiceRegistry';
 import { registerAllServices } from '@/common/di/services';
 import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 import { initRouter, triggerInitialNavigation } from '@/common/router/initRouter';
-import { renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, initMegaMenuAccessibility, closeMegaMenus, revealMainContent, showToast, } from '@/common/ui';
-import { registerActionsWithLegacy, initGlobalEventDelegation, } from '@/common/utils/actionRegistry';
+import {
+  renderMegaMenu,
+  renderSopsMegaMenu,
+  renderHubMegaMenu,
+  renderMoreMenu,
+  initMegaMenuAccessibility,
+  closeMegaMenus,
+  revealMainContent,
+  showToast,
+} from '@/common/ui';
+import {
+  registerActionsWithLegacy,
+  initGlobalEventDelegation,
+} from '@/common/utils/actionRegistry';
 import { initEventLogger } from '@/common/utils/eventLogger';
 import { loadingManager } from '@/common/utils/LoadingManager';
 import { installOnceAnimationCleanup } from '@/common/utils/onceAnimationCleanup';
@@ -40,7 +52,6 @@ import { appStore } from '@/stores/useAppStore';
 
 import './components/modal/AppModal';
 import { initHomeSplash } from './modules/home/homeDisplay';
-
 
 const bootstrapConsole = globalThis.console;
 
@@ -60,15 +71,6 @@ if (import.meta.env.DEV) {
     });
 }
 
-
-
-
-
-
-
-
-
-
 type SystemSettingsModule = typeof import('./components/settings/systemSettings');
 let systemSettingsModulePromise: Promise<SystemSettingsModule> | null = null;
 
@@ -85,7 +87,6 @@ async function withSystemSettings<T>(
   const settings = await loadSystemSettingsModule();
   return run(settings);
 }
-
 
 // Domain shells register route listeners — load them in parallel with bootstrap
 // instead of blocking the static entry parse graph.

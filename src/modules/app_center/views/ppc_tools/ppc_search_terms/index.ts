@@ -52,7 +52,6 @@ import type { AnalysisStatusTone } from './analysis/analysisFlowTypes';
 import type { ColumnMapping } from './columns/columns';
 import type { AnalyzedRow, ReportType } from './types';
 
-
 import '../style.css';
 
 export type { ActionType, AnalyzedRow, Thresholds } from './types';

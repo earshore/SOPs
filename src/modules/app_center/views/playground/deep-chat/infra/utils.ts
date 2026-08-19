@@ -11,7 +11,6 @@ import type { DeepChatRequestBody } from '../types';
 import type { ChatMessage } from '@/services/llmService';
 import type { LLMProviderConfig } from '@/types/state';
 
-
 export function createTextInputEvent(prompt: string): Event {
   if (typeof InputEvent === 'function') {
     return new InputEvent('input', {

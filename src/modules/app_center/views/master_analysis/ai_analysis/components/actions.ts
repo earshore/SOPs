@@ -45,8 +45,6 @@ import type { Product } from '../config/sampleData';
 import type { AlpineContext, FullReportData } from '../types';
 import type { AnalysisReport } from '@/types/modules-business';
 
-
-
 type AnalysisSchedulePlan = ReturnType<typeof resolveAnalysisSchedulePlan>;
 type PerformanceSettings = ReturnType<typeof getPerformanceSettings>;
 
