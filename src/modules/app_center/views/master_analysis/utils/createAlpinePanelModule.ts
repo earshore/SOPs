@@ -3,12 +3,13 @@
  */
 
 import BaseModule from '@/common/BaseModule';
+import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 import {
   SafeTemplateLoader,
   type ModuleLoadOptions,
 } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
-import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
+
 import { destroyAlpineComponent } from './alpineLifecycle';
 
 export interface AlpinePanelModuleConfig {

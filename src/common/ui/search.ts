@@ -3,9 +3,10 @@
  * 提供 SOPs、智库、侧边栏的搜索功能
  */
 
-import { MENU_CONFIG } from '../config/menuConfig';
 import { appStore } from '@/stores/useAppStore';
+
 import { getEl } from './utils';
+import { MENU_CONFIG } from '../config/menuConfig';
 
 type SearchRoute = {
   id: string;

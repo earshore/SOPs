@@ -5,6 +5,7 @@
  */
 
 import { createStore } from 'zustand/vanilla';
+
 import type { Route, RouteHistory } from './types';
 
 /**

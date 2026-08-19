@@ -1,5 +1,5 @@
-import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createOwnerField } from '../../../utils/ownerField';
+import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
 const RELEASE_OWNER_STORAGE_KEY = 'fba_shipping_owner_v1';

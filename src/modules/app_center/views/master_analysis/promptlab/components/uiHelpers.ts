@@ -1,5 +1,6 @@
+import { navigateToRouteId } from '@/common/router/initRouter';
+import { showToast } from '@/common/ui';
 import { copyTextToClipboard } from '@/common/utils/clipboard';
-
 /**
  * Promptlab UI 辅助模块
  *
@@ -12,21 +13,19 @@ import { copyTextToClipboard } from '@/common/utils/clipboard';
  * - 报告模块全选 / 清空（selectAllReportSections / clearReportSections）
  * - 表单变化事件（onReportSectionChange / onInputChange）
  */
-
-import { appStore } from '@/stores/useAppStore';
-import { showToast } from '@/common/ui';
-import { navigateToRouteId } from '@/common/router/initRouter';
 import {
   clearListingPromptHandoff,
   createListingPromptWorkflowContext,
   queueListingPromptForDeepChat,
   type ListingPromptSource,
 } from '@/modules/app_center/listingWorkflowHandoff';
+import { appStore } from '@/stores/useAppStore';
+
+import { HistoryService } from '../../services/historyService';
+import { confirmWithModal } from '../../utils/confirmModal';
+
 import type { DnaConfidence, PromptlabAlpineContext, ConsoleMode } from './types';
 import type { UserProductProfile } from '@/types/state';
-import { confirmWithModal } from '../../utils/confirmModal';
-import { HistoryService } from '../../services/historyService';
-
 // ==========================================
 // 输入框高度自适应
 // ==========================================

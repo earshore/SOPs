@@ -1,5 +1,15 @@
+import { showToast } from '@/common/ui/notifications';
+
+import { buildStoredThreadMessages, withVisionAttachmentMetaDisplay } from './conversationContext';
 import { getChat } from './domHelpers';
-import { uiHooks } from './uiHooks';
+import { getMountedRenderContainer, getRenderContainerForThread } from './mountContext';
+import {
+  sessionState,
+  PENDING_DISPLAY_INTERVAL_MS,
+  PENDING_DISPLAY_CHARS_PER_TICK,
+  PENDING_PARTIAL_PERSIST_MIN_CHARS,
+  PENDING_PARTIAL_PERSIST_MIN_MS,
+} from './sessionState';
 import {
   getActiveThread,
   markThreadUnread,
@@ -7,13 +17,13 @@ import {
   saveThreadMessages,
   threadExists,
 } from './threadStore';
-import type { ChatMessage } from '@/services/llmService';
-
-import { buildStoredThreadMessages, withVisionAttachmentMetaDisplay } from './conversationContext';
+import { uiHooks } from './uiHooks';
 import {
   resolveListingDisplayText,
   withListingDisplaySanitize,
 } from '../composer/listingCopyDisplay';
+import { getMaxThreadCount, STOPPED_RESPONSE_TEXT } from '../constants';
+import { getThreadTitle } from '../infra/utils';
 import {
   abortPendingDeepChatRequest,
   appendPendingDeepChatAssistantText,
@@ -29,8 +39,6 @@ import {
   type DeepChatPendingAbortReason,
 } from '../request/lifecycle';
 
-import { getMaxThreadCount, STOPPED_RESPONSE_TEXT } from '../constants';
-
 import type {
   DeepChatElement,
   DeepChatMessage,
@@ -38,17 +46,7 @@ import type {
   DeepChatThread,
   DeepChatThreadStore,
 } from '../types';
-import { getThreadTitle } from '../infra/utils';
-
-import { showToast } from '@/common/ui/notifications';
-
-import {
-  sessionState,
-  PENDING_DISPLAY_INTERVAL_MS,
-  PENDING_DISPLAY_CHARS_PER_TICK,
-  PENDING_PARTIAL_PERSIST_MIN_CHARS,
-  PENDING_PARTIAL_PERSIST_MIN_MS,
-} from './sessionState';
+import type { ChatMessage } from '@/services/llmService';
 
 export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessage[] {
   const pendingRequest = sessionState.pendingRequests.get(thread.id);
@@ -396,7 +394,6 @@ export function applyPendingRequestsToThreadStore(store: DeepChatThreadStore): D
   return nextStore;
 }
 
-import { getMountedRenderContainer, getRenderContainerForThread } from './mountContext';
 export { getMountedRenderContainer, getRenderContainerForThread };
 
 export function syncPendingRequestView(

@@ -4,6 +4,7 @@
  */
 
 import { jsonrepair } from 'jsonrepair';
+
 import { ValidationError } from '@/common/errors/AppError';
 
 export interface ParseLlmJsonResult {

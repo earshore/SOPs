@@ -3,12 +3,15 @@
  * 负责从各种数据源加载和检查数据
  */
 
-import { appStore } from '@/stores/useAppStore';
 import { showToast } from '@/common/ui/index';
+import { appStore } from '@/stores/useAppStore';
+
+import { unwrapReportPayload } from '../../services/reportIdentity';
 import { formatHistoryDate } from '../services/reportGenerator';
 import { AlpineContext, HistoricalReportDetail } from '../types';
+
 import type { AnalysisReport, ScrapedData } from '@/types/modules-business';
-import { unwrapReportPayload } from '../../services/reportIdentity';
+
 
 function isHistoricalAnalysisReport(report: unknown): report is AnalysisReport | string {
   return typeof report === 'string' || (typeof report === 'object' && report !== null);

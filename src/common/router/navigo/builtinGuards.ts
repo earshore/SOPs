@@ -4,10 +4,11 @@
  * 提供常用的路由守卫实现
  */
 
-import type { Route, RouteGuard, GuardResult } from './types';
 
 import { container } from '@/common/di/Container';
 import { featureFlagService } from '@/services/featureFlagService';
+
+import type { Route, RouteGuard, GuardResult } from './types';
 
 function denyGuard(reason: string): GuardResult {
   return {

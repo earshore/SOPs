@@ -5,18 +5,21 @@
 // 🎯 P0优化: 使用统一类型定义
 // ================================================================
 
+import { ApiError, ValidationError } from '@/common/errors/AppError';
+import { parseLlmJson } from '@/common/utils/parseLlmJson';
 import { callLLM } from '@/services/llmService';
 import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
-import { ApiError, ValidationError } from '@/common/errors/AppError';
-import { TRANSLATE_PROMPT_TEMPLATE } from '../constants/prompts';
-import { sanitizePromptInput } from '../ai_analysis/prompts/promptSanitizer';
+
 import {
   getMasterAnalysisFullReportMaxTokens,
   getMasterAnalysisTranslationMaxTokens,
 } from './llmOutputBudget';
+import { sanitizePromptInput } from '../ai_analysis/prompts/promptSanitizer';
+import { TRANSLATE_PROMPT_TEMPLATE } from '../constants/prompts';
+
 import type { ProductData, DataOptions, LLMConfig, AnalysisReport } from '@/types/modules-business';
-import { parseLlmJson } from '@/common/utils/parseLlmJson';
+
 
 const nativeLoggerConsole = globalThis.console;
 

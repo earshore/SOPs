@@ -1,5 +1,5 @@
-import { analyzePpcSearchTermsWithAgent } from '../services/llmAnalysisService';
-import { isCurrentAnalysisRun, type ActiveAnalysisRun } from '../analysis/analysisRun';
+import { showToast } from '@/common/ui/notifications';
+
 import {
   applyModelDecisions,
   applyPartialModelDecisions,
@@ -7,12 +7,15 @@ import {
   formatAgentToast,
   hasProgressDecisions,
 } from './agentReview';
+import { isCurrentAnalysisRun, type ActiveAnalysisRun } from '../analysis/analysisRun';
+import { analyzePpcSearchTermsWithAgent } from '../services/llmAnalysisService';
+
 import type { AnalysisResult } from '../analysis/analysisEngine';
 import type { AnalysisFlowCallbacks } from '../analysis/analysisFlowTypes';
 import type { AnalysisSettings } from '../settings/settings';
 import type { Thresholds } from '../types';
 import type { PpcSearchTermsLlmAnalysisProgress } from './agentTypes';
-import { showToast } from '@/common/ui/notifications';
+
 
 interface AgentAnalysisContext {
   container: HTMLElement;

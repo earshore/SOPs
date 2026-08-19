@@ -1,5 +1,5 @@
-import type { ChatMessage } from '@/services/llmService';
 import type { PreReplyActivityStep } from './preReplyActivity';
+import type { ChatMessage } from '@/services/llmService';
 
 export type DeepChatPendingAbortReason = 'stopped' | 'deleted' | 'cleared';
 

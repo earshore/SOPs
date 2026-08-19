@@ -1,4 +1,5 @@
 import { ACTION_LABELS } from '../actions/actionMetadata';
+
 import type { ActionType, AnalyzedRow, ReportType } from '../types';
 
 export type FilterType = ActionType | 'all';

@@ -1,49 +1,51 @@
+import { BusinessError } from '@/common/errors/AppError';
+import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
+import { showToast } from '@/common/ui/index';
 import { copyTextToClipboard } from '@/common/utils/clipboard';
 import { downloadJson as downloadJsonFile } from '@/common/utils/download';
-
 /**
  * Alpine 组件用户动作
  * 处理所有用户交互操作
  */
+import { appStore } from '@/stores/useAppStore';
 
-import { showToast } from '@/common/ui/index';
-import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
+import { getMarketLanguage } from './helpers';
+import { getPerformanceSettings } from './PerformanceSettings';
+import {
+  registerAnalysisRunningArtifact,
+  removeAnalysisRunningArtifact,
+} from '../../../../artifactEnvelopeService';
+import { emitHistoryUpdated } from '../../services/historyEvents';
+import { getScrapedDataFingerprint } from '../../services/reportIdentity';
 import { analysisTargets } from '../config/analysisTargets';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
+import { resolveAnalysisSchedulePlan } from '../services/analysisScheduler';
 import { parseAnalysisReport } from '../services/analysisService';
+import { estimateAnalysisTime } from '../services/analysisTimeEstimator';
 import {
   getCachedAnalysisResults,
   type ParallelAnalysisResultUpdate,
   runParallelAIAnalysis,
 } from '../services/parallelAnalysisService';
-import { resolveAnalysisSchedulePlan } from '../services/analysisScheduler';
-import { generateMarkdownReport, generateJsonReportData } from '../services/reportGenerator';
-import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
-import { getMarketLanguage } from './helpers';
-import type { Product } from '../config/sampleData';
-import { estimateAnalysisTime } from '../services/analysisTimeEstimator';
 import {
   getAnalysisReasoningEffortLabel,
   getAnalysisReasoningPrefs,
 } from '../services/reasoningPolicy';
-import type { AlpineContext, FullReportData } from '../types';
-import { appStore } from '@/stores/useAppStore';
-import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analysisReportData';
-import type { AnalysisReport } from '@/types/modules-business';
-import { BusinessError } from '@/common/errors/AppError';
-import { getPerformanceSettings } from './PerformanceSettings';
-import { emitHistoryUpdated } from '../../services/historyEvents';
-import { getScrapedDataFingerprint } from '../../services/reportIdentity';
+import { generateMarkdownReport, generateJsonReportData } from '../services/reportGenerator';
 import {
   clearAnalysisSession,
   loadAnalysisSession,
   saveAnalysisSession,
   type AnalysisSessionSnapshot,
 } from '../utils/analysisSession';
-import {
-  registerAnalysisRunningArtifact,
-  removeAnalysisRunningArtifact,
-} from '../../../../artifactEnvelopeService';
+import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
+
+import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analysisReportData';
+import type { Product } from '../config/sampleData';
+import type { AlpineContext, FullReportData } from '../types';
+import type { AnalysisReport } from '@/types/modules-business';
+
+
 
 type AnalysisSchedulePlan = ReturnType<typeof resolveAnalysisSchedulePlan>;
 type PerformanceSettings = ReturnType<typeof getPerformanceSettings>;

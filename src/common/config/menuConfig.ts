@@ -6,6 +6,7 @@
 import { buildMenuRoutes } from './moduleManifest';
 import { ROUTE_MANIFESTS } from './routeManifests';
 import { validateModuleConfig, validateRouteConfig } from '../utils/typeGuards';
+
 import type { RouteMeta } from '@/common/router/navigo/types';
 // ==================== 类型定义 ====================
 

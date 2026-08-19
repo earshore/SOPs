@@ -4,19 +4,21 @@
 // Extracted from llmService (no dependency on llmService internals).
 // ================================================================
 
+import { getDangerousEndpoints, isDangerousEndpoint } from '@/common/config/apiEndpoints';
 import { configCenter } from '@/common/config/ConfigCenter';
 import { EnvConfig } from '@/common/config/envConfig';
-import { getDangerousEndpoints, isDangerousEndpoint } from '@/common/config/apiEndpoints';
 import { DEFAULT_LLM_PROVIDER_ID, DEFAULT_NEW_API_ENDPOINT } from '@/common/config/llmProviders';
 import { SystemError } from '@/common/errors';
-import type { ApiPathId, ApiSurface, SessionReasoningOverride } from './modelCapability';
+
 import {
   buildBodyForApiPath,
   buildFullApiUrl,
   resolveEffectiveReasoning,
   resolveModelCapability,
 } from './modelCapability';
+
 import type { ChatMessage, ResolvedLLMOptions } from './llmTypes';
+import type { ApiPathId, ApiSurface, SessionReasoningOverride } from './modelCapability';
 
 export function resolveProviderEndpoint(provider: string, endpoint: string): string {
   const trimmedEndpoint = (endpoint || '').trim();

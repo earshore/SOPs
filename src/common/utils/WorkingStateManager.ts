@@ -5,8 +5,9 @@
 // ================================================================
 
 import { SystemError } from '@/common/errors/AppError';
-import eventBus from '../EventBus';
+
 import { APP_EVENTS } from '../constants/eventConstants';
+import eventBus from '../EventBus';
 
 /**
  * 工作状态配置

@@ -1,4 +1,5 @@
 import { strFromU8 } from 'fflate';
+
 import { SystemError, ValidationError } from '@/common/errors/AppError';
 
 export type XlsxZipFiles = Record<string, Uint8Array>;

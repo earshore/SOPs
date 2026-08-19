@@ -8,10 +8,12 @@
 // ================================================================
 
 import { configCenter } from '@/common/config/ConfigCenter';
+import { isApiResponse } from '@/common/guards/typeGuards';
+
+import { httpCacheService, type CacheStrategy } from './HttpCacheService';
 import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool';
 import { requestManager } from './RequestManager';
-import { httpCacheService, type CacheStrategy } from './HttpCacheService';
-import { isApiResponse } from '@/common/guards/typeGuards';
+
 import type { ApiResponse } from '@/types/api';
 import type { ILoggerService, IConfigService, IHttpService } from '@/types/services';
 

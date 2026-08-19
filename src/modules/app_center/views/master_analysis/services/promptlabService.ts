@@ -1,9 +1,11 @@
 // src/modules/app_center/views/master_analysis/services/promptlabService.ts
 
 import SITE_CONFIGS from '@/common/constants/constants';
+
+import { sanitizePromptInput } from '../ai_analysis/prompts/promptSanitizer';
+
 import type { AnalysisReport } from '@/types/modules-business';
 import type { PromptInputs } from '@/types/state';
-import { sanitizePromptInput } from '../ai_analysis/prompts/promptSanitizer';
 
 type SubItemSelection = boolean | { enabled: boolean; items?: Record<string, boolean> };
 type SubItemSelections = Record<string, SubItemSelection>;

@@ -4,6 +4,8 @@
  * 提供运行时类型检查和验证功能
  */
 
+import { ValidationError } from '@/common/errors/AppError';
+
 import type {
   Route,
   RouteConfig,
@@ -18,7 +20,6 @@ import type {
   RouterConfig,
   GuardResult,
 } from './types';
-import { ValidationError } from '@/common/errors/AppError';
 
 type OptionalTypeName = 'string' | 'number' | 'boolean' | 'function';
 type FieldValidator<T extends object> = readonly [keyof T, (value: unknown) => boolean];

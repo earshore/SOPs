@@ -1,15 +1,16 @@
-import { copyTextToClipboard } from '@/common/utils/clipboard';
-
-import { setSafeHtml } from '@/common/utils/security';
 import { showToast } from '@/common/ui/notifications';
+import { copyTextToClipboard } from '@/common/utils/clipboard';
+import { setSafeHtml } from '@/common/utils/security';
+
 import { MESSAGE_TOOLBAR_CLASS } from '../constants';
+import { isListingPromptContext, sanitizeListingCopy } from './listingCopySanitize';
 import {
   hydrateUserMessageBubblesWithSkillChips,
   serializeChipContainingElement,
 } from './skillContextChip';
-import type { DeepChatElement, DeepChatMessage, DeepChatSkillContext } from '../types';
 import { getMessageText, isZwspOnlyText } from '../infra/utils';
-import { isListingPromptContext, sanitizeListingCopy } from './listingCopySanitize';
+
+import type { DeepChatElement, DeepChatMessage, DeepChatSkillContext } from '../types';
 
 /** Live generation progress at toolbar end (正在生成回复 · 已收到 N 字). */
 export const TOOLBAR_LIVE_STATUS_CLASS = 'deep-chat-toolbar-live-status';

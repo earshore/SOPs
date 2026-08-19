@@ -1,6 +1,8 @@
 import { SystemError } from '@/common/errors/AppError';
+
 import { appCenterManifest } from './module.manifest';
 import { sopsManifest } from '../sops/module.manifest';
+
 import type { AppCenterRouteId } from './appCatalog';
 
 type SopsRouteId = (typeof sopsManifest.routes)[number]['routeId'];

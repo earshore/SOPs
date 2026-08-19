@@ -6,15 +6,25 @@
  * General-review targets: hesitation-points, buyer-profile, vocab-gap, promise-reality
  */
 
-import { callLLM, type ChatMessage, type LLMStreamMetrics } from '@/services/llmService';
-import { buildRecoveryPrompt, callWithReasoningOnlyRecovery } from './reasoningOnlyRecovery';
-import { getAnalysisReasoningPrefs } from './reasoningPolicy';
-import { withStructuredAnalysisOptions } from '@/services/modelCapability';
-import type { ResolvedToolLlmConfig } from '@/services/llmToolBridge';
-import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
+import { parseLlmJson } from '@/common/utils/parseLlmJson';
 import { sanitizePromptInput } from '@/common/utils/promptSanitizer';
 import { isObject } from '@/common/utils/typeGuards';
-import type { Product, Review } from '../config/sampleData';
+import { callLLM, type ChatMessage, type LLMStreamMetrics } from '@/services/llmService';
+import { withStructuredAnalysisOptions } from '@/services/modelCapability';
+import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
+import {
+  getRuntimeMasterAnalysisOptions,
+  type MasterAnalysisEvidenceDepth,
+} from '@/services/runtimeStrategyService';
+
+import { parseAnalysisResponse } from './analysisResultParser';
+import { buildRecoveryPrompt, callWithReasoningOnlyRecovery } from './reasoningOnlyRecovery';
+import { getAnalysisReasoningPrefs } from './reasoningPolicy';
+import {
+  getMasterAnalysisReasoningMultiplier,
+  getMasterAnalysisReduceMaxTokens,
+  getMasterAnalysisTargetMaxTokens,
+} from '../../services/llmOutputBudget';
 import { generateAnalysisPrompt, MASTER_ANALYSIS_SYSTEM_PROMPT } from '../prompts/analysisPrompts';
 import {
   buildFatalFlawsMapPrompt,
@@ -31,17 +41,6 @@ import {
   buildWowMomentsMapPrompt,
   buildWowMomentsReducePrompt,
 } from '../prompts/pipelinePrompts';
-import { parseAnalysisResponse } from './analysisResultParser';
-import { parseLlmJson } from '@/common/utils/parseLlmJson';
-import {
-  getMasterAnalysisReasoningMultiplier,
-  getMasterAnalysisReduceMaxTokens,
-  getMasterAnalysisTargetMaxTokens,
-} from '../../services/llmOutputBudget';
-import {
-  getRuntimeMasterAnalysisOptions,
-  type MasterAnalysisEvidenceDepth,
-} from '@/services/runtimeStrategyService';
 import {
   applyFairSliceBudget,
   compactForReduce,
@@ -52,6 +51,9 @@ import {
   type EvidenceDedupeStats,
 } from '../utils/evidencePack';
 import { estimateTokenCount } from '../utils/tokenCounter';
+
+import type { Product, Review } from '../config/sampleData';
+import type { ResolvedToolLlmConfig } from '@/services/llmToolBridge';
 
 export type ReviewEvidenceTargetId =
   | 'fatal-flaws'

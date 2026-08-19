@@ -2,29 +2,31 @@
  * AI 分析服务 - 调用大模型进行真实数据分析
  */
 
+import { AppError, ErrorLevel, ErrorCategory } from '@/common/errors/AppError';
 import { callLLM, type ChatMessage } from '@/services/llmService';
-import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import { resolveToolLlmConfig, type ResolvedToolLlmConfig } from '@/services/llmToolBridge';
+import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
-import type { FullAnalysisReport } from '../config/analysisReportData';
-import type { Product } from '../config/sampleData';
-import {
-  generateAnalysisPrompt,
-  getReviewSamplingMetadata,
-  MASTER_ANALYSIS_SYSTEM_PROMPT,
-  withMapReduceHygieneMetadata,
-} from '../prompts/analysisPrompts';
-import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
+
 import { parseAnalysisResponse, validateAnalysisResult } from './analysisResultParser';
-import { runSellingPointsPipeline } from './sellingPointsPipeline';
+import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import {
   buildReviewSourcePack,
   isReviewEvidenceTargetId,
   runReviewEvidencePipeline,
   type ReviewSourcePack,
 } from './reviewEvidencePipeline';
-import { AppError, ErrorLevel, ErrorCategory } from '@/common/errors/AppError';
+import { runSellingPointsPipeline } from './sellingPointsPipeline';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
+import {
+  generateAnalysisPrompt,
+  getReviewSamplingMetadata,
+  MASTER_ANALYSIS_SYSTEM_PROMPT,
+  withMapReduceHygieneMetadata,
+} from '../prompts/analysisPrompts';
+
+import type { FullAnalysisReport } from '../config/analysisReportData';
+import type { Product } from '../config/sampleData';
 
 const nativeLoggerConsole = globalThis.console;
 

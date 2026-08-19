@@ -1,4 +1,5 @@
 import { formatCurrency, formatPercent } from '../utils/formatters';
+
 import type { AnalyzedRow } from '../types';
 
 export function createResultRow(row: AnalyzedRow): HTMLTableRowElement {

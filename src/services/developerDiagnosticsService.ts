@@ -1,4 +1,5 @@
 import { configCenter } from '@/common/config/ConfigCenter';
+
 import { StorageService } from './storageService';
 
 export type DeveloperLogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';

@@ -7,30 +7,29 @@
  * Single small product still uses one-shot full schema with partial defaults.
  */
 
-import { callLLM, type ChatMessage, type LLMStreamMetrics } from '@/services/llmService';
-import { buildRecoveryPrompt, callWithReasoningOnlyRecovery } from './reasoningOnlyRecovery';
-import { getAnalysisReasoningPrefs } from './reasoningPolicy';
-import { withStructuredAnalysisOptions } from '@/services/modelCapability';
-import type { ResolvedToolLlmConfig } from '@/services/llmToolBridge';
-import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
 import { sanitizePromptInput } from '@/common/utils/promptSanitizer';
 import { isObject } from '@/common/utils/typeGuards';
-import type { Product } from '../config/sampleData';
+import { callLLM, type ChatMessage, type LLMStreamMetrics } from '@/services/llmService';
+import { withStructuredAnalysisOptions } from '@/services/modelCapability';
+import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
 import {
-  buildSellingPointsMapPrompt,
-  buildSellingPointsReducePrompt,
-} from '../prompts/pipelinePrompts';
-import { generateAnalysisPrompt, MASTER_ANALYSIS_SYSTEM_PROMPT } from '../prompts/analysisPrompts';
+  getRuntimeMasterAnalysisOptions,
+  type MasterAnalysisEvidenceDepth,
+} from '@/services/runtimeStrategyService';
+
 import { parseAnalysisResponse } from './analysisResultParser';
+import { buildRecoveryPrompt, callWithReasoningOnlyRecovery } from './reasoningOnlyRecovery';
+import { getAnalysisReasoningPrefs } from './reasoningPolicy';
 import {
   getMasterAnalysisReasoningMultiplier,
   getMasterAnalysisReduceMaxTokens,
   getMasterAnalysisTargetMaxTokens,
 } from '../../services/llmOutputBudget';
+import { generateAnalysisPrompt, MASTER_ANALYSIS_SYSTEM_PROMPT } from '../prompts/analysisPrompts';
 import {
-  getRuntimeMasterAnalysisOptions,
-  type MasterAnalysisEvidenceDepth,
-} from '@/services/runtimeStrategyService';
+  buildSellingPointsMapPrompt,
+  buildSellingPointsReducePrompt,
+} from '../prompts/pipelinePrompts';
 import {
   applyFairSliceBudget,
   compactForReduce,
@@ -41,6 +40,9 @@ import {
   type EvidenceDedupeStats,
 } from '../utils/evidencePack';
 import { estimateTokenCount } from '../utils/tokenCounter';
+
+import type { Product } from '../config/sampleData';
+import type { ResolvedToolLlmConfig } from '@/services/llmToolBridge';
 
 const MAP_CHUNK_BULLETS = 8;
 /** Prefer Map–Reduce when many bullets or multi-ASIN source groups. */

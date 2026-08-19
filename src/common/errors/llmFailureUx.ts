@@ -1,11 +1,13 @@
 // src/common/errors/llmFailureUx.ts
 // Unified LLM failure copy + optional deep-link into system settings.
 
-import eventBus from '@/common/EventBus';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
 import { showToast, type ToastType } from '@/common/ui/notifications';
-import type { SettingsOpenOptions } from '@/components/settings/settingsOpenOptions';
+
 import { isAppError } from './AppError';
+
+import type { SettingsOpenOptions } from '@/components/settings/settingsOpenOptions';
 
 export interface LlmFailureUx {
   title: string;

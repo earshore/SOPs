@@ -1,7 +1,8 @@
-import { getInput } from '../ui/dom';
-import { isFilterType, type FilterType } from '../utils/filters';
-import { updateReportControls } from '../ui/reportControls';
 import { renderResults, setActiveFilterButton } from '../results/resultsRenderer';
+import { getInput } from '../ui/dom';
+import { updateReportControls } from '../ui/reportControls';
+import { isFilterType, type FilterType } from '../utils/filters';
+
 import type { AnalyzedRow, ReportType } from '../types';
 
 interface ActionListStateDependencies {

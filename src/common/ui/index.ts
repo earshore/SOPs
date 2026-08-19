@@ -2,11 +2,7 @@
  * index.ts - UI 模块统一导出
  * 提供向后兼容的统一接口
  */
-
-// 工具函数
 export { getEl, getErrorSummary, sleep } from './utils';
-
-// Mega Menu 渲染
 export {
   renderMegaMenu,
   renderMoreMenu,
@@ -15,8 +11,6 @@ export {
   initMegaMenuAccessibility,
   closeMegaMenus,
 } from './megaMenu';
-
-// 导航和路由
 export {
   updateUIForRoute,
   prepareUIForRoute,
@@ -27,11 +21,7 @@ export {
   scrollToHubModule,
   scrollToMoreModule,
 } from './navigation';
-
-// 通知
 export { showToast, showProgress, type ToastType } from './notifications';
-
-// 搜索
 export {
   searchSOPs,
   clearSOPSearch,
@@ -40,13 +30,17 @@ export {
   searchSidebar,
   clearSidebarSearch,
 } from './search';
-
-// 新路由系统（推荐使用）
-export { navigateToRouteId, getRouter, getCurrentRoute, hasRoute } from '../router/initRouter';
-
 import { closeMegaMenus } from './megaMenu';
+import {
+  toggleSOPGroup,
+  scrollToSOPModule,
+  scrollToHubModule,
+  scrollToMoreModule,
+} from './navigation';
+export { navigateToRouteId, getRouter, getCurrentRoute, hasRoute } from '../router/initRouter';
 import { searchSidebar, clearSOPSearch, clearHubSearch, clearSidebarSearch } from './search';
 import { navigateToRouteId } from '../router/initRouter';
+import { registerActions, unregisterActions } from '../utils/actionRegistry';
 
 const sidebarSearchInputHandler = (event: Event): void => {
   const target = event.target as HTMLInputElement | null;
@@ -60,14 +54,6 @@ document.addEventListener('input', sidebarSearchInputHandler);
 // ========================
 // 注册动作到 ActionRegistry
 // ========================
-
-import { registerActions, unregisterActions } from '../utils/actionRegistry';
-import {
-  toggleSOPGroup,
-  scrollToSOPModule,
-  scrollToHubModule,
-  scrollToMoreModule,
-} from './navigation';
 
 const UI_ACTIONS = {
   // 路由导航（通过 data-action="switch-tab" data-tab="xxx" 触发）

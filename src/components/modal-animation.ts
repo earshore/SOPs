@@ -6,6 +6,7 @@
  */
 
 import { animationManager } from '@/services/animation-manager';
+
 import { ANIMATION_CLASSES, MODAL_CONFIG } from '../config/animation-config';
 
 type ModalBackdropElement = HTMLElement & {

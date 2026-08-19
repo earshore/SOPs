@@ -39,8 +39,6 @@ export type { ApiErrorOptions, AppErrorOptions, ErrorContext } from './AppError'
 
 // ==================== 便捷函数 ====================
 
-import { globalErrorHandler } from './GlobalErrorHandler';
-import type { ErrorHandlerOptions } from './GlobalErrorHandler';
 import {
   AppError,
   NetworkError,
@@ -51,7 +49,10 @@ import {
   ErrorContext,
 } from './AppError';
 import { ERROR_CODES } from './errorCodes';
+import { globalErrorHandler } from './GlobalErrorHandler';
+
 import type { ErrorCode } from './errorCodes';
+import type { ErrorHandlerOptions } from './GlobalErrorHandler';
 
 export interface HandleApiErrorOptions {
   statusCode?: number;

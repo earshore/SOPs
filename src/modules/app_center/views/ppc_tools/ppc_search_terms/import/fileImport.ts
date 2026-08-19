@@ -1,9 +1,10 @@
-import { showToast } from '@/common/ui/notifications';
 import { ValidationError } from '@/common/errors/AppError';
-import { getInput, getTextarea, setText } from '../ui/dom';
-import { MAX_IMPORT_FILE_SIZE_BYTES } from '../analysis/reportLimits';
+import { showToast } from '@/common/ui/notifications';
+
 import { xlsxArrayBufferToDelimitedText } from './xlsx';
 import { setPasteInputError } from '../analysis/analysisInput';
+import { MAX_IMPORT_FILE_SIZE_BYTES } from '../analysis/reportLimits';
+import { getInput, getTextarea, setText } from '../ui/dom';
 import { setPpcSearchTermsStatus } from '../ui/reportControls';
 
 export interface ReportImportCallbacks {

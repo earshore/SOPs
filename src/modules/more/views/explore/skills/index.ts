@@ -5,20 +5,21 @@
  */
 
 import BaseModule from '@/common/BaseModule';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
-import { copyTextToClipboard } from '@/common/utils/clipboard';
+import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui';
-import { skillRegistry } from '@/services/skillRegistry';
-import type { Skill, SkillCategoryId, SkillMeta } from '@/services/skillRegistry';
-import { StorageService } from '@/services/storageService';
+import { copyTextToClipboard } from '@/common/utils/clipboard';
+import { setSafeHtml } from '@/common/utils/security';
 import {
   buildSkillDeepChatUserDraft,
   queueSkillForDeepChat,
 } from '@/modules/app_center/skillDeepChatHandoff';
-import eventBus from '@/common/EventBus';
-import { APP_EVENTS } from '@/common/constants/eventConstants';
-import { navigateToRouteId } from '@/common/router/initRouter';
+import { skillRegistry } from '@/services/skillRegistry';
+import { StorageService } from '@/services/storageService';
+
+import type { Skill, SkillCategoryId, SkillMeta } from '@/services/skillRegistry';
 import '@/components/modal/AppModal';
 import './skills_style.css';
 

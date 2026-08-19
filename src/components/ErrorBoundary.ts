@@ -4,8 +4,8 @@
 // 提供一致的错误UI和重试机制
 // ================================================================
 
-import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import { randomBase36 } from '@/common/utils/random';
+import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 
 /**
  * 错误边界配置

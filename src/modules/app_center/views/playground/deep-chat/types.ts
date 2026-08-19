@@ -1,14 +1,14 @@
-import type { ChatMessage } from '@/services/llmService';
-import type { LLMProviderConfig } from '@/types/state';
+import type { PendingDeepChatRequest } from './request/lifecycle';
 import type {
   DeepChatAttachmentMeta,
   DeepChatMessage,
   DeepChatMessageStatus,
   DeepChatRole,
 } from './session/conversationContext';
-import type { PendingDeepChatRequest } from './request/lifecycle';
 import type { ListingPromptWorkflowContext } from '@/modules/app_center/listingWorkflowHandoff';
 import type { SkillDeepChatContext } from '@/modules/app_center/skillDeepChatHandoff';
+import type { ChatMessage } from '@/services/llmService';
+import type { LLMProviderConfig } from '@/types/state';
 
 /** 会话上下文 Chip：持久化 skill 引用（系统提示词来源） */
 export type DeepChatSkillContext = Pick<

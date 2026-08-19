@@ -1,8 +1,9 @@
-import { mapColumns, type ColumnMapping } from '../columns/columns';
 import { readField, readSearchTermPerformanceMetrics } from './analysisMetrics';
-import type { ParsedReport, RawRecord } from '../import/delimitedReport';
+import { mapColumns, type ColumnMapping } from '../columns/columns';
 import { classifySearchTermMetrics } from '../rules/searchTermRules';
+
 import type { AnalysisResult } from './analysisResult';
+import type { ParsedReport, RawRecord } from '../import/delimitedReport';
 import type { AnalyzedRow, ReportType, Thresholds } from '../types';
 
 export function analyzeSearchTermParsedReport(

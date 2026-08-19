@@ -1,7 +1,9 @@
 import { ValidationError } from '@/common/errors/AppError';
-import type { ActionType, AnalyzedRow } from '../types';
-import { PPC_SEARCH_TERMS_LLM_ACTION_TYPES, type PpcSearchTermsLlmDecision } from './agentTypes';
+
 import { parseJsonObject } from './agentResponseJson';
+import { PPC_SEARCH_TERMS_LLM_ACTION_TYPES, type PpcSearchTermsLlmDecision } from './agentTypes';
+
+import type { ActionType, AnalyzedRow } from '../types';
 
 export function parsePpcSearchTermsLlmDecisions(response: string): PpcSearchTermsLlmDecision[] {
   const payload = parseJsonObject(response);

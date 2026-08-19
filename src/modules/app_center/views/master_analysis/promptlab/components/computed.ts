@@ -6,7 +6,9 @@
  */
 
 import { appStore } from '@/stores/useAppStore';
+
 import { estimateTokenCount, formatTokenCount } from '../../ai_analysis/utils/tokenCounter';
+
 import type { PromptlabAlpineContext } from './types';
 
 type ReportRecord = Record<string, unknown>;

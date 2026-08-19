@@ -6,11 +6,13 @@
  * - hover: border-{color}-300/50 (柔和的配色边框浮现)
  */
 
-import { MENU_CONFIG } from '../config/menuConfig';
 import { getEl } from './utils';
-import { escapeHtml, setSafeHtml } from '../utils/security';
-import type { ColorSchemeName } from '../constants/colorSchemes';
+import { MENU_CONFIG } from '../config/menuConfig';
 import { routeIdToPath } from '../router/routePaths';
+import { escapeHtml, setSafeHtml } from '../utils/security';
+
+import type { ColorSchemeName } from '../constants/colorSchemes';
+
 
 type MenuModule = (typeof MENU_CONFIG.modules)[keyof typeof MENU_CONFIG.modules];
 

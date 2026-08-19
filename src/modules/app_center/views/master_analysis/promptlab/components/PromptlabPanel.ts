@@ -16,20 +16,11 @@
  *  types.ts           — 共享类型定义
  */
 
-import { appStore } from '@/stores/useAppStore';
+import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 import { APP_EVENTS, MODULE_EVENTS } from '@/common/constants/eventConstants';
 import eventBus from '@/common/EventBus';
 import { consumePromptResume } from '@/modules/app_center/artifactResumeSelection';
-import { HistoryService } from '../../services/historyService';
-import { getReportFingerprint } from '../../services/reportIdentity';
-// ── 子模块导入 ────────────────────────────────────────────────────────────────
-import type {
-  ConsoleMode,
-  DnaConfidence,
-  DnaExtractionFieldName,
-  DnaExtractionFieldSummary,
-  PromptlabAlpineContext,
-} from './types';
+import { appStore } from '@/stores/useAppStore';
 
 import {
   computeHasReport,
@@ -46,23 +37,19 @@ import {
   getConfidenceLevel,
   getConfidenceAriaLabel,
 } from './computed';
-
-import {
-  generateLanguageOptions,
-  renderReportAnalysis,
-  autoSelectMarket,
-  renderReportModules,
-} from './reportRenderer';
-
 import {
   canExtractDNA,
   autoPopulateDNA,
   extractSingleField,
   refreshDnaExtractionSummary,
 } from './dnaActions';
-
 import { generateListingPrompt, generateVisualPrompt } from './promptActions';
-
+import {
+  generateLanguageOptions,
+  renderReportAnalysis,
+  autoSelectMarket,
+  renderReportModules,
+} from './reportRenderer';
 import {
   initAutoHeightInputs,
   expandInput,
@@ -76,9 +63,17 @@ import {
   onReportSectionChange,
   onInputChange,
 } from './uiHelpers';
+import { HistoryService } from '../../services/historyService';
+import { getReportFingerprint } from '../../services/reportIdentity';
 
+import type {
+  ConsoleMode,
+  DnaConfidence,
+  DnaExtractionFieldName,
+  DnaExtractionFieldSummary,
+  PromptlabAlpineContext,
+} from './types';
 import type { UserProductProfile } from '@/types/state';
-import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 
 // ─────────────────────────────────────────────────────────────────────────────
 

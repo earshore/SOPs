@@ -3,13 +3,15 @@
  * 模块内只读摘要 + 深链打开系统设置；策略写入唯一入口为系统设置。
  */
 
-import { getCacheStatsAsync, clearAnalysisCacheAsync } from '../services/parallelAnalysisService';
+import { showToast } from '@/common/ui/index';
+import { openSettings } from '@/components/settings/systemSettings';
 import {
   getRuntimeMasterAnalysisOptions,
   getRuntimeStrategySettings,
   MASTER_ANALYSIS_SCHEDULING_BY_EVIDENCE_DEPTH,
   saveRuntimeStrategySettings,
 } from '@/services/runtimeStrategyService';
+
 import {
   isSchedulingPreference,
   resolveAnalysisSchedule,
@@ -18,8 +20,7 @@ import {
   type SchedulingPreference,
   type ScheduleTier,
 } from '../services/analysisScheduler';
-import { showToast } from '@/common/ui/index';
-import { openSettings } from '@/components/settings/systemSettings';
+import { getCacheStatsAsync, clearAnalysisCacheAsync } from '../services/parallelAnalysisService';
 import { clearAnalysisSession } from '../utils/analysisSession';
 
 const SETTINGS_VERSION = 3;

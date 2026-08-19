@@ -1,9 +1,12 @@
-import { setSafeHtml } from '@/common/utils/security';
 import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
-import type { PromptHistoryItem } from '@/types/state';
+import { setSafeHtml } from '@/common/utils/security';
+
+
 import { formatPromptDraftPreviewMeta, getPromptDrafts } from '../composer/promptDrafts';
-import type { PromptPreviewLeftOptions, PromptPreviewPointer } from '../types';
 import { escapeHTML } from '../infra/utils';
+
+import type { PromptPreviewLeftOptions, PromptPreviewPointer } from '../types';
+import type { PromptHistoryItem } from '@/types/state';
 
 /** Hover must stay still this long before the Listing Prompt bubble appears. */
 const PROMPT_PREVIEW_SHOW_DELAY_MS = 1000;

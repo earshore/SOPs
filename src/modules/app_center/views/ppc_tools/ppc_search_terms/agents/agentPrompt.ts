@@ -1,8 +1,9 @@
-import type { ChatMessage } from '@/services/llmService';
-import type { AnalyzedRow, Thresholds } from '../types';
-import { type PpcSearchTermsAnalysisContext } from './agentTypes';
 import { compactContext, toPromptRow } from './agentPromptInput';
 import { buildPpcSearchTermsAgentRules, PPC_SEARCH_TERMS_AGENT_PRESET } from './agentPromptPreset';
+import { type PpcSearchTermsAnalysisContext } from './agentTypes';
+
+import type { AnalyzedRow, Thresholds } from '../types';
+import type { ChatMessage } from '@/services/llmService';
 
 export function buildPpcSearchTermsAgentMessages(
   rows: AnalyzedRow[],

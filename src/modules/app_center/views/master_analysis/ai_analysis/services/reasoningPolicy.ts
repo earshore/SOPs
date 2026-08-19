@@ -13,10 +13,11 @@
  * 同时 UI 明示当前档位实际使用的推理等级。
  */
 
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { normalizeReasoningUserPrefs } from '@/services/modelCapability/prefs';
-import type { ReasoningEffortLevel, ReasoningUserPrefs } from '@/services/modelCapability/types';
 import { getRuntimeMasterAnalysisOptions } from '@/services/runtimeStrategyService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+
+import type { ReasoningEffortLevel, ReasoningUserPrefs } from '@/services/modelCapability/types';
 import type { MasterAnalysisEvidenceDepth } from '@/services/runtimeStrategyService';
 
 /** 分析链路实际推理档位（与 LLMOptions.reasoningPrefs 同构）。off 时 effort 为占位值。 */

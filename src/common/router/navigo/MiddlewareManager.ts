@@ -5,9 +5,11 @@
  * 支持 before 和 after 中间件
  */
 
-import type { Route, RouteMiddleware, RouteContext } from './types';
-import { isRouteMiddleware } from './guards';
 import { ValidationError } from '@/common/errors/AppError';
+
+import { isRouteMiddleware } from './guards';
+
+import type { Route, RouteMiddleware, RouteContext } from './types';
 
 export interface BeforeMiddlewareResult {
   allowed: boolean;

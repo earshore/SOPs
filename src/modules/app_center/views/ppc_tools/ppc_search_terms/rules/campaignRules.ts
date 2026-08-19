@@ -1,5 +1,6 @@
-import { makeActionDecision, type ActionDecision } from '../actions/actionDecision';
 import { CAMPAIGN_CLASSIFICATION_RULES } from './campaignRuleDefinitions';
+import { makeActionDecision, type ActionDecision } from '../actions/actionDecision';
+
 import type { CampaignMetrics } from './campaignRuleTypes';
 import type { Thresholds } from '../types';
 

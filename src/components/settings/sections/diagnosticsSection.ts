@@ -1,26 +1,25 @@
 // TD-SET-01 Phase 1: diagnostics section fragment (verbatim).
+import { getDangerousEndpoints } from '@/common/config/apiEndpoints';
 import { APP_VERSION } from '@/common/constants/constants';
-import { ErrorService } from '@/services/errorService';
-import {
-  LLMState,
-  ProxyState,
-  ToolStrategyState,
-  RuntimeStrategyState,
-  SettingsPanelPart,
-} from '../panelTypes';
+import { showToast } from '@/common/ui';
+import { initEventLogger } from '@/common/utils/eventLogger';
 import {
   diffSettingsPartitions,
   snapshotSettingsPartitions,
   type SettingsDirtyPartition,
 } from '@/components/settings/domain/settingsDirty';
+import { evaluateSettingsHealth } from '@/components/settings/domain/settingsHealth';
 import {
   evaluateExternalStorageChange,
   undoLastSettingsSave as popLastSettingsSave,
   type SettingsRollbackPartition,
 } from '@/components/settings/domain/settingsRollback';
-import { evaluateSettingsHealth } from '@/components/settings/domain/settingsHealth';
-import { getDangerousEndpoints } from '@/common/config/apiEndpoints';
-import { initEventLogger } from '@/common/utils/eventLogger';
+import {
+  updateDeveloperDiagnosticSetting,
+  type DeveloperDiagnosticSettings,
+  type DeveloperLogLevel,
+} from '@/services/developerDiagnosticsService';
+import { ErrorService } from '@/services/errorService';
 import {
   saveRuntimeStrategySettings,
   type RuntimeStrategySettings,
@@ -29,12 +28,14 @@ import {
   saveToolStrategySettings,
   type ToolStrategySettings,
 } from '@/services/toolStrategyService';
-import { showToast } from '@/common/ui';
+
 import {
-  updateDeveloperDiagnosticSetting,
-  type DeveloperDiagnosticSettings,
-  type DeveloperLogLevel,
-} from '@/services/developerDiagnosticsService';
+  LLMState,
+  ProxyState,
+  ToolStrategyState,
+  RuntimeStrategyState,
+  SettingsPanelPart,
+} from '../panelTypes';
 
 /** Plain partition payloads for dirty detection (excludes UI-only flags). */
 function buildSettingsDirtyInput(panel: {

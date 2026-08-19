@@ -9,22 +9,28 @@
  * - 管理浮动关键词窗口的显示和交互
  */
 
+import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
-import BaseModule from '@/common/BaseModule';
-import { showToast } from '@/common/ui';
 import { navigateToRouteId } from '@/common/router/initRouter';
+import { showToast } from '@/common/ui';
+import { clearRuntimeCssRule, updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
+import { createSafeFragment } from '@/common/utils/security';
+import { createModelSelect } from '@/components/modelSelect';
+import { ErrorService } from '@/services/errorService';
+import { getRuntimeKeywordHunterSeoOptions } from '@/services/runtimeStrategyService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+import { appStore } from '@/stores/useAppStore';
+
+import {
+  AnalysisStatsViewRenderer,
+  buildAnalysisStatsSnapshot,
+} from './analysisStatsRenderer';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
-import { createModelSelect } from '@/components/modelSelect';
-import type { ModelSelectController } from '@/components/modelSelect';
-import { appStore } from '@/stores/useAppStore';
-import { ErrorService } from '@/services/errorService';
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
-import { getRuntimeKeywordHunterSeoOptions } from '@/services/runtimeStrategyService';
-import { createSafeFragment } from '@/common/utils/security';
-import { clearRuntimeCssRule, updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
 import '../styles.css';
+
+import type { ModelSelectController } from '@/components/modelSelect';
 
 // ==========================================
 // Module State
@@ -58,13 +64,6 @@ interface ActiveTranslationRun {
   llmStatus?: KeywordHunterService.KeywordHunterLlmStatus;
 }
 
-interface AnalysisStats {
-  total: number;
-  matched: number;
-  unmatched: number;
-  rate: number;
-}
-
 interface HighlightSegment {
   text: string;
   keywords: Set<string>;
@@ -77,7 +76,6 @@ interface HighlightedTranslationParagraph {
 }
 
 type KeywordHunterStoreState = ReturnType<typeof appStore.getState>['keywordTracker'];
-type MatchedKeywordEntry = KeywordHunterStoreState['matchedKeywords'][number] | string;
 
 let floatWinState: FloatWinState = {
   isDragging: false,
@@ -321,223 +319,11 @@ function renderProcessModule(): void {
  */
 function renderAnalysisStats(): void {
   const tracker = ensureKeywordHunterState();
-  const stats = getAnalysisStats(tracker);
-  renderCoverageStats(stats);
-  renderWordFrequencyStats(tracker);
-}
-
-function getAnalysisStats(tracker: KeywordHunterStoreState): AnalysisStats {
-  const total = tracker.keywords ? tracker.keywords.length : 0;
-  const matched = tracker.matchedKeywords ? tracker.matchedKeywords.length : 0;
-  const unmatched = tracker.unmatchedKeywords ? tracker.unmatchedKeywords.length : 0;
-  const rate = total === 0 ? 0 : Math.round((matched / total) * 100);
-
-  return { total, matched, unmatched, rate };
-}
-
-function renderCoverageStats(stats: AnalysisStats): void {
-  // 更新覆盖率
-  const rateEl = document.getElementById('keyword-hunter-coverage-rate');
-  if (rateEl) rateEl.textContent = stats.rate + '%';
-
-  const barEl = document.getElementById('keyword-hunter-coverage-bar') as HTMLElement | null;
-  if (barEl) setProgressValue(barEl, stats.rate);
-
-  // 更新统计数据
-  const matchedEl = document.getElementById('keyword-hunter-stat-matched');
-  if (matchedEl) matchedEl.textContent = stats.matched.toString();
-
-  const unmatchedEl = document.getElementById('keyword-hunter-stat-unmatched');
-  if (unmatchedEl) unmatchedEl.textContent = stats.unmatched.toString();
-
-  const totalEl = document.getElementById('keyword-hunter-stat-total');
-  if (totalEl) totalEl.textContent = stats.total.toString();
-}
-
-function renderWordFrequencyStats(tracker: KeywordHunterStoreState): void {
-  const freqList = document.getElementById('keyword-hunter-word-frequency-list');
-  if (!freqList || !tracker.wordFrequency) return;
-
-  const matchedKeywordRoots = collectMatchedKeywordRoots(tracker.matchedKeywords);
-  const unmatchedKeywordRoots = collectUnmatchedKeywordRoots(tracker);
-
-  freqList.replaceChildren();
-  if (tracker.wordFrequency.length === 0 && unmatchedKeywordRoots.size === 0) {
-    freqList.appendChild(createEmptyWordFrequencyElement());
-    return;
-  }
-
-  renderWordCloud(freqList, tracker.wordFrequency, matchedKeywordRoots);
-  renderUnmatchedRootSection(freqList, unmatchedKeywordRoots);
-}
-
-function createEmptyWordFrequencyElement(): HTMLElement {
-  const emptyDiv = document.createElement('div');
-  emptyDiv.className = 'flex flex-col items-center justify-center py-16 px-4 text-center';
-  emptyDiv.setAttribute('role', 'status');
-  emptyDiv.setAttribute('aria-live', 'polite');
-
-  const iconWrap = document.createElement('div');
-  iconWrap.className =
-    'w-14 h-14 rounded-2xl bg-[var(--module-accent-soft)] flex items-center justify-center mb-4 border border-[var(--module-accent-soft)]';
-  const icon = document.createElement('i');
-  icon.className = 'fas fa-cloud text-[var(--module-accent)] text-xl';
-  icon.setAttribute('aria-hidden', 'true');
-  iconWrap.appendChild(icon);
-
-  const title = document.createElement('p');
-  title.className = 'text-sm font-semibold text-slate-600';
-  title.textContent = '还没有词频数据';
-
-  const reason = document.createElement('p');
-  reason.className = 'text-xs text-slate-500 mt-2 max-w-sm leading-relaxed';
-  reason.textContent = '当前没有可统计的 Listing 文案和关键词匹配结果。';
-
-  const action = document.createElement('p');
-  action.className = 'text-xs text-slate-500 mt-2 max-w-sm leading-relaxed';
-  action.textContent = '推荐操作：返回输入页粘贴关键词和文案，点击开始分析后这里会生成词云。';
-
-  emptyDiv.append(iconWrap, title, reason, action);
-  return emptyDiv;
-}
-
-function collectMatchedKeywordRoots(matchedKeywords: readonly MatchedKeywordEntry[]): Set<string> {
-  const roots = new Set<string>();
-  matchedKeywords.forEach(item => {
-    addKeywordRoots(roots, getMatchedKeywordText(item));
+  const snapshot = buildAnalysisStatsSnapshot(tracker);
+  const container = document.getElementById('keyword-hunter-process') ?? document.body;
+  new AnalysisStatsViewRenderer().render(container, snapshot, {
+    onLocateRoot: locateUnmatchedRootInList,
   });
-  return roots;
-}
-
-function collectUnmatchedKeywordRoots(tracker: KeywordHunterStoreState): Set<string> {
-  const roots = new Set<string>();
-  const highFreqWordsSet = new Set(tracker.wordFrequency.map(([word]) => word.toLowerCase()));
-
-  tracker.unmatchedKeywords.forEach(keyword => {
-    addKeywordRoots(roots, keyword, highFreqWordsSet);
-  });
-
-  return roots;
-}
-
-function getMatchedKeywordText(item: MatchedKeywordEntry): string {
-  return typeof item === 'object' ? item.keyword : item;
-}
-
-function addKeywordRoots(roots: Set<string>, keyword: string, excludedRoots?: Set<string>): void {
-  if (!keyword) return;
-
-  const words = keyword.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
-  words.forEach((word: string) => {
-    if (word.length > 2 && !excludedRoots?.has(word)) {
-      roots.add(word);
-    }
-  });
-}
-
-function renderWordCloud(
-  freqList: HTMLElement,
-  wordFrequency: Array<[string, number]>,
-  matchedKeywordRoots: Set<string>
-): void {
-  const wordCloudDiv = document.createElement('div');
-  wordCloudDiv.className = 'flex flex-wrap gap-3';
-  const wordFragment = document.createDocumentFragment();
-
-  wordFrequency.forEach(([word, count]) => {
-    wordFragment.appendChild(
-      createWordFrequencySpan(word, count, matchedKeywordRoots.has(word.toLowerCase()))
-    );
-  });
-
-  wordCloudDiv.appendChild(wordFragment);
-  freqList.appendChild(wordCloudDiv);
-}
-
-function createWordFrequencySpan(word: string, count: number, isMatched: boolean): HTMLElement {
-  const span = document.createElement('span');
-  const countSpan = document.createElement('span');
-  countSpan.textContent = `(${count})`;
-
-  if (isMatched) {
-    span.className =
-      'px-2 py-1 bg-green-100 text-green-700 text-xs rounded-md flex items-center gap-1';
-    const checkIcon = document.createElement('i');
-    checkIcon.className = 'fa-solid fa-check text-[10px]';
-    checkIcon.setAttribute('aria-hidden', 'true');
-    span.appendChild(checkIcon);
-    span.appendChild(document.createTextNode(` ${word} `));
-    countSpan.className = 'opacity-60';
-    span.appendChild(countSpan);
-    return span;
-  }
-
-  span.className = 'px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md';
-  span.textContent = `${word} `;
-  countSpan.className = 'text-slate-400';
-  span.appendChild(countSpan);
-  return span;
-}
-
-function renderUnmatchedRootSection(
-  freqList: HTMLElement,
-  unmatchedKeywordRoots: Set<string>
-): void {
-  if (unmatchedKeywordRoots.size === 0) {
-    return;
-  }
-
-  const unmatchedRootsArray = Array.from(unmatchedKeywordRoots).sort();
-
-  const unmatchedSection = document.createElement('div');
-  unmatchedSection.className = 'mt-4 pt-4 border-t border-slate-200';
-  unmatchedSection.appendChild(createUnmatchedRootsHeader(unmatchedRootsArray.length));
-  unmatchedSection.appendChild(createUnmatchedRootsContainer(unmatchedRootsArray));
-  freqList.appendChild(unmatchedSection);
-}
-
-function createUnmatchedRootsHeader(rootCount: number): HTMLElement {
-  const header = document.createElement('div');
-  header.className = 'text-xs text-slate-500 mb-2 font-medium flex items-center gap-2';
-  const icon = document.createElement('i');
-  icon.className = 'fas fa-exclamation-triangle text-red-500';
-  header.appendChild(icon);
-  const headerText = document.createElement('span');
-  headerText.textContent = `未在文案中出现的关键词词根 (${rootCount})`;
-  header.appendChild(headerText);
-  return header;
-}
-
-function createUnmatchedRootsContainer(roots: string[]): HTMLElement {
-  const rootsContainer = document.createElement('div');
-  rootsContainer.className = 'flex flex-wrap gap-2';
-  const rootsFragment = document.createDocumentFragment();
-
-  roots.forEach((root: string) => {
-    rootsFragment.appendChild(createUnmatchedRootTag(root));
-  });
-
-  rootsContainer.appendChild(rootsFragment);
-  return rootsContainer;
-}
-
-function createUnmatchedRootTag(root: string): HTMLElement {
-  const span = document.createElement('span');
-  span.className =
-    'px-2 py-1 bg-red-100 text-red-700 text-xs rounded-md inline-flex items-center gap-1 cursor-pointer hover:bg-red-200 transition-colors';
-  span.title = '点击在关键词监控中定位';
-  span.addEventListener('click', () => locateUnmatchedRootInList(root));
-
-  const icon = document.createElement('i');
-  icon.className = 'fa-solid fa-xmark text-[10px]';
-  icon.setAttribute('aria-hidden', 'true');
-  span.appendChild(icon);
-
-  const text = document.createElement('span');
-  text.textContent = root;
-  span.appendChild(text);
-
-  return span;
 }
 
 /**
@@ -1799,3 +1585,4 @@ export const mount = (container: HTMLElement): Promise<void> =>
 export const unmount = (): void => {
   keywordHunterProcessModule.unmount();
 };
+

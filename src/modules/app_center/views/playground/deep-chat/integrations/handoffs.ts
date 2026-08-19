@@ -1,18 +1,22 @@
-import {
-  uiHooks,
-  registerHandoffUiHooks,
-  findConfigModelsEntry,
-  parseReasoningEffortValue,
-} from '../session/uiHooks';
-import {
-  createThread,
-  flushThreadStore,
-  getActiveListingPromptContext,
-  getActiveThread,
-  renderPromptDraftsForActiveThread,
-  updateActiveThreadFields,
-} from '../session/threadStore';
 
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
+import { navigateToRouteId } from '@/common/router/initRouter';
+import { showToast } from '@/common/ui/notifications';
+import { registerListingCopyArtifact } from '@/modules/app_center/artifactEnvelopeService';
+import { applyListingCopyToKeywordHunter } from '@/modules/app_center/keywordHunterListingHandoff';
+import {
+  saveListingCopy,
+  type AppCenterListingCopy,
+} from '@/modules/app_center/listingCopyService';
+import {
+  buildSystemPromptFromSkillContexts,
+  consumeSkillForDeepChat,
+  prefixDraftWithSkillContexts,
+  type SkillDeepChatContext,
+} from '@/modules/app_center/skillDeepChatHandoff';
+import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
+import { setWorkspaceContext } from '@/modules/app_center/workspaceContext';
 import {
   clampEffort,
   DEFAULT_REASONING_PREFS,
@@ -21,47 +25,38 @@ import {
   shouldShowReasoningControls,
   type ReasoningEffortLevel,
 } from '@/services/modelCapability';
-
 import { StorageService } from '@/services/storageService';
-
 import { appStore } from '@/stores/useAppStore';
-import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
-import { registerListingCopyArtifact } from '@/modules/app_center/artifactEnvelopeService';
-import { applyListingCopyToKeywordHunter } from '@/modules/app_center/keywordHunterListingHandoff';
-import {
-  saveListingCopy,
-  type AppCenterListingCopy,
-} from '@/modules/app_center/listingCopyService';
 
-import {
-  buildSystemPromptFromSkillContexts,
-  consumeSkillForDeepChat,
-  prefixDraftWithSkillContexts,
-  type SkillDeepChatContext,
-} from '@/modules/app_center/skillDeepChatHandoff';
-
-import { setWorkspaceContext } from '@/modules/app_center/workspaceContext';
-
-import { chooseWithModal, confirmWithModal } from '../infra/confirmModal';
-
-import { getDeepChatSystemPromptBudgetError } from '../request/budget';
-
-import { getPromptDrafts } from '../composer/promptDrafts';
 import {
   hasListingCopyStart,
   isCompleteListingCopy,
   sanitizeListingCopy,
 } from '../composer/listingCopySanitize';
+import { getPromptDrafts } from '../composer/promptDrafts';
 import { resolveIncompleteGenerationGuard } from '../composer/pushGuard';
+import { chooseWithModal, confirmWithModal } from '../infra/confirmModal';
+import { normalizeTemperature, updateTemperatureTrack } from '../infra/utils';
+import { getDeepChatSystemPromptBudgetError } from '../request/budget';
+import { sessionState } from '../session/sessionState';
+import {
+  createThread,
+  flushThreadStore,
+  getActiveListingPromptContext,
+  getActiveThread,
+  renderPromptDraftsForActiveThread,
+  updateActiveThreadFields,
+} from '../session/threadStore';
+import {
+  uiHooks,
+  registerHandoffUiHooks,
+  findConfigModelsEntry,
+  parseReasoningEffortValue,
+} from '../session/uiHooks';
 
 import type { DeepChatMessage, DeepChatSkillContext } from '../types';
-import { normalizeTemperature, updateTemperatureTrack } from '../infra/utils';
-import eventBus from '@/common/EventBus';
-import { APP_EVENTS } from '@/common/constants/eventConstants';
-import { navigateToRouteId } from '@/common/router/initRouter';
-import { showToast } from '@/common/ui/notifications';
 
-import { sessionState } from '../session/sessionState';
+
 
 export function consumePendingSkillHandoff(container: HTMLElement): boolean {
   const skillContext = consumeSkillForDeepChat();

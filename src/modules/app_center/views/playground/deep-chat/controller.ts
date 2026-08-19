@@ -2,7 +2,7 @@ import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { consumeListingPromptForDeepChat } from '@/modules/app_center/listingWorkflowHandoff';
-import { DEEP_CHAT_TEMPLATE_PATH } from './constants';
+
 
 // Side-effect imports: register uiHooks before mount wires domains together.
 import './session/pendingRuntime';
@@ -12,9 +12,27 @@ import './integrations/handoffs';
 import './request/handleRequest';
 import './shell/shellUi';
 
-import { ensureDeepChatElementDefined } from './infra/deepChatElementLoader';
+import { clearPendingChromeObserver } from './chrome/generationChrome';
+import {
+  clearDraftInputHeightSync,
+  clearSubmitStopButtonSync,
+  saveActiveThreadDraft,
+} from './composer/composerUi';
 import { cleanupMessageToolbars } from './composer/messageToolbar';
-import { resetPromptPreviewState } from './shell/promptPreview';
+import { unmountVisionComposer } from './composer/visionComposer';
+import { DEEP_CHAT_TEMPLATE_PATH } from './constants';
+import { ensureDeepChatElementDefined } from './infra/deepChatElementLoader';
+import {
+  bindSkillHandoffListeners,
+  consumePendingSkillHandoff,
+  saveActiveThreadTuning,
+} from './integrations/handoffs';
+import {
+  applyPendingRequestsToThreadStore,
+  persistPendingPartialIfNeeded,
+  schedulePendingAssistantDisplay,
+} from './session/pendingRuntime';
+import { clearDeepChatThreadStore } from './session/sessionLifecycle';
 import {
   DEEP_CHAT_SYSTEM_FONT_STACK,
   bindPersistThreadStore,
@@ -40,24 +58,7 @@ import {
   renderHistoryThreadList,
   renderPromptDraftsForActiveThread,
 } from './session/threadStore';
-import {
-  applyPendingRequestsToThreadStore,
-  persistPendingPartialIfNeeded,
-  schedulePendingAssistantDisplay,
-} from './session/pendingRuntime';
-import { clearDeepChatThreadStore } from './session/sessionLifecycle';
-import { clearPendingChromeObserver } from './chrome/generationChrome';
-import {
-  clearDraftInputHeightSync,
-  clearSubmitStopButtonSync,
-  saveActiveThreadDraft,
-} from './composer/composerUi';
-import { unmountVisionComposer } from './composer/visionComposer';
-import {
-  bindSkillHandoffListeners,
-  consumePendingSkillHandoff,
-  saveActiveThreadTuning,
-} from './integrations/handoffs';
+import { resetPromptPreviewState } from './shell/promptPreview';
 import { bindControls, initDeepChat, refreshLLMConfig } from './shell/shellUi';
 
 bindPersistThreadStore(persistThreadStore);

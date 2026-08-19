@@ -1,6 +1,6 @@
-import { getElement } from '../ui/dom';
 import { getInput } from './settingsFields';
 import { THRESHOLD_FIELDS, type ThresholdFieldDefinition } from './thresholdFields';
+import { getElement } from '../ui/dom';
 
 const THRESHOLD_INPUT_CLASS = 'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm';
 

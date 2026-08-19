@@ -1,16 +1,18 @@
 import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui/notifications';
+
 import {
   registerComplianceCheckArtifact,
   type AppCenterArtifactEnvelope,
   type AppCenterWorkItem,
 } from '../../artifactEnvelopeService';
+import { parseArtifactPayloadRef } from '../../artifactResumeService';
 import {
   getComplianceReviewView,
   type ComplianceReviewStates,
   type ComplianceReviewStatus,
 } from '../../complianceReviewState';
-import { parseArtifactPayloadRef } from '../../artifactResumeService';
+
 import type { AppCenterWorkspaceContext } from '../../workspaceContext';
 
 const STATUS_OPTIONS: ReadonlyArray<{ value: ComplianceReviewStatus; label: string }> = [

@@ -1,6 +1,6 @@
+import { getChat } from '../session/domHelpers';
 import { sessionState } from '../session/sessionState';
 import { getActiveThread, getThreadForSave } from '../session/threadStore';
-import { getChat } from '../session/domHelpers';
 
 /**
  * 模型切换通知（role: system）渲染对账：

@@ -1,14 +1,16 @@
-import { showToast } from '@/common/ui/notifications';
 import {
   formatLlmFailureUx,
   openSettingsFromLlmFailure,
   type LlmFailureUx,
 } from '@/common/errors/llmFailureUx';
+import { showToast } from '@/common/ui/notifications';
+
+import { setPasteInputError } from './analysisInput';
 import { isSearchTermReportType } from '../columns/columns';
+import { readAnalysisSettings, type AnalysisSettings } from '../settings/settings';
+
 import type { AnalysisResult } from './analysisEngine';
 import type { AnalysisFlowCallbacks } from './analysisFlowTypes';
-import { readAnalysisSettings, type AnalysisSettings } from '../settings/settings';
-import { setPasteInputError } from './analysisInput';
 
 function detailFromLlmFailure(ux: LlmFailureUx): string {
   return ux.description ? `${ux.title}。${ux.description}` : ux.title;

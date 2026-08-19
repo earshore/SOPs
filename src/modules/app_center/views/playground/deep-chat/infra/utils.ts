@@ -1,13 +1,16 @@
-import { getModelId } from '@/components/modelSelect/modelSelectService';
-import type { ChatMessage } from '@/services/llmService';
-import type { LLMProviderConfig } from '@/types/state';
 import { randomBase36 } from '@/common/utils/random';
+import { getModelId } from '@/components/modelSelect/modelSelectService';
+
 import {
   getDeepChatMessageText,
   type DeepChatMessage,
   type DeepChatRole,
 } from '../session/conversationContext';
+
 import type { DeepChatRequestBody } from '../types';
+import type { ChatMessage } from '@/services/llmService';
+import type { LLMProviderConfig } from '@/types/state';
+
 
 export function createTextInputEvent(prompt: string): Event {
   if (typeof InputEvent === 'function') {

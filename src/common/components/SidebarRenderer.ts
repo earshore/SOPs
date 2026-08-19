@@ -10,13 +10,14 @@
  * - 微交互动效 (scale, translate, opacity)
  */
 
+import { appStore } from '@/stores/useAppStore';
+
 import {
   MENU_CONFIG,
   type RouteConfig,
   type CategoryConfig,
   type ModuleConfig,
 } from '../config/menuConfig';
-import { appStore } from '@/stores/useAppStore';
 import { COLOR_SCHEMES, type ColorSchemeName } from '../constants/colorSchemes';
 import { ColorContext } from '../utils/ColorContext';
 import { setSafeHtml } from '../utils/security';

@@ -1,32 +1,33 @@
-import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui/notifications';
 import { openFilePicker } from '@/common/utils/filePicker';
+
+import { createActionListState } from './actions/actionListState';
 import {
   analyzeReportText,
   cancelActiveAnalysis,
   type AnalysisFlowCallbacks,
 } from './analysis/analysisFlow';
 import { setPasteInputError } from './analysis/analysisInput';
-import { updateContextFieldsVisibility } from './settings/analysisSettingsPanel';
+import { inferReportTypeFromText } from './analysis/reportTypeInference';
 import {
-  handleReportFileImport,
-  loadSampleReport,
-  type ReportImportCallbacks,
-} from './import/fileImport';
+  consumePpcActionListResume,
+  type PpcActionListSnapshot,
+} from './export/actionListSnapshotService';
 import {
   copyActionSummary,
   exportActionRows,
   type ExportControllerState,
 } from './export/exportController';
-import { getGrowthExportFilter, getWasteExportFilter } from './utils/filters';
-import { getInput, getTextarea, setAnalyzeButtonState, setText } from './ui/dom';
-import { bindPpcSearchTermsEvents } from './ui/eventBindings';
-import { renderMappingStatus, setPpcSearchTermsStatus } from './ui/reportControls';
-import { inferReportTypeFromText } from './analysis/reportTypeInference';
-import { createListenerRegistry } from './ui/listenerRegistry';
-import { initializeThresholdPanel, toggleThresholdPanel } from './settings/thresholdPanel';
+import {
+  handleReportFileImport,
+  loadSampleReport,
+  type ReportImportCallbacks,
+} from './import/fileImport';
+import { renderPpcResumeReviewBanner } from './resumeReviewBanner';
+import { updateContextFieldsVisibility } from './settings/analysisSettingsPanel';
 import {
   readAnalysisSettings,
   readReportSelection,
@@ -40,15 +41,17 @@ import {
   saveReportSelection,
   saveThresholds,
 } from './settings/settings';
-import { createActionListState } from './actions/actionListState';
-import type { AnalyzedRow, ReportType } from './types';
-import type { ColumnMapping } from './columns/columns';
+import { initializeThresholdPanel, toggleThresholdPanel } from './settings/thresholdPanel';
+import { getInput, getTextarea, setAnalyzeButtonState, setText } from './ui/dom';
+import { bindPpcSearchTermsEvents } from './ui/eventBindings';
+import { createListenerRegistry } from './ui/listenerRegistry';
+import { renderMappingStatus, setPpcSearchTermsStatus } from './ui/reportControls';
+import { getGrowthExportFilter, getWasteExportFilter } from './utils/filters';
+
 import type { AnalysisStatusTone } from './analysis/analysisFlowTypes';
-import {
-  consumePpcActionListResume,
-  type PpcActionListSnapshot,
-} from './export/actionListSnapshotService';
-import { renderPpcResumeReviewBanner } from './resumeReviewBanner';
+import type { ColumnMapping } from './columns/columns';
+import type { AnalyzedRow, ReportType } from './types';
+
 
 import '../style.css';
 

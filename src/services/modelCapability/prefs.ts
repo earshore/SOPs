@@ -1,3 +1,5 @@
+import { DEFAULT_REASONING_PREFS, isReasoningEffortLevel } from './types';
+
 import type {
   EffectiveReasoningPrefs,
   ReasoningEffort,
@@ -6,7 +8,6 @@ import type {
   ResolvedModelCapability,
   SessionReasoningOverride,
 } from './types';
-import { DEFAULT_REASONING_PREFS, isReasoningEffortLevel } from './types';
 
 const EFFORT_TIER_ORDER: readonly ReasoningEffortLevel[] = [
   'low',

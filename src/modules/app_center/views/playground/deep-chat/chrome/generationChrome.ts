@@ -1,13 +1,15 @@
-import {
-  getChat,
-  createChevronIcon,
-  setToggleExpanded,
-  formatCompletedDurationLabel,
-} from '../session/domHelpers';
-import { uiHooks, registerChromeUiHooks } from '../session/uiHooks';
-import { getActiveThread } from '../session/threadStore';
-import { getMountedRenderContainer, getThreadDisplayMessages } from '../session/pendingRuntime';
 
+import {
+  flushDisplayedLength,
+  liveStreamingChromeSatisfied,
+  resolveSettledHandoffExpand,
+  shouldFlushTypewriterOnSettle,
+  shouldInstantPaintReasoning,
+  shouldRearmTypewriter,
+  typewriterStep,
+} from './reasoningDisplayState';
+import { refreshMessageToolbarStatuses } from '../composer/messageToolbar';
+import { isZwspOnlyText } from '../infra/utils';
 import {
   getDeepChatGenerationPhase,
   getPendingReasoningDurationSec,
@@ -19,20 +21,12 @@ import {
   type PreReplyActivityStep,
 } from '../request/preReplyActivity';
 import {
-  flushDisplayedLength,
-  liveStreamingChromeSatisfied,
-  resolveSettledHandoffExpand,
-  shouldFlushTypewriterOnSettle,
-  shouldInstantPaintReasoning,
-  shouldRearmTypewriter,
-  typewriterStep,
-} from './reasoningDisplayState';
-
-import { refreshMessageToolbarStatuses } from '../composer/messageToolbar';
-
-import type { DeepChatElement, DeepChatMessage } from '../types';
-import { isZwspOnlyText } from '../infra/utils';
-
+  getChat,
+  createChevronIcon,
+  setToggleExpanded,
+  formatCompletedDurationLabel,
+} from '../session/domHelpers';
+import { getMountedRenderContainer, getThreadDisplayMessages } from '../session/pendingRuntime';
 import {
   sessionState,
   PENDING_GENERATING_PREFIX,
@@ -46,6 +40,10 @@ import {
   REASONING_TYPEWRITER_INTERVAL_MS,
   REASONING_TYPEWRITER_CHARS,
 } from '../session/sessionState';
+import { getActiveThread } from '../session/threadStore';
+import { uiHooks, registerChromeUiHooks } from '../session/uiHooks';
+
+import type { DeepChatElement, DeepChatMessage } from '../types';
 
 export function disconnectChromeMutationObserver(): void {
   sessionState.pendingChromeObserver?.disconnect();

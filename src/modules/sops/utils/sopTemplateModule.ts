@@ -1,9 +1,10 @@
 ﻿import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import type { ActionHandler } from '@/common/utils/actionRegistry';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { setSafeHtml } from '@/common/utils/security';
+
 import type { OwnerFieldController } from './ownerField';
+import type { ActionHandler } from '@/common/utils/actionRegistry';
 
 export type SopTemplateAction = (...args: unknown[]) => unknown;
 

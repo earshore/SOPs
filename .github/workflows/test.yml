@@ -67,10 +67,34 @@ jobs:
       - name: Format check
         run: npm run format:check
 
+  quality-gate:
+    name: architecture boundaries & duplication
+    runs-on: ubuntu-latest
+    needs: lint-warning-gate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '20.x'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Architecture boundary check (eslint-plugin-boundaries)
+        run: npm run lint:boundaries
+
+      - name: Duplication gate (jscpd)
+        run: npm run jscpd:gate
+
   unit:
     name: unit
     runs-on: ubuntu-latest
-    needs: lint-warning-gate
+    needs: quality-gate
 
     steps:
       - name: Checkout
@@ -412,6 +436,7 @@ jobs:
     needs:
       - type-check
       - lint-warning-gate
+      - quality-gate
       - unit
       - build
       - smoke-e2e
@@ -428,6 +453,7 @@ jobs:
           $results = @{
             'type-check' = '${{ needs['type-check'].result }}'
             'lint warning gate' = '${{ needs['lint-warning-gate'].result }}'
+            'boundaries & duplication' = '${{ needs['quality-gate'].result }}'
             'unit' = '${{ needs.unit.result }}'
             'build' = '${{ needs.build.result }}'
             'smoke e2e' = '${{ needs['smoke-e2e'].result }}'

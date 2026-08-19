@@ -1,13 +1,4 @@
-import { getChat } from '../session/domHelpers';
-import { uiHooks, registerComposerUiHooks } from '../session/uiHooks';
-import {
-  getActiveThread,
-  isThreadVisibleInHistory,
-  renderMountedThreadList,
-  updateActiveThreadFields,
-} from '../session/threadStore';
-import { stopPendingRequest } from '../session/pendingRuntime';
-
+import { showToast } from '@/common/ui/notifications';
 import {
   buildSystemPromptFromSkillContexts,
   normalizeSkillChipDraftText,
@@ -15,6 +6,9 @@ import {
   stripSkillMarkersFromDraft,
 } from '@/modules/app_center/skillDeepChatHandoff';
 
+
+
+import { refreshMessageToolbarStatuses } from './messageToolbar';
 import {
   SKILL_CHIP_CLASS,
   createSkillContextChip,
@@ -22,20 +16,24 @@ import {
   setContentWithInlineSkillChips,
   textContainsSkillChipMarker,
 } from './skillContextChip';
-import { refreshMessageToolbarStatuses } from './messageToolbar';
-
 import { EMPTY_CHAT_WRAP_HEIGHT } from '../constants';
-
-import type { DeepChatElement, DeepChatSkillContext, DeepChatThread } from '../types';
 import { createTextInputEvent } from '../infra/utils';
-
-import { showToast } from '@/common/ui/notifications';
-
+import { getChat } from '../session/domHelpers';
+import { stopPendingRequest } from '../session/pendingRuntime';
 import {
   sessionState,
   SESSION_SKILL_CHIP_DOCK_ID,
   draftPersistController,
 } from '../session/sessionState';
+import {
+  getActiveThread,
+  isThreadVisibleInHistory,
+  renderMountedThreadList,
+  updateActiveThreadFields,
+} from '../session/threadStore';
+import { uiHooks, registerComposerUiHooks } from '../session/uiHooks';
+
+import type { DeepChatElement, DeepChatSkillContext, DeepChatThread } from '../types';
 
 export function setupDraftInputHeightSync(
   container: HTMLElement,

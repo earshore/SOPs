@@ -4,17 +4,19 @@
 // 定义基础服务和核心服务的注册配置
 // ================================================================
 
-import type { ServiceRegistry } from '../ServiceRegistry';
-import { SERVICE_NAMES } from '../ServiceRegistry';
-import type { IConfigService, ILoggerService } from '@/types/services';
 
 import { ConfigCenter } from '@/common/config/ConfigCenter';
-import { StorageService } from '@/services/storageService';
-import eventBus from '@/common/EventBus';
 import { globalErrorHandler } from '@/common/errors/GlobalErrorHandler';
-import { loadingManager } from '@/common/utils/LoadingManager';
-import actionRegistry from '@/common/utils/actionRegistry';
+import eventBus from '@/common/EventBus';
 import { initRouter } from '@/common/router/initRouter';
+import actionRegistry from '@/common/utils/actionRegistry';
+import { loadingManager } from '@/common/utils/LoadingManager';
+import { StorageService } from '@/services/storageService';
+
+import { SERVICE_NAMES } from '../ServiceRegistry';
+
+import type { ServiceRegistry } from '../ServiceRegistry';
+import type { IConfigService, ILoggerService } from '@/types/services';
 
 function registerBaseServices(registry: ServiceRegistry): void {
   registry.register({

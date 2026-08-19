@@ -1,3 +1,4 @@
+import { createOwnerField } from '../../../utils/ownerField';
 import {
   createSopTemplateModule,
   type SopTemplateModuleContext,
@@ -6,8 +7,6 @@ import {
  * 邮件回复模板 SOP - 静态版
  * Email Reply Templates SOP - Static Version
  */
-
-import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
 const REVIEW_OWNER_STORAGE_KEY = 'email_templates_owner_v1';

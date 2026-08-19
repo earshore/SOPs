@@ -5,9 +5,12 @@
 // ================================================================
 
 import { createStore, type StoreApi } from 'zustand/vanilla';
-import { persist } from './middleware/persist';
-import { devtools } from './middleware/devtools';
+
 import { getRuntimeKeywordHunterSeoOptions } from '@/services/runtimeStrategyService';
+
+import { devtools } from './middleware/devtools';
+import { persist } from './middleware/persist';
+
 import type {
   UIState,
   ScraperState,

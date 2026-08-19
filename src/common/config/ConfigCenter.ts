@@ -4,10 +4,11 @@
 // 集中管理所有应用配置，支持环境差异化、验证和热更新
 // ================================================================
 
+import { loadRouteConfig } from './loaders/routeConfigLoader';
+import { validateConfig } from './schemas/configSchema';
+
 import type { MenuConfig } from '@/types/config';
 import type { IConfigService } from '@/types/services';
-import { validateConfig } from './schemas/configSchema';
-import { loadRouteConfig } from './loaders/routeConfigLoader';
 // ==================== 类型定义 ====================
 
 /**

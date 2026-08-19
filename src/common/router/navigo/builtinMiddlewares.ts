@@ -4,10 +4,11 @@
  * 提供常用的路由中间件实现
  */
 
+import { loadingManager } from '@/common/utils/LoadingManager';
+import { analyticsService } from '@/services/analyticsService';
+
 import type { RouteMiddleware } from './types';
 
-import { analyticsService } from '@/services/analyticsService';
-import { loadingManager } from '@/common/utils/LoadingManager';
 // ==================== 日志中间件 ====================
 
 /**

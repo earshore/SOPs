@@ -1,5 +1,6 @@
-import type { GeneratedPromptProfileSnapshot } from '@/types/modules-business';
 import { createOneShotHandoffQueue } from '@/common/utils/oneShotHandoff';
+
+import type { GeneratedPromptProfileSnapshot } from '@/types/modules-business';
 
 export interface ListingPromptSource {
   id: string;

@@ -1,9 +1,10 @@
+import { getComplianceReviewView } from './complianceReviewState';
+
 import type {
   AppCenterArtifactEnvelope,
   AppCenterArtifactType,
   AppCenterWorkItem,
 } from './artifactEnvelopeService';
-import { getComplianceReviewView } from './complianceReviewState';
 
 export interface RecentArtifactPresentation {
   typeLabel: string;

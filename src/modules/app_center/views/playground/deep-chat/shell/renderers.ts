@@ -1,15 +1,17 @@
 import { setSafeHtml } from '@/common/utils/security';
-import type { PromptHistoryItem } from '@/types/state';
-import type { PendingDeepChatRequest } from '../request/lifecycle';
+
 import { getActivePromptPreviewId, hidePromptPreview, renderPromptPreview } from './promptPreview';
 import { formatPromptDraftMeta, getPromptDrafts } from '../composer/promptDrafts';
+import { escapeHTML, formatThreadTime, truncateText } from '../infra/utils';
+
+import type { PendingDeepChatRequest } from '../request/lifecycle';
 import type {
   DeepChatThread,
   DeepChatThreadStore,
   ThreadEditingState,
   ThreadMenuState,
 } from '../types';
-import { escapeHTML, formatThreadTime, truncateText } from '../infra/utils';
+import type { PromptHistoryItem } from '@/types/state';
 
 export type { ThreadEditingState, ThreadMenuState };
 

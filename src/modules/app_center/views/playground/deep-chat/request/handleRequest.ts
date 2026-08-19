@@ -1,11 +1,40 @@
-import { getChat, createChevronIcon, setToggleExpanded } from '../session/domHelpers';
-import { uiHooks, redactSensitiveError } from '../session/uiHooks';
+import { ValidationError } from '@/common/errors/AppError';
+import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
+import { showToast } from '@/common/ui/notifications';
+import { normalizeSkillChipDraftText } from '@/modules/app_center/skillDeepChatHandoff';
+import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
+import { isDeepChatVisionFeatureEnabled } from '@/services/runtimeStrategyService';
+import { StorageService } from '@/services/storageService';
+
 import {
-  getActiveThread,
-  renderMountedThreadList,
-  saveThreadMessages,
-  threadExists,
-} from '../session/threadStore';
+  buildBudgetedDeepChatMessages,
+  getDeepChatMessageBudgetError,
+  getDeepChatSystemPromptBudgetError,
+  resolveDeepChatRequestBudget,
+  type DeepChatRequestBudget,
+} from './budget';
+import {
+  getPendingReasoningDurationSec,
+  markPendingDeepChatRequestSettled,
+  type PendingDeepChatRequest,
+} from './lifecycle';
+import { callDeepChatLLM, prepareDeepChatReasoningCallOptions } from './llmCall';
+import {
+  DEEP_CHAT_VISION_COPY,
+  DEEP_CHAT_VISION_PLACEHOLDER_TEXT,
+  resolveDeepChatVisionUserParts,
+  type DeepChatVisionUserPart,
+} from './visionAttachments';
+import { reconcileSwitchNotices } from '../chrome/switchNoticeChrome';
+import { refreshMessageToolbarStatuses } from '../composer/messageToolbar';
+import {
+  clearStagedVisionAttachments,
+  getStagedVisionFiles,
+  setVisionComposerPending,
+} from '../composer/visionComposer';
+import { getFirstModel, normalizeChatMessages } from '../infra/utils';
+import { mergeThreadHistoryWithRequest } from '../session/conversationContext';
+import { getChat, createChevronIcon, setToggleExpanded } from '../session/domHelpers';
 import {
   bindStopSignal,
   cleanupLifecyclePendingRequest,
@@ -20,61 +49,26 @@ import {
   schedulePendingAssistantDisplay,
   syncPendingRequestView,
 } from '../session/pendingRuntime';
-import { callDeepChatLLM, prepareDeepChatReasoningCallOptions } from './llmCall';
-import { reconcileSwitchNotices } from '../chrome/switchNoticeChrome';
-import type { ChatMessage } from '@/services/llmService';
-import type { LLMProviderConfig } from '@/types/state';
-
-import { StorageService } from '@/services/storageService';
-import { ValidationError } from '@/common/errors/AppError';
-import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
-import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
-
-import { normalizeSkillChipDraftText } from '@/modules/app_center/skillDeepChatHandoff';
-
-import { mergeThreadHistoryWithRequest } from '../session/conversationContext';
+import { sessionState, nativeLoggerConsole } from '../session/sessionState';
 import {
-  getPendingReasoningDurationSec,
-  markPendingDeepChatRequestSettled,
-  type PendingDeepChatRequest,
-} from './lifecycle';
-import {
-  buildBudgetedDeepChatMessages,
-  getDeepChatMessageBudgetError,
-  getDeepChatSystemPromptBudgetError,
-  resolveDeepChatRequestBudget,
-  type DeepChatRequestBudget,
-} from './budget';
-import {
-  DEEP_CHAT_VISION_COPY,
-  DEEP_CHAT_VISION_PLACEHOLDER_TEXT,
-  resolveDeepChatVisionUserParts,
-  type DeepChatVisionUserPart,
-} from './visionAttachments';
-import {
-  clearStagedVisionAttachments,
-  getStagedVisionFiles,
-  setVisionComposerPending,
-} from '../composer/visionComposer';
-import { findConfigModelsEntry } from '../session/uiHooks';
-import { isDeepChatVisionFeatureEnabled } from '@/services/runtimeStrategyService';
-
-import { refreshMessageToolbarStatuses } from '../composer/messageToolbar';
+  getActiveThread,
+  renderMountedThreadList,
+  saveThreadMessages,
+  threadExists,
+} from '../session/threadStore';
+import { findConfigModelsEntry, registerRequestUiHooks, redactSensitiveError, uiHooks } from '../session/uiHooks';
 
 import type {
   DeepChatElement,
   DeepChatMessage,
   DeepChatRequestBody,
-  DeepChatSignals,
   DeepChatRequestMessages,
   DeepChatRequestModelConfig,
+  DeepChatSignals,
   PreparedDeepChatRequest,
 } from '../types';
-import { getFirstModel, normalizeChatMessages } from '../infra/utils';
-
-import { showToast } from '@/common/ui/notifications';
-
-import { sessionState, nativeLoggerConsole } from '../session/sessionState';
+import type { ChatMessage } from '@/services/llmService';
+import type { LLMProviderConfig } from '@/types/state';
 
 function paintSettledGenerationChrome(): void {
   const mount = getMountedRenderContainer();
@@ -607,7 +601,6 @@ export async function emitDeepChatResponse(
   }
 }
 
-import { registerRequestUiHooks } from '../session/uiHooks';
 registerRequestUiHooks({
   emitDeepChatResponse,
   isCurrentResponseTarget,

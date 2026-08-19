@@ -1,9 +1,12 @@
-import { REPORT_LABELS } from '../actions/actionMetadata';
-import type { ColumnMapping } from '../columns/columns';
 import { getElement, getTextarea, setButtonContent, setText } from './dom';
-import type { FilterType } from '../utils/filters';
+import { REPORT_LABELS } from '../actions/actionMetadata';
 import { renderFilterButtons } from '../results/resultsRenderer';
+
+import type { ColumnMapping } from '../columns/columns';
 import type { ReportType } from '../types';
+import type { FilterType } from '../utils/filters';
+
+
 
 export function updateReportControls(
   container: HTMLElement,

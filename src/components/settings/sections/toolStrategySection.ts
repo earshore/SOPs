@@ -1,4 +1,23 @@
 // TD-SET-01 Phase 1: tool section fragment (verbatim).
+import { getLlmProviderConfig } from '@/common/config/llmProviders';
+import { showToast } from '@/common/ui';
+import {
+  applyRuntimePreset,
+  isRuntimePresetId,
+  matchRuntimePreset,
+  type RuntimePresetId,
+} from '@/components/settings/domain/settingsPresets';
+import {
+  getSettingsRollbackCount,
+  pushSettingsRollbackSnapshot,
+} from '@/components/settings/domain/settingsRollback';
+import {
+  formatSchedulePreferenceHint,
+  isSchedulingPreference,
+  SCHEDULE_PREFERENCE_SHORT_LABELS,
+  type SchedulingPreference,
+} from '@/modules/app_center/views/master_analysis/ai_analysis/services/analysisScheduler';
+import { ErrorService } from '@/services/errorService';
 import {
   DEFAULT_RUNTIME_STRATEGY_SETTINGS,
   getRuntimeStrategySettings,
@@ -9,7 +28,6 @@ import {
   type MasterAnalysisEvidenceDepth,
   type RuntimeStrategySettings,
 } from '@/services/runtimeStrategyService';
-import { ErrorService } from '@/services/errorService';
 import {
   TOOL_STRATEGY_TARGETS,
   getToolStrategySettings,
@@ -17,26 +35,9 @@ import {
   setToolTargetDefaultModel,
   type ToolStrategyTargetId,
 } from '@/services/toolStrategyService';
-import { ToolStrategyTargetView, RuntimeNumberFieldView, SettingsPanelPart } from '../panelTypes';
-import {
-  applyRuntimePreset,
-  isRuntimePresetId,
-  matchRuntimePreset,
-  type RuntimePresetId,
-} from '@/components/settings/domain/settingsPresets';
+
 import { type ModelOption } from '../domain/localDataCopy';
-import {
-  formatSchedulePreferenceHint,
-  isSchedulingPreference,
-  SCHEDULE_PREFERENCE_SHORT_LABELS,
-  type SchedulingPreference,
-} from '@/modules/app_center/views/master_analysis/ai_analysis/services/analysisScheduler';
-import { getLlmProviderConfig } from '@/common/config/llmProviders';
-import {
-  getSettingsRollbackCount,
-  pushSettingsRollbackSnapshot,
-} from '@/components/settings/domain/settingsRollback';
-import { showToast } from '@/common/ui';
+import { ToolStrategyTargetView, RuntimeNumberFieldView, SettingsPanelPart } from '../panelTypes';
 
 const MASTER_ANALYSIS_BUDGET_FIELDS = [
   { key: 'title-keywords', label: '标题关键词', min: 1024, max: 32000, step: 512 },

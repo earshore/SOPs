@@ -3,15 +3,8 @@
  * 处理应用中 AI 分析生成的报告格式（buyer-profile, selling-points, title-keywords）
  */
 
-import type { ReportAdapter, ExtractionResult } from './ReportAdapter';
-import type {
-  BuyerProfileReport,
-  FullAnalysisReport,
-  SellingPointsReport,
-  TitleKeywordsReport,
-} from '../../ai_analysis/config/analysisReportData';
-import type { ExtendedDNA } from '../../types/extendedDNA';
-import { getSpecLabel } from '../../config/specLabels';
+import { ValidationError } from '@/common/errors/AppError';
+
 import {
   AUDIENCE_CONFIDENCE_WEIGHTS,
   USPS_CONFIDENCE_WEIGHTS,
@@ -21,7 +14,17 @@ import {
   DIFFERENTIATION_CONFIDENCE_WEIGHTS,
   CONFIDENCE_THRESHOLDS,
 } from '../../config/confidenceWeights';
-import { ValidationError } from '@/common/errors/AppError';
+import { getSpecLabel } from '../../config/specLabels';
+
+import type { ReportAdapter, ExtractionResult } from './ReportAdapter';
+import type {
+  BuyerProfileReport,
+  FullAnalysisReport,
+  SellingPointsReport,
+  TitleKeywordsReport,
+} from '../../ai_analysis/config/analysisReportData';
+import type { ExtendedDNA } from '../../types/extendedDNA';
+
 
 const nativeLoggerConsole = globalThis.console;
 

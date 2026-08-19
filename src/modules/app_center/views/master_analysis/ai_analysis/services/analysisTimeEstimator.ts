@@ -6,8 +6,6 @@
  * 估算结果以区间（下限-上限）展示，避免把不确定值说死。
  */
 
-import type { Product } from '../config/sampleData';
-import type { MasterAnalysisEvidenceDepth } from '@/services/runtimeStrategyService';
 import {
   buildReviewSourcePack,
   estimateReviewMapCalls,
@@ -18,8 +16,11 @@ import {
   buildSellingPointsSourcePack,
   shouldUseSellingPointsMapReduce,
 } from './sellingPointsPipeline';
+
 import type { AnalysisReasoningPrefs } from './reasoningPolicy';
+import type { Product } from '../config/sampleData';
 import type { ReasoningEffortLevel } from '@/services/modelCapability/types';
+import type { MasterAnalysisEvidenceDepth } from '@/services/runtimeStrategyService';
 
 export interface AnalysisWorkloadEstimate {
   /** 分片/单次调用数（oneshot=1，map-reduce=map 分片数）。 */

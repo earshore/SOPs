@@ -1,6 +1,7 @@
 import { getChat } from '../session/domHelpers';
-import { getActiveThread } from '../session/threadStore';
 import { getThreadDisplayMessages } from '../session/pendingRuntime';
+import { getActiveThread } from '../session/threadStore';
+
 import type { DeepChatElement } from '../types';
 
 /**

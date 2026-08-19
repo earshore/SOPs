@@ -3,11 +3,13 @@
  * 从语义分析报告中提取产品 DNA
  */
 
+import { ValidationError } from '@/common/errors/AppError';
+
+import { isTechnicalSpec } from '../../utils/specUtils';
+
 import type { ReportAdapter, ExtractionResult } from './ReportAdapter';
 import type { SemanticAnalysisReport } from '../../types/downloadsReportTypes';
 import type { ExtendedDNA } from '../../types/extendedDNA';
-import { isTechnicalSpec } from '../../utils/specUtils';
-import { ValidationError } from '@/common/errors/AppError';
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' ? (value as Record<string, unknown>) : {};

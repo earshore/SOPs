@@ -1,7 +1,9 @@
 import { appStore } from '@/stores/useAppStore';
-import type { PromptHistoryItem } from '@/types/state';
+
 import { getMaxPromptDraftCount } from '../constants';
 import { formatThreadTime } from '../infra/utils';
+
+import type { PromptHistoryItem } from '@/types/state';
 
 export function getPromptDrafts(): PromptHistoryItem[] {
   const history = appStore.getState().promptlab.history || [];

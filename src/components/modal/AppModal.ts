@@ -5,6 +5,7 @@
 // ================================================================
 
 import { createSafeFragment, escapeHtml } from '@/common/utils/security';
+
 import modalStylesUrl from './AppModal.css?url';
 
 /**

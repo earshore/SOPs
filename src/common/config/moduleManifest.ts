@@ -1,6 +1,7 @@
-import type { ModuleLoaderFn, ModuleMap } from '@/types/modules-business';
-import type { RouteMeta } from '@/common/router/navigo/types';
 import { SystemError } from '@/common/errors/AppError';
+
+import type { RouteMeta } from '@/common/router/navigo/types';
+import type { ModuleLoaderFn, ModuleMap } from '@/types/modules-business';
 
 export interface ModuleManifestRoute {
   key: string;

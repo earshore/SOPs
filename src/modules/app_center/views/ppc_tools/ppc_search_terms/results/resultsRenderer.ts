@@ -1,5 +1,7 @@
+import { updateFilterCounts } from './resultsFilterControls';
+import { MAX_RENDER_ROWS, renderRows } from './resultsTable';
+import { formatSummaryAcos, summarize, type AnalysisSummary } from '../export/summary';
 import { getElement, setButtonDisabled, setText } from '../ui/dom';
-import { formatCurrency } from '../utils/formatters';
 import {
   filterRows,
   getGrowthExportFilter,
@@ -7,9 +9,8 @@ import {
   searchRows,
   type FilterType,
 } from '../utils/filters';
-import { updateFilterCounts } from './resultsFilterControls';
-import { MAX_RENDER_ROWS, renderRows } from './resultsTable';
-import { formatSummaryAcos, summarize, type AnalysisSummary } from '../export/summary';
+import { formatCurrency } from '../utils/formatters';
+
 import type { AnalyzedRow, ReportType } from '../types';
 
 export { renderFilterButtons, setActiveFilterButton } from './resultsFilterControls';

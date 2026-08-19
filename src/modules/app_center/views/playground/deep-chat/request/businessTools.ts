@@ -8,11 +8,13 @@
  * raw tool syntax as assistant text.
  */
 
-import type { ResponsesToolExecutor } from '@/services/modelCapability';
-import type { DeepChatThread } from '../types';
-import { getDeepChatMessageText } from '../session/conversationContext';
 import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
+
 import { parseToolArgsObject, runSearchX, runWebSearch } from './webSearch';
+import { getDeepChatMessageText } from '../session/conversationContext';
+
+import type { DeepChatThread } from '../types';
+import type { ResponsesToolExecutor } from '@/services/modelCapability';
 
 /** Default product: tools on so models use native tool_calls instead of text dumps. */
 export const DEEP_CHAT_BUSINESS_TOOLS_DEFAULT_ENABLED = true;

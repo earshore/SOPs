@@ -1,8 +1,11 @@
 import { showToast } from '@/common/ui/notifications';
-import { getElement, getTextarea } from '../ui/dom';
+
 import { MAX_REPORT_DATA_CHARS } from './reportLimits';
-import type { AnalysisFlowCallbacks } from './analysisFlowTypes';
+import { getElement, getTextarea } from '../ui/dom';
 import { setPpcSearchTermsStatus } from '../ui/reportControls';
+
+import type { AnalysisFlowCallbacks } from './analysisFlowTypes';
+
 
 export function getAnalyzableReportText(
   container: HTMLElement,

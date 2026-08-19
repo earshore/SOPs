@@ -48,10 +48,63 @@
  * @see {@link Product} 产品数据类型定义
  * @see {@link AnalysisTaskDefinition} 分析任务定义类型
  */
+import { ValidationError } from '@/common/errors/AppError';
+
+import { EXTRA_INPUT_LANGUAGES_HINT, applyPreamble } from './pipelinePrompts';
+import { sanitizePromptInput } from './promptSanitizer';
 
 import type { Product } from '../config/sampleData';
-import { sanitizePromptInput } from './promptSanitizer';
-import { ValidationError } from '@/common/errors/AppError';
+
+/**
+ * AI 分析提示词模板系统
+ *
+ * ## 功能概述
+ * 本模块负责生成用于 AI 分析的结构化提示词（prompts）。
+ * 支持 8 种不同的分析任务，每种任务都有专门的提示词模板和 JSON Schema。
+ *
+ * ## 核心功能
+ * 1. **动态模板生成**: 根据产品数据动态填充提示词模板
+ * 2. **多语言支持**: 强制 AI 输出统一语言，避免多语言混搭
+ * 3. **安全防护**: 集成 prompt injection 防护机制
+ * 4. **输入验证**: 严格验证产品数据完整性
+ * 5. **批量处理**: 支持一次生成多个分析任务的提示词
+ *
+ * ## 支持的分析任务
+ * 1. **title-keywords** - 标题核心词根提取
+ * 2. **selling-points** - 卖点结构拆解
+ * 3. **fatal-flaws** - 致命劝退点识别
+ * 4. **wow-moments** - 惊喜顿悟时刻提取
+ * 5. **hesitation-points** - 购买前犹豫点分析
+ * 6. **buyer-profile** - 画像与场景侧写
+ * 7. **vocab-gap** - 词汇鸿沟分析
+ * 8. **promise-reality** - 承诺/现实断层检测
+ *
+ * ## 使用示例
+ * ```typescript
+ * // 单任务分析
+ * const prompt = generateAnalysisPrompt('title-keywords', product, 'zh');
+ *
+ * // 批量分析
+ * const batchPrompt = generateBatchAnalysisPrompt(
+ *   ['title-keywords', 'selling-points', 'buyer-profile'],
+ *   product,
+ *   'de'
+ * );
+ * ```
+ *
+ * ## 安全特性
+ * - **Prompt Injection 防护**: 自动清洗用户输入，移除恶意指令
+ * - **长度限制**: 防止超长输入导致 token 溢出
+ * - **特殊字符转义**: 保护 prompt 模板结构
+ *
+ * ## 多语言强制要求
+ * 所有生成的 prompt 都包含 CRITICAL LANGUAGE REQUIREMENT 部分，
+ * 强制 AI 将所有分析结果翻译为目标语言，避免保留原始评论的多语言内容。
+ *
+ * @module analysisPrompts
+ * @see {@link Product} 产品数据类型定义
+ * @see {@link AnalysisTaskDefinition} 分析任务定义类型
+ */
 
 const nativeLoggerConsole = globalThis.console;
 // 核心 JSON 规则
@@ -804,8 +857,6 @@ function applyPromptData(taskPrompt: string, product: Product, promptData: Promp
     .replace('{{allReviews}}', promptData.allReviews)
     .replace('{{reviewerCountries}}', promptData.reviewerCountries);
 }
-
-import { EXTRA_INPUT_LANGUAGES_HINT, applyPreamble } from './pipelinePrompts';
 
 /**
  * 单次分析提取引擎前缀。

@@ -5,9 +5,11 @@
  * 守卫按优先级顺序执行，可以阻止导航或重定向
  */
 
-import type { Route, RouteGuard } from './types';
-import { isRouteGuard, isGuardResult } from './guards';
 import { ValidationError } from '@/common/errors/AppError';
+
+import { isRouteGuard, isGuardResult } from './guards';
+
+import type { Route, RouteGuard } from './types';
 
 /**
  * 守卫管理器

@@ -7,7 +7,9 @@
  * - Files live only in memory (object URLs); never thread/localStorage base64
  */
 
-import type { DeepChatElement } from '../types';
+import { showToast } from '@/common/ui/notifications';
+
+import { createSvgIcon } from './skillContextChip';
 import {
   DEEP_CHAT_VISION_ACCEPTED_FORMATS,
   DEEP_CHAT_VISION_COPY,
@@ -16,8 +18,9 @@ import {
   DEEP_CHAT_VISION_MAX_TOTAL_BYTES,
   isAllowedVisionImage,
 } from '../request/visionAttachments';
-import { createSvgIcon } from './skillContextChip';
-import { showToast } from '@/common/ui/notifications';
+
+import type { DeepChatElement } from '../types';
+
 
 export const VISION_COMPOSER_ROOT_ID = 'deep-chat-vision-composer-root';
 export const VISION_STRIP_ID = 'deep-chat-vision-strip';

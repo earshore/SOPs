@@ -3,9 +3,11 @@
 // App Center Overview - 总览页面 (TypeScript版本)
 // ================================================================
 
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '@/common/utils/security';
+
+import { cleanupRecentPanel, renderRecentPanel } from './recentPanel';
 import {
   APP_CENTER_CATALOG_CATEGORIES,
   APP_CENTER_CATALOG_GROUPS,
@@ -18,7 +20,6 @@ import {
   getAppCenterWorkflowDefinition,
   type AppCenterWorkflowStep,
 } from '../../workflowDefinitions';
-import { cleanupRecentPanel, renderRecentPanel } from './recentPanel';
 
 interface OverviewFilterState {
   category: string;

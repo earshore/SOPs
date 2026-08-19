@@ -2,10 +2,12 @@
  * Deep Chat 侧栏 Skill Library：弹窗浏览 / 搜索 / 快速挂载技能（不离开当前页）
  */
 import { setSafeHtml } from '@/common/utils/security';
-import { skillRegistry } from '@/services/skillRegistry';
-import type { SkillCategoryId, SkillMeta } from '@/services/skillRegistry';
 import { displaySkillTitle } from '@/modules/app_center/skillDeepChatHandoff';
+import { skillRegistry } from '@/services/skillRegistry';
+
 import { escapeHTML } from '../infra/utils';
+
+import type { SkillCategoryId, SkillMeta } from '@/services/skillRegistry';
 
 export type SkillLibraryApplyHandler = (skillId: string) => void | Promise<void>;
 

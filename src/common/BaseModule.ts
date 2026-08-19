@@ -6,15 +6,17 @@
  * 🎯 增强: 支持DI容器注入和服务获取
  */
 
+import { SystemError } from '@/common/errors/AppError';
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
+
+import { APP_EVENTS } from './constants/eventConstants';
 import { container as globalContainer } from './di/Container';
-import type { DIContainer } from './di/Container';
-import type { ServiceName } from './di/ServiceRegistry';
 import { SERVICE_NAMES } from './di/ServiceRegistry';
 import eventBus from './EventBus';
-import { APP_EVENTS } from './constants/eventConstants';
+
+import type { DIContainer } from './di/Container';
+import type { ServiceName } from './di/ServiceRegistry';
 import type { ILoggerService, IStorageService, IHttpService } from '@/types/services';
-import { SystemError } from '@/common/errors/AppError';
 
 /**
  * 动作处理器类型

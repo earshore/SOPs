@@ -3,11 +3,12 @@
  */
 
 import BaseModule from '@/common/BaseModule';
-import { SEO_RADAR_DATA } from '../../../constants/amz_hub_constants';
-import './styles.css';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { loadChartJs, type ChartJS } from '@/common/utils/lazyLibs';
 import { setSafeHtml } from '@/common/utils/security';
+import './styles.css';
+
+import { SEO_RADAR_DATA } from '../../../constants/amz_hub_constants';
 
 // Chart.js 实例类型定义
 interface ChartInstance {

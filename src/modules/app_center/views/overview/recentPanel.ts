@@ -3,6 +3,8 @@ import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui/notifications';
 import { copyTextToClipboard } from '@/common/utils/clipboard';
 import { StorageService } from '@/services/storageService';
+
+import { createComplianceReviewPanel } from './recentComplianceReview';
 import {
   APP_CENTER_ARTIFACTS_CHANGED,
   COMPETITOR_LISTING_PROGRESS_TYPES,
@@ -23,6 +25,7 @@ import {
   resolveResumePayloadStatusAsync,
   type ResumeMode,
 } from '../../artifactResumeService';
+import { getComplianceReviewView } from '../../complianceReviewState';
 import {
   buildResumeClipboardSummary,
   isGenericArtifactTitle,
@@ -38,10 +41,8 @@ import {
   type RecentQueueItem,
   type RecentQueueSortMode,
 } from '../../recentQueueService';
-import { getWorkspaceContext } from '../../workspaceContext';
-import { getComplianceReviewView } from '../../complianceReviewState';
 import { getAppCenterWorkflowDefinition } from '../../workflowDefinitions';
-import { createComplianceReviewPanel } from './recentComplianceReview';
+import { getWorkspaceContext } from '../../workspaceContext';
 
 const RECENT_ARTIFACT_LIMIT = 10;
 const PAYLOAD_STATUS_CACHE_TTL = 5_000;

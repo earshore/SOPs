@@ -6,6 +6,7 @@ import {
   createStaticTemplateModule,
   type StaticTemplateModule,
 } from '@/common/utils/createStaticTemplateModule';
+
 import { renderBusinessScenarioPage } from './casePageRenderer';
 
 type CaseId =

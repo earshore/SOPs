@@ -1,9 +1,10 @@
+import { normalizeReasoningUserPrefs } from '@/services/modelCapability/prefs';
 import {
   DEFAULT_RUNTIME_STRATEGY_SETTINGS,
   getRuntimeMasterAnalysisOptions,
 } from '@/services/runtimeStrategyService';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
-import { normalizeReasoningUserPrefs } from '@/services/modelCapability/prefs';
+
 import type { ReasoningEffortLevel } from '@/services/modelCapability/types';
 
 const TARGET_OUTPUT_TOKEN_BUDGETS: Record<string, number> = {

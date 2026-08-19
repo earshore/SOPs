@@ -5,15 +5,10 @@
  * Requirements: 10.1, 10.2, 11.1, 11.2, 11.3, 11.4, 11.5
  */
 
-import { StorageService } from './storageService';
-import eventBus from '@/common/EventBus';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
-import type {
-  AnimationSettings,
-  AnimationSpeed,
-  AnimationCategory,
-  StoredAnimationSettings,
-} from '@/types/animation-types';
+import eventBus from '@/common/EventBus';
+
+import { StorageService } from './storageService';
 import {
   DEFAULT_ANIMATION_SETTINGS,
   SPEED_MULTIPLIERS,
@@ -22,6 +17,13 @@ import {
   ANIMATION_CLASSES,
   DATA_ATTRIBUTES,
 } from '../config/animation-config';
+
+import type {
+  AnimationSettings,
+  AnimationSpeed,
+  AnimationCategory,
+  StoredAnimationSettings,
+} from '@/types/animation-types';
 
 /**
  * 动画管理器类

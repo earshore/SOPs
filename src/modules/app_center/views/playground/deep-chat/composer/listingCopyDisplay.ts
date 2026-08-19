@@ -1,5 +1,5 @@
-import { getDeepChatMessageText, type DeepChatMessage } from '../session/conversationContext';
 import { isListingPromptContext, sanitizeListingCopy } from './listingCopySanitize';
+import { getDeepChatMessageText, type DeepChatMessage } from '../session/conversationContext';
 
 /**
  * 渲染层净化（单条文本）：Listing 工作流下，把模型写进正文开头的自我审查/开场说明

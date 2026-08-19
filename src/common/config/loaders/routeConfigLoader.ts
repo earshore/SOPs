@@ -5,6 +5,7 @@
 // ================================================================
 
 import { MENU_CONFIG } from '../menuConfig';
+
 import type { MenuConfig } from '@/types/config';
 
 /**

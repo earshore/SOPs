@@ -18,8 +18,16 @@ import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/act
 import { formatCsvRows } from '@/common/utils/csv';
 import { downloadCsv } from '@/common/utils/download';
 import { escapeHtml } from '@/common/utils/security';
+
+import {
+  MOCK_PRODUCTS as NPI_DEMO_PRODUCTS,
+  STAGE_CONFIG,
+  SITE_FLAGS,
+  SITE_DOMAINS,
+} from './data/mockData';
 import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
+
 import type {
   NPIProductRecord,
   StageConfig,
@@ -28,12 +36,6 @@ import type {
   SiteDomainsMap,
   ComplianceStatus,
 } from '@/types/modules-business';
-import {
-  MOCK_PRODUCTS as NPI_DEMO_PRODUCTS,
-  STAGE_CONFIG,
-  SITE_FLAGS,
-  SITE_DOMAINS,
-} from './data/mockData';
 
 // Demo seed data used until a real NPI data source is wired in.
 const SAMPLE_DATA = NPI_DEMO_PRODUCTS as NPIProductRecord[];

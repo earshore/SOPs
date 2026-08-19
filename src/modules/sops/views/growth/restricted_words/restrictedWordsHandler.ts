@@ -4,14 +4,15 @@
  * Phase 5: 迁移到新架构 (SafeTemplateLoader, AlpineRegistry, SafeRenderer)
  */
 
+import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import * as actionRegistry from '@/common/utils/actionRegistry';
+
 import {
   RESTRICTED_WORDS_DATABASE,
   RISK_LEVELS,
   WORD_CATEGORIES,
 } from './constants/restrictedWordsConstants';
-import * as actionRegistry from '@/common/utils/actionRegistry';
-import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
-import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 import '@/components/modal/AppModal';
 
 type SearchMode = 'fuzzy' | 'exact' | 'fulltext' | 'regex';

@@ -1,5 +1,6 @@
-import { readThinkingBudgetTokens, THINKING_BUDGET_ANSWER_HEADROOM } from './mappers';
 import { applyVisionPartsToChatMessages } from './chatVision';
+import { readThinkingBudgetTokens, THINKING_BUDGET_ANSWER_HEADROOM } from './mappers';
+
 import type { EffectiveReasoningPrefs, ResolvedModelCapability } from './types';
 
 export type ChatCompletionsBodyBase = Record<string, unknown> & {

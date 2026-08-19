@@ -5,14 +5,16 @@
  * 从 PromptlabPanel.ts 中提取出来，接收显式上下文参数。
  */
 
-import { appStore } from '@/stores/useAppStore';
-import { randomBase36 } from '@/common/utils/random';
-import { promptlabService } from '../../services/promptlabService';
-import { HistoryService } from '../../services/historyService';
-import { emitHistoryUpdated } from '../../services/historyEvents';
-import { getReportFingerprint, getScrapedDataFingerprint } from '../../services/reportIdentity';
 import { showToast } from '@/common/ui';
+import { randomBase36 } from '@/common/utils/random';
+import { appStore } from '@/stores/useAppStore';
+
 import { computeIsListingReady, computeIsReady, computeHasReport } from './computed';
+import { emitHistoryUpdated } from '../../services/historyEvents';
+import { HistoryService } from '../../services/historyService';
+import { promptlabService } from '../../services/promptlabService';
+import { getReportFingerprint, getScrapedDataFingerprint } from '../../services/reportIdentity';
+
 import type { PromptlabAlpineContext } from './types';
 import type {
   AnalysisReport,

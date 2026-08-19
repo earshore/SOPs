@@ -4,6 +4,9 @@
  * 初始化新的 Navigo 路由系统，替换旧的路由实现
  */
 
+import { SystemError } from '@/common/errors/AppError';
+
+import { LEGACY_ROUTE_ALIASES, shouldReplaceLegacyRoute } from './legacyRouteAliases';
 import {
   createRouter,
   convertMenuConfig,
@@ -11,13 +14,11 @@ import {
   createRouterStoreSync,
   type NavigoAdapter,
 } from './navigo';
-import { MENU_CONFIG } from '../config/menuConfig';
-import { prepareUIForRoute, updateUIForRoute } from '../ui/navigation';
-import { SystemError } from '@/common/errors/AppError';
 import { normalizeRoutePath, routeIdToPath, routeIdToPathStrict } from './routePaths';
-import { LEGACY_ROUTE_ALIASES, shouldReplaceLegacyRoute } from './legacyRouteAliases';
-import eventBus from '../EventBus';
+import { MENU_CONFIG } from '../config/menuConfig';
 import { APP_EVENTS } from '../constants/eventConstants';
+import eventBus from '../EventBus';
+import { prepareUIForRoute, updateUIForRoute } from '../ui/navigation';
 
 // 全局路由实例
 let routerInstance: NavigoAdapter | null = null;

@@ -1,6 +1,7 @@
 import { ValidationError } from '@/common/errors/AppError';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { applyToolTargetModel, type ToolStrategyTargetId } from '@/services/toolStrategyService';
+
 import type { LLMOptions } from '@/services/llmService';
 
 export interface ResolvedToolLlmConfig {

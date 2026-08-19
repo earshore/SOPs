@@ -6,14 +6,16 @@
 // 🎯 增强: 支持DI容器注入到模块实例
 // ================================================================
 
-import { APP_EVENTS } from '../constants/eventConstants';
+import { beginMinimalLoading } from '@/common/components/MinimalLoadingIndicator';
+import { ValidationError } from '@/common/errors/AppError';
+
 import {
   renderErrorBoundary,
   renderNotRegistered,
   renderTimeout,
 } from '../../components/ErrorBoundary';
-import { ValidationError } from '@/common/errors/AppError';
-import { beginMinimalLoading } from '@/common/components/MinimalLoadingIndicator';
+import { APP_EVENTS } from '../constants/eventConstants';
+
 import type { DIContainer } from '../di/Container';
 
 // ==================== 类型定义 ====================
