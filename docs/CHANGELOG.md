@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2-rc.2] - 2026-08-19
+
+> 功能冻结后的发布候选（Pre-release）。`v3.1.1` GA 之后的候选线续作：本候选在 `v3.1.2-rc.1` 可读性收官基础上，落地 **Level 2 标准化重构**（事件总线类型系统拆分、ViewRenderer / llmService 等服务层职责收敛，307 文件调整并补强单测），同步修复 smoke e2e 基线重 mint 注入与生产构建 esbuild CSS 压缩告警（转义任意值类 legacy 选择器清理）。上一 GA 与生产回滚基线均为 `v3.1.1`，GitHub Latest 仍为 `v3.1.1`。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Added（新增）
+
+- **事件总线类型系统拆分（`types/events/*`）**：`types/events.d.ts`（1360 行）拆分为 `bus` / `names` / `payloads-app` / `payloads-module` / `batch` / `debug` / `replay` / `schema` 模块，事件名与载荷类型按域解耦（`123134f8`）。
+
+### Changed（变更）
+
+- **Level 2 标准化重构（`123134f8`）**：ViewRenderer / llmService 等服务层拆解，modelCapability、storageService、skillRegistry 等 307 文件职责收敛，并补齐 `analysisStatsRenderer` 等单测。
+- **smoke e2e 基线重 mint 注入（`aa6c87ed`）**：`test.yml` 注入 `UPDATE_SNAPSHOTS` 环境变量，color-region 基线重生成路径归一（CI 基建）。
+
+### Fixed（修复）
+
+- **esbuild CSS 压缩告警消除（`58b8eb6`）**：`dark-content-compat.css` 删除两个语法非法的 legacy 转义选择器（类名内裸 `#94a3b8` 会被解析为 ID 选择器、永不匹配，且触发 esbuild `css-syntax-error` 压缩告警），属性子串 `!important` 兜底规则保持全覆盖；more 模块 workflows / overview 模板 27 处 `text-[color:var(--color-slate-400,#94a3b8)]` 统一为全库一致的 `text-[color:var(--color-slate-400)]`（token 恒定义，渲染零变化）；生产构建零警告。
+
+### 门禁验收
+
+- type-check 0 error · lint 0/0 warning · ci:quality 20 项全绿 · vitest 3735 通过（3 项发布元数据契约测试随本版本更新转绿）· format:check 通过 · build 零错误零告警。
+
+### 锚点 commit
+
+- `123134f8` Level 2 标准化重构 + 预存测试修复 · `aa6c87ed` smoke e2e UPDATE_SNAPSHOTS 注入 · `58b8eb6` esbuild CSS 压缩告警消除
+
 ## [3.1.2-rc.1] - 2026-08-18
 
 > 功能冻结后的发布候选（Pre-release）。`v3.1.1` GA 之后的下一候选线：本候选专注**深色/浅色模式可读性债务收官**——在 v3.1.1 GA 定稿（dark 全 40 路由对比度审计 0 缺陷）基础上，补做 More 子页与系统设置的深度审计、图标/文本可读性专项、审计工具 local-contrast 合成修正后的全量复检（40 路由 × dark/light 双模式均 0 缺陷），并修复 settings-scale 门禁超限。上一 GA 与生产回滚基线均为 `v3.1.1`，GitHub Latest 仍为 `v3.1.1`。

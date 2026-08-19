@@ -25,18 +25,25 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-| 通道                         | 版本          | 说明                                                                          |
-| ---------------------------- | ------------- | ----------------------------------------------------------------------------- |
-| **GitHub Latest（稳定 GA）** | `v3.1.1`      | 生产推荐版本；保持 Latest                                                     |
-| **当前 Pre-release 候选**    | `v3.1.2-rc.1` | 深色/浅色可读性债务收官候选（Pre-release，未抢占 Latest）                     |
-| package.json                 | `3.1.2-rc.1`  | 与候选 tag / Release 一致                                                    |
-| **回滚基线（GA）**           | `v3.1.0`      | 生产回退至上一代稳定版本                                                     |
-| 上一 GA                      | `v3.1.0`      | `v3.1.1` 之前一代稳定 GA；历史基线见 CHANGELOG                                |
+| 通道                         | 版本          | 说明                                                 |
+| ---------------------------- | ------------- | ---------------------------------------------------- |
+| **GitHub Latest（稳定 GA）** | `v3.1.1`      | 生产推荐版本；保持 Latest                            |
+| **当前 Pre-release 候选**    | `v3.1.2-rc.2` | Level 2 标准化重构候选（Pre-release，未抢占 Latest） |
+| package.json                 | `3.1.2-rc.2`  | 与候选 tag / Release 一致                            |
+| **回滚基线（GA）**           | `v3.1.0`      | 生产回退至上一代稳定版本                             |
+| 上一 GA                      | `v3.1.0`      | `v3.1.1` 之前一代稳定 GA；历史基线见 CHANGELOG       |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.1.2-rc.1` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.1.2-rc.2` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.1`（GA），当前候选线为 `v3.1.2-rc.1`（Pre-release，Latest 仍为 `v3.1.1`）。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口；当前稳定版为 `v3.1.1`（GA），当前候选线为 `v3.1.2-rc.2`（Pre-release，Latest 仍为 `v3.1.1`）。
+
+`v3.1.2-rc.2`（2026-08-19，Pre-release）聚焦 **Level 2 标准化重构与构建链路收敛**：
+
+- **事件总线类型系统拆分**：`types/events.d.ts`（1360 行）拆分为 `bus` / `names` / `payloads-app` / `payloads-module` / `batch` / `debug` / `replay` / `schema` 模块，事件名与载荷类型按域解耦。
+- **Level 2 标准化重构**：ViewRenderer / llmService 等服务层拆解，modelCapability / storageService / skillRegistry 等 307 文件职责收敛，补齐 `analysisStatsRenderer` 等单测。
+- **构建链路修复**：smoke e2e 基线重 mint 注入归一；生产构建 esbuild CSS 压缩告警消除（legacy 转义选择器清理 + more 模板 fallback 类统一，渲染零变化）。
+- GitHub Latest **仍指向** `v3.1.1`；回滚基线为 `v3.1.1`；生产目标 `https://sops.hongecb.store`。
 
 `v3.1.2-rc.1`（2026-08-18，Pre-release）聚焦**深色/浅色模式可读性债务收官**：
 
