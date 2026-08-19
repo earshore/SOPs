@@ -1,12 +1,13 @@
 /**
  * Shared mutable Deep Chat session state (object bag — assignable across modules).
  */
-import type { LLMProviderConfig } from '@/types/state';
-import type { DeepChatElement, DeepChatThreadStore, ThreadMenuState } from '../types';
-import type { PendingDeepChatRequest } from '../request/lifecycle';
 import { createDraftPersistController } from '../composer/draftPersistence';
 import { DRAFT_PERSIST_DEBOUNCE_MS } from '../constants';
 import { createThreadId } from '../infra/utils';
+
+import type { PendingDeepChatRequest } from '../request/lifecycle';
+import type { DeepChatElement, DeepChatThreadStore, ThreadMenuState } from '../types';
+import type { LLMProviderConfig } from '@/types/state';
 
 export const PENDING_GENERATING_PREFIX = '正在生成回复...';
 export const WAITING_STATUS_LABELS = ['思考中...', '等待模型响应...', '正在连接模型...'] as const;

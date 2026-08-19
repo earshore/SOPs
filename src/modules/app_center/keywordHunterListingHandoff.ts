@@ -1,4 +1,5 @@
 import { appStore } from '@/stores/useAppStore';
+
 import type { AppCenterListingCopy } from './listingCopyService';
 
 export function applyListingCopyToKeywordHunter(copy: AppCenterListingCopy): void {

@@ -1,12 +1,11 @@
+import { cleanupRestrictedWordsPanel, initRestrictedWordsPanel } from './restrictedWordsHandler';
+import { createOwnerField } from '../../../utils/ownerField';
 import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 /**
  * 欧洲本土化高危词库 (Restricted Words) SOP
  * EU Localized Restricted Words Database SOP
  */
-
-import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
-import { cleanupRestrictedWordsPanel, initRestrictedWordsPanel } from './restrictedWordsHandler';
 import './styles.css';
 
 const REVIEW_OWNER_STORAGE_KEY = 'restricted_words_owner_v1';

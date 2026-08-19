@@ -34,10 +34,12 @@
  * or status colors. Those live outside Appearance control.
  */
 
-import type { ColorSchemeName } from '../constants/colorSchemes';
-import { updateRuntimeCssRule } from '../utils/runtimeStyles';
 import { StorageService } from '@/services/storageService';
+
 import eventBus from '../EventBus';
+import { updateRuntimeCssRule } from '../utils/runtimeStyles';
+
+import type { ColorSchemeName } from '../constants/colorSchemes';
 
 /** User preference for surface color mode (Layer M). */
 export type ColorMode = 'light' | 'dark' | 'system';

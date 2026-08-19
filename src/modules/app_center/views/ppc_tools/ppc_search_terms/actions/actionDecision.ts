@@ -1,4 +1,5 @@
 import { ACTION_LABELS } from './actionMetadata';
+
 import type { ActionType } from '../types';
 
 export interface ActionDecision {

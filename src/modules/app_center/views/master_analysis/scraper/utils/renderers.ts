@@ -2,9 +2,10 @@
  * HTML渲染工具函数
  */
 
-import type { ProductData } from '../types';
-import { escapeHtml, sanitizeProductData } from './sanitizers';
 import { getErrorSummary, getSiteDomain } from './formatters';
+import { escapeHtml, sanitizeProductData } from './sanitizers';
+
+import type { ProductData } from '../types';
 
 const SUPPORTED_SITE_KEYS = new Set([
   'US',

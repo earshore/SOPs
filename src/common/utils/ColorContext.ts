@@ -17,6 +17,7 @@ import {
   type ModuleConfig,
   type MenuConfig,
 } from '../config/menuConfig';
+
 import type { ColorSchemeName } from '../constants/colorSchemes';
 
 // 定义CategoryConfig类型，避免从SidebarRenderer导入造成循环依赖

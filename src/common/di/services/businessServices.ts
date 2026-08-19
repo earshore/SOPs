@@ -4,14 +4,16 @@
 // 定义业务相关服务的注册配置
 // ================================================================
 
-import type { ServiceRegistry } from '../ServiceRegistry';
-import { SERVICE_NAMES } from '../ServiceRegistry';
-import type { ILoggerService } from '@/types/services';
-
+import { alertService } from '@/services/alertService';
 import { analyticsService } from '@/services/analyticsService';
 import { errorTracker } from '@/services/errorTracker';
-import { alertService } from '@/services/alertService';
 import { performanceStorage } from '@/services/performanceStorage';
+
+import { SERVICE_NAMES } from '../ServiceRegistry';
+
+import type { ServiceRegistry } from '../ServiceRegistry';
+import type { ILoggerService } from '@/types/services';
+
 /**
  * 注册业务服务到注册表
  */

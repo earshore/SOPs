@@ -1,6 +1,8 @@
-import type { ChatMessage } from '@/services/llmService';
 import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
+
 import { normalizePreReplyActivitySteps } from '../request/preReplyActivity';
+
+import type { ChatMessage } from '@/services/llmService';
 
 export type DeepChatRole = 'user' | 'ai' | 'assistant' | 'system';
 /**

@@ -1,4 +1,10 @@
 // TD-SET-01 Phase 4: llm persistence/connection action cluster (kept under 600-line section limit).
+import { showToast } from '@/common/ui';
+import { getModelId } from '@/common/utils/modelOptions';
+import { confirmWithModal } from '@/components/modal/confirmModal';
+import { pushSettingsRollbackSnapshot } from '@/components/settings/domain/settingsRollback';
+import { ErrorService } from '@/services/errorService';
+import { callLLM } from '@/services/llmService';
 import {
   DEFAULT_REASONING_PREFS,
   clampEffort,
@@ -7,24 +13,20 @@ import {
   normalizeReasoningUserPrefs,
   type ReasoningEffortLevel,
 } from '@/services/modelCapability';
-import { callLLM } from '@/services/llmService';
-import { confirmWithModal } from '@/components/modal/confirmModal';
-import { pushSettingsRollbackSnapshot } from '@/components/settings/domain/settingsRollback';
-import { ErrorService } from '@/services/errorService';
 import { StorageService } from '@/services/storageService';
-import { showToast } from '@/common/ui';
-import { getModelId } from '@/common/utils/modelOptions';
-import type { LLMProviderConfig } from '@/types/state';
+
+import { saveSettingsDomainPartition } from '../domain/settingsDomain';
 import {
   LLM_TEST_CONNECTION_MAX_TOKENS,
   apiPathIdForFamily,
   buildAutoSaveLlmConfig,
   isLLMApiKeyRequired,
 } from '../domain/settingsLlmModel';
-import { saveSettingsDomainPartition } from '../domain/settingsDomain';
 import { updateModelStatus } from '../domain/settingsModelStatus';
+
 import type { ModelOption } from '../domain/localDataCopy';
 import type { LlmApiFamilyId, SettingsPanelPart } from '../panelTypes';
+import type { LLMProviderConfig } from '@/types/state';
 
 export const llmSectionRichBehavior: SettingsPanelPart = {
   async testConnection(): Promise<void> {

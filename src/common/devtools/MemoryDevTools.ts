@@ -4,8 +4,8 @@
 // 提供可视化的内存监控面板
 // ================================================================
 
-import { memoryLeakDetector } from '../utils/MemoryLeakDetector';
 import eventBus from '../EventBus';
+import { memoryLeakDetector } from '../utils/MemoryLeakDetector';
 import { setSafeHtml } from '../utils/security';
 
 /**

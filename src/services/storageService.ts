@@ -7,16 +7,18 @@
 // 🎯 P0-4.1.8: 在数据边界使用类型守卫
 // ================================================================
 
-import { handleSystemError } from '@/common/errors';
-import { isLLMProviderConfig, isProxyConfig } from '@/common/guards/typeGuards';
 import {
   DEFAULT_SCRAPER_PROXY_TYPE,
   SCRAPER_PROXY_CREDENTIAL_TYPES,
 } from '@/common/config/scraperProxies';
+import { handleSystemError } from '@/common/errors';
+import { isLLMProviderConfig, isProxyConfig } from '@/common/guards/typeGuards';
+
+import { isSopsManagedLocalStorageKey, LocalDataStore } from './localDataStore';
+
 import type { HistoryItem, ProxyConfig } from '@/types/modules-business';
 import type { IStorageService } from '@/types/services';
 import type { LLMProviderConfig } from '@/types/state';
-import { isSopsManagedLocalStorageKey, LocalDataStore } from './localDataStore';
 
 /**
  * 存储键名常量

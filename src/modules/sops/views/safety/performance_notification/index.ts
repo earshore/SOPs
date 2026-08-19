@@ -1,5 +1,5 @@
-import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createOwnerField } from '../../../utils/ownerField';
+import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
 const REPORT_OWNER_STORAGE_KEY = 'performance_notification_owner_v1';

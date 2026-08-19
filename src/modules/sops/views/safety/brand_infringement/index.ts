@@ -1,5 +1,5 @@
-import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createOwnerField } from '../../../utils/ownerField';
+import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
 const REVIEW_OWNER_STORAGE_KEY = 'brand_infringement_owner_v1';

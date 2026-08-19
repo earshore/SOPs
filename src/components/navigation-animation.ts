@@ -7,6 +7,7 @@
 
 import { setSafeHtml } from '@/common/utils/security';
 import { animationManager } from '@/services/animation-manager';
+
 import { ANIMATION_CLASSES } from '../config/animation-config';
 
 type PageTransitionElement = HTMLElement & {

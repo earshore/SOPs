@@ -2,14 +2,16 @@
  * 数据操作处理器 - 删除产品/评论
  */
 
-import type { ScrapedData, DeleteResult, ConfirmModalCallback } from '../types';
-import { HistoryService } from '../../services/historyService';
-import { emitHistoryUpdated } from '../../services/historyEvents';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
+import { ValidationError, BusinessError, SystemError } from '@/common/errors/AppError';
 import eventBus from '@/common/EventBus';
 import { showToast } from '@/common/ui';
-import { ValidationError, BusinessError, SystemError } from '@/common/errors/AppError';
 import { escapeHtml } from '@/common/utils/security';
+
+import { emitHistoryUpdated } from '../../services/historyEvents';
+import { HistoryService } from '../../services/historyService';
+
+import type { ScrapedData, DeleteResult, ConfirmModalCallback } from '../types';
 
 const nativeLoggerConsole = globalThis.console;
 

@@ -55,12 +55,13 @@
  * @see {@link ExtendedDNA} DNA 数据结构定义
  */
 
-import type { ReportAdapter } from './adapters/ReportAdapter';
-import type { ExtendedDNA } from '../types/extendedDNA';
-import { FullAnalysisReportAdapter } from './adapters/FullAnalysisReportAdapter';
 import { CompetitorReportAdapter } from './adapters/CompetitorReportAdapter';
+import { FullAnalysisReportAdapter } from './adapters/FullAnalysisReportAdapter';
 import { ProductOverviewAdapter } from './adapters/ProductOverviewAdapter';
 import { SemanticAnalysisAdapter } from './adapters/SemanticAnalysisAdapter';
+
+import type { ExtendedDNA } from '../types/extendedDNA';
+import type { ReportAdapter } from './adapters/ReportAdapter';
 /**
  * 通用 DNA 提取器类
  *

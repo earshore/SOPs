@@ -6,7 +6,7 @@
 // ================================================================
 
 import { ApiError } from '@/common/errors';
-import type { LLMChatCompletionResponse, LLMErrorResponse } from '@/types/api';
+
 import {
   getResponsesReasoningStreamDelta,
   getResponsesStreamTextDelta,
@@ -14,6 +14,8 @@ import {
   getGeminiStreamTextDelta,
   type ApiSurface,
 } from './modelCapability';
+
+import type { LLMChatCompletionResponse, LLMErrorResponse } from '@/types/api';
 
 export function getChatCompletionsStreamDelta(payload: Record<string, unknown>): string {
   const choices = payload.choices;

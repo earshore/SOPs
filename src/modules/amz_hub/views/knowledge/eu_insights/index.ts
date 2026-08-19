@@ -2,12 +2,13 @@
  * 欧洲站市场洞察 - 各国消费者画像雷达图
  */
 
-import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import BaseModule from '@/common/BaseModule';
-import { AMZ_COUNTRY_DATA, type CountryCode } from '../../../constants/amz_hub_constants';
-import './styles.css';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { loadChartJs, type ChartJS } from '@/common/utils/lazyLibs';
+import { escapeHtml, setSafeHtml } from '@/common/utils/security';
+import './styles.css';
+
+import { AMZ_COUNTRY_DATA, type CountryCode } from '../../../constants/amz_hub_constants';
 
 // Chart.js 实例类型定义
 interface ChartInstance {

@@ -1,11 +1,13 @@
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
   getRuntimePpcSearchTermsOptions,
   getRuntimeStrategySettings,
   saveRuntimeStrategySettings,
 } from '@/services/runtimeStrategyService';
-import type { PpcSearchTermsAnalysisContext } from '../services/llmAnalysisService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+
 import { getAnalysisSettingInputs, getInput, getTextarea, setChecked } from './settingsFields';
+
+import type { PpcSearchTermsAnalysisContext } from '../services/llmAnalysisService';
 
 export interface AnalysisSettings {
   useAgent: boolean;

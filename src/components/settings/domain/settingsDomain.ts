@@ -13,8 +13,7 @@ import {
   saveToolStrategySettings,
   type ToolStrategySettings,
 } from '@/services/toolStrategyService';
-import type { ProxyConfig } from '@/types/modules-business';
-import type { LLMProviderConfig } from '@/types/state';
+
 import {
   diffSettingsPartitions,
   snapshotSettingsPartitions,
@@ -22,6 +21,9 @@ import {
   type SettingsDirtySnapshot,
 } from './settingsDirty';
 import { isRuntimeRawInvalid } from './settingsHealth';
+
+import type { ProxyConfig } from '@/types/modules-business';
+import type { LLMProviderConfig } from '@/types/state';
 
 export type SettingsDomainPartition = 'llm' | 'toolStrategy' | 'runtime' | 'proxy';
 

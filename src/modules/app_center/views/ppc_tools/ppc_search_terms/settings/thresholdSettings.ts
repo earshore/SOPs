@@ -1,4 +1,3 @@
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
   DEFAULT_RUNTIME_STRATEGY_SETTINGS,
   getRuntimePpcSearchTermsOptions,
@@ -6,6 +5,8 @@ import {
   saveRuntimeStrategySettings,
   type PpcSearchTermsThresholds,
 } from '@/services/runtimeStrategyService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+
 import { readNumber, setInputValue } from './settingsFields';
 import {
   HIGH_ACOS_FIELD,
@@ -17,6 +18,7 @@ import {
   THRESHOLD_FIELDS,
   type ThresholdFieldDefinition,
 } from './thresholdFields';
+
 import type { Thresholds } from '../types';
 
 /** @deprecated Legacy dual-write key — migrate once on read, never write again. */

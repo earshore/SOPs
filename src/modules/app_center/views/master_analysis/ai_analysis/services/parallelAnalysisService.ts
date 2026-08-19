@@ -8,30 +8,23 @@
  * 4. 失败隔离（单个失败不影响整体）
  */
 
-import { callLLM, type ChatMessage, type LLMStreamMetrics } from '@/services/llmService';
-import { buildRecoveryPrompt, callWithReasoningOnlyRecovery } from './reasoningOnlyRecovery';
-import { getAnalysisReasoningPrefs } from './reasoningPolicy';
-import { withStructuredAnalysisOptions } from '@/services/modelCapability';
-import { LocalDataStore } from '@/services/localDataStore';
-import { StorageService, STORAGE_KEYS, CACHE_PREFIXES } from '@/services/storageService';
-import { resolveToolTargetModel } from '@/services/toolStrategyService';
-import { resolveToolLlmConfig, type ResolvedToolLlmConfig } from '@/services/llmToolBridge';
 import { BusinessError } from '@/common/errors/AppError';
 import { isObject } from '@/common/utils/typeGuards';
+import { callLLM, type ChatMessage, type LLMStreamMetrics } from '@/services/llmService';
+import { resolveToolLlmConfig, type ResolvedToolLlmConfig } from '@/services/llmToolBridge';
+import { LocalDataStore } from '@/services/localDataStore';
+import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import {
   getRuntimeLlmAnalysisOptions,
   getRuntimeMasterAnalysisOptions,
 } from '@/services/runtimeStrategyService';
-import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analysisReportData';
-import type { Product } from '../config/sampleData';
-import {
-  generateAnalysisPrompt,
-  getReviewSamplingMetadata,
-  MASTER_ANALYSIS_SYSTEM_PROMPT,
-  withMapReduceHygieneMetadata,
-  type EvidenceHygieneMetadata,
-  type ReviewSamplingMetadata,
-} from '../prompts/analysisPrompts';
+import { StorageService, STORAGE_KEYS, CACHE_PREFIXES } from '@/services/storageService';
+import { resolveToolTargetModel } from '@/services/toolStrategyService';
+
+import { parseAnalysisResponse } from './analysisResultParser';
+import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
+import { buildRecoveryPrompt, callWithReasoningOnlyRecovery } from './reasoningOnlyRecovery';
+import { getAnalysisReasoningPrefs } from './reasoningPolicy';
 import {
   buildReviewSourcePack,
   buildSharedGeneralReviewMap,
@@ -43,11 +36,20 @@ import {
   type ReviewEvidenceTargetId,
   type SharedGeneralMapBundle,
 } from './reviewEvidencePipeline';
-import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
-import { parseAnalysisResponse } from './analysisResultParser';
 import { runSellingPointsPipeline, shouldUseSellingPointsMapReduce } from './sellingPointsPipeline';
-import { estimateTokenCount } from '../utils/tokenCounter';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
+import {
+  generateAnalysisPrompt,
+  getReviewSamplingMetadata,
+  MASTER_ANALYSIS_SYSTEM_PROMPT,
+  withMapReduceHygieneMetadata,
+  type EvidenceHygieneMetadata,
+  type ReviewSamplingMetadata,
+} from '../prompts/analysisPrompts';
+import { estimateTokenCount } from '../utils/tokenCounter';
+
+import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analysisReportData';
+import type { Product } from '../config/sampleData';
 
 const DEFAULT_ANALYSIS_CONCURRENCY = 8;
 const MAX_ANALYSIS_CONCURRENCY = 8;

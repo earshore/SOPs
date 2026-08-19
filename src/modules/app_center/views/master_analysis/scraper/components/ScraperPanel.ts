@@ -2,6 +2,40 @@
  * Scraper Panel Alpine.js 组件核心逻辑
  */
 
+import {
+  DEFAULT_SCRAPER_PROXY_TYPE,
+  getScraperProxyDisplayName,
+  getScraperProxyProvider,
+} from '@/common/config/scraperProxies';
+import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import { showToast } from '@/common/ui';
+import { openFilePicker } from '@/common/utils/filePicker';
+import { ErrorService } from '@/services/errorService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+import { appStore } from '@/stores/useAppStore';
+
+import { DataPreview, DataPreviewState } from './DataPreview';
+import { HistoryPanel } from './HistoryPanel';
+import { emitHistoryUpdated } from '../../services/historyEvents';
+import {
+  deleteProduct as deleteProductCore,
+  deleteReview as deleteReviewCore,
+  confirmWithModal,
+} from '../handlers/dataOperations';
+import {
+  handleImportFiles as handleImportFilesCore,
+  type ImportMode,
+} from '../handlers/importHandler';
+import {
+  startScrape,
+  handleScrapeComplete,
+  saveScrapeSnapshot,
+  updateTask,
+} from '../handlers/scrapeHandler';
+import { getFlag, getSiteName, getSiteUrl, formatDate } from '../utils/formatters';
+import { extractValidAsins } from '../utils/validators';
+
 import type {
   Task,
   ProxyConfig,
@@ -10,41 +44,9 @@ import type {
   ImportResult,
   DeleteResult,
 } from '../types';
+import type { ScrapedData, ScrapedProduct, HistoryItem } from '@/types/modules-business';
 import type { ScraperSite } from '@/types/modules-business';
 import type { ScraperState } from '@/types/state';
-import { appStore } from '@/stores/useAppStore';
-import { APP_EVENTS } from '@/common/constants/eventConstants';
-import { showToast } from '@/common/ui';
-import { openFilePicker } from '@/common/utils/filePicker';
-import { ErrorService } from '@/services/errorService';
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
-import { extractValidAsins } from '../utils/validators';
-import { getFlag, getSiteName, getSiteUrl, formatDate } from '../utils/formatters';
-import {
-  DEFAULT_SCRAPER_PROXY_TYPE,
-  getScraperProxyDisplayName,
-  getScraperProxyProvider,
-} from '@/common/config/scraperProxies';
-import {
-  startScrape,
-  handleScrapeComplete,
-  saveScrapeSnapshot,
-  updateTask,
-} from '../handlers/scrapeHandler';
-import {
-  handleImportFiles as handleImportFilesCore,
-  type ImportMode,
-} from '../handlers/importHandler';
-import {
-  deleteProduct as deleteProductCore,
-  deleteReview as deleteReviewCore,
-  confirmWithModal,
-} from '../handlers/dataOperations';
-import type { ScrapedData, ScrapedProduct, HistoryItem } from '@/types/modules-business';
-import { DataPreview, DataPreviewState } from './DataPreview';
-import { HistoryPanel } from './HistoryPanel';
-import { emitHistoryUpdated } from '../../services/historyEvents';
-import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 
 type ScraperPanelState = {
   inputAsins: string;

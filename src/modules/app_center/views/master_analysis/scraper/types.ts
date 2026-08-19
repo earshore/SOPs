@@ -5,6 +5,7 @@
  * 参见：src/types/modules-business.d.ts
  */
 
+import type { ScraperProxyType } from '@/common/config/scraperProxies';
 import type {
   ScrapedData,
   ScrapedDataMetadata,
@@ -12,7 +13,6 @@ import type {
   CustomerReview,
   ScraperSite,
 } from '@/types/modules-business';
-import type { ScraperProxyType } from '@/common/config/scraperProxies';
 
 // ==================== 重新导出全局类型 ====================
 

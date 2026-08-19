@@ -10,6 +10,7 @@ import {
   isUnambiguousRawSkillTitle,
   normalizeSkillChipDraftText,
 } from '@/modules/app_center/skillDeepChatHandoff';
+
 import type { DeepChatSkillContext } from '../types';
 
 export const SKILL_CHIP_CLASS = 'deep-chat-context-chip';

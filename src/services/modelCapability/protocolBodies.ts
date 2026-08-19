@@ -2,20 +2,21 @@
  * Native request body builders for each API path.
  */
 
-import type { EffectiveReasoningPrefs, ResolvedModelCapability } from './types';
 import {
   buildChatCompletionsBody,
   buildResponsesBody,
   type ResponsesJsonSchemaFormat,
 } from './applyToRequest';
-import type { ApiPathId } from './apiPaths';
 import { normalizeToolsForChat } from './chatTools';
-import { normalizeToolsForResponses } from './responsesTools';
 import {
   GEMINI_THINKING_BUDGET_BY_EFFORT,
   GEMINI_THINKING_LEVEL_BY_EFFORT,
   THINKING_BUDGET_ANSWER_HEADROOM,
 } from './mappers';
+import { normalizeToolsForResponses } from './responsesTools';
+
+import type { ApiPathId } from './apiPaths';
+import type { EffectiveReasoningPrefs, ResolvedModelCapability } from './types';
 
 export type ChatMessageLike = { role: string; content: string };
 

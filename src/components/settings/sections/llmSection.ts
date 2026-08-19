@@ -1,4 +1,15 @@
 // TD-SET-01 Phase 1: llm section fragment (verbatim).
+import { EnvConfig } from '@/common/config/envConfig';
+import {
+  DEFAULT_NEW_API_ENDPOINT,
+  PROVIDERS,
+  getLlmProviderConfig,
+  type ProviderConfig,
+} from '@/common/config/llmProviders';
+import { showToast } from '@/common/ui';
+import { getModelId } from '@/common/utils/modelOptions';
+import { ErrorService } from '@/services/errorService';
+import { fetchModelsFromApi } from '@/services/llmService';
 import {
   API_PATH_OPTIONS,
   DEFAULT_REASONING_EFFORTS,
@@ -12,15 +23,11 @@ import {
   type ApiPathOption,
   type ReasoningEffortLevel,
 } from '@/services/modelCapability';
-import {
-  DEFAULT_NEW_API_ENDPOINT,
-  PROVIDERS,
-  getLlmProviderConfig,
-  type ProviderConfig,
-} from '@/common/config/llmProviders';
-import { EnvConfig } from '@/common/config/envConfig';
-import { getModelId } from '@/common/utils/modelOptions';
+import { StorageService } from '@/services/storageService';
+import { LLMProviderConfig } from '@/types/state';
+
 import { type ModelMetadata } from '../domain/localDataCopy';
+import { saveSettingsDomainPartition } from '../domain/settingsDomain';
 import {
   LLM_API_FAMILY_OPTIONS,
   apiFamilyFromPathId,
@@ -42,8 +49,7 @@ import {
   resolveProviderEndpoint,
   validateModelFetchInput,
 } from '../domain/settingsLlmModel';
-import { ErrorService } from '@/services/errorService';
-import { LLMProviderConfig } from '@/types/state';
+import { updateModelStatus } from '../domain/settingsModelStatus';
 import {
   LlmApiFamilyId,
   LlmApiFamilyOption,
@@ -51,11 +57,6 @@ import {
   ModelFeatureBadge,
   SettingsPanelPart,
 } from '../panelTypes';
-import { StorageService } from '@/services/storageService';
-import { fetchModelsFromApi } from '@/services/llmService';
-import { showToast } from '@/common/ui';
-import { updateModelStatus } from '../domain/settingsModelStatus';
-import { saveSettingsDomainPartition } from '../domain/settingsDomain';
 
 export const llmSectionBehavior: SettingsPanelPart = {
   get currentProviderConfig(): ProviderConfig | Record<string, never> {

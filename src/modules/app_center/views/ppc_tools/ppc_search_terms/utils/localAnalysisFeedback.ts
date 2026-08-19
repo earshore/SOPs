@@ -1,5 +1,7 @@
 import { showToast } from '@/common/ui/notifications';
+
 import { isSearchTermReportType } from '../columns/columns';
+
 import type { AnalysisResult } from '../analysis/analysisEngine';
 import type { AnalysisSettings } from '../settings/settings';
 import type { ReportType } from '../types';

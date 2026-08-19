@@ -1,19 +1,57 @@
 import '@/common/utils/nativeLoggerConsole';
-// Critical icon set only — brands (~100KB woff2) load after first paint.
-import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
-import '@fortawesome/fontawesome-free/css/solid.min.css';
-import '@fortawesome/fontawesome-free/css/regular.min.css';
 
-// src/main.ts
-// ================================================================
+// src/main.ts — 启动入口
 // 🎯 P1 重构: 使用 ActionRegistry 替代散落的 window.xxx 赋值
 // 🎯 Phase 4: 使用 StorageService 统一数据访问
-// ================================================================
+// Chart.js and GridStack 现通过 src/common/utils/lazyLibs.ts 懒加载
+// 🎯 性能优化: 首屏关键CSS由 index.html 提前加载，模块特定样式按需懒加载
 
-// Chart.js and GridStack are now lazy loaded via src/common/utils/lazyLibs.js
+// ✅ 全局错误兜底已由GlobalErrorHandler统一处理
+// 见 src/common/errors/GlobalErrorHandler.ts
 
-// 🎯 性能优化: 首屏关键CSS由 index.html 提前加载，其他CSS在 DOMContentLoaded 后异步加载
-// 模块特定样式改为按需懒加载,不在启动时导入
+// Settings panel is large and only needed for Alpine settings + settings actions.
+// Keep it out of the static entry graph; load on demand.
+
+import Alpine from '@alpinejs/csp';
+import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
+import '@fortawesome/fontawesome-free/css/regular.min.css';
+import '@fortawesome/fontawesome-free/css/solid.min.css';
+
+import { ServiceBootstrap } from '@/common/bootstrap/ServiceBootstrap';
+import { ThemeManager } from '@/common/config/themeConfig';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import { container } from '@/common/di/Container';
+import { serviceRegistry } from '@/common/di/ServiceRegistry';
+import { registerAllServices } from '@/common/di/services';
+import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
+import { initRouter, triggerInitialNavigation } from '@/common/router/initRouter';
+import {
+  renderMegaMenu,
+  renderSopsMegaMenu,
+  renderHubMegaMenu,
+  renderMoreMenu,
+  initMegaMenuAccessibility,
+  closeMegaMenus,
+  revealMainContent,
+  showToast,
+} from '@/common/ui';
+import {
+  registerActionsWithLegacy,
+  initGlobalEventDelegation,
+} from '@/common/utils/actionRegistry';
+import { initEventLogger } from '@/common/utils/eventLogger';
+import { loadingManager } from '@/common/utils/LoadingManager';
+import { installOnceAnimationCleanup } from '@/common/utils/onceAnimationCleanup';
+import { openAmazonInsightPluginDownload } from '@/common/utils/openAmazonInsightPluginDownload';
+import { loadPlugins } from '@/common/utils/pluginLoader';
+import { initDeferredViews, initHomeView } from '@/common/utils/viewLoader';
+import { animationManager } from '@/services/animation-manager';
+import { applyDeveloperDiagnosticSettings } from '@/services/developerDiagnosticsService';
+import { initializeAnimationStore } from '@/stores/animation-settings';
+import { appStore } from '@/stores/useAppStore';
+
+import './components/modal/AppModal';
+import { initHomeSplash } from './modules/home/homeDisplay';
 
 const bootstrapConsole = globalThis.console;
 
@@ -33,48 +71,6 @@ if (import.meta.env.DEV) {
     });
 }
 
-// 🎯 导入 Zustand Store
-import { appStore } from '@/stores/useAppStore';
-
-// 🎯 阶段4: 导入主题管理器
-import { ThemeManager } from '@/common/config/themeConfig';
-
-import { container } from '@/common/di/Container';
-import { installOnceAnimationCleanup } from '@/common/utils/onceAnimationCleanup';
-import { initDeferredViews, initHomeView } from '@/common/utils/viewLoader';
-
-// ✅ 导入 Web Components
-import './components/modal/AppModal';
-
-// 🎯 P0优化: 导入服务初始化管理器和注册表
-import { ServiceBootstrap } from '@/common/bootstrap/ServiceBootstrap';
-import { serviceRegistry } from '@/common/di/ServiceRegistry';
-import { registerAllServices } from '@/common/di/services';
-
-// 🎯 短期优化：导入 LoadingManager
-import { loadingManager } from '@/common/utils/LoadingManager';
-
-// 🎯 微交互动画系统：导入动画管理器和状态管理
-import { animationManager } from '@/services/animation-manager';
-import { initializeAnimationStore } from '@/stores/animation-settings';
-
-// ✅ P1: 导入动作注册中心
-import {
-  registerActionsWithLegacy,
-  initGlobalEventDelegation,
-} from '@/common/utils/actionRegistry';
-
-import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
-import { initRouter, triggerInitialNavigation } from '@/common/router/initRouter';
-import { initEventLogger } from '@/common/utils/eventLogger';
-import { loadPlugins } from '@/common/utils/pluginLoader';
-import { applyDeveloperDiagnosticSettings } from '@/services/developerDiagnosticsService';
-
-// ✅ 全局错误兜底已由GlobalErrorHandler统一处理
-// 见 src/common/errors/GlobalErrorHandler.ts
-
-// Settings panel is large and only needed for Alpine settings + settings actions.
-// Keep it out of the static entry graph; load on demand.
 type SystemSettingsModule = typeof import('./components/settings/systemSettings');
 let systemSettingsModulePromise: Promise<SystemSettingsModule> | null = null;
 
@@ -91,20 +87,6 @@ async function withSystemSettings<T>(
   const settings = await loadSystemSettingsModule();
   return run(settings);
 }
-
-import {
-  renderMegaMenu,
-  renderSopsMegaMenu,
-  renderHubMegaMenu,
-  renderMoreMenu,
-  initMegaMenuAccessibility,
-  closeMegaMenus,
-  revealMainContent,
-  showToast,
-} from '@/common/ui';
-import { APP_EVENTS } from '@/common/constants/eventConstants';
-import { openAmazonInsightPluginDownload } from '@/common/utils/openAmazonInsightPluginDownload';
-import { initHomeSplash } from './modules/home/homeDisplay';
 
 // Domain shells register route listeners — load them in parallel with bootstrap
 // instead of blocking the static entry parse graph.
@@ -132,7 +114,6 @@ async function loadDomainModules() {
 }
 
 // ✅ Alpine.js
-import Alpine from '@alpinejs/csp';
 
 interface RouterDebugApi {
   navigate?: unknown;

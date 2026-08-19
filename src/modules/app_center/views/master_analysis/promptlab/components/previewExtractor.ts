@@ -5,8 +5,8 @@
  * 无 Alpine 上下文依赖，完全可单独测试。
  */
 
-import { ANALYSIS_MODULES } from '../../constants/prompts';
 import { PROMPTLAB_DISPLAY_LIMITS } from '../../config/displayLimits';
+import { ANALYSIS_MODULES } from '../../constants/prompts';
 // ==========================================
 // 工具函数
 // ==========================================

@@ -1,5 +1,6 @@
 import { getCampaignStatusLabel, hasInactiveCampaignStatus } from './campaignStatus';
 import { formatMetric, formatPercent } from '../utils/formatters';
+
 import type { CampaignClassificationRule, CampaignMetrics } from './campaignRuleTypes';
 import type { Thresholds } from '../types';
 

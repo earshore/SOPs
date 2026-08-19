@@ -1,6 +1,7 @@
+import { formatSummaryAcos, type AnalysisSummary } from './summary';
 import { getActionStatus, requiresHumanConfirmation } from '../actions/actionItems';
 import { formatCurrency, formatPercent } from '../utils/formatters';
-import { formatSummaryAcos, type AnalysisSummary } from './summary';
+
 import type { AnalyzedRow } from '../types';
 
 export function buildSpendSummaryLine(summary: AnalysisSummary): string {

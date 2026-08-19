@@ -1,8 +1,9 @@
 // TD-SET-01 Phase 1: appearance section fragment (verbatim).
-import { AnimationSpeed } from '@/types/animation-types';
-import { SettingsPanelPart } from '../panelTypes';
 import { ThemeManager, THEME_PRESETS, type ColorMode } from '@/common/config/themeConfig';
 import { animationSettingsStore, getAnimationSettings } from '@/stores/animation-settings';
+import { AnimationSpeed } from '@/types/animation-types';
+
+import { SettingsPanelPart } from '../panelTypes';
 
 export const appearanceSectionBehavior: SettingsPanelPart = {
   get appearanceThemeOptions(): Array<{ id: string; name: string; description?: string }> {

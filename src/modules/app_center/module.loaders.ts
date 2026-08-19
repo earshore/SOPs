@@ -1,6 +1,8 @@
 import { buildModuleMapFromLoaderPaths } from '@/common/config/moduleManifest';
-import type { ModuleLoaderFn } from '@/types/modules-business';
+
 import { appCenterManifest } from './module.manifest';
+
+import type { ModuleLoaderFn } from '@/types/modules-business';
 
 const loaders = import.meta.glob('./views/**/index.ts') as Record<string, ModuleLoaderFn>;
 

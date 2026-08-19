@@ -1,6 +1,7 @@
 import { ACTION_ICONS, ACTION_LABELS, REPORT_FILTERS } from '../actions/actionMetadata';
 import { createIcon, getElement } from '../ui/dom';
 import { isFilterType, type FilterType } from '../utils/filters';
+
 import type { ActionType, AnalyzedRow, ReportType } from '../types';
 
 export function renderFilterButtons(

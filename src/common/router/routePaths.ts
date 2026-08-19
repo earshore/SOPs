@@ -1,6 +1,6 @@
 import { buildRoutePathMap } from '../config/moduleManifest';
-import { isValidRouteId } from '../constants/routes';
 import { ROUTE_MANIFESTS } from '../config/routeManifests';
+import { isValidRouteId } from '../constants/routes';
 
 const ROUTE_PATHS = buildRoutePathMap(ROUTE_MANIFESTS);
 

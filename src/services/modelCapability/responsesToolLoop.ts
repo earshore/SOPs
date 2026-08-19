@@ -3,12 +3,12 @@
  * Stateless HTTP style using previous_response_id when available.
  */
 
+import { extractAssistantTextFromResponsesOrChat, extractResponsesId } from './responsesParse';
 import {
   buildToolFollowUpInputItems,
   extractResponsesFunctionCalls,
   type ResponsesFunctionCall,
 } from './responsesTools';
-import { extractAssistantTextFromResponsesOrChat, extractResponsesId } from './responsesParse';
 
 export type ResponsesToolExecutor = (call: {
   name: string;

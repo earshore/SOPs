@@ -4,6 +4,10 @@
  */
 
 import { appStore } from '@/stores/useAppStore';
+
+import { showToast } from './notifications';
+import { getEl } from './utils';
+import { createSidebarRenderer, type SidebarRenderer } from '../components/SidebarRenderer';
 import {
   MENU_CONFIG,
   getRoutesByModule,
@@ -12,12 +16,9 @@ import {
   type ModuleConfig,
   type RouteFullConfig,
 } from '../config/menuConfig';
-import { createSidebarRenderer, type SidebarRenderer } from '../components/SidebarRenderer';
-import { ensureViewLoaded } from '../utils/viewLoader';
 import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
-import { getEl } from './utils';
-import { showToast } from './notifications';
 import { setSafeHtml } from '../utils/security';
+import { ensureViewLoaded } from '../utils/viewLoader';
 
 // ========================
 // 侧边栏渲染器注册表

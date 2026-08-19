@@ -1,7 +1,7 @@
 // TD-SET-01 Phase 1: updateModelStatus moved verbatim.
 import { PROVIDERS } from '@/common/config/llmProviders';
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 
 export async function updateModelStatus(): Promise<void> {
   const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;

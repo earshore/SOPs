@@ -2,6 +2,7 @@ import {
   bindCategoryFilterButtons,
   scrollToModuleSection,
 } from '@/common/utils/overviewInteractions';
+
 import {
   createSopTemplateModule,
   type SopTemplateModuleContext,

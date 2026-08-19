@@ -4,15 +4,17 @@
 // 示例：使用 getService() 替代直接导入服务
 // ================================================================
 
-import { escapeHtml, setSafeHtml } from '@/common/utils/security';
-import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
 import BaseModule from '@/common/BaseModule';
+import { configCenter } from '@/common/config/ConfigCenter';
 import { SERVICE_NAMES } from '@/common/di/ServiceRegistry';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import type { IStorageService } from '@/types/services';
+import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
+import { escapeHtml, setSafeHtml } from '@/common/utils/security';
+
 import { AMZF_COUNTRIES, AMZF_EVENTS, AMZF_MONTHS } from '../../../constants/amz_hub_constants';
-import { configCenter } from '@/common/config/ConfigCenter';
+
 import type { MarketingEvent, CountryInfo } from '@/types/modules-business';
+import type { IStorageService } from '@/types/services';
 import './flag-icons.local.css';
 import './styles.css';
 

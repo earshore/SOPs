@@ -1,5 +1,6 @@
-import { getElement, setText } from '../ui/dom';
 import { createResultRow } from './resultsRow';
+import { getElement, setText } from '../ui/dom';
+
 import type { AnalyzedRow } from '../types';
 
 export const MAX_RENDER_ROWS = 300;

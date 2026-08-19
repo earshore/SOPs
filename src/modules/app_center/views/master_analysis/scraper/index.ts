@@ -11,9 +11,10 @@
 
 import { showToast } from '@/common/ui/notifications';
 import { openFilePicker } from '@/common/utils/filePicker';
+
 import { createScraperPanel } from './components/ScraperPanel';
-import { createAlpinePanelModule } from '../utils/createAlpinePanelModule';
 import { getAlpineData } from '../utils/alpineLifecycle';
+import { createAlpinePanelModule } from '../utils/createAlpinePanelModule';
 import '../master_analysis_style.css';
 import './scraper_style.css';
 

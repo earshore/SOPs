@@ -5,20 +5,22 @@
  * 所有函数接收 PromptlabAlpineContext 作为显式参数，避免 this 绑定。
  */
 
+import SITE_CONFIGS from '@/common/constants/constants';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { escapeHtml } from '@/common/utils/security';
 import { appStore } from '@/stores/useAppStore';
-import SITE_CONFIGS from '@/common/constants/constants';
-import type { TargetMarket } from '@/types/state';
-import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
-import { analysisTargets } from '../../ai_analysis/config/analysisTargets';
-import { getFieldTitle, getPreviewText } from './previewExtractor';
+
 import {
   getTargetConfidence,
   getConfidenceColorClass,
   getConfidenceAriaLabel,
   computeHasReport,
 } from './computed';
+import { getFieldTitle, getPreviewText } from './previewExtractor';
+import { analysisTargets } from '../../ai_analysis/config/analysisTargets';
+
 import type { PromptlabAlpineContext } from './types';
+import type { TargetMarket } from '@/types/state';
 
 type ReportRecord = Record<string, unknown>;
 type TargetConfig = { title: string; iconClass: string; color: string };

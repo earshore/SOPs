@@ -3,9 +3,11 @@
  * 负责不同数据格式之间的转换
  */
 
-import type { Product } from '../config/sampleData';
-import { ScraperData, ScraperProduct } from '../types';
 import { ValidationError } from '@/common/errors/AppError';
+
+import { ScraperData, ScraperProduct } from '../types';
+
+import type { Product } from '../config/sampleData';
 
 function pickFirst<T>(...values: T[]): T | undefined {
   return values.find(value => Boolean(value));

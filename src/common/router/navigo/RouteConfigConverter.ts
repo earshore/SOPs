@@ -4,9 +4,10 @@
  * 将 MENU_CONFIG 格式转换为 Navigo 路由配置
  */
 
+import { SystemError } from '@/common/errors/AppError';
+
 import type { RouteConfig as NavigoRouteConfig } from './types';
 import type { RouteConfig as MenuRouteConfig, MenuConfig } from '../../config/menuConfig';
-import { SystemError } from '@/common/errors/AppError';
 
 /**
  * 转换选项

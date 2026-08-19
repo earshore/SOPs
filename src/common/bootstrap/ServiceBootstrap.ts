@@ -5,15 +5,16 @@
  * 🎯 重构: 使用DI容器作为底层依赖管理
  */
 
-import type { DIContainer } from '../di/Container';
-import type { ServiceRegistry, ServiceName } from '../di/ServiceRegistry';
-import { errorTracker } from '@/services/errorTracker';
-import { analyticsService } from '@/services/analyticsService';
-import { performanceStorage } from '@/services/performanceStorage';
-import { alertService, AlertType } from '@/services/alertService';
-import { SystemError } from '@/common/errors/AppError';
 import { EnvConfig } from '@/common/config/envConfig';
 import { APP_VERSION } from '@/common/constants/constants';
+import { SystemError } from '@/common/errors/AppError';
+import { alertService, AlertType } from '@/services/alertService';
+import { analyticsService } from '@/services/analyticsService';
+import { errorTracker } from '@/services/errorTracker';
+import { performanceStorage } from '@/services/performanceStorage';
+
+import type { DIContainer } from '../di/Container';
+import type { ServiceRegistry, ServiceName } from '../di/ServiceRegistry';
 
 const nativeLoggerConsole = globalThis.console;
 

@@ -1,19 +1,21 @@
 import eventBus from '@/common/EventBus';
 import { StorageService } from '@/services/storageService';
-import type {
-  GeneratedPromptRecord,
-  HistoryItem,
-  KeywordHunterSnapshot,
-} from '@/types/modules-business';
-import type { AppCenterWorkspaceContext } from './workspaceContext';
-import { createWorkItemIdFromHistoryItem } from './workspaceContext';
-import type { AppCenterListingCopy } from './listingCopyService';
-import { APP_CENTER_COMPLIANCE_CHECKLIST } from './workflowDefinitions';
+
 import {
   createComplianceReviewStates,
   getComplianceReviewView,
   type ComplianceReviewStates,
 } from './complianceReviewState';
+import { APP_CENTER_COMPLIANCE_CHECKLIST } from './workflowDefinitions';
+import { createWorkItemIdFromHistoryItem } from './workspaceContext';
+
+import type { AppCenterListingCopy } from './listingCopyService';
+import type { AppCenterWorkspaceContext } from './workspaceContext';
+import type {
+  GeneratedPromptRecord,
+  HistoryItem,
+  KeywordHunterSnapshot,
+} from '@/types/modules-business';
 
 export const APP_CENTER_WORK_ITEMS_STORAGE_KEY = 'app_center_work_items_v1';
 export const APP_CENTER_ARTIFACTS_STORAGE_KEY = 'app_center_artifact_envelopes_v1';

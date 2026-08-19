@@ -6,6 +6,18 @@
  */
 
 import Navigo from 'navigo';
+
+import { ValidationError } from '@/common/errors/AppError';
+
+import { builtinGuardList } from './builtinGuards';
+import { ErrorHandler } from './ErrorHandler';
+import { GuardManager } from './GuardManager';
+import { isRouteConfig, isNavigateOptions } from './guards';
+import { MiddlewareManager } from './MiddlewareManager';
+import { ParamParser } from './ParamParser';
+import { PreloadManager } from './PreloadManager';
+
+import type { RouterStoreSync } from './RouterStore';
 import type {
   Route,
   RouteConfig,
@@ -16,16 +28,6 @@ import type {
   RouteMiddleware,
   PreloadOptions,
 } from './types';
-import { isRouteConfig, isNavigateOptions } from './guards';
-import { GuardManager } from './GuardManager';
-import { builtinGuardList } from './builtinGuards';
-import { MiddlewareManager } from './MiddlewareManager';
-import { ParamParser } from './ParamParser';
-import { PreloadManager } from './PreloadManager';
-import { ErrorHandler } from './ErrorHandler';
-import type { RouterStoreSync } from './RouterStore';
-
-import { ValidationError } from '@/common/errors/AppError';
 
 type NavigationTarget = {
   normalizedPath: string;

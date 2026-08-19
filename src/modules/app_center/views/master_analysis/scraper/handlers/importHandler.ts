@@ -2,18 +2,20 @@
  * 数据导入处理器
  */
 
-import type { ScrapedData, ProductData, ImportResult, FileReadResult } from '../types';
-import type { ScrapedProduct, CustomerReview, ScraperSite } from '@/types/modules-business';
-import { validateScrapedData } from '../utils/validators';
-import { getFlag } from '../utils/formatters';
-import { HistoryService } from '../../services/historyService';
-import { emitHistoryUpdated } from '../../services/historyEvents';
 import { LANGUAGE_HEADERS } from '@/common/constants/constants';
 import { APP_EVENTS, MODULE_EVENTS } from '@/common/constants/eventConstants';
+import { ValidationError, BusinessError, SystemError } from '@/common/errors/AppError';
 import eventBus from '@/common/EventBus';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui';
-import { ValidationError, BusinessError, SystemError } from '@/common/errors/AppError';
+
+import { emitHistoryUpdated } from '../../services/historyEvents';
+import { HistoryService } from '../../services/historyService';
+import { getFlag } from '../utils/formatters';
+import { validateScrapedData } from '../utils/validators';
+
+import type { ScrapedData, ProductData, ImportResult, FileReadResult } from '../types';
+import type { ScrapedProduct, CustomerReview, ScraperSite } from '@/types/modules-business';
 
 const nativeLoggerConsole = globalThis.console;
 

@@ -1,14 +1,14 @@
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { showToast } from '@/common/ui';
 import { copyTextToClipboard } from '@/common/utils/clipboard';
-
 /**
  * More 模块 - 提示词页面
  * 提示词库浏览、搜索和复制功能
  */
-
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import '@/components/modal/AppModal';
 import { setSafeHtml } from '@/common/utils/security';
+
 import {
   PROMPT_CATEGORIES,
   getPromptsByCategory,
@@ -19,9 +19,8 @@ import {
   type PromptCategory,
   type PromptCategoryId,
 } from './constants/promptLibrary';
-import { showToast } from '@/common/ui';
-import './prompts_style.css';
 
+import './prompts_style.css';
 // 使用导入的类型别名
 type Prompt = PromptItem;
 

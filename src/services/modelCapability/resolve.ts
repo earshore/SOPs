@@ -1,5 +1,11 @@
-import { getModelCapabilityRules } from './registry';
 import { normalizeModelIdForCapability } from './normalizeModelId';
+import { getModelCapabilityRules } from './registry';
+import {
+  DEFAULT_API_SURFACE,
+  DEFAULT_REASONING_EFFORTS,
+  DEFAULT_UNKNOWN_CONTEXT_WINDOW,
+} from './types';
+
 import type {
   ApiSurface,
   ModelCapabilityRule,
@@ -8,11 +14,6 @@ import type {
   ResolvedModelCapability,
   ReasoningEffortLevel,
   SurfaceCapability,
-} from './types';
-import {
-  DEFAULT_API_SURFACE,
-  DEFAULT_REASONING_EFFORTS,
-  DEFAULT_UNKNOWN_CONTEXT_WINDOW,
 } from './types';
 
 /** Match model id against pattern with `*` wildcards (glob-style, case-insensitive). */

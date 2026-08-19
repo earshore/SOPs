@@ -1,16 +1,10 @@
-import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { DEFAULT_LLM_PROVIDER_ID, DEFAULT_NEW_API_ENDPOINT } from '@/common/config/llmProviders';
-import { DEFAULT_REASONING_PREFS } from '@/services/modelCapability';
 import { DEFAULT_SCRAPER_PROXY_TYPE } from '@/common/config/scraperProxies';
-import { ErrorService } from '@/services/errorService';
-import eventBus from '@/common/EventBus';
-import { SettingsPanelData, AlpineWatchContext, SettingsPanelPart } from './panelTypes';
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { ThemeManager } from '@/common/config/themeConfig';
-import { apiPathIdForFamily } from './domain/settingsLlmModel';
-import { assembleSettingsTemplate } from './loader';
-import settingsShellHtml from './systemSettings.html?raw';
-import { appearanceSectionBehavior } from './sections/appearanceSection';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
+import { showToast } from '@/common/ui';
+import { createSafeFragment } from '@/common/utils/security';
 import {
   applySettingsDeepLink,
   expandSettingsFocusTarget,
@@ -18,13 +12,13 @@ import {
   resolveSettingsNavGroupFromSection,
   type SettingsOpenOptions,
 } from '@/components/settings/domain/settingsDeepLink';
+import { type SettingsDirtyPartition } from '@/components/settings/domain/settingsDirty';
+import { isRuntimeRawInvalid } from '@/components/settings/domain/settingsHealth';
 import {
-  createEmptyToolTargetModels,
-  toolStrategySectionBehavior,
-} from './sections/toolStrategySection';
-import { confirmSettingsAction, dataSectionBehavior } from './sections/dataSection';
-import { LOCAL_DATA_BUCKET_IDS } from '@/services/localDataStore';
-import { diagnosticsSectionBehavior } from './sections/diagnosticsSection';
+  measureSettingsNavMarkers,
+  pickActiveSettingsNavGroup,
+  pickActiveSettingsNavId,
+} from '@/components/settings/domain/settingsNavScroll';
 import {
   findFirstSettingsSearchMatch,
   findSettingsSearchMatches,
@@ -33,19 +27,26 @@ import {
   type SettingsSearchHitView,
 } from '@/components/settings/domain/settingsSearch';
 import { getDeveloperDiagnosticSettings } from '@/services/developerDiagnosticsService';
+import { ErrorService } from '@/services/errorService';
+import { LOCAL_DATA_BUCKET_IDS } from '@/services/localDataStore';
+import { DEFAULT_REASONING_PREFS } from '@/services/modelCapability';
 import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
-import { type SettingsDirtyPartition } from '@/components/settings/domain/settingsDirty';
-import { isRuntimeRawInvalid } from '@/components/settings/domain/settingsHealth';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+
+import { apiPathIdForFamily } from './domain/settingsLlmModel';
+import { assembleSettingsTemplate } from './loader';
+import { SettingsPanelData, AlpineWatchContext, SettingsPanelPart } from './panelTypes';
+import { appearanceSectionBehavior } from './sections/appearanceSection';
+import { confirmSettingsAction, dataSectionBehavior } from './sections/dataSection';
+import { diagnosticsSectionBehavior } from './sections/diagnosticsSection';
 import { llmSectionBehavior } from './sections/llmSection';
 import { llmSectionRichBehavior } from './sections/llmSectionRich';
-import {
-  measureSettingsNavMarkers,
-  pickActiveSettingsNavGroup,
-  pickActiveSettingsNavId,
-} from '@/components/settings/domain/settingsNavScroll';
 import { networkSectionBehavior } from './sections/networkSection';
-import { showToast } from '@/common/ui';
-import { createSafeFragment } from '@/common/utils/security';
+import {
+  createEmptyToolTargetModels,
+  toolStrategySectionBehavior,
+} from './sections/toolStrategySection';
+import settingsShellHtml from './systemSettings.html?raw';
 
 // src/components/settings/systemSettings.ts
 // ================================================================

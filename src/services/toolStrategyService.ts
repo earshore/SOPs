@@ -1,6 +1,8 @@
-import type { LLMProviderConfig } from '@/types/state';
 import { getModelId } from '@/common/utils/modelOptions';
+
 import { StorageService, STORAGE_KEYS } from './storageService';
+
+import type { LLMProviderConfig } from '@/types/state';
 
 export const TOOL_STRATEGY_TARGETS = [
   {

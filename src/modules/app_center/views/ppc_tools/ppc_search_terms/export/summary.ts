@@ -1,4 +1,5 @@
 import { formatPercent } from '../utils/formatters';
+
 import type { AnalyzedRow } from '../types';
 
 export interface AnalysisSummary {

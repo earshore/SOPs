@@ -1,4 +1,5 @@
 import { ValidationError } from '@/common/errors/AppError';
+
 import { assertReportRowLimit } from '../analysis/reportLimits';
 
 export type RawRecord = Record<string, string>;

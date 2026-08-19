@@ -4,8 +4,9 @@
 // 捕获、记录和分析应用错误
 // ================================================================
 
-import type { AppError } from '@/common/errors/AppError';
 import { randomFloat } from '@/common/utils/random';
+
+import type { AppError } from '@/common/errors/AppError';
 import type { ILoggerService } from '@/types/services';
 
 const nativeLoggerConsole = globalThis.console;

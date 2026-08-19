@@ -3,11 +3,11 @@
  * Promotion Submission SOP - EU Sites
  */
 
+import { createOwnerField } from '../../../utils/ownerField';
 import {
   createSopTemplateModule,
   type SopTemplateModuleContext,
 } from '../../../utils/sopTemplateModule';
-import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
 const REVIEW_OWNER_STORAGE_KEY = 'promotion_submission_owner_v1';

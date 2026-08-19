@@ -1,5 +1,5 @@
-import type { AnalyzedRow, ReportType } from '../types';
 import type { ColumnMapping } from '../columns/columns';
+import type { AnalyzedRow, ReportType } from '../types';
 
 export type AnalysisStatusTone = 'status' | 'error';
 

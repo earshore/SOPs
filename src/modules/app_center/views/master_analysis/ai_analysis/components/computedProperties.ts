@@ -4,15 +4,17 @@
  */
 
 import { appStore } from '@/stores/useAppStore';
+
 import { analysisTargets } from '../config/analysisTargets';
-import type { Product } from '../config/sampleData';
-import { convertScraperDataToProduct } from '../utils/dataTransformers';
 import { parseAnalysisReport } from '../services/analysisService';
 import { AnalysisResult, AlpineContext, FullReportData } from '../types';
-import type { ScrapedData } from '@/types/modules-business';
-import type { FullAnalysisReport } from '../config/analysisReportData';
 import { getPromptTokenCount } from './helpers';
+import { convertScraperDataToProduct } from '../utils/dataTransformers';
 import { formatTokenCount } from '../utils/tokenCounter';
+
+import type { FullAnalysisReport } from '../config/analysisReportData';
+import type { Product } from '../config/sampleData';
+import type { ScrapedData } from '@/types/modules-business';
 
 /**
  * 计算属性接口

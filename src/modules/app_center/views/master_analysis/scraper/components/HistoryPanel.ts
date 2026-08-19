@@ -2,18 +2,20 @@
  * 历史记录面板组件
  */
 
-import type { HistoryItem, ScraperSite } from '@/types/modules-business';
-import { HistoryService } from '../../services/historyService';
-import { emitHistoryUpdated } from '../../services/historyEvents';
-import { getScrapedDataFingerprint } from '../../services/reportIdentity';
 import { LANGUAGE_HEADERS } from '@/common/constants/constants';
+import { MODULE_EVENTS } from '@/common/constants/eventConstants';
+import { SystemError } from '@/common/errors/AppError';
+import eventBus from '@/common/EventBus';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui';
 import { appStore } from '@/stores/useAppStore';
-import { MODULE_EVENTS } from '@/common/constants/eventConstants';
-import eventBus from '@/common/EventBus';
-import { SystemError } from '@/common/errors/AppError';
+
+import { emitHistoryUpdated } from '../../services/historyEvents';
+import { HistoryService } from '../../services/historyService';
+import { getScrapedDataFingerprint } from '../../services/reportIdentity';
 import { confirmWithModal } from '../../utils/confirmModal';
+
+import type { HistoryItem, ScraperSite } from '@/types/modules-business';
 
 const nativeLoggerConsole = globalThis.console;
 /**

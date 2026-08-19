@@ -10,22 +10,25 @@
  */
 
 import { marked } from 'marked';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+
 import BaseModule from '@/common/BaseModule';
-import { showToast } from '@/common/ui';
+import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 import { ValidationError } from '@/common/errors/AppError';
 import { formatLlmFailureUx, showLlmFailureToast } from '@/common/errors/llmFailureUx';
-import * as KeywordHunterService from '../services/keywordHunterService';
-import { appStore } from '@/stores/useAppStore';
-import { ErrorService } from '@/services/errorService';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import { showToast } from '@/common/ui';
 import { createSafeFragment, setSafeHtml } from '@/common/utils/security';
-import { KeywordHunterSnapshotService } from '../services/snapshotService';
-import { confirmWithModal } from '../utils/confirmModal';
-import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
+import { ErrorService } from '@/services/errorService';
 import { resolveToolLlmPublicConfig } from '@/services/llmToolBridge';
+import { appStore } from '@/stores/useAppStore';
+
 import { estimateSingleCallTime } from '../../master_analysis/ai_analysis/services/analysisTimeEstimator';
 import { getUserReasoningPrefs } from '../../master_analysis/ai_analysis/services/reasoningPolicy';
+import * as KeywordHunterService from '../services/keywordHunterService';
+import { KeywordHunterSnapshotService } from '../services/snapshotService';
+import { confirmWithModal } from '../utils/confirmModal';
+
 import '../styles.css';
 
 // ==========================================

@@ -5,20 +5,21 @@
  * 从 PromptlabPanel.ts 中提取出来，接收显式上下文参数。
  */
 
-import { appStore } from '@/stores/useAppStore';
 import SITE_CONFIGS from '@/common/constants/constants';
 import { showToast } from '@/common/ui';
+import { appStore } from '@/stores/useAppStore';
+
 import {
   extractProductDNA,
   canExtractDNA as canExtractDNALegacy,
 } from '../../services/dnaExtractor';
-import type { ExtractedDNA } from '../../services/dnaExtractor';
+import { getReportFingerprint, unwrapReportPayload } from '../../services/reportIdentity';
 import {
   extractDNAFromDownloadsReport,
   canExtractDNAFromDownloadsReport,
 } from '../../services/UniversalDNAExtractor';
-import { getReportFingerprint, unwrapReportPayload } from '../../services/reportIdentity';
-import type { ExtendedDNA } from '../../types/extendedDNA';
+import { confirmWithModal } from '../../utils/confirmModal';
+
 import type {
   DnaExtractionFieldName,
   DnaExtractionFieldSummary,
@@ -27,7 +28,8 @@ import type {
   PromptlabAlpineContext,
 } from './types';
 import type { FullAnalysisReport } from '../../ai_analysis/config/analysisReportData';
-import { confirmWithModal } from '../../utils/confirmModal';
+import type { ExtractedDNA } from '../../services/dnaExtractor';
+import type { ExtendedDNA } from '../../types/extendedDNA';
 
 export type ExtractableFieldName = DnaExtractionFieldName;
 

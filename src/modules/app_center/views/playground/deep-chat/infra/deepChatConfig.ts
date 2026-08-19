@@ -1,23 +1,25 @@
-import { DEEP_CHAT_AUXILIARY_STYLE } from './deepChatStyles';
-import type {
-  DeepChatElement,
-  DeepChatRequestBody,
-  DeepChatSignals,
-  DeepChatThread,
-} from '../types';
-import type { DeepChatMessage } from '../session/conversationContext';
-import { findConfigModelsEntry } from '../session/uiHooks';
-import { sessionState } from '../session/sessionState';
 import { normalizeApiPathId, resolveModelCapability } from '@/services/modelCapability';
+import { isDeepChatVisionFeatureEnabled } from '@/services/runtimeStrategyService';
 import { StorageService } from '@/services/storageService';
-import { resolveDeepChatImagesConfig } from '../request/visionAttachments';
+
+import { DEEP_CHAT_AUXILIARY_STYLE } from './deepChatStyles';
 import {
   hasStagedVisionAttachments,
   mountVisionComposer,
   syncVisionComposerCapability,
   unmountVisionComposer,
 } from '../composer/visionComposer';
-import { isDeepChatVisionFeatureEnabled } from '@/services/runtimeStrategyService';
+import { resolveDeepChatImagesConfig } from '../request/visionAttachments';
+import { sessionState } from '../session/sessionState';
+import { findConfigModelsEntry } from '../session/uiHooks';
+
+import type { DeepChatMessage } from '../session/conversationContext';
+import type {
+  DeepChatElement,
+  DeepChatRequestBody,
+  DeepChatSignals,
+  DeepChatThread,
+} from '../types';
 
 type DraftUpdater = (threadId: string, draftText: string) => void;
 type RequestHandler = (

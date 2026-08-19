@@ -9,15 +9,16 @@ import { getLlmProviderConfig } from '@/common/config/llmProviders';
 import { ValidationError } from '@/common/errors/AppError';
 import { getModelId } from '@/common/utils/modelOptions';
 import { fetchModelsFromApi } from '@/services/llmModelList';
-import type { ModelInfo } from '@/services/llmTypes';
 import { StorageService } from '@/services/storageService';
 import {
   getToolTargetDefaultModel,
   setToolTargetDefaultModel,
   type ToolStrategyTargetId,
 } from '@/services/toolStrategyService';
-import type { LLMProviderConfig } from '@/types/state';
+
 import type { ModelOption, ModelSelectHooks, ModelSelectSource } from './types';
+import type { ModelInfo } from '@/services/llmTypes';
+import type { LLMProviderConfig } from '@/types/state';
 
 // ========================
 // 模型选项助手（纯函数）

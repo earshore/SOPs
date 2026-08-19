@@ -7,8 +7,10 @@
  */
 
 import { StorageService } from '@/services/storageService';
+
 import { normalizeApiPathId, type ApiPathId } from './apiPaths';
 import { resolveModelCapability } from './resolve';
+
 import type { ResponsesJsonSchemaFormat } from './applyToRequest';
 
 export type StructuredAnalysisContext = {

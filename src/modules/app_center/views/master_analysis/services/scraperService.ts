@@ -4,20 +4,22 @@
 // 🎯 P0优化: 完整类型定义
 // ==========================================
 
-import { LANGUAGE_HEADERS } from '@/common/constants/constants';
-import { randomFloat } from '@/common/utils/random';
-import { parseProductPage, parseReviews } from './parserService';
-import { sleep, getErrorSummary } from '@/common/ui';
-import { HistoryService } from './historyService';
-import { StorageService } from '@/services/storageService';
-import { getRuntimeScraperOptions } from '@/services/runtimeStrategyService';
 import {
   DEFAULT_SCRAPER_PROXY_TYPE,
   buildScraperProxyUrl,
   getScraperProxyProvider,
   isCommercialScraperProxyType,
 } from '@/common/config/scraperProxies';
+import { LANGUAGE_HEADERS } from '@/common/constants/constants';
 import { ValidationError, ApiError, SystemError } from '@/common/errors/AppError';
+import { sleep, getErrorSummary } from '@/common/ui';
+import { randomFloat } from '@/common/utils/random';
+import { getRuntimeScraperOptions } from '@/services/runtimeStrategyService';
+import { StorageService } from '@/services/storageService';
+
+import { HistoryService } from './historyService';
+import { parseProductPage, parseReviews } from './parserService';
+
 import type {
   ProxyConfig,
   FetchOptions,

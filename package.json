@@ -150,7 +150,12 @@
     "button-ui:audit": "tsx scripts/quality/audit-shared-ui.ts",
     "button-ui:baseline": "tsx scripts/quality/audit-shared-ui.ts --update-baseline",
     "button-ui:gate": "tsx scripts/quality/audit-shared-ui.ts --fail-on-increase",
-    "ci:ui-audit": "npm run build:app && npm run card-ui:audit && npm run callout-ui:audit && npm run workbench-ui:audit"
+    "ci:ui-audit": "npm run build:app && npm run card-ui:audit && npm run callout-ui:audit && npm run workbench-ui:audit",
+    "lint:boundaries": "eslint --config config/eslint-boundaries.config.js src --ignore-pattern \"**/*.test.ts\" --ignore-pattern \"**/*.spec.ts\" --ignore-pattern \"**/*.test.tsx\" --ignore-pattern \"**/*.spec.tsx\"",
+    "lint:boundaries:fix": "eslint --config config/eslint-boundaries.config.js src --ignore-pattern \"**/*.test.ts\" --ignore-pattern \"**/*.spec.ts\" --ignore-pattern \"**/*.test.tsx\" --ignore-pattern \"**/*.spec.tsx\" --fix",
+    "jscpd": "jscpd --config config/.jscpdrc.json src",
+    "jscpd:gate": "tsx scripts/quality/jscpd-gate.ts",
+    "jscpd:update": "tsx scripts/quality/jscpd-gate.ts --update"
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^8.0.0",
@@ -169,8 +174,11 @@
     "docdash": "^2.0.2",
     "esbuild": "^0.28.1",
     "eslint": "^8.0.0",
+    "eslint-import-resolver-typescript": "^4.3.0",
+    "eslint-plugin-boundaries": "^7.2.0",
+    "eslint-plugin-import": "^2.32.0",
     "fast-check": "^4.5.3",
-    "jscpd": "^4.0.5",
+    "jscpd": "^4.2.5",
     "jsdoc": "^4.0.5",
     "jsdom": "^23.0.0",
     "lighthouse": "12.6.1",

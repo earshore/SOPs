@@ -1,6 +1,7 @@
 import { StorageService } from '@/services/storageService';
-import { DEFAULT_ACTION_OWNER, normalizeActionOwner } from '../actions/actionItems';
+
 import { getInput } from './settingsFields';
+import { DEFAULT_ACTION_OWNER, normalizeActionOwner } from '../actions/actionItems';
 
 const ACTION_OWNER_STORAGE_KEY = 'ppc_search_terms_action_owner_v1';
 const LEGACY_ACTION_OWNER_STORAGE_KEY = 'ppc_action_owner_v1';

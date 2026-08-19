@@ -3,13 +3,14 @@
  * 识别各种报告格式
  */
 
+import { ReportType } from '../types/downloadsReportTypes';
+
+import type { FullAnalysisReport } from '../ai_analysis/config/analysisReportData';
 import type {
   CompetitorReport,
   ProductOverviewReport,
   SemanticAnalysisReport,
 } from '../types/downloadsReportTypes';
-import type { FullAnalysisReport } from '../ai_analysis/config/analysisReportData';
-import { ReportType } from '../types/downloadsReportTypes';
 
 type ReportRecord = Record<string, unknown>;
 

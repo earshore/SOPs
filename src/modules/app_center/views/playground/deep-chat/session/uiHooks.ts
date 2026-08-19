@@ -3,6 +3,9 @@
  * Lower layers call through this bag so static imports do not form cycles.
  * Higher layers register real implementations at module load (side-effect).
  */
+import { isReasoningEffortLevel, type ReasoningEffortLevel } from '@/services/modelCapability';
+
+import type { PendingDeepChatRequest, DeepChatPendingAbortReason } from '../request/lifecycle';
 import type {
   DeepChatElement,
   DeepChatMessage,
@@ -13,8 +16,6 @@ import type {
   ThreadEditingState,
   ThreadMenuState,
 } from '../types';
-import type { PendingDeepChatRequest, DeepChatPendingAbortReason } from '../request/lifecycle';
-import { isReasoningEffortLevel, type ReasoningEffortLevel } from '@/services/modelCapability';
 
 export type DeepChatReasoningSessionOverride = {
   enabled: boolean;

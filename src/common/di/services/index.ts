@@ -6,9 +6,10 @@
 export { registerCoreServices } from './coreServices';
 export { registerBusinessServices } from './businessServices';
 
-import type { ServiceRegistry } from '../ServiceRegistry';
-import { registerCoreServices } from './coreServices';
 import { registerBusinessServices } from './businessServices';
+import { registerCoreServices } from './coreServices';
+
+import type { ServiceRegistry } from '../ServiceRegistry';
 
 /**
  * 注册所有服务到注册表

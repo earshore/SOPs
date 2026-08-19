@@ -3,8 +3,9 @@
  * 分析期间每个目标完成后持久化一次，页面刷新/切页后可恢复已完成结果并继续。
  */
 
-import type { FullAnalysisReport } from '../config/analysisReportData';
 import { StorageService } from '@/services/storageService';
+
+import type { FullAnalysisReport } from '../config/analysisReportData';
 
 const SESSION_STORAGE_KEY = 'ai_analysis_in_progress_v1';
 const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;

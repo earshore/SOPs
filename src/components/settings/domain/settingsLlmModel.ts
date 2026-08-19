@@ -1,5 +1,26 @@
 // TD-SET-01 Phase 1: LLM pure helpers moved verbatim (sections <= 600 lines).
+import {
+  DEFAULT_LLM_PROVIDER_ID,
+  OBSOLETE_PRESET_MODEL_IDS,
+  OLD_PRESET_MODEL_IDS,
+  getLlmProviderConfig,
+  type ModelFeature,
+  type ProviderConfig,
+} from '@/common/config/llmProviders';
 import { ApiError, isAppError } from '@/common/errors/AppError';
+import { formatLlmFailureUx, showLlmFailureToast } from '@/common/errors/llmFailureUx';
+import { showToast } from '@/common/ui';
+import { dedupeModels } from '@/components/modelSelect/modelSelectService';
+import {
+  normalizeApiPathId,
+  normalizeReasoningUserPrefs,
+  type ApiPathId,
+  type ResolvedModelCapability,
+} from '@/services/modelCapability';
+import { StorageService } from '@/services/storageService';
+import { LLMProviderConfig } from '@/types/state';
+
+import { getModelId, type ModelMetadata, type ModelOption } from '../domain/localDataCopy';
 import {
   CapabilityBadge,
   LlmApiFamilyId,
@@ -9,26 +30,6 @@ import {
   SavedLLMConfig,
   SettingsPanelData,
 } from '../panelTypes';
-import {
-  DEFAULT_LLM_PROVIDER_ID,
-  OBSOLETE_PRESET_MODEL_IDS,
-  OLD_PRESET_MODEL_IDS,
-  getLlmProviderConfig,
-  type ModelFeature,
-  type ProviderConfig,
-} from '@/common/config/llmProviders';
-import { LLMProviderConfig } from '@/types/state';
-import { StorageService } from '@/services/storageService';
-import { formatLlmFailureUx, showLlmFailureToast } from '@/common/errors/llmFailureUx';
-import { getModelId, type ModelMetadata, type ModelOption } from '../domain/localDataCopy';
-import { dedupeModels } from '@/components/modelSelect/modelSelectService';
-import {
-  normalizeApiPathId,
-  normalizeReasoningUserPrefs,
-  type ApiPathId,
-  type ResolvedModelCapability,
-} from '@/services/modelCapability';
-import { showToast } from '@/common/ui';
 
 export const LLM_API_FAMILY_OPTIONS: readonly LlmApiFamilyOption[] = [
   { id: 'openai', label: 'OpenAI' },

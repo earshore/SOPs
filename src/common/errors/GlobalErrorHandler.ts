@@ -4,12 +4,13 @@
 // 统一处理和记录所有错误
 // ================================================================
 
-import eventBus from '../EventBus';
-import { APP_EVENTS } from '../constants/eventConstants';
-import { AppError, ErrorLevel, ErrorContext, isAppError, toAppError } from './AppError';
-import { formatLlmFailureUx, showLlmFailureToast } from './llmFailureUx';
 import { showToast } from '@/common/ui/notifications';
 import { errorTracker } from '@/services/errorTracker';
+
+import { AppError, ErrorLevel, ErrorContext, isAppError, toAppError } from './AppError';
+import { formatLlmFailureUx, showLlmFailureToast } from './llmFailureUx';
+import { APP_EVENTS } from '../constants/eventConstants';
+import eventBus from '../EventBus';
 
 const nativeLoggerConsole = globalThis.console;
 

@@ -7,9 +7,11 @@
 import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
 import { showToast } from '@/common/ui';
 import { ErrorService } from '@/services/errorService';
+
 import * as service from './modelSelectService';
 import { createInitialState, toError, toFetching, toReady } from './modelSelectState';
 import { renderRefreshButton, renderSelect, renderStatus } from './modelSelectUi';
+
 import type {
   ModelSelectController,
   ModelSelectHooks,

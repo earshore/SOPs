@@ -1,5 +1,5 @@
-import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createOwnerField } from '../../../utils/ownerField';
+import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
 const ACCOUNT_SECURITY_OWNER_STORAGE_KEY = 'account_security_owner_v1';

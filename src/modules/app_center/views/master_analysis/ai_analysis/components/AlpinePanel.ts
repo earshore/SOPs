@@ -3,28 +3,30 @@
  * 整合所有子模块，创建完整的 AI 分析面板组件
  */
 
-import { analysisTargets } from '../config/analysisTargets';
-import { checkAndLoadScraperData, checkLoadedReport, loadHistoricalReport } from './dataLoaders';
-import { formatHistoryDate } from '../services/reportGenerator';
-import { parseAnalysisReport } from '../services/analysisService';
-import { getTargetColorClass, getPromptText, getResultIcon, getResultColor } from './helpers';
-import { getPromptTokenCount, getFormattedTokenCount } from './helpers';
-import * as actions from './actions';
-import { AlpineContext, FullReportData } from '../types';
-import { createComputedProperties, ComputedProperties } from './computedProperties';
-import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analysisReportData';
-import { createMultipleStateSyncs, cleanupSubscriptions } from '@/common/utils/stateSync';
-import { createPerformanceSettingsPanel } from './PerformanceSettings';
+import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui';
-import { APP_EVENTS } from '@/common/constants/eventConstants';
-import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
+import { createMultipleStateSyncs, cleanupSubscriptions } from '@/common/utils/stateSync';
 import { confirmWithModal } from '@/components/modal/confirmModal';
+
+import * as actions from './actions';
+import { createComputedProperties, ComputedProperties } from './computedProperties';
+import { checkAndLoadScraperData, checkLoadedReport, loadHistoricalReport } from './dataLoaders';
+import { getTargetColorClass, getPromptText, getResultIcon, getResultColor } from './helpers';
+import { getPromptTokenCount, getFormattedTokenCount } from './helpers';
+import { createPerformanceSettingsPanel } from './PerformanceSettings';
+import { analysisTargets } from '../config/analysisTargets';
+import { parseAnalysisReport } from '../services/analysisService';
 import {
   getAnalysisReasoningEffortLabel,
   getUserReasoningPrefs,
   resolveAnalysisReasoningPrefs,
 } from '../services/reasoningPolicy';
+import { formatHistoryDate } from '../services/reportGenerator';
+import { AlpineContext, FullReportData } from '../types';
+
+import type { AnalysisReportMetadata, FullAnalysisReport } from '../config/analysisReportData';
 
 type AlpineWatchContext = {
   $watch: (property: string, callback: (newValue: unknown) => void) => void;

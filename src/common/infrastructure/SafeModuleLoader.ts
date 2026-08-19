@@ -4,11 +4,11 @@
 // 当前生产链路主要使用模板加载能力；子模块加载由 ModuleLoader 负责。
 // ================================================================
 
-import { errorTracker } from '@/services/errorTracker';
 import { AppError, NetworkError, SystemError } from '@/common/errors/AppError';
-import { setSafeHtml } from '@/common/utils/security';
 import { randomBetween } from '@/common/utils/random';
+import { setSafeHtml } from '@/common/utils/security';
 import { loadTemplate as viewLoaderLoadTemplate } from '@/common/utils/viewLoader';
+import { errorTracker } from '@/services/errorTracker';
 
 /**
  * 模块加载选项

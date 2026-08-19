@@ -1,5 +1,3 @@
-import { DEFAULT_ACTION_OWNER, normalizeActionOwner } from '../actions/actionItems';
-import { today } from '../utils/formatters';
 import { summarize } from './summary';
 import {
   buildReviewActionLines,
@@ -7,6 +5,9 @@ import {
   buildTopEvidenceLines,
   countHumanReviewRows,
 } from './summaryTextLines';
+import { DEFAULT_ACTION_OWNER, normalizeActionOwner } from '../actions/actionItems';
+import { today } from '../utils/formatters';
+
 import type { ActionType, AnalyzedRow } from '../types';
 
 export function buildSummaryText(rows: AnalyzedRow[], owner = DEFAULT_ACTION_OWNER): string {

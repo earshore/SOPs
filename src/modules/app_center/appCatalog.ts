@@ -1,4 +1,5 @@
 import { SystemError } from '@/common/errors/AppError';
+
 import { appCenterManifest } from './module.manifest';
 
 type AppCenterManifestRoute = (typeof appCenterManifest.routes)[number];

@@ -1,20 +1,18 @@
-import { uiHooks } from './uiHooks';
+import { StorageService } from '@/services/storageService';
+
+import {
+  abortAllPendingRequests,
+  clearAllPendingDisplayTimers,
+  getMountedRenderContainer,
+} from './pendingRuntime';
 import {
   createDefaultThreadStore,
   clearPersistedThreadStore,
   renderHistoryThreadList,
   renderPromptDraftsForActiveThread,
 } from './threadStore';
-import {
-  abortAllPendingRequests,
-  clearAllPendingDisplayTimers,
-  getMountedRenderContainer,
-} from './pendingRuntime';
-
-import { StorageService } from '@/services/storageService';
-
+import { uiHooks } from './uiHooks';
 import { THREAD_STORAGE_KEY } from '../constants';
-
 import { sessionState, draftPersistController } from './sessionState';
 
 export function disposeActiveSession(options: { clearPendingMap?: boolean } = {}): void {

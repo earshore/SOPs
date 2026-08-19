@@ -4,9 +4,10 @@
 // 统一管理所有API端点，支持环境差异化配置
 // ================================================================
 
+import { SITE_DOMAIN_MAP } from '@/common/constants/constants';
+
 import { DEFAULT_NEW_API_DOMAIN } from './llmProviders';
 import { getScraperProxyEndpointConfigs } from './scraperProxies';
-import { SITE_DOMAIN_MAP } from '@/common/constants/constants';
 
 /**
  * API端点配置

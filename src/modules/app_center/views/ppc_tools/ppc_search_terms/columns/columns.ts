@@ -1,5 +1,5 @@
-import type { ReportType } from '../types';
 import { ValidationError } from '@/common/errors/AppError';
+
 import {
   COLUMN_ALIASES,
   getRequiredFields,
@@ -9,6 +9,8 @@ import {
   type ColumnMapping,
   type MappedColumnKey,
 } from './columnDefinitions';
+
+import type { ReportType } from '../types';
 
 export type { CampaignOnlyColumnKey, ColumnKey, ColumnMapping, MappedColumnKey };
 export { labelColumn };

@@ -5,42 +5,6 @@
 // 集成 Zod 进行运行时验证
 // ================================================================
 
-import type {
-  UserProductProfile,
-  ScrapedDataItem,
-  PromptHistoryItem,
-  KeywordData,
-  TrackingData,
-  UIState,
-  ScraperState,
-  AnalysisState,
-  PromptLabState,
-  LLMProviderConfig,
-  ProxyConfig,
-} from '@/types/state';
-
-import type {
-  ApiResponse,
-  ApiError,
-  LLMChatCompletionResponse,
-  LLMMessage,
-  LLMModel,
-  AmazonProductData,
-  AnalysisReportResponse,
-  AnalysisSection,
-} from '@/types/api';
-
-import type {
-  RouteChangedEventPayload,
-  ModuleLoadedEventPayload,
-  StateChangedEventPayload,
-  ErrorOccurredEventPayload,
-  PerformanceMetricEventPayload,
-} from '@/types/events';
-
-import type { AnalysisReport } from '@/types/modules-business';
-
-// 导入 Zod schemas
 import {
   UserProductProfileSchema,
   ScrapedDataItemSchema,
@@ -66,6 +30,40 @@ import {
   ErrorOccurredEventPayloadSchema,
   PerformanceMetricEventPayloadSchema,
 } from './zodSchemas';
+
+import type {
+  ApiResponse,
+  ApiError,
+  LLMChatCompletionResponse,
+  LLMMessage,
+  LLMModel,
+  AmazonProductData,
+  AnalysisReportResponse,
+  AnalysisSection,
+} from '@/types/api';
+import type {
+  RouteChangedEventPayload,
+  ModuleLoadedEventPayload,
+  StateChangedEventPayload,
+  ErrorOccurredEventPayload,
+  PerformanceMetricEventPayload,
+} from '@/types/events';
+import type { AnalysisReport } from '@/types/modules-business';
+import type {
+  UserProductProfile,
+  ScrapedDataItem,
+  PromptHistoryItem,
+  KeywordData,
+  TrackingData,
+  UIState,
+  ScraperState,
+  AnalysisState,
+  PromptLabState,
+  LLMProviderConfig,
+  ProxyConfig,
+} from '@/types/state';
+
+// 导入 Zod schemas
 
 // ==================== 基础类型守卫工具 ====================
 

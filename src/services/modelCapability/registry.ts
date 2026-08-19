@@ -19,6 +19,8 @@ import {
   mapResponsesReasoning,
   mapThinkingPlusEffort,
 } from './mappers';
+import { DEFAULT_REASONING_EFFORTS } from './types';
+
 import type {
   ApiSurface,
   EffortControlKind,
@@ -26,7 +28,6 @@ import type {
   ReasoningEffortLevel,
   SurfaceCapability,
 } from './types';
-import { DEFAULT_REASONING_EFFORTS } from './types';
 
 /** Per-surface effort profile — product keeps 5 tiers; each model lists what it can send. */
 type EffortProfile = {

@@ -3,12 +3,18 @@
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ================================================================
 
-import { appStore } from '@/stores/useAppStore';
+import { SystemError } from '@/common/errors/AppError';
 import {
   getRuntimeStorageStrategyOptions,
   StorageService,
   STORAGE_KEYS,
 } from '@/services/storageService';
+import { appStore } from '@/stores/useAppStore';
+
+import { getReportFingerprint, getScrapedDataFingerprint } from './reportIdentity';
+import { registerHistoryArtifacts } from '../../../artifactEnvelopeService';
+import { setWorkspaceContextFromHistoryItem } from '../../../workspaceContext';
+
 import type {
   GeneratedPromptRecord,
   HistoryItem,
@@ -18,10 +24,6 @@ import type {
   AnalysisReport,
 } from '@/types/modules-business';
 import type { UserProductProfile } from '@/types/state';
-import { SystemError } from '@/common/errors/AppError';
-import { getReportFingerprint, getScrapedDataFingerprint } from './reportIdentity';
-import { registerHistoryArtifacts } from '../../../artifactEnvelopeService';
-import { setWorkspaceContextFromHistoryItem } from '../../../workspaceContext';
 
 const MAX_PROMPT_RESULT_HISTORY = 20;
 

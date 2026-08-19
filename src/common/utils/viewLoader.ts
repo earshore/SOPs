@@ -5,13 +5,14 @@
 // 🎯 P3 优化: 本地持久化缓存 (LocalStorage Cache)
 // ================================================================
 
-import { APP_VERSION } from '../constants/constants';
-import { StorageService, CACHE_PREFIXES } from '@/services/storageService';
-import { getViewPathByRoute } from '../config/menuConfig';
+import { beginMinimalLoading } from '@/common/components/MinimalLoadingIndicator';
 import { SystemError } from '@/common/errors/AppError';
 import { createSafeFragment, escapeHtml } from '@/common/utils/security';
-import { beginMinimalLoading } from '@/common/components/MinimalLoadingIndicator';
 import { assembleSettingsTemplate } from '@/components/settings/loader';
+import { StorageService, CACHE_PREFIXES } from '@/services/storageService';
+
+import { getViewPathByRoute } from '../config/menuConfig';
+import { APP_VERSION } from '../constants/constants';
 
 const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
 const LEGACY_CACHE_PREFIX = 'view_cache_';

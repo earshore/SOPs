@@ -2,7 +2,7 @@
  * 分析服务 - 处理数据解析和报告生成
  */
 
-import { AnalysisResult } from '../types';
+import { ANALYSIS_DISPLAY_LIMITS } from '../../config/displayLimits';
 import {
   FullAnalysisReport,
   TitleKeywordsReport,
@@ -14,7 +14,7 @@ import {
   VocabGapReport,
   PromiseRealityReport,
 } from '../config/analysisReportData';
-import { ANALYSIS_DISPLAY_LIMITS } from '../../config/displayLimits';
+import { AnalysisResult } from '../types';
 
 /**
  * 安全获取数组，如果不存在则返回空数组

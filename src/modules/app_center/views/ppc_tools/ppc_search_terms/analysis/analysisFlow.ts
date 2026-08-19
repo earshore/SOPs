@@ -4,10 +4,6 @@ import { getAnalyzableReportText } from './analysisInput';
 import { clearActiveAnalysisRun, isCurrentAnalysisRun, startAnalysisRun } from './analysisRun';
 import { applyAgentAnalysis } from '../agents/agentAnalysisFlow';
 import {
-  finishLocalAnalysisIfNeeded,
-  getLocalAnalysisStatus,
-} from '../utils/localAnalysisFeedback';
-import {
   readAnalysisSettings,
   readReportSelection,
   readThresholds,
@@ -15,6 +11,11 @@ import {
   saveReportSelection,
   saveThresholds,
 } from '../settings/settings';
+import {
+  finishLocalAnalysisIfNeeded,
+  getLocalAnalysisStatus,
+} from '../utils/localAnalysisFeedback';
+
 import type { AnalysisFlowCallbacks } from './analysisFlowTypes';
 
 export type { AnalysisFlowCallbacks } from './analysisFlowTypes';

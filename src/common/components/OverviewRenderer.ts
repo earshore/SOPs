@@ -13,15 +13,17 @@
  * await renderer.render();
  */
 
+import { SystemError } from '@/common/errors/AppError';
+
 import {
   MENU_CONFIG,
   getRoutesByModule,
   type RouteConfig,
   type ModuleConfig,
 } from '../config/menuConfig';
-import type { CategoryConfig } from './SidebarRenderer';
-import { SystemError } from '@/common/errors/AppError';
 import { setSafeHtml } from '../utils/security';
+
+import type { CategoryConfig } from './SidebarRenderer';
 /**
  * 布局类型
  */

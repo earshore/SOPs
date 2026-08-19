@@ -1,12 +1,10 @@
 // TD-SET-01 Phase 1: data section fragment (verbatim).
+import { showToast } from '@/common/ui';
+import { downloadJson } from '@/common/utils/download';
+import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorageBoundary';
+import { chooseWithModal, confirmWithModal } from '@/components/modal/confirmModal';
+import { isStorageQuotaWarning } from '@/components/settings/domain/settingsHealth';
 import { ErrorService } from '@/services/errorService';
-import {
-  LOCAL_DATA_BUCKET_META,
-  buildLocalDataExportConfirm,
-  buildLocalDataImportChoiceContent,
-  formatLocalDataBytes,
-} from '../domain/localDataCopy';
-import { LocalDataBucketView, SettingsPanelPart } from '../panelTypes';
 import {
   LOCAL_DATA_BUCKET_IDS,
   LocalDataStore,
@@ -14,12 +12,15 @@ import {
   type LocalDataBucketId,
   type LocalDataExportSummary,
 } from '@/services/localDataStore';
-import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorageBoundary';
 import { appStore } from '@/stores/useAppStore';
-import { chooseWithModal, confirmWithModal } from '@/components/modal/confirmModal';
-import { downloadJson } from '@/common/utils/download';
-import { isStorageQuotaWarning } from '@/components/settings/domain/settingsHealth';
-import { showToast } from '@/common/ui';
+
+import {
+  LOCAL_DATA_BUCKET_META,
+  buildLocalDataExportConfirm,
+  buildLocalDataImportChoiceContent,
+  formatLocalDataBytes,
+} from '../domain/localDataCopy';
+import { LocalDataBucketView, SettingsPanelPart } from '../panelTypes';
 
 async function resetAppStoreRuntimeState(): Promise<void> {
   const state = appStore.getState();

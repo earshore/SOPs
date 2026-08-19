@@ -3,11 +3,13 @@
  * 从产品概览报告中提取产品 DNA
  */
 
+import { ValidationError } from '@/common/errors/AppError';
+
+import { isTechnicalSpec } from '../../utils/specUtils';
+
 import type { ReportAdapter, ExtractionResult } from './ReportAdapter';
 import type { ProductOverviewReport } from '../../types/downloadsReportTypes';
 import type { ExtendedDNA } from '../../types/extendedDNA';
-import { isTechnicalSpec } from '../../utils/specUtils';
-import { ValidationError } from '@/common/errors/AppError';
 
 type ProductOverviewUserProfileInput = Partial<ProductOverviewReport['user_profile']> & {
   demographics?: Partial<ProductOverviewReport['user_profile']['demographics']> & {

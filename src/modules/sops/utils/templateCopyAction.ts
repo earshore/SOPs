@@ -1,5 +1,7 @@
 import { showToast } from '@/common/ui/notifications';
+
 import { copyTextToClipboard } from './clipboard';
+
 import type { OwnerFieldController } from './ownerField';
 
 export interface TemplateCopyActionConfig {

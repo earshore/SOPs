@@ -5,8 +5,9 @@
 // ================================================================
 
 import { StorageService } from '@/services/storageService';
-import eventBus from '../EventBus';
+
 import { APP_EVENTS } from '../constants/eventConstants';
+import eventBus from '../EventBus';
 import { ACTION_GLOBAL_NAMES, ACTION_PREFIXES, validateRegistryActionName } from './actionNaming';
 
 const nativeLoggerConsole = globalThis.console;

@@ -1,4 +1,5 @@
 import { parseMetric, parsePercentageMetric, percentage, ratio } from '../utils/metrics';
+
 import type { ColumnMapping, MappedColumnKey } from '../columns/columns';
 import type { RawRecord } from '../import/delimitedReport';
 import type { SearchTermMetrics } from '../rules/searchTermRules';

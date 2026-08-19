@@ -1,22 +1,26 @@
-import { getChat } from './domHelpers';
-import { uiHooks } from './uiHooks';
-import { getMountedRenderContainer } from './mountContext';
-import type { ChatMessage } from '@/services/llmService';
-
-import { LocalDataStore } from '@/services/localDataStore';
-
+import { showToast } from '@/common/ui/notifications';
 import {
   consumeDeepChatThreadResume,
   createListingPromptWorkflowContext,
   type ListingPromptWorkflowContext,
 } from '@/modules/app_center/listingWorkflowHandoff';
+import { LocalDataStore } from '@/services/localDataStore';
 
-import { confirmWithModal } from '../infra/confirmModal';
 import { buildStoredThreadMessages, normalizeStoredThreadMessages } from './conversationContext';
-
-import { getMaxThreadCount, THREAD_STORAGE_KEY } from '../constants';
-
+import { getChat } from './domHelpers';
+import { getMountedRenderContainer } from './mountContext';
+import { readEffectivePageDefaults, type DeepChatPageDefaults } from './pageDefaults';
+import {
+  sessionState,
+  THREAD_MENU_HEIGHT,
+  THREAD_MENU_GAP,
+  draftPersistController,
+} from './sessionState';
 import { getPromptDrafts } from '../composer/promptDrafts';
+import { getMaxThreadCount, THREAD_STORAGE_KEY } from '../constants';
+import { uiHooks } from './uiHooks';
+import { confirmWithModal } from '../infra/confirmModal';
+import { createThreadId, getThreadTitle, normalizeTemperature } from '../infra/utils';
 
 import type {
   CreateThreadOptions,
@@ -26,17 +30,7 @@ import type {
   DeepChatThreadStore,
   SaveThreadMessagesOptions,
 } from '../types';
-import { createThreadId, getThreadTitle, normalizeTemperature } from '../infra/utils';
-import { readEffectivePageDefaults, type DeepChatPageDefaults } from './pageDefaults';
-
-import { showToast } from '@/common/ui/notifications';
-
-import {
-  sessionState,
-  THREAD_MENU_HEIGHT,
-  THREAD_MENU_GAP,
-  draftPersistController,
-} from './sessionState';
+import type { ChatMessage } from '@/services/llmService';
 
 let threadStorePersistQueue: Promise<boolean> | null = null;
 

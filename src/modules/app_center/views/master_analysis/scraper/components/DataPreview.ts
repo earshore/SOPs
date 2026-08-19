@@ -2,11 +2,13 @@
  * 数据预览组件
  */
 
-import type { ScrapedData, DataTab } from '../types';
-import type { ScrapedProduct } from '@/types/modules-business';
-import { renderProductCard, syntaxHighlight } from '../utils/renderers';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui';
+
+import { renderProductCard, syntaxHighlight } from '../utils/renderers';
+
+import type { ScrapedData, DataTab } from '../types';
+import type { ScrapedProduct } from '@/types/modules-business';
 
 export interface DataPreviewState {
   expandedAsin: string | null;

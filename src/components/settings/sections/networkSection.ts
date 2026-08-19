@@ -11,12 +11,13 @@ import {
   scraperProxyNeedsInput,
   type ScraperProxyProviderConfig,
 } from '@/common/config/scraperProxies';
-import { ProxyConfig } from '@/types/modules-business';
-import { ProxyState, SettingsPanelPart } from '../panelTypes';
-import { StorageService } from '@/services/storageService';
-import { confirmWithModal } from '@/components/modal/confirmModal';
 import { showToast } from '@/common/ui';
+import { confirmWithModal } from '@/components/modal/confirmModal';
+import { StorageService } from '@/services/storageService';
+import { ProxyConfig } from '@/types/modules-business';
+
 import { saveSettingsDomainPartition } from '../domain/settingsDomain';
+import { ProxyState, SettingsPanelPart } from '../panelTypes';
 
 /** Lightweight public URL used only to exercise the configured proxy path. */
 const PROXY_PROBE_TARGET_URL = 'https://www.example.com/';

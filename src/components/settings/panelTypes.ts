@@ -1,29 +1,29 @@
 // TD-SET-01 Phase 1: settings panel type aggregation (verbatim).
-import type { AnimationSpeed } from '@/types/animation-types';
-import type { LLMProviderConfig } from '@/types/state';
 import type { ModelOption, ModelMetadata, LocalDataBucketMeta } from './domain/localDataCopy';
+import type { SettingsOpenOptions } from './domain/settingsDeepLink';
+import type { SettingsDirtyPartition, SettingsDirtySnapshot } from './domain/settingsDirty';
+import type { RuntimePresetId } from './domain/settingsPresets';
+import type { SettingsRollbackPartition } from './domain/settingsRollback';
+import type { SettingsSearchHitView } from './domain/settingsSearch';
+import type { ProviderConfig } from '@/common/config/llmProviders';
+import type { ScraperProxyProviderConfig } from '@/common/config/scraperProxies';
+import type { ColorMode } from '@/common/config/themeConfig';
+import type { SchedulingPreference } from '@/modules/app_center/views/master_analysis/ai_analysis/services/analysisScheduler';
+import type { DeveloperDiagnosticSettings } from '@/services/developerDiagnosticsService';
+import type { LocalDataBucketId, LocalDataUsage } from '@/services/localDataStore';
 import type {
   ApiPathId,
   ApiPathOption,
   ReasoningEffortLevel,
   ReasoningUserPrefs,
 } from '@/services/modelCapability';
-import type { ToolStrategyTargetId } from '@/services/toolStrategyService';
 import type {
   MasterAnalysisEvidenceDepth,
   RuntimeStrategySettings,
 } from '@/services/runtimeStrategyService';
-import type { RuntimePresetId } from './domain/settingsPresets';
-import type { SettingsSearchHitView } from './domain/settingsSearch';
-import type { ColorMode } from '@/common/config/themeConfig';
-import type { DeveloperDiagnosticSettings } from '@/services/developerDiagnosticsService';
-import type { ProviderConfig } from '@/common/config/llmProviders';
-import type { ScraperProxyProviderConfig } from '@/common/config/scraperProxies';
-import type { LocalDataBucketId, LocalDataUsage } from '@/services/localDataStore';
-import type { SettingsDirtyPartition, SettingsDirtySnapshot } from './domain/settingsDirty';
-import type { SettingsOpenOptions } from './domain/settingsDeepLink';
-import type { SettingsRollbackPartition } from './domain/settingsRollback';
-import type { SchedulingPreference } from '@/modules/app_center/views/master_analysis/ai_analysis/services/analysisScheduler';
+import type { ToolStrategyTargetId } from '@/services/toolStrategyService';
+import type { AnimationSpeed } from '@/types/animation-types';
+import type { LLMProviderConfig } from '@/types/state';
 
 export type CapabilityBadge = {
   id: string;

@@ -1,24 +1,4 @@
-import {
-  uiHooks,
-  findConfigModelsEntry,
-  parseReasoningEffortValue,
-  type DeepChatReasoningSessionOverride,
-} from '../session/uiHooks';
-import {
-  getActiveThread,
-  getThreadById,
-  updateActiveThreadFields,
-  updateThreadFields,
-} from '../session/threadStore';
-import type { DeepChatThread } from '../types';
-import {
-  appendPendingAssistantText,
-  emitPendingAssistantDelta,
-  getMountedRenderContainer,
-  getRenderContainerForThread,
-  schedulePendingAssistantDisplay,
-} from '../session/pendingRuntime';
-
+import { ValidationError } from '@/common/errors/AppError';
 import { callLLM, type ChatMessage } from '@/services/llmService';
 import {
   normalizeApiPathId,
@@ -28,38 +8,54 @@ import {
   type ReasoningEffortLevel,
 } from '@/services/modelCapability';
 import {
-  createDeepChatBusinessToolExecutor,
-  DEEP_CHAT_BUSINESS_TOOLS,
-  isDeepChatBusinessToolsEnabled,
-} from './businessTools';
-import { StorageService } from '@/services/storageService';
-import { getRuntimeDeepChatOptions } from '@/services/runtimeStrategyService';
-import {
   collapseTextEmittedToolCallsForDisplay,
   describeResponsesEmptyBody,
   textLooksLikeEmittedToolCalls,
 } from '@/services/modelCapability';
+import { getRuntimeDeepChatOptions } from '@/services/runtimeStrategyService';
+import { StorageService } from '@/services/storageService';
 
-import type { LLMProviderConfig } from '@/types/state';
-
-import { appendPendingDeepChatReasoningText, type PendingDeepChatRequest } from './lifecycle';
 import {
   DEEP_CHAT_RECOVERY_MAX_OUTPUT_TOKENS_FLOOR,
   resolveDeepChatMaxOutputTokens,
   resolveDeepChatRequestBudget,
 } from './budget';
 import {
+  createDeepChatBusinessToolExecutor,
+  DEEP_CHAT_BUSINESS_TOOLS,
+  isDeepChatBusinessToolsEnabled,
+} from './businessTools';
+import { appendPendingDeepChatReasoningText, type PendingDeepChatRequest } from './lifecycle';
+import {
   formatToolActivityLabel,
   formatToolArgsDetail,
   formatToolResultDetail,
   upsertPreReplyActivityStep,
 } from './preReplyActivity';
-
-import type { DeepChatElement, DeepChatSignals, DeepChatLLMCallContext } from '../types';
-
-import { ValidationError } from '@/common/errors/AppError';
-
+import {
+  appendPendingAssistantText,
+  emitPendingAssistantDelta,
+  getMountedRenderContainer,
+  getRenderContainerForThread,
+  schedulePendingAssistantDisplay,
+} from '../session/pendingRuntime';
 import { sessionState } from '../session/sessionState';
+import {
+  getActiveThread,
+  getThreadById,
+  updateActiveThreadFields,
+  updateThreadFields,
+} from '../session/threadStore';
+import {
+  uiHooks,
+  findConfigModelsEntry,
+  parseReasoningEffortValue,
+  type DeepChatReasoningSessionOverride,
+} from '../session/uiHooks';
+
+import type { DeepChatThread } from '../types';
+import type { DeepChatElement, DeepChatSignals, DeepChatLLMCallContext } from '../types';
+import type { LLMProviderConfig } from '@/types/state';
 
 type DeepChatStreamState = { streamedText: string };
 

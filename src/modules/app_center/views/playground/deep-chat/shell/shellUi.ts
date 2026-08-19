@@ -1,31 +1,20 @@
-import {
-  findConfigModelsEntry,
-  parseReasoningEffortValue,
-  registerShellUiHooks,
-  type DeepChatReasoningSessionOverride,
-} from '../session/uiHooks';
-import {
-  appendThreadNotice,
-  cancelThreadRename,
-  closeThreadMenu,
-  commitThreadRename,
-  createThread,
-  createThreadFromPromptDraft,
-  getActiveListingPromptContext,
-  getActiveThread,
-  handleThreadMenuAction,
-  isThreadVisibleInHistory,
-  renderPromptDraftsForActiveThread,
-  switchThread,
-  toggleThreadMenu,
-  updateActiveThreadFields,
-} from '../session/threadStore';
-import {
-  getThreadDisplayMessages,
-  schedulePendingAssistantDisplay,
-  stopPendingRequest,
-} from '../session/pendingRuntime';
-import { handleDeepChatRequest } from '../request/handleRequest';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
+import { navigateToRouteId } from '@/common/router/initRouter';
+import { showToast } from '@/common/ui/notifications';
+import { setSafeHtml } from '@/common/utils/security';
+import { createModelSelect, type ModelSelectController } from '@/components/modelSelect';
+import { buildSkillDeepChatUserDraft } from '@/modules/app_center/skillDeepChatHandoff';
+import { resolveModelCapability, shouldShowReasoningControls } from '@/services/modelCapability';
+import { skillRegistry } from '@/services/skillRegistry';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+import { resolveToolTargetModel } from '@/services/toolStrategyService';
+import { appStore } from '@/stores/useAppStore';
+
+import { hidePromptPreview, setupPromptPreview } from './promptPreview';
+import { renderPromptDraftList, renderThreadList } from './renderers';
+import { setupSkillLibrary } from './skillLibrary';
+import { disconnectChatViewRebuildWatch, watchChatViewRebuild } from '../chrome/chatViewChrome';
 import {
   disconnectChromeMutationObserver,
   getActiveLiveGenerationStatusLabel,
@@ -46,6 +35,23 @@ import {
   syncStopOverlayState,
   updateThreadDraft,
 } from '../composer/composerUi';
+import { refreshMessageToolbarStatuses, setupMessageToolbars } from '../composer/messageToolbar';
+import { unmountVisionComposer } from '../composer/visionComposer';
+import { THREAD_RAIL_COLLAPSED_CLASS } from '../constants';
+import {
+  applyDeepChatVisionUploadConfig,
+  configureDeepChatBase,
+  configureDeepChatConnection,
+  configureDeepChatStyles,
+} from '../infra/deepChatConfig';
+import {
+  escapeHTML,
+  getFirstModel,
+  getMessageText,
+  getThreadTitle,
+  normalizeTemperature,
+  updateTemperatureTrack,
+} from '../infra/utils';
 import {
   applySkillContextsToSession,
   applyThreadTuningToSession,
@@ -55,66 +61,51 @@ import {
   sendAssistantCopyToKeywordHunter,
   syncDeepChatReasoningControlsFromThread,
 } from '../integrations/handoffs';
-
-import { resolveModelCapability, shouldShowReasoningControls } from '@/services/modelCapability';
-
-import { createModelSelect, type ModelSelectController } from '@/components/modelSelect';
-
-import { StorageService, STORAGE_KEYS } from '@/services/storageService';
-import { resolveToolTargetModel } from '@/services/toolStrategyService';
-
-import { appStore } from '@/stores/useAppStore';
-
-import { buildSkillDeepChatUserDraft } from '@/modules/app_center/skillDeepChatHandoff';
-import { skillRegistry } from '@/services/skillRegistry';
-
+import { handleDeepChatRequest } from '../request/handleRequest';
 import {
   isPendingPushReady,
   markPendingDeepChatAssistantTextDisplayed,
 } from '../request/lifecycle';
-
-import { THREAD_RAIL_COLLAPSED_CLASS } from '../constants';
-import {
-  applyDeepChatVisionUploadConfig,
-  configureDeepChatBase,
-  configureDeepChatConnection,
-  configureDeepChatStyles,
-} from '../infra/deepChatConfig';
-
-import { refreshMessageToolbarStatuses, setupMessageToolbars } from '../composer/messageToolbar';
-import { unmountVisionComposer } from '../composer/visionComposer';
-
-import { hidePromptPreview, setupPromptPreview } from './promptPreview';
-import { renderPromptDraftList, renderThreadList } from './renderers';
-import { disconnectChatViewRebuildWatch, watchChatViewRebuild } from '../chrome/chatViewChrome';
 import {
   clearPageDefaults,
   resolveReasoningFingerprint,
   writePageDefaults,
 } from '../session/pageDefaults';
-
-import { setupSkillLibrary } from './skillLibrary';
-import type { DeepChatElement, DeepChatThread, TuningControlRefs } from '../types';
-import type { LLMProviderConfig } from '@/types/state';
 import {
-  escapeHTML,
-  getFirstModel,
-  getMessageText,
-  getThreadTitle,
-  normalizeTemperature,
-  updateTemperatureTrack,
-} from '../infra/utils';
-import eventBus from '@/common/EventBus';
-import { APP_EVENTS } from '@/common/constants/eventConstants';
-import { navigateToRouteId } from '@/common/router/initRouter';
-import { showToast } from '@/common/ui/notifications';
-
-import { setSafeHtml } from '@/common/utils/security';
+  getThreadDisplayMessages,
+  schedulePendingAssistantDisplay,
+  stopPendingRequest,
+} from '../session/pendingRuntime';
 import {
   sessionState,
   CHAT_SEARCH_FOCUSABLE_SELECTOR,
   DEEP_CHAT_SYSTEM_FONT_STACK,
 } from '../session/sessionState';
+import {
+  appendThreadNotice,
+  cancelThreadRename,
+  closeThreadMenu,
+  commitThreadRename,
+  createThread,
+  createThreadFromPromptDraft,
+  getActiveListingPromptContext,
+  getActiveThread,
+  handleThreadMenuAction,
+  isThreadVisibleInHistory,
+  renderPromptDraftsForActiveThread,
+  switchThread,
+  toggleThreadMenu,
+  updateActiveThreadFields,
+} from '../session/threadStore';
+import {
+  findConfigModelsEntry,
+  parseReasoningEffortValue,
+  registerShellUiHooks,
+  type DeepChatReasoningSessionOverride,
+} from '../session/uiHooks';
+
+import type { DeepChatElement, DeepChatThread, TuningControlRefs } from '../types';
+import type { LLMProviderConfig } from '@/types/state';
 
 type ChatSearchRefs = {
   modal: HTMLElement;

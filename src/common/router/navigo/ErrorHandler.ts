@@ -5,6 +5,7 @@
  */
 
 import { RouterError, RouterErrorCode } from './types';
+
 import type { Route } from './types';
 
 /**

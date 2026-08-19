@@ -1,5 +1,6 @@
 import { resolveReportType } from '../columns/columns';
 import { parseReport } from '../import/delimitedReport';
+
 import type { ReportSelection, ReportType } from '../types';
 
 export function inferReportTypeFromText(

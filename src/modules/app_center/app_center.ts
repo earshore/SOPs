@@ -5,8 +5,10 @@
 
 import './app_center_style.css';
 import { createModuleLoader, ModuleLoader } from '@/common/utils/ModuleLoader';
-import type { ModuleLoaderFn } from '@/types/modules-business';
+
 import { MODULE_MAP } from './module.loaders';
+
+import type { ModuleLoaderFn } from '@/types/modules-business';
 
 // ================= 使用通用ModuleLoader =================
 const moduleLoader: ModuleLoader = createModuleLoader({

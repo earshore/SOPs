@@ -1,13 +1,15 @@
+import eventBus from '@/common/EventBus';
 import { StorageService } from '@/services/storageService';
+
+import { getArtifactsForWorkItem, getWorkItemProgress } from './artifactEnvelopeService';
+import { APP_CENTER_ARTIFACTS_CHANGED } from './artifactEnvelopeService';
+import { buildRecentArtifactPresentation } from './recentArtifactPresenter';
+
 import type {
   AppCenterArtifactEnvelope,
   AppCenterArtifactType,
   AppCenterWorkItem,
 } from './artifactEnvelopeService';
-import { getArtifactsForWorkItem, getWorkItemProgress } from './artifactEnvelopeService';
-import eventBus from '@/common/EventBus';
-import { APP_CENTER_ARTIFACTS_CHANGED } from './artifactEnvelopeService';
-import { buildRecentArtifactPresentation } from './recentArtifactPresenter';
 
 export const APP_CENTER_RECENT_QUEUE_PREFS_KEY = 'app_center_recent_queue_prefs_v1';
 

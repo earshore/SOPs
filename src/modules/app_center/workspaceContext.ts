@@ -1,5 +1,6 @@
 import eventBus from '@/common/EventBus';
 import { StorageService } from '@/services/storageService';
+
 import type { HistoryItem } from '@/types/modules-business';
 
 export const APP_CENTER_WORKSPACE_CONTEXT_STORAGE_KEY = 'app_center_workspace_context_v1';
