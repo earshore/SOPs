@@ -18,6 +18,7 @@ import '@fortawesome/fontawesome-free/css/regular.min.css';
 import '@fortawesome/fontawesome-free/css/solid.min.css';
 
 import { ServiceBootstrap } from '@/common/bootstrap/ServiceBootstrap';
+import { initCommandPalette } from '@/common/command-palette';
 import { ThemeManager } from '@/common/config/themeConfig';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { container } from '@/common/di/Container';
@@ -308,7 +309,11 @@ function guardFailedDomainRoutes(domainModuleResults: DomainModuleResults): void
           : '当前页面所需模块暂时无法加载，已返回首页，请刷新后重试',
         { type: 'error' }
       );
-      return { allow: false, redirect: '/home', reason: 'domain_module_unavailable' };
+      return {
+        allow: false,
+        redirect: '/home',
+        reason: 'domain_module_unavailable',
+      };
     },
   });
 }
@@ -598,6 +603,13 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
     // 初始化成功，继续启动流程
     // ================================================================
     await continueStartup(homeViewReady, shouldWaitForHomeView);
+
+    // P1-2: ⌘K 命令面板（全局快捷键与面板元素延迟挂载）
+    try {
+      initCommandPalette();
+    } catch (error) {
+      mainLogger.warn('命令面板初始化失败，不影响主流程', error);
+    }
 
     mainLogger.info('System: Ready');
   } catch (error) {

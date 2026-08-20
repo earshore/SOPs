@@ -41,3 +41,5 @@
 @import './utilities/animation-controls.css';
 @import './utilities/interactive.css';
 @import './utilities/legacy-compat.css';
+@import './components/search-box.css';
+@import './components/command-palette.css';

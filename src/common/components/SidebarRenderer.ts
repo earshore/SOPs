@@ -12,6 +12,7 @@
 
 import { appStore } from '@/stores/useAppStore';
 
+import { createSearchBox } from './SearchBox';
 import {
   MENU_CONFIG,
   type RouteConfig,
@@ -96,6 +97,7 @@ export class SidebarRenderer {
   private enableSearch: boolean;
   private searchPlaceholder: string;
   private moduleColor: ColorSchemeName; // ✅ 新增：模块主题色
+  private searchBoxHandle: ReturnType<typeof createSearchBox> | null = null;
 
   constructor(config: SidebarConfig) {
     this.moduleId = config.moduleId;
@@ -145,7 +147,7 @@ export class SidebarRenderer {
     // ✅ 安全: buildHTML返回的HTML使用内部配置数据(categories, routes来自MENU_CONFIG)
     setSafeHtml(sidebar, html);
     this.initCategoryToggle(sidebar);
-
+    this.mountSearchBox(sidebar);
     if (activeCategory) {
       this.expandCategory(sidebar, activeCategory);
     }
@@ -272,6 +274,30 @@ export class SidebarRenderer {
   // Toggle & Expand
   // ═══════════════════════════════════════════════════════
 
+  // ═══════════════════════════════════════════════════════
+  // SearchBox 装配（P1-2 统一搜索组件）
+  // ═══════════════════════════════════════════════════════
+
+  /** 模板保留 id=sidebar-search-input 的 input 兼容全局输入委托（ui/index.ts）。 */
+  private mountSearchBox(sidebar: HTMLElement): void {
+    const root = sidebar.querySelector('[data-sops-searchbox="sidebar"]');
+    if (!root) {
+      return;
+    }
+    if (this.searchBoxHandle) {
+      this.searchBoxHandle.destroy();
+    }
+    this.searchBoxHandle = createSearchBox({
+      moduleId: this.moduleId,
+      placeholder: this.searchPlaceholder,
+      ariaLabel: '侧边栏搜索',
+      inputId: 'sidebar-search-input',
+      styleVariant: 'sidebar',
+      maxResults: 6,
+    });
+    this.searchBoxHandle.mount(root as HTMLElement);
+  }
+
   private initCategoryToggle(sidebar: HTMLElement): void {
     const categoryBtns = sidebar.querySelectorAll('[data-action="toggle-category"]');
 
@@ -392,7 +418,7 @@ export class SidebarRenderer {
             <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">${title}</div>
           </div>
 
-          ${this.enableSearch ? this.buildSearchBox() : ''}
+          ${this.enableSearch ? '<div data-sops-searchbox="sidebar"></div>' : ''}
         </div>
 
         <!-- ═══ Subtle Separator ═══ -->
@@ -565,52 +591,6 @@ export class SidebarRenderer {
         <div class="sidebar-active-dot w-1.5 h-1.5 rounded-full flex-shrink-0
           ${dotCls} transition-all duration-300"></div>
       </button>
-    `;
-  }
-
-  // ── Search Box ──
-
-  private buildSearchBox(): string {
-    return `
-      <div class="sidebar-search relative group mb-1">
-        <!-- Search Icon Container -->
-        <div class="sidebar-search-prefix absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md bg-slate-100
-          flex items-center justify-center transition-colors duration-200 pointer-events-none z-10">
-          <i class="sidebar-search-icon fas fa-search text-[9px] text-slate-400 transition-colors duration-200"></i>
-        </div>
-
-        <!-- Input -->
-        <input type="text" id="sidebar-search-input"
-          aria-label="${this.searchPlaceholder}"
-          aria-controls="sidebar-search-results sidebar-nav-container"
-          placeholder="${this.searchPlaceholder}"
-          class="sidebar-search-input w-full pl-10 pr-8 py-2 text-[12px] border border-slate-200 rounded-xl
-            bg-white/80 backdrop-blur-sm
-            hover:border-slate-300
-            placeholder:text-slate-400
-            outline-none transition-all duration-200 shadow-sm">
-
-        <!-- Clear Button -->
-        <button type="button" id="sidebar-search-clear" data-action="clear-sidebar-search"
-          aria-label="清除侧边栏搜索"
-          class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md
-            bg-slate-100 hover:bg-slate-200
-            flex items-center justify-center
-            text-slate-400 hover:text-slate-600 transition-all duration-200">
-          <i class="fas fa-times text-[8px]"></i>
-        </button>
-
-        <!-- Search Results Dropdown -->
-        <div id="sidebar-search-results"
-          role="region"
-          aria-label="侧边栏搜索结果"
-          aria-live="polite"
-          aria-hidden="true"
-          class="sidebar-scrollbar-thin hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-sm
-            border border-slate-200 shadow-xl shadow-slate-200/50
-            rounded-xl mt-1.5 max-h-60 overflow-y-auto z-30 p-1">
-        </div>
-      </div>
     `;
   }
 

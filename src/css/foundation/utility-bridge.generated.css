@@ -80,8 +80,6 @@
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-white:not(.twb-keep) { background-color: var(--surface-card); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-white\/60:not(.twb-keep) { background-color: color-mix(in srgb, var(--surface-card) 60%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-white\/70:not(.twb-keep) { background-color: color-mix(in srgb, var(--surface-card) 70%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .bg-white\/80:not(.twb-keep) { background-color: color-mix(in srgb, var(--surface-card) 80%, transparent); }
-:is(.dark, [data-color-mode-resolved="dark"]) .bg-white\/95:not(.twb-keep) { background-color: color-mix(in srgb, var(--surface-card) 95%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-yellow-100:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-yellow-400) 18%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-yellow-200:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-yellow-400) 26%, transparent); }
 :is(.dark, [data-color-mode-resolved="dark"]) .bg-yellow-50:not(.twb-keep) { background-color: color-mix(in srgb, var(--color-yellow-400) 12%, transparent); }

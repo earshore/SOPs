@@ -1,0 +1,218 @@
+/*
+ * command-palette.css - P1-2 ⌘K 命令面板视觉规范
+ *
+ * 与 search-box.css 同源 token 体系（--sops-search-* / --sops-cmdk-*），
+ * 暗色模式由 html.dark-mode / html[data-theme='dark'] 自动映射。
+ */
+:root {
+  --sops-cmdk-surface-bg: #ffffff;
+  --sops-cmdk-surface-border: var(--border-subtle, #e2e8f0);
+  --sops-cmdk-shadow: 0 24px 48px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.04);
+  --sops-cmdk-input-bg: #ffffff;
+  --sops-cmdk-input-text: #0f172a;
+  --sops-cmdk-input-placeholder: #94a3b8;
+  --sops-cmdk-input-border: var(--border-subtle, #e2e8f0);
+  --sops-cmdk-input-focus-ring: var(--color-primary, #4f46e5);
+  --sops-cmdk-kbd-text: #94a3b8;
+  --sops-cmdk-kbd-bg: #f1f5f9;
+  --sops-cmdk-kbd-border: var(--border-subtle, #e2e8f0);
+  --sops-cmdk-option-bg: transparent;
+  --sops-cmdk-option-hover: var(--color-primary-light, #eef2ff);
+  --sops-cmdk-option-text: #475569;
+  --sops-cmdk-option-label: #0f172a;
+  --sops-cmdk-option-suffix: #94a3b8;
+  --sops-cmdk-option-icon: #94a3b8;
+  --sops-cmdk-group-text: #64748b;
+  --sops-cmdk-empty-text: #94a3b8;
+  --sops-cmdk-radius: 0.875rem;
+}
+
+html.dark-mode,
+html[data-theme='dark'] {
+  --sops-cmdk-surface-bg: var(--surface-elevated, #1e293b);
+  --sops-cmdk-surface-border: var(--border-subtle-dark, #334155);
+  --sops-cmdk-shadow: 0 24px 64px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(148, 163, 184, 0.08);
+  --sops-cmdk-input-bg: var(--surface-elevated, #1e293b);
+  --sops-cmdk-input-text: #f1f5f9;
+  --sops-cmdk-input-placeholder: #64748b;
+  --sops-cmdk-input-border: var(--border-subtle-dark, #334155);
+  --sops-cmdk-input-focus-ring: var(--color-primary-light, #818cf8);
+  --sops-cmdk-kbd-text: #64748b;
+  --sops-cmdk-kbd-bg: #334155;
+  --sops-cmdk-kbd-border: #475569;
+  --sops-cmdk-option-hover: var(--color-primary-dark-hover, #312e81);
+  --sops-cmdk-option-text: #cbd5e1;
+  --sops-cmdk-option-label: #f1f5f9;
+  --sops-cmdk-option-suffix: #64748b;
+  --sops-cmdk-option-icon: #64748b;
+  --sops-cmdk-group-text: #64748b;
+  --sops-cmdk-empty-text: #64748b;
+}
+
+sops-command-palette {
+  display: contents;
+}
+
+.sops-command-palette-dialog {
+  padding: 0;
+  margin: auto;
+  max-width: min(34rem, calc(100vw - 2rem));
+  width: 34rem;
+  background: var(--sops-cmdk-surface-bg);
+  border: 1px solid var(--sops-cmdk-surface-border);
+  border-radius: var(--sops-cmdk-radius);
+  box-shadow: var(--sops-cmdk-shadow);
+  color: var(--sops-cmdk-option-text);
+}
+
+.sops-command-palette-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+html.dark-mode .sops-command-palette-dialog::backdrop,
+html[data-theme='dark'] .sops-command-palette-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.sops-command-palette-surface {
+  display: flex;
+  flex-direction: column;
+}
+
+.sops-command-palette-combobox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 0;
+}
+
+.sops-command-palette-input {
+  flex: 1;
+  width: 0;
+  padding: 0.5rem 0.5rem;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--sops-cmdk-input-text);
+}
+
+.sops-command-palette-input::placeholder {
+  color: var(--sops-cmdk-input-placeholder);
+}
+
+.sops-command-palette-input:focus-visible {
+  outline: none;
+}
+
+.sops-command-palette-kbd {
+  flex-shrink: 0;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.6875rem;
+  line-height: 1.25;
+  color: var(--sops-cmdk-kbd-text);
+  background: var(--sops-cmdk-kbd-bg);
+  border: 1px solid var(--sops-cmdk-kbd-border);
+  border-radius: 0.375rem;
+  font-family: inherit;
+}
+
+.sops-command-palette-list {
+  list-style: none;
+  margin: 0.5rem 0.5rem 0.5rem;
+  padding: 0.25rem 0;
+  max-height: min(24rem, 60vh);
+  overflow-y: auto;
+  border-top: 1px solid var(--sops-cmdk-input-border);
+}
+
+.sops-command-palette-group-heading {
+  padding: 0.5rem 0.875rem 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sops-cmdk-group-text);
+}
+
+.sops-command-palette-option {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.5rem 0.875rem;
+  border: none;
+  background: var(--sops-cmdk-option-bg);
+  color: var(--sops-cmdk-option-text);
+  font-size: 0.8125rem;
+  line-height: 1.375;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.sops-command-palette-option:hover,
+.sops-command-palette-option:focus-visible {
+  background: var(--sops-cmdk-option-hover);
+  color: var(--sops-cmdk-option-text);
+}
+
+.sops-command-palette-option:focus-visible {
+  outline: 2px solid var(--sops-cmdk-input-focus-ring);
+  outline-offset: -2px;
+}
+
+.sops-command-palette-option i {
+  width: 1rem;
+  color: var(--sops-cmdk-option-icon);
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.sops-command-palette-option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--sops-cmdk-option-label);
+}
+
+.sops-command-palette-option-suffix {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  color: var(--sops-cmdk-option-suffix);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 8rem;
+}
+
+.sops-command-palette-empty {
+  padding: 1rem 0.875rem;
+  text-align: center;
+  color: var(--sops-cmdk-empty-text);
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 768px) {
+  .sops-command-palette-dialog {
+    max-width: calc(100vw - 1rem);
+    border-radius: var(--sops-cmdk-radius);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sops-command-palette-option {
+    transition: none;
+  }
+}
+
+/* 后台标签页不可见时隐藏面板，避免后台重排 */
+html.is-hidden .sops-command-palette-dialog[open] {
+  display: none;
+}

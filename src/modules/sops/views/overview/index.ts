@@ -1,3 +1,4 @@
+import { createSearchBox } from '@/common/components/SearchBox';
 import {
   bindCategoryFilterButtons,
   scrollToModuleSection,
@@ -36,22 +37,17 @@ function initOverviewEvents(container: HTMLElement, context: SopTemplateModuleCo
   const disposeFilter = bindCategoryFilterButtons(container);
   context.addDisposable(disposeFilter);
 
-  // 搜索框事件
-  const searchInput = container.querySelector('#sop-search-input') as HTMLInputElement;
-  if (searchInput) {
-    context.addEventListener(searchInput, 'input', e => {
-      searchSOPs(container, (e.target as HTMLInputElement).value);
+  // P1-2：统一 SearchBox 组件装配（模板中 data-sops-searchbox 装配位）
+  const searchboxRoot = container.querySelector('[data-sops-searchbox="sops"]');
+  if (searchboxRoot) {
+    const handle = createSearchBox({
+      moduleId: 'sops',
+      placeholder: '搜索 SOP 页面...',
+      ariaLabel: '搜索 SOP 页面',
+      styleVariant: 'page',
+      hideResultsWhenEmpty: true,
     });
+    handle.mount(searchboxRoot as HTMLElement);
+    context.addDisposable(() => handle.destroy());
   }
-}
-
-function searchSOPs(container: HTMLElement, keyword: string): void {
-  const cards = container.querySelectorAll('.sop-card');
-  const lowerKeyword = keyword.toLowerCase();
-  cards.forEach(card => {
-    const cardElement = card as HTMLElement;
-    const title = cardElement.querySelector('h3')?.textContent?.toLowerCase() || '';
-    const desc = cardElement.querySelector('p')?.textContent?.toLowerCase() || '';
-    cardElement.hidden = !title.includes(lowerKeyword) && !desc.includes(lowerKeyword);
-  });
 }

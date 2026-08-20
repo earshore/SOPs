@@ -213,22 +213,14 @@ afterEach(() => {
     );
 
     expect(sidebar.dataset.moduleId).toBe('sops');
-    expect(sidebar.querySelector('#sidebar-search-input')?.getAttribute('placeholder')).toBe(
-      '搜索 SOP'
-    );
-    expect(sidebar.querySelector('#sidebar-search-input')?.getAttribute('aria-label')).toBe(
-      '搜索 SOP'
-    );
-    expect(sidebar.querySelector('#sidebar-search-input')?.getAttribute('aria-controls')).toBe(
-      'sidebar-search-results sidebar-nav-container'
-    );
-    expect(sidebar.querySelector('#sidebar-search-results')?.getAttribute('role')).toBe('region');
-    expect(sidebar.querySelector('#sidebar-search-results')?.getAttribute('aria-live')).toBe(
-      'polite'
-    );
-    expect(sidebar.querySelector('#sidebar-search-results')?.getAttribute('aria-hidden')).toBe(
-      'true'
-    );
+    // P1-2：侧边栏搜索框已换装统一 SearchBox 组件（视觉与 aria 语义统一）。
+    const searchInput = sidebar.querySelector('#sidebar-search-input');
+    expect(searchInput?.getAttribute('placeholder')).toBe('搜索 SOP');
+    expect(searchInput?.getAttribute('aria-label')).toBe('侧边栏搜索');
+    expect(sidebar.querySelector('[role="search"]')?.getAttribute('role')).toBe('search');
+    const results = sidebar.querySelector('.sops-search-box__results');
+    expect(results?.getAttribute('role')).toBe('listbox');
+    expect(results?.getAttribute('aria-hidden')).toBe('true');
     expect(sidebar.querySelector(`#sidebar-btn-${activeRoute.id}`)?.getAttribute('aria-current')).toBe(
       'page'
     );
