@@ -592,6 +592,26 @@
   color: var(--color-slate-900, var(--color-slate-900, #0f172a));
 }
 
+/* AI 未配置：amber 静点（无脉冲），示意“待激活”（P0-1 真实状态）。 */
+.status-dot-inner--unconfigured {
+  background: var(--color-amber-500, #f59e0b);
+}
+
+.status-dot-inner--unconfigured::after {
+  border-color: color-mix(in srgb, var(--color-amber-500, #f59e0b) 30%, transparent);
+  animation-duration: var(--duration-3s, 3000ms);
+}
+
+/* AI 连接异常：red 静点，示意“需排查”。 */
+.status-dot-inner--error {
+  background: var(--color-red-500, #ef4444);
+}
+
+.status-dot-inner--error::after {
+  border-color: color-mix(in srgb, var(--color-red-500, #ef4444) 30%, transparent);
+  animation-duration: var(--duration-3s, 3000ms);
+}
+
 /* ----------------------------------------
    4. 浮动极简工作台
    ---------------------------------------- */
@@ -1066,5 +1086,11 @@
   .floating-workbench__actions,
   .floating-workbench__item {
     transition-duration: 1ms;
+  }
+  /* P1-1：reduced-motion 下停止 AI 徽标与首屏入场动画。 */
+  .ai-status,
+  .status-dot-inner::after {
+    animation: none;
+    opacity: 1;
   }
 }

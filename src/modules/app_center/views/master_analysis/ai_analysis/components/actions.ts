@@ -1,6 +1,6 @@
 import { BusinessError } from '@/common/errors/AppError';
 import { showLlmFailureToast } from '@/common/errors/llmFailureUx';
-import { showToast } from '@/common/ui/index';
+import { announceDone, showToast } from '@/common/ui/index';
 import { copyTextToClipboard } from '@/common/utils/clipboard';
 import { downloadJson as downloadJsonFile } from '@/common/utils/download';
 /**
@@ -780,7 +780,14 @@ async function completeAnalysisAction(
     // 正式 analysis_report 工件由 history 落库负责，运行中工件退位
     removeAnalysisRunningArtifact(sourceBinding.sourceHistoryId);
   }
-  showToast(completion.toastMessage, { type: completion.toastType });
+  // 统一完成反馈（P0-2 成功反馈闭环）：使用 announceDone 提供一致的
+  // “工作项完成”模式与更长的可感知时长（5s）。
+  if (completion.toastType === 'success') {
+    announceDone(completion.toastMessage, 'AI 分析报告已同步至数据源。');
+  } else {
+    // 部分失败：保持 warning 提示，告知失败目标，避免误导为全量成功。
+    showToast(completion.toastMessage, { type: completion.toastType });
+  }
 }
 
 function handleAnalysisActionError(context: AlpineContext, error: unknown): void {
