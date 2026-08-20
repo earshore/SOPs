@@ -98,7 +98,7 @@ describe('getAiConnectionStatus', () => {
 });
 
 describe('welcome flag', () => {
-  const inMemoryGet = (key: string, defaultValue = null) =>
+  const inMemoryGet = (key: string, defaultValue: unknown = null) =>
     getMockImplementation(defaultValue)(key, defaultValue); // function 声明，无 TDZ
 
   beforeEach(() => {
