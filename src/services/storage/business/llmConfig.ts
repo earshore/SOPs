@@ -7,6 +7,7 @@
 
 import { handleSystemError } from '@/common/errors';
 import { isLLMProviderConfig } from '@/common/guards/typeGuards';
+
 import {
   getLLMCredentialKey,
   parseLegacyPlainSecret,
@@ -16,6 +17,7 @@ import {
   stripLLMSecret,
 } from '../core';
 import { getSecure, setSecure } from '../secure';
+
 import type { LLMProviderConfig } from '@/types/state';
 
 /**

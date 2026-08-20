@@ -5,6 +5,7 @@
  */
 
 import BaseModule from '@/common/BaseModule';
+import { createSearchBox, type SearchBoxHandle } from '@/common/components/SearchBox';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import eventBus from '@/common/EventBus';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
@@ -12,7 +13,6 @@ import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui';
 import { copyTextToClipboard } from '@/common/utils/clipboard';
 import { setSafeHtml } from '@/common/utils/security';
-import { createSearchBox, type SearchBoxHandle } from '@/common/components/SearchBox';
 import {
   buildSkillDeepChatUserDraft,
   queueSkillForDeepChat,

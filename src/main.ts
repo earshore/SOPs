@@ -19,6 +19,7 @@ import '@fortawesome/fontawesome-free/css/solid.min.css';
 
 import { ServiceBootstrap } from '@/common/bootstrap/ServiceBootstrap';
 import { initCommandPalette } from '@/common/command-palette';
+import { initHeaderGlobalSearch } from '@/common/components/HeaderGlobalSearch';
 import { ThemeManager } from '@/common/config/themeConfig';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { container } from '@/common/di/Container';
@@ -46,7 +47,6 @@ import { installOnceAnimationCleanup } from '@/common/utils/onceAnimationCleanup
 import { openAmazonInsightPluginDownload } from '@/common/utils/openAmazonInsightPluginDownload';
 import { loadPlugins } from '@/common/utils/pluginLoader';
 import { initDeferredViews, initHomeView } from '@/common/utils/viewLoader';
-import { initHeaderGlobalSearch } from '@/common/components/HeaderGlobalSearch';
 import { animationManager } from '@/services/animation-manager';
 import { applyDeveloperDiagnosticSettings } from '@/services/developerDiagnosticsService';
 import { initializeAnimationStore } from '@/stores/animation-settings';

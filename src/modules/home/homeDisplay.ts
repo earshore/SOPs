@@ -4,13 +4,15 @@
 // ================================================================
 
 import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
-import { showToast } from '@/common/ui';
-import eventBus from '@/common/EventBus';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
-import type { SettingsOpenOptions } from '@/components/settings/settingsOpenOptions';
+import eventBus from '@/common/EventBus';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { showToast } from '@/common/ui';
+import { setSafeHtml } from '@/common/utils/security';
+
 import { getAiConnectionStatus, isWelcomeShown, markWelcomeShown } from './aiConnectionStatus';
+
+import type { SettingsOpenOptions } from '@/components/settings/settingsOpenOptions';
 import './homeDisplay.css';
 
 interface ParticleConfig {

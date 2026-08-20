@@ -1,4 +1,5 @@
 import BaseModule from '@/common/BaseModule';
+import { createSearchBox, type SearchBoxHandle } from '@/common/components/SearchBox';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui/notifications';
@@ -26,7 +27,6 @@ import {
   loadSampleReport,
   type ReportImportCallbacks,
 } from './import/fileImport';
-import { createSearchBox, type SearchBoxHandle } from '@/common/components/SearchBox';
 import { renderPpcResumeReviewBanner } from './resumeReviewBanner';
 import { updateContextFieldsVisibility } from './settings/analysisSettingsPanel';
 import {

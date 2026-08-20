@@ -2,13 +2,13 @@
 // 首页 AI 状态徽标数据来源（P0-1 首屏真实 AI 状态）。
 // 纯函数模块，零 UI 依赖：读取 LLM 配置快照并产出连接状态。
 import { getLlmProviderConfig } from '@/common/config/llmProviders';
-import { StorageService } from '@/services/storageService';
 import { evaluateSettingsHealth } from '@/common/settings/settingsHealth';
 import {
   loadProviderApiKey,
   resolveProviderEndpoint,
   type SavedLlmConfigLike,
 } from '@/common/settings/settingsLlmModel';
+import { StorageService } from '@/services/storageService';
 
 export type AiConnectionState = 'connected' | 'unconfigured' | 'error';
 

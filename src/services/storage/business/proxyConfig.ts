@@ -11,6 +11,7 @@ import {
 } from '@/common/config/scraperProxies';
 import { handleSystemError } from '@/common/errors';
 import { isProxyConfig } from '@/common/guards/typeGuards';
+
 import {
   getProxyCredentialKey,
   getStorageCore,
@@ -19,6 +20,7 @@ import {
   stripProxySecret,
 } from '../core';
 import { getSecure, setSecure, removeSecure } from '../secure';
+
 import type { ProxyConfig } from '@/types/modules-business';
 
 function proxyReportStorageReadError(action: string, key: string, error: Error): void {
