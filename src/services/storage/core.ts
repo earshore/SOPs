@@ -1,0 +1,1201 @@
+// src/services/storage/core.ts
+// ================================================================
+// 🎯 核心存储引擎（TypeScript 版本）
+// 替代分散的 localStorage 直接调用
+// 🎯 P0-4: 已迁移到统一错误处理
+// 🎯 DI改造：移除Logger依赖
+// 🎯 P0-4.1.8: 在数据边界使用类型守卫
+// Level 3 B'：storageService 拆分的核心引擎，业务方法已迁入 business/*
+// ================================================================
+import {
+  DEFAULT_SCRAPER_PROXY_TYPE,
+  SCRAPER_PROXY_CREDENTIAL_TYPES,
+} from '@/common/config/scraperProxies';
+import { handleSystemError } from '@/common/errors';
+import { isLLMProviderConfig, isProxyConfig } from '@/common/guards/typeGuards';
+
+import { isSopsManagedLocalStorageKey, LocalDataStore } from '../localDataStore';
+
+import type { HistoryItem, ProxyConfig } from '@/types/modules-business';
+import type { IStorageService } from '@/types/services';
+import type { LLMProviderConfig } from '@/types/state';
+
+/**
+ * 存储键名常量
+ */
+export const STORAGE_KEYS = {
+  // === LLM 配置 ===
+  LLM_ACTIVE_PROVIDER: 'llm_active_provider',
+  LLM_CONFIG_PREFIX: 'llm_',
+  TOOL_STRATEGY_SETTINGS: 'tool_strategy_settings',
+  RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
+
+  // === 代理配置 ===
+  PROXY_CONFIG: 'proxy_config',
+  PROXY_KEY_MAP: 'proxy_key_map',
+  SCRAPER_PROXY_CONFIG: 'scraper_proxy_config',
+
+  // === 采集历史 ===
+  SCRAPE_HISTORY: 'scrape_history',
+  KEYWORD_HUNTER_SNAPSHOTS: 'keyword_hunter_snapshots',
+
+  // === 布局配置 ===
+  LAYOUT_CONFIG_PREFIX: 'layout_config_',
+
+  // === 功能开关 ===
+  FEATURE_FLAGS_PREFIX: 'feature_',
+
+  // === Deep Chat ===
+  DEEP_CHAT_PAGE_DEFAULTS: 'deep_chat_page_defaults',
+
+  // === 搜索历史 ===
+  AMZ_SEARCH_HISTORY: 'amzf_search_history',
+} as const;
+
+export const CACHE_PREFIXES = {
+  VIEW: 'cache:view:',
+  HTTP: 'cache:http:',
+  AI_ANALYSIS: 'cache:ai-analysis:',
+} as const;
+
+const CACHE_KEY_PREFIXES = [
+  CACHE_PREFIXES.VIEW,
+  CACHE_PREFIXES.HTTP,
+  CACHE_PREFIXES.AI_ANALYSIS,
+  'view_cache_',
+  'http-cache:',
+  'ai_analysis_',
+];
+
+const LLM_CREDENTIAL_PREFIX = 'llm_key_';
+const PROXY_CREDENTIAL_PREFIX = 'proxy_key_';
+const SENSITIVE_PLAIN_STORAGE_KEY_PATTERN =
+  /(?:api[_-]?key|access[_-]?key|private[_-]?key|password|token|secret|credential)/i;
+const SENSITIVE_PLAIN_VALUE_KEYS = new Set([
+  'apiKey',
+  'accessToken',
+  'refreshToken',
+  'password',
+  'token',
+  'secret',
+  'credential',
+]);
+
+export function getProxyCredentialKey(type: string): string {
+  return `${PROXY_CREDENTIAL_PREFIX}${type || DEFAULT_SCRAPER_PROXY_TYPE}`;
+}
+
+export function getLLMCredentialKey(provider: string): string {
+  return `${LLM_CREDENTIAL_PREFIX}${provider}`;
+}
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export function isStringMap(value: unknown): value is Record<string, string> {
+  return isRecord(value) && Object.values(value).every(item => typeof item === 'string');
+}
+
+export function stripProxySecret(config: ProxyConfig): ProxyConfig {
+  const { customUrl: _customUrl, ...safeConfig } = config;
+  return safeConfig;
+}
+
+export function stripLLMSecret(config: LLMProviderConfig): LLMProviderConfig {
+  return { ...config, apiKey: '' };
+}
+
+export function hasSensitivePlainValue(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return Object.entries(value).some(
+    ([key, item]) =>
+      SENSITIVE_PLAIN_VALUE_KEYS.has(key) && typeof item === 'string' && item.trim().length > 0
+  );
+}
+
+export function parseLegacyPlainSecret(raw: string): string {
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (typeof parsed === 'string') {
+      return parsed;
+    }
+    if (isRecord(parsed) && typeof parsed.apiKey === 'string') {
+      return parsed.apiKey;
+    }
+    return '';
+  } catch {
+    return raw;
+  }
+}
+
+/**
+ * LRU缓存配置
+ */
+export interface LRUConfig {
+  maxSize: number;
+  warningThreshold: number;
+  cleanupRatio: number;
+}
+
+export interface RuntimeStorageStrategyOptions {
+  historyMaxItems: number;
+  lruWarningThreshold: number;
+  lruCleanupRatio: number;
+}
+
+const DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS: RuntimeStorageStrategyOptions = {
+  historyMaxItems: 50,
+  lruWarningThreshold: 0.8,
+  lruCleanupRatio: 0.3,
+};
+
+function clampRuntimeNumber(value: unknown, fallback: number, min: number, max: number): number {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.max(min, Math.min(Math.round(numeric), max));
+}
+
+function clampRuntimeRatio(value: unknown, fallback: number, min: number, max: number): number {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.max(min, Math.min(numeric, max));
+}
+
+export function getRuntimeStorageStrategyOptions(): RuntimeStorageStrategyOptions {
+  try {
+    if (typeof localStorage === 'undefined') {
+      return { ...DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS };
+    }
+
+    const raw = localStorage.getItem(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : null;
+    const storage =
+      isRecord(parsed) && isRecord(parsed.storage)
+        ? parsed.storage
+        : DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS;
+
+    return {
+      historyMaxItems: clampRuntimeNumber(
+        storage.historyMaxItems,
+        DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS.historyMaxItems,
+        10,
+        500
+      ),
+      lruWarningThreshold: clampRuntimeRatio(
+        storage.lruWarningThreshold,
+        DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS.lruWarningThreshold,
+        0.5,
+        0.95
+      ),
+      lruCleanupRatio: clampRuntimeRatio(
+        storage.lruCleanupRatio,
+        DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS.lruCleanupRatio,
+        0.05,
+        0.8
+      ),
+    };
+  } catch {
+    return { ...DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS };
+  }
+}
+
+/**
+ * 存储使用情况
+ */
+export interface StorageUsage {
+  used: number;
+  total: number;
+  percent: number;
+}
+
+/**
+ * 访问时间记录
+ */
+export interface AccessTimeRecord {
+  key: string;
+  accessTime: number;
+  size: number;
+}
+
+/**
+ * 存储服务类
+ * 🎯 DI改造：无依赖，保持原样
+ */
+class StorageServiceClass implements IStorageService {
+  private _lruConfig: LRUConfig;
+
+  constructor() {
+    this._lruConfig = {
+      maxSize: 4 * 1024 * 1024, // 4MB
+      warningThreshold: 0.8,
+      cleanupRatio: 0.3,
+    };
+  }
+
+  /**
+   * 获取存储值（带类型守卫验证）
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
+   */
+  get<T = unknown>(key: string, defaultValue: T | null = null): T | null {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return defaultValue;
+
+      this.updateAccessTime(key);
+
+      const parsed = JSON.parse(raw);
+
+      // 🎯 数据边界验证：对于已知类型，使用类型守卫验证
+      // 注意：这里只对特定的已知键进行验证，避免过度验证影响性能
+      // 排除 llm_active_provider，它存储的是字符串而不是配置对象
+      if (
+        key.startsWith(STORAGE_KEYS.LLM_CONFIG_PREFIX) &&
+        key !== STORAGE_KEYS.LLM_ACTIVE_PROVIDER
+      ) {
+        if (!isLLMProviderConfig(parsed)) {
+          this.remove(key);
+          return defaultValue;
+        }
+      } else if (key === STORAGE_KEYS.PROXY_CONFIG || key === STORAGE_KEYS.SCRAPER_PROXY_CONFIG) {
+        if (!isProxyConfig(parsed)) {
+          this.remove(key);
+          return defaultValue;
+        }
+      }
+
+      return parsed as T;
+    } catch (e) {
+      handleSystemError(
+        'SYS_PARSE_ERROR',
+        {
+          module: 'StorageService',
+          action: 'get',
+          key,
+        },
+        e as Error,
+        {
+          log: true,
+          notify: false, // 静默失败,返回默认值
+        }
+      );
+      return defaultValue;
+    }
+  }
+
+  /**
+   * 设置存储值
+   */
+  set(key: string, value: unknown): boolean {
+    let serialized = '';
+
+    try {
+      const valueForStorage = this.sanitizePlainStorageValue(key, value);
+      if (!this.canWritePlainStorage('set', key, valueForStorage)) {
+        return false;
+      }
+
+      serialized = JSON.stringify(valueForStorage);
+
+      this.checkCacheSize(serialized.length * 2);
+
+      localStorage.setItem(key, serialized);
+      this.updateAccessTime(key);
+
+      return true;
+    } catch (e) {
+      return this.handleStorageWriteError(
+        'set',
+        key,
+        serialized,
+        serialized.length,
+        e as Error & { name?: string }
+      );
+    }
+  }
+
+  /**
+   * 获取原始字符串
+   */
+  getRaw(key: string, defaultValue: string | null = null): string | null {
+    try {
+      const raw = localStorage.getItem(key);
+
+      if (raw !== null) {
+        this.updateAccessTime(key);
+      }
+
+      return raw !== null ? raw : defaultValue;
+    } catch (e) {
+      handleSystemError(
+        'SYS_STORAGE_ERROR',
+        {
+          module: 'StorageService',
+          action: 'getRaw',
+          key,
+        },
+        e as Error,
+        {
+          log: true,
+          notify: false,
+        }
+      );
+      return defaultValue;
+    }
+  }
+
+  /**
+   * 设置原始字符串
+   */
+  setRaw(key: string, value: string): boolean {
+    try {
+      if (!this.canWritePlainStorage('setRaw', key, value)) {
+        return false;
+      }
+
+      this.checkCacheSize(value.length * 2);
+
+      localStorage.setItem(key, value);
+      this.updateAccessTime(key);
+
+      return true;
+    } catch (e) {
+      return this.handleStorageWriteError(
+        'setRaw',
+        key,
+        value,
+        value.length,
+        e as Error & { name?: string }
+      );
+    }
+  }
+
+  private handleStorageWriteError(
+    action: 'set' | 'setRaw',
+    key: string,
+    value: string,
+    valueSize: number,
+    error: Error & { name?: string }
+  ): boolean {
+    if (error.name === 'QuotaExceededError') {
+      handleSystemError(
+        'SYS_STORAGE_FULL',
+        {
+          module: 'StorageService',
+          action,
+          key,
+          valueSize,
+        },
+        error,
+        {
+          log: true,
+          notify: true,
+        }
+      );
+
+      this.handleQuotaExceeded();
+      try {
+        localStorage.setItem(key, value);
+        this.updateAccessTime(key);
+        return true;
+      } catch (retryError) {
+        this.reportStorageError(action, key, retryError as Error, true);
+        return false;
+      }
+    }
+
+    this.reportStorageError(action, key, error, false);
+    return false;
+  }
+
+  private sanitizePlainStorageValue(key: string, value: unknown): unknown {
+    if (
+      (key === STORAGE_KEYS.PROXY_CONFIG || key === STORAGE_KEYS.SCRAPER_PROXY_CONFIG) &&
+      isRecord(value)
+    ) {
+      return stripProxySecret(value as ProxyConfig);
+    }
+
+    if (
+      key.startsWith(STORAGE_KEYS.LLM_CONFIG_PREFIX) &&
+      key !== STORAGE_KEYS.LLM_ACTIVE_PROVIDER &&
+      isRecord(value) &&
+      'apiKey' in value
+    ) {
+      return stripLLMSecret(value as unknown as LLMProviderConfig);
+    }
+
+    return value;
+  }
+
+  private canWritePlainStorage(action: 'set' | 'setRaw', key: string, value: unknown): boolean {
+    if (this.isSensitivePlainStorageKey(key) || hasSensitivePlainValue(value)) {
+      handleSystemError(
+        'SYS_STORAGE_ERROR',
+        {
+          module: 'StorageService',
+          action,
+          key,
+          reason: 'sensitive-plain-storage',
+        },
+        new Error('Sensitive data must use SecureStorage'),
+        {
+          log: true,
+          notify: false,
+        }
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  private isSensitivePlainStorageKey(key: string): boolean {
+    return (
+      key === STORAGE_KEYS.PROXY_KEY_MAP ||
+      key.startsWith(LLM_CREDENTIAL_PREFIX) ||
+      SENSITIVE_PLAIN_STORAGE_KEY_PATTERN.test(key)
+    );
+  }
+
+  private reportStorageError(
+    action: 'set' | 'setRaw',
+    key: string,
+    error: Error,
+    retry: boolean
+  ): void {
+    handleSystemError(
+      'SYS_STORAGE_ERROR',
+      {
+        module: 'StorageService',
+        action,
+        key,
+        ...(retry ? { retry: true } : {}),
+      },
+      error,
+      {
+        log: true,
+        notify: retry,
+      }
+    );
+  }
+
+  private reportStorageReadError(action: string, key: string, error: Error): void {
+    handleSystemError(
+      'SYS_STORAGE_ERROR',
+      {
+        module: 'StorageService',
+        action,
+        key,
+      },
+      error,
+      {
+        log: true,
+        notify: false,
+      }
+    );
+  }
+
+  /**
+   * 删除存储值
+   */
+  remove(key: string): void {
+    try {
+      localStorage.removeItem(key);
+      this.removeAccessTime(key);
+    } catch (e) {
+      this.reportStorageReadError('remove', key, e as Error);
+    }
+  }
+
+  /**
+   * 清空本应用管理的 localStorage 键，避免误删同 origin 下的外部数据。
+   */
+  clear(namespace?: string): void {
+    try {
+      if (!namespace) {
+        LocalDataStore.clearAppLocalStorageKeys();
+        return;
+      }
+
+      this.keys(namespace).forEach(key => this.remove(key));
+    } catch (e) {
+      this.reportStorageReadError('clear', namespace || '*', e as Error);
+    }
+  }
+
+  /**
+   * 危险操作：清空整个 origin 的 localStorage。只允许明确知道影响范围时调用。
+   */
+  dangerouslyClearAllLocalStorage(): void {
+    try {
+      localStorage.clear();
+    } catch (e) {
+      this.reportStorageReadError('dangerouslyClearAllLocalStorage', '*', e as Error);
+    }
+  }
+
+  /**
+   * 检查键是否存在
+   */
+  has(key: string): boolean {
+    try {
+      return localStorage.getItem(key) !== null;
+    } catch (e) {
+      this.reportStorageReadError('has', key, e as Error);
+      return false;
+    }
+  }
+
+  /**
+   * 获取所有键
+   */
+  keys(namespace?: string): string[] {
+    try {
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (
+          key &&
+          !key.startsWith('_lru_access_') &&
+          isSopsManagedLocalStorageKey(key) &&
+          (!namespace || key.startsWith(namespace))
+        ) {
+          keys.push(key);
+        }
+      }
+      return keys;
+    } catch (e) {
+      this.reportStorageReadError('keys', namespace || '*', e as Error);
+      return [];
+    }
+  }
+
+  /**
+   * 更新访问时间
+   */
+  private updateAccessTime(key: string): void {
+    if (this.isSensitivePlainStorageKey(key)) {
+      return;
+    }
+
+    try {
+      const accessKey = `_lru_access_${key}`;
+      localStorage.setItem(accessKey, Date.now().toString());
+    } catch (e) {
+      // 静默失败
+    }
+  }
+
+  /**
+   * 移除访问时间记录
+   */
+  private removeAccessTime(key: string): void {
+    try {
+      const accessKey = `_lru_access_${key}`;
+      localStorage.removeItem(accessKey);
+    } catch (e) {
+      // 静默失败
+    }
+  }
+
+  /**
+   * 获取所有键的访问时间
+   */
+  private getAccessTimes(): AccessTimeRecord[] {
+    const items: AccessTimeRecord[] = [];
+
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+
+        if (key && key.startsWith('_lru_access_')) {
+          continue;
+        }
+
+        if (key) {
+          const accessKey = `_lru_access_${key}`;
+          const accessTime = parseInt(localStorage.getItem(accessKey) || '0', 10);
+          const value = localStorage.getItem(key) || '';
+          const size = value.length * 2;
+
+          items.push({ key, accessTime, size });
+        }
+      }
+    } catch (e) {
+      handleSystemError(
+        'SYS_STORAGE_ERROR',
+        {
+          module: 'StorageService',
+          action: 'getAccessTimes',
+        },
+        e as Error,
+        {
+          log: true,
+          notify: false,
+        }
+      );
+    }
+
+    return items.sort((a, b) => a.accessTime - b.accessTime);
+  }
+
+  /**
+   * 检查缓存大小
+   */
+  private checkCacheSize(newItemSize: number): void {
+    const usage = this.getUsage();
+    const projectedUsage = usage.used + newItemSize;
+    const threshold =
+      this._lruConfig.maxSize * getRuntimeStorageStrategyOptions().lruWarningThreshold;
+
+    if (projectedUsage > threshold) {
+      this.cleanupLRU();
+    }
+  }
+
+  /**
+   * LRU清理策略
+   */
+  private cleanupLRU(): void {
+    try {
+      const items = this.getAccessTimes();
+      const usage = this.getUsage();
+      const targetSize = usage.used * (1 - getRuntimeStorageStrategyOptions().lruCleanupRatio);
+
+      let currentSize = usage.used;
+
+      for (const item of items) {
+        if (this.isProtectedKey(item.key) || !this.isCacheKey(item.key)) {
+          continue;
+        }
+
+        this.remove(item.key);
+        currentSize -= item.size;
+
+        if (currentSize <= targetSize) {
+          break;
+        }
+      }
+    } catch (e) {
+      handleSystemError(
+        'SYS_STORAGE_ERROR',
+        {
+          module: 'StorageService',
+          action: 'cleanupLRU',
+        },
+        e as Error,
+        {
+          log: true,
+          notify: false,
+        }
+      );
+    }
+  }
+
+  /**
+   * 判断是否为受保护的键
+   */
+  private isProtectedKey(key: string): boolean {
+    const protectedPrefixes = ['llm_', 'secure_', 'proxy_', 'feature_', 'layout_config_', 'user:'];
+
+    const protectedKeys = [
+      'app-storage',
+      STORAGE_KEYS.SCRAPE_HISTORY,
+      'playground_deep_chat_threads_v1',
+    ];
+
+    return protectedKeys.includes(key) || protectedPrefixes.some(prefix => key.startsWith(prefix));
+  }
+
+  /**
+   * 判断是否为可自动清理的缓存键
+   */
+  private isCacheKey(key: string): boolean {
+    return CACHE_KEY_PREFIXES.some(prefix => key.startsWith(prefix));
+  }
+
+  /**
+   * 获取存储使用情况
+   */
+  getUsage(): StorageUsage {
+    try {
+      let used = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !isSopsManagedLocalStorageKey(key)) continue;
+        used += (localStorage.getItem(key) || '').length * 2;
+      }
+      const total = 5 * 1024 * 1024; // 5MB
+      return {
+        used,
+        total,
+        percent: Math.round((used / total) * 100),
+      };
+    } catch (e) {
+      this.reportStorageReadError('getUsage', '*', e as Error);
+      const total = 5 * 1024 * 1024;
+      return {
+        used: 0,
+        total,
+        percent: 0,
+      };
+    }
+  }
+
+  /**
+   * 处理存储空间超限
+   */
+  private handleQuotaExceeded(): void {
+    this.cleanupLRU();
+
+    const history = this.get<unknown[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
+    const maxItems = getRuntimeStorageStrategyOptions().historyMaxItems;
+    if (history && history.length > maxItems) {
+      this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, maxItems));
+    }
+  }
+  // ================================================================
+  // 业务快捷方法
+  // ================================================================
+  // ================================================================
+
+  /**
+   * 获取 LLM 配置（包含加密的API密钥）
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
+   */
+  async getLLMConfigWithKey(provider: string | null = null): Promise<LLMProviderConfig | null> {
+    const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+    if (!activeProvider) return null;
+
+    const config = this.getLLMConfig(activeProvider);
+    if (!config) return null;
+
+    try {
+      const endpoint = config.endpoint || '';
+      const storedApiKey =
+        (await this.getSecure<string>(getLLMCredentialKey(activeProvider), '')) ||
+        (await this.migrateLegacyPlainLLMKey(activeProvider));
+      const apiKey = storedApiKey;
+      const fullConfig = { ...config, endpoint, apiKey } as LLMProviderConfig;
+
+      // 🎯 数据边界验证：验证完整配置
+      if (!isLLMProviderConfig(fullConfig)) {
+        return null;
+      }
+
+      return fullConfig;
+    } catch (error) {
+      handleSystemError(
+        'SYS_STORAGE_ERROR',
+        {
+          module: 'StorageService',
+          action: 'getLLMConfigWithKey',
+          key: getLLMCredentialKey(activeProvider),
+        },
+        error as Error,
+        {
+          log: true,
+          notify: false,
+        }
+      );
+      return {
+        ...config,
+        endpoint: config.endpoint || '',
+        apiKey: '',
+      } as LLMProviderConfig;
+    }
+  }
+
+  /**
+   * 获取 LLM 配置
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
+   */
+  getLLMConfig(provider: string | null = null): Partial<LLMProviderConfig> | null {
+    const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+    if (!activeProvider) return null;
+
+    const config = this.get<LLMProviderConfig>(
+      `${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`,
+      {} as LLMProviderConfig
+    );
+
+    // 🎯 数据边界验证：已在 get() 方法中验证
+    if (!config) return null;
+
+    // 🔐 安全: 移除敏感的 apiKey,返回部分配置
+    if (config && 'apiKey' in config) {
+      const { apiKey: _apiKey, ...safeConfig } = config;
+      return safeConfig;
+    }
+
+    return config;
+  }
+
+  /**
+   * 保存 LLM 配置
+   */
+  setLLMConfig(provider: string, config: LLMProviderConfig): void {
+    this.set(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, stripLLMSecret(config));
+    this.set(STORAGE_KEYS.LLM_ACTIVE_PROVIDER, provider);
+  }
+
+  /** Updates a provider catalog without changing the active system provider. */
+  setLLMModelCatalog(provider: string, config: LLMProviderConfig): void {
+    this.set(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, stripLLMSecret(config));
+  }
+
+  private async migrateLegacyPlainLLMKey(provider: string): Promise<string> {
+    const legacyKey = getLLMCredentialKey(provider);
+    const raw = localStorage.getItem(legacyKey);
+    if (raw === null) {
+      return '';
+    }
+
+    const apiKey = parseLegacyPlainSecret(raw);
+    if (apiKey && (await this.setSecure(legacyKey, apiKey))) {
+      localStorage.removeItem(legacyKey);
+      this.removeAccessTime(legacyKey);
+    }
+    return apiKey;
+  }
+
+  /**
+   * 获取代理配置
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
+   */
+  getProxyConfig(): ProxyConfig {
+    const config =
+      this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null) ||
+      this.get<ProxyConfig>(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, null);
+
+    // 🎯 数据边界验证：已在 get() 方法中验证
+    // 如果验证失败，返回默认配置
+    if (!config) {
+      return { type: DEFAULT_SCRAPER_PROXY_TYPE, enabled: true };
+    }
+
+    return stripProxySecret(config);
+  }
+
+  /**
+   * 保存代理配置
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
+   */
+  setProxyConfig(config: ProxyConfig): boolean {
+    // 🎯 数据边界验证：保存前验证
+    if (!isProxyConfig(config)) {
+      return false;
+    }
+
+    const safeConfig = stripProxySecret(config);
+    return (
+      this.set(STORAGE_KEYS.PROXY_CONFIG, safeConfig) &&
+      this.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, safeConfig)
+    );
+  }
+
+  private async readProxyKeyMap(): Promise<Record<string, string>> {
+    const keyMap: Record<string, string> = {};
+
+    for (const type of SCRAPER_PROXY_CREDENTIAL_TYPES) {
+      const credential = await this.getSecure<string>(getProxyCredentialKey(type), '');
+      if (credential) {
+        keyMap[type] = credential;
+      }
+    }
+
+    const legacyKeyMap = this.get<Record<string, string>>(STORAGE_KEYS.PROXY_KEY_MAP, {});
+    if (isStringMap(legacyKeyMap)) {
+      for (const [type, credential] of Object.entries(legacyKeyMap)) {
+        if (!keyMap[type]) {
+          keyMap[type] = credential;
+        }
+      }
+    }
+
+    return keyMap;
+  }
+
+  private getLegacyProxyConfig(): ProxyConfig | null {
+    const proxyConfig = this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null);
+    const scraperProxyConfig = this.get<ProxyConfig>(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, null);
+
+    if (proxyConfig?.customUrl) {
+      return proxyConfig;
+    }
+
+    if (scraperProxyConfig?.customUrl) {
+      return scraperProxyConfig;
+    }
+
+    return proxyConfig || scraperProxyConfig;
+  }
+
+  private async migrateLegacyProxyKeyMap(
+    keyMap: Record<string, string>,
+    legacyConfig: ProxyConfig | null
+  ): Promise<void> {
+    if (legacyConfig?.customUrl) {
+      const legacyType = legacyConfig.type || DEFAULT_SCRAPER_PROXY_TYPE;
+      if (!keyMap[legacyType]) {
+        keyMap[legacyType] = legacyConfig.customUrl;
+      }
+    }
+
+    const saved = await this.setProxyKeyMap(keyMap, false);
+    if (!saved) {
+      return;
+    }
+
+    if (legacyConfig?.customUrl && !this.setProxyConfig(legacyConfig)) {
+      return;
+    }
+
+    this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
+  }
+
+  async getProxyKeyMap(): Promise<Record<string, string>> {
+    try {
+      const keyMap = await this.readProxyKeyMap();
+      const legacyConfig = this.getLegacyProxyConfig();
+
+      await this.migrateLegacyProxyKeyMap(keyMap, legacyConfig);
+      return keyMap;
+    } catch (e) {
+      this.reportStorageReadError('getProxyKeyMap', STORAGE_KEYS.PROXY_KEY_MAP, e as Error);
+      return {};
+    }
+  }
+
+  async setProxyKeyMap(
+    keyMap: Record<string, string>,
+    removeLegacyKey: boolean = true
+  ): Promise<boolean> {
+    try {
+      let saved = true;
+
+      for (const [type, credential] of Object.entries(keyMap)) {
+        if (!credential) {
+          this.removeSecure(getProxyCredentialKey(type));
+          continue;
+        }
+
+        saved = (await this.setSecure(getProxyCredentialKey(type), credential)) && saved;
+      }
+
+      if (saved && removeLegacyKey) {
+        this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
+      }
+      return saved;
+    } catch (e) {
+      this.reportStorageReadError('setProxyKeyMap', STORAGE_KEYS.PROXY_KEY_MAP, e as Error);
+      return false;
+    }
+  }
+
+  hasProxyCredential(type: string): boolean {
+    return this.has(`secure_${getProxyCredentialKey(type)}`);
+  }
+
+  async getProxyConfigWithCredential(): Promise<ProxyConfig> {
+    try {
+      const config = this.getProxyConfig();
+      const type = config.type || DEFAULT_SCRAPER_PROXY_TYPE;
+      const keyMap = await this.getProxyKeyMap();
+      const customUrl = keyMap[type];
+
+      return customUrl ? { ...config, customUrl } : config;
+    } catch (e) {
+      this.reportStorageReadError(
+        'getProxyConfigWithCredential',
+        STORAGE_KEYS.PROXY_CONFIG,
+        e as Error
+      );
+      return { type: DEFAULT_SCRAPER_PROXY_TYPE, enabled: true };
+    }
+  }
+
+  async setProxyConfigWithCredential(config: ProxyConfig): Promise<boolean> {
+    try {
+      const type = config.type || DEFAULT_SCRAPER_PROXY_TYPE;
+      const savedConfig = this.setProxyConfig(config);
+
+      if (!config.customUrl) {
+        this.removeSecure(getProxyCredentialKey(type));
+        return savedConfig;
+      }
+
+      const savedCredential = await this.setSecure(getProxyCredentialKey(type), config.customUrl);
+      return savedConfig && savedCredential;
+    } catch (e) {
+      this.reportStorageReadError(
+        'setProxyConfigWithCredential',
+        STORAGE_KEYS.PROXY_CONFIG,
+        e as Error
+      );
+      return false;
+    }
+  }
+
+  /**
+   * 获取采集历史
+   */
+  getScrapeHistory(): HistoryItem[] {
+    return this.get<HistoryItem[]>(STORAGE_KEYS.SCRAPE_HISTORY, []) || [];
+  }
+
+  /**
+   * 保存采集历史（localStorage 同步键）
+   */
+  setScrapeHistory(history: HistoryItem[]): boolean {
+    const maxItems = getRuntimeStorageStrategyOptions().historyMaxItems;
+    const trimmed = history.slice(0, maxItems);
+    const saved = this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
+    if (saved) {
+      // 镜像到 IndexedDB：同步/异步两条读路径保持同源（失败静默，异步读仍可回退 localStorage）
+      LocalDataStore.set(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`, trimmed, 'user-data').catch(
+        () => undefined
+      );
+    }
+    return saved;
+  }
+
+  /**
+   * 获取采集历史（IndexedDB，大对象层）
+   * 兼容迁移旧 localStorage 数据，迁移后会保留旧键作为安全备份。
+   */
+  async getScrapeHistoryAsync(): Promise<HistoryItem[]> {
+    try {
+      const indexedKey = `user:${STORAGE_KEYS.SCRAPE_HISTORY}`;
+      const migrated = await LocalDataStore.migrateLocalStorageKey<HistoryItem[]>(
+        STORAGE_KEYS.SCRAPE_HISTORY,
+        indexedKey,
+        'user-data'
+      );
+
+      if (migrated) {
+        return migrated;
+      }
+
+      return (await LocalDataStore.get<HistoryItem[]>(indexedKey, [])) || [];
+    } catch (e) {
+      this.reportStorageReadError('getScrapeHistoryAsync', STORAGE_KEYS.SCRAPE_HISTORY, e as Error);
+      return this.getScrapeHistory();
+    }
+  }
+
+  /**
+   * 保存采集历史（IndexedDB，大对象层）
+   */
+  async setScrapeHistoryAsync(history: HistoryItem[]): Promise<boolean> {
+    const maxItems = getRuntimeStorageStrategyOptions().historyMaxItems;
+    const trimmed = history.slice(0, maxItems);
+
+    try {
+      const saved = await LocalDataStore.set(
+        `user:${STORAGE_KEYS.SCRAPE_HISTORY}`,
+        trimmed,
+        'user-data'
+      );
+      if (saved) {
+        // IDB 为权威：成功后同步镜像 localStorage，让同步读路径（getScrapeHistory / getById 等）见到最新值
+        this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
+      }
+      return saved;
+    } catch (e) {
+      this.reportStorageReadError('setScrapeHistoryAsync', STORAGE_KEYS.SCRAPE_HISTORY, e as Error);
+      return this.setScrapeHistory(trimmed);
+    }
+  }
+
+  async removeScrapeHistoryAsync(): Promise<void> {
+    try {
+      await LocalDataStore.remove(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`);
+    } catch (e) {
+      this.reportStorageReadError(
+        'removeScrapeHistoryAsync',
+        STORAGE_KEYS.SCRAPE_HISTORY,
+        e as Error
+      );
+    }
+
+    this.remove(STORAGE_KEYS.SCRAPE_HISTORY);
+    // 同步清理迁移标记，避免下次 migrate 时误读其状态
+    this.remove(`${STORAGE_KEYS.SCRAPE_HISTORY}_migrated_to_indexeddb`);
+  }
+
+  /**
+   * 获取布局配置
+   */
+  getLayoutConfig(
+    templateId: string
+  ): Array<{ id: string; x: number; y: number; w: number; h: number }> {
+    return (
+      this.get<Array<{ id: string; x: number; y: number; w: number; h: number }>>(
+        `${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`,
+        []
+      ) || []
+    );
+  }
+
+  /**
+   * 保存布局配置
+   */
+  setLayoutConfig(
+    templateId: string,
+    layout: Array<{ id: string; x: number; y: number; w: number; h: number }>
+  ): void {
+    this.set(`${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`, layout);
+  }
+  // ================================================================
+  // 安全存储快捷方法
+  // ================================================================
+  // ================================================================
+  // 安全存储快捷方法
+  // ================================================================
+
+  /**
+   * 安全存储敏感数据
+   */
+  async setSecure(key: string, value: unknown): Promise<boolean> {
+    try {
+      const { SecureStorage } = await import('@/common/utils/secureStorage');
+      return await SecureStorage.setSecure(key, value);
+    } catch (e) {
+      this.reportStorageReadError('setSecure', key, e as Error);
+      return false;
+    }
+  }
+
+  /**
+   * 读取安全存储的数据
+   */
+  async getSecure<T = unknown>(key: string, defaultValue: T | null = null): Promise<T | null> {
+    try {
+      const { SecureStorage } = await import('@/common/utils/secureStorage');
+      return await SecureStorage.getSecure(key, defaultValue);
+    } catch (e) {
+      this.reportStorageReadError('getSecure', key, e as Error);
+      return defaultValue;
+    }
+  }
+
+  /**
+   * 删除安全存储的数据
+   */
+  removeSecure(key: string): void {
+    this.remove(`secure_${key}`);
+  }
+}
+// 创建单例
+export const StorageService = new StorageServiceClass();
+// 默认导出
+export default StorageService;
+// 仅供 storage 子包内部业务域模块取核心单例使用，避免循环依赖
+export function getStorageCore(): StorageServiceClass {
+  return StorageService;
+}
