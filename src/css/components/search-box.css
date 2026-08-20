@@ -6,38 +6,46 @@
  * --sops-search-* 前缀，浅色/暗色由既有主题变量映射。
  */
 :root {
-  --sops-search-bg: #ffffff;
+  /* 浅色：全部映射语义 token（--surface-card / --border-subtle / --text-primary 等随 color mode 翻转） */
+  --sops-search-bg: var(--surface-card);
   --sops-search-bg-solid: rgba(255, 255, 255, 0.85);
-  --sops-search-border: var(--border-subtle, #e2e8f0);
-  --sops-search-focus-ring: var(--color-primary, #4f46e5);
-  --sops-search-icon: #94a3b8;
-  --sops-search-input-text: #0f172a;
-  --sops-search-placeholder: #94a3b8;
-  --sops-search-result-bg: #ffffff;
-  --sops-search-result-hover: var(--color-primary-light, #eef2ff);
-  --sops-search-result-text: #475569;
-  --sops-search-result-icon: #94a3b8;
-  --sops-search-empty-text: #94a3b8;
+  --sops-search-border: var(--border-subtle);
+  --sops-search-focus-ring: var(--color-primary);
+  --sops-search-icon: var(--color-slate-400);
+  --sops-search-input-text: var(--text-primary);
+  --sops-search-placeholder: var(--color-slate-400);
+  --sops-search-result-bg: var(--surface-card);
+  --sops-search-result-hover: var(--color-primary-light);
+  --sops-search-result-text: var(--color-slate-600);
+  --sops-search-result-icon: var(--color-slate-400);
+  --sops-search-empty-text: var(--color-slate-400);
   --sops-search-clear-size: 1.25rem;
   --sops-search-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
   --sops-search-radius: 0.75rem;
 }
 
-/* 暗色模式：跟随项目既有暗色变量（--surface-elevated 等）映射 */
-html.dark-mode,
-html[data-theme='dark'] {
-  --sops-search-bg: var(--surface-elevated, #1e293b);
+/*
+ * 暗色：跟随项目统一暗色选择器（ThemeManager 以 .dark 类 + data-color-mode[-resolved]
+ * 生效，见 foundation/variables.css 暗色块）。旧选择器 html.dark-mode /
+ * html[data-theme='dark'] 永不命中：主题类名是 .dark，data-theme 由 Appearance 占用，
+ * 故此前暗色值从未生效，搜索框在暗色模式下一直保持浅色。
+ */
+.dark,
+[data-theme='dark'],
+[data-color-mode='dark'],
+[data-color-mode-resolved='dark'] {
+  --sops-search-bg: var(--surface-card);
   --sops-search-bg-solid: rgba(30, 41, 59, 0.9);
-  --sops-search-border: var(--border-subtle-dark, #334155);
-  --sops-search-focus-ring: var(--color-primary-light, #818cf8);
-  --sops-search-icon: #64748b;
-  --sops-search-input-text: #f1f5f9;
-  --sops-search-placeholder: #64748b;
-  --sops-search-result-bg: var(--surface-elevated, #1e293b);
-  --sops-search-result-hover: var(--color-primary-dark-hover, #312e81);
-  --sops-search-result-text: #cbd5e1;
-  --sops-search-result-icon: #64748b;
-  --sops-search-empty-text: #64748b;
+  --sops-search-border: var(--border-subtle);
+  --sops-search-focus-ring: var(--color-primary-light);
+  --sops-search-icon: var(--color-slate-400);
+  --sops-search-input-text: var(--text-primary);
+  --sops-search-placeholder: var(--color-slate-400);
+  --sops-search-result-bg: var(--surface-card);
+  --sops-search-result-hover: var(--color-primary-light);
+  --sops-search-result-text: var(--color-slate-300);
+  --sops-search-result-icon: var(--color-slate-400);
+  --sops-search-empty-text: var(--color-slate-400);
   --sops-search-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 

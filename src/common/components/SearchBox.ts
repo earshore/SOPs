@@ -158,6 +158,8 @@ function applySearchQuery(ctx: SearchQueryContext): void {
   const hasQuery = query.trim().length > 0;
   clearButton.classList.toggle('sops-hidden', query.length === 0);
   if (ctx.onFilter) {
+    // 页面内过滤模式：results 容器不参与下拉渲染，保持隐藏（调用方自行渲染页面内容）。
+    ctx.hideResults();
     ctx.onFilter(query);
     return;
   }

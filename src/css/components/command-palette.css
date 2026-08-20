@@ -2,53 +2,58 @@
  * command-palette.css - P1-2 ⌘K 命令面板视觉规范
  *
  * 与 search-box.css 同源 token 体系（--sops-search-* / --sops-cmdk-*），
- * 暗色模式由 html.dark-mode / html[data-theme='dark'] 自动映射。
+ * 暗色模式跟随项目统一暗色选择器（.dark 类 + data-color-mode[-resolved]，
+ * 见 foundation/variables.css）；旧 html.dark-mode / html[data-theme='dark']
+ * 选择器永不命中（主题类名是 .dark，data-theme 由 Appearance 占用）。
  */
 :root {
-  --sops-cmdk-surface-bg: #ffffff;
-  --sops-cmdk-surface-border: var(--border-subtle, #e2e8f0);
+  --sops-cmdk-surface-bg: var(--surface-card);
+  --sops-cmdk-surface-border: var(--border-subtle);
   --sops-cmdk-shadow: 0 24px 48px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.04);
-  --sops-cmdk-input-bg: #ffffff;
-  --sops-cmdk-input-text: #0f172a;
+  --sops-cmdk-input-bg: var(--surface-card);
+  --sops-cmdk-input-text: var(--text-primary);
   /* P1-2 二期：placeholder 归并统一搜索 token，避免 token 分叉 */
-  --sops-cmdk-input-placeholder: var(--sops-search-placeholder, #94a3b8);
-  --sops-cmdk-input-border: var(--border-subtle, #e2e8f0);
-  --sops-cmdk-input-focus-ring: var(--color-primary, #4f46e5);
-  --sops-cmdk-kbd-text: #94a3b8;
-  --sops-cmdk-kbd-bg: #f1f5f9;
-  --sops-cmdk-kbd-border: var(--border-subtle, #e2e8f0);
+  --sops-cmdk-input-placeholder: var(--sops-search-placeholder, var(--color-slate-400));
+  --sops-cmdk-input-border: var(--border-subtle);
+  --sops-cmdk-input-focus-ring: var(--color-primary);
+  --sops-cmdk-kbd-text: var(--color-slate-400);
+  --sops-cmdk-kbd-bg: var(--color-slate-100);
+  --sops-cmdk-kbd-border: var(--border-subtle);
   --sops-cmdk-option-bg: transparent;
-  --sops-cmdk-option-hover: var(--color-primary-light, #eef2ff);
-  --sops-cmdk-option-text: #475569;
-  --sops-cmdk-option-label: #0f172a;
-  --sops-cmdk-option-suffix: #94a3b8;
-  --sops-cmdk-option-icon: #94a3b8;
-  --sops-cmdk-group-text: #64748b;
-  --sops-cmdk-empty-text: #94a3b8;
+  --sops-cmdk-option-hover: var(--color-primary-light);
+  --sops-cmdk-option-text: var(--color-slate-600);
+  --sops-cmdk-option-label: var(--text-primary);
+  --sops-cmdk-option-suffix: var(--color-slate-400);
+  --sops-cmdk-option-icon: var(--color-slate-400);
+  --sops-cmdk-group-text: var(--color-slate-500);
+  --sops-cmdk-empty-text: var(--color-slate-400);
   --sops-cmdk-radius: 0.875rem;
 }
 
-html.dark-mode,
-html[data-theme='dark'] {
-  --sops-cmdk-surface-bg: var(--surface-elevated, #1e293b);
-  --sops-cmdk-surface-border: var(--border-subtle-dark, #334155);
+.dark,
+[data-theme='dark'],
+[data-color-mode='dark'],
+[data-color-mode-resolved='dark'] {
+  --sops-cmdk-surface-bg: var(--surface-card);
+  --sops-cmdk-surface-border: var(--border-subtle);
   --sops-cmdk-shadow: 0 24px 64px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(148, 163, 184, 0.08);
-  --sops-cmdk-input-bg: var(--surface-elevated, #1e293b);
-  --sops-cmdk-input-text: #f1f5f9;
+  --sops-cmdk-input-bg: var(--surface-card);
+  --sops-cmdk-input-text: var(--text-primary);
   /* P1-2 二期：placeholder 归并统一搜索 token，避免 token 分叉 */
-  --sops-cmdk-input-placeholder: var(--sops-search-placeholder, #64748b);
-  --sops-cmdk-input-border: var(--border-subtle-dark, #334155);
-  --sops-cmdk-input-focus-ring: var(--color-primary-light, #818cf8);
-  --sops-cmdk-kbd-text: #64748b;
-  --sops-cmdk-kbd-bg: #334155;
-  --sops-cmdk-kbd-border: #475569;
-  --sops-cmdk-option-hover: var(--color-primary-dark-hover, #312e81);
-  --sops-cmdk-option-text: #cbd5e1;
-  --sops-cmdk-option-label: #f1f5f9;
-  --sops-cmdk-option-suffix: #64748b;
-  --sops-cmdk-option-icon: #64748b;
-  --sops-cmdk-group-text: #64748b;
-  --sops-cmdk-empty-text: #64748b;
+  --sops-cmdk-input-placeholder: var(--sops-search-placeholder, var(--color-slate-400));
+  --sops-cmdk-input-border: var(--border-subtle);
+  --sops-cmdk-input-focus-ring: var(--color-primary-light);
+  --sops-cmdk-kbd-text: var(--color-slate-400);
+  --sops-cmdk-kbd-bg: var(--color-slate-700);
+  --sops-cmdk-kbd-border: var(--color-slate-600);
+  --sops-cmdk-option-bg: transparent;
+  --sops-cmdk-option-hover: var(--color-primary-light);
+  --sops-cmdk-option-text: var(--color-slate-300);
+  --sops-cmdk-option-label: var(--text-primary);
+  --sops-cmdk-option-suffix: var(--color-slate-400);
+  --sops-cmdk-option-icon: var(--color-slate-400);
+  --sops-cmdk-group-text: var(--color-slate-400);
+  --sops-cmdk-empty-text: var(--color-slate-400);
 }
 
 sops-command-palette {
@@ -72,8 +77,10 @@ sops-command-palette {
   backdrop-filter: blur(2px);
 }
 
-html.dark-mode .sops-command-palette-dialog::backdrop,
-html[data-theme='dark'] .sops-command-palette-dialog::backdrop {
+.dark .sops-command-palette-dialog::backdrop,
+[data-theme='dark'] .sops-command-palette-dialog::backdrop,
+[data-color-mode='dark'] .sops-command-palette-dialog::backdrop,
+[data-color-mode-resolved='dark'] .sops-command-palette-dialog::backdrop {
   background: rgba(0, 0, 0, 0.6);
 }
 
