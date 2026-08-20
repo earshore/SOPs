@@ -114,7 +114,7 @@ describe('SearchBox 统一搜索框组件', () => {
       });
       const input = container.querySelector('input') as HTMLInputElement;
       expect(input.placeholder).toBe('搜 SOP...');
-      expect(input.getAttribute('aria-label')).toBe('global-search-input' ? '全局搜索' : '全局搜索');
+      expect(input.getAttribute('aria-label')).toBe('全局搜索');
       expect(input.id).toBe('global-search-input');
       h.destroy();
     });
