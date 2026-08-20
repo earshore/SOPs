@@ -161,6 +161,7 @@
     "@fullhuman/postcss-purgecss": "^8.0.0",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.58.2",
+    "@sentry/core": "^7.120.4",
     "@types/marked": "^5.0.2",
     "@types/navigo": "^8.1.1",
     "@types/node": "^20.0.0",

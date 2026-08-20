@@ -38,6 +38,13 @@ export interface SearchBoxOptions {
   emptyMessage?: string;
   /** 未输入时是否隐藏结果区，默认 true（page 变体适用）。 */
   hideResultsWhenEmpty?: boolean;
+  /**
+   * 自定义过滤渲染（页面内过滤场景）：输入变化时回调，由调用方负责结果渲染。
+   * 提供后不再渲染默认下拉列表（results 容器保持隐藏）。
+   */
+  onFilter?: (query: string) => void;
+  /** 查询值由调用方控制（配合 onFilter 使用，组件不读取 input.value）。 */
+  externalQuery?: () => string;
 }
 
 export interface SearchBoxHandle {
@@ -138,14 +145,22 @@ interface SearchQueryContext {
   getCandidates(): CommandItem[];
   render(items: CommandItem[], emptyFallback: string): void;
   hideResults(): void;
+  /** 页面内过滤场景的自定义渲染回调。 */
+  onFilter?: (query: string) => void;
+  /** 由调用方提供查询值（externalQuery 场景）。 */
+  externalQuery?: () => string;
 }
 
 /** 按当前输入值执行一次搜索渲染（纯逻辑，便于单测）。 */
 function applySearchQuery(ctx: SearchQueryContext): void {
   const { input, clearButton, placeholder, emptyMessage, hideResultsWhenEmpty } = ctx;
-  const query = input.value;
+  const query = ctx.externalQuery ? ctx.externalQuery() : input.value;
   const hasQuery = query.trim().length > 0;
   clearButton.classList.toggle('sops-hidden', query.length === 0);
+  if (ctx.onFilter) {
+    ctx.onFilter(query);
+    return;
+  }
   if (!hasQuery) {
     if (hideResultsWhenEmpty) {
       ctx.hideResults();
@@ -313,6 +328,39 @@ function createResultOption(
 }
 
 /**
+ * 按当前输入执行一次查询（runSearch 的纯逻辑封装，避免 attach 内闭包过长）。
+ */
+function applySearchBoxQuery(
+  input: HTMLInputElement,
+  clearButton: HTMLButtonElement,
+  options: SearchBoxOptions,
+  state: {
+    destroyState: SearchBoxDestroyState;
+    placeholder: string;
+    emptyMessage: string;
+    hideResultsWhenEmpty: boolean;
+    getCandidates(): CommandItem[];
+    render(items: CommandItem[], emptyFallback: string): void;
+    hideResults(): void;
+    onFilter?: (query: string) => void;
+  }
+): void {
+  if (state.destroyState.destroyed) return;
+  applySearchQuery({
+    input,
+    clearButton,
+    placeholder: state.placeholder,
+    emptyMessage: state.emptyMessage,
+    hideResultsWhenEmpty: state.hideResultsWhenEmpty,
+    getCandidates: state.getCandidates,
+    render: state.render,
+    hideResults: state.hideResults,
+    onFilter: state.onFilter,
+    externalQuery: options.externalQuery,
+  });
+}
+
+/**
  * 搜索框行为（渲染/搜索/导航/生命周期），DOM 与逻辑分离便于单测。
  */
 function attachSearchBoxBehavior(
@@ -327,11 +375,14 @@ function attachSearchBoxBehavior(
   const { root, input, clearButton, results } = dom;
   const moduleId = options.moduleId;
   const onExecute = options.onExecute;
+  const onFilter = options.onFilter;
   const maxResults = options.maxResults ?? DEFAULT_MAX_RESULTS;
   const emptyMessage = options.emptyMessage ?? DEFAULT_EMPTY_MESSAGE;
   const placeholder = options.placeholder ?? '搜索功能...';
   const initialValue = options.initialValue ?? '';
   const hideResultsWhenEmpty = options.hideResultsWhenEmpty ?? true;
+
+  const clearResults = onFilter ? () => undefined : hideResults;
 
   const destroyState: SearchBoxDestroyState = {
     destroyed: false,
@@ -343,8 +394,8 @@ function attachSearchBoxBehavior(
   function clear(): void {
     input.value = '';
     clearButton.classList.add('sops-hidden');
-    if (hideResultsWhenEmpty) {
-      hideResults();
+    if (hideResultsWhenEmpty || onFilter) {
+      clearResults();
       return;
     }
     render(getCandidates(), placeholder);
@@ -371,19 +422,17 @@ function attachSearchBoxBehavior(
     renderSearchResults(results, items, maxResults, emptyFallback, onSelect);
   }
 
-  const runSearch = (): void => {
-    if (destroyState.destroyed) return;
-    applySearchQuery({
-      input,
-      clearButton,
+  const runSearch = (): void =>
+    applySearchBoxQuery(input, clearButton, options, {
+      destroyState,
       placeholder,
       emptyMessage,
       hideResultsWhenEmpty,
       getCandidates,
       render,
       hideResults,
+      onFilter,
     });
-  };
   const onInput = (): void => {
     if (!destroyState.destroyed && destroyState.mountedInput) runSearch();
   };

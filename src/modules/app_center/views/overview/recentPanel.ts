@@ -1,4 +1,5 @@
 import eventBus from '@/common/EventBus';
+import { createSearchBox, type SearchBoxHandle } from '@/common/components/SearchBox';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui/notifications';
 import { copyTextToClipboard } from '@/common/utils/clipboard';
@@ -134,7 +135,11 @@ let pendingFocusSelector = '';
 let searchDebounceTimer: number | undefined;
 const payloadStatusCache = new Map<
   string,
-  { signature: string; checkedAt: number; status: RecentQueueItem['payloadStatus'] }
+  {
+    signature: string;
+    checkedAt: number;
+    status: RecentQueueItem['payloadStatus'];
+  }
 >();
 
 function parseRecentColumns(value: string | undefined): RecentColumns | null {
@@ -186,7 +191,11 @@ async function resolveCachedPayloadStatus(
     return cached.status;
   }
   const status = await resolveResumePayloadStatusAsync(artifact);
-  payloadStatusCache.set(artifact.id, { signature, checkedAt: Date.now(), status });
+  payloadStatusCache.set(artifact.id, {
+    signature,
+    checkedAt: Date.now(),
+    status,
+  });
   return status;
 }
 
@@ -211,7 +220,10 @@ async function getQueueItems(
     sortMode: state.sortMode,
     limit: Number.MAX_SAFE_INTEGER,
   });
-  return { items: allItems.slice(0, state.visibleLimit), total: allItems.length };
+  return {
+    items: allItems.slice(0, state.visibleLimit),
+    total: allItems.length,
+  };
 }
 
 async function handleResume(
@@ -1426,16 +1438,31 @@ export async function renderRecentPanel(
       });
     });
 
-  const searchInput = container.querySelector<HTMLInputElement>('#app-overview-recent-search');
-  searchInput?.addEventListener('input', () => {
-    state.query = searchInput.value.trim();
-    state.visibleLimit = RECENT_ARTIFACT_LIMIT;
-    if (searchDebounceTimer !== undefined) window.clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = window.setTimeout(() => {
-      searchDebounceTimer = undefined;
-      void renderRecentList(container, state);
-    }, 160);
-  });
+  const searchContainer = container.querySelector<HTMLElement>(
+    '[data-sops-searchbox="app-recent"]'
+  );
+  let searchHandle: SearchBoxHandle | null = null;
+  if (searchContainer) {
+    // P1-2 二期：统一搜索框（SearchBox 组件），防抖与渲染由 onFilter 承接
+    searchHandle = createSearchBox({
+      placeholder: '搜索站点、ASIN 或负责人',
+      ariaLabel: '搜索最近作业',
+      inputId: 'app-overview-recent-search',
+      onFilter: (query: string) => {
+        state.query = query.trim();
+        state.visibleLimit = RECENT_ARTIFACT_LIMIT;
+        if (searchDebounceTimer !== undefined) window.clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = window.setTimeout(() => {
+          searchDebounceTimer = undefined;
+          void renderRecentList(container, state);
+        }, 160);
+      },
+    });
+    searchHandle.mount(searchContainer);
+    unsubscribers.push(() => {
+      searchHandle?.destroy();
+    });
+  }
 
   const undoButton = container.querySelector<HTMLButtonElement>('[data-recent-undo-remove]');
   undoButton?.addEventListener('click', () => {
@@ -1456,7 +1483,7 @@ export async function renderRecentPanel(
     state.sortMode = 'activity';
     state.visibleLimit = RECENT_ARTIFACT_LIMIT;
     state.showDismissed = false;
-    if (searchInput) searchInput.value = '';
+    searchHandle?.clear();
     void refresh();
   });
 

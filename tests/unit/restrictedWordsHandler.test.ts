@@ -1,4 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
+import { createSearchBox } from '@/common/components/SearchBox';
 import {
   cleanupRestrictedWordsPanel,
   initRestrictedWordsPanel,
@@ -13,7 +14,6 @@ vi.mock('@/common/utils/actionRegistry', () => actionRegistryMock);
 
 function buildDom(): void {
   document.body.innerHTML = `
-    <input id="rw-search-input" />
     <button id="rw-search-btn"></button>
     <button id="rw-clear-btn"></button>
     <select id="rw-search-mode">
@@ -30,6 +30,7 @@ function buildDom(): void {
       <option value="US">US</option>
     </select>
     <div id="rw-stats-display"></div>
+    <div data-sops-searchbox="restricted-words"></div>
     <table><tbody id="rw-results-tbody"></tbody></table>
     <app-modal id="rw-detail-modal" class="hidden" title="高危词详情" size="2xl" no-header>
       <div slot="body">
@@ -63,6 +64,14 @@ function initFreshPanel(): void {
 beforeEach(() => {
   vi.useRealTimers();
   buildDom();
+  createSearchBox({
+    placeholder: '输入关键词检索',
+    ariaLabel: '高危词检索关键词',
+    inputId: 'rw-search-input',
+    styleVariant: 'page',
+    onFilter: () => undefined,
+  }).mount(document.body);
+  cleanupRestrictedWordsPanel();
   actionRegistryMock.registerActionsWithLegacy.mockReset().mockReturnValue([
     'showWordDetail',
     'closeWordDetail',
@@ -72,7 +81,6 @@ beforeEach(() => {
     callback(0);
     return 1;
   });
-  cleanupRestrictedWordsPanel();
 });
 
   it('initializes filters, renders all rows, and registers legacy actions', () => {

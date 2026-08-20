@@ -1111,7 +1111,7 @@
 }
 
 .deep-chat-search-input::placeholder {
-  color: var(--deep-chat-ink-muted);
+  color: var(--sops-search-placeholder, var(--deep-chat-ink-muted));
 }
 
 .deep-chat-search-new {
@@ -2697,7 +2697,7 @@ body #deep-chat-skill-library-search {
   border: 0 !important;
   border-radius: 0;
   background: transparent !important;
-  color: var(--deep-chat-ink-secondary, #334155);
+  color: var(--sops-search-input-text, var(--deep-chat-ink-secondary, #334155));
   font-size: 13px;
   line-height: 1.4;
   box-shadow: none !important;
@@ -2728,7 +2728,7 @@ body #deep-chat-skill-library-search:focus {
 
 body input.deep-chat-skill-library-search::placeholder,
 body #deep-chat-skill-library-search::placeholder {
-  color: var(--deep-chat-ink-muted, #64748b);
+  color: var(--sops-search-placeholder, var(--deep-chat-ink-muted, #64748b));
 }
 
 .deep-chat-skill-library-category {

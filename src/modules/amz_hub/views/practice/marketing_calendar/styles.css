@@ -252,7 +252,7 @@
   border-color: var(--color-indigo-500);
   box-shadow:
     0 8px 32px rgba(102, 126, 234, 0.25),
-    0 0 0 4px rgba(102, 126, 234, 0.1),
+    0 0 0 4px var(--sops-search-focus-ring, rgba(102, 126, 234, 0.1)),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   transform: translateY(-2px);
 }
@@ -273,13 +273,13 @@
   background: transparent;
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--color-slate-900);
+  color: var(--sops-search-input-text, var(--color-slate-900));
   outline: none;
   min-width: 0;
 }
 
 .amzf_search_input::placeholder {
-  color: var(--color-slate-500);
+  color: var(--sops-search-placeholder, var(--color-slate-500));
   font-weight: 400;
   transition: opacity 0.3s ease;
 }
@@ -297,7 +297,7 @@
   background: var(--color-slate-50);
   border: none;
   border-radius: 50%;
-  color: var(--color-slate-500);
+  color: var(--sops-search-icon, var(--color-slate-500));
   font-size: 0.75rem;
   cursor: pointer;
   opacity: 0;
