@@ -3,7 +3,6 @@
  */
 
 import BaseModule from '@/common/BaseModule';
-import { createSearchBox } from '@/common/components/SearchBox';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import {
   bindCategoryFilterButtons,
@@ -44,20 +43,6 @@ class HubOverviewModule extends BaseModule {
 
     const dispose = bindCategoryFilterButtons(container);
     this.addDisposable(dispose);
-
-    // P1-2：统一 SearchBox 组件装配（模板中 data-sops-searchbox 装配位）
-    const searchboxRoot = container.querySelector('[data-sops-searchbox="amz_hub"]');
-    if (searchboxRoot) {
-      const handle = createSearchBox({
-        moduleId: 'amz_hub',
-        placeholder: '搜索智库页面...',
-        ariaLabel: '搜索智库页面',
-        styleVariant: 'page',
-        hideResultsWhenEmpty: true,
-      });
-      handle.mount(searchboxRoot as HTMLElement);
-      this.addDisposable(() => handle.destroy());
-    }
   }
 }
 

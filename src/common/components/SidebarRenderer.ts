@@ -5,14 +5,12 @@
  * - 渐变图标容器 + 带色阴影 (与设置面板/指南统一)
  * - 左侧激活色条指示器
  * - 分类头渐变背景 + 展开/收起动画
- * - 搜索框前缀图标容器 + focus 联动
  * - 统一圆角体系 (rounded-xl / rounded-2xl)
  * - 微交互动效 (scale, translate, opacity)
  */
 
 import { appStore } from '@/stores/useAppStore';
 
-import { createSearchBox } from './SearchBox';
 import {
   MENU_CONFIG,
   type RouteConfig,
@@ -39,8 +37,6 @@ export interface SidebarConfig {
   moduleId: string;
   categories: Record<string, CategoryConfig>;
   overviewRouteId: string;
-  enableSearch?: boolean;
-  searchPlaceholder?: string;
 }
 
 const SIDEBAR_THEME_CLASSES: Record<ColorSchemeName, string> = {
@@ -94,17 +90,12 @@ export class SidebarRenderer {
   private moduleId: string;
   private categories: Record<string, CategoryConfig>;
   private overviewRouteId: string;
-  private enableSearch: boolean;
-  private searchPlaceholder: string;
   private moduleColor: ColorSchemeName; // ✅ 新增：模块主题色
-  private searchBoxHandle: ReturnType<typeof createSearchBox> | null = null;
 
   constructor(config: SidebarConfig) {
     this.moduleId = config.moduleId;
     this.categories = config.categories;
     this.overviewRouteId = config.overviewRouteId;
-    this.enableSearch = config.enableSearch !== false;
-    this.searchPlaceholder = config.searchPlaceholder || '搜索...';
 
     // ✅ 自动推断模块颜色
     this.moduleColor = ColorContext.inferColorFromModule(this.moduleId);
@@ -147,7 +138,6 @@ export class SidebarRenderer {
     // ✅ 安全: buildHTML返回的HTML使用内部配置数据(categories, routes来自MENU_CONFIG)
     setSafeHtml(sidebar, html);
     this.initCategoryToggle(sidebar);
-    this.mountSearchBox(sidebar);
     if (activeCategory) {
       this.expandCategory(sidebar, activeCategory);
     }
@@ -274,30 +264,6 @@ export class SidebarRenderer {
   // Toggle & Expand
   // ═══════════════════════════════════════════════════════
 
-  // ═══════════════════════════════════════════════════════
-  // SearchBox 装配（P1-2 统一搜索组件）
-  // ═══════════════════════════════════════════════════════
-
-  /** 模板保留 id=sidebar-search-input 的 input 兼容全局输入委托（ui/index.ts）。 */
-  private mountSearchBox(sidebar: HTMLElement): void {
-    const root = sidebar.querySelector('[data-sops-searchbox="sidebar"]');
-    if (!root) {
-      return;
-    }
-    if (this.searchBoxHandle) {
-      this.searchBoxHandle.destroy();
-    }
-    this.searchBoxHandle = createSearchBox({
-      moduleId: this.moduleId,
-      placeholder: this.searchPlaceholder,
-      ariaLabel: '侧边栏搜索',
-      inputId: 'sidebar-search-input',
-      styleVariant: 'sidebar',
-      maxResults: 6,
-    });
-    this.searchBoxHandle.mount(root as HTMLElement);
-  }
-
   private initCategoryToggle(sidebar: HTMLElement): void {
     const categoryBtns = sidebar.querySelectorAll('[data-action="toggle-category"]');
 
@@ -417,8 +383,6 @@ export class SidebarRenderer {
             </div>
             <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">${title}</div>
           </div>
-
-          ${this.enableSearch ? '<div data-sops-searchbox="sidebar"></div>' : ''}
         </div>
 
         <!-- ═══ Subtle Separator ═══ -->

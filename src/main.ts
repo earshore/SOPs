@@ -46,6 +46,7 @@ import { installOnceAnimationCleanup } from '@/common/utils/onceAnimationCleanup
 import { openAmazonInsightPluginDownload } from '@/common/utils/openAmazonInsightPluginDownload';
 import { loadPlugins } from '@/common/utils/pluginLoader';
 import { initDeferredViews, initHomeView } from '@/common/utils/viewLoader';
+import { initHeaderGlobalSearch } from '@/common/components/HeaderGlobalSearch';
 import { animationManager } from '@/services/animation-manager';
 import { applyDeveloperDiagnosticSettings } from '@/services/developerDiagnosticsService';
 import { initializeAnimationStore } from '@/stores/animation-settings';
@@ -378,6 +379,7 @@ async function loadCriticalViewsAndNavigate(
 
 function initializeStartupUtilities(): void {
   initGlobalEventDelegation();
+  initHeaderGlobalSearch();
 
   const globalLoading = document.getElementById('global-loading');
   if (globalLoading) {

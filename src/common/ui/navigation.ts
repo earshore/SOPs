@@ -28,32 +28,24 @@ const sopsRenderer = createSidebarRenderer({
   moduleId: 'sops',
   categories: MENU_CONFIG.sopCategories,
   overviewRouteId: 'sops_overview',
-  enableSearch: true,
-  searchPlaceholder: '搜索全站 SOP...',
 });
 
 const appCenterRenderer = createSidebarRenderer({
   moduleId: 'app_center',
   categories: MENU_CONFIG.appCategories,
   overviewRouteId: 'app_center_overview',
-  enableSearch: true,
-  searchPlaceholder: '搜索应用...',
 });
 
 const hubRenderer = createSidebarRenderer({
   moduleId: 'amz_hub',
   categories: MENU_CONFIG.hubCategories,
   overviewRouteId: 'amz_hub_overview',
-  enableSearch: true,
-  searchPlaceholder: '搜索智库内容...',
 });
 
 const moreRenderer = createSidebarRenderer({
   moduleId: 'more_core',
   categories: MENU_CONFIG.moreCategories,
   overviewRouteId: 'more_overview',
-  enableSearch: true,
-  searchPlaceholder: '搜索功能...',
 });
 
 const SIDEBAR_RENDERER_REGISTRY: Record<string, SidebarRenderer> = {

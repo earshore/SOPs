@@ -10,7 +10,8 @@
   --sops-cmdk-shadow: 0 24px 48px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.04);
   --sops-cmdk-input-bg: #ffffff;
   --sops-cmdk-input-text: #0f172a;
-  --sops-cmdk-input-placeholder: #94a3b8;
+  /* P1-2 二期：placeholder 归并统一搜索 token，避免 token 分叉 */
+  --sops-cmdk-input-placeholder: var(--sops-search-placeholder, #94a3b8);
   --sops-cmdk-input-border: var(--border-subtle, #e2e8f0);
   --sops-cmdk-input-focus-ring: var(--color-primary, #4f46e5);
   --sops-cmdk-kbd-text: #94a3b8;
@@ -34,7 +35,8 @@ html[data-theme='dark'] {
   --sops-cmdk-shadow: 0 24px 64px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(148, 163, 184, 0.08);
   --sops-cmdk-input-bg: var(--surface-elevated, #1e293b);
   --sops-cmdk-input-text: #f1f5f9;
-  --sops-cmdk-input-placeholder: #64748b;
+  /* P1-2 二期：placeholder 归并统一搜索 token，避免 token 分叉 */
+  --sops-cmdk-input-placeholder: var(--sops-search-placeholder, #64748b);
   --sops-cmdk-input-border: var(--border-subtle-dark, #334155);
   --sops-cmdk-input-focus-ring: var(--color-primary-light, #818cf8);
   --sops-cmdk-kbd-text: #64748b;

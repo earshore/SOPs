@@ -26,6 +26,7 @@ import {
   loadSampleReport,
   type ReportImportCallbacks,
 } from './import/fileImport';
+import { createSearchBox, type SearchBoxHandle } from '@/common/components/SearchBox';
 import { renderPpcResumeReviewBanner } from './resumeReviewBanner';
 import { updateContextFieldsVisibility } from './settings/analysisSettingsPanel';
 import {
@@ -69,6 +70,7 @@ let retainAnalyzerState = false;
 let activeContainer: HTMLElement | null = null;
 let activeResumeSnapshot: PpcActionListSnapshot | null = null;
 const listenerRegistry = createListenerRegistry();
+let actionSearchHandle: SearchBoxHandle | null = null;
 
 interface StatusSnapshot {
   message: string;
@@ -178,6 +180,7 @@ class PpcSearchTermsModule extends BaseModule {
       if (ownerInput) ownerInput.value = activeResumeSnapshot.owner;
     }
     bindEvents(this.container);
+    initActionSearchBox(this.container);
     restoreAnalyzerView(this.container);
     if (activeResumeSnapshot) {
       renderPpcResumeReviewBanner(this.container, activeResumeSnapshot);
@@ -192,9 +195,10 @@ class PpcSearchTermsModule extends BaseModule {
       activeContainer = null;
     }
     listenerRegistry.clear();
+    actionSearchHandle?.destroy();
+    actionSearchHandle = null;
   }
 }
-
 const ppcSearchTermsModule = new PpcSearchTermsModule();
 
 export const mount = (container: HTMLElement): Promise<void> =>
@@ -202,6 +206,23 @@ export const mount = (container: HTMLElement): Promise<void> =>
 export const unmount = (): void => {
   ppcSearchTermsModule.unmount();
 };
+
+function initActionSearchBox(container: HTMLElement): void {
+  actionSearchHandle?.destroy();
+  actionSearchHandle = null;
+
+  const mountPoint = container.querySelector<HTMLElement>('[data-sops-searchbox="ppc-action"]');
+  if (!mountPoint) return;
+
+  actionSearchHandle = createSearchBox({
+    placeholder: '搜索词 / 活动 / 店铺 / 原因',
+    ariaLabel: '搜索动作清单',
+    inputId: 'ppc-search-terms-action-search',
+    hideResultsWhenEmpty: true,
+    onFilter: query => actionListState.applySearchQuery(container, query),
+  });
+  actionSearchHandle.mount(mountPoint);
+}
 
 function bindEvents(container: HTMLElement): void {
   bindPpcSearchTermsEvents(container, listenerRegistry.add, {
@@ -237,9 +258,6 @@ function bindEvents(container: HTMLElement): void {
         exportControllerState
       ),
     copySummary: () => copyActionSummary(container, exportControllerState),
-    handleActionSearch: () => actionListState.handleSearch(container),
-    handleActionSearchKeydown: event => actionListState.handleSearchKeydown(container, event),
-    clearActionSearch: () => actionListState.clearSearch(container),
     setFilter: button => actionListState.setFilterFromButton(container, button),
     handleThresholdChange: () => handleThresholdChange(container),
     handleAnalysisSettingsChange: () => handleAnalysisSettingsChange(container),

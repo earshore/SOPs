@@ -1,7 +1,7 @@
 import { updateFilterCounts } from './resultsFilterControls';
 import { MAX_RENDER_ROWS, renderRows } from './resultsTable';
 import { formatSummaryAcos, summarize, type AnalysisSummary } from '../export/summary';
-import { getElement, setButtonDisabled, setText } from '../ui/dom';
+import { setButtonDisabled, setText } from '../ui/dom';
 import {
   filterRows,
   getGrowthExportFilter,
@@ -33,7 +33,6 @@ export function renderResults(
   updateFilterCounts(container, searchedRows);
   updateExportAvailability(container, rows, visibleRows, state.reportType);
   updateResultCount(container, rows, searchedRows, visibleRows, state.searchQuery);
-  updateSearchControls(container, state.searchQuery);
   renderRows(container, visibleRows, rows.length > 0, state.searchQuery);
 }
 
@@ -81,10 +80,4 @@ function updateExportAvailability(
   setButtonDisabled(container, 'ppc-search-terms-export-negative', !hasWasteRows);
   setButtonDisabled(container, 'ppc-search-terms-export-harvest', !hasGrowthRows);
   setButtonDisabled(container, 'ppc-search-terms-copy-summary', !hasRows);
-}
-
-function updateSearchControls(container: HTMLElement, searchQuery: string): void {
-  const hasQuery = searchQuery.length > 0;
-  setButtonDisabled(container, 'ppc-search-terms-action-search-clear', !hasQuery);
-  getElement(container, 'ppc-search-terms-action-search')?.classList.toggle('has-value', hasQuery);
 }

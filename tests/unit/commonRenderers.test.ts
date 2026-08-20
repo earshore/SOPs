@@ -203,8 +203,6 @@ afterEach(() => {
       moduleId: 'sops',
       categories: MENU_CONFIG.sopCategories,
       overviewRouteId: 'sops_overview',
-      enableSearch: true,
-      searchPlaceholder: '搜索 SOP',
     });
     renderer.render(
       sidebar,
@@ -213,14 +211,9 @@ afterEach(() => {
     );
 
     expect(sidebar.dataset.moduleId).toBe('sops');
-    // P1-2：侧边栏搜索框已换装统一 SearchBox 组件（视觉与 aria 语义统一）。
-    const searchInput = sidebar.querySelector('#sidebar-search-input');
-    expect(searchInput?.getAttribute('placeholder')).toBe('搜索 SOP');
-    expect(searchInput?.getAttribute('aria-label')).toBe('侧边栏搜索');
-    expect(sidebar.querySelector('[role="search"]')?.getAttribute('role')).toBe('search');
-    const results = sidebar.querySelector('.sops-search-box__results');
-    expect(results?.getAttribute('role')).toBe('listbox');
-    expect(results?.getAttribute('aria-hidden')).toBe('true');
+    // P1-2：侧边栏搜索框已移除，搜索收敛至 header 全局搜索框。
+    expect(sidebar.querySelector('#sidebar-search-input')).toBeNull();
+    expect(sidebar.querySelector('.sops-search-box__results')).toBeNull();
     expect(sidebar.querySelector(`#sidebar-btn-${activeRoute.id}`)?.getAttribute('aria-current')).toBe(
       'page'
     );

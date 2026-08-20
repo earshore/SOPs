@@ -56,6 +56,15 @@ html[data-theme='dark'] {
   background: var(--sops-search-bg);
 }
 
+/* 顶栏全局搜索：与 header-actions 高度对齐的紧凑样式 */
+.sops-search-box--header {
+  width: 100%;
+  max-width: 24rem;
+  box-shadow: var(--sops-search-shadow);
+  background: var(--sops-search-bg-solid);
+  height: 2rem;
+}
+
 .sops-search-box__prefix {
   position: absolute;
   left: 0.75rem;

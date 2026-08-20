@@ -121,12 +121,10 @@ const mocks = vi.hoisted(() => ({
       <button id="ppc-search-terms-export-negative" type="button"></button>
       <button id="ppc-search-terms-export-harvest" type="button"></button>
       <button id="ppc-search-terms-copy-summary" type="button"></button>
-      <input id="ppc-search-terms-action-search" type="search" aria-describedby="ppc-search-terms-result-count ppc-search-terms-table-help" />
-      <button id="ppc-search-terms-action-search-clear" type="button"></button>
+      <div class="ppc-search-terms-action-toolbar" data-sops-searchbox="ppc-action" aria-describedby="ppc-search-terms-result-count ppc-search-terms-table-help"></div>
       <div id="ppc-search-terms-filter-buttons"></div>
       <h2 id="ppc-search-terms-results-title">动作清单</h2>
       <p id="ppc-search-terms-result-count"></p>
-      <div class="ppc-search-terms-action-toolbar"></div>
       <div id="ppc-search-terms-empty-state"><div id="ppc-search-terms-empty-title"></div><p id="ppc-search-terms-empty-description"></p></div>
       <div
         id="ppc-search-terms-table-wrapper"
@@ -541,7 +539,7 @@ describe('PPC 搜索词分析器 UI - 默认本地分析', () => {
       container.querySelector('#ppc-search-terms-file-input')?.getAttribute('aria-describedby')
     ).toContain('ppc-search-terms-file-name');
     const actionSearchDescription = container
-      .querySelector('#ppc-search-terms-action-search')
+      .querySelector<HTMLElement>('[data-sops-searchbox="ppc-action"]')
       ?.getAttribute('aria-describedby');
     expect(actionSearchDescription).toContain('ppc-search-terms-result-count');
     expect(actionSearchDescription).toContain('ppc-search-terms-table-help');
@@ -608,7 +606,7 @@ describe('PPC 搜索词分析器 UI - 筛选和复制', () => {
   it('支持动作清单搜索并导出当前搜索结果', async () => {
     await loadSampleAndAnalyze(container);
 
-    const search = container.querySelector<HTMLInputElement>('#ppc-search-terms-action-search');
+    const search = container.querySelector<HTMLInputElement>('input#ppc-search-terms-action-search');
     if (search) {
       search.value = 'waterproof dog jacket';
       search.dispatchEvent(new Event('input', { bubbles: true }));
@@ -627,7 +625,9 @@ describe('PPC 搜索词分析器 UI - 筛选和复制', () => {
       });
     });
 
-    container.querySelector<HTMLButtonElement>('#ppc-search-terms-action-search-clear')?.click();
+    container
+      .querySelector<HTMLButtonElement>('.sops-search-box__clear')
+      ?.click();
     expect(container.querySelector('#ppc-search-terms-result-count')?.textContent).toBe(
       '共 10 行，当前筛选 10 行。'
     );
