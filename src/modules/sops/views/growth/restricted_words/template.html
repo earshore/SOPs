@@ -1098,19 +1098,11 @@
           <option value="fulltext">全文检索</option>
           <option value="regex">正则表达式</option>
         </select>
-        <div class="relative flex-1">
-          <i
-            class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 sops-neutral-text-faint"
-          ></i>
-          <input
-            class="w-full pl-9 pr-4 py-2 border border-slate-300 text-sm focus:ring-2 focus:ring-[var(--color-primary,#3b82f6)] focus:border-[var(--color-primary,#3b82f6)] outline-none"
-            id="rw-search-input"
-            aria-label="高危词检索关键词"
-            aria-describedby="rw-results-description rw-results-table-help"
-            placeholder="输入关键词检索 (如 Bamboo, Antibacterial, CE, Bio, Leder...)"
-            type="text"
-          />
-        </div>
+        <div
+          class="relative flex-1"
+          data-sops-searchbox="restricted-words"
+          aria-describedby="rw-results-description rw-results-table-help"
+        ></div>
         <button
           type="button"
           class="action-btn action-btn-primary rounded-r-lg shadow-sm"

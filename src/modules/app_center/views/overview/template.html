@@ -83,17 +83,8 @@
     </div>
 
     <div class="app-overview-recent-toolbar">
-      <label class="app-overview-recent-search-label" for="app-overview-recent-search">
-        <i class="fas fa-search" aria-hidden="true"></i>
-        <span class="sr-only">搜索最近作业</span>
-        <input
-          id="app-overview-recent-search"
-          class="app-overview-recent-search"
-          type="search"
-          placeholder="搜索站点、ASIN 或负责人"
-          autocomplete="off"
-        />
-      </label>
+      <!-- P1-2 二期：统一搜索框（SearchBox 组件，视觉/内核与侧边栏一致） -->
+      <div data-sops-searchbox="app-recent"></div>
       <div class="app-overview-recent-type-filters" role="group" aria-label="按当前阶段筛选"></div>
       <div
         class="app-overview-recent-status-filters"

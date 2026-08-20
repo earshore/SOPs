@@ -615,28 +615,6 @@
   margin: 0 0 0.75rem;
 }
 
-.app-overview-recent-search-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-width: min(100%, 16rem);
-  flex: 1 1 12rem;
-  padding: 0.35rem 0.65rem;
-  border: 1px solid var(--app-overview-border);
-  border-radius: var(--rounded-md, 8px);
-  background: var(--app-overview-surface);
-  color: var(--app-overview-text-muted);
-}
-
-.app-overview-recent-search {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: var(--app-overview-text-primary);
-  font-size: 0.8125rem;
-  outline: none;
-}
-
 .app-overview-recent-type-filters,
 .app-overview-recent-status-filters,
 .app-overview-recent-sort {

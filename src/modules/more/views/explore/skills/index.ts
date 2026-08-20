@@ -12,6 +12,7 @@ import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui';
 import { copyTextToClipboard } from '@/common/utils/clipboard';
 import { setSafeHtml } from '@/common/utils/security';
+import { createSearchBox, type SearchBoxHandle } from '@/common/components/SearchBox';
 import {
   buildSkillDeepChatUserDraft,
   queueSkillForDeepChat,
@@ -44,6 +45,7 @@ let currentCategory: SkillCategoryId | 'all' = 'all';
 let currentKeyword = '';
 let currentSkill: Skill | null = null;
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
+let searchHandle: SearchBoxHandle | null = null;
 
 /** F4：跨试用往返保留筛选（StorageService） */
 function loadPersistedFilters(): void {
@@ -682,16 +684,6 @@ function handleModalClick(e: Event): void {
   if (target === modal) closeDetail();
 }
 
-function handleSearchInput(e: Event): void {
-  const value = (e.target as HTMLInputElement).value;
-  if (searchTimer) clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    currentKeyword = value.trim();
-    persistFilters();
-    renderList();
-  }, 200);
-}
-
 function handleDocumentKeydown(e: KeyboardEvent): void {
   if (e.key !== 'Escape') return;
   const modal = getSkillModal();
@@ -700,8 +692,28 @@ function handleDocumentKeydown(e: KeyboardEvent): void {
 
 function initEventListeners(root: HTMLElement): void {
   moduleRoot = root;
-  searchInputRef = root.querySelector('#skill-search');
-  searchInputRef?.addEventListener('input', handleSearchInput);
+  const searchContainer = root.querySelector<HTMLElement>('[data-sops-searchbox="skills"]');
+
+  if (searchContainer) {
+    // P1-2 二期：统一搜索框（SearchBox 组件），防抖与持久化由 onFilter 承接
+    searchHandle = createSearchBox({
+      placeholder: '搜索技能名称或能力描述，如广告、Listing、FBA…',
+      ariaLabel: '搜索技能',
+      inputId: 'skill-search',
+      initialValue: currentKeyword,
+      onFilter: (query: string) => {
+        if (searchTimer) clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+          currentKeyword = query.trim();
+          persistFilters();
+          renderList();
+        }, 200);
+      },
+    });
+    searchHandle.mount(searchContainer);
+    searchInputRef = searchContainer.querySelector<HTMLInputElement>('#skill-search');
+  }
+
   root.addEventListener('click', handleModuleClick);
   root.addEventListener('keydown', handleModuleKeydown);
   getSkillModal()?.addEventListener('click', handleModalClick);
@@ -712,7 +724,8 @@ function initEventListeners(root: HTMLElement): void {
 function removeEventListeners(): void {
   if (searchTimer) clearTimeout(searchTimer);
   searchTimer = null;
-  searchInputRef?.removeEventListener('input', handleSearchInput);
+  searchHandle?.destroy();
+  searchHandle = null;
   moduleRoot?.removeEventListener('click', handleModuleClick);
   moduleRoot?.removeEventListener('keydown', handleModuleKeydown);
   getSkillModal()?.removeEventListener('click', handleModalClick);
@@ -738,9 +751,6 @@ class SkillsModule extends BaseModule {
     skillRegistry.ensureInitialized();
     mountSkillModal(container);
     initEventListeners(container);
-    if (searchInputRef && currentKeyword) {
-      searchInputRef.value = currentKeyword;
-    }
     renderMetrics();
     renderCategories();
     renderList();

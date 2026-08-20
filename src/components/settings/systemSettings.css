@@ -752,6 +752,7 @@
   max-width: 18rem;
 }
 
+/* P1-2 二期：icon 色对齐统一搜索 token（--sops-search-icon，见 search-box.css） */
 .settings-search__icon {
   pointer-events: none;
   position: absolute;
@@ -764,7 +765,7 @@
   transform: translateY(-50%);
   align-items: center;
   justify-content: center;
-  color: var(--color-slate-400, #94a3b8);
+  color: var(--sops-search-icon, #94a3b8);
   font-size: 0.75rem;
 }
 
@@ -774,10 +775,11 @@
   padding-right: 0.75rem;
 }
 
+/* P1-2 二期：empty 文案色对齐统一搜索 token（--sops-search-empty-text） */
 .settings-search-empty {
   margin: 0;
   font-size: 0.6875rem;
-  color: var(--color-slate-400, #94a3b8);
+  color: var(--sops-search-empty-text, #94a3b8);
 }
 
 .settings-search-results {

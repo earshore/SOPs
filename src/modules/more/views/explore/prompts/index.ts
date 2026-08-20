@@ -8,6 +8,7 @@ import { copyTextToClipboard } from '@/common/utils/clipboard';
  */
 import '@/components/modal/AppModal';
 import { setSafeHtml } from '@/common/utils/security';
+import { createSearchBox, type SearchBoxHandle } from '@/common/components/SearchBox';
 
 import {
   PROMPT_CATEGORIES,
@@ -29,7 +30,7 @@ let currentPrompt: Prompt | null = null;
 let currentLang: 'zh' | 'en' = 'zh';
 let currentKeyword = '';
 let moduleRoot: HTMLElement | null = null;
-let searchInputRef: HTMLInputElement | null = null;
+let searchHandle: SearchBoxHandle | null = null;
 let promptModalRef: HTMLElement | null = null;
 
 type AppModalElement = HTMLElement & {
@@ -203,9 +204,22 @@ function handleDocumentKeydown(e: KeyboardEvent): void {
  */
 function initEventListeners(root: HTMLElement): void {
   moduleRoot = root;
-  searchInputRef = root.querySelector('#prompt-search');
+  const searchContainer = root.querySelector<HTMLElement>('[data-sops-searchbox="prompts"]');
 
-  searchInputRef?.addEventListener('input', handleSearch);
+  if (searchContainer) {
+    // P1-2 二期：统一搜索框（SearchBox 组件），页面内过滤语义由 onFilter 承接
+    searchHandle = createSearchBox({
+      placeholder: '搜索场景、动作或风险点...',
+      ariaLabel: '搜索提示词',
+      inputId: 'prompt-search',
+      onFilter: (query: string) => {
+        currentKeyword = query.trim();
+        renderPromptList();
+      },
+    });
+    searchHandle.mount(searchContainer);
+  }
+
   root.addEventListener('click', handleModuleClick);
   getPromptModal()?.addEventListener('click', handleModalBackdropClick);
   getPromptModal()?.addEventListener('close', syncPromptModalClosed);
@@ -213,23 +227,14 @@ function initEventListeners(root: HTMLElement): void {
 }
 
 function removeEventListeners(): void {
-  searchInputRef?.removeEventListener('input', handleSearch);
+  searchHandle?.destroy();
+  searchHandle = null;
   moduleRoot?.removeEventListener('click', handleModuleClick);
   getPromptModal()?.removeEventListener('click', handleModalBackdropClick);
   getPromptModal()?.removeEventListener('close', syncPromptModalClosed);
   document.removeEventListener('keydown', handleDocumentKeydown);
 
-  searchInputRef = null;
   moduleRoot = null;
-}
-
-/**
- * 处理搜索
- */
-function handleSearch(e: Event): void {
-  const target = e.target as HTMLInputElement;
-  currentKeyword = target.value.trim();
-  renderPromptList();
 }
 
 /**

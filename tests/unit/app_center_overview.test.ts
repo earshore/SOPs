@@ -51,7 +51,7 @@ const overviewTemplate = `
       <span class="app-overview-mini-badge app-overview-recent-count-badge">显示 0 项</span>
     </div>
     <div class="app-overview-recent-toolbar">
-      <input id="app-overview-recent-search" type="search">
+      <div data-sops-searchbox="app-recent"></div>
       <div class="app-overview-recent-type-filters"></div>
       <div class="app-overview-recent-status-filters"></div>
       <div class="app-overview-recent-columns-toggle" role="group" aria-label="最近继续列数">

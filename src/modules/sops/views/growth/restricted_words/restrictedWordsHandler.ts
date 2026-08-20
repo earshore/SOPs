@@ -4,6 +4,7 @@
  * Phase 5: 迁移到新架构 (SafeTemplateLoader, AlpineRegistry, SafeRenderer)
  */
 
+import { createSearchBox } from '@/common/components/SearchBox';
 import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import * as actionRegistry from '@/common/utils/actionRegistry';
@@ -63,6 +64,7 @@ interface RestrictedWordsPanelComponent {
 let currentResults = [...RESTRICTED_WORDS_DATABASE];
 let currentSiteContext: SiteContext = 'ALL';
 let removeEventListeners: (() => void) | null = null;
+let searchHandle: import('@/common/components/SearchBox').SearchBoxHandle | null = null;
 let registeredActions: string[] = [];
 
 let activeFilters: ActiveFilters = {
@@ -140,6 +142,7 @@ export function initRestrictedWordsPanel(): void {
 export function cleanupRestrictedWordsPanel(): void {
   removeEventListeners?.();
   removeEventListeners = null;
+  searchHandle = null;
 
   if (registeredActions.length > 0 && 'unregisterActions' in actionRegistry) {
     actionRegistry.unregisterActions(registeredActions);
@@ -191,20 +194,36 @@ function bindEventListeners(): void {
     cleanupFns.push(() => target.removeEventListener(type, listener));
   };
 
-  // 搜索输入
-  const searchInput = document.getElementById('rw-search-input') as HTMLInputElement | null;
+  // 搜索输入：统一 SearchBox 组件（P1-2 二期），onFilter 即时触发执行搜索
+  const searchTarget = document.querySelector<HTMLElement>(
+    '[data-sops-searchbox="restricted-words"]'
+  );
   const searchBtn = document.getElementById('rw-search-btn');
   const clearBtn = document.getElementById('rw-clear-btn');
   const searchModeSelect = document.getElementById('rw-search-mode') as HTMLSelectElement | null;
   const detailModal = document.getElementById('rw-detail-modal');
 
+  searchHandle = searchTarget
+    ? createSearchBox({
+        placeholder: '输入关键词检索 (如 Bamboo, Antibacterial, CE, Bio, Leder...)',
+        ariaLabel: '高危词检索关键词',
+        inputId: 'rw-search-input',
+        styleVariant: 'page',
+        onFilter: () => executeSearch(),
+      })
+    : null;
+  if (searchHandle && searchTarget) {
+    searchHandle.mount(searchTarget);
+    cleanupFns.push(() => {
+      searchHandle?.destroy();
+      searchHandle = null;
+    });
+  }
+
   addListener(searchBtn, 'click', () => executeSearch());
   addListener(detailModal, 'close', () => {
     detailModal?.classList.add('hidden');
     detailModal?.classList.remove('show');
-  });
-  addListener(searchInput, 'keypress', e => {
-    if ((e as KeyboardEvent).key === 'Enter') executeSearch();
   });
   addListener(clearBtn, 'click', () => resetFilters());
 
@@ -369,6 +388,7 @@ function resetFilters(): void {
   const siteContext = document.getElementById('rw-site-context') as HTMLSelectElement | null;
 
   if (searchInput) searchInput.value = '';
+  searchHandle?.clear();
   if (catFilter) catFilter.value = '';
   if (riskFilter) riskFilter.value = '';
   if (siteContext) siteContext.value = 'ALL';

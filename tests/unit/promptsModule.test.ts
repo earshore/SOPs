@@ -7,7 +7,7 @@ import { showToast } from '@/common/ui';
 const promptMocks = vi.hoisted(() => {
   const template = `
     <section>
-      <input id="prompt-search" />
+      <div data-sops-searchbox="prompts"></div>
       <div id="category-container"></div>
       <div id="prompt-list"></div>
       <app-modal id="prompt-detail-modal" class="hidden" title="提示词详情" size="full" no-header>
