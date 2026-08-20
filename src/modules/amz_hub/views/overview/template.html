@@ -9,7 +9,10 @@
       </div>
       <div class="wb-title-row">
         <h1 class="wb-title">Amazon 智库</h1>
-        <span aria-label="中心功能" class="wb-badge wb-badge-hub badge badge--hub">
+        <span
+          aria-label="中心功能"
+          class="wb-badge wb-badge-hub badge badge--hub"
+        >
           <i aria-hidden="true" class="fas fa-star"></i>HUB
         </span>
       </div>
@@ -32,9 +35,13 @@
       </div>
     </div>
   </div>
+  <!-- SearchBox 装配位（P1-2 统一搜索组件，由 index.ts 挂载） -->
+  <div data-sops-searchbox="amz_hub"></div>
 
   <!-- 平台定位声明 -->
-  <div class="bg-primary-50 border border-primary-100 rounded-xl p-4 mb-6 flex items-start gap-3">
+  <div
+    class="bg-primary-50 border border-primary-100 rounded-xl p-4 mb-6 flex items-start gap-3"
+  >
     <i class="fas fa-circle-info text-primary-600 text-xl mt-0.5"></i>
     <div>
       <h3 class="font-bold text-primary-800 text-sm mb-1">适用范围声明</h3>
@@ -47,7 +54,9 @@
   </div>
 
   <!-- 分类筛选器 -->
-  <div class="amz-hub-filter-panel mb-6 flex items-center gap-3 overflow-x-auto pb-2">
+  <div
+    class="amz-hub-filter-panel mb-6 flex items-center gap-3 overflow-x-auto pb-2"
+  >
     <button
       class="category-filter-btn active"
       data-category="all"
@@ -64,10 +73,20 @@
     >
       <i class="fas fa-lightbulb mr-2"></i><span>Amazon知识早知道</span>
     </button>
-    <button class="category-filter-btn" data-category="practice" type="button" aria-pressed="false">
+    <button
+      class="category-filter-btn"
+      data-category="practice"
+      type="button"
+      aria-pressed="false"
+    >
       <i class="fas fa-hands mr-2"></i><span>入门实操宝典</span>
     </button>
-    <button class="category-filter-btn" data-category="advanced" type="button" aria-pressed="false">
+    <button
+      class="category-filter-btn"
+      data-category="advanced"
+      type="button"
+      aria-pressed="false"
+    >
       <i class="fas fa-chart-line mr-2"></i><span>运营提升全攻略</span>
     </button>
   </div>
@@ -82,7 +101,9 @@
           <i class="fas fa-lightbulb"></i>
         </div>
         <div>
-          <h2 class="text-xl font-bold text-[color:var(--color-slate-900,#1e293b)]">
+          <h2
+            class="text-xl font-bold text-[color:var(--color-slate-900,#1e293b)]"
+          >
             第一模块：Amazon知识早知道
           </h2>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)]">
@@ -98,14 +119,19 @@
           data-tab="amz_eu_insights"
         >
           <div class="flex items-start justify-between mb-3">
-            <div class="sop-icon-container bg-[#eff6ff] text-[var(--module-accent-text)]">
+            <div
+              class="sop-icon-container bg-[#eff6ff] text-[var(--module-accent-text)]"
+            >
               <i class="fas fa-globe-europe"></i>
             </div>
-            <span class="sop-status-badge sop-status-active badge badge--status-active"
+            <span
+              class="sop-status-badge sop-status-active badge badge--status-active"
               >已发布</span
             >
           </div>
-          <h3 class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2">
+          <h3
+            class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2"
+          >
             市场洞察
           </h3>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)] mb-3">
@@ -120,14 +146,19 @@
           data-tab="amz_seo_strategy"
         >
           <div class="flex items-start justify-between mb-3">
-            <div class="sop-icon-container bg-[#eff6ff] text-[var(--module-accent-text)]">
+            <div
+              class="sop-icon-container bg-[#eff6ff] text-[var(--module-accent-text)]"
+            >
               <i class="fas fa-magnifying-glass-chart"></i>
             </div>
-            <span class="sop-status-badge sop-status-active badge badge--status-active"
+            <span
+              class="sop-status-badge sop-status-active badge badge--status-active"
               >已发布</span
             >
           </div>
-          <h3 class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2">
+          <h3
+            class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2"
+          >
             SEO 策略
           </h3>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)] mb-3">
@@ -142,14 +173,19 @@
           data-tab="amz_ecosystem"
         >
           <div class="flex items-start justify-between mb-3">
-            <div class="sop-icon-container bg-[#eff6ff] text-[var(--module-accent-text)]">
+            <div
+              class="sop-icon-container bg-[#eff6ff] text-[var(--module-accent-text)]"
+            >
               <i class="fas fa-network-wired"></i>
             </div>
-            <span class="sop-status-badge sop-status-active badge badge--status-active"
+            <span
+              class="sop-status-badge sop-status-active badge badge--status-active"
               >已发布</span
             >
           </div>
-          <h3 class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2">
+          <h3
+            class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2"
+          >
             A10 &amp; COSMO
           </h3>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)] mb-3">
@@ -170,7 +206,9 @@
           <i class="fas fa-hands"></i>
         </div>
         <div>
-          <h2 class="text-xl font-bold text-[color:var(--color-slate-900,#1e293b)]">
+          <h2
+            class="text-xl font-bold text-[color:var(--color-slate-900,#1e293b)]"
+          >
             第二模块：入门实操宝典
           </h2>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)]">
@@ -189,11 +227,14 @@
             <div class="sop-icon-container bg-emerald-50 text-emerald-600">
               <i class="fas fa-star"></i>
             </div>
-            <span class="sop-status-badge sop-status-active badge badge--status-active"
+            <span
+              class="sop-status-badge sop-status-active badge badge--status-active"
               >已发布</span
             >
           </div>
-          <h3 class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2">
+          <h3
+            class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2"
+          >
             教你打造优质Listing
           </h3>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)] mb-3">
@@ -211,11 +252,14 @@
             <div class="sop-icon-container bg-emerald-50 text-emerald-600">
               <i class="fas fa-calendar-alt"></i>
             </div>
-            <span class="sop-status-badge sop-status-active badge badge--status-active"
+            <span
+              class="sop-status-badge sop-status-active badge badge--status-active"
               >已发布</span
             >
           </div>
-          <h3 class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2">
+          <h3
+            class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2"
+          >
             EU营销日历
           </h3>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)] mb-3">
@@ -233,11 +277,14 @@
             <div class="sop-icon-container bg-emerald-50 text-emerald-600">
               <i class="fa-solid fa-gift"></i>
             </div>
-            <span class="sop-status-badge sop-status-active badge badge--status-active"
+            <span
+              class="sop-status-badge sop-status-active badge badge--status-active"
               >已发布</span
             >
           </div>
-          <h3 class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2">
+          <h3
+            class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2"
+          >
             促销活动
           </h3>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)] mb-3">
@@ -255,11 +302,14 @@
             <div class="sop-icon-container bg-emerald-50 text-emerald-600">
               <i class="fas fa-tools"></i>
             </div>
-            <span class="sop-status-badge sop-status-active badge badge--status-active"
+            <span
+              class="sop-status-badge sop-status-active badge badge--status-active"
               >已发布</span
             >
           </div>
-          <h3 class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2">
+          <h3
+            class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2"
+          >
             促销工具
           </h3>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)] mb-3">
@@ -280,7 +330,9 @@
           <i class="fas fa-chart-line"></i>
         </div>
         <div>
-          <h2 class="text-xl font-bold text-[color:var(--color-slate-900,#1e293b)]">
+          <h2
+            class="text-xl font-bold text-[color:var(--color-slate-900,#1e293b)]"
+          >
             第三模块：运营提升全攻略
           </h2>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)]">
@@ -299,11 +351,14 @@
             <div class="sop-icon-container bg-rose-50 text-rose-600">
               <i class="fas fa-rocket"></i>
             </div>
-            <span class="sop-status-badge sop-status-active badge badge--status-active"
+            <span
+              class="sop-status-badge sop-status-active badge badge--status-active"
               >已发布</span
             >
           </div>
-          <h3 class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2">
+          <h3
+            class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2"
+          >
             新品30天极速突围
           </h3>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)] mb-3">
@@ -321,11 +376,14 @@
             <div class="sop-icon-container bg-rose-50 text-rose-600">
               <i class="fas fa-chart-line"></i>
             </div>
-            <span class="sop-status-badge sop-status-active badge badge--status-active"
+            <span
+              class="sop-status-badge sop-status-active badge badge--status-active"
               >已发布</span
             >
           </div>
-          <h3 class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2">
+          <h3
+            class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2"
+          >
             链接转化率低自查优化的五大方面
           </h3>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)] mb-3">
@@ -343,11 +401,14 @@
             <div class="sop-icon-container bg-rose-50 text-rose-600">
               <i class="fas fa-trophy"></i>
             </div>
-            <span class="sop-status-badge sop-status-active badge badge--status-active"
+            <span
+              class="sop-status-badge sop-status-active badge badge--status-active"
               >已发布</span
             >
           </div>
-          <h3 class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2">
+          <h3
+            class="font-bold text-lg text-[color:var(--color-slate-900,#1e293b)] mb-2"
+          >
             成熟期运营策略
           </h3>
           <p class="text-sm text-[color:var(--color-slate-500,#64748b)] mb-3">
@@ -362,15 +423,21 @@
   <div class="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4">
     <div class="ui-card p-4 text-center">
       <div class="text-2xl font-bold text-[var(--module-accent-text)]">3</div>
-      <div class="text-xs text-[color:var(--color-slate-500,#64748b)] mt-1">Amazon知识早知道</div>
+      <div class="text-xs text-[color:var(--color-slate-500,#64748b)] mt-1">
+        Amazon知识早知道
+      </div>
     </div>
     <div class="ui-card p-4 text-center">
       <div class="text-2xl font-bold text-emerald-500">4</div>
-      <div class="text-xs text-[color:var(--color-slate-500,#64748b)] mt-1">入门实操宝典</div>
+      <div class="text-xs text-[color:var(--color-slate-500,#64748b)] mt-1">
+        入门实操宝典
+      </div>
     </div>
     <div class="ui-card p-4 text-center">
       <div class="text-2xl font-bold text-rose-500">3</div>
-      <div class="text-xs text-[color:var(--color-slate-500,#64748b)] mt-1">运营提升全攻略</div>
+      <div class="text-xs text-[color:var(--color-slate-500,#64748b)] mt-1">
+        运营提升全攻略
+      </div>
     </div>
   </div>
 </div>

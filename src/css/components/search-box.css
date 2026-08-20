@@ -1,0 +1,215 @@
+/*
+ * search-box.css - P1-2 统一搜索框组件视觉规范
+ *
+ * 侧边栏 / SOPs overview / 智库 overview 三处搜索位共用此文件，
+ * 不得在组件 DOM 内使用 Tailwind 内联类。token 命名遵循
+ * --sops-search-* 前缀，浅色/暗色由既有主题变量映射。
+ */
+:root {
+  --sops-search-bg: #ffffff;
+  --sops-search-bg-solid: rgba(255, 255, 255, 0.85);
+  --sops-search-border: var(--border-subtle, #e2e8f0);
+  --sops-search-focus-ring: var(--color-primary, #4f46e5);
+  --sops-search-icon: #94a3b8;
+  --sops-search-input-text: #0f172a;
+  --sops-search-placeholder: #94a3b8;
+  --sops-search-result-bg: #ffffff;
+  --sops-search-result-hover: var(--color-primary-light, #eef2ff);
+  --sops-search-result-text: #475569;
+  --sops-search-result-icon: #94a3b8;
+  --sops-search-empty-text: #94a3b8;
+  --sops-search-clear-size: 1.25rem;
+  --sops-search-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --sops-search-radius: 0.75rem;
+}
+
+/* 暗色模式：跟随项目既有暗色变量（--surface-elevated 等）映射 */
+html.dark-mode,
+html[data-theme='dark'] {
+  --sops-search-bg: var(--surface-elevated, #1e293b);
+  --sops-search-bg-solid: rgba(30, 41, 59, 0.9);
+  --sops-search-border: var(--border-subtle-dark, #334155);
+  --sops-search-focus-ring: var(--color-primary-light, #818cf8);
+  --sops-search-icon: #64748b;
+  --sops-search-input-text: #f1f5f9;
+  --sops-search-placeholder: #64748b;
+  --sops-search-result-bg: var(--surface-elevated, #1e293b);
+  --sops-search-result-hover: var(--color-primary-dark-hover, #312e81);
+  --sops-search-result-text: #cbd5e1;
+  --sops-search-result-icon: #64748b;
+  --sops-search-empty-text: #64748b;
+  --sops-search-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.sops-search-box {
+  position: relative;
+  width: 100%;
+  background: var(--sops-search-bg-solid);
+  border: 1px solid var(--sops-search-border);
+  border-radius: var(--sops-search-radius);
+  display: flex;
+  align-items: center;
+}
+
+.sops-search-box--page {
+  box-shadow: var(--sops-search-shadow);
+  background: var(--sops-search-bg);
+}
+
+.sops-search-box__prefix {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--sops-search-icon);
+  font-size: 0.75rem;
+}
+
+.sops-search-box__icon-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.sops-search-box__input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0.5rem 2.25rem 0.5rem 2rem;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--sops-search-input-text);
+  border-radius: var(--sops-search-radius);
+}
+
+.sops-search-box__input::placeholder {
+  color: var(--sops-search-placeholder);
+}
+
+.sops-search-box__input:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--sops-search-focus-ring);
+}
+
+.sops-search-box__clear {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sops-search-clear-size);
+  height: var(--sops-search-clear-size);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--sops-search-icon);
+  cursor: pointer;
+  border-radius: 9999px;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.sops-search-box__clear:hover {
+  color: var(--sops-search-input-text);
+  background: var(--sops-search-result-hover);
+}
+
+.sops-search-box__clear:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--sops-search-focus-ring);
+}
+
+.sops-search-box__results {
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  margin: 0;
+  padding: 0.375rem 0;
+  list-style: none;
+  background: var(--sops-search-bg);
+  border: 1px solid var(--sops-search-border);
+  border-radius: var(--sops-search-radius);
+  box-shadow: var(--sops-search-shadow);
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.sops-hidden {
+  display: none !important;
+}
+
+.sops-search-box__results.sops-hidden,
+.sops-search-box__clear.sops-hidden {
+  display: none !important;
+}
+
+.sops-search-box__option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--sops-search-result-text);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.sops-search-box__option:hover,
+.sops-search-box__option:focus-visible {
+  background: var(--sops-search-result-hover);
+  color: var(--sops-search-input-text);
+}
+
+.sops-search-box__option:focus-visible {
+  outline: 2px solid var(--sops-search-focus-ring);
+  outline-offset: -2px;
+}
+
+.sops-search-box__option i {
+  color: var(--sops-search-result-icon);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.sops-search-box__option-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sops-search-box__empty {
+  padding: 0.625rem 0.75rem;
+  color: var(--sops-search-empty-text);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* 减少动态：hover 过渡与焦点动画降级为无动画 */
+@media (prefers-reduced-motion: reduce) {
+  .sops-search-box__clear,
+  .sops-search-box__option {
+    transition: none;
+  }
+  .sops-search-box__input:focus-visible {
+    box-shadow: none;
+    outline: 2px solid var(--sops-search-focus-ring);
+  }
+}
+
+/* 后台标签页不可见时隐藏下拉，避免后台重排开销 */
+html.is-hidden .sops-search-box__results {
+  display: none;
+}

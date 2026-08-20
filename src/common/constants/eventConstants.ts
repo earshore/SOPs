@@ -52,6 +52,10 @@ export const APP_EVENTS = {
   LLM_REQUEST_SUCCESS: 'app:llm-request-success',
   LLM_REQUEST_ERROR: 'app:llm-request-error',
 
+  // 命令面板相关（P1-2 ⌘K）
+  COMMAND_PALETTE_OPEN: 'app:command-palette-open',
+  COMMAND_PALETTE_CLOSE: 'app:command-palette-close',
+
   // 搜索相关
   SEARCH_START: 'app:search-start',
   SEARCH_COMPLETE: 'app:search-complete',

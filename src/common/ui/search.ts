@@ -155,6 +155,9 @@ function searchMenuRoutes(query: string, config: MenuSearchConfig): void {
 
 /**
  * 搜索 SOPs
+ *
+ * @deprecated P1-2 起局部搜索统一改用 `SearchBox` 组件（`src/common/components/SearchBox.ts`），
+ *   搜索内核与命令面板共用同一索引引擎（`filterCommands`）；本函数为历史悬空绑定保留。
  */
 export function searchSOPs(query: string): void {
   searchMenuRoutes(query, {
@@ -182,6 +185,9 @@ export function clearSOPSearch(): void {
 
 /**
  * 搜索智库内容
+ *
+ * @deprecated P1-2 起局部搜索统一改用 `SearchBox` 组件（`src/common/components/SearchBox.ts`），
+ *   搜索内核与命令面板共用同一索引引擎（`filterCommands`）；本函数为历史悬空绑定保留。
  */
 export function searchHub(query: string): void {
   searchMenuRoutes(query, {
