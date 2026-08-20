@@ -1,5 +1,5 @@
-import eventBus from '@/common/EventBus';
 import { createSearchBox, type SearchBoxHandle } from '@/common/components/SearchBox';
+import eventBus from '@/common/EventBus';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui/notifications';
 import { copyTextToClipboard } from '@/common/utils/clipboard';

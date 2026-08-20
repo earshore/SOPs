@@ -227,7 +227,8 @@ export default [
   },
   {
     // 服务文件可以访问localStorage（因为它们封装了访问）
-    files: ['**/storageService.ts', '**/secureStorage.ts', '**/persist.ts'],
+    // Level 3 B'：storageService 拆分子模块继承同一豁免语义
+    files: ['**/storageService.ts', '**/storage/**/*.ts', '**/secureStorage.ts', '**/persist.ts'],
     rules: {
       'no-restricted-globals': 'off',
     },
