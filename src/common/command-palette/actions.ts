@@ -5,11 +5,14 @@
  * 保持与 settings 面板深链机制（APP_EVENTS.SETTINGS_OPEN）同一模式。
  */
 import { APP_EVENTS } from '@/common/constants/eventConstants';
+import { ThemeManager } from '@/common/config/themeConfig';
 
 import type { ActionCommandItem } from './types';
 
 // 延迟 resolve，避免模块求值期静态绑定导致测试 mock 失效（actions.ts 与
 // 面板共享同一 mock 时点）。运行时解析开销由模块缓存承担，可忽略。
+// themeConfig 例外：main.ts / settings 已静态引入（必然在主 chunk），动态
+// import 无法拆包，故直接静态绑定（见 resolveTheme）。
 function resolveNavigate(): Promise<(routeId: string) => Promise<boolean>> {
   return import('@/common/router/index').then(m => m.navigateToRouteId);
 }
@@ -21,9 +24,7 @@ function resolveEventBus(): Promise<{
 }
 
 function resolveTheme(): Promise<{ applyColorMode(mode: string): void }> {
-  return import('@/common/config/themeConfig').then(
-    m => m.ThemeManager as { applyColorMode(mode: string): void }
-  );
+  return Promise.resolve(ThemeManager as { applyColorMode(mode: string): void });
 }
 
 type SettingsSectionId =
