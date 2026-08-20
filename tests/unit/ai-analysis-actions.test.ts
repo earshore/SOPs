@@ -37,6 +37,7 @@ import { getScrapedDataFingerprint } from '../../src/modules/app_center/views/ma
 // Mock 依赖
 vi.mock('@/common/ui/index', () => ({
   showToast: vi.fn(),
+  announceDone: vi.fn(),
 }));
 
 const mockAppStoreState = vi.hoisted(() => ({

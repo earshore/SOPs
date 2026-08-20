@@ -6,6 +6,11 @@
 import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '@/common/utils/security';
+import { showToast } from '@/common/ui';
+import eventBus from '@/common/EventBus';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import type { SettingsOpenOptions } from '@/components/settings/settingsOpenOptions';
+import { getAiConnectionStatus, isWelcomeShown, markWelcomeShown } from './aiConnectionStatus';
 import './homeDisplay.css';
 
 interface ParticleConfig {
@@ -106,6 +111,8 @@ class HomeModule extends BaseModule {
   /** rAF scheduled from ResizeObserver — cancelled on unmount to avoid post-leave work. */
   private resizeRafId: number | null = null;
   private resizeObserver: ResizeObserver | null = null;
+  /** 视口不可见时暂停粒子动画，切回后恢复，避免后台白跑 60fps（P1-1）。 */
+  private pausedByVisibility = false;
   private particles: Particle[] = [];
   private mouse: MousePosition = { x: -1000, y: -1000 };
   private canvas: HTMLCanvasElement | null = null;
@@ -144,6 +151,8 @@ class HomeModule extends BaseModule {
     this.updateTime();
     this.setInterval(() => this.updateTime(), 1000);
     this.initFloatingWorkbench();
+    // P0-1：首屏真实 AI 状态徽标（读取 LLM 配置快照，非静态写死）。
+    void this.refreshAiStatus();
 
     const canvas = document.getElementById('particles-canvas') as HTMLCanvasElement | null;
     if (!canvas) return;
@@ -152,9 +161,74 @@ class HomeModule extends BaseModule {
     this.ctx = canvas.getContext('2d');
     if (!this.ctx) return;
 
-    this.addEventListener(document, 'mousemove', e => this.handleMouseMove(e as MouseEvent));
-    this.initResizeObserver();
-    this.animate();
+    // P1-1：尊重 prefers-reduced-motion；鼠标交互仅非小屏启用。
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isSmallScreen = window.matchMedia('(max-width: 768px)').matches;
+    if (!prefersReducedMotion) {
+      if (!isSmallScreen) {
+        this.addEventListener(document, 'mousemove', e => this.handleMouseMove(e as MouseEvent));
+      }
+      this.initResizeObserver();
+      this.animate();
+      this.addEventListener(
+        document as unknown as HTMLElement,
+        'visibilitychange' as unknown as keyof HTMLElementEventMap,
+        () => {
+          this.handleVisibilityChange();
+        }
+      );
+    }
+  }
+
+  /**
+   * P0-1 首屏真实 AI 状态：同步 LLM 配置快照（设置面板健康判定同源）到徽标；
+   * 首次访问且未配置时弹出一次性首启引导 toast（含“打开设置”深链 CTA）。
+   */
+  private async refreshAiStatus(): Promise<void> {
+    const statusText = document.querySelector('.ai-status .status-text') as HTMLElement | null;
+    const statusDot = document.querySelector('.ai-status .status-dot-inner') as HTMLElement | null;
+    if (!statusText) return;
+
+    const status = await getAiConnectionStatus();
+    if (status.state === 'connected') {
+      statusText.textContent = status.label;
+      statusDot?.classList.remove('status-dot-inner--unconfigured', 'status-dot-inner--error');
+      return;
+    }
+
+    statusText.textContent = status.label;
+    statusDot?.classList.toggle('status-dot-inner--unconfigured', status.state === 'unconfigured');
+    statusDot?.classList.toggle('status-dot-inner--error', status.state === 'error');
+
+    if (!isWelcomeShown()) {
+      markWelcomeShown();
+      const openSettings = (): void => {
+        const deepLink: SettingsOpenOptions = { sectionId: 'settings-section-llm' };
+        eventBus.emit(APP_EVENTS.SETTINGS_OPEN, { ...deepLink, timestamp: Date.now() });
+      };
+      showToast('欢迎！完成 2 步即可使用 AI 功能', {
+        type: 'info',
+        description: '1. 选择 LLM 提供商并填写 API Key；2. 保存配置后返回首页',
+        duration: 8000,
+        action: { label: '打开设置', onClick: openSettings },
+      });
+    }
+  }
+
+  private handleVisibilityChange(): void {
+    if (document.hidden) {
+      this.pausedByVisibility = true;
+      if (this.animationFrameId !== null) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+      }
+      return;
+    }
+    if (this.pausedByVisibility && this.isMounted) {
+      this.pausedByVisibility = false;
+      this.lastFrameTime = 0;
+      this.animate();
+    }
   }
 
   onUnmount(): void {
@@ -370,7 +444,7 @@ class HomeModule extends BaseModule {
   }
 
   private animate(currentTime = 0): void {
-    if (!this.isMounted) return;
+    if (!this.isMounted || this.pausedByVisibility) return;
 
     const elapsed = currentTime - this.lastFrameTime;
     if (elapsed < this.frameInterval) {

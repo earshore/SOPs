@@ -21,7 +21,7 @@ export {
   scrollToHubModule,
   scrollToMoreModule,
 } from './navigation';
-export { showToast, showProgress, type ToastType } from './notifications';
+export { showToast, showProgress, announceDone, type ToastType } from './notifications';
 export {
   searchSOPs,
   clearSOPSearch,

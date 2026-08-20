@@ -124,6 +124,21 @@ export function showToast(title: string, options: ToastOptions = {}): void {
 }
 
 /**
+ * 任务完成反馈统一入口（P0-2 成功反馈闭环）。
+ * 复用既有 showToast 的 CTA（ToastAction: label + onClick）能力，为作业型
+ * 模块（Master Analysis 等）提供一致的“工作项完成 + 下一步”反馈模式。
+ * 显示时长默认 5000ms，比配置型反馈更久，保证作业完成信息可感知。
+ */
+export function announceDone(title: string, description?: string, action?: ToastAction): void {
+  showToast(title, {
+    type: 'success',
+    description,
+    duration: 5000,
+    ...(action ? { action } : {}),
+  });
+}
+
+/**
  * 显示/隐藏全局进度条
  */
 export function showProgress(show: boolean, percent: number = 0): void {
