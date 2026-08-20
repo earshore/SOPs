@@ -3,12 +3,12 @@
 // 纯函数模块，零 UI 依赖：读取 LLM 配置快照并产出连接状态。
 import { getLlmProviderConfig } from '@/common/config/llmProviders';
 import { StorageService } from '@/services/storageService';
-import { evaluateSettingsHealth } from '@/components/settings/domain/settingsHealth';
+import { evaluateSettingsHealth } from '@/common/settings/settingsHealth';
 import {
   loadProviderApiKey,
   resolveProviderEndpoint,
-} from '@/components/settings/domain/settingsLlmModel';
-import type { SavedLLMConfig } from '@/components/settings/panelTypes';
+  type SavedLlmConfigLike,
+} from '@/common/settings/settingsLlmModel';
 
 export type AiConnectionState = 'connected' | 'unconfigured' | 'error';
 
@@ -25,9 +25,11 @@ function readActiveProvider(): string | null {
   return StorageService.get<string>('llm_active_provider') || null;
 }
 
-function readProviderConfig(provider: string): SavedLLMConfig | null {
+function readProviderConfig(provider: string): SavedLlmConfigLike | null {
   try {
-    return StorageService.get<Record<string, unknown>>(`llm_${provider}`) as SavedLLMConfig | null;
+    return StorageService.get<Record<string, unknown>>(
+      `llm_${provider}`
+    ) as SavedLlmConfigLike | null;
   } catch {
     return null;
   }
@@ -78,7 +80,7 @@ export async function getAiConnectionStatus(): Promise<AiConnectionStatus> {
     : '';
   let apiKey = '';
   try {
-    apiKey = await loadProviderApiKey(provider, (savedConfig || {}) as SavedLLMConfig);
+    apiKey = await loadProviderApiKey(provider, savedConfig);
   } catch {
     apiKey = '';
   }

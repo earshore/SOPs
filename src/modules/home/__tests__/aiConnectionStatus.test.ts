@@ -16,17 +16,14 @@ vi.mock('@/services/storageService', async importOriginal => {
   };
 });
 
-vi.mock('@/components/settings/domain/settingsLlmModel', () => ({
+vi.mock('@/common/settings/settingsLlmModel', () => ({
   resolveProviderEndpoint: vi.fn(),
   loadProviderApiKey: vi.fn(),
 }));
 
 import { DEFAULT_LLM_PROVIDER_ID } from '@/common/config/llmProviders';
 import { StorageService } from '@/services/storageService';
-import {
-  loadProviderApiKey,
-  resolveProviderEndpoint,
-} from '@/components/settings/domain/settingsLlmModel';
+import { loadProviderApiKey, resolveProviderEndpoint } from '@/common/settings/settingsLlmModel';
 import { getAiConnectionStatus, isWelcomeShown, markWelcomeShown } from '../aiConnectionStatus';
 
 const mockedGet = vi.mocked(StorageService.get);

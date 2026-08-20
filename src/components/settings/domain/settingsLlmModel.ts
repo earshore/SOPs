@@ -1,6 +1,5 @@
 // TD-SET-01 Phase 1: LLM pure helpers moved verbatim (sections <= 600 lines).
 import {
-  DEFAULT_LLM_PROVIDER_ID,
   OBSOLETE_PRESET_MODEL_IDS,
   OLD_PRESET_MODEL_IDS,
   getLlmProviderConfig,
@@ -17,7 +16,6 @@ import {
   type ApiPathId,
   type ResolvedModelCapability,
 } from '@/services/modelCapability';
-import { StorageService } from '@/services/storageService';
 import { LLMProviderConfig } from '@/types/state';
 
 import { getModelId, type ModelMetadata, type ModelOption } from '../domain/localDataCopy';
@@ -185,28 +183,9 @@ export function buildAutoSaveLlmConfig(
 // 收敛：实现与共享组件 modelSelectService.dedupeModels 完全重复（P2 归一化），
 // 此处 re-export 组件实现，保持导出名/签名/行为兼容。
 export { dedupeModels };
-export function resolveProviderEndpoint(
-  provider: string,
-  config: ProviderConfig,
-  savedEndpoint: string
-): string {
-  const shouldUseNewApiDefault =
-    provider === DEFAULT_LLM_PROVIDER_ID &&
-    (!savedEndpoint || savedEndpoint === '/v1' || savedEndpoint === '/v1/');
-  return shouldUseNewApiDefault ? config.endpoint : savedEndpoint || config.endpoint || '';
-}
-
-export async function loadProviderApiKey(
-  provider: string,
-  savedConfig: SavedLLMConfig
-): Promise<string> {
-  try {
-    const key = await StorageService.getSecure(`llm_key_${provider}`, '');
-    return key || '';
-  } catch {
-    return savedConfig && 'apiKey' in savedConfig ? savedConfig.apiKey || '' : '';
-  }
-}
+// Shared with the home AI status badge; implementations live in src/common/settings
+// (AC-6: sections/domain must not be imported from outside components/settings).
+export { loadProviderApiKey, resolveProviderEndpoint } from '@/common/settings/settingsLlmModel';
 export function getRawProviderModels(
   savedConfig: SavedLLMConfig,
   config: ProviderConfig
