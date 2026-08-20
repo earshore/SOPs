@@ -180,8 +180,7 @@
 }
 
 .ppc-search-terms-threshold-toggle,
-.ppc-search-terms-export-btn,
-.ppc-search-terms-search-clear-btn {
+.ppc-search-terms-export-btn {
   cursor: pointer;
   touch-action: manipulation;
 }
@@ -229,8 +228,7 @@
 /* 共享 focus 风格（outline 2px var(--color-primary)）；
    已迁移按钮的 focus 由 .action-btn / .category-filter-btn 自带 */
 .ppc-search-terms-threshold-toggle:focus-visible,
-.ppc-search-terms-export-btn:focus-visible,
-.ppc-search-terms-search-clear-btn:focus-visible {
+.ppc-search-terms-export-btn:focus-visible {
   outline: 2px solid var(--color-primary, var(--color-primary));
   outline-offset: 2px;
 }

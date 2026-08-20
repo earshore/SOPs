@@ -25,9 +25,6 @@ export interface PpcSearchTermsEventHandlers {
   exportWaste(): void;
   exportGrowth(): void;
   copySummary(): Promise<void>;
-  handleActionSearch(): void;
-  handleActionSearchKeydown(event: Event): void;
-  clearActionSearch(): void;
   setFilter(button: HTMLElement): void;
   handleThresholdChange(): void;
   handleAnalysisSettingsChange(): void;
@@ -82,21 +79,6 @@ export function bindPpcSearchTermsEvents(
   addListener(getElement(container, 'ppc-search-terms-copy-summary'), 'click', () => {
     void handlers.copySummary();
   });
-  addListener(
-    getInput(container, 'ppc-search-terms-action-search'),
-    'input',
-    handlers.handleActionSearch
-  );
-  addListener(
-    getInput(container, 'ppc-search-terms-action-search'),
-    'keydown',
-    handlers.handleActionSearchKeydown
-  );
-  addListener(
-    getElement(container, 'ppc-search-terms-action-search-clear'),
-    'click',
-    handlers.clearActionSearch
-  );
   addListener(getElement(container, 'ppc-search-terms-filter-buttons'), 'click', event => {
     const target =
       event.target instanceof Element

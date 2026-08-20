@@ -36,6 +36,19 @@
   justify-content: flex-end;
 }
 
+/* P1-2 二期：顶栏全局搜索容器（SearchBox 组件挂载位） */
+.header-global-search {
+  display: flex;
+  align-items: center;
+  width: 18rem;
+  flex-shrink: 1;
+}
+@media (max-width: 767px) {
+  .header-global-search {
+    display: none;
+  }
+}
+
 /* ========================================
    Logo 区域
    ======================================== */

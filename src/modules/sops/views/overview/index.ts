@@ -1,4 +1,3 @@
-import { createSearchBox } from '@/common/components/SearchBox';
 import {
   bindCategoryFilterButtons,
   scrollToModuleSection,
@@ -36,18 +35,4 @@ export function scrollToModule(categoryId: string): void {
 function initOverviewEvents(container: HTMLElement, context: SopTemplateModuleContext): void {
   const disposeFilter = bindCategoryFilterButtons(container);
   context.addDisposable(disposeFilter);
-
-  // P1-2：统一 SearchBox 组件装配（模板中 data-sops-searchbox 装配位）
-  const searchboxRoot = container.querySelector('[data-sops-searchbox="sops"]');
-  if (searchboxRoot) {
-    const handle = createSearchBox({
-      moduleId: 'sops',
-      placeholder: '搜索 SOP 页面...',
-      ariaLabel: '搜索 SOP 页面',
-      styleVariant: 'page',
-      hideResultsWhenEmpty: true,
-    });
-    handle.mount(searchboxRoot as HTMLElement);
-    context.addDisposable(() => handle.destroy());
-  }
 }

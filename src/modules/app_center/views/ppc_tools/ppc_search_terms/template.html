@@ -370,26 +370,11 @@
       <div id="ppc-search-terms-filter-buttons" class="flex flex-wrap gap-2"></div>
     </div>
 
-    <div class="ppc-search-terms-action-toolbar">
-      <label class="ppc-search-terms-action-search">
-        <span class="sr-only">搜索动作清单</span>
-        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-        <input
-          id="ppc-search-terms-action-search"
-          type="search"
-          autocomplete="off"
-          placeholder="搜索词 / 活动 / 店铺 / 原因"
-          aria-describedby="ppc-search-terms-result-count ppc-search-terms-table-help"
-        />
-      </label>
-      <button
-        id="ppc-search-terms-action-search-clear"
-        type="button"
-        class="ppc-search-terms-search-clear-btn"
-        disabled
-      >
-        <i class="fas fa-xmark"></i>清除
-      </button>
+    <div
+      class="ppc-search-terms-action-toolbar"
+      aria-describedby="ppc-search-terms-result-count ppc-search-terms-table-help"
+    >
+      <div data-sops-searchbox="ppc-action"></div>
     </div>
 
     <div class="flex flex-wrap gap-2 mb-4">

@@ -22,14 +22,6 @@ export {
   scrollToMoreModule,
 } from './navigation';
 export { showToast, showProgress, announceDone, type ToastType } from './notifications';
-export {
-  searchSOPs,
-  clearSOPSearch,
-  searchHub,
-  clearHubSearch,
-  searchSidebar,
-  clearSidebarSearch,
-} from './search';
 import { closeMegaMenus } from './megaMenu';
 import {
   toggleSOPGroup,
@@ -38,18 +30,8 @@ import {
   scrollToMoreModule,
 } from './navigation';
 export { navigateToRouteId, getRouter, getCurrentRoute, hasRoute } from '../router/initRouter';
-import { searchSidebar, clearSOPSearch, clearHubSearch, clearSidebarSearch } from './search';
 import { navigateToRouteId } from '../router/initRouter';
 import { registerActions, unregisterActions } from '../utils/actionRegistry';
-
-const sidebarSearchInputHandler = (event: Event): void => {
-  const target = event.target as HTMLInputElement | null;
-  if (target?.id === 'sidebar-search-input') {
-    searchSidebar(target.value);
-  }
-};
-
-document.addEventListener('input', sidebarSearchInputHandler);
 
 // ========================
 // 注册动作到 ActionRegistry
@@ -71,9 +53,6 @@ const UI_ACTIONS = {
   },
   'toggle-sop-group': (params: Record<string, unknown>) =>
     toggleSOPGroup({ category: (params.group as string) || (params.category as string) }),
-  'clear-sop-search': clearSOPSearch,
-  'clear-hub-search': clearHubSearch,
-  'clear-sidebar-search': clearSidebarSearch,
   'scroll-to-sop-module': (params: Record<string, unknown>) =>
     scrollToSOPModule(params.category as string),
   'scroll-to-hub-module': (params: Record<string, unknown>) =>
@@ -88,7 +67,6 @@ registerActions(UI_ACTIONS);
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
-    document.removeEventListener('input', sidebarSearchInputHandler);
     unregisterActions(uiActionNames);
   });
 }

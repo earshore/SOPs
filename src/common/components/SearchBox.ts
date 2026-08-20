@@ -1,7 +1,7 @@
 /**
  * SearchBox.ts - 统一搜索框组件（P1-2 一期）
  *
- * 侧边栏 / SOPs overview / 智库 overview 三处搜索位共用同一工厂：
+ * 侧边栏 / SOPs overview / 智库 overview / 全局 header 四处搜索位共用同一工厂：
  * - 同一段 DOM 生成代码、同一份 CSS token（search-box.css）
  * - 同一模糊匹配核心（command-palette/filterCommands）
  * - 结果条目沿用既有 `data-action="switch-tab"` / `data-tab=<routeId>` 语义，
@@ -15,7 +15,7 @@ import { filterCommands } from '@/common/command-palette/filterCommands';
 
 import type { CommandItem } from '@/common/command-palette/types';
 
-export type SearchBoxStyleVariant = 'sidebar' | 'page';
+export type SearchBoxStyleVariant = 'sidebar' | 'page' | 'header';
 
 export interface SearchBoxOptions {
   /** 占位文案，默认 "搜索功能..."。 */
@@ -30,7 +30,7 @@ export interface SearchBoxOptions {
   inputId?: string;
   /** 初始值（挂载时自动触发一次搜索）。 */
   initialValue?: string;
-  /** 尺寸/圆角变体：sidebar 紧凑、page 标准。 */
+  /** 尺寸/圆角变体：sidebar 紧凑、page 标准、header 深色顶栏。 */
   styleVariant?: SearchBoxStyleVariant;
   /** 展示的最大结果数，默认 8。 */
   maxResults?: number;
@@ -360,10 +360,17 @@ function applySearchBoxQuery(
   });
 }
 
-/**
- * 搜索框行为（渲染/搜索/导航/生命周期），DOM 与逻辑分离便于单测。
- */
-function attachSearchBoxBehavior(
+/** 搜索框行为集合（渲染/搜索/导航/事件处理）。 */
+interface SearchBoxBehaviors {
+  clear(): void;
+  runSearch(): void;
+  onInput(): void;
+  onKeydown(event: KeyboardEvent): void;
+  onClearClick(event: Event): void;
+}
+
+/** 构建搜索框行为集合（便于单测：行为与 DOM 装配解耦）。 */
+function buildSearchBoxBehaviors(
   dom: {
     root: HTMLDivElement;
     input: HTMLInputElement;
@@ -371,18 +378,15 @@ function attachSearchBoxBehavior(
     results: HTMLUListElement;
   },
   options: SearchBoxOptions
-): SearchBoxHandle {
-  const { root, input, clearButton, results } = dom;
+): { behaviors: SearchBoxBehaviors; destroyState: SearchBoxDestroyState } {
+  const { input, clearButton, results } = dom;
   const moduleId = options.moduleId;
   const onExecute = options.onExecute;
   const onFilter = options.onFilter;
   const maxResults = options.maxResults ?? DEFAULT_MAX_RESULTS;
   const emptyMessage = options.emptyMessage ?? DEFAULT_EMPTY_MESSAGE;
   const placeholder = options.placeholder ?? '搜索功能...';
-  const initialValue = options.initialValue ?? '';
   const hideResultsWhenEmpty = options.hideResultsWhenEmpty ?? true;
-
-  const clearResults = onFilter ? () => undefined : hideResults;
 
   const destroyState: SearchBoxDestroyState = {
     destroyed: false,
@@ -390,16 +394,6 @@ function attachSearchBoxBehavior(
   };
   const getCandidates = (): CommandItem[] =>
     moduleId ? filterByModule(getIndex(), moduleId) : getIndex();
-
-  function clear(): void {
-    input.value = '';
-    clearButton.classList.add('sops-hidden');
-    if (hideResultsWhenEmpty || onFilter) {
-      clearResults();
-      return;
-    }
-    render(getCandidates(), placeholder);
-  }
 
   function hideResults(): void {
     results.classList.add('sops-hidden');
@@ -409,6 +403,25 @@ function attachSearchBoxBehavior(
     results.innerHTML = '';
   }
 
+  function render(items: CommandItem[], emptyFallback: string): void {
+    renderSearchResults(results, items, maxResults, emptyFallback, onSelect);
+  }
+
+  function clear(): void {
+    input.value = '';
+    clearButton.classList.add('sops-hidden');
+    if (onFilter) {
+      // 页面内过滤模式：同步清空页面过滤状态（hideResults 为 true 时已无结果面板）。
+      onFilter('');
+      return;
+    }
+    if (hideResultsWhenEmpty) {
+      hideResults();
+      return;
+    }
+    render(getCandidates(), placeholder);
+  }
+
   function onSelect(item: CommandItem): void {
     if (onExecute) {
       onExecute(item);
@@ -416,10 +429,6 @@ function attachSearchBoxBehavior(
     }
     // 默认走 actionRegistry 的 switch-tab 语义（navigateToRouteId）。
     clear();
-  }
-
-  function render(items: CommandItem[], emptyFallback: string): void {
-    renderSearchResults(results, items, maxResults, emptyFallback, onSelect);
   }
 
   const runSearch = (): void =>
@@ -433,6 +442,7 @@ function attachSearchBoxBehavior(
       hideResults,
       onFilter,
     });
+
   const onInput = (): void => {
     if (!destroyState.destroyed && destroyState.mountedInput) runSearch();
   };
@@ -443,11 +453,11 @@ function attachSearchBoxBehavior(
     clear();
   };
 
-  function onKeydown(event: KeyboardEvent): void {
+  const onKeydown = (event: KeyboardEvent): void => {
     handleSearchBoxKeydown(event, {
       input,
       results,
-      clear: () => {
+      clear: (): void => {
         clear();
         input.blur();
       },
@@ -458,11 +468,33 @@ function attachSearchBoxBehavior(
         }
       },
     });
-  }
+  };
 
-  input.addEventListener('input', onInput);
-  input.addEventListener('keydown', onKeydown);
-  clearButton.addEventListener('click', onClearClick);
+  return {
+    behaviors: { clear, runSearch, onInput, onKeydown, onClearClick },
+    destroyState,
+  };
+}
+
+/**
+ * 搜索框行为（渲染/搜索/导航/生命周期），DOM 与逻辑分离便于单测。
+ */
+function attachSearchBoxBehavior(
+  dom: {
+    root: HTMLDivElement;
+    input: HTMLInputElement;
+    clearButton: HTMLButtonElement;
+    results: HTMLUListElement;
+  },
+  options: SearchBoxOptions
+): SearchBoxHandle {
+  const { root, input, clearButton } = dom;
+  const { behaviors, destroyState } = buildSearchBoxBehaviors(dom, options);
+  const initialValue = options.initialValue ?? '';
+
+  input.addEventListener('input', behaviors.onInput);
+  input.addEventListener('keydown', behaviors.onKeydown);
+  clearButton.addEventListener('click', behaviors.onClearClick);
   destroyState.mountedInput = true;
 
   return buildSearchBoxHandle({
@@ -470,10 +502,10 @@ function attachSearchBoxBehavior(
     input,
     clearButton,
     initialValue,
-    runSearch,
-    onInput,
-    onKeydown,
-    onClearClick,
+    runSearch: behaviors.runSearch,
+    onInput: behaviors.onInput,
+    onKeydown: behaviors.onKeydown,
+    onClearClick: behaviors.onClearClick,
     destroyState,
   });
 }
