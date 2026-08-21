@@ -263,9 +263,9 @@ type PromptlabPanelState = Pick<
   | '_unsubscribers'
   | '_appStoreUnsubscribe'
   | 'listingVersionMenuOpen'
-  | 'listingVersionPreference'
 > & {
   reportRevision: number;
+  listingVersionPreference: ListingPromptVersion;
   /** EventBus + appStore subscriptions are init-once until destroy. */
   _subscriptionsInitialized: boolean;
 };
