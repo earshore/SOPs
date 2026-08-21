@@ -264,6 +264,34 @@
               >以当地语言为准</span
             >
           </div>
+          <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
+            <span class="text-slate-600">同一字词（含品牌名）</span>
+            <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded"
+              >≤ 2 次</span
+            >
+          </div>
+          <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
+            <span class="text-slate-600">禁用特殊字符</span>
+            <span class="font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded"
+              >! $ ? _ { } ^ ¬ ¦</span
+            >
+          </div>
+          <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
+            <span class="text-slate-600">促销/受限用语</span>
+            <span class="font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">禁止使用</span>
+          </div>
+          <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
+            <span class="text-slate-600">信息顺序</span>
+            <span class="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded"
+              >品牌→款式→类型→属性→颜色/尺寸→型号</span
+            >
+          </div>
+          <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
+            <span class="text-slate-600">商品亮点（溢出信息）</span>
+            <span class="font-bold text-[var(--module-accent-text)] bg-[#eff6ff] px-2 py-0.5 rounded"
+              >≤ 125 字符</span
+            >
+          </div>
           <p class="ui-card__muted text-xs mt-2">
             * Amazon 已公告非媒体类商品标题规则将收紧；2026-07-27 起按 75
             字符口径准备。不同类目、媒体类和后台迁移状态可能不同，上架前以 Seller Central
@@ -1926,6 +1954,24 @@
               class="rounded text-[var(--module-accent-text)] w-4 h-4 flex-shrink-0"
             />
             <span class="text-slate-700">包含同义词扩展，语义连贯，人类可读</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              class="rounded text-[var(--module-accent-text)] w-4 h-4 flex-shrink-0"
+            />
+            <span class="text-slate-700"
+              >同一字词（含品牌名）在标题中≤2 次，信息顺序为品牌→款式→类型→属性→颜色/尺寸→型号</span
+            >
+          </label>
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              class="rounded text-[var(--module-accent-text)] w-4 h-4 flex-shrink-0"
+            />
+            <span class="text-slate-700"
+              >多变体 ASIN 标题结构一致；溢出信息已放入商品亮点字段（≤125 字符）</span
+            >
           </label>
         </div>
       </div>

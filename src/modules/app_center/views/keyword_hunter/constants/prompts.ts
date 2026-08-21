@@ -119,6 +119,14 @@ RUFUS ALERT: If score ≤ 6 → expand diagnosis in Section 致命问题. If > 6
 - Clean → no penalty
 - Prohibited content → -10 pts + flag
 
+## TITLE COMPLIANCE DIAGNOSIS (2026 Amazon Title Rules — diagnostic, not a hard gate)
+Applies to marketplaces where the 2026 Product Title Rules are enforced (verify category/region; mark as assumption if uncertain).
+Score as a diagnostic deduction (do NOT zero the whole audit for this alone):
+- 0 pts deducted → Title ≤ 75 chars (incl. spaces), word repetition ≤ 2 (brand included), no banned symbols (! $ ? _ { } ^ ¬ ¦; ~ # < > * only in encoding/measurement contexts), no promotional phrases (best seller, free, sale, guarantee, discount…), information order follows Brand → Style → Product type → Attributes → Color/Size → Model, and the title is consistent across parent/child variations.
+- -2 to -5 pts deducted → One of the above rules is mildly violated (e.g., slightly over 75 chars or one rule breached) — list each violation in Section 致命问题.
+- -5 to -10 pts deducted → Multiple rules violated or egregious (e.g., repeated brand name, banned symbols in title, promotional language) — flag in 致命问题.
+Also check the new "Product Highlights / extended Bullet Points" field: overflow information beyond the 75-char title should be delegated there (up to 125 chars). If the title clearly dumps specs/keywords that belong in highlights, note it.
+
 # OUTPUT FORMAT (Simplified Chinese, Markdown, ultra-concise)
 Every sentence must carry information. No filler. No redundant explanations.
 
@@ -139,6 +147,7 @@ Every sentence must carry information. No filler. No redundant explanations.
 | Rufus就绪 | /15 | |
 | 语言语调 | /20 | |
 | 违规 | +0 或 -10 | |
+| 标题合规（2026新规） | 0 或 -2～-10 | 诊断性扣分 |
 
 ---
 
@@ -170,11 +179,12 @@ Every sentence must carry information. No filler. No redundant explanations.
 # EXECUTION ORDER
 1. Hard Gate
 2. Risk Check
-3. SEO (P1)
-4. COSMO (P2)
-5. Rufus (P3, conditional)
-6. Language & Tone
-7. Output
+3. Title Compliance Diagnosis (2026 rules, conditional on marketplace/category)
+4. SEO (P1)
+5. COSMO (P2)
+6. Rufus (P3, conditional)
+7. Language & Tone
+8. Output
 
 Begin audit now.
 `;

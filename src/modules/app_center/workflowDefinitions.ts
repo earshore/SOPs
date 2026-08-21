@@ -7,7 +7,13 @@ import type { AppCenterRouteId } from './appCatalog';
 
 type SopsRouteId = (typeof sopsManifest.routes)[number]['routeId'];
 
-const COMPLIANCE_REVIEW_POINTS = ['高危词', '品牌与侵权', '产品合规', 'GPSR'] as const;
+const COMPLIANCE_REVIEW_POINTS = [
+  '高危词',
+  '品牌与侵权',
+  '产品合规',
+  'GPSR',
+  '商品名称合规（2026 新规：≤75 字符、重复词、特殊字符、促销语，已生效类目适用）',
+] as const;
 const COMPLIANCE_REVIEW_ROUTE_IDS = [
   'sops_restricted_words',
   'sops_brand_infringement',
