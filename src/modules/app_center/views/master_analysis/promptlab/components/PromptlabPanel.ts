@@ -16,6 +16,7 @@
  *  types.ts           — 共享类型定义
  */
 
+import { configCenter } from '@/common/config/ConfigCenter';
 import { getWorkbenchIconContainerClasses } from '@/common/constants/colorSchemes';
 import { APP_EVENTS, MODULE_EVENTS } from '@/common/constants/eventConstants';
 import eventBus from '@/common/EventBus';
@@ -64,14 +65,13 @@ import {
   onInputChange,
 } from './uiHelpers';
 import { HistoryService } from '../../services/historyService';
-import { getReportFingerprint } from '../../services/reportIdentity';
-import { configCenter } from '@/common/config/ConfigCenter';
 import {
   ListingPromptVersion,
   DEFAULT_LISTING_PROMPT_VERSION,
   normalizeListingPromptVersion,
   LISTING_PROMPT_VERSIONS,
 } from '../../services/promptlabService';
+import { getReportFingerprint } from '../../services/reportIdentity';
 
 import type {
   ConsoleMode,
@@ -263,6 +263,7 @@ type PromptlabPanelState = Pick<
   | '_unsubscribers'
   | '_appStoreUnsubscribe'
   | 'listingVersionMenuOpen'
+  | 'listingVersionMenuPosition'
 > & {
   reportRevision: number;
   /** EventBus + appStore subscriptions are init-once until destroy. */
@@ -288,7 +289,9 @@ type PromptlabPanelThis = PromptlabAlpineContext & {
   listingVersion: ListingPromptVersion;
   listingVersionBadgeLabel: string;
   listingVersionMenuOpen: boolean;
+  listingVersionMenuPosition: { top: number; right: number } | null;
   toggleListingVersionMenu(): void;
+  computeVersionMenuPosition(): { top: number; right: number } | null;
   selectListingVersion(version: string): void;
   isSupportedListingVersion(version: string): boolean;
   restoreState(): void;
@@ -320,6 +323,7 @@ function createPromptlabPanelState(): PromptlabPanelState {
     currentConsoleMode: 'listing' as ConsoleMode,
     listingPromptCache: '',
     listingVersionMenuOpen: false,
+    listingVersionMenuPosition: null,
     visualPromptCache: '',
     lastMarketplace: '',
     originalHeights: new Map<HTMLElement, number>(),
@@ -812,7 +816,53 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     return this.listingVersion === 'v2' ? '· 新规' : '';
   },
   toggleListingVersionMenu(): void {
-    this.listingVersionMenuOpen = !this.listingVersionMenuOpen;
+    const willOpen = !this.listingVersionMenuOpen;
+    this.listingVersionMenuOpen = willOpen;
+    // 菜单展开时页面可能因滚动回弹导致按钮位置变化，
+    // 在下一帧（页面滚动稳定后）记录 caret 按钮的视口位置。
+    if (willOpen) {
+      // 翻转卡容器带 preserve-3d 与 rotateY 翻转动画，按 CSS 规范构成
+      // fixed 定位上下文：菜单若留在卡内，fixed 定位相对该 transform
+      // 容器而非视口（位置偏移且被 overflow-hidden 裁剪）。
+      // Alpine CSP 不支持 teleport 指令，用 JS 将菜单移至 document.body，
+      // Alpine 的 x-data/x-show 绑定不受 DOM 位置影响。
+      const menu = document.getElementById('listing-version-menu');
+      if (menu && menu.parentNode !== document.body) {
+        document.body.appendChild(menu);
+      }
+      const nextTick = (this as { $nextTick?: (callback: () => void) => void }).$nextTick;
+      const recordPosition = () => {
+        this.listingVersionMenuPosition = this.computeVersionMenuPosition();
+      };
+      if (typeof nextTick === 'function') {
+        nextTick(recordPosition);
+      } else {
+        recordPosition();
+      }
+    }
+  },
+
+  /** 菜单 DOM 已移至 document.body（脱离翻转卡 transform 祖先，
+   * fixed 定位相对视口生效且不被 overflow-hidden 裁剪），
+   * 通过记录 caret 按钮的视口位置以 fixed 方式定位到按钮正下方。 */
+  get listingVersionMenuStyle(): string {
+    if (!this.listingVersionMenuOpen) return '';
+    const pos = this.listingVersionMenuPosition;
+    if (!pos) return '';
+    return `top:${pos.top}px;right:${pos.right}px;`;
+  },
+
+  /** 计算 caret 按钮的视口位置，供 fixed 定位菜单使用。 */
+  computeVersionMenuPosition(): { top: number; right: number } | null {
+    const caret = document.querySelector<HTMLButtonElement>(
+      'button[aria-label="选择 Listing Prompt 版本"]'
+    );
+    if (!caret) return null;
+    const rect = caret.getBoundingClientRect();
+    return {
+      top: Math.round(rect.bottom + 4),
+      right: Math.round(window.innerWidth - rect.right),
+    };
   },
   selectListingVersion(version: string): void {
     if (LISTING_PROMPT_VERSIONS.includes(version as ListingPromptVersion)) {

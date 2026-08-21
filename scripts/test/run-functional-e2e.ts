@@ -43,6 +43,7 @@ export const FUNCTIONAL_E2E_GROUPS = [
       'tests/e2e/ai-analysis.spec.ts',
       'tests/e2e/promptlab-dna-extraction.spec.ts',
       'tests/e2e/promptlab.spec.ts',
+      'tests/e2e/promptlab-version-menu.spec.ts',
       'tests/e2e/scraper.spec.ts',
     ],
   },

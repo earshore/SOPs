@@ -77,6 +77,8 @@ export interface PromptlabAlpineContext {
   _appStoreUnsubscribe: (() => void) | null;
   /** Listing Prompt 生成按钮的版本选择菜单是否展开。 */
   listingVersionMenuOpen: boolean;
+  /** 版本选择菜单 fixed 定位坐标（视口像素，展开时计算）。 */
+  listingVersionMenuPosition: { top: number; right: number } | null;
 
   // ---- 跨模块调用的方法 ----
   saveState(): void;

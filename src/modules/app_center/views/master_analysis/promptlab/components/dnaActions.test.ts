@@ -66,6 +66,7 @@ function createContext(profile: Partial<UserProductProfile> = {}): PromptlabAlpi
     _unsubscribers: [],
     _appStoreUnsubscribe: null,
     listingVersionMenuOpen: false,
+    listingVersionMenuPosition: null,
     saveState: vi.fn(),
     renderReportAnalysis: vi.fn(),
     initializeGranularSelections: vi.fn(),
