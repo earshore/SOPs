@@ -615,7 +615,18 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
         this.renderReportAnalysis();
       });
 
-      this._unsubscribers = [unsubScrape, unsubHistory];
+      const unsubRoute = eventBus.on(APP_EVENTS.ROUTE_CHANGED, () => {
+        if (this.listingVersionMenuOpen) {
+          this.listingVersionMenuOpen = false;
+          const menu = document.getElementById('listing-version-menu');
+          const container = document.querySelector('.promptlab-menu-container');
+          if (menu && container && menu.parentNode === document.body) {
+            container.appendChild(menu);
+          }
+        }
+      });
+
+      this._unsubscribers = [unsubScrape, unsubHistory, unsubRoute];
 
       if (appStore && typeof appStore.subscribe === 'function') {
         this._appStoreUnsubscribe = appStore.subscribe((state, previousState) => {
@@ -809,15 +820,23 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   toggleListingVersionMenu(): void {
     const willOpen = !this.listingVersionMenuOpen;
     this.listingVersionMenuOpen = willOpen;
+    const menu = document.getElementById('listing-version-menu');
+    if (!menu) return;
+
     if (willOpen) {
       // 翻转卡容器带 preserve-3d 与 rotateY 翻转动画，按 CSS 规范构成
       // fixed 定位上下文：菜单若留在卡内，fixed 定位相对该 transform
       // 容器而非视口（位置偏移且被 overflow-hidden 裁剪）。
       // Alpine CSP 不支持 teleport 指令，用 JS 将菜单移至 document.body，
       // Alpine 的 x-data/x-show 绑定不受 DOM 位置影响。
-      const menu = document.getElementById('listing-version-menu');
-      if (menu && menu.parentNode !== document.body) {
+      if (menu.parentNode !== document.body) {
         document.body.appendChild(menu);
+      }
+    } else {
+      // 收起时移回原容器，防止页面切换后 DOM 漂流
+      const container = document.querySelector('.promptlab-menu-container');
+      if (container && menu.parentNode === document.body) {
+        container.appendChild(menu);
       }
     }
   },
