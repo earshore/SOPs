@@ -598,6 +598,18 @@ it('cleans, clears, and pastes copy text while persisting input state', async ()
   expect(inputMocks.state.keywordTracker.copyInputText).toBe('clipboard copy');
 });
 
+it('keeps counting the full copy when a title heading is not found', async () => {
+  const container = await mountInput();
+  const copyInput = container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input');
+  expect(copyInput).not.toBeNull();
+
+  copyInput!.value = 'Wireless earbuds copy without a title heading';
+  copyInput!.dispatchEvent(new Event('input', { bubbles: true }));
+
+  expect(container.querySelector('#copy-char-count')?.textContent).toBe('45');
+  expect(container.querySelector('#copy-title-status')?.textContent).toContain('not_found');
+});
+
 it('validates required inputs and stores analysis results before navigation', async () => {
   const container = await mountInput();
   await inputMocks.actions.keyword_hunter_startAnalysis({}, new Event('click'));

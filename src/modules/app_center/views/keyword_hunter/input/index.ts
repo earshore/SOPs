@@ -356,8 +356,9 @@ function updateCopyCharCount(): void {
   if (!copyInput || !counter) return;
 
   const extracted = extractListingTitle(copyInput.value);
+  const copyLength = [...copyInput.value].length;
   const titleLength = extracted.status === 'found' ? [...extracted.title].length : 0;
-  counter.textContent = titleLength.toString();
+  counter.textContent = (extracted.status === 'found' ? titleLength : copyLength).toString();
 
   if (titleStatus) {
     titleStatus.textContent =
