@@ -65,7 +65,6 @@ type AiAnalysisPanelState = Pick<
   | '_unsubscribes'
 > & {
   productSummaryTooltipVisible: boolean;
-  productSummaryTooltipStyle: string;
   showSelectionPanel: boolean;
   isCollapsed: boolean;
   Math: AlpineSafeMath;
@@ -351,7 +350,6 @@ function createAiAnalysisPanelState(): AiAnalysisPanelState {
     showJsonViewer: false,
     dataSource: 'scraper' as const,
     productSummaryTooltipVisible: false,
-    productSummaryTooltipStyle: '',
     showSelectionPanel: false,
     Math: ALPINE_SAFE_MATH,
     _unsubscribes: [] as Array<() => void>,
@@ -591,7 +589,9 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
       const tooltipWidth = 288;
       const left = Math.round(rect.left + rect.width / 2 - tooltipWidth / 2);
       const top = Math.round(rect.top - 8);
-      this.productSummaryTooltipStyle = `left:${left}px; top:${top}px; transform:translateY(-100%);`;
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+      tooltip.style.transform = 'translateY(-100%)';
     }
   },
 

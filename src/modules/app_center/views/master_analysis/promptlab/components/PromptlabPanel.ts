@@ -263,7 +263,7 @@ type PromptlabPanelState = Pick<
   | '_unsubscribers'
   | '_appStoreUnsubscribe'
   | 'listingVersionMenuOpen'
-  | 'listingVersion'
+  | 'listingVersionPreference'
 > & {
   reportRevision: number;
   /** EventBus + appStore subscriptions are init-once until destroy. */
@@ -287,6 +287,8 @@ type PromptlabPanelThis = PromptlabAlpineContext & {
   overallConfidence: number;
   hasExpandedDimensions: boolean;
   listingVersion: ListingPromptVersion;
+  listingVersionPreference: ListingPromptVersion;
+  listingVersionBadgeLabel: string;
   listingVersionMenuOpen: boolean;
   toggleListingVersionMenu(): void;
   closeListingVersionMenu(): void;
@@ -336,7 +338,7 @@ function createPromptlabPanelState(): PromptlabPanelState {
     _unsubscribers: [] as Array<() => void>,
     _appStoreUnsubscribe: null,
     _subscriptionsInitialized: false,
-    listingVersion: DEFAULT_LISTING_PROMPT_VERSION,
+    listingVersionPreference: DEFAULT_LISTING_PROMPT_VERSION,
   };
 }
 
@@ -363,6 +365,25 @@ function isVisualReadyForUi(ctx: PromptlabPanelThis): boolean {
  */
 const promptlabPanelBehavior: PromptlabPanelBehavior = {
   // ========== Computed Getters ==========
+
+  get listingVersion(): ListingPromptVersion {
+    const stored = configCenter.get<string>(LISTING_VERSION_CONFIG_KEY);
+    if (stored === undefined) return this.listingVersionPreference;
+
+    const normalized = normalizeListingPromptVersion(stored);
+    if (normalized !== stored) {
+      configCenter.set(LISTING_VERSION_CONFIG_KEY, normalized);
+    }
+    return normalized;
+  },
+
+  set listingVersion(value: ListingPromptVersion) {
+    this.listingVersionPreference = normalizeListingPromptVersion(value);
+  },
+
+  get listingVersionBadgeLabel(): string {
+    return this.listingVersion === 'v2' ? '· 新规' : '';
+  },
 
   /** Workbench section icons — no marketing scale-110 (D4). */
   get workbenchSectionIconAnalysis(): string {

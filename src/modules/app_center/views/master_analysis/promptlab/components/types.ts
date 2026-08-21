@@ -80,6 +80,8 @@ export interface PromptlabAlpineContext {
   listingVersionMenuOpen: boolean;
   /** Listing Prompt 规则版本。 */
   listingVersion: ListingPromptVersion;
+  /** Listing Prompt 规则版本的按钮内引导文案。 */
+  listingVersionBadgeLabel: string;
 
   // ---- 跨模块调用的方法 ----
   saveState(): void;

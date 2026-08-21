@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.1.2-rc.3] - 2026-08-21
 
-> 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.2-rc.2` 基础上落地 Amazon 2026 商品名称新规、Promptlab 版本选择 UX 收口与 Keyword Hunter / Deep Chat 标题合规辅助能力。GitHub Latest 仍为 `v3.1.1`，回滚基线为 `v3.1.1`。
+> 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.2-rc.2` 基础上落地 Amazon 2026 商品名称新规、Promptlab 版本选择 UX 收口与 Keyword Hunter / Deep Chat 标题合规辅助能力。上一 GA 与回滚基线均为 `v3.1.1`，GitHub Latest 仍为 `v3.1.1`。
 > 生产目标为 `https://sops.hongecb.store`。
 
 ### Added（新增）
