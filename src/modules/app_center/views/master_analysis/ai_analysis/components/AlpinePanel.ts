@@ -65,6 +65,7 @@ type AiAnalysisPanelState = Pick<
   | '_unsubscribes'
 > & {
   productSummaryTooltipVisible: boolean;
+  productSummaryTooltipStyle: string;
   showSelectionPanel: boolean;
   isCollapsed: boolean;
   Math: AlpineSafeMath;
@@ -350,6 +351,7 @@ function createAiAnalysisPanelState(): AiAnalysisPanelState {
     showJsonViewer: false,
     dataSource: 'scraper' as const,
     productSummaryTooltipVisible: false,
+    productSummaryTooltipStyle: '',
     showSelectionPanel: false,
     Math: ALPINE_SAFE_MATH,
     _unsubscribes: [] as Array<() => void>,
@@ -577,6 +579,16 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   showProductSummaryTooltip(): void {
     this.productSummaryTooltipVisible = true;
+    // 计算触发图标的视口位置
+    const trigger = document.querySelector('.fa-circle-exclamation.text-accent-500.cursor-help');
+    if (trigger) {
+      const rect = trigger.getBoundingClientRect();
+      // Tooltip 宽度为 72 (w-72 = 18rem = 288px)，居中显示在图标上方
+      const tooltipWidth = 288;
+      const left = Math.round(rect.left + rect.width / 2 - tooltipWidth / 2);
+      const bottom = Math.round(window.innerHeight - rect.top + 8);
+      this.productSummaryTooltipStyle = `left: ${left}px; bottom: ${bottom}px;`;
+    }
   },
 
   hideProductSummaryTooltip(): void {

@@ -767,22 +767,21 @@
                       class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
                     ></div>
                     <i class="fas fa-microchip relative z-10 group-hover:animate-pulse"></i>
-                    <span class="relative z-10" :class="listingVersion === 'v2' ? 'pr-4' : ''">生成 Master Prompt</span>
-                    <span
-                      x-show="listingVersion === 'v2'"
-                      x-cloak
-                      x-text="'· 新规'"
-                      class="relative z-10 text-xs opacity-80"
-                    ></span>
+                    <span class="relative z-10">生成 Master Prompt</span>
                     <button
                       type="button"
                       :disabled="generateButtonDisabled"
                       @click.stop="toggleListingVersionMenu"
                       aria-label="选择 Listing Prompt 版本"
                       :aria-expanded="listingVersionMenuOpen.toString()"
-                      class="absolute right-0 top-0 bottom-0 w-9 flex items-center justify-center rounded-r-xl text-white/60 hover:text-white hover:bg-white/10 border-l border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                      class="absolute right-0 top-0 bottom-0 px-2 flex items-center justify-center gap-1 rounded-r-xl text-white/60 hover:text-white hover:bg-white/10 border-l border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                     >
-                      <i class="fas fa-caret-down text-sm"></i>
+                      <span
+                        x-show="listingVersion === 'v2'"
+                        x-cloak
+                        class="text-[10px] font-bold bg-white/20 px-1 rounded leading-tight"
+                      >新规</span>
+                      <i class="fas fa-caret-down text-xs"></i>
                     </button>
                   </button>
                   <div
@@ -798,7 +797,7 @@
                       <button
                         type="button"
                         @click="selectListingVersion('v1')"
-                        :class="listingVersion === 'v1' ? 'ring-1 ring-[var(--color-primary)] bg-primary-900/30' : 'hover:bg-slate-700/60'"
+                        :class="listingVersion === 'v1' ? 'bg-primary-900/40 ring-1 ring-primary-500/50' : 'hover:bg-slate-700/60'"
                         class="w-full text-left rounded-lg px-3 py-2.5 transition duration-150"
                       >
                         <div class="text-sm font-semibold text-slate-100">经典版 <span class="font-normal text-slate-400">· 180 字符</span></div>
@@ -807,7 +806,7 @@
                       <button
                         type="button"
                         @click="selectListingVersion('v2')"
-                        :class="listingVersion === 'v2' ? 'ring-1 ring-[var(--color-primary)] bg-primary-900/30' : 'hover:bg-slate-700/60'"
+                        :class="listingVersion === 'v2' ? 'bg-primary-900/40 ring-1 ring-primary-500/50' : 'hover:bg-slate-700/60'"
                         class="w-full text-left rounded-lg px-3 py-2.5 transition duration-150"
                       >
                         <div class="text-sm font-semibold text-slate-100">2026 新规版 <span class="font-normal text-slate-400">· 75 字符</span></div>
