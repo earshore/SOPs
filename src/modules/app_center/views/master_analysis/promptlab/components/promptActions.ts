@@ -14,6 +14,7 @@ import { emitHistoryUpdated } from '../../services/historyEvents';
 import { HistoryService } from '../../services/historyService';
 import { promptlabService } from '../../services/promptlabService';
 import { getReportFingerprint, getScrapedDataFingerprint } from '../../services/reportIdentity';
+import type { ListingPromptVersion } from '../../services/promptlabService';
 
 import type { PromptlabAlpineContext } from './types';
 import type {
@@ -89,7 +90,8 @@ function createPromptRecord(
   ctx: PromptlabAlpineContext,
   type: GeneratedPromptType,
   prompt: string,
-  analysisReport: AnalysisReport | null
+  analysisReport: AnalysisReport | null,
+  promptVersion?: ListingPromptVersion
 ): GeneratedPromptRecord {
   const state = appStore.getState();
   const scrapedData = state.scraper.scrapedData;
@@ -115,6 +117,7 @@ function createPromptRecord(
       state.scraper.selectedSite ||
       getReportMarketplace(analysisReport),
     profile: cloneProfileSnapshot(ctx),
+    ...(promptVersion !== undefined ? { promptVersion } : {}),
   };
 }
 
@@ -170,9 +173,10 @@ function persistPromptRecord(
   ctx: PromptlabAlpineContext,
   type: GeneratedPromptType,
   prompt: string,
-  analysisReport: AnalysisReport | null
+  analysisReport: AnalysisReport | null,
+  promptVersion?: ListingPromptVersion
 ): void {
-  const record = createPromptRecord(ctx, type, prompt, analysisReport);
+  const record = createPromptRecord(ctx, type, prompt, analysisReport, promptVersion);
   const state = appStore.getState();
 
   state.setCurrentPrompt(prompt);
@@ -204,8 +208,12 @@ function persistPromptRecord(
 
 /**
  * 生成 Listing Prompt 并写入 ctx.listingPromptCache
+ * @param promptVersion 商品名称合规版本：'v1' 经典版（现网口径）或 'v2' 2026 新规版
  */
-export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
+export function generateListingPrompt(
+  ctx: PromptlabAlpineContext,
+  promptVersion: ListingPromptVersion = 'v1'
+): void {
   if (!computeIsListingReady(ctx)) {
     showToast(
       getPromptReadinessMessage(ctx, {
@@ -222,9 +230,10 @@ export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
   const analysisReport = getPromptAnalysisReport();
   ctx.listingPromptCache = promptlabService.generateMasterPrompt(
     createPromptInputs(ctx),
-    analysisReport
+    analysisReport,
+    promptVersion
   );
-  persistPromptRecord(ctx, 'listing', ctx.listingPromptCache, analysisReport);
+  persistPromptRecord(ctx, 'listing', ctx.listingPromptCache, analysisReport, promptVersion);
   showToast('Listing Prompt 已生成', { type: 'success' });
 }
 

@@ -65,6 +65,13 @@ import {
 } from './uiHelpers';
 import { HistoryService } from '../../services/historyService';
 import { getReportFingerprint } from '../../services/reportIdentity';
+import { configCenter } from '@/common/config/ConfigCenter';
+import {
+  ListingPromptVersion,
+  DEFAULT_LISTING_PROMPT_VERSION,
+  normalizeListingPromptVersion,
+  LISTING_PROMPT_VERSIONS,
+} from '../../services/promptlabService';
 
 import type {
   ConsoleMode,
@@ -155,6 +162,9 @@ function getCurrentSnapshotProfile(): UserProductProfile | null {
 
   return HistoryService.getUserProductProfileById(currentHistoryId);
 }
+
+/** Listing Prompt 版本偏好的 configCenter 键名。 */
+const LISTING_VERSION_CONFIG_KEY = 'app_center.promptlab.listingPromptVersion';
 
 function hasMatchingReportFingerprint(
   profile: UserProductProfile,
@@ -252,6 +262,7 @@ type PromptlabPanelState = Pick<
   | 'expandedSubItems'
   | '_unsubscribers'
   | '_appStoreUnsubscribe'
+  | 'listingVersionMenuOpen'
 > & {
   reportRevision: number;
   /** EventBus + appStore subscriptions are init-once until destroy. */
@@ -274,6 +285,12 @@ type PromptlabPanelThis = PromptlabAlpineContext & {
   reportConfidence: Record<string, number> | null;
   overallConfidence: number;
   hasExpandedDimensions: boolean;
+  listingVersion: ListingPromptVersion;
+  listingVersionBadgeLabel: string;
+  listingVersionMenuOpen: boolean;
+  toggleListingVersionMenu(): void;
+  selectListingVersion(version: string): void;
+  isSupportedListingVersion(version: string): boolean;
   restoreState(): void;
   restorePromptCachesFromCurrentSnapshot(): void;
   refreshDnaExtractionSummary(): void;
@@ -302,6 +319,7 @@ function createPromptlabPanelState(): PromptlabPanelState {
   return {
     currentConsoleMode: 'listing' as ConsoleMode,
     listingPromptCache: '',
+    listingVersionMenuOpen: false,
     visualPromptCache: '',
     lastMarketplace: '',
     originalHeights: new Map<HTMLElement, number>(),
@@ -774,9 +792,36 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   },
 
   // ========== Prompt Actions ==========
-
   generateListingPrompt() {
-    generateListingPrompt(this as unknown as PromptlabAlpineContext);
+    generateListingPrompt(this as unknown as PromptlabAlpineContext, this.listingVersion);
+  },
+
+  // ========== Listing Prompt 版本选择 ==========
+  get listingVersion(): ListingPromptVersion {
+    const stored = configCenter.get<string>(
+      LISTING_VERSION_CONFIG_KEY,
+      DEFAULT_LISTING_PROMPT_VERSION
+    );
+    const normalized = normalizeListingPromptVersion(stored);
+    if (stored !== normalized) {
+      configCenter.set(LISTING_VERSION_CONFIG_KEY, normalized);
+    }
+    return normalized;
+  },
+  get listingVersionBadgeLabel(): string {
+    return this.listingVersion === 'v2' ? '· 新规' : '';
+  },
+  toggleListingVersionMenu(): void {
+    this.listingVersionMenuOpen = !this.listingVersionMenuOpen;
+  },
+  selectListingVersion(version: string): void {
+    if (LISTING_PROMPT_VERSIONS.includes(version as ListingPromptVersion)) {
+      configCenter.set(LISTING_VERSION_CONFIG_KEY, version);
+    }
+    this.listingVersionMenuOpen = false;
+  },
+  isSupportedListingVersion(version: string): boolean {
+    return LISTING_PROMPT_VERSIONS.includes(version as ListingPromptVersion);
   },
 
   generateVisualPrompt() {
