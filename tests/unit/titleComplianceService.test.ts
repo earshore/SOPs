@@ -7,7 +7,7 @@
  *  - 脏输入防御（null / undefined / 超长）降级报告，零抛错
  *  - 硬规则：max-length / word-repeat / banned-chars / promo-phrases
  *  - 软规则：info-order / capitalization / trailing-punct / bullet-hint / variant-consistency
- *  - 类目差异化（媒体类 50 字符上限、豁免站点跳过新规）
+ *  - 类目差异化（媒体类豁免新规、豁免站点回退 v1）
  *  - 得分单调性、summary 统计、单项快检
  *
  * 纯函数直接 import 真模块，零 mock。
@@ -366,13 +366,16 @@ describe("checkTitleCompliance - variant-consistency", () => {
 });
 
 describe("checkTitleCompliance - 类目差异化与豁免站点", () => {
-  it("should apply 50-char limit for media categories", () => {
+  it("should exempt media categories from the 2026 title limit", () => {
     const title60 = "A".repeat(60);
-    const report = checkTitleCompliance({ title: title60, category: "Books" });
-    expect(report.issues.some((i) => i.rule === "max-length")).toBe(true);
-    expect(
-      report.issues.find((i) => i.rule === "max-length")!.message,
-    ).toContain("上限 50");
+    const report = checkTitleCompliance({
+      title: title60,
+      category: "Books",
+      version: "v2",
+      isFirstPublication: true,
+    });
+    expect(report.appliedVersion).toBe("v1");
+    expect(report.issues.some((i) => i.rule === "max-length")).toBe(false);
   });
 
   it("should skip v2-only rules for exempt marketplaces (SA/EG/TR/AE)", () => {
@@ -407,6 +410,99 @@ describe("checkTitleCompliance - 类目差异化与豁免站点", () => {
           i.rule === "max-length",
       ),
     ).toBe(true);
+  });
+
+  it("should fall back to the v1 baseline for exempt marketplaces", () => {
+    const report = checkTitleCompliance({
+      title: LONG_TITLE,
+      marketplaceId: "SA",
+      version: "v2",
+      isFirstPublication: true,
+    });
+
+    expect(report.appliedVersion).toBe("v1");
+    expect(report.issues.some((i) => i.rule === "max-length")).toBe(false);
+    expect(report.issues.some((i) => i.rule === "word-repeat")).toBe(false);
+  });
+
+  it("should fall back to the v1 baseline for media categories", () => {
+    const report = checkTitleCompliance({
+      title: LONG_TITLE,
+      category: "Books",
+      version: "v2",
+      isFirstPublication: true,
+    });
+
+    expect(report.appliedVersion).toBe("v1");
+    expect(report.issues.some((i) => i.rule === "max-length")).toBe(false);
+    expect(report.issues.some((i) => i.rule === "word-repeat")).toBe(false);
+  });
+
+  it("should not apply v2 rules to an existing publication", () => {
+    const report = checkTitleCompliance({
+      title: LONG_TITLE,
+      version: "v2",
+      isFirstPublication: false,
+    });
+
+    expect(report.appliedVersion).toBe("v1");
+    expect(report.issues.some((i) => i.rule === "max-length")).toBe(false);
+    expect(report.issues.some((i) => i.rule === "word-repeat")).toBe(false);
+  });
+});
+
+describe("checkTitleCompliance - 受限短语、亮点与变体上下文", () => {
+  it("should reject complete FSA/HSA eligibility phrases", () => {
+    const report = checkTitleCompliance({
+      title: "Anker Power Bank FSA or HSA Eligible",
+      version: "v2",
+      isFirstPublication: true,
+    });
+
+    expect(report.issues.some((i) => i.rule === "restricted-phrases")).toBe(true);
+  });
+
+  it("should allow factual measurement unit abbreviations", () => {
+    const report = checkTitleCompliance({
+      title: "Samsung 55-inch 4K Smart TV, 55 in, 2023 Model",
+      version: "v2",
+      isFirstPublication: true,
+    });
+
+    expect(report.issues.some((i) => i.rule === "measurement-unit")).toBe(false);
+  });
+
+  it("should validate product highlights as a separate 125-character field", () => {
+    const report = checkTitleCompliance({
+      title: GOOD_TITLE_V2,
+      highlights: "x".repeat(126),
+      version: "v2",
+      isFirstPublication: true,
+    });
+
+    expect(report.issues.some((i) => i.rule === "highlights-length")).toBe(true);
+  });
+
+  it("should warn when a parent title includes provided color or size", () => {
+    const report = checkTitleCompliance({
+      title: "Anker Power Bank Black Medium",
+      asinRole: "parent",
+      variationAttributes: { color: "Black", size: "Medium" },
+      version: "v2",
+      isFirstPublication: true,
+    });
+
+    expect(report.issues.some((i) => i.rule === "parent-variation-attribute")).toBe(true);
+  });
+
+  it("should not treat a full-width semicolon as an official banned-character error", () => {
+    const report = checkTitleCompliance({
+      title: "Anker Power Bank ； USB-C",
+      version: "v2",
+      isFirstPublication: true,
+    });
+
+    expect(report.issues.some((i) => i.rule === "banned-chars")).toBe(false);
   });
 });
 

@@ -1020,3 +1020,135 @@
     color: var(--color-purple-300, #d8b4fe);
   }
 }
+
+/* PromptLab listing CTA: the version choice is a quiet, discoverable label
+   inside the generate button rather than a second button. */
+.promptlab-generate-button {
+  border-radius: 0.75rem;
+  background: var(--ma-accent, #6257f5);
+  isolation: isolate;
+}
+
+.promptlab-version-label {
+  min-width: 0;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  background: rgb(255 255 255 / 0.1);
+  color: rgb(255 255 255 / 0.9);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.promptlab-version-label:hover,
+.promptlab-version-label:focus-visible,
+.promptlab-version-label[aria-expanded='true'] {
+  background: rgb(255 255 255 / 0.18);
+  border-color: rgb(255 255 255 / 0.28);
+  color: #ffffff;
+}
+
+#btn-generate-prompt:disabled {
+  background: var(--color-bg-tertiary, #e2e8f0);
+  color: var(--color-slate-500, #64748b);
+}
+
+#btn-generate-prompt:disabled .promptlab-version-label {
+  cursor: not-allowed;
+  background: rgb(148 163 184 / 0.18);
+  border-color: var(--border-subtle, rgb(148 163 184 / 0.28));
+  color: var(--color-slate-500, #64748b);
+}
+
+.promptlab-version-menu {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--color-border-default, #e2e8f0);
+  color: var(--color-slate-800, #1e293b);
+}
+
+.promptlab-version-option {
+  color: var(--color-slate-700, #334155);
+}
+
+.promptlab-version-option:hover,
+.promptlab-version-option:focus-visible {
+  background: var(--surface-card-hover, #f8fafc);
+}
+
+.promptlab-version-option-title {
+  color: var(--color-slate-800, #1e293b);
+}
+
+.promptlab-version-option-description {
+  color: var(--color-slate-500, #64748b);
+}
+
+.promptlab-version-option-badge {
+  color: var(--ma-accent-hover, #4f46e5);
+  background: var(--ma-accent-soft, #f5f3ff);
+}
+
+.promptlab-version-option[class~='bg-primary-600/30'] {
+  background: color-mix(in srgb, var(--ma-accent) 14%, var(--surface-card));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ma-accent) 38%, transparent);
+}
+
+.dark .promptlab-version-menu,
+[data-color-mode-resolved='dark'] .promptlab-version-menu,
+[data-theme='dark'] .promptlab-version-menu {
+  background: var(--surface-panel, #1e293b);
+  border-color: var(--color-border-default, #475569);
+  color: var(--color-slate-200, #e2e8f0);
+}
+
+.dark .promptlab-version-option,
+[data-color-mode-resolved='dark'] .promptlab-version-option,
+[data-theme='dark'] .promptlab-version-option {
+  color: var(--color-slate-200, #e2e8f0);
+}
+
+.dark .promptlab-version-option:hover,
+.dark .promptlab-version-option:focus-visible,
+[data-color-mode-resolved='dark'] .promptlab-version-option:hover,
+[data-color-mode-resolved='dark'] .promptlab-version-option:focus-visible,
+[data-theme='dark'] .promptlab-version-option:hover,
+[data-theme='dark'] .promptlab-version-option:focus-visible {
+  background: var(--surface-card-hover, #334155);
+}
+
+.dark .promptlab-version-option-title,
+[data-color-mode-resolved='dark'] .promptlab-version-option-title,
+[data-theme='dark'] .promptlab-version-option-title {
+  color: var(--color-slate-100, #f1f5f9);
+}
+
+.dark .promptlab-version-option-description,
+[data-color-mode-resolved='dark'] .promptlab-version-option-description,
+[data-theme='dark'] .promptlab-version-option-description {
+  color: var(--color-slate-400, #94a3b8);
+}
+
+.dark .promptlab-version-option-badge,
+[data-color-mode-resolved='dark'] .promptlab-version-option-badge,
+[data-theme='dark'] .promptlab-version-option-badge {
+  color: var(--ma-accent-hover, #c0bcfa);
+  background: color-mix(in srgb, var(--ma-accent) 18%, var(--surface-card));
+}
+
+.dark #btn-generate-prompt:disabled,
+[data-color-mode-resolved='dark'] #btn-generate-prompt:disabled,
+[data-theme='dark'] #btn-generate-prompt:disabled {
+  background: rgb(255 255 255 / 0.12);
+}
+
+.dark #btn-generate-prompt:disabled .promptlab-version-label,
+[data-color-mode-resolved='dark'] #btn-generate-prompt:disabled .promptlab-version-label,
+[data-theme='dark'] #btn-generate-prompt:disabled .promptlab-version-label {
+  background: rgb(255 255 255 / 0.1);
+  border-color: rgb(255 255 255 / 0.2);
+  color: var(--color-slate-300, #cbd5e1);
+}

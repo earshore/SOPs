@@ -69,4 +69,56 @@ describe('PromptLab template accessibility semantics', () => {
       expect(template).not.toMatch(new RegExp(`<input\\b[^>]*\\bid="${field.id}"`, 's'));
     });
   });
+
+  it('keeps the listing version control visually integrated and theme-aware', () => {
+    expect(template).toContain('promptlab-generate-button');
+    expect(template).toContain('promptlab-version-label');
+    expect(template).toContain('promptlab-version-menu');
+    expect(template).toContain('promptlab-version-option');
+    expect(template).toContain('aria-label="选择 Listing Prompt 版本"');
+    expect(template).toContain('aria-controls="listing-version-menu"');
+    expect(template).toContain('role="button"');
+    expect(template).toContain('tabindex="0"');
+    expect(template).toContain('aria-expanded="false"');
+    expect(template).not.toContain('listingVersionCaretClass');
+    expect(template).not.toContain('listingVersionMenuOpen.toString()');
+    expect(template).not.toContain('promptlab-version-toggle');
+    expect(template).not.toMatch(/<button\b[^>]*aria-label="选择 Listing Prompt 版本"/s);
+    expect(template).not.toContain('2026 新规版');
+    expect(template).toContain('新规版');
+  });
+
+  it('defines light and dark surfaces for the listing version menu', () => {
+    const css = readFileSync(
+      'src/modules/app_center/views/master_analysis/master_analysis_style.css',
+      'utf8'
+    );
+
+    expect(css).toContain('.promptlab-version-menu');
+    expect(css).toContain('[data-color-mode-resolved=\'dark\'] .promptlab-version-menu');
+    expect(css).toContain('.promptlab-version-label');
+    expect(css).not.toContain('.promptlab-version-toggle');
+    expect(css).toContain('background: var(--ma-accent, #6257f5)');
+    expect(css).toContain('white-space: nowrap');
+  });
+
+  it('keeps the teleported version menu inside the PromptLab Alpine scope', () => {
+    expect(template).toContain('<template x-teleport="body">');
+    expect(template).toContain('x-show="listingVersionMenuOpen"');
+    expect(template).toMatch(
+      /<template x-teleport="body">[\s\S]*id="listing-version-menu"[\s\S]*<\/template>/
+    );
+  });
+
+  it('keeps Listing and Visual generation buttons on the same full-width track', () => {
+    const listingButton = template.match(
+      /<button\b[^>]*id="btn-generate-prompt"[^>]*>/s
+    )?.[0];
+    const visualButton = template.match(
+      /<button\b[^>]*id="btn-generate-visual"[^>]*>/s
+    )?.[0];
+
+    expect(listingButton).toContain('w-full');
+    expect(visualButton).toContain('w-full');
+  });
 });

@@ -755,18 +755,15 @@
                   </p>
                 </div>
                 <div class="relative z-10 group promptlab-menu-container">
-                  <div 
+                  <!-- 主操作与版本选择共用一个按钮；版本标签单独拦截点击打开菜单。 -->
+                  <button
+                    type="button"
+                    id="btn-generate-prompt"
+                    :disabled="generateButtonDisabled"
                     :class="listingGenerateButtonClass"
-                    class="flex items-stretch rounded-xl overflow-hidden transition-all duration-300 shadow-lg hover:shadow-xl"
+                    @click="generateListingPrompt"
+                    class="promptlab-generate-button relative w-full py-3.5 pl-5 pr-3 font-bold transition duration-200 focus-visible:outline-none flex items-center justify-center gap-2.5 group/btn overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
                   >
-                    <!-- Main Action Button -->
-                    <button
-                      type="button"
-                      id="btn-generate-prompt"
-                      :disabled="generateButtonDisabled"
-                      @click="generateListingPrompt"
-                      class="relative flex-1 py-3.5 pl-5 pr-3 font-bold transition duration-200 focus-visible:outline-none flex items-center justify-center gap-2.5 group/btn overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
-                    >
                     <div
                       class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
                     ></div>
@@ -775,78 +772,90 @@
                       <span>生成 Master Prompt</span>
                       <span
                         x-text="listingVersion === 'v2' ? '· 新规版' : '· 经典版'"
-                        class="text-[10px] opacity-80 font-normal bg-white/10 px-1.5 py-0.5 rounded"
-                      ></span>
+                        class="promptlab-version-label inline-flex items-center gap-1 text-[10px] opacity-80 font-normal px-1.5 py-0.5 rounded"
+                        role="button"
+                        tabindex="0"
+                        aria-label="选择 Listing Prompt 版本"
+                        aria-controls="listing-version-menu"
+                        aria-haspopup="menu"
+                        aria-expanded="false"
+                        title="点击切换版本"
+                        @click.stop="toggleListingVersionMenu"
+                        @keydown.enter.stop.prevent="toggleListingVersionMenu"
+                        @keydown.space.stop.prevent="toggleListingVersionMenu"
+                      >
+                        <i
+                          class="fas fa-caret-down text-[9px] transition-transform duration-200"
+                          aria-hidden="true"
+                        ></i>
+                      </span>
                     </div>
                   </button>
-                  
-                  <!-- Version Selector Toggle -->
-                  <button
-                    type="button"
-                    :disabled="generateButtonDisabled"
-                    @click.stop="toggleListingVersionMenu"
-                    aria-label="选择 Listing Prompt 版本"
-                    :aria-expanded="listingVersionMenuOpen.toString()"
-                    class="px-3 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 border-l border-white/20 transition-all duration-200 focus-visible:outline-none disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <i class="fas fa-caret-down text-xs transition-transform duration-200" :class="listingVersionMenuOpen ? 'rotate-180' : ''"></i>
-                  </button>
-                </div>
 
-                  <!-- Fixed Dropdown Menu -->
-                  <div
-                    id="listing-version-menu"
-                    x-show="listingVersionMenuOpen"
-                    x-cloak
-                    @click.away="listingVersionMenuOpen = false"
-                    @keydown.escape.window="listingVersionMenuOpen = false"
-                    :style="listingVersionMenuStyle"
-                    class="fixed w-72 rounded-xl bg-slate-800 border border-slate-700 shadow-2xl overflow-hidden z-40"
-                  >
-                    <div class="p-2 space-y-1">
-                      <!-- v1: Classic -->
-                      <button
-                        type="button"
-                        @click="selectListingVersion('v1')"
-                        :class="listingVersion === 'v1' ? 'bg-primary-600/30 ring-1 ring-primary-500/50' : 'hover:bg-slate-700/60'"
-                        class="w-full text-left rounded-lg px-3 py-2.5 transition duration-150 group relative"
-                      >
-                        <div class="flex items-start justify-between gap-2">
-                          <div class="flex-1">
-                            <div class="text-sm font-semibold text-slate-100 flex items-center gap-2">
-                              经典版
-                              <span class="text-[10px] font-normal text-slate-400 bg-slate-700/50 px-1.5 py-0.5 rounded">180 字符</span>
+                  <!-- Teleport keeps the menu visible above the flipped card while preserving Alpine scope. -->
+                  <template x-teleport="body">
+                    <div
+                      id="listing-version-menu"
+                      x-show="listingVersionMenuOpen"
+                      x-cloak
+                      @click.away="closeListingVersionMenu"
+                      @keydown.escape.window="closeListingVersionMenu"
+                      :style="$root.listingVersionMenuStyle"
+                      class="promptlab-version-menu fixed w-72 rounded-xl shadow-2xl overflow-hidden z-40"
+                      role="menu"
+                      aria-label="Listing Prompt 版本"
+                    >
+                      <div class="p-2 space-y-1">
+                        <!-- v1: Classic -->
+                        <button
+                          type="button"
+                          @click="selectListingVersion('v1')"
+                          role="menuitemradio"
+                          aria-label="经典版，180 字符，兼容旧规则"
+                          :aria-checked="($root.listingVersion === 'v1').toString()"
+                          :class="$root.listingVersion === 'v1' ? 'bg-primary-600/30 ring-1 ring-primary-500/50' : 'hover:bg-slate-700/60'"
+                          class="promptlab-version-option w-full text-left rounded-lg px-3 py-2.5 transition duration-150 group relative"
+                        >
+                          <div class="flex items-start justify-between gap-2">
+                            <div class="flex-1">
+                              <div class="promptlab-version-option-title text-sm font-semibold flex items-center gap-2">
+                                经典版
+                                <span class="promptlab-version-option-badge text-[10px] font-normal px-1.5 py-0.5 rounded">180 字符 标题</span>
+                              </div>
+                              <div class="promptlab-version-option-description text-xs mt-1 leading-relaxed">生成旧版Listing</div>
                             </div>
-                            <div class="text-xs text-slate-400 mt-1 leading-relaxed">现网口径，适用于新规尚未生效的类目</div>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                              <i x-show="$root.listingVersion === 'v1'" class="fas fa-check text-primary-400 text-xs" aria-hidden="true"></i>
+                            </div>
                           </div>
-                          <div class="w-4 h-4 flex items-center justify-center">
-                            <i x-show="listingVersion === 'v1'" class="fas fa-check text-primary-400 text-xs"></i>
-                          </div>
-                        </div>
-                      </button>
+                        </button>
 
-                      <!-- v2: 2026 Rules -->
-                      <button
-                        type="button"
-                        @click="selectListingVersion('v2')"
-                        :class="listingVersion === 'v2' ? 'bg-primary-600/30 ring-1 ring-primary-500/50' : 'hover:bg-slate-700/60'"
-                        class="w-full text-left rounded-lg px-3 py-2.5 transition duration-150 group relative"
-                      >
-                        <div class="flex items-start justify-between gap-2">
-                          <div class="flex-1">
-                            <div class="text-sm font-semibold text-slate-100 flex items-center gap-2">
-                              2026 新规版
-                              <span class="text-[10px] font-normal text-primary-300 bg-primary-500/20 px-1.5 py-0.5 rounded">75 字符</span>
+                        <!-- v2: 2026 Rules -->
+                        <button
+                          type="button"
+                          @click="selectListingVersion('v2')"
+                          role="menuitemradio"
+                          aria-label="新规版，75 字符，适用新规类目"
+                          :aria-checked="($root.listingVersion === 'v2').toString()"
+                          :class="$root.listingVersion === 'v2' ? 'bg-primary-600/30 ring-1 ring-primary-500/50' : 'hover:bg-slate-700/60'"
+                          class="promptlab-version-option w-full text-left rounded-lg px-3 py-2.5 transition duration-150 group relative"
+                        >
+                          <div class="flex items-start justify-between gap-2">
+                            <div class="flex-1">
+                              <div class="promptlab-version-option-title text-sm font-semibold flex items-center gap-2">
+                                新规版
+                                <span class="promptlab-version-option-badge text-[10px] font-normal px-1.5 py-0.5 rounded">75 字符 标题 + 125 字符 亮点</span>
+                              </div>
+                              <div class="promptlab-version-option-description text-xs mt-1 leading-relaxed">生成新版 标题 + 亮点 Listing</div>
                             </div>
-                            <div class="text-xs text-slate-400 mt-1 leading-relaxed">商品名称新规合规版（≤75 字符、重复词、特殊字符、商品亮点字段）</div>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                              <i x-show="$root.listingVersion === 'v2'" class="fas fa-check text-primary-400 text-xs" aria-hidden="true"></i>
+                            </div>
                           </div>
-                          <div class="w-4 h-4 flex items-center justify-center">
-                            <i x-show="listingVersion === 'v2'" class="fas fa-check text-primary-400 text-xs"></i>
-                          </div>
-                        </div>
-                      </button>
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  </template>
                 </div>
               </div>
             </div>

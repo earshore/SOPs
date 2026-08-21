@@ -20,6 +20,7 @@ import { appStore } from '@/stores/useAppStore';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { confirmWithModal } from '../utils/confirmModal';
+import { extractListingTitle } from './titleCompliance';
 
 import type { KeywordHunterSnapshot } from '@/types/modules-business';
 import type { KeywordTrackerState } from '@/types/state';
@@ -351,8 +352,18 @@ function updateCopyCharCount(): void {
     'keyword-hunter-copy-input'
   ) as HTMLTextAreaElement | null;
   const counter = document.getElementById('copy-char-count');
-  if (copyInput && counter) {
-    counter.textContent = copyInput.value.length.toString();
+  const titleStatus = document.getElementById('copy-title-status');
+  if (!copyInput || !counter) return;
+
+  const extracted = extractListingTitle(copyInput.value);
+  const titleLength = extracted.status === 'found' ? [...extracted.title].length : 0;
+  counter.textContent = titleLength.toString();
+
+  if (titleStatus) {
+    titleStatus.textContent =
+      extracted.status === 'found' ? `标题已识别 · ${titleLength} 字符` : '标题未识别（not_found）';
+    titleStatus.classList.toggle('text-emerald-700', extracted.status === 'found');
+    titleStatus.classList.toggle('text-amber-700', extracted.status === 'not_found');
   }
 }
 

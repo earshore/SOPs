@@ -4,6 +4,7 @@ import {
   isCompleteListingCopy,
   isListingPromptContext,
   sanitizeListingCopy,
+  extractListingTitle,
 } from './listingCopySanitize';
 
 describe('sanitizeListingCopy', () => {
@@ -40,6 +41,15 @@ describe('sanitizeListingCopy', () => {
   it('空字符串 / 纯空白原样返回', () => {
     expect(sanitizeListingCopy('')).toBe('');
     expect(sanitizeListingCopy('   ')).toBe('   ');
+  });
+});
+
+describe('extractListingTitle shared helper', () => {
+  it('is available to Deep Chat without changing display sanitization', () => {
+    expect(extractListingTitle('**Titel**\nKabellose Ohrhörer')).toMatchObject({
+      status: 'found',
+      title: 'Kabellose Ohrhörer',
+    });
   });
 });
 

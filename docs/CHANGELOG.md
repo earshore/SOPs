@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2-rc.3] - 2026-08-21
+
+> 功能冻结后的发布候选（Pre-release）。本候选在 `v3.1.2-rc.2` 基础上落地 Amazon 2026 商品名称新规、Promptlab 版本选择 UX 收口与 Keyword Hunter / Deep Chat 标题合规辅助能力。GitHub Latest 仍为 `v3.1.1`，回滚基线为 `v3.1.1`。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Added（新增）
+
+- **Amazon 商品名称 2026 新规校验**：新增纯函数 `titleComplianceService`，支持 v1 经典版 / v2 新规版、商城与类目豁免、首次发布上下文、变体属性、亮点长度及确定性问题报告。
+- **标题合规辅助链路**：Keyword Hunter 与 Deep Chat 复用标题提取与合规提示，无法识别标题时明确保持未知，不把整段 Listing 误判为通过。
+- **发布设计与验收资料**：补充 Amazon 标题新规 PDF、Spec/Plan、Promptlab a11y 契约与 Windows light/dark NPI 视觉基线。
+
+### Changed（变更）
+
+- **Promptlab 版本选择**：经典版 / 新规版选择弱化为生成 Master Prompt 按钮内的 label 与右侧下拉入口，统一生成 Master Prompt 与生成视觉剧本按钮宽度，并优化浅色/深色菜单层级、文案和可见性。
+- **标题相关文案与输入体验**：Keyword Hunter、Listing SEO、PPC、质量 Listing 等页面对齐新规语义，统一复制前清洗与提示行为。
+
+### Fixed（修复）
+
+- 修复 Promptlab 版本菜单 teleport 后 Alpine 作用域丢失、CSP 表达式引用未定义状态，以及下拉箭头 / `aria-expanded` 不同步问题。
+- 修复标题提取对 `Title` / `Titel`、Markdown 标记、下一行标题和自由格式输出的兼容性，降低误拦截。
+
+### 门禁验收
+
+- `npm run build` 通过（0 exit code）。
+- `npm run test:e2e:smoke` 通过（31 passed）。
+- Promptlab 版本菜单 E2E 2 passed；Promptlab a11y 契约 7/7 passed；`git diff --check` 通过。
+
 ## [3.1.2-rc.2] - 2026-08-19
 
 > 功能冻结后的发布候选（Pre-release）。`v3.1.1` GA 之后的候选线续作：本候选在 `v3.1.2-rc.1` 可读性收官基础上，落地 **Level 2 标准化重构**（事件总线类型系统拆分、ViewRenderer / llmService 等服务层职责收敛，307 文件调整并补强单测），同步修复 smoke e2e 基线重 mint 注入与生产构建 esbuild CSS 压缩告警（转义任意值类 legacy 选择器清理）。上一 GA 与生产回滚基线均为 `v3.1.1`，GitHub Latest 仍为 `v3.1.1`。

@@ -1,5 +1,11 @@
 import { getActiveListingPromptContext } from '../session/threadStore';
 
+// Shared with Keyword Hunter so Title/Titel parsing has one implementation.
+export {
+  extractListingTitle,
+  type ExtractedListingTitle,
+} from '@/modules/app_center/views/keyword_hunter/input/titleCompliance';
+
 /**
  * 判断当前是否为「Listing 文案工作流」。
  * 复用 threadStore.getActiveListingPromptContext() 的权威判断：

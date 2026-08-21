@@ -4,6 +4,7 @@
  */
 
 import type { UserProductProfile } from '@/types/state';
+import type { ListingPromptVersion } from '../../services/promptlabService';
 
 // ==========================================
 // 基础类型
@@ -77,6 +78,8 @@ export interface PromptlabAlpineContext {
   _appStoreUnsubscribe: (() => void) | null;
   /** Listing Prompt 生成按钮的版本选择菜单是否展开。 */
   listingVersionMenuOpen: boolean;
+  /** Listing Prompt 规则版本。 */
+  listingVersion: ListingPromptVersion;
 
   // ---- 跨模块调用的方法 ----
   saveState(): void;
