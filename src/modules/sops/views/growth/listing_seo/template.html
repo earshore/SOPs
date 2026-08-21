@@ -36,7 +36,7 @@
       </div>
       <div>
         <dt class="ui-card__title font-semibold">适用站点</dt>
-        <dd class="ui-card__muted">Amazon EU/GB 主推站点（DE/FR/IT/ES/NL/SE/PL/BE/GB/IE/TR）</dd>
+        <dd class="ui-card__muted">Amazon EU/GB 主推站点；SA/EG/TR/AE、媒介类和既有商品按上下文复核</dd>
       </div>
       <div>
         <dt class="ui-card__title font-semibold">输入</dt>
@@ -107,11 +107,11 @@
           </label>
           <label class="flex items-start gap-2">
             <input type="checkbox" class="mt-1" />
-            <span>按 75 字符内标题公式重写 Title，前 70 字符必须包含品牌、核心词和关键卖点。</span>
+            <span>按适用场景的 75 字符上限重写 Title，优先放品牌、核心词和关键属性。</span>
           </label>
           <label class="flex items-start gap-2">
             <input type="checkbox" class="mt-1" />
-            <span>逐条复核标题合规：同词（含品牌名）≤2 次、无 ! $ ? _ { } ^ ¬ ¦、无促销语、品牌→款式→类型→属性→颜色/尺寸→型号顺序（2026 新规，已生效类目适用）。</span>
+            <span>逐条复核标题合规：同词（含品牌名）≤2 次、无 ! $ ? _ { } ^ ¬ ¦、无促销或 FSA/HSA 受限短语、品牌→款式→类型→属性→颜色/尺寸/包装数量→型号（仅类目要求时）。</span>
           </label>
           <label class="flex items-start gap-2">
             <input type="checkbox" class="mt-1 accent-emerald-600" />
@@ -338,15 +338,16 @@ Search Terms:
           <div class="p-3 bg-amber-50 rounded-lg text-sm">
             <strong class="text-amber-800">字符限制：</strong>
             <span class="sops-neutral-text-muted"
-              >非媒体类按 75 字符以内准备；后台类目限制与过渡期提示必须逐 ASIN 复核</span
+              >适用类目和首次发布商品按 75 字符以内准备；SA/EG/TR/AE、媒介类及既有商品按上下文复核</span
             >
             <ul class="text-xs sops-neutral-text-muted list-disc pl-4 mt-2 space-y-1">
               <li>同一字词（含品牌名）不得出现超过 2 次</li>
               <li>禁用 ! $ ? _ { } ^ ¬ ¦；~ # < > * 仅限编码/测量上下文</li>
-              <li>禁促销用语（Best Seller、Free、Sale、Guarantee 等）与受限短语</li>
-              <li>信息顺序：品牌 → 款式 → 类型 → 属性 → 颜色/尺寸 → 型号</li>
-              <li>父/子变体使用一致的标题结构</li>
-              <li>溢出信息放入「商品亮点」字段（约 125 字符），不放标题</li>
+              <li>禁促销用语（Best Seller、Free、Sale、Guarantee 等）及 FSA or HSA eligible 等受限短语</li>
+              <li>信息顺序：品牌 → 款式/风味 → 类型 → 属性 → 颜色 → 尺寸/包装数量 → 型号（仅类目要求时）</li>
+              <li>父 ASIN 不放颜色/尺寸；子 ASIN 放对应变体属性</li>
+              <li>含特殊字符的品牌填写品牌名称字段；无品牌填写“无品牌”</li>
+              <li>溢出信息放入「商品亮点」字段（≤125 字符），不放标题</li>
             </ul>
           </div>
         </div>
@@ -357,7 +358,7 @@ Search Terms:
           <i class="fas fa-list-ul text-primary-500"></i>五点描述 (Bullet Points)
         </h2>
         <p class="text-xs sops-neutral-text-muted mb-4">
-          核心原则：移动端只展示前3点的前70字符，把最硬核信息（尺寸/兼容性/材质）前置。
+          核心原则：移动端先展示前 3 点，把最硬核信息（尺寸/兼容性/材质）前置。
         </p>
         <div class="space-y-3">
           <!-- Bullet 1 -->
@@ -568,7 +569,7 @@ Search Terms:
         </div>
         <!-- Mobile Mantra -->
         <div class="mt-4 p-3 bg-amber-100 rounded-lg text-xs text-amber-900">
-          <strong>📱 手机端必查：</strong> 前70字符卖点明确？主图小屏C位？前3点抓眼球？
+          <strong>📱 手机端必查：</strong> 标题开头卖点明确？主图小屏 C 位？前 3 点抓眼球？
         </div>
       </div>
     </div>

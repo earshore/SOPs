@@ -127,6 +127,20 @@ describe('generateMasterPrompt v2 (2026 rules · 75 chars)', () => {
     expect(prompt).toMatch(/promotion|promotional|best seller|free|sale|guarantee/i);
   });
 
+  it('should allow factual measurement unit abbreviations', () => {
+    const prompt = promptlabService.generateMasterPrompt(baseInputs, null, 'v2');
+
+    expect(prompt).toMatch(/cm|oz|in|kg/i);
+    expect(prompt).not.toContain('Do not use measurement-unit abbreviations');
+  });
+
+  it('should reject complete FSA/HSA eligibility phrases', () => {
+    const prompt = promptlabService.generateMasterPrompt(baseInputs, null, 'v2');
+
+    expect(prompt).toMatch(/FSA.*HSA|fsa\/hsa/i);
+    expect(prompt).toMatch(/eligible|requirements/i);
+  });
+
   it('should enforce the information order (brand, style, product type, attributes, color/size, model)', () => {
     const prompt = promptlabService.generateMasterPrompt(baseInputs, null, 'v2');
 

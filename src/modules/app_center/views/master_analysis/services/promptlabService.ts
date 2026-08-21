@@ -36,10 +36,10 @@ const TITLE_COMPLIANCE_V2_GUIDELINES: string[] = [
   '  - **Length:** The product title MUST stay within 75 characters including spaces. Prefer concise, mobile-friendly titles.',
   '  - **Word repetition:** No word may appear more than 2 times in the title, brand names included. Prepositions, articles, and conjunctions (in, on, with, for, the, a, an, and, or) are exempt from this count.',
   '  - **Forbidden characters:** Do not use decorative characters such as ! $ ? _ { } ^ ¬ ¦. Characters ~ # < > * are allowed ONLY in product-code or measurement contexts.',
-  '  - **Promotional / subjective language:** Never use promotional phrases (free shipping, best seller, hot item, sale) or subjective claims (amazing, fantastic, 100% quality).',
-  '  - **Capitalization & numerals:** Use title case with lowercase prepositions/articles/conjunctions. Write quantities as Arabic numerals (2, not Two). Do not use measurement-unit abbreviations.',
-  '  - **Information order:** Brand → style/flavor → product type → key attributes → color/size/count → model.',
-  '  - **Variations:** Parent ASIN titles MUST NOT contain size or color; keep those only on child ASIN titles. Put the most important variation attribute in the title, move the rest to Bullet Points.',
+  '  - **Promotional / subjective language:** Never use promotional phrases (free shipping, best seller, hot item, sale, FSA or HSA eligible, FSA/HSA eligible, FSA or HSA requirements, FSA/HSA requirements) or subjective claims (amazing, fantastic, 100% quality).',
+  '  - **Capitalization & numerals:** Use title case with lowercase prepositions/articles/conjunctions. Write quantities as Arabic numerals (2, not Two). Keep factual measurement-unit abbreviations such as cm, oz, in, and kg when they describe the product.',
+  '  - **Information order:** Brand → style/flavor → product type → key attributes → color → size/pack count → model when the category requires a model. Use only necessary punctuation such as hyphens, slashes, commas, ampersands, and periods; do not add decorative separators.',
+  '  - **Variations:** Parent ASIN titles MUST NOT contain size or color. Child ASIN titles should include the relevant variation attribute(s), while remaining attributes can stay in Bullet Points.',
   '**PRODUCT HIGHLIGHTS FIELD (new):** Right after the Title (before the 5 classic bullets), output an additional "Product Highlights" section: concise, comma-separated phrases within 125 characters total (material, usage scenarios, certifications, extra attributes). These highlights display under the title in search results, so they carry information that no longer fits the 75-character title.',
 ];
 

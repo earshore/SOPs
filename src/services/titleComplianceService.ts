@@ -10,7 +10,7 @@
  * - 硬规则（长度 / 重复词 / 禁用字符 / 促销语）定级 error，由程序确定性判定；
  *   软规则（信息顺序 / 大小写 / 末尾标点）定级 warning/info，为启发式，仅"建议复核"
  * - 版本分流：v1 经典版（180 字符 + 促销语 + 末尾标点）为 v2 子集，通过规则的 versions 字段自然分流
- * - 类目差异化：媒体类（books/music/video/dvd）字符上限 50；沙特/埃及/土耳其/阿联酋站点豁免新规
+ * - 适用性判定：媒体类与 SA/EG/TR/AE 回退 v1 基线；本指南没有给媒介类 50 字符上限
  * - 脏输入不抛错：null / undefined 返回降级报告，超长输入（>10000）返回输入异常报告
  *
  * 与 promptlabService 的版本归一化行为一致：非法版本 fallback 至 v1。
@@ -40,13 +40,21 @@ export interface TitleComplianceInput {
   title: string;
   /**
    * 规则集版本：'v1' 经典版（兼容旧口径），'v2' 2026 新规版。
-   * 默认 v2；非法值 fallback 至 v1（与 promptlab 归一化行为一致）。
+   * 默认 v1；非法值 fallback 至 v1（与 promptlab 归一化行为一致）。
    */
   version?: string;
-  /** 类目（用于类目差异化：媒体类上限 50 字符） */
+  /** 类目（用于媒体类新规豁免判断） */
   category?: string;
   /** 商城站点（用于豁免站点判断） */
   marketplaceId?: string;
+  /** 是否为首次发布商品；false 时不启用 2026 新规 */
+  isFirstPublication?: boolean;
+  /** 父/子 ASIN 角色（提供时启用变体属性提示） */
+  asinRole?: 'parent' | 'child';
+  /** 父/子 ASIN 的颜色/尺寸属性（提供时启用变体属性提示） */
+  variationAttributes?: { color?: string; size?: string };
+  /** 独立商品亮点字段（最多 125 个字符） */
+  highlights?: string;
   /** 可选：输入携带变体标题列表时启用变体一致性校验 */
   variants?: string[];
 }
@@ -72,12 +80,10 @@ export interface TitleComplianceReport {
 const V2_MAX_LENGTH = 75;
 /** v1（经典版）字符上限 */
 const V1_MAX_LENGTH = 180;
-/** 媒体类（books / music / video / dvd 等）字符上限 */
-const MEDIA_MAX_LENGTH = 50;
 /** 字词重复上限：任一词出现次数不得高于此值 */
 const DEFAULT_MAX_WORD_REPEAT = 2;
 /** 商品亮点字段总字符上限（超标时建议信息移入亮点字段） */
-const BULLET_HIGHLIGHTS_MAX = 125;
+export const BULLET_HIGHLIGHTS_MAX = 125;
 /** 超大输入防御阈值：超过此长度直接返回输入异常报告 */
 const MAX_INPUT_LENGTH = 10000;
 
@@ -88,7 +94,7 @@ const WORD_REPEAT_EXEMPT = new Set(['in', 'on', 'with', 'for', 'the', 'a', 'an',
 const MEASUREMENT_ALLOWED_CHARS = new Set(['~', '#', '<', '>', '*']);
 
 /** 无条件禁用的特殊字符 */
-const BANNED_CHARS = new Set(['!', '$', '?', '_', '{', '}', '^', '¬', '¦', '；']);
+const BANNED_CHARS = new Set(['!', '$', '?', '_', '{', '}', '^', '¬', '¦']);
 
 /**
  * 2026 新规促销 / 受限用语词库（大小写不敏感匹配）。
@@ -127,6 +133,18 @@ export const PROMO_PHRASES: ReadonlyArray<string> = [
   'on sale',
   'buy one get one',
   'as seen on tv',
+];
+
+/** 2026 新规中的受限资格 / 保障短语（独立于促销词库） */
+export const RESTRICTED_PHRASES: ReadonlyArray<string> = [
+  'fsa or hsa eligible',
+  'fsa/hsa eligible',
+  'fsa eligible',
+  'hsa eligible',
+  'fsa or hsa requirements',
+  'fsa/hsa requirements',
+  'fsa requirements',
+  'hsa requirements',
 ];
 
 /** 媒体类类目标识（小写匹配） */
@@ -328,6 +346,31 @@ const RULES: readonly RuleEntry[] = [
     },
   },
   {
+    rule: 'restricted-phrases',
+    severity: 'error',
+    versions: ['v2'],
+    check: (title, _ctx) => {
+      const lower = title.toLowerCase();
+      const hit = RESTRICTED_PHRASES.filter(phrase => {
+        const idx = lower.indexOf(phrase);
+        if (idx === -1) return false;
+        const beforeOk = idx === 0 || /[^a-z0-9\u4e00-\u9fff]/.test(lower.charAt(idx - 1));
+        const afterIdx = idx + phrase.length;
+        const afterOk =
+          afterIdx >= lower.length || /[^a-z0-9\u4e00-\u9fff]/.test(lower.charAt(afterIdx));
+        return beforeOk && afterOk;
+      });
+      if (hit.length === 0) return null;
+      return {
+        rule: 'restricted-phrases',
+        severity: 'error',
+        message: `标题包含受限短语：${hit.join('、')}`,
+        detail: hit.join(', '),
+        suggestion: '将资格、保障或计划信息移出商品名称，保留客观商品属性',
+      };
+    },
+  },
+  {
     rule: 'info-order',
     severity: 'warning',
     versions: ['v2'],
@@ -425,6 +468,37 @@ const RULES: readonly RuleEntry[] = [
     },
   },
   {
+    rule: 'highlights-length',
+    severity: 'error',
+    versions: ['v2'],
+    check: (_title, _ctx, input) => {
+      if (input.highlights === undefined) return null;
+      const count = [...input.highlights].length;
+      if (count <= BULLET_HIGHLIGHTS_MAX) return null;
+      return {
+        rule: 'highlights-length',
+        severity: 'error',
+        message: `商品亮点字符数 ${count} 超出上限 ${BULLET_HIGHLIGHTS_MAX}`,
+        suggestion: `精简商品亮点至 ${BULLET_HIGHLIGHTS_MAX} 字符以内，并保留逗号分隔短语`,
+      };
+    },
+  },
+  {
+    rule: 'highlights-format',
+    severity: 'warning',
+    versions: ['v2'],
+    check: (_title, _ctx, input) => {
+      const highlights = input.highlights?.trim();
+      if (!highlights || !/[.!?。！？]/.test(highlights)) return null;
+      return {
+        rule: 'highlights-format',
+        severity: 'warning',
+        message: '商品亮点疑似使用完整句子',
+        suggestion: '改为用逗号分隔的简短短语，不要写完整句子',
+      };
+    },
+  },
+  {
     rule: 'variant-consistency',
     severity: 'info',
     versions: ['v2'],
@@ -459,6 +533,37 @@ const RULES: readonly RuleEntry[] = [
       };
     },
   },
+  {
+    rule: 'parent-variation-attribute',
+    severity: 'warning',
+    versions: ['v2'],
+    check: (title, _ctx, input) => {
+      if (!input.asinRole || !input.variationAttributes) return null;
+      const lowerTitle = title.toLowerCase();
+      const attributes = [input.variationAttributes.color, input.variationAttributes.size]
+        .map(value => value?.trim().toLowerCase())
+        .filter((value): value is string => Boolean(value));
+      if (attributes.length === 0) return null;
+      if (input.asinRole === 'parent') {
+        const present = attributes.filter(value => lowerTitle.includes(value));
+        if (present.length === 0) return null;
+        return {
+          rule: 'parent-variation-attribute',
+          severity: 'warning',
+          message: `父 ASIN 标题包含颜色 / 尺寸属性：${present.join('、')}`,
+          suggestion: '父 ASIN 标题移除颜色和尺寸；子 ASIN 再保留对应变体属性',
+        };
+      }
+      const missing = attributes.filter(value => !lowerTitle.includes(value));
+      if (missing.length === 0) return null;
+      return {
+        rule: 'child-variation-attribute',
+        severity: 'warning',
+        message: `子 ASIN 标题缺少变体属性：${missing.join('、')}`,
+        suggestion: '子 ASIN 标题应包含对应颜色 / 尺寸；其余属性可移入商品亮点',
+      };
+    },
+  },
 ];
 
 // ============================================================
@@ -469,31 +574,23 @@ function buildContext(input: TitleComplianceInput): {
   ctx: RuleContext;
   version: ListingComplianceVersion;
 } {
-  const version = normalizeComplianceVersion(input.version);
-  const maxLength = version === 'v2' ? V2_MAX_LENGTH : V1_MAX_LENGTH;
+  const requestedVersion = normalizeComplianceVersion(input.version);
   const skipRules = new Set<string>();
 
-  // 类目差异化：媒体类上限 50 字符
   const category = (input.category ?? '').trim().toLowerCase();
-  const effectiveMax = MEDIA_CATEGORIES.has(category)
-    ? Math.min(maxLength, MEDIA_MAX_LENGTH)
-    : maxLength;
-
-  // 豁免站点：跳过全部新规规则，仅保留 v1 基础项
   const marketplace = (input.marketplaceId ?? '').trim().toLowerCase();
-  if (EXEMPT_MARKETPLACES.has(marketplace)) {
-    for (const entry of RULES) {
-      if (entry.versions.includes('v2') && entry.rule !== 'max-length') {
-        skipRules.add(entry.rule);
-      }
-    }
-  }
+  const v2Applicable =
+    requestedVersion === 'v2' &&
+    input.isFirstPublication !== false &&
+    !EXEMPT_MARKETPLACES.has(marketplace) &&
+    !MEDIA_CATEGORIES.has(category);
+  const version: ListingComplianceVersion = v2Applicable ? 'v2' : 'v1';
 
   return {
     version,
     ctx: {
       version,
-      maxTitleLength: effectiveMax,
+      maxTitleLength: version === 'v2' ? V2_MAX_LENGTH : V1_MAX_LENGTH,
       maxWordRepeat: DEFAULT_MAX_WORD_REPEAT,
       skipRules,
     },

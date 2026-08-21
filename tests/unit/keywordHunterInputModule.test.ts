@@ -21,6 +21,7 @@ function createKeywordHunterTemplate(): string {
         aria-describedby="keyword-hunter-copy-input-helper copy-char-count-label"></textarea>
       <span id="keyword-hunter-copy-input-helper">Tip: 包含完整 Listing 内容可提升分析精度</span>
       <span id="copy-char-count-label"><span id="copy-char-count"></span></span>
+      <span id="copy-title-status" role="status" aria-live="polite"></span>
       <button id="keyword-hunter-btn-clean-kw"></button>
       <button id="keyword-hunter-btn-undo-kw-clean"></button>
       <button id="keyword-hunter-btn-clean-copy"></button>
@@ -315,7 +316,7 @@ beforeEach(() => {
 
 it('mounts the template, restores inputs, updates counters, and registers actions', async () => {
   inputMocks.state.keywordTracker.keywordsInputText = 'alpha\nbeta\nalpha';
-  inputMocks.state.keywordTracker.copyInputText = 'short copy';
+  inputMocks.state.keywordTracker.copyInputText = 'Title: short copy';
 
   const container = await mountInput();
 
@@ -341,6 +342,7 @@ it('mounts the template, restores inputs, updates counters, and registers action
   ).toBe(false);
   expect(container.querySelector('#keyword-hunter-duplicate-count')?.textContent).toBe('1');
   expect(container.querySelector('#copy-char-count')?.textContent).toBe('10');
+  expect(container.querySelector('#copy-title-status')?.textContent).toContain('标题已识别');
   expect(
     container.querySelector('#keyword-hunter-copy-input')?.getAttribute('aria-labelledby')
   ).toBe('keyword-hunter-copy-input-label');
@@ -579,13 +581,13 @@ it('cleans, clears, and pastes copy text while persisting input state', async ()
   const container = await mountInput();
   const copyInput = container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input');
   expect(copyInput).not.toBeNull();
-  copyInput!.value = '**Bold** and `code`\n\n\nplain';
+  copyInput!.value = 'Title: **Bold** and `code`\n\n\nplain';
 
   inputMocks.actions.keyword_hunter_cleanCopyFormat({}, new Event('click'));
 
-  expect(copyInput!.value).toBe('Bold and code\n\nplain');
-  expect(container.querySelector('#copy-char-count')?.textContent).toBe('20');
-  expect(inputMocks.state.keywordTracker.copyInputText).toBe('Bold and code\n\nplain');
+  expect(copyInput!.value).toBe('Title: Bold and code\n\nplain');
+  expect(container.querySelector('#copy-char-count')?.textContent).toBe('13');
+  expect(inputMocks.state.keywordTracker.copyInputText).toBe('Title: Bold and code\n\nplain');
 
   inputMocks.actions.keyword_hunter_clearCopyInput({}, new Event('click'));
   expect(copyInput!.value).toBe('');
@@ -594,6 +596,18 @@ it('cleans, clears, and pastes copy text while persisting input state', async ()
   await inputMocks.actions.keyword_hunter_pasteFromClipboard({}, new Event('click'));
   expect(copyInput!.value).toBe('clipboard copy');
   expect(inputMocks.state.keywordTracker.copyInputText).toBe('clipboard copy');
+});
+
+it('keeps counting the full copy when a title heading is not found', async () => {
+  const container = await mountInput();
+  const copyInput = container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input');
+  expect(copyInput).not.toBeNull();
+
+  copyInput!.value = 'Wireless earbuds copy without a title heading';
+  copyInput!.dispatchEvent(new Event('input', { bubbles: true }));
+
+  expect(container.querySelector('#copy-char-count')?.textContent).toBe('45');
+  expect(container.querySelector('#copy-title-status')?.textContent).toContain('not_found');
 });
 
 it('validates required inputs and stores analysis results before navigation', async () => {

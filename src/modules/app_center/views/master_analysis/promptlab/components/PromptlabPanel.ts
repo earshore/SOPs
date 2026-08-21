@@ -263,9 +263,9 @@ type PromptlabPanelState = Pick<
   | '_unsubscribers'
   | '_appStoreUnsubscribe'
   | 'listingVersionMenuOpen'
-  | 'listingVersion'
 > & {
   reportRevision: number;
+  listingVersionPreference: ListingPromptVersion;
   /** EventBus + appStore subscriptions are init-once until destroy. */
   _subscriptionsInitialized: boolean;
 };
@@ -287,8 +287,12 @@ type PromptlabPanelThis = PromptlabAlpineContext & {
   overallConfidence: number;
   hasExpandedDimensions: boolean;
   listingVersion: ListingPromptVersion;
+  listingVersionPreference: ListingPromptVersion;
+  listingVersionBadgeLabel: string;
   listingVersionMenuOpen: boolean;
   toggleListingVersionMenu(): void;
+  closeListingVersionMenu(): void;
+  updateListingVersionTriggerState(): void;
   computeVersionMenuPosition(): { top: number; right: number } | null;
   selectListingVersion(version: string): void;
   isSupportedListingVersion(version: string): boolean;
@@ -334,7 +338,7 @@ function createPromptlabPanelState(): PromptlabPanelState {
     _unsubscribers: [] as Array<() => void>,
     _appStoreUnsubscribe: null,
     _subscriptionsInitialized: false,
-    listingVersion: DEFAULT_LISTING_PROMPT_VERSION,
+    listingVersionPreference: DEFAULT_LISTING_PROMPT_VERSION,
   };
 }
 
@@ -361,6 +365,25 @@ function isVisualReadyForUi(ctx: PromptlabPanelThis): boolean {
  */
 const promptlabPanelBehavior: PromptlabPanelBehavior = {
   // ========== Computed Getters ==========
+
+  get listingVersion(): ListingPromptVersion {
+    const stored = configCenter.get<string>(LISTING_VERSION_CONFIG_KEY);
+    if (stored === undefined) return this.listingVersionPreference;
+
+    const normalized = normalizeListingPromptVersion(stored);
+    if (normalized !== stored) {
+      configCenter.set(LISTING_VERSION_CONFIG_KEY, normalized);
+    }
+    return normalized;
+  },
+
+  set listingVersion(value: ListingPromptVersion) {
+    this.listingVersionPreference = normalizeListingPromptVersion(value);
+  },
+
+  get listingVersionBadgeLabel(): string {
+    return this.listingVersion === 'v2' ? '· 新规' : '';
+  },
 
   /** Workbench section icons — no marketing scale-110 (D4). */
   get workbenchSectionIconAnalysis(): string {
@@ -589,6 +612,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       DEFAULT_LISTING_PROMPT_VERSION
     );
     this.listingVersion = normalizeListingPromptVersion(stored);
+    this.updateListingVersionTriggerState();
 
     // 从 store 恢复 profile
     this.restoreState();
@@ -616,14 +640,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       });
 
       const unsubRoute = eventBus.on(APP_EVENTS.ROUTE_CHANGED, () => {
-        if (this.listingVersionMenuOpen) {
-          this.listingVersionMenuOpen = false;
-          const menu = document.getElementById('listing-version-menu');
-          const container = document.querySelector('.promptlab-menu-container');
-          if (menu && container && menu.parentNode === document.body) {
-            container.appendChild(menu);
-          }
-        }
+        this.closeListingVersionMenu();
       });
 
       this._unsubscribers = [unsubScrape, unsubHistory, unsubRoute];
@@ -818,32 +835,24 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
   // ========== Listing Prompt 版本选择 ==========
   toggleListingVersionMenu(): void {
-    const willOpen = !this.listingVersionMenuOpen;
-    this.listingVersionMenuOpen = willOpen;
-    const menu = document.getElementById('listing-version-menu');
-    if (!menu) return;
-
-    if (willOpen) {
-      // 翻转卡容器带 preserve-3d 与 rotateY 翻转动画，按 CSS 规范构成
-      // fixed 定位上下文：菜单若留在卡内，fixed 定位相对该 transform
-      // 容器而非视口（位置偏移且被 overflow-hidden 裁剪）。
-      // Alpine CSP 不支持 teleport 指令，用 JS 将菜单移至 document.body，
-      // Alpine 的 x-data/x-show 绑定不受 DOM 位置影响。
-      if (menu.parentNode !== document.body) {
-        document.body.appendChild(menu);
-      }
-    } else {
-      // 收起时移回原容器，防止页面切换后 DOM 漂流
-      const container = document.querySelector('.promptlab-menu-container');
-      if (container && menu.parentNode === document.body) {
-        container.appendChild(menu);
+    this.listingVersionMenuOpen = !this.listingVersionMenuOpen;
+    this.updateListingVersionTriggerState();
+    if (this.listingVersionMenuOpen) {
+      const menu = document.getElementById('listing-version-menu');
+      const pos = this.computeVersionMenuPosition();
+      if (menu && pos) {
+        menu.style.top = `${pos.top}px`;
+        menu.style.right = `${pos.right}px`;
       }
     }
   },
 
-  /** 菜单 DOM 已移至 document.body（脱离翻转卡 transform 祖先，
-   * fixed 定位相对视口生效且不被 overflow-hidden 裁剪），
-   * 通过实时计算 caret 按钮的视口位置以 fixed 方式定位到按钮正下方。 */
+  closeListingVersionMenu(): void {
+    this.listingVersionMenuOpen = false;
+    this.updateListingVersionTriggerState();
+  },
+
+  /** Teleport 到 body 后，fixed 菜单相对视口定位到版本标签正下方。 */
   get listingVersionMenuStyle(): string {
     if (!this.listingVersionMenuOpen) return '';
     const pos = this.computeVersionMenuPosition();
@@ -851,13 +860,18 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     return `top:${pos.top}px;right:${pos.right}px;`;
   },
 
+  updateListingVersionTriggerState(): void {
+    const trigger = document.querySelector<HTMLElement>('.promptlab-version-label');
+    if (!trigger) return;
+    trigger.setAttribute('aria-expanded', this.listingVersionMenuOpen ? 'true' : 'false');
+    trigger.querySelector('i')?.classList.toggle('rotate-180', this.listingVersionMenuOpen);
+  },
+
   /** 计算 caret 按钮的视口位置，供 fixed 定位菜单使用。 */
   computeVersionMenuPosition(): { top: number; right: number } | null {
-    const caret = document.querySelector<HTMLButtonElement>(
-      'button[aria-label="选择 Listing Prompt 版本"]'
-    );
-    if (!caret) return null;
-    const rect = caret.getBoundingClientRect();
+    const trigger = document.querySelector<HTMLElement>('.promptlab-version-label');
+    if (!trigger) return null;
+    const rect = trigger.getBoundingClientRect();
     return {
       top: Math.round(rect.bottom + 4),
       right: Math.round(window.innerWidth - rect.right),
@@ -868,7 +882,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       this.listingVersion = version as ListingPromptVersion;
       configCenter.set(LISTING_VERSION_CONFIG_KEY, version);
     }
-    this.listingVersionMenuOpen = false;
+    this.closeListingVersionMenu();
   },
   isSupportedListingVersion(version: string): boolean {
     return LISTING_PROMPT_VERSIONS.includes(version as ListingPromptVersion);

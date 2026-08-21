@@ -5,7 +5,7 @@ test.describe('Promptlab 版本选择菜单', () => {
     await page.goto('/#/app-center/master-analysis/promptlab');
     await page.waitForSelector('#btn-generate-prompt', { state: 'visible', timeout: 30000 });
 
-    // 生成按钮与版本选择按钮需要站点与关键词上下文才可点击
+    // 生成按钮与版本选择标签需要站点与关键词上下文才可点击
     // 站点选项值为显示名（如 English (US)），按文本精确匹配选取
     const usOption = await page
       .locator('#lab-target-market option')
@@ -19,24 +19,27 @@ test.describe('Promptlab 版本选择菜单', () => {
     await page.fill('#lab-keywords-tier1', 'humidifier, cool mist');
     await page.fill('#lab-keywords-tier2', 'bedroom humidifier, portable');
 
-    const menuButton = page.locator('button[aria-label="选择 Listing Prompt 版本"]');
-    await expect(menuButton).toBeEnabled({ timeout: 15000 });
+    const menuButton = page.locator('.promptlab-version-label');
+    await expect(menuButton).toBeVisible({ timeout: 15000 });
+    await expect(menuButton).toHaveAttribute('role', 'button');
 
-    // 点击 caret 展开版本选择菜单
+    // 点击版本标签展开版本选择菜单
     await menuButton.click();
 
     // 菜单以 fixed 定位脱离翻转卡容器，不被卡片 overflow-hidden 裁剪；
     // 用同一时刻的 getBoundingClientRect 测量（避免 Playwright 自动滚动导致坐标漂移）
     const result = await page.evaluate(() => {
-      const caret = document
-        .querySelector('button[aria-label="选择 Listing Prompt 版本"]')
+      const trigger = document
+        .querySelector('.promptlab-version-label')
         ?.getBoundingClientRect();
       const menuEl = document.querySelector(
         'div[x-show*="listingVersionMenuOpen"]'
       ) as HTMLElement | null;
       const menu = menuEl ? menuEl.getBoundingClientRect() : null;
       return {
-        caret: caret ? { top: caret.top, bottom: caret.bottom, right: caret.right } : null,
+        trigger: trigger
+          ? { top: trigger.top, bottom: trigger.bottom, right: trigger.right }
+          : null,
         menu: menu
           ? {
               top: menu.top,
@@ -52,10 +55,10 @@ test.describe('Promptlab 版本选择菜单', () => {
 
     expect(result.menu).not.toBeNull();
     expect(result.menu?.display).toBe('block');
-    expect(result.caret).not.toBeNull();
+    expect(result.trigger).not.toBeNull();
 
     const menuTop = (result.menu as { top: number }).top;
-    const buttonBottom = (result.caret as { bottom: number }).bottom;
+    const buttonBottom = (result.trigger as { bottom: number }).bottom;
 
     // fixed 定位：菜单顶部位于按钮底部附近（含过渡与滚动时序允许的合理间隙）
     expect(menuTop - buttonBottom).toBeGreaterThanOrEqual(0);
@@ -72,7 +75,7 @@ test.describe('Promptlab 版本选择菜单', () => {
     await page.goto('/#/app-center/master-analysis/promptlab');
     await page.waitForSelector('#btn-generate-prompt', { state: 'visible', timeout: 30000 });
 
-    const menuButton = page.locator('button[aria-label="选择 Listing Prompt 版本"]');
+    const menuButton = page.locator('.promptlab-version-label');
     const enOption = await page
       .locator('#lab-target-market option')
       .filter({ hasText: /English/ })
@@ -82,11 +85,11 @@ test.describe('Promptlab 版本选择菜单', () => {
     await page.selectOption('#lab-target-market', enText);
     await page.fill('#lab-keywords-tier1', 'humidifier');
     await page.fill('#lab-keywords-tier2', 'cool mist');
-    await expect(menuButton).toBeEnabled({ timeout: 15000 });
+    await expect(menuButton).toBeVisible({ timeout: 15000 });
     await menuButton.click();
 
     const menu = page.locator('#listing-version-menu');
-    const v2Option = menu.locator('text=2026 新规版');
+    const v2Option = menu.locator('text=新规版');
     await expect(v2Option).toBeVisible();
     const v1Option = menu.locator('text=经典版');
     await expect(v1Option).toBeVisible();

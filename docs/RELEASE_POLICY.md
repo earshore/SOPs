@@ -66,7 +66,8 @@
 - `v3.1.0` 已于 2026-08-12 GA 收口；当前候选线为 `v3.1.1-rc.6`（2026-08-16，随 rc.6 更新），必须保持 **Pre-release**，GitHub Latest 仍为 `v3.1.0`；RC 回滚基线为 `v3.1.0`。
 - `v3.1.1`（2026-08-17）为当前 GA：收口 `v3.1.1-rc.1`…`rc.6`（Launchpad / 加载视觉 / AI 提示词集中化 / TD-THM-01 遗留池 B 批与 S 批消债 / TD-CMP-04 badge 契约 / rc.6 门禁与供应链修复），并纳入 GA 定稿修复：深色模式文字可读性专项（dark 全 40 路由对比度审计 0 缺陷）；GitHub Latest 指向 `v3.1.1`，回滚基线 `v3.1.0`。候选线已关闭：GA 后不得再发 `v3.1.1-rc.*`，下一候选进入 `v3.1.2-rc.*` 或 `v3.2.0-rc.*`。
 - `v3.1.2-rc.1`（2026-08-18）为 Pre-release 候选（历史，已由 rc.2 接替）：深色/浅色可读性债务收官——More 子页与系统设置深度审计、图标可读性专项、审计工具 local-contrast 合成修正后 40 路由 × dark/light 双模式 0 缺陷、settings-scale 门禁修复；GitHub Latest 仍为 `v3.1.1`，回滚基线 `v3.1.1`。
-- `v3.1.2-rc.2`（2026-08-19）为当前 Pre-release 候选：Level 2 标准化重构（事件总线类型系统拆分 `types/events/*`、ViewRenderer / llmService 等服务层职责收敛）+ smoke e2e 基线重 mint 注入 + 生产构建 esbuild CSS 压缩告警消除；GitHub Latest 仍为 `v3.1.1`，回滚基线 `v3.1.1`。
+- `v3.1.2-rc.2`（2026-08-19）为历史 Pre-release 候选：Level 2 标准化重构（事件总线类型系统拆分 `types/events/*`、ViewRenderer / llmService 等服务层职责收敛）+ smoke e2e 基线重 mint 注入 + 生产构建 esbuild CSS 压缩告警消除；由 `v3.1.2-rc.3` 接替，历史 Release 不变。
+- `v3.1.2-rc.3`（2026-08-21）为当前 Pre-release 候选：Amazon 商品名称 2026 新规校验与跨入口辅助提示、Promptlab 经典版 / 新规版选择 UX 收口、浅色/深色菜单与按钮可访问性修复；GitHub Latest 仍为 `v3.1.1`，回滚基线 `v3.1.1`。
 - `v3.1.1-rc.1` 为首页亚马逊运营工作台 Launchpad 的功能冻结候选：统一最近作业、SOPs 与三条核心工具直达路径，保留浮动工作台和 PPC 快捷入口；须通过 Build、发布冒烟、首页直达路由与人工 OPS/A11y 抽检后方可升级 GA。
 - `v3.1.0-rc.3`（2026-08-10）为生产验证候选：Deep Chat 跨会话串线/删除复活/预算预检/KH 推送误拦/双提交/输入持久化；**Pre-release**（已并入 `v3.1.0` GA）。
 - `v3.1.0-rc.2`（2026-08-10）为生产验证候选：Deep Chat 会话设置加固全量；**Pre-release**，Latest 仍为 `v3.0.12`。

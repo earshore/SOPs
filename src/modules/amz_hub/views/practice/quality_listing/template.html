@@ -166,9 +166,8 @@
           <i class="fas fa-user text-emerald-500"></i>对买家：0.3 秒决策
         </h4>
         <p class="text-sm text-slate-600">
-          移动端搜索结果页只显示前 70-80 个字符。买家扫描列表时，0.3 秒内决定要不要点进来。
-          标题前半段决定点击率——这是 Listing 里 ROI 最高的优化点，没有之一。
-          前半段写不好，后面所有内容都没有展示机会。
+          搜索结果和详情页都会展示商品名称。应在适用的 75 字符上限内优先放入品牌、款式、
+          商品类型和关键属性；具体展示截断以 Seller Central 当前界面为准。
         </p>
       </div>
     </div>
@@ -179,7 +178,7 @@
         id="quality-title-formula-title"
         class="ui-card__title font-bold mb-3 flex items-center gap-2"
       >
-        <i class="fas fa-flask text-primary-500"></i>黄金标题公式（欧洲站通用）
+        <i class="fas fa-flask text-primary-500"></i>标题公式（按站点与类目复核）
       </h3>
       <p id="quality-title-formula-description" class="ui-card__muted text-xs mb-3">
         公式支持横向滚动；按品牌、核心关键词、用途、特性和规格组合标题结构。
@@ -218,15 +217,14 @@
       <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm mb-2">
         <strong class="text-slate-700">示例（厨房工具类目）：</strong>
         <span class="text-slate-500 italic">
-          BrandName Garlic Press Stainless Steel | Heavy Duty Garlic Crusher &amp; Mincer with
-          Silicone Peeler — Dishwasher Safe, No Peeling Needed, for Kitchen Cooking — Pack of 2
+          BrandName Garlic Press Stainless Steel, Dishwasher Safe, Pack of 2
         </span>
       </div>
       <p class="ui-card__muted text-xs">
         <i class="fas fa-info-circle text-primary-400 mr-1"></i>
-        注意示例中的结构：品牌 → 核心词（Garlic Press）→ 材质（Stainless Steel）→
-        同义词扩展（Crusher &amp; Mincer） → 关键卖点（Dishwasher Safe）→ 规格（Pack of
-        2）。一石二鸟，既索引关键词，又传达卖点。
+        注意示例中的结构：品牌 → 款式/风味（如有）→ 商品类型（Garlic Press）→
+        关键属性（Stainless Steel）→ 颜色/尺寸/包装数量（如有）→ 型号（仅在类目要求时）。
+        只保留必要信息，避免关键词堆砌。
       </p>
     </div>
 
@@ -234,7 +232,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
       <div class="ui-card p-4">
         <h4 class="ui-card__title font-bold mb-3 flex items-center gap-2">
-          <i class="fas fa-ruler-horizontal text-primary-500"></i>字符数规范（欧洲站）
+          <i class="fas fa-ruler-horizontal text-primary-500"></i>字符数规范（按适用性）
         </h4>
         <div class="space-y-2 text-sm">
           <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
@@ -244,24 +242,18 @@
               >≤ 75 字符</span
             >
           </div>
-          <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
-            <span class="text-slate-600">移动端搜索列表可见区域</span>
-            <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded"
-              >前 70–80 字符</span
-            >
-          </div>
           <div
             class="flex justify-between items-center p-2 bg-amber-50 rounded border border-amber-100"
           >
-            <span class="text-slate-600">2026-07-27前过渡期</span>
+            <span class="text-slate-600">适用范围</span>
             <span class="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded"
-              >后台逐ASIN复核</span
+              >除 SA/EG/TR/AE 外；媒介类另行复核</span
             >
           </div>
           <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
-            <span class="text-slate-600">.de / .fr / .it / .es</span>
+            <span class="text-slate-600">豁免/既有商品</span>
             <span class="font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded"
-              >以当地语言为准</span
+              >按 Seller Central 当前提示</span
             >
           </div>
           <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
@@ -283,7 +275,7 @@
           <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
             <span class="text-slate-600">信息顺序</span>
             <span class="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded"
-              >品牌→款式→类型→属性→颜色/尺寸→型号</span
+              >品牌→款式/风味→类型→属性→颜色→尺寸/包装数量→型号（按类目）</span
             >
           </div>
           <div class="flex justify-between items-center p-2 bg-slate-50 rounded">
@@ -293,9 +285,9 @@
             >
           </div>
           <p class="ui-card__muted text-xs mt-2">
-            * Amazon 已公告非媒体类商品标题规则将收紧；2026-07-27 起按 75
-            字符口径准备。不同类目、媒体类和后台迁移状态可能不同，上架前以 Seller Central
-            当前提示为准。
+            * 本页只采用 PDF 可核验的规则：首次发布的适用商品名称 ≤75 字符（含空格），
+            固定禁用字符和受限短语需逐项检查；商品亮点独立 ≤125 字符。更新后搜索结果和详情页
+            可能需要 24–48 小时，最终以上架时 Seller Central 当前提示为准。
           </p>
         </div>
       </div>
@@ -304,20 +296,14 @@
           <i class="fas fa-mobile-alt text-purple-500"></i>移动端标题截断示意
         </h4>
         <div class="bg-slate-900 rounded-lg p-3 font-mono text-xs leading-relaxed mb-2">
-          <span class="text-yellow-300">BrandName Garlic Press Stainless Steel |</span
-          ><span class="text-white opacity-25">
-            Heavy Duty Garlic Crusher &amp; Mincer with Silicone Peeler — Dishwasher Safe, No
-            Peeling Needed...</span
-          >
+          <span class="text-yellow-300">BrandName Garlic Press Stainless Steel, Dishwasher Safe, Pack of 2</span>
         </div>
         <p class="ui-card__muted text-xs mb-3">
           <i class="fas fa-exclamation-triangle text-amber-500 mr-1"></i>
-          黄色高亮部分是移动端搜索列表中买家能看到的内容。
-          <strong>核心词必须在这里</strong>，后半段留给补充信息和长尾词。
+          示例只说明信息顺序：标题开头优先放品牌、商品类型和关键属性；实际展示范围以 Seller Central 当前界面为准。
         </p>
         <div class="p-2 bg-primary-100 rounded text-xs text-primary-800">
-          <strong>实测数据：</strong>欧洲各站点移动端流量占比已超过 65%，
-          部分类目（家居/母婴/宠物）更高达 80%+。移动端优化不是加分项，是及格线。
+          <strong>复核提示：</strong>提交标题或商品亮点后，搜索结果和详情页展示可能需要 24–48 小时。
         </div>
       </div>
     </div>
@@ -331,11 +317,11 @@
         <ul class="space-y-2 text-sm text-slate-700">
           <li class="flex items-start gap-2">
             <span class="text-emerald-500 font-bold mt-0.5 flex-shrink-0">✓</span>
-            <span>将搜索量最高的核心关键词放在前 80 字符内，品牌名紧跟其后</span>
+            <span>在标题开头自然放入核心关键词，并按品牌→款式→类型→属性顺序组织</span>
           </li>
           <li class="flex items-start gap-2">
             <span class="text-emerald-500 font-bold mt-0.5 flex-shrink-0">✓</span>
-            <span>使用竖线 | 或破折号 — 隔开信息块，让买家一眼扫读关键信息</span>
+            <span>只使用必要的连字符、斜线、逗号、&amp; 或句点分隔信息块，不添加装饰性分隔符</span>
           </li>
           <li class="flex items-start gap-2">
             <span class="text-emerald-500 font-bold mt-0.5 flex-shrink-0">✓</span>
@@ -378,7 +364,7 @@
           </li>
           <li class="flex items-start gap-2">
             <span class="text-red-500 font-bold mt-0.5 flex-shrink-0">✗</span>
-            <span>滥用特殊字符，仅允许少数分隔符号（| — , . /）</span>
+            <span>滥用特殊字符或装饰性分隔符；仅保留必要的 - / , &amp; .</span>
           </li>
           <li class="flex items-start gap-2">
             <span class="text-red-500 font-bold mt-0.5 flex-shrink-0">✗</span>
@@ -553,8 +539,7 @@
             >
           </div>
           <p class="text-xs text-slate-600">
-            放入搜索量最大的 2-3 个核心词，以及最重要的同义词和修饰词。 前 80
-            字符必须包含最高价值关键词。
+            放入与商品事实匹配的核心词和必要修饰词；标题上限为 75 字符，不为塞词牺牲可读性。
           </p>
         </div>
       </div>
@@ -1930,7 +1915,7 @@
               type="checkbox"
               class="rounded text-[var(--module-accent-text)] w-4 h-4 flex-shrink-0"
             />
-            <span class="text-slate-700">核心关键词在前 80 字符内，品牌名已包含</span>
+            <span class="text-slate-700">核心关键词位于标题开头，品牌字段已核对</span>
           </label>
           <label class="flex items-center gap-2 text-sm cursor-pointer">
             <input
@@ -2220,7 +2205,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
       <label class="flex items-start gap-2"
         ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
-          >标题前70字符必须包含品牌+核心关键词+核心卖点（移动端可见）。</span
+          >标题开头应包含品牌、核心关键词和关键属性，并控制在适用的 75 字符上限内。</span
         ></label
       >
       <label class="flex items-start gap-2"
@@ -2295,7 +2280,7 @@
           <div>
             <h4 class="ui-card__title font-bold text-sm mb-1">忽视移动端展示</h4>
             <p class="ui-card__muted text-xs">
-              → 移动端流量占比60%+，标题前70字符、首图、前3条五点是全部可见区。
+              → 移动端展示优先放置标题核心信息、主图和前几条五点；具体可见范围以当前界面为准。
             </p>
           </div>
         </div>
