@@ -263,6 +263,7 @@ type PromptlabPanelState = Pick<
   | '_unsubscribers'
   | '_appStoreUnsubscribe'
   | 'listingVersionMenuOpen'
+  | 'listingVersion'
 > & {
   reportRevision: number;
   /** EventBus + appStore subscriptions are init-once until destroy. */
@@ -333,6 +334,7 @@ function createPromptlabPanelState(): PromptlabPanelState {
     _unsubscribers: [] as Array<() => void>,
     _appStoreUnsubscribe: null,
     _subscriptionsInitialized: false,
+    listingVersion: DEFAULT_LISTING_PROMPT_VERSION,
   };
 }
 
@@ -581,6 +583,13 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   // ========== Lifecycle ==========
 
   init() {
+    // 初始化 Listing 版本
+    const stored = configCenter.get<string>(
+      LISTING_VERSION_CONFIG_KEY,
+      DEFAULT_LISTING_PROMPT_VERSION
+    );
+    this.listingVersion = normalizeListingPromptVersion(stored);
+
     // 从 store 恢复 profile
     this.restoreState();
 
@@ -797,17 +806,6 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   },
 
   // ========== Listing Prompt 版本选择 ==========
-  get listingVersion(): ListingPromptVersion {
-    const stored = configCenter.get<string>(
-      LISTING_VERSION_CONFIG_KEY,
-      DEFAULT_LISTING_PROMPT_VERSION
-    );
-    const normalized = normalizeListingPromptVersion(stored);
-    if (stored !== normalized) {
-      configCenter.set(LISTING_VERSION_CONFIG_KEY, normalized);
-    }
-    return normalized;
-  },
   toggleListingVersionMenu(): void {
     const willOpen = !this.listingVersionMenuOpen;
     this.listingVersionMenuOpen = willOpen;
@@ -848,6 +846,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   },
   selectListingVersion(version: string): void {
     if (LISTING_PROMPT_VERSIONS.includes(version as ListingPromptVersion)) {
+      this.listingVersion = version as ListingPromptVersion;
       configCenter.set(LISTING_VERSION_CONFIG_KEY, version);
     }
     this.listingVersionMenuOpen = false;
