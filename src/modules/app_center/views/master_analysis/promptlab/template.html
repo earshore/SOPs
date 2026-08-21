@@ -779,7 +779,7 @@
                       :disabled="generateButtonDisabled"
                       @click.stop="toggleListingVersionMenu"
                       aria-label="选择 Listing Prompt 版本"
-                      :aria-expanded="String(listingVersionMenuOpen)"
+                      :aria-expanded="listingVersionMenuOpen.toString()"
                       class="absolute right-0 top-0 bottom-0 w-9 flex items-center justify-center rounded-r-xl text-white/60 hover:text-white hover:bg-white/10 border-l border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                     >
                       <i class="fas fa-caret-down text-sm"></i>
