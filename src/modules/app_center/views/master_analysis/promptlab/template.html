@@ -754,16 +754,19 @@
                     基于 A10 算法逻辑生成高转化 Listing 文本
                   </p>
                 </div>
-                <div class="relative z-10 flex items-stretch">
-                  <!-- Main Action Button -->
-                  <button
-                    type="button"
+                <div class="relative z-10 group">
+                  <div 
                     :class="listingGenerateButtonClass"
-                    :disabled="generateButtonDisabled"
-                    @click="generateListingPrompt"
-                    class="relative flex-1 py-3.5 font-bold rounded-l-xl transition duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 flex items-center justify-center gap-2.5 group overflow-hidden"
-                    id="btn-generate-prompt"
+                    class="flex items-stretch rounded-xl overflow-hidden transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
                   >
+                    <!-- Main Action Button -->
+                    <button
+                      type="button"
+                      id="btn-generate-prompt"
+                      :disabled="generateButtonDisabled"
+                      @click="generateListingPrompt"
+                      class="relative flex-1 py-3.5 pl-5 pr-3 font-bold transition duration-200 focus-visible:outline-none flex items-center justify-center gap-2.5 group/btn overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
                     <div
                       class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
                     ></div>
@@ -784,11 +787,11 @@
                     @click.stop="toggleListingVersionMenu"
                     aria-label="选择 Listing Prompt 版本"
                     :aria-expanded="listingVersionMenuOpen.toString()"
-                    :class="listingGenerateButtonClass"
-                    class="px-3 flex items-center justify-center rounded-r-xl text-white/60 hover:text-white border-l border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    class="px-3 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 border-l border-white/20 transition-all duration-200 focus-visible:outline-none disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <i class="fas fa-caret-down text-xs transition-transform duration-200" :class="listingVersionMenuOpen ? 'rotate-180' : ''"></i>
                   </button>
+                </div>
 
                   <!-- Fixed Dropdown Menu -->
                   <div
@@ -798,7 +801,7 @@
                     @click.stop
                     @keydown.escape.window="listingVersionMenuOpen = false"
                     :style="listingVersionMenuStyle"
-                    class="fixed w-72 rounded-xl bg-slate-800 border border-slate-700 shadow-2xl overflow-hidden z-50"
+                    class="fixed w-72 rounded-xl bg-slate-800 border border-slate-700 shadow-2xl overflow-hidden z-40"
                   >
                     <div class="p-2 space-y-1">
                       <!-- v1: Classic -->
