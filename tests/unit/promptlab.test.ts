@@ -15,6 +15,7 @@ import eventBus from '@/common/EventBus';
 import { MODULE_EVENTS, APP_EVENTS } from '@/common/constants/eventConstants';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 import { getReportFingerprint } from '@/modules/app_center/views/master_analysis/services/reportIdentity';
+import { configCenter } from '@/common/config/ConfigCenter';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import {
   clearListingPromptHandoff,
@@ -33,6 +34,9 @@ vi.mock('@/modules/app_center/views/master_analysis/services/promptlabService', 
     generateMasterPrompt: vi.fn(() => 'Generated Listing Prompt'),
     generateVisualPrompt: vi.fn(() => 'Generated Visual Prompt'),
   },
+  DEFAULT_LISTING_PROMPT_VERSION: 'v1',
+  normalizeListingPromptVersion: (value: unknown) => (value === 'v2' ? 'v2' : 'v1'),
+  LISTING_PROMPT_VERSIONS: ['v1', 'v2'] as const,
 }));
 
 vi.mock('@/common/router/initRouter', () => ({
@@ -929,9 +933,87 @@ describe('Prompt Generation', () => {
         keywordsTier2: 'manual longtail',
         useAnalysisData: true,
       }),
-      null
+      null,
+      'v1'
     );
     expect(component.listingPromptCache).toBe('Generated Listing Prompt');
+  });
+
+  it('should default to v1 when no version preference is stored', () => {
+    vi.spyOn(configCenter, 'get').mockReturnValue(undefined);
+
+    expect(component.listingVersion).toBe('v1');
+    expect(component.listingVersionBadgeLabel).toBe('');
+    expect(component.listingVersionMenuOpen).toBe(false);
+  });
+
+  it('should reflect a stored v2 preference and show the rules badge', () => {
+    vi.spyOn(configCenter, 'get').mockReturnValue('v2');
+
+    expect(component.listingVersion).toBe('v2');
+    expect(component.listingVersionBadgeLabel).toBe('· 新规');
+  });
+
+  it('should sanitize an invalid stored preference back to v1', () => {
+    vi.spyOn(configCenter, 'get').mockReturnValue('v3');
+    const setSpy = vi.spyOn(configCenter, 'set').mockImplementation(() => {});
+
+    expect(component.listingVersion).toBe('v1');
+    expect(setSpy).toHaveBeenCalledWith('app_center.promptlab.listingPromptVersion', 'v1');
+  });
+
+  it('should persist the selected version and close the menu', () => {
+    vi.spyOn(configCenter, 'get').mockReturnValue('v1');
+    const setSpy = vi.spyOn(configCenter, 'set').mockImplementation(() => {});
+
+    component.toggleListingVersionMenu();
+    expect(component.listingVersionMenuOpen).toBe(true);
+
+    component.selectListingVersion('v2');
+
+    expect(setSpy).toHaveBeenCalledWith('app_center.promptlab.listingPromptVersion', 'v2');
+    expect(component.listingVersionMenuOpen).toBe(false);
+  });
+
+  it('should ignore unsupported version selections without persisting', () => {
+    vi.spyOn(configCenter, 'get').mockReturnValue('v1');
+    const setSpy = vi.spyOn(configCenter, 'set').mockImplementation(() => {});
+
+    component.selectListingVersion('v3');
+
+    expect(setSpy).not.toHaveBeenCalled();
+    expect(component.listingVersionMenuOpen).toBe(false);
+  });
+
+  it('should pass the selected version to generateMasterPrompt when generating', async () => {
+    const { promptlabService } =
+      await import('@/modules/app_center/views/master_analysis/services/promptlabService');
+    vi.spyOn(configCenter, 'get').mockReturnValue('v2');
+
+    appStore.getState().updateAnalysis({ analysisReport: createUsableAnalysisReport() });
+    appStore.getState().updateScraper({
+      scrapedData: null,
+      currentHistoryId: null,
+      selectedSite: '',
+    });
+    component.profile.targetMarket = 'English';
+    component.profile.keywordsTier1 = 'keyword';
+    component.profile.keywordsTier2 = 'longtail';
+
+    component.generateListingPrompt();
+
+    expect(promptlabService.generateMasterPrompt).toHaveBeenCalledWith(
+      expect.objectContaining({ targetMarket: 'English' }),
+      expect.anything(),
+      'v2'
+    );
+  });
+
+  it('should reject unsupported versions when queried', () => {
+    expect(component.isSupportedListingVersion('v1')).toBe(true);
+    expect(component.isSupportedListingVersion('v2')).toBe(true);
+    expect(component.isSupportedListingVersion('v3')).toBe(false);
+    expect(component.isSupportedListingVersion('')).toBe(false);
   });
 
   it('should not generate listing prompt when not ready', async () => {

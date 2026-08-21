@@ -555,6 +555,11 @@ export interface GeneratedPromptRecord {
   asins: string[];
   marketplace?: string;
   profile: GeneratedPromptProfileSnapshot;
+  /**
+   * 商品名称合规版本：'v1' 经典版（现网口径），'v2' 2026 新规合规版。
+   * 可选字段，保证向后兼容：旧格式记录无此字段，读取时视为 'v1'。
+   */
+  promptVersion?: 'v1' | 'v2';
 }
 
 export interface HistoryPromptResults {

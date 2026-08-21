@@ -75,6 +75,8 @@ export interface PromptlabAlpineContext {
   expandedSubItems: Set<string>;
   _unsubscribers: Array<() => void>;
   _appStoreUnsubscribe: (() => void) | null;
+  /** Listing Prompt 生成按钮的版本选择菜单是否展开。 */
+  listingVersionMenuOpen: boolean;
 
   // ---- 跨模块调用的方法 ----
   saveState(): void;
