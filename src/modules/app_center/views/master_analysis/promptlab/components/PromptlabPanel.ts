@@ -263,7 +263,6 @@ type PromptlabPanelState = Pick<
   | '_unsubscribers'
   | '_appStoreUnsubscribe'
   | 'listingVersionMenuOpen'
-  | 'listingVersionMenuPosition'
 > & {
   reportRevision: number;
   /** EventBus + appStore subscriptions are init-once until destroy. */
@@ -287,9 +286,7 @@ type PromptlabPanelThis = PromptlabAlpineContext & {
   overallConfidence: number;
   hasExpandedDimensions: boolean;
   listingVersion: ListingPromptVersion;
-  listingVersionBadgeLabel: string;
   listingVersionMenuOpen: boolean;
-  listingVersionMenuPosition: { top: number; right: number } | null;
   toggleListingVersionMenu(): void;
   computeVersionMenuPosition(): { top: number; right: number } | null;
   selectListingVersion(version: string): void;
@@ -323,7 +320,6 @@ function createPromptlabPanelState(): PromptlabPanelState {
     currentConsoleMode: 'listing' as ConsoleMode,
     listingPromptCache: '',
     listingVersionMenuOpen: false,
-    listingVersionMenuPosition: null,
     visualPromptCache: '',
     lastMarketplace: '',
     originalHeights: new Map<HTMLElement, number>(),
@@ -812,14 +808,9 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     }
     return normalized;
   },
-  get listingVersionBadgeLabel(): string {
-    return this.listingVersion === 'v2' ? '· 新规' : '';
-  },
   toggleListingVersionMenu(): void {
     const willOpen = !this.listingVersionMenuOpen;
     this.listingVersionMenuOpen = willOpen;
-    // 菜单展开时页面可能因滚动回弹导致按钮位置变化，
-    // 在下一帧（页面滚动稳定后）记录 caret 按钮的视口位置。
     if (willOpen) {
       // 翻转卡容器带 preserve-3d 与 rotateY 翻转动画，按 CSS 规范构成
       // fixed 定位上下文：菜单若留在卡内，fixed 定位相对该 transform
@@ -830,24 +821,15 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       if (menu && menu.parentNode !== document.body) {
         document.body.appendChild(menu);
       }
-      const nextTick = (this as { $nextTick?: (callback: () => void) => void }).$nextTick;
-      const recordPosition = () => {
-        this.listingVersionMenuPosition = this.computeVersionMenuPosition();
-      };
-      if (typeof nextTick === 'function') {
-        nextTick(recordPosition);
-      } else {
-        recordPosition();
-      }
     }
   },
 
   /** 菜单 DOM 已移至 document.body（脱离翻转卡 transform 祖先，
    * fixed 定位相对视口生效且不被 overflow-hidden 裁剪），
-   * 通过记录 caret 按钮的视口位置以 fixed 方式定位到按钮正下方。 */
+   * 通过实时计算 caret 按钮的视口位置以 fixed 方式定位到按钮正下方。 */
   get listingVersionMenuStyle(): string {
     if (!this.listingVersionMenuOpen) return '';
-    const pos = this.listingVersionMenuPosition;
+    const pos = this.computeVersionMenuPosition();
     if (!pos) return '';
     return `top:${pos.top}px;right:${pos.right}px;`;
   },
