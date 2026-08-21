@@ -579,20 +579,30 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   showProductSummaryTooltip(): void {
     this.productSummaryTooltipVisible = true;
-    // 计算触发图标的视口位置
-    const trigger = document.querySelector('.fa-circle-exclamation.text-accent-500.cursor-help');
-    if (trigger) {
+    const trigger = document.getElementById('ai-analysis-tooltip-trigger');
+    const tooltip = document.getElementById('ai-analysis-product-tooltip');
+    if (trigger && tooltip) {
+      // 避开父容器 overflow-hidden 裁剪
+      if (tooltip.parentNode !== document.body) {
+        document.body.appendChild(tooltip);
+      }
       const rect = trigger.getBoundingClientRect();
-      // Tooltip 宽度为 72 (w-72 = 18rem = 288px)，居中显示在图标上方
+      // Tooltip 宽度为 72 (w-72 = 288px)，居中显示在图标上方
       const tooltipWidth = 288;
       const left = Math.round(rect.left + rect.width / 2 - tooltipWidth / 2);
-      const bottom = Math.round(window.innerHeight - rect.top + 8);
-      this.productSummaryTooltipStyle = `left: ${left}px; bottom: ${bottom}px;`;
+      const top = Math.round(rect.top - 8);
+      this.productSummaryTooltipStyle = `left:${left}px; top:${top}px; transform:translateY(-100%);`;
     }
   },
 
   hideProductSummaryTooltip(): void {
     this.productSummaryTooltipVisible = false;
+    // 隐藏时移回原位，保持 DOM 结构逻辑一致（可选，但推荐）
+    const tooltip = document.getElementById('ai-analysis-product-tooltip');
+    const container = document.querySelector('.relative.ml-auto');
+    if (tooltip && container && tooltip.parentNode !== container) {
+      container.appendChild(tooltip);
+    }
   },
 
   get selectionPanelChevronClass(): string {

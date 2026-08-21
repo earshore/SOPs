@@ -85,18 +85,20 @@ test.describe('Promptlab 版本选择菜单', () => {
     await expect(menuButton).toBeEnabled({ timeout: 15000 });
     await menuButton.click();
 
-    const v2Option = page.locator('text=2026 新规版');
+    const menu = page.locator('#listing-version-menu');
+    const v2Option = menu.locator('text=2026 新规版');
     await expect(v2Option).toBeVisible();
-    const v1Option = page.locator('text=经典版');
+    const v1Option = menu.locator('text=经典版');
     await expect(v1Option).toBeVisible();
 
     // 点击 v2 后菜单应关闭且按钮 badge 显示新规标识
     await v2Option.click();
-    await expect(menuButton.locator('xpath=..').locator('text=· 新规')).not.toBeVisible();
+    await expect(page.locator('#btn-generate-prompt')).toContainText('· 新规版');
 
     // v2 已选中，再次展开后点击 v1
     await menuButton.click();
-    await page.locator('text=经典版').click();
-    await expect(page.locator('#btn-generate-prompt span:has-text("· 新规")')).not.toBeVisible();
+    await menu.locator('text=经典版').click();
+    await expect(page.locator('#btn-generate-prompt')).toContainText('· 经典版');
+    await expect(page.locator('#btn-generate-prompt')).not.toContainText('· 新规版');
   });
 });

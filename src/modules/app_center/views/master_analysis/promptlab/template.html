@@ -754,36 +754,43 @@
                     基于 A10 算法逻辑生成高转化 Listing 文本
                   </p>
                 </div>
-                <div class="relative z-10">
+                <div class="relative z-10 flex items-stretch">
+                  <!-- Main Action Button -->
                   <button
                     type="button"
                     :class="listingGenerateButtonClass"
                     :disabled="generateButtonDisabled"
                     @click="generateListingPrompt"
-                    class="relative w-full py-3.5 font-bold rounded-xl transition duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 flex items-center justify-center gap-2.5 group overflow-hidden"
+                    class="relative flex-1 py-3.5 font-bold rounded-l-xl transition duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary,var(--color-primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 flex items-center justify-center gap-2.5 group overflow-hidden"
                     id="btn-generate-prompt"
                   >
                     <div
                       class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
                     ></div>
                     <i class="fas fa-microchip relative z-10 group-hover:animate-pulse"></i>
-                    <span class="relative z-10">生成 Master Prompt</span>
-                    <button
-                      type="button"
-                      :disabled="generateButtonDisabled"
-                      @click.stop="toggleListingVersionMenu"
-                      aria-label="选择 Listing Prompt 版本"
-                      :aria-expanded="listingVersionMenuOpen.toString()"
-                      class="absolute right-0 top-0 bottom-0 px-2 flex items-center justify-center gap-1 rounded-r-xl text-white/60 hover:text-white hover:bg-white/10 border-l border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                    >
+                    <div class="flex items-center gap-1.5 relative z-10">
+                      <span>生成 Master Prompt</span>
                       <span
-                        x-show="listingVersion === 'v2'"
-                        x-cloak
-                        class="text-[10px] font-bold bg-white/20 px-1 rounded leading-tight"
-                      >新规</span>
-                      <i class="fas fa-caret-down text-xs"></i>
-                    </button>
+                        x-text="listingVersion === 'v2' ? '· 新规版' : '· 经典版'"
+                        class="text-[10px] opacity-80 font-normal bg-white/10 px-1.5 py-0.5 rounded"
+                      ></span>
+                    </div>
                   </button>
+                  
+                  <!-- Version Selector Toggle -->
+                  <button
+                    type="button"
+                    :disabled="generateButtonDisabled"
+                    @click.stop="toggleListingVersionMenu"
+                    aria-label="选择 Listing Prompt 版本"
+                    :aria-expanded="listingVersionMenuOpen.toString()"
+                    :class="listingGenerateButtonClass"
+                    class="px-3 flex items-center justify-center rounded-r-xl text-white/60 hover:text-white border-l border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <i class="fas fa-caret-down text-xs transition-transform duration-200" :class="listingVersionMenuOpen ? 'rotate-180' : ''"></i>
+                  </button>
+
+                  <!-- Fixed Dropdown Menu -->
                   <div
                     id="listing-version-menu"
                     x-show="listingVersionMenuOpen"
@@ -791,26 +798,49 @@
                     @click.stop
                     @keydown.escape.window="listingVersionMenuOpen = false"
                     :style="listingVersionMenuStyle"
-                    class="fixed w-64 rounded-xl bg-slate-800 border border-slate-700 shadow-2xl overflow-hidden z-50"
+                    class="fixed w-72 rounded-xl bg-slate-800 border border-slate-700 shadow-2xl overflow-hidden z-50"
                   >
                     <div class="p-2 space-y-1">
+                      <!-- v1: Classic -->
                       <button
                         type="button"
                         @click="selectListingVersion('v1')"
-                        :class="listingVersion === 'v1' ? 'bg-primary-900/40 ring-1 ring-primary-500/50' : 'hover:bg-slate-700/60'"
-                        class="w-full text-left rounded-lg px-3 py-2.5 transition duration-150"
+                        :class="listingVersion === 'v1' ? 'bg-primary-600/30 ring-1 ring-primary-500/50' : 'hover:bg-slate-700/60'"
+                        class="w-full text-left rounded-lg px-3 py-2.5 transition duration-150 group relative"
                       >
-                        <div class="text-sm font-semibold text-slate-100">经典版 <span class="font-normal text-slate-400">· 180 字符</span></div>
-                        <div class="text-xs text-slate-400 mt-0.5 leading-relaxed">现网口径，适用于新规尚未生效的类目</div>
+                        <div class="flex items-start justify-between gap-2">
+                          <div class="flex-1">
+                            <div class="text-sm font-semibold text-slate-100 flex items-center gap-2">
+                              经典版
+                              <span class="text-[10px] font-normal text-slate-400 bg-slate-700/50 px-1.5 py-0.5 rounded">180 字符</span>
+                            </div>
+                            <div class="text-xs text-slate-400 mt-1 leading-relaxed">现网口径，适用于新规尚未生效的类目</div>
+                          </div>
+                          <div class="w-4 h-4 flex items-center justify-center">
+                            <i x-show="listingVersion === 'v1'" class="fas fa-check text-primary-400 text-xs"></i>
+                          </div>
+                        </div>
                       </button>
+
+                      <!-- v2: 2026 Rules -->
                       <button
                         type="button"
                         @click="selectListingVersion('v2')"
-                        :class="listingVersion === 'v2' ? 'bg-primary-900/40 ring-1 ring-primary-500/50' : 'hover:bg-slate-700/60'"
-                        class="w-full text-left rounded-lg px-3 py-2.5 transition duration-150"
+                        :class="listingVersion === 'v2' ? 'bg-primary-600/30 ring-1 ring-primary-500/50' : 'hover:bg-slate-700/60'"
+                        class="w-full text-left rounded-lg px-3 py-2.5 transition duration-150 group relative"
                       >
-                        <div class="text-sm font-semibold text-slate-100">2026 新规版 <span class="font-normal text-slate-400">· 75 字符</span></div>
-                        <div class="text-xs text-slate-400 mt-0.5 leading-relaxed">商品名称新规合规版（≤75 字符、重复词、特殊字符、商品亮点字段）</div>
+                        <div class="flex items-start justify-between gap-2">
+                          <div class="flex-1">
+                            <div class="text-sm font-semibold text-slate-100 flex items-center gap-2">
+                              2026 新规版
+                              <span class="text-[10px] font-normal text-primary-300 bg-primary-500/20 px-1.5 py-0.5 rounded">75 字符</span>
+                            </div>
+                            <div class="text-xs text-slate-400 mt-1 leading-relaxed">商品名称新规合规版（≤75 字符、重复词、特殊字符、商品亮点字段）</div>
+                          </div>
+                          <div class="w-4 h-4 flex items-center justify-center">
+                            <i x-show="listingVersion === 'v2'" class="fas fa-check text-primary-400 text-xs"></i>
+                          </div>
+                        </div>
                       </button>
                     </div>
                   </div>
