@@ -14,9 +14,9 @@ import { emitHistoryUpdated } from '../../services/historyEvents';
 import { HistoryService } from '../../services/historyService';
 import { promptlabService } from '../../services/promptlabService';
 import { getReportFingerprint, getScrapedDataFingerprint } from '../../services/reportIdentity';
-import type { ListingPromptVersion } from '../../services/promptlabService';
 
 import type { PromptlabAlpineContext } from './types';
+import type { ListingPromptVersion } from '../../services/promptlabService';
 import type {
   AnalysisReport,
   GeneratedPromptProfileSnapshot,

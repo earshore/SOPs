@@ -40,7 +40,7 @@ const TITLE_COMPLIANCE_V2_GUIDELINES: string[] = [
   '  - **Capitalization & numerals:** Use title case with lowercase prepositions/articles/conjunctions. Write quantities as Arabic numerals (2, not Two). Do not use measurement-unit abbreviations.',
   '  - **Information order:** Brand → style/flavor → product type → key attributes → color/size/count → model.',
   '  - **Variations:** Parent ASIN titles MUST NOT contain size or color; keep those only on child ASIN titles. Put the most important variation attribute in the title, move the rest to Bullet Points.',
-  '**BULLET POINTS FIELD (new):** After the 5 classic bullets, output an additional "Product Highlights" section: concise, comma-separated phrases within 125 characters total (material, usage scenarios, certifications, extra attributes). These highlights display under the title in search results, so they carry information that no longer fits the 75-character title.',
+  '**PRODUCT HIGHLIGHTS FIELD (new):** Right after the Title (before the 5 classic bullets), output an additional "Product Highlights" section: concise, comma-separated phrases within 125 characters total (material, usage scenarios, certifications, extra attributes). These highlights display under the title in search results, so they carry information that no longer fits the 75-character title.',
 ];
 
 /**
@@ -1342,16 +1342,16 @@ ${styleInstructions.join('\n')}
 # EXECUTION STEPS
 1. **Internal Review**: Silently review the Competitor Insights and identify the top 3 "Buying Hesitations" to address and "Vocab Gaps" to fill. Do not output hidden reasoning.
 2. **Drafting - Title**: Construct the title placing the Main Keyword strictly in the first 5 words, within 75 characters including spaces, following the order: brand → style → product type → key attributes → color/size/count → model. Parent ASIN titles must not contain size or color.
-3. **Drafting - Bullets**: Write 5 bullets using the structure: ${bulletFormat}.
-4. **Drafting - Product Highlights**: Write an additional highlights section of comma-separated phrases within 125 characters total (material, usage scenarios, certifications, extra attributes) that display under the title in search results.
+3. **Drafting - Product Highlights**: Write an additional highlights section of comma-separated phrases within 125 characters total (material, usage scenarios, certifications, extra attributes) that display under the title in search results, placed right after the title.
+4. **Drafting - Bullets**: Write 5 bullets using the structure: ${bulletFormat}.
 5. **Drafting - Description**: Create an HTML description using "Answer-First" headers.
 6. **Perform Compliance and Fidelity Checks**: Verify the title is ≤ 75 characters, no word repeats more than twice (brand names included; prepositions/articles/conjunctions exempt), no forbidden decorative characters, no promotional or subjective language, and Arabic numerals with title case; then check unsupported claims, keyword stuffing, cultural fit, and evidence gaps before outputting; all specifications, numbers, and functional statements must have original sources; those without sources will be deleted.
 
 # OUTPUT TASK
 Generate the complete Amazon Listing following the structure below:
 1. **Title:** (Max 75 chars including spaces). format: [Brand] + [Style] + [Product Type] + [Key Attributes] + [Color/Size/Count] + [Model].
-2. **5 Bullet Points:** Target 150-200 visible characters each. Structure: ${bulletFormat}.
-3. **Product Highlights:** Comma-separated phrases, max 125 characters total.
+2. **Product Highlights:** Comma-separated phrases, max 125 characters total (placed right after the title, displayed under the title in search results).
+3. **5 Bullet Points:** Target 150-200 visible characters each. Structure: ${bulletFormat}.
 4. **Backend Search Terms:** (Space-separated, < 249 bytes). specific long-tail keywords not already in the title.
 5. **Product Description:** (HTML formatted). Use "Answer-First" logic. Start with the core value proposition, then elaborate for ${marketProfile.buyerDescriptor}.
 6. **Evidence & Compliance Notes:** list unsupported claims you avoided, claims requiring proof, and the final title character count verification.

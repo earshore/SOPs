@@ -4,8 +4,8 @@
  * 所有动作命令均通过事件总线深链或公共 API 执行，不直接调用组件内部函数，
  * 保持与 settings 面板深链机制（APP_EVENTS.SETTINGS_OPEN）同一模式。
  */
-import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { ThemeManager } from '@/common/config/themeConfig';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
 
 import type { ActionCommandItem } from './types';
 
