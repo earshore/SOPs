@@ -106,8 +106,12 @@
             <span>整理 Tier 1 核心词、Tier 2 功能词、禁止词三列。</span>
           </label>
           <label class="flex items-start gap-2">
-            <input type="checkbox" class="mt-1 accent-emerald-600" />
+            <input type="checkbox" class="mt-1" />
             <span>按 75 字符内标题公式重写 Title，前 70 字符必须包含品牌、核心词和关键卖点。</span>
+          </label>
+          <label class="flex items-start gap-2">
+            <input type="checkbox" class="mt-1" />
+            <span>逐条复核标题合规：同词（含品牌名）≤2 次、无 ! $ ? _ { } ^ ¬ ¦、无促销语、品牌→款式→类型→属性→颜色/尺寸→型号顺序（2026 新规，已生效类目适用）。</span>
           </label>
           <label class="flex items-start gap-2">
             <input type="checkbox" class="mt-1 accent-emerald-600" />
@@ -330,11 +334,21 @@ Search Terms:
             </p>
           </div>
         </div>
-        <div class="mt-4 p-3 bg-amber-50 rounded-lg text-sm">
-          <strong class="text-amber-800">字符限制：</strong>
-          <span class="sops-neutral-text-muted"
-            >非媒体类按 75 字符以内准备；后台类目限制与过渡期提示必须逐 ASIN 复核</span
-          >
+        <div class="mt-4 space-y-3">
+          <div class="p-3 bg-amber-50 rounded-lg text-sm">
+            <strong class="text-amber-800">字符限制：</strong>
+            <span class="sops-neutral-text-muted"
+              >非媒体类按 75 字符以内准备；后台类目限制与过渡期提示必须逐 ASIN 复核</span
+            >
+            <ul class="text-xs sops-neutral-text-muted list-disc pl-4 mt-2 space-y-1">
+              <li>同一字词（含品牌名）不得出现超过 2 次</li>
+              <li>禁用 ! $ ? _ { } ^ ¬ ¦；~ # < > * 仅限编码/测量上下文</li>
+              <li>禁促销用语（Best Seller、Free、Sale、Guarantee 等）与受限短语</li>
+              <li>信息顺序：品牌 → 款式 → 类型 → 属性 → 颜色/尺寸 → 型号</li>
+              <li>父/子变体使用一致的标题结构</li>
+              <li>溢出信息放入「商品亮点」字段（约 125 字符），不放标题</li>
+            </ul>
+          </div>
         </div>
       </div>
       <!-- Bullet Points (EU Anti-Return Logic) -->
